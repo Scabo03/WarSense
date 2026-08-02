@@ -27,6 +27,15 @@ public struct Sciame: Hashable, Codable, Sendable {
     /// Vero se giunto come rinforzo (01 §11.6). Sempre falso nella fase A.
     public var rinforzo: Bool
 
+    public init(id: IdSciame, parte: Parte, archetipo: IdentificatoreDati,
+                protezione: TipoProtezione, atomiIniziali: Int64, serbatoio: Int64,
+                munizioni: Int, posizione: Cella, azioneSpesa: Bool, rinforzo: Bool) {
+        self.id = id; self.parte = parte; self.archetipo = archetipo
+        self.protezione = protezione; self.atomiIniziali = atomiIniziali
+        self.serbatoio = serbatoio; self.munizioni = munizioni
+        self.posizione = posizione; self.azioneSpesa = azioneSpesa; self.rinforzo = rinforzo
+    }
+
     /// Atomi presenti: divisione con troncamento e minimo di uno finché vivo (01 §4.3).
     public func atomiPresenti(puntiVitaPerAtomo: Int64, minimo: Int64) -> Int64 {
         guard serbatoio > 0 else { return 0 }

@@ -4,7 +4,7 @@ import Foundation
 /// Nel Motore la virgola mobile è vietata: i coefficienti decimali dei file
 /// diventano `Scalato` al caricamento e ogni formula opera su interi.
 /// Convenzione dei file: al più tre cifre decimali.
-public struct Scalato: Hashable, Sendable, Codable {
+public struct Scalato: Hashable, Sendable, Codable, Comparable {
     /// Fattore di scala fisso e dichiarato.
     public static let fattore: Int64 = 1000
 
