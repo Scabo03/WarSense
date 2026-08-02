@@ -176,6 +176,8 @@ public struct ValoriDiGioco: Sendable {
     /// Versione effettiva registrata nei salvataggi: base, o base più suffisso locale (RDA-45).
     public let versioneEffettiva: String
     public let modificatiLocalmente: Bool
+    /// Versioni di salvataggio che questi valori sanno aprire (00 §15, 05 §6.6).
+    public let versioniCompatibili: [String]
     public let archetipi: [IdentificatoreDati: DefinizioneArchetipo]
     public let protezioni: [TipoProtezione: ProfiloProtezione]
     public let formati: [IdentificatoreDati: FormatoBattaglia]

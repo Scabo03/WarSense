@@ -1,0 +1,141 @@
+import Foundation
+import Motore
+import Dati
+
+/// L'atto di fondazione: prima riga del giornale (05 §2.10). Stato iniziale
+/// ricostruito dalla fabbrica più comandi del giornale: questa è l'intera
+/// definizione di una partita (05 §4.5).
+public struct Fondazione: Codable, Sendable {
+    public let versioneSchema: Int
+    public let versioneValori: String
+    public let versioneTesti: String
+    public let seme: UInt64
+    public let identificatore: String
+    public let scenario: ScenarioBattaglia
+    public static let schemaCorrente = 1
+
+    enum CodingKeys: String, CodingKey {
+        case versioneSchema = "versione_schema"
+        case versioneValori = "versione_valori"
+        case versioneTesti = "versione_testi"
+        case seme, identificatore, scenario
+    }
+}
+
+/// Le voci del giornale (05 §6.1): comandi e marcatori. La codifica è stabile:
+/// i casi si aggiungono, non si rinominano.
+public enum VoceGiornale: Codable, Sendable {
+    case fondazione(Fondazione)
+    case comando(parte: Parte, comando: ComandoBattaglia)
+    /// Marcatore di inizio turno: bersaglio dell'azzeramento (05 §6.4) e punto di conferma (05 §6.5).
+    case inizioTurno(parte: Parte, giro: Int)
+}
+
+/// Una riga del giornale, numerata progressivamente.
+public struct RigaGiornale: Codable, Sendable {
+    public let numero: Int
+    public let voce: VoceGiornale
+}
+
+/// Il giornale dei comandi: file in appendice, una riga JSON per voce (05 §6.1).
+/// La scrittura è confermata prima che l'esito diventi visibile; il ritiro è una
+/// riscrittura atomica (05 §6.4); la lettura tollera una riga finale tronca (05 §6.8).
+public final class Giornale {
+    public let percorso: URL
+    private var maniglia: FileHandle
+    public private(set) var righe: [RigaGiornale]
+
+    private static let codificatore: JSONEncoder = {
+        let e = JSONEncoder()
+        e.outputFormatting = [.sortedKeys, .withoutEscapingSlashes]
+        return e
+    }()
+    private static let decodificatore = JSONDecoder()
+
+    public enum ErroreGiornale: Error {
+        case percorsoNonScrivibile
+        case fondazioneMancante
+    }
+
+    /// Apre un giornale nuovo, scrivendo l'atto di fondazione.
+    public static func nuovo(a percorso: URL, fondazione: Fondazione) throws -> Giornale {
+        FileManager.default.createFile(atPath: percorso.path, contents: nil)
+        guard let maniglia = try? FileHandle(forWritingTo: percorso) else {
+            throw ErroreGiornale.percorsoNonScrivibile
+        }
+        let giornale = Giornale(percorso: percorso, maniglia: maniglia, righe: [])
+        try giornale.appendi(.fondazione(fondazione))
+        return giornale
+    }
+
+    /// Apre un giornale esistente, troncando alla ultima riga integra se serve (05 §6.8).
+    public static func apri(a percorso: URL) throws -> Giornale {
+        let contenuto = (try? Data(contentsOf: percorso)) ?? Data()
+        var righe: [RigaGiornale] = []
+        var byteValidi = 0
+        var inizio = contenuto.startIndex
+        while inizio < contenuto.endIndex {
+            let fine = contenuto[inizio...].firstIndex(of: 0x0A) ?? contenuto.endIndex
+            let rigaByte = contenuto[inizio..<fine]
+            if fine == contenuto.endIndex { break } // riga senza fine riga: tronca, non integra
+            if let riga = try? decodificatore.decode(RigaGiornale.self, from: Data(rigaByte)) {
+                righe.append(riga)
+                byteValidi = contenuto.distance(from: contenuto.startIndex, to: fine) + 1
+            } else {
+                break // prima riga corrotta: si tronca qui
+            }
+            inizio = contenuto.index(after: fine)
+        }
+        if byteValidi < contenuto.count {
+            try contenuto.prefix(byteValidi).write(to: percorso, options: .atomic)
+        }
+        guard case .fondazione = righe.first?.voce else { throw ErroreGiornale.fondazioneMancante }
+        guard let maniglia = try? FileHandle(forWritingTo: percorso) else {
+            throw ErroreGiornale.percorsoNonScrivibile
+        }
+        try maniglia.seekToEnd()
+        return Giornale(percorso: percorso, maniglia: maniglia, righe: righe)
+    }
+
+    private init(percorso: URL, maniglia: FileHandle, righe: [RigaGiornale]) {
+        self.percorso = percorso
+        self.maniglia = maniglia
+        self.righe = righe
+    }
+
+    public var fondazione: Fondazione {
+        if case .fondazione(let f) = righe[0].voce { return f }
+        preconditionFailure("giornale.senza.fondazione")
+    }
+
+    /// Appende e conferma su disco prima di restituire (05 §6.1).
+    public func appendi(_ voce: VoceGiornale) throws {
+        let riga = RigaGiornale(numero: righe.count, voce: voce)
+        var dati = try Giornale.codificatore.encode(riga)
+        dati.append(0x0A)
+        try maniglia.write(contentsOf: dati)
+        try maniglia.synchronize()
+        righe.append(riga)
+    }
+
+    /// Ritira le righe dalla posizione indicata in poi: riscrittura atomica (05 §6.4).
+    public func tronca(a numeroRighe: Int) throws {
+        precondition(numeroRighe >= 1, "la.fondazione.non.si.ritira")
+        let rimaste = Array(righe.prefix(numeroRighe))
+        var dati = Data()
+        for riga in rimaste {
+            dati.append(try Giornale.codificatore.encode(riga))
+            dati.append(0x0A)
+        }
+        try dati.write(to: percorso, options: .atomic)
+        try? maniglia.close()
+        guard let nuova = try? FileHandle(forWritingTo: percorso) else {
+            throw ErroreGiornale.percorsoNonScrivibile
+        }
+        try nuova.seekToEnd()
+        maniglia = nuova
+        righe = rimaste
+    }
+
+    deinit { try? maniglia.close() }
+}

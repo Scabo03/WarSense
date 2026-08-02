@@ -88,6 +88,7 @@ public enum CaricatoreValori {
         return ValoriDiGioco(versione: manifest.versione,
                              versioneEffettiva: versioneEffettiva,
                              modificatiLocalmente: discordanti,
+                             versioniCompatibili: manifest.versioniCompatibili,
                              archetipi: archetipi,
                              protezioni: protezioni,
                              formati: formati,
