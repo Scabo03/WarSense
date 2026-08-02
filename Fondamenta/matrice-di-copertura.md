@@ -4,7 +4,7 @@ Documento di lavoro della fase di architettura — versione 1.0
 
 ## 0. Che cosa contiene e come si usa
 
-Ogni requisito numerato dei quattro documenti consolidati — 00 carta dei principi (versione 1.2), 01 progetto del gioco (versione 3.1), 02 accessibilità (versione 2.1), 03 dati (versione 2.0) — in relazione con il punto del documento di architettura (05, versione 1.0, citato come "A") che vi provvede.
+Ogni requisito numerato dei quattro documenti consolidati — 00 carta dei principi (versione 1.2), 01 progetto del gioco (versione 3.2), 02 accessibilità (versione 2.1), 03 dati (versione 2.0) — in relazione con il punto del documento di architettura (05, versione 1.0, citato come "A") che vi provvede.
 
 Dove un requisito non richiede alcuna provvidenza architetturale, la cosa è dichiarata espressamente con la ragione, mai lasciata come omissione: una riga assente sarebbe indistinguibile da una dimenticanza, una riga che dichiara l'assenza di necessità no. I rinvii "RDA-nn" puntano al registro delle decisioni architetturali.
 
@@ -97,7 +97,7 @@ La matrice si legge per documento; l'ordine delle righe segue la numerazione dei
 | 00 §16.3 | Tester non vedenti coinvolti dal primo prototipo | A §15.3, A §15.9 |
 | 00 §16.4 | Prima un singolo scontro completo, poi la campagna | A §15.1 |
 
-### Documento 01 — Progetto del gioco (versione 3.1)
+### Documento 01 — Progetto del gioco (versione 3.2)
 
 | Requisito | Sintesi | Provvidenza |
 |---|---|---|
@@ -370,6 +370,7 @@ La matrice si legge per documento; l'ordine delle righe segue la numerazione dei
 | 01 §9.5.3 | Riserva significativa; a contatto non si estrae | Nessuna provvidenza architetturale necessaria — conseguenza voluta |
 | 01 §9.6 | Tiro deciso a ogni turno, mai automatico | A §3.4 (ordina tiro) |
 | 01 §9.6.1 | Munizioni non reintegrate; il reparto resta in campo | A §2.7, A §3.7 (evento munizioni esaurite) |
+| 01 §9.6.2 | Nessun fuoco amico: il tiro colpisce solo avversari | A §3.2 (validazione del bersaglio), A §14.2 (prova dedicata) |
 | 01 §9.7 | Mischia continua con perdite reciproche per turno | A §3.9 (risoluzione simultanea delle mischie) |
 | 01 §9.7.1 | Annuncio complessivo a inizio turno; dettaglio per cella | A §3.9 (evento aggregato), A §10.7 |
 | 01 §9.8 | Disingaggio a soglia proporzionale alla consistenza d'ingresso | A §2.7 (consistenza d'ingresso), A §3.9 |
@@ -382,6 +383,7 @@ La matrice si legge per documento; l'ordine delle righe segue la numerazione dei
 | 01 §9.9.2 | Stesso meccanismo di accoppiamento in mischia | A §7.4 |
 | 01 §10.1 | La resa apre la ritirata combattuta | A §3.4 (dichiara resa), A §2.7 |
 | 01 §10.2 | Resa dopo soglia minima, accorciata dalle perdite | A §3.2 più A §12.4 (metrica 03 §6.1) |
+| 01 §10.2.1 | Base delle perdite: sole forze impiegate sul campo | A §2.7 (contatore nello stato), A §3.2, A §14.2 |
 | 01 §10.3 | Prosegue fino alla riga di soglia | A §2.7 (riga di soglia) |
 | 01 §10.4 | Volume per ritirare gli arretrati e sbarrare | A §3.4 (ritira unità), A §7.4 |
 | 01 §10.4.1 | I reparti a contatto non si ritirano | A §3.2 (motivo di non ammissibilità) |

@@ -413,6 +413,91 @@ final class RegoleBattagliaTest: XCTestCase {
         XCTAssertNotNil(vistaDopo.occupanteVisibile(di: cella))
     }
 
+    // MARK: - Base delle perdite: le sole forze impiegate (01 §10.2, revisione del titolare)
+
+    func test_01_10_2_la_soglia_si_accorcia_sulle_forze_impiegate() throws {
+        var stato = try crea(scenarioOrdinario())
+        esegui(.seleziona(indiceDeck: 0), .giocatore, &stato)
+        esegui(.piazza(cella: Cella(riga: 10, colonna: 5)), .giocatore, &stato)
+        // Impiegate: un solo sciame, 5 atomi per 100 punti vita.
+        XCTAssertEqual(stato.forzeImpegnate[.giocatore], 500)
+        // Metà delle forze impiegate perdute: riduzione 0,5 × 0,5 = 0,25; soglia 4 → 3.
+        stato.perditeSubite[.giocatore] = 250
+        XCTAssertEqual(motore.sogliaResaEffettiva(per: .giocatore, stato: stato), 3)
+        // Tutto il piazzato perduto: riduzione 0,5; soglia 4 → 2.
+        stato.perditeSubite[.giocatore] = 500
+        XCTAssertEqual(motore.sogliaResaEffettiva(per: .giocatore, stato: stato), 2)
+    }
+
+    func test_01_10_2_le_riserve_nel_deck_non_trattengono_la_resa() throws {
+        var stato = try crea(scenarioOrdinario())
+        esegui(.seleziona(indiceDeck: 0), .giocatore, &stato)
+        esegui(.piazza(cella: Cella(riga: 10, colonna: 5)), .giocatore, &stato)
+        stato.perditeSubite[.giocatore] = 500 // perso tutto ciò che era in campo
+        // Sulla base delle sole forze impiegate la soglia scende a 2. Con la base
+        // precedente (l'intero mazzo: 2300 punti vita) la proporzione sarebbe stata
+        // 500/2300 e la soglia sarebbe rimasta 3: la riserva avrebbe trattenuto la resa.
+        XCTAssertEqual(motore.sogliaResaEffettiva(per: .giocatore, stato: stato), 2,
+                       "chi ha impegnato poco e perso quel poco deve poter concludere presto")
+        XCTAssertEqual(motore.proporzionePerdite(per: .giocatore, stato: stato), .uno)
+    }
+
+    func test_01_10_2_piazzare_altro_accresce_la_base_e_riallunga_la_soglia() throws {
+        var stato = try crea(scenarioOrdinario())
+        esegui(.seleziona(indiceDeck: 0), .giocatore, &stato)
+        esegui(.piazza(cella: Cella(riga: 10, colonna: 5)), .giocatore, &stato)
+        stato.perditeSubite[.giocatore] = 500
+        XCTAssertEqual(motore.sogliaResaEffettiva(per: .giocatore, stato: stato), 2)
+        // Chi sceglie di impegnare altro accresce la base: la proporzione scende
+        // e la soglia si riallunga. Vale identicamente per i rinforzi futuri,
+        // che entrano nella base quando scendono in campo.
+        esegui(.piazza(cella: Cella(riga: 10, colonna: 6)), .giocatore, &stato)
+        XCTAssertEqual(stato.forzeImpegnate[.giocatore], 1000)
+        XCTAssertEqual(motore.sogliaResaEffettiva(per: .giocatore, stato: stato), 3)
+        // Prima di qualunque piazzamento la proporzione è zero per definizione.
+        let vergine = try crea(scenarioOrdinario())
+        XCTAssertEqual(motore.proporzionePerdite(per: .giocatore, stato: vergine), .zero)
+    }
+
+    // MARK: - Nessun fuoco amico (01 §9.6.2, revisione del titolare)
+
+    func test_01_9_6_2_nessun_fuoco_amico() throws {
+        var (stato, mio, suo) = try statoConFronteggiamento()
+        if stato.parteDiTurno != .giocatore { esegui(.fineTurno, stato.parteDiTurno, &stato) }
+        esegui(.ingaggia(sciame: mio, bersaglio: suo), .giocatore, &stato)
+
+        // Un tiratore proprio entro gittata del nemico impegnato.
+        esegui(.seleziona(indiceDeck: 1), .giocatore, &stato)
+        let posNemico = stato.sciami[suo]!.posizione
+        let cellaTiratore = stato.griglia.tutteLeCelle.first { cella in
+            motore.valida(.piazza(cella: cella), parte: .giocatore, stato: stato).eValido
+                && stato.griglia.distanza(cella, posNemico) <= valori.archetipi["tiratori"]!.gittataDisturbo
+        }
+        let tiratore = IdSciame(stato.prossimoIdSciame)
+        esegui(.piazza(cella: try XCTUnwrap(cellaTiratore)), .giocatore, &stato)
+        esegui(.fineTurno, .giocatore, &stato)
+        esegui(.fineTurno, .avversario, &stato) // il giro nuovo risolve una mischia
+
+        // Il proprio reparto non è mai un bersaglio, né di tiro né di ingaggio.
+        XCTAssertEqual(motore.valida(.tira(sciame: tiratore, bersaglio: mio,
+                                           proiettile: .proiettileLeggero),
+                                     parte: .giocatore, stato: stato).motivo, .bersaglioNonValido)
+        XCTAssertFalse(motore.valida(.ingaggia(sciame: tiratore, bersaglio: mio),
+                                     parte: .giocatore, stato: stato).eValido)
+
+        // Battere un nemico impegnato in mischia con i propri è lecito e senza
+        // alcun rischio per i propri: il danno cade soltanto sul bersaglio.
+        XCTAssertTrue(stato.impegnato(suo))
+        let serbatoioMioPrima = stato.sciami[mio]!.serbatoio
+        let perditeMiePrima = stato.perditeSubite[.giocatore] ?? 0
+        let perditeSuePrima = stato.perditeSubite[.avversario] ?? 0
+        esegui(.tira(sciame: tiratore, bersaglio: suo, proiettile: .proiettileLeggero),
+               .giocatore, &stato)
+        XCTAssertEqual(stato.sciami[mio]?.serbatoio, serbatoioMioPrima)
+        XCTAssertEqual(stato.perditeSubite[.giocatore] ?? 0, perditeMiePrima)
+        XCTAssertGreaterThan(stato.perditeSubite[.avversario] ?? 0, perditeSuePrima)
+    }
+
     // MARK: - Determinismo
 
     func test_00_3_1_determinismo_stessa_sequenza_stessa_impronta() throws {

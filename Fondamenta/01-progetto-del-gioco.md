@@ -1,6 +1,8 @@
 # Documento di progetto del gioco
 
-Documento 01 di 05 — versione 3.1
+Documento 01 di 05 — versione 3.2
+
+Novità della versione 3.2, per decisione del titolare in sede di revisione delle chiusure: la base di calcolo delle perdite ai fini della resa, della ritirata combattuta e di ogni soglia che dipende dalle perdite di battaglia è costituita dalle sole forze effettivamente impiegate sul campo, riserve del deck escluse (10.2, 10.2.1); il tiro colpisce soltanto avversari e non esiste fuoco amico in alcuna forma, regola dichiarata al nuovo punto 9.6.2. Tutte le altre chiusure della versione 3.1 sono state esaminate dal titolare e confermate.
 
 Novità della versione 3.1, prodotta nella fase di architettura tecnica su delega del titolare: chiusura di tutti i punti contrassegnati come da confermare al punto 16.2 della versione 3.0. In particolare: sequenza delle acquisizioni e ambiti della soglia distribuita (2.8.2); elenco definitivo degli archetipi (3.2.3); installazioni e voci acquistabili fuori dall'inverno (5.5.1.4.1 e 5.5.2); elenco chiuso delle azioni di campagna (5.6.8.1); ordine di risoluzione della giornata (5.6.11); stanchezza e manutenzione (5.7, 5.7.1, 5.7.2); effetto dell'approvvigionamento (5.8); stagioni intermedie (5.9.2); sabotaggio e studio approfondito (5.10.2); magazzino, torri e ricognizione rispetto al taglio (5.15); assedio della fortezza (5.14.3.6); sortita resa deterministica (8b.5, 8b.5.1); base del riporto di volume (9.3.4); ordine dei turni in battaglia (9.4.1); cella a occupante unico confermata (9.4.2); conteggio e vincoli dei rinforzi (11.3, 11.8); resoconto di fine battaglia (15.3.1). Le motivazioni di ogni chiusura sono nel registro delle decisioni architetturali. Nessuna decisione della versione 3.0 è stata riaperta.
 
@@ -576,6 +578,8 @@ Questa versione recepisce, oltre alla scrematura dell'inventario dei fattori sto
 
 9.6.1 Le munizioni non si reintegrano durante la battaglia. Il reparto che le ha esaurite resta in campo e conserva la propria azione, ma può soltanto muoversi o ingaggiare in corpo a corpo. Le battaglie lunghe tendono quindi naturalmente a diventare battaglie di contatto, il che è coerente con il quadro storico. Il reintegro presso le proprie retrovie è stato valutato e rinviato: non fa parte della prima versione.
 
+9.6.2 Il tiro non colpisce mai i propri, stabilito dal titolare in sede di revisione delle chiusure. I reparti da tiro colpiscono soltanto avversari e non esiste fuoco amico in alcuna forma. Battere un nemico impegnato in mischia con propri reparti è lecito e non comporta alcun rischio per i propri. Il principio è generale e vale in ogni punto in cui si producono perdite: nessuna regola del gioco può danneggiare le forze di chi la esegue per effetto di un'azione rivolta all'avversario. La regola è dichiarata perché nessuna revisione futura introduca il fuoco amico credendo di correggere una dimenticanza.
+
 9.7 Risoluzione della mischia. La mischia è continua: a ogni turno i reparti a contatto si infliggono perdite reciproche, e il contatto prosegue finché uno dei due è distrutto oppure si disingaggia secondo il punto 9.8. Poiché i reparti impegnati sono fuori controllo, ciò avviene senza che il giocatore decida alcunché.
 
 9.7.1 L'annuncio non è per singola mischia ma complessivo: all'inizio del turno il gioco riferisce in una sola comunicazione ordinata l'esito di tutti i contatti in corso, e il dettaglio di ciascuno resta consultabile atterrando sulla cella interessata. La mischia risolta in una volta sola al momento del contatto è stata valutata e scartata, poiché avrebbe ridotto la perdita di controllo a un turno e quindi a una formalità.
@@ -600,7 +604,9 @@ Questa versione recepisce, oltre alla scrematura dell'inventario dei fattori sto
 
 10.1 In qualunque momento il giocatore può dichiarare la resa mediante un comando dedicato. La resa non conclude immediatamente lo scontro: apre una fase di ritirata combattuta.
 
-10.2 La resa è disponibile solo dopo un numero minimo di turni trascorsi. Tale soglia si accorcia in funzione delle perdite subite, espresse come proporzione delle forze iniziali e non come valore assoluto, così che la regola si comporti allo stesso modo su tutti i formati di scontro.
+10.2 La resa è disponibile solo dopo un numero minimo di turni trascorsi. Tale soglia si accorcia in funzione delle perdite subite, espresse come proporzione delle forze effettivamente impiegate sul campo e non come valore assoluto, così che la regola si comporti allo stesso modo su tutti i formati di scontro.
+
+10.2.1 Base di calcolo, stabilita dal titolare in sede di revisione delle chiusure. Le forze effettivamente impiegate sono la somma delle forze con cui ciascun reparto è sceso in campo fino a quel momento; le riserve ancora nel deck non vi rientrano. Una battaglia perduta si riconosce e si chiude per quel che accade sul campo: un esercito che ha impegnato poco e perso quel poco può concludere presto, senza essere trattenuto dal peso di ciò che non ha mai schierato. Chi sceglie di impegnare altro, rinforzi compresi quando scendono in campo, accresce la base e con essa riallunga la soglia. La medesima base vale per la ritirata combattuta e per ogni altra soglia che dipenda dalle perdite subite in battaglia; resta distinta la soglia di disingaggio del punto 9.8, che per sua natura si calcola sulla consistenza con cui il singolo reparto è entrato nel contatto.
 
 10.3 Durante la ritirata combattuta lo scontro prosegue finché le forze avversarie non raggiungono una riga di soglia prossima alle retrovie del giocatore. Esempio su griglia da dieci righe: la battaglia prosegue finché l'avversario non raggiunge la riga otto.
 

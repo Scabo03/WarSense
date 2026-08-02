@@ -64,7 +64,7 @@ extension StatoBattaglia {
             let b = bilancio[parte] ?? BilancioVolume(baseTurno: 0, riportoEntrante: 0, spesa: 0)
             c.intero(b.baseTurno); c.intero(b.riportoEntrante); c.intero(b.spesa)
             c.intero(perditeSubite[parte] ?? 0)
-            c.intero(forzeIniziali[parte] ?? 0)
+            c.intero(forzeImpegnate[parte] ?? 0)
             let ev = evacuati[parte] ?? []
             c.intero(Int64(ev.count))
             for id in ev { c.intero(id.numero) }

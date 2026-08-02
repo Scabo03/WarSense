@@ -37,6 +37,10 @@ Criterio di uscita: scontro completo giocabile solo con VoiceOver, consegnato ai
 
 La fase C ha già lo scheletro dell'eseguibile `Verifica` e la forma degli scenari (`ScenarioBattaglia` è Codable proprio per gli scenari dichiarativi di 05 §12.2).
 
+## Intervento correttivo della revisione del titolare (dopo la fase A)
+
+Applicato l'incarico di intervento sulle chiusure: la base delle perdite per la resa e per ogni soglia di battaglia è ora costituita dalle sole forze effettivamente impiegate sul campo, come contatore cumulativo che cresce a ogni piazzamento (consolidato 01 alla versione 3.2, punti 10.2 e 10.2.1; registro RDA-46; nel codice il campo dello stato si chiama forzeImpegnate). Il divieto di fuoco amico è diventato regola dichiarata (01 punto 9.6.2, RDA-47) con prova di persistenza dedicata. L'imposizione della battaglia che consuma la giornata è confermata per iscritto sotto RDA-25. Collaudo a 44 prove, tutte verdi; la riproduzione d'oro è rimasta valida perché nello scontro registrato l'intero mazzo scende in campo e le due basi coincidono.
+
 ## Avvertenze per chi riprende
 
 - Il guidatore tattico dentro `SessioneBattagliaTest.giocaBattagliaCompleta` è un attrezzo di prova, non il tattico avversario: quello va scritto nel Motore (05 §5.3).

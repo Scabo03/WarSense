@@ -143,7 +143,12 @@ public struct StatoBattaglia: Hashable, Codable, Sendable {
 
     // Perdite cumulative per la soglia della resa (01 §10.2).
     public var perditeSubite: [Parte: Int64]
-    public var forzeIniziali: [Parte: Int64]
+    /// Forze effettivamente impiegate sul campo: la somma dei punti vita con cui
+    /// ogni sciame è sceso in campo, riserve del deck escluse (01 §10.2, decisione
+    /// del titolare in revisione delle chiusure). Cresce a ogni piazzamento,
+    /// rinforzi compresi quando verranno; è la base di ogni soglia che dipende
+    /// dalle perdite subite in battaglia.
+    public var forzeImpegnate: [Parte: Int64]
 
     public var esito: EsitoBattaglia?
 

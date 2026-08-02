@@ -71,13 +71,6 @@ public enum FabbricaBattaglia {
         let deckG = try elementi(scenario.deckGiocatore)
         let deckA = try elementi(scenario.deckAvversario)
 
-        // Forze iniziali: la somma dei punti vita di tutto ciò che entra nello scontro (01 §10.2).
-        func forze(_ deck: [ElementoDeck]) -> Int64 {
-            deck.reduce(0) { somma, e in
-                somma + Int64(e.esemplari) * e.atomi * valori.archetipi[e.archetipo]!.puntiVitaPerAtomo
-            }
-        }
-
         var stato = StatoBattaglia(
             formato: scenario.formato,
             griglia: griglia,
@@ -101,7 +94,7 @@ public enum FabbricaBattaglia {
             resaDichiarataDa: nil,
             evacuati: [:],
             perditeSubite: [:],
-            forzeIniziali: [.giocatore: forze(deckG), .avversario: forze(deckA)],
+            forzeImpegnate: [:], // cresce a ogni discesa in campo (01 §10.2)
             esito: nil
         )
         let motore = MotoreBattaglia(valori: valori)

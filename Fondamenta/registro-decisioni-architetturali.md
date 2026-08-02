@@ -4,7 +4,7 @@ Documento di lavoro della fase di architettura — versione 1.0
 
 ## 0. Che cosa contiene e come si usa
 
-Ogni scelta non banale compiuta nella fase di architettura, con il problema, le opzioni considerate, la scelta, la motivazione e le conseguenze. Comprende le decisioni tecniche (RDA-01 fino a RDA-12), le chiusure dei punti che i consolidati lasciavano aperti, delegate dal titolare (RDA-13 fino a RDA-40), e le decisioni aggiunte a valle delle verifiche di conformità e di sufficienza condotte nella stessa fase (RDA-41 fino a RDA-45). Serve a impedire che una cosa già valutata e respinta venga riproposta come idea nuova. Prima di proporre un cambiamento a una di queste materie, leggere la voce corrispondente.
+Ogni scelta non banale compiuta nella fase di architettura, con il problema, le opzioni considerate, la scelta, la motivazione e le conseguenze. Comprende le decisioni tecniche (RDA-01 fino a RDA-12), le chiusure dei punti che i consolidati lasciavano aperti, delegate dal titolare (RDA-13 fino a RDA-40), le decisioni aggiunte a valle delle verifiche di conformità e di sufficienza condotte nella stessa fase (RDA-41 fino a RDA-45), e le decisioni della revisione del titolare sulle chiusure (RDA-46 e RDA-47, più la conferma annotata sotto RDA-25). Serve a impedire che una cosa già valutata e respinta venga riproposta come idea nuova. Prima di proporre un cambiamento a una di queste materie, leggere la voce corrispondente.
 
 I rinvii usano le stesse convenzioni del documento 05: carta come 00 §P.n, consolidati come 01 §n, 02 §n, 03 §n, architettura come A §n.
 
@@ -12,7 +12,7 @@ I rinvii usano le stesse convenzioni del documento 05: carta come 00 §P.n, cons
 
 ## Parte prima — Decisioni tecniche
 
-### RDA-01 — Pacchetto SwiftPM con sei bersagli e confini di dipendenza imposti
+### RDA-01 — Pacchetto SwiftPM con sette bersagli e confini di dipendenza imposti
 
 Problema. Come organizzare il programma perché la separazione fra logica e interfaccia (00 §3) sia un fatto strutturale e non una disciplina volontaria.
 
@@ -230,6 +230,8 @@ Scelta. Magazzino con la disciplina comune delle opere permanenti, su territorio
 
 Scelta. Sedici azioni, elencate con i requisiti di categoria; riunione, revoca, accettazione, apertura della battaglia e dirottamento espressamente dichiarati non-azioni. Il criterio di inclusione: ogni azione già nominata nei consolidati e nelle direzioni, nessuna nuova. La distruzione di opera nemica e l'imposizione della battaglia consumano la giornata perché sono lavoro di una giornata (01 §5.14.7, §5.6.0.5); l'accettazione no, perché chi accetta non compie: subisce la volontà altrui (01 §6.1.1).
 
+Conferma del titolare, in sede di revisione delle chiusure. L'imposizione della battaglia che consuma la giornata del gruppo è confermata così com'è, insieme alla conseguenza esaminata e accettata come voluta: fra l'arrivo dell'attaccante e la battaglia intercorre sempre una notte, e gli scontri campali della prima versione avverranno quasi soltanto contro chi non può o non vuole sfilarsi. Il peso di questa scelta sulla frequenza degli scontri ricade sulla taratura del carattere degli ufficiali e della velocità delle colonne (01 §6.1.3, 03 §6.5). La voce non va riaperta come se fosse una svista.
+
 ### RDA-26 — Ordine di risoluzione della giornata (incide sul gioco; 01 §5.6.11)
 
 Problema. Il turno a un'azione per gruppo non stabiliva quando agissero i gruppi avversari.
@@ -375,3 +377,27 @@ Scelta. Versione locale derivata: a impronte discordanti ma contenuti validi, il
 Motivazione. Conserva insieme le due garanzie in conflitto: il flusso di modifica diretta previsto dalla carta e la riconducibilità di ogni difetto ai valori esatti con cui si è prodotto.
 
 Conseguenze. Un salvataggio nato da valori ritoccati è riconoscibile per sempre; il programma di verifica può ricevere la stessa cartella di valori ritoccati e riprodurre la segnalazione.
+
+---
+
+## Parte quarta — Decisioni della revisione del titolare
+
+### RDA-46 — Le perdite si contano sulle sole forze impiegate (incide sul gioco; 01 §10.2, §10.2.1)
+
+Problema. Nella scrittura dello scontro la proporzione delle perdite, da cui dipende l'accorciamento della soglia della resa, era calcolata sul totale delle forze comprese le riserve non ancora schierate: chi perdeva poco rispetto a un esercito grande non poteva arrendersi presto, trattenuto dal peso di ciò che non aveva mai schierato. Il titolare ha stabilito l'intento opposto: una battaglia perduta si riconosce e si chiude per quel che accade sul campo.
+
+Opzioni. Base sul totale delle forze, riserve comprese (la scrittura precedente); base sulle forze presenti sul campo nell'istante del calcolo; base cumulativa su tutto ciò che è sceso in campo fino a quel momento.
+
+Scelta. La base cumulativa: un contatore per parte, che cresce a ogni piazzamento della somma di punti vita con cui il reparto scende in campo, rinforzi compresi quando verranno. Proporzione = perdite cumulative diviso forze impiegate; prima di qualunque piazzamento la proporzione è zero. La medesima base vale per la ritirata combattuta e per ogni soglia dipendente dalle perdite; resta distinta, per natura, la soglia di disingaggio calcolata per singolo contatto (01 §9.8).
+
+Motivazione. La base sul campo nell'istante del calcolo oscillerebbe con le evacuazioni e con le distruzioni (un esercito distrutto quasi del tutto avrebbe base quasi nulla e proporzioni paradossali); la base cumulativa è monotona, deterministica, calcolabile dal solo stato, e realizza l'intento: chi impegna poco e perde quel poco conclude presto, chi sceglie di impegnare altro riallunga la propria soglia con le proprie mani.
+
+Conseguenze. Contatore nuovo nello stato e nell'impronta; la riproduzione d'oro resta valida perché in quello scontro l'intero mazzo scende in campo e le due basi coincidono; tenere riserve non ritarda più la possibilità di arrendersi, e la stima del peso delle riserve passa interamente alla taratura.
+
+### RDA-47 — Nessun fuoco amico, regola dichiarata (incide sul gioco; 01 §9.6.2)
+
+Problema. Il motore dello scontro già impediva di prendere a bersaglio i propri reparti, ma come conseguenza tacita della validazione, non come regola del gioco: una sessione futura avrebbe potuto introdurre il fuoco amico credendo di correggere una dimenticanza.
+
+Scelta. Regola dichiarata nel consolidato: i reparti da tiro colpiscono soltanto avversari, non esiste fuoco amico in alcuna forma, e battere un nemico impegnato in mischia con propri reparti è lecito e senza rischio per i propri. Il principio è generale: nessuna regola del gioco può danneggiare le forze di chi la esegue per effetto di un'azione rivolta all'avversario. Verificato che valga in ogni punto in cui si producono perdite: il tiro convalida il bersaglio come avversario, l'ingaggio pure, e la mischia infligge perdite soltanto fra i due contendenti del contatto.
+
+Conseguenze. Una prova di collaudo dedicata accerta la persistenza della regola (tiro sul proprio respinto, tiro sul nemico impegnato senza danno ai propri); la scelta tattica di battere la mischia dal di fuori resta lecita e senza contropartita, e il suo eventuale peso è materia di taratura dei valori del tiro.

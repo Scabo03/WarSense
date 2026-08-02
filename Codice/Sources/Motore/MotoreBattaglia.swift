@@ -80,13 +80,20 @@ public struct MotoreBattaglia: Sendable {
         return max(1, Int(coeff.applicato(a: Int64(gittata))))
     }
 
+    /// Proporzione delle perdite sulla base delle sole forze effettivamente impiegate
+    /// sul campo (01 §10.2, decisione del titolare): le riserve nel deck non contano.
+    /// È la base unica di ogni soglia che dipende dalle perdite subite in battaglia.
+    public func proporzionePerdite(per parte: Parte, stato: StatoBattaglia) -> Scalato {
+        let impiegate = stato.forzeImpegnate[parte] ?? 0
+        guard impiegate > 0 else { return .zero }
+        let perdite = stato.perditeSubite[parte] ?? 0
+        return Scalato(millesimi: perdite * 1000 / impiegate)
+    }
+
     /// Soglia effettiva della resa: la soglia minima si accorcia con le perdite (01 §10.2).
     public func sogliaResaEffettiva(per parte: Parte, stato: StatoBattaglia) -> Int {
         let f = formato(stato)
-        let iniziali = stato.forzeIniziali[parte] ?? 1
-        let perdite = stato.perditeSubite[parte] ?? 0
-        let proporzioneMillesimi = iniziali > 0 ? perdite * 1000 / iniziali : 0
-        let riduzione = f.accorciamentoResaPerPerdite * Scalato(millesimi: proporzioneMillesimi)
+        let riduzione = f.accorciamentoResaPerPerdite * proporzionePerdite(per: parte, stato: stato)
         let fattore = riduzione >= .uno ? Scalato.zero : Scalato.uno - riduzione
         return max(1, Int(fattore.applicato(a: Int64(f.sogliaMinimaResaTurni))))
     }
@@ -235,6 +242,7 @@ public struct MotoreBattaglia: Sendable {
                                 azioneSpesa: true, // 01 §8.1.2
                                 rinforzo: false)
             stato.sciami[id] = sciame
+            stato.forzeImpegnate[parte, default: 0] += sciame.serbatoio // base delle perdite (01 §10.2)
             stato.bilancio[parte]!.spesa += costiDichiarati.volume
             elemento.esemplari -= 1
             stato.deck[parte]![indice] = elemento
