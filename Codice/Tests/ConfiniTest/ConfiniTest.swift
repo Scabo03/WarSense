@@ -14,11 +14,14 @@ final class ConfiniTest: XCTestCase {
     }()
 
     /// Le regole di dipendenza di 05 §1.3, come insiemi di moduli importabili.
+    /// Segnali può importare Motore (il solo tipo degli eventi), Dati e i framework
+    /// di piattaforma; mai Sessione né Presentazione (05 §1.3, RDA-48).
     static let importAmmessi: [String: Set<String>] = [
         "Dati": ["Foundation"],
         "Motore": ["Foundation", "Dati"],
         "Sessione": ["Foundation", "Motore", "Dati"],
         "Contenuti": ["Foundation"],
+        "Segnali": ["Foundation", "Motore", "Dati", "UIKit", "CoreHaptics", "AVFoundation"],
         "Verifica": ["Foundation", "Sessione", "Motore", "Dati", "Contenuti"],
     ]
 

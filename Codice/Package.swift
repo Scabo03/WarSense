@@ -7,6 +7,13 @@ let package = Package(
     name: "WarSense",
     defaultLocalization: "it",
     platforms: [.iOS(.v17), .macOS(.v14)],
+    products: [
+        .library(name: "Dati", targets: ["Dati"]),
+        .library(name: "Motore", targets: ["Motore"]),
+        .library(name: "Sessione", targets: ["Sessione"]),
+        .library(name: "Contenuti", targets: ["Contenuti"]),
+        .library(name: "Segnali", targets: ["Segnali"]),
+    ],
     targets: [
         // Dati: caricamento e validazione dei file dei valori e dei testi. Importa soltanto Foundation.
         .target(name: "Dati"),
@@ -16,12 +23,16 @@ let package = Package(
         .target(name: "Sessione", dependencies: ["Motore", "Dati"]),
         // Contenuti: i file veri (valori, testi). Nessun codice oltre l'esposizione del bundle.
         .target(name: "Contenuti", resources: [.copy("Valori"), .copy("Testi")]),
+        // Segnali: punto centrale dei segnali. Compila su ogni piattaforma: nucleo puro
+        // più parti di piattaforma dietro compilazione condizionale (RDA-48).
+        .target(name: "Segnali", dependencies: ["Motore", "Dati"]),
         // Verifica: programma di verifica del bilanciamento, senza interfaccia (fase C).
         .executableTarget(name: "Verifica", dependencies: ["Sessione", "Motore", "Dati", "Contenuti"]),
         // Collaudo.
         .testTarget(name: "DatiTest", dependencies: ["Dati", "Contenuti"]),
         .testTarget(name: "MotoreTest", dependencies: ["Motore", "Dati", "Contenuti"]),
         .testTarget(name: "SessioneTest", dependencies: ["Sessione", "Motore", "Dati", "Contenuti"]),
+        .testTarget(name: "SegnaliTest", dependencies: ["Segnali"]),
         .testTarget(name: "ConfiniTest", dependencies: []),
     ]
 )

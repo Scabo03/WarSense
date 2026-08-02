@@ -401,3 +401,19 @@ Problema. Il motore dello scontro già impediva di prendere a bersaglio i propri
 Scelta. Regola dichiarata nel consolidato: i reparti da tiro colpiscono soltanto avversari, non esiste fuoco amico in alcuna forma, e battere un nemico impegnato in mischia con propri reparti è lecito e senza rischio per i propri. Il principio è generale: nessuna regola del gioco può danneggiare le forze di chi la esegue per effetto di un'azione rivolta all'avversario. Verificato che valga in ogni punto in cui si producono perdite: il tiro convalida il bersaglio come avversario, l'ingaggio pure, e la mischia infligge perdite soltanto fra i due contendenti del contatto.
 
 Conseguenze. Una prova di collaudo dedicata accerta la persistenza della regola (tiro sul proprio respinto, tiro sul nemico impegnato senza danno ai propri); la scelta tattica di battere la mischia dal di fuori resta lecita e senza contropartita, e il suo eventuale peso è materia di taratura dei valori del tiro.
+
+---
+
+## Parte quinta — Decisioni della fase di infrastruttura
+
+### RDA-48 — Segnali come bersaglio del pacchetto con compilazione condizionale (A §1.2)
+
+Problema. Il bersaglio Segnali importa i framework di piattaforma (UIKit, CoreHaptics, AVFoundation), ma il pacchetto deve compilare anche su macOS, dove girano il collaudo e il programma di verifica: la sessione della fase A aveva lasciato aperta la scelta fra compilazione condizionale e spostamento del modulo nel solo progetto applicativo.
+
+Opzioni. Bersaglio soltanto nel progetto applicativo Xcode (fuori dal pacchetto); pacchetto separato solo iOS; bersaglio nel pacchetto con le parti di piattaforma dietro `#if canImport(UIKit)`.
+
+Scelta. La terza: Segnali resta un bersaglio del pacchetto, come 05 §1.2 dichiara. Il nucleo di decisione dei canali (05 §11.3) è puro e compila ovunque, con le proprie prove eseguite dal collaudo ordinario; le realizzazioni di piattaforma (aptica, suoni, annunci) vivono dietro compilazione condizionale e prendono corpo nella fase B.
+
+Motivazione. Spostare il modulo nel progetto applicativo lo sottrarrebbe al collaudo dei confini e contraddirebbe l'architettura senza necessità; un pacchetto separato aggiungerebbe un artefatto per un problema che una direttiva di compilazione risolve. Con la scelta adottata la tabella eventi-canali resta collaudabile su macOS, che è dove il collaudo gira a ogni invio.
+
+Conseguenze. Il collaudo dei confini conosce l'insieme degli import ammessi di Segnali, framework di piattaforma compresi; l'integrazione continua esegue anche le prove del nucleo dei canali; la parte di piattaforma andrà scritta interamente dentro i blocchi condizionali.
