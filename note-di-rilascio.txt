@@ -1,0 +1,1 @@
+Prima build della catena di distribuzione. L'interfaccia arriva con la fase B; questa build mostra soltanto nome e versione.

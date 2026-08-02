@@ -1,4 +1,14 @@
-.DS_Store
+# Artefatti di compilazione e cartelle di lavoro
 .build/
 DerivedData/
+Applicazione/build/
+*.xcarchive
+*.ipa
+xcuserdata/
 *.xcuserstate
+.DS_Store
+# Credenziali e chiavi: non entrano mai nel repository, in nessuna forma
+*.p8
+*.env
+*.mobileprovision
+private_keys/

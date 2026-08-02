@@ -1,0 +1,18 @@
+# Integrazione continua: a ogni invio compila il pacchetto ed esegue l'intero
+# collaudo, comprese le prove dei confini fra i moduli (05 §14).
+# Nessun caricamento su TestFlight da qui: il caricamento è un atto deliberato,
+# eseguito in locale con scripts/carica-testflight.sh.
+name: collaudo
+on:
+  push:
+    branches: [principale]
+  pull_request:
+jobs:
+  collaudo:
+    runs-on: macos-15
+    steps:
+      - uses: actions/checkout@v4
+      - name: Versione di Swift
+        run: swift --version
+      - name: Collaudo completo del pacchetto
+        run: swift test --package-path Codice

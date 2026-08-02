@@ -1,0 +1,51 @@
+# Progetto applicativo che assembla il pacchetto (05 §1.2). Generato con xcodegen:
+# il file di progetto Xcode è un artefatto, questo è la sorgente di verità.
+# La versione di marketing ha qui la sua unica sorgente di verità (MARKETING_VERSION);
+# il numero di build viene da TestFlight a ogni caricamento (scripts/carica-testflight.sh).
+name: WarSense
+options:
+  deploymentTarget:
+    iOS: "17.0"
+packages:
+  WarSensePacchetto:
+    path: ../Codice
+targets:
+  WarSense:
+    type: application
+    platform: iOS
+    sources:
+      - Sorgenti
+      - Risorse
+    dependencies:
+      - package: WarSensePacchetto
+        products: [Sessione, Motore, Dati, Contenuti, Segnali]
+    info:
+      path: Sorgenti/Info.plist
+      properties:
+        CFBundleDisplayName: WarSense
+        UILaunchScreen: {}
+        # Dichiarazione sulla crittografia: nessun algoritmo di cifratura in uso.
+        # Evita la domanda sull'esportazione a ogni caricamento su TestFlight.
+        ITSAppUsesNonExemptEncryption: false
+        UISupportedInterfaceOrientations:
+          - UIInterfaceOrientationPortrait
+          - UIInterfaceOrientationPortraitUpsideDown
+          - UIInterfaceOrientationLandscapeLeft
+          - UIInterfaceOrientationLandscapeRight
+    settings:
+      base:
+        PRODUCT_BUNDLE_IDENTIFIER: com.scabo.warsense
+        MARKETING_VERSION: "0.1.0"
+        CURRENT_PROJECT_VERSION: 1
+        DEVELOPMENT_TEAM: D2KQYQ8YU8
+        TARGETED_DEVICE_FAMILY: "1,2"
+        SWIFT_VERSION: "6.0"
+        ASSETCATALOG_COMPILER_APPICON_NAME: AppIcon
+      configs:
+        Release:
+          # Firma manuale sul certificato di distribuzione già esistente (vincolo
+          # assoluto: nessun certificato nuovo, nessuna revoca). Il profilo è
+          # specifico di questa applicazione e riusa quel certificato.
+          CODE_SIGN_STYLE: Manual
+          CODE_SIGN_IDENTITY: "Apple Distribution"
+          PROVISIONING_PROFILE_SPECIFIER: "match AppStore com.scabo.warsense"

@@ -25,9 +25,11 @@ La prova prescritta dalla sezione 2 dell'incarico (catena dei testi esterni) è 
 
 ### Fase B — Lo scontro accessibile: NON COMINCIATA
 
+L'infrastruttura è montata e provata (vedi memoria-infrastruttura.md): progetto applicativo in Applicazione/ (xcodegen, firma manuale sul certificato riusato, schermata provvisoria accessibile), caricamento su TestFlight con un solo comando (scripts/carica-testflight.sh, build 1 caricata), integrazione continua su GitHub, bersaglio Segnali creato con compilazione condizionale (RDA-48) e nucleo dei canali già collaudato.
+
 Da dove partire:
-1. Progetto applicativo Xcode che assembla il pacchetto (05 §1.2): bersaglio Presentazione (UIKit programmatico, RDA-02) e bersaglio Segnali (libreria; per compilare nel pacchetto multipiattaforma servirà `#if canImport(UIKit)` o l'inclusione nel solo progetto applicativo — decidere e registrare).
-2. Segnali: punto unico eventi→canali (05 §11), tabella di 02 §11.7.1, coda annunci con lingua.
+1. Sostituire la schermata provvisoria con la Presentazione vera (UIKit programmatico, RDA-02) dentro Applicazione/Sorgenti.
+2. Completare Segnali: realizzazioni di piattaforma dietro i blocchi condizionali (aptica pronta, suoni, coda annunci con lingua), tabella di 02 §11.7.1.
 3. Griglia come contenitore di elementi accessibili persistenti (05 §10.1, RDA-03), ordine di lettura 02 §2.8, deck, pannello della cella, annullamento/azzeramento, rotori 02 §7.2, verbosità, impostazioni, schermata di apprendimento segnali, resoconto di fine battaglia (01 §15.3.1).
 4. Tattico avversario di prima stesura nel Motore (deterministico, parametri ufficiale da `ufficiali.json` da creare).
 5. Prove XCUITest del fuoco (05 §14.4, regole a–e di 05 §10.3).
