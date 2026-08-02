@@ -1,0 +1,4 @@
+{
+  "anti_saturazione": {"para_saturazione": 0.7, "para_perforazione": 0.2},
+  "anti_perforazione": {"para_saturazione": 0.2, "para_perforazione": 0.7}
+}

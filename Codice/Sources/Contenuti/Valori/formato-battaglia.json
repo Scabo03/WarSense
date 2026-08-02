@@ -1,0 +1,4 @@
+[
+  {"identificatore":"cento","righe":10,"colonne":10,"budget_volume_base":300,"coefficiente_primo_turno":1.2,"quota_riporto":0.1,"righe_di_piazzamento":3,"righe_soglia_ritirata":2,"coefficiente_spostamento_doppio":1.8,"turni_vantaggio_imboscante":3,"sconto_imboscante":0.3,"soglia_minima_resa_turni":4,"accorciamento_resa_per_perdite":0.5},
+  {"identificatore":"quindici","righe":4,"colonne":4,"budget_volume_base":120,"coefficiente_primo_turno":1.2,"quota_riporto":0.1,"righe_di_piazzamento":2,"righe_soglia_ritirata":1,"coefficiente_spostamento_doppio":1.8,"turni_vantaggio_imboscante":3,"sconto_imboscante":0.3,"soglia_minima_resa_turni":3,"accorciamento_resa_per_perdite":0.5}
+]

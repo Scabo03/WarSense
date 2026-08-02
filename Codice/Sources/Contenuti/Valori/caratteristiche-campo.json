@@ -1,0 +1,4 @@
+[
+  {"identificatore":"campo_aperto","modificatori":{}},
+  {"identificatore":"terreno_rotto","modificatori":{"coefficiente_costo_movimento":1.3}}
+]

@@ -1,1 +1,14 @@
-{}
+{
+ "impronte": {
+  "archetipi.json": "3e8822d77050eada334d22166db3416fc008ac76cc5eba2a4cebe7bdec81c6f7",
+  "caratteristiche-campo.json": "cda6b75ef6bd34f3445ce5ce803ca32d7bbea2b21169e0fef243bf1ab467793f",
+  "combattimento.json": "d19eb50acb60bc1862049e591dedfff43024c5c63971294c25d0109afda2dc94",
+  "formato-battaglia.json": "d5877cc487278512568a7efec9e76f3195542b3ecb0d23be9f6dc49939a5f290",
+  "minimi.json": "d67b738ee9136f09d98382d60c3bd661751943c5caacb5dc1b60e12811df353c",
+  "offese-e-protezioni.json": "bb48b76b1c6f93837850dda262114c4cc4ce9ead5a3c4b463dee75ef65bcc35f"
+ },
+ "versione": "0.1.0",
+ "versioni_compatibili": [
+  "0.1.0"
+ ]
+}
