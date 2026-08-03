@@ -25,7 +25,7 @@ La prova prescritta dalla sezione 2 dell'incarico (catena dei testi esterni) è 
 
 ### Fase B — Lo scontro accessibile: CONCLUSA (in attesa della distribuzione ai tester)
 
-Criterio di uscita (05 §15.3, «scontro completo giocabile solo con VoiceOver, consegnato ai tester»): la parte realizzativa è compiuta e provata; al titolare resta soltanto l'assegnazione della build al gruppo di tester su App Store Connect. Le build 1 e 2 giacciono sul treno di versione «1.0» per la sbavatura dell'Info.plist, corretta e documentata nella memoria di infrastruttura; la build 3 (versione 0.2.0) è quella della prima consegna. Collaudo: 58 prove del pacchetto più 12 fra ospitate e interfaccia sul simulatore, tutte verdi.
+Criterio di uscita (05 §15.3, «scontro completo giocabile solo con VoiceOver, consegnato ai tester»): la parte realizzativa è compiuta e provata; il gruppo di tester «WarLab» ha accesso automatico a ogni build caricata (verificato via API), quindi la consegna è compiuta con il caricamento stesso. Le build 1 e 2 giacciono sul treno di versione «1.0» per la sbavatura dell'Info.plist, corretta e documentata nella memoria di infrastruttura; la build 3 (versione 0.2.0) è quella della prima consegna. Collaudo: 58 prove del pacchetto più 12 fra ospitate e interfaccia sul simulatore, tutte verdi.
 
 #### Intervento correttivo dopo la prima prova su dispositivo (build 4, versione 0.2.0)
 

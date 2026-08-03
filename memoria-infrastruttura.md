@@ -67,7 +67,7 @@ In `Applicazione/project.yml`, fra le proprietà dell'Info.plist: `ITSAppUsesNon
 
 ## Che cosa deve fare il titolare su App Store Connect
 
-Dopo ogni caricamento: la build compare in TestFlight dopo l'elaborazione (minuti). Per renderla disponibile ai tester: TestFlight → gruppo di tester (interno: disponibile subito; esterno: prima build soggetta a revisione di Apple) → aggiungere la build al gruppo. La nota «cosa provare» è già allegata dallo script.
+Dopo ogni caricamento: la build compare in TestFlight dopo l'elaborazione (minuti). Il gruppo attuale «WarLab» è interno con accesso automatico a tutte le build (`hasAccessToAllBuilds: true`, verificato via API il 2026-08-03): ogni build caricata gli arriva DA SÉ, con notifica automatica ai tester — nessuna assegnazione manuale. Solo per eventuali gruppi futuri senza accesso automatico (o esterni, con prima build soggetta a revisione di Apple) serve aggiungere la build al gruppo a mano. La nota «cosa provare» è già allegata dallo script.
 
 ## Problemi già incontrati e soluzioni
 
