@@ -13,11 +13,39 @@ export API_PRIVATE_KEYS_DIR="$(dirname "$APP_STORE_CONNECT_API_KEY_PATH")"
 APP_ID="6797306323"   # WarSense su App Store Connect
 ASC="python3 $RADICE/scripts/asc_api.py"
 
-echo "== Numero di build: ultimo su TestFlight più uno =="
-ULTIMO=$(eval $ASC GET "'/v1/builds?filter[app]=$APP_ID&sort=-uploadedDate&limit=1'" \
-  | python3 -c "import json,sys; d=json.load(sys.stdin)['data']; print(d[0]['attributes']['version'] if d else 0)")
+# ============================================================================
+# CONTROLLO PREVENTIVO DELLE VERSIONI — PRIMA DI QUALUNQUE ALTRA OPERAZIONE.
+# La versione di marketing SALE SOLTANTO: TestFlight propone ai dispositivi
+# l'ultima build della versione più alta, quindi caricare una versione
+# all'indietro rende invisibili tutte le build successive (è già accaduto:
+# treno 1.0 accidentale sopra 0.2.0, build 3 e 4 mai proposte come
+# aggiornamento). Questo controllo NON è aggirabile: nessuna opzione,
+# nessuna variabile d'ambiente lo salta.
+# ============================================================================
+echo "== Controllo preventivo: la versione non torna mai indietro =="
+VERSIONE=$(grep -E '^\s*MARKETING_VERSION:' "$RADICE/Applicazione/project.yml" \
+  | sed -E 's/.*"([^"]+)".*/\1/')
+eval $ASC GET "'/v1/preReleaseVersions?filter[app]=$APP_ID&limit=200'" \
+  | python3 -c "
+import json, sys
+
+def segmenti(v):
+    return tuple(int(p) for p in v.split('.'))
+
+nuova = '$VERSIONE'
+presenti = [i['attributes']['version'] for i in json.load(sys.stdin)['data']]
+massima = max(presenti, key=segmenti) if presenti else None
+if massima is not None and segmenti(nuova) < segmenti(massima):
+    print(f'RIFIUTATO: la versione {nuova} è inferiore alla più alta già su TestFlight ({massima}); TestFlight propone il treno più alto e questa build resterebbe invisibile ai dispositivi.')
+    sys.exit(1)
+print(f'versione da caricare: {nuova}; più alta già presente: {massima or \"nessuna\"} — si procede')
+"
+
+echo "== Numero di build: massimo su tutto l'account più uno =="
+ULTIMO=$(eval $ASC GET "'/v1/builds?filter[app]=$APP_ID&limit=200'" \
+  | python3 -c "import json,sys; d=json.load(sys.stdin)['data']; print(max((int(b['attributes']['version']) for b in d), default=0))")
 NUOVO=$((ULTIMO + 1))
-echo "ultimo: $ULTIMO -> nuovo: $NUOVO"
+echo "massimo: $ULTIMO -> nuovo: $NUOVO"
 
 echo "== Collaudo del pacchetto prima del caricamento =="
 (cd "$RADICE/Codice" && swift test 2>&1 | tail -2)

@@ -462,7 +462,7 @@
 					"$(inherited)",
 					"@executable_path/Frameworks",
 				);
-				MARKETING_VERSION = 0.2.0;
+				MARKETING_VERSION = 1.1.0;
 				PRODUCT_BUNDLE_IDENTIFIER = com.scabo.warsense;
 				PROVISIONING_PROFILE_SPECIFIER = "match AppStore com.scabo.warsense";
 				SDKROOT = iphoneos;
@@ -539,7 +539,7 @@
 					"$(inherited)",
 					"@executable_path/Frameworks",
 				);
-				MARKETING_VERSION = 0.2.0;
+				MARKETING_VERSION = 1.1.0;
 				PRODUCT_BUNDLE_IDENTIFIER = com.scabo.warsense;
 				SDKROOT = iphoneos;
 				SWIFT_VERSION = 6.0;
