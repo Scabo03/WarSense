@@ -396,7 +396,8 @@ public struct MotoreBattaglia: Sendable {
                                coefficiente: .uno, stato: stato)
             danni.append(DannoCalcolato(bersaglio: contatto.secondo, danno: dannoAB))
             danni.append(DannoCalcolato(bersaglio: contatto.primo, danno: dannoBA))
-            esiti.append(EsitoContatto(cellaPrimo: a.posizione, cellaSecondo: b.posizione,
+            esiti.append(EsitoContatto(partePrimo: a.parte,
+                                       cellaPrimo: a.posizione, cellaSecondo: b.posizione,
                                        dannoAlPrimo: dannoBA, dannoAlSecondo: dannoAB))
         }
         eventi.append(.esitoMischiaComplessivo(esiti))

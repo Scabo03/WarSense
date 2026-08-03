@@ -32,7 +32,7 @@ let package = Package(
         .testTarget(name: "DatiTest", dependencies: ["Dati", "Contenuti"]),
         .testTarget(name: "MotoreTest", dependencies: ["Motore", "Dati", "Contenuti"]),
         .testTarget(name: "SessioneTest", dependencies: ["Sessione", "Motore", "Dati", "Contenuti"]),
-        .testTarget(name: "SegnaliTest", dependencies: ["Segnali"]),
+        .testTarget(name: "SegnaliTest", dependencies: ["Segnali", "Dati", "Contenuti"]),
         .testTarget(name: "ConfiniTest", dependencies: []),
     ]
 )

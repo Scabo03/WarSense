@@ -62,10 +62,25 @@ public enum EfficaciaQualitativa: String, Codable, Hashable, Sendable {
 
 /// L'esito di un contatto in un giro, per l'annuncio complessivo (01 §9.7.1).
 public struct EsitoContatto: Hashable, Codable, Sendable {
+    public let partePrimo: Parte
     public let cellaPrimo: Cella
     public let cellaSecondo: Cella
     public let dannoAlPrimo: Int64
     public let dannoAlSecondo: Int64
+
+    public init(partePrimo: Parte, cellaPrimo: Cella, cellaSecondo: Cella,
+                dannoAlPrimo: Int64, dannoAlSecondo: Int64) {
+        self.partePrimo = partePrimo
+        self.cellaPrimo = cellaPrimo
+        self.cellaSecondo = cellaSecondo
+        self.dannoAlPrimo = dannoAlPrimo
+        self.dannoAlSecondo = dannoAlSecondo
+    }
+
+    /// Le perdite subite dalla parte indicata in questo contatto.
+    public func perdite(di parte: Parte) -> Int64 {
+        partePrimo == parte ? dannoAlPrimo : dannoAlSecondo
+    }
 }
 
 /// Gli eventi astratti del Motore (05 §3.7): fatti, mai annunci (00 §3.2).

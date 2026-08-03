@@ -1,0 +1,21 @@
+{
+  "commento": "Pattern con nomi parlanti (00 §5.5). Ritmo = genere; intensita e nitidezza = sfumature (02 §11.4). Tempi in millesimi di secondo. Assegnazioni: 02 §11.7.1.",
+  "pattern": {
+    "cambio_riga":            {"impulsi": [{"attesa": 0, "intensita": 0.5, "nitidezza": 0.8}]},
+    "cambio_riga_con_nemici": {"impulsi": [{"attesa": 0, "intensita": 0.9, "nitidezza": 0.8}]},
+    "marcia_completata":      {"impulsi": [{"attesa": 0, "intensita": 0.8, "nitidezza": 0.9}]},
+    "conferma":               {"impulsi": [{"attesa": 0, "intensita": 0.7, "nitidezza": 0.6}, {"attesa": 90, "intensita": 0.7, "nitidezza": 0.6}]},
+    "annullamento":           {"impulsi": [{"attesa": 0, "intensita": 0.4, "nitidezza": 0.3}, {"attesa": 90, "intensita": 0.4, "nitidezza": 0.3}]},
+    "mischia_favorevole":     {"impulsi": [{"attesa": 0, "intensita": 0.9, "nitidezza": 0.7}, {"attesa": 80, "intensita": 0.9, "nitidezza": 0.7}, {"attesa": 160, "intensita": 0.9, "nitidezza": 0.7}]},
+    "mischia_sfavorevole":    {"impulsi": [{"attesa": 0, "intensita": 0.4, "nitidezza": 0.7}, {"attesa": 80, "intensita": 0.4, "nitidezza": 0.7}, {"attesa": 160, "intensita": 0.4, "nitidezza": 0.7}]},
+    "disingaggio":            {"impulsi": [{"attesa": 0, "intensita": 0.6, "nitidezza": 0.2}, {"attesa": 80, "intensita": 0.6, "nitidezza": 0.2}, {"attesa": 160, "intensita": 0.6, "nitidezza": 0.2}]},
+    "munizioni_esaurite":     {"impulsi": [{"attesa": 0, "intensita": 0.7, "nitidezza": 0.5}, {"attesa": 180, "intensita": 0.7, "nitidezza": 0.5}]},
+    "deck_esaurito":          {"impulsi": [{"attesa": 0, "intensita": 0.5, "nitidezza": 0.5}, {"attesa": 180, "intensita": 0.5, "nitidezza": 0.5}]},
+    "rifornimento_interrotto":{"impulsi": [{"attesa": 0, "intensita": 0.8, "nitidezza": 0.5}, {"attesa": 180, "intensita": 0.8, "nitidezza": 0.5}]},
+    "risorsa_insufficiente":  {"impulsi": [{"attesa": 0, "intensita": 0.6, "nitidezza": 0.4}, {"attesa": 180, "intensita": 0.6, "nitidezza": 0.4}]},
+    "imboscata":              {"impulsi": [{"attesa": 0, "intensita": 1.0, "nitidezza": 0.9}, {"attesa": 95, "intensita": 0.8, "nitidezza": 0.9}, {"attesa": 160, "intensita": 0.8, "nitidezza": 0.9}, {"attesa": 255, "intensita": 1.0, "nitidezza": 0.9}]},
+    "battaglia_in_sospeso":   {"impulsi": [{"attesa": 0, "intensita": 0.8, "nitidezza": 0.7}, {"attesa": 95, "intensita": 0.6, "nitidezza": 0.7}, {"attesa": 160, "intensita": 0.6, "nitidezza": 0.7}, {"attesa": 255, "intensita": 0.8, "nitidezza": 0.7}]},
+    "sortita":                {"impulsi": [{"attesa": 0, "intensita": 0.9, "nitidezza": 0.8}, {"attesa": 95, "intensita": 0.7, "nitidezza": 0.8}, {"attesa": 160, "intensita": 0.7, "nitidezza": 0.8}, {"attesa": 255, "intensita": 0.9, "nitidezza": 0.8}]},
+    "vincolo_campagna":       {"impulsi": [{"attesa": 0, "intensita": 0.7, "nitidezza": 0.6}, {"attesa": 95, "intensita": 0.5, "nitidezza": 0.6}, {"attesa": 160, "intensita": 0.5, "nitidezza": 0.6}, {"attesa": 255, "intensita": 0.7, "nitidezza": 0.6}]}
+  }
+}

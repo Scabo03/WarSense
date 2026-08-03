@@ -26,3 +26,22 @@
 "errore.testi.manifest_malformato" = "Il manifest dei testi non è leggibile";
 "errore.testi.lingua_assente" = "La lingua %@ non è presente nei testi";
 "errore.testi.pacchetto_illeggibile" = "Il pacchetto di lingua %@ non è leggibile";
+"errore.dati.troppi_significati_tattili" = "I significati tattili superano il tetto stabilito";
+
+/* Annunci degli eventi di battaglia (05 §10.7): frasi intere con segnaposto. */
+"battaglia.turno_proprio" = "Turno %d, tocca a te";
+"battaglia.turno_proprio.sintetico" = "Turno %d, a te";
+"battaglia.turno_avversario" = "Turno %d, agisce l'avversario";
+"battaglia.turno_avversario.sintetico" = "Turno %d, avversario";
+"battaglia.spostamento" = "Spostato in riga %d, cella %d: costa %d, restano %d";
+"battaglia.tiro_eseguito" = "Tiro eseguito, danno %d, %@";
+"battaglia.mischia_complessiva" = "Esito delle mischie, %d contatti: ";
+"battaglia.mischia_complessiva.sintetico" = "Mischie, %d: ";
+"battaglia.mischia_voce" = "riga %d cella %d, perdite %d contro %d";
+"battaglia.mischia_separatore" = "; ";
+"battaglia.disfatto_proprio" = "Un tuo reparto è disfatto in riga %d, cella %d";
+"battaglia.disfatto_avversario" = "Reparto avversario disfatto in riga %d, cella %d";
+"battaglia.resa_propria" = "Resa dichiarata: comincia la tua ritirata combattuta";
+"battaglia.resa_avversaria" = "L'avversario si ritira";
+"battaglia.evacuata" = "Unità evacuata: costa %d";
+"battaglia.sorpresa_conclusa" = "Le posizioni sono ora tutte scoperte";

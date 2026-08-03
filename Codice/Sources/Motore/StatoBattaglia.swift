@@ -100,6 +100,11 @@ public struct EsitoBattaglia: Hashable, Codable, Sendable {
     public let sconfitto: Parte
     public let modo: Modo
     public let turni: Int
+    public init(sconfitto: Parte, modo: Modo, turni: Int) {
+        self.sconfitto = sconfitto
+        self.modo = modo
+        self.turni = turni
+    }
 }
 
 /// Lo stato completo di una battaglia (05 §2.7). Un valore, interamente Codable,

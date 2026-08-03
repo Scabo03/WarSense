@@ -1,0 +1,22 @@
+{
+  "commento": "Vocabolario sonoro parallelo alle famiglie tattili (02 §12.1). Eventi senza segnale tattile: solo suono e voce (02 §11.7.1).",
+  "assegnazioni": {
+    "cambio_riga": "navigazione_singolo",
+    "cambio_riga_con_nemici": "navigazione_singolo",
+    "marcia_completata": "navigazione_arrivo",
+    "conferma": "conferma_doppio",
+    "annullamento": "conferma_doppio_tenue",
+    "mischia_favorevole": "combattimento_triplo_alto",
+    "mischia_sfavorevole": "combattimento_triplo_basso",
+    "disingaggio": "combattimento_triplo_morbido",
+    "munizioni_esaurite": "risorse_doppio_lento",
+    "deck_esaurito": "risorse_doppio_lento",
+    "rifornimento_interrotto": "risorse_doppio_lento",
+    "risorsa_insufficiente": "risorse_doppio_lento",
+    "imboscata": "allarme_1_2_1",
+    "battaglia_in_sospeso": "allarme_1_2_1",
+    "sortita": "allarme_1_2_1",
+    "vincolo_campagna": "allarme_1_2_1",
+    "rinforzi_nel_deck": "rinforzi"
+  }
+}

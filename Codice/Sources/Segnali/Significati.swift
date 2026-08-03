@@ -1,0 +1,130 @@
+import Foundation
+import Dati
+import Motore
+
+/// I significati assegnati ai segnali (02 §11.7.1): quindici, in cinque famiglie
+/// ritmiche, più gli eventi che restano a suono e voce. Le chiavi corrispondono
+/// ai pattern di aptica.json e alle assegnazioni di suoni.json.
+public enum SignificatoSegnale: String, Sendable, CaseIterable {
+    case cambioRiga = "cambio_riga"
+    case cambioRigaConNemici = "cambio_riga_con_nemici"
+    case marciaCompletata = "marcia_completata"
+    case conferma = "conferma"
+    case annullamento = "annullamento"
+    case mischiaFavorevole = "mischia_favorevole"
+    case mischiaSfavorevole = "mischia_sfavorevole"
+    case disingaggio = "disingaggio"
+    case munizioniEsaurite = "munizioni_esaurite"
+    case deckEsaurito = "deck_esaurito"
+    case rifornimentoInterrotto = "rifornimento_interrotto"
+    case risorsaInsufficiente = "risorsa_insufficiente"
+    case imboscata = "imboscata"
+    case battagliaInSospeso = "battaglia_in_sospeso"
+    case sortita = "sortita"
+    case vincoloCampagna = "vincolo_campagna"
+    /// Fuori dal tetto tattile: solo suono e voce (02 §11.7.1).
+    case rinforziNelDeck = "rinforzi_nel_deck"
+
+    /// Vero se il significato ha un segnale tattile assegnato (02 §11.7.1).
+    public var conSegnaleTattile: Bool {
+        self != .rinforziNelDeck
+    }
+}
+
+/// La traduzione degli eventi della battaglia in significato e annuncio (05 §10.7):
+/// l'ingresso di Segnali è l'evento astratto; qui si risolvono modello, verbosità
+/// e lingua. Parte neutra e collaudabile: nessun canale di piattaforma.
+public struct TraduttoreEventi: Sendable {
+    let testi: Testi
+    /// La parte che ascolta: gli eventi si annunciano dal suo punto di vista.
+    let parte: Parte
+
+    public init(testi: Testi, parte: Parte) {
+        self.testi = testi
+        self.parte = parte
+    }
+
+    /// Il significato di segnale per l'evento, se l'evento ne merita uno.
+    public func significato(per evento: EventoBattaglia) -> SignificatoSegnale? {
+        switch evento {
+        case .piazzamentoConfermato(let p, _, _, _, _):
+            return p == parte ? .conferma : nil
+        case .elementoDeckEsaurito(let p, _):
+            return p == parte ? .deckEsaurito : nil
+        case .esitoMischiaComplessivo(let esiti):
+            return esiti.isEmpty ? nil : esitoFavorevole(esiti) ? .mischiaFavorevole : .mischiaSfavorevole
+        case .disingaggio: return .disingaggio
+        case .munizioniEsaurite: return .munizioniEsaurite
+        case .contattoAvviato: return nil // l'annuncio basta: il segnale arriva con l'esito
+        case .sorpresaConclusa: return .imboscata
+        default: return nil
+        }
+    }
+
+    /// L'esito complessivo delle mischie, dal punto di vista della parte che ascolta:
+    /// favorevole se le perdite inflitte non sono inferiori alle subite
+    /// (il segno è la sfumatura dentro la famiglia, 02 §11.4).
+    func esitoFavorevole(_ esiti: [EsitoContatto]) -> Bool {
+        var inflitte: Int64 = 0, subite: Int64 = 0
+        for e in esiti {
+            subite += e.perdite(di: parte)
+            inflitte += e.perdite(di: parte.avversaria)
+        }
+        return inflitte >= subite
+    }
+
+    /// L'annuncio per l'evento, già risolto nel livello di verbosità e nella lingua.
+    /// Restituisce nulla per gli eventi che non producono annuncio proattivo.
+    public func annuncio(per evento: EventoBattaglia, verbosita: Verbosita) -> TestoLocalizzato? {
+        switch evento {
+        case .turnoIniziato(let p, let giro):
+            let chiave = p == parte ? "battaglia.turno_proprio" : "battaglia.turno_avversario"
+            return testi.frase(chiave, verbosita: verbosita, giro)
+        case .piazzamentoConfermato(let p, _, _, let costo, let residuo):
+            guard p == parte else { return nil }
+            return testi.frase("battaglia.piazzamento_confermato", verbosita: verbosita,
+                               Int(costo), Int(residuo))
+        case .elementoDeckEsaurito(let p, _):
+            return p == parte ? testi.frase("battaglia.elemento_esaurito", verbosita: verbosita) : nil
+        case .spostamentoEseguito(_, let a, let costo, let residuo):
+            return testi.frase("battaglia.spostamento", verbosita: verbosita,
+                               a.riga, a.colonna, Int(costo), Int(residuo))
+        case .tiroEseguito(_, _, let danno, let efficacia):
+            let termine = testi.termine(efficacia.rawValue).testo
+            return testi.frase("battaglia.tiro_eseguito", verbosita: verbosita, Int(danno), termine)
+        case .contattoAvviato(let cella):
+            return testi.frase("battaglia.contatto_avviato", verbosita: verbosita, cella.riga, cella.colonna)
+        case .esitoMischiaComplessivo(let esiti):
+            guard !esiti.isEmpty else { return nil }
+            // Una sola comunicazione ordinata per tutti i contatti (01 §9.7.1).
+            let voci = esiti.map { e in
+                testi.frase("battaglia.mischia_voce", verbosita: verbosita,
+                            e.cellaPrimo.riga, e.cellaPrimo.colonna,
+                            Int(e.dannoAlPrimo), Int(e.dannoAlSecondo)).testo
+            }
+            let separatore = testi.frase("battaglia.mischia_separatore").testo
+            return TestoLocalizzato(
+                testo: testi.frase("battaglia.mischia_complessiva", verbosita: verbosita,
+                                   esiti.count).testo + voci.joined(separator: separatore),
+                lingua: testi.lingua)
+        case .disingaggio(_, _, let a):
+            return testi.frase("battaglia.disingaggio", verbosita: verbosita, a.riga, a.colonna)
+        case .sciameDisfatto(_, let cella, let p):
+            let chiave = p == parte ? "battaglia.disfatto_proprio" : "battaglia.disfatto_avversario"
+            return testi.frase(chiave, verbosita: verbosita, cella.riga, cella.colonna)
+        case .munizioniEsaurite(_, let cella):
+            return testi.frase("battaglia.munizioni_esaurite", verbosita: verbosita, cella.riga, cella.colonna)
+        case .resaDichiarata(let p):
+            let chiave = p == parte ? "battaglia.resa_propria" : "battaglia.resa_avversaria"
+            return testi.frase(chiave, verbosita: verbosita)
+        case .unitaEvacuata(_, let costo):
+            return testi.frase("battaglia.evacuata", verbosita: verbosita, Int(costo))
+        case .sorpresaConclusa:
+            return testi.frase("battaglia.sorpresa_conclusa", verbosita: verbosita)
+        case .battagliaConclusa(let esito):
+            let chiave = esito.modo == .annientamento
+                ? "battaglia.conclusa_annientamento" : "battaglia.conclusa_ritirata"
+            return testi.frase(chiave, verbosita: verbosita)
+        }
+    }
+}

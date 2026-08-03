@@ -5,6 +5,10 @@ import Foundation
 public struct TestoLocalizzato: Hashable, Sendable {
     public let testo: String
     public let lingua: String
+    public init(testo: String, lingua: String) {
+        self.testo = testo
+        self.lingua = lingua
+    }
 }
 
 /// I tre livelli di verbosità (00 §9.5). Preferenza locale, mai parte dello stato.
