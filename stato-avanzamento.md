@@ -23,7 +23,22 @@ Costruito:
 
 La prova prescritta dalla sezione 2 dell'incarico (catena dei testi esterni) è stata eseguita per prima, il primo giorno: esito positivo, con l'insidia della cache dei Bundle documentata e aggirata (scostamento S1).
 
-### Fase B — Lo scontro accessibile: NON COMINCIATA
+### Fase B — Lo scontro accessibile: CONCLUSA (in attesa della distribuzione ai tester)
+
+Criterio di uscita (05 §15.3, «scontro completo giocabile solo con VoiceOver, consegnato ai tester»): la parte realizzativa è compiuta e provata; la distribuzione spetta al titolare con `./scripts/carica-testflight.sh` (la nota per i tester è già in `note-di-rilascio.txt`; archivio ed esportazione firmata verificati). Collaudo: 58 prove del pacchetto più 7 fra ospitate e interfaccia sul simulatore, tutte verdi.
+
+Costruito nella fase B:
+- Campioni committati del giornale con prova di compatibilità (ogni caso di comando; i casi nuovi entrano nei campioni nella stessa modifica).
+- Tattico avversario deterministico nel Motore (ufficiali.json, vantaggi-nascosti.json), pompato dalla Sessione; prove dei casi d'angolo delle mischie (contatti multipli, disingaggi doppi) con la precisazione P4; secondo oro con riserve nel mazzo a copertura della base delle perdite (RDA-46).
+- Segnali: traduttore eventi-annunci collaudato per contenuto, coda annunci con lingua, aptica da file con motore mantenuto pronto, suoni generati per famiglia ritmica, assegnazioni di 02 §11.7.1.
+- La battaglia accessibile in Applicazione/Sorgenti: griglia di elementi persistenti aggiornati sul posto (RDA-03), ordine di lettura dichiarato (02 §2.8 più RDA-49), deck, pannello della cella, designazione sulla griglia (scostamento S2), rotori del campo, tocco magico per lo stato, cambio riga con segnale, annullamento/azzeramento, resoconto (7 voci applicabili), impostazioni, apprendimento dei segnali, avvio con ripresa e rifiuto dei salvataggi incompatibili.
+- Prove del fuoco automatiche (identità degli elementi, registro del guardiano del fuoco), prove degli annunci per contenuto (testa fissa, ordine con selezione, verbosità, vocabolario), fumo d'interfaccia; confini estesi alla Presentazione.
+
+### Fase C — Verifica sugli scontri: NON COMINCIATA
+
+Da dove partire: l'eseguibile Verifica ha lo scheletro; `ScenarioBattaglia` è già Codable per gli scenari dichiarativi (05 §12.2) e il tattico è riusabile per far giocare le due parti. Servono: lettura degli scenari da cartella, corse ripetute con semi e configurazioni agli estremi delle forbici (00 §13.2.4), metriche di battaglia di 03 §6.1, 6.2, 6.4, 6.6 in uscita CSV/JSON riproducibile (05 §12.6), fumo nel collaudo (05 §14.7). PUNTO DI ARRESTO: dopo la C ci si ferma; la fase D non comincia prima del ritorno dei tester, in nessun caso.
+
+### Vecchio elenco della fase B (superato, conservato per riferimento)
 
 L'infrastruttura è montata e provata (vedi memoria-infrastruttura.md): progetto applicativo in Applicazione/ (xcodegen, firma manuale sul certificato riusato, schermata provvisoria accessibile), caricamento su TestFlight con un solo comando (scripts/carica-testflight.sh, build 1 caricata), integrazione continua su GitHub, bersaglio Segnali creato con compilazione condizionale (RDA-48) e nucleo dei canali già collaudato.
 

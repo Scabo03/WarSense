@@ -26,6 +26,10 @@ In fase A un'unica Sessione serve entrambe le parti (il collaudo guida anche l'a
 
 01 §9.8.2 norma la ritrazione del reparto che si disingaggia, ma non il caso dei contatti multipli: un reparto ingaggiato da due avversari che supera la soglia in uno dei contatti. Realizzazione (fase B): la ritrazione chiude tutti i contatti del reparto che si ritrae, e ogni coppia coinvolta entra nella memoria dei disingaggi e nel divieto di un turno (01 §9.8.2, §9.8.3). La lettura opposta — ritrarsi da una mischia restando dentro un'altra — avrebbe prodotto mischie a distanza prive di senso. La modifica ha cambiato la dinamica del primo copione d'oro, che conteneva davvero un contatto multiplo: la riproduzione è stata rigenerata con revisione esplicita, come la procedura prescrive (05 §14.6). Coperta da prove dedicate (CasiAngoloMischiaTest).
 
+## S2 — La designazione pendente è stato di presentazione, non di partita
+
+05 §2.7 colloca «la designazione di bersaglio in corso» nello stato di battaglia. Nella realizzazione della fase B la designazione (la scelta della destinazione sulla griglia dopo l'apertura del pannello) vive nella schermata: nessun comando viene emesso finché la scelta non è confermata, e una chiusura dell'applicazione a metà designazione riprende dalla cella dell'unità, senza perdere nulla di giocato. Ragione: mettere nel giornale uno stato che non muta la partita avrebbe sporcato la sequenza dei comandi (RDA-05) per conservare un'intenzione, non una scelta. La selezione dal deck, che invece è un comando, resta nello stato e sopravvive alla ripresa come 01 §6.6 chiede. Se le prove con i tester mostrassero che la perdita della designazione alla ripresa disorienta, la materia si riapre; per ora il documento 05 §2.7 va letto con questa precisazione.
+
 ## Nessuno scostamento strutturale
 
 Nessun punto dell'architettura è risultato irrealizzabile o errato nella fase A: i confini dei bersagli, il giornale con istantanee, l'impronta canonica, la virgola fissa e la catena dei testi esterni funzionano come dichiarato. I documenti 00–05 non richiedono modifiche.

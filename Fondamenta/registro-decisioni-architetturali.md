@@ -417,3 +417,12 @@ Scelta. La terza: Segnali resta un bersaglio del pacchetto, come 05 §1.2 dichia
 Motivazione. Spostare il modulo nel progetto applicativo lo sottrarrebbe al collaudo dei confini e contraddirebbe l'architettura senza necessità; un pacchetto separato aggiungerebbe un artefatto per un problema che una direttiva di compilazione risolve. Con la scelta adottata la tabella eventi-canali resta collaudabile su macOS, che è dove il collaudo gira a ogni invio.
 
 Conseguenze. Il collaudo dei confini conosce l'insieme degli import ammessi di Segnali, framework di piattaforma compresi; l'integrazione continua esegue anche le prove del nucleo dei canali; la parte di piattaforma andrà scritta interamente dentro i blocchi condizionali.
+
+
+### RDA-49 — Completamenti di presentazione della fase B (02 §2.8, 00 §7.4)
+
+Problema. Tre punti che i documenti non normavano riguardo alla schermata dello scontro: dove stiano la resa e la fine del turno nell'ordine di lettura; con quale controllo realizzare il pannello della cella; l'attivazione di una cella con un elemento selezionato.
+
+Scelta. L'ordine di lettura prosegue oltre i comandi obbligatori di 02 §2.8: celle, deck, annullamento, azzeramento, poi resa e fine del turno. Il pannello della cella è nella fase B l'avviso di sistema, che è nativamente accessibile e restituisce il fuoco alla cella d'origine alla chiusura tramite il guardiano del fuoco; una realizzazione propria è ammessa in seguito solo a parità di comportamento del fuoco provata. L'attivazione di una cella con un elemento del deck selezionato piazza direttamente, senza pannello: è la conferma dello schema seleziona-naviga-conferma (00 §8.2), e il pannello resta per le celle occupate da un proprio reparto senza selezione attiva.
+
+Conseguenze. Nessuna regola nuova per il giocatore; l'ordine è dichiarato e stabile; la scelta del pannello è rivedibile con i ritorni dei tester.

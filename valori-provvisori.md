@@ -38,6 +38,27 @@ I quattro coefficienti dei due profili di protezione (para_saturazione/para_perf
 
 Tutti a 1, come impone 00 §13.6 (minimo di uno dove il troncamento darebbe zero); l'elenco dei casi è 03 §8.2.
 
+## ufficiali.json — PROVVISORI
+
+I cinque parametri di carattere dei due ufficiali di prova (propensione all'attacco, tolleranza alle perdite, tendenza all'accerchiamento, propensione all'imboscata, propensione alla ritirata). Grandezza critica 03 §6.5: il carattere determina la frequenza effettiva degli scontri, taratura con le simulazioni.
+
+## vantaggi-nascosti.json
+
+- Ritirata avversaria dalla sola ultima riga: FISSATO — 01 §13.2.
+- Riduzione della propensione alla ritirata avversaria (0.3): PROVVISORIO — «molto bassa» di 01 §13.2, misura da tarare (03 §7).
+
+## scenari.json — PROVVISORI
+
+Composizione dei mazzi dello scontro di prova, ostacoli, ufficiale assegnato: numeri di lavoro per la fase B, senza pretesa di equilibrio.
+
+## aptica.json e suoni.json
+
+Intensità, nitidezze e tempi dei pattern e suoni generati: PROVVISORI come resa, FISSATA la struttura (famiglie ritmiche e assegnazioni di 02 §11.7.1). Da raffinare con i ritorni dei tester.
+
+## Soglia del tattico (formula, non numero)
+
+La soglia di resa del tattico è tolleranza alle perdite divisa per la propensione effettiva alla ritirata: struttura nel codice, numeri nei file (01 §12.1, RDA-46).
+
 ## Numeri di struttura (non di gioco, quindi nel codice per 05 §0.4)
 
 - Fattore di scala della virgola fissa: 1000 (`Scalato.fattore`, RDA-44).
