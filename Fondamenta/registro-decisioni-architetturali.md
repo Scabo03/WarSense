@@ -426,3 +426,31 @@ Problema. Tre punti che i documenti non normavano riguardo alla schermata dello 
 Scelta. L'ordine di lettura prosegue oltre i comandi obbligatori di 02 §2.8: celle, deck, annullamento, azzeramento, poi resa e fine del turno. Il pannello della cella è nella fase B l'avviso di sistema, che è nativamente accessibile e restituisce il fuoco alla cella d'origine alla chiusura tramite il guardiano del fuoco; una realizzazione propria è ammessa in seguito solo a parità di comportamento del fuoco provata. L'attivazione di una cella con un elemento del deck selezionato piazza direttamente, senza pannello: è la conferma dello schema seleziona-naviga-conferma (00 §8.2), e il pannello resta per le celle occupate da un proprio reparto senza selezione attiva.
 
 Conseguenze. Nessuna regola nuova per il giocatore; l'ordine è dichiarato e stabile; la scelta del pannello è rivedibile con i ritorni dei tester.
+
+---
+
+## Parte sesta — Decisioni dell'intervento correttivo della fase B
+
+### RDA-50 — Il deck come tessere in riga scorrevole (02 §8.1, §8.2; 00 §1.2)
+
+Problema. Nella prima stesura della fase B gli elementi del deck erano pulsanti ordinari impilati sotto la griglia, identici ai comandi globali alla vista e all'ascolto; e la pila, sommata all'altezza della griglia imposta al 55 per cento, produceva vincoli insoddisfacibili con elementi schiacciati fuori dall'aggancio di VoiceOver (scostamento S3, primo collaudo su dispositivo).
+
+Opzioni. Pulsanti in pila dentro uno scorrimento verticale; tessere-riquadro in una riga orizzontale scorrevole; griglia più bassa a valore fisso.
+
+Scelta. Tessere (`TesseraDeck`, controllo proprio): riquadro con bordo, nome dell'archetipo come etichetta, valore in ordine fisso — atomi, volume, esemplari residui, selezione — e suggerimento d'uso da chiave dei testi; nessun ruolo di pulsante, così all'ascolto non si confondono con i comandi globali; tratti di selezione e disabilitazione; aggiornate sul posto (RDA-03). La riga riempie la larghezza quando le tessere sono poche e scorre quando saranno tante (i rinforzi), mai comprimere; la tessera fuori vista che riceve il fuoco si porta in vista da sé. L'altezza della griglia diventa desiderata a bassa priorità: quando lo spazio manca cede alla colonna, restando scorrevole e ingrandibile (00 §10.4).
+
+Motivazione. 02 §8.2 impone che ogni elemento del deck annunci identità, atomi, volume; il principio 1 impone che tutto sia agganciabile; l'ordine di lettura di 02 §2.8 e RDA-49 resta immutato. Lo scorrimento verticale della pila avrebbe conservato la confusione con i comandi globali; la griglia fissa più bassa avrebbe solo spostato il punto di rottura.
+
+Conseguenze. Chiavi nuove nei testi di fabbrica (`deck.volume`, `deck.elemento_indicazione`), versione dei testi 0.1.1; la vecchia chiave composita `deck.elemento` è rimossa; la selezione si annuncia nel valore, quindi l'aggiornamento non muove il fuoco (00 §11.3).
+
+### RDA-51 — Il collaudo accerta la raggiungibilità, non la sola dichiarazione (00 §1.2, 05 §14.4)
+
+Problema. Le prove della fase B verificavano esistenza, identità ed etichette; su dispositivo elementi dichiarati risultavano non agganciabili (scostamento S3).
+
+Opzioni. Affidare la raggiungibilità alla sola prova manuale su dispositivo; verificarla in automatico fin dove possibile e dichiarare il resto.
+
+Scelta. La seconda. Ogni schermata ha una prova di raggiungibilità sul formato di schermo piccolo: il lettore dell'ordine effettivo (`LettoreAccessibilita`) percorre gli elenchi dichiarati come la tecnologia assistiva e accerta presenza nel percorso, etichetta, cornice non degenere, posizione nello schermo o in contenitore scorrevole, bersagli di almeno 44 punti; il fumo d'interfaccia esercita il tocco vero. Ciò che l'automazione non può cogliere — pronuncia, gesti di sistema, aptica, scorrimento al fuoco, caratteri molto grandi — è dichiarato espressamente in `collaudo-solo-dispositivo.md`, consegnato ai tester con ogni build.
+
+Motivazione. Un elemento non raggiungibile è una violazione del principio 1, della stessa gravità di un blocco del programma: il collaudo deve poterla vedere prima del dispositivo. La sola prova manuale non scala e arriva tardi; l'automazione senza dichiarazione dei limiti darebbe una falsa completezza (il verde della fase B).
+
+Conseguenze. Le schermate future nascono con la prova di raggiungibilità; l'elenco delle verifiche da dispositivo è un documento vivo, aggiornato quando l'automazione si estende o una prova manuale scopre un buco nuovo.

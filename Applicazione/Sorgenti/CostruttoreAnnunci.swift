@@ -112,18 +112,32 @@ struct CostruttoreAnnunci {
 
     // MARK: - Deck
 
-    /// L'etichetta di un elemento del deck (02 §8.2).
-    func etichettaElementoDeck(indice: Int) -> String {
-        guard let elemento = stato.deck[.giocatore]?[indice] else { return "" }
-        let nome = testi.frase("unita." + elemento.archetipo).testo
-        let atomi = testi.frase("battaglia.atomi_presenti", Int(elemento.atomi)).testo
+    private func elementoDeck(_ indice: Int) -> ElementoDeck? {
+        guard let mazzo = stato.deck[.giocatore], mazzo.indices.contains(indice) else { return nil }
+        return mazzo[indice]
+    }
+
+    /// L'identità di un elemento del deck: il nome del suo archetipo (02 §8.2).
+    func nomeElementoDeck(indice: Int) -> String {
+        guard let elemento = elementoDeck(indice) else { return "" }
+        return testi.frase("unita." + elemento.archetipo).testo
+    }
+
+    /// Il valore annunciato di un elemento del deck, in ordine fisso: atomi,
+    /// volume, esemplari residui, selezione (02 §8.2). Mai tagliato: sono le
+    /// informazioni con cui si decide lo schieramento.
+    func valoreElementoDeck(indice: Int) -> String {
+        guard let elemento = elementoDeck(indice) else { return "" }
         let volume = elemento.atomi * valori.archetipi[elemento.archetipo]!.volumePerAtomo
-        let esemplari = testi.frase("deck.esemplari", elemento.esemplari).testo
-        var etichetta = testi.frase("deck.elemento", nome, atomi, Int(volume), esemplari).testo
+        var parti = [
+            testi.frase("battaglia.atomi_presenti", Int(elemento.atomi)).testo,
+            testi.frase("deck.volume", Int(volume)).testo,
+            testi.frase("deck.esemplari", elemento.esemplari).testo,
+        ]
         if stato.selezione[.giocatore] == indice {
-            etichetta += ", " + testi.frase("deck.selezionato").testo
+            parti.append(testi.frase("deck.selezionato").testo)
         }
-        return etichetta
+        return parti.joined(separator: ", ")
     }
 
     // MARK: - Informazione di stato (02 §6.4)

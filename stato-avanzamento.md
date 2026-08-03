@@ -25,7 +25,18 @@ La prova prescritta dalla sezione 2 dell'incarico (catena dei testi esterni) è 
 
 ### Fase B — Lo scontro accessibile: CONCLUSA (in attesa della distribuzione ai tester)
 
-Criterio di uscita (05 §15.3, «scontro completo giocabile solo con VoiceOver, consegnato ai tester»): la parte realizzativa è compiuta e provata; la build 3, versione 0.2.0, è caricata su TestFlight con la nota per i tester allegata ed elaborazione conclusa; al titolare resta soltanto l'assegnazione della build al gruppo di tester su App Store Connect. Le build 1 e 2 giacciono sul treno di versione «1.0» per la sbavatura dell'Info.plist, corretta e documentata nella memoria di infrastruttura. Collaudo: 58 prove del pacchetto più 7 fra ospitate e interfaccia sul simulatore, tutte verdi.
+Criterio di uscita (05 §15.3, «scontro completo giocabile solo con VoiceOver, consegnato ai tester»): la parte realizzativa è compiuta e provata; al titolare resta soltanto l'assegnazione della build al gruppo di tester su App Store Connect. Le build 1 e 2 giacciono sul treno di versione «1.0» per la sbavatura dell'Info.plist, corretta e documentata nella memoria di infrastruttura; la build 3 (versione 0.2.0) è quella della prima consegna. Collaudo: 58 prove del pacchetto più 12 fra ospitate e interfaccia sul simulatore, tutte verdi.
+
+#### Intervento correttivo dopo la prima prova su dispositivo (build 4, versione 0.2.0)
+
+La prova del titolare su dispositivo con VoiceOver ha trovato due difetti bloccanti nella build 3, entrambi riprodotti con una prova che falliva, corretti, e coperti:
+
+1. **Il pannello delle azioni riportava alla schermata iniziale.** L'avviso di sistema si congeda da solo al tocco di una voce; `chiudiPannello` congedava allora la schermata dello scontro stessa (per chi ascolta, indistinguibile da un riavvio). Corretto: il congedo colpisce soltanto un pannello ancora presentato; la sequenza reale del tocco è riprodotta da `PannelloAzioniTest` (precisazione P5).
+2. **Elementi del deck non agganciabili.** Vincoli insoddisfacibili nella colonna sotto la griglia: il risolutore schiacciava ad altezza zero elementi variabili (l'intermittenza osservata). Il deck è stato rifatto a tessere-riquadro in riga scorrevole con identità, esemplari e costo dichiarati, distinte dai comandi globali; la griglia cede spazio alla colonna (RDA-50, scostamento S3).
+
+Il collaudo ora accerta la raggiungibilità reale e non la sola dichiarazione: `LettoreAccessibilita` più `RaggiungibilitaTest` sul formato di schermo piccolo, fumo d'interfaccia con tocco vero (RDA-51); ciò che resta accertabile solo su dispositivo è dichiarato in `collaudo-solo-dispositivo.md`, da consegnare con ogni build. Versione dei testi a 0.1.1 (chiavi nuove del deck; la compatibilità dei salvataggi si valuta sui valori, non sui testi).
+
+Osservazione registrata e volutamente non affrontata: le celle della griglia appaiono più grandi del necessario (da riesaminare con i ritorni dei tester, insieme alla forma del pannello di RDA-49).
 
 Costruito nella fase B:
 - Campioni committati del giornale con prova di compatibilità (ogni caso di comando; i casi nuovi entrano nei campioni nella stessa modifica).

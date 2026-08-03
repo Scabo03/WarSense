@@ -56,9 +56,10 @@
 "cella.disponibile" = "costa %d, restano %d";
 "cella.bersaglio" = "%@, %@";
 "deck.intestazione" = "Riserve da schierare";
-"deck.elemento" = "%@, %@, volume %d, %@";
+"deck.volume" = "volume %d";
 "deck.selezionato" = "selezionato";
 "deck.rinforzo" = "rinforzo";
+"deck.elemento_indicazione" = "Riserva da schierare: attivala per selezionarla, poi conferma sulla cella di destinazione";
 "pulsante.annulla" = "Annulla l'ultima operazione";
 "pulsante.azzera" = "Azzera lo schieramento del turno";
 "pulsante.fine_turno" = "Fine del turno";

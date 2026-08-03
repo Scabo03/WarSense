@@ -23,9 +23,26 @@ final class FumoInterfacciaTest: XCTestCase {
             .matching(NSPredicate(format: "label BEGINSWITH %@", "riga 1, cella 1")).firstMatch
         XCTAssertTrue(cella.waitForExistence(timeout: 10), "le celle sono elementi, non disegno")
 
-        // I comandi globali esistono e sono raggiungibili (02 §8.4).
-        XCTAssertTrue(app.buttons["Annulla l'ultima operazione"].exists)
-        XCTAssertTrue(app.buttons["Azzera lo schieramento del turno"].exists)
-        XCTAssertTrue(app.buttons["Fine del turno"].exists)
+        // Le tessere del deck sono elementi propri e davvero raggiungibili
+        // (00 §1.2, 02 §8.2): qui risponde il servizio di accessibilità vero, e la
+        // prova è il comportamento — il tocco seleziona — non la sola geometria.
+        for nome in ["fanteria leggera", "fanteria pesante", "tiratori"] {
+            let tessera = app.descendants(matching: .any)[nome]
+            XCTAssertTrue(tessera.waitForExistence(timeout: 10),
+                          "la tessera «\(nome)» è un elemento a sé")
+            tessera.tap()
+            let selezionata = NSPredicate(format: "value CONTAINS %@", "selezionato")
+            XCTAssertTrue(app.descendants(matching: .any).matching(selezionata)
+                            .firstMatch.waitForExistence(timeout: 5),
+                          "il tocco della tessera «\(nome)» la seleziona davvero")
+        }
+
+        // I comandi globali esistono, sono raggiungibili e agganciabili (02 §8.4).
+        for titolo in ["Annulla l'ultima operazione", "Azzera lo schieramento del turno",
+                       "Dichiara la resa", "Fine del turno"] {
+            let comando = app.buttons[titolo]
+            XCTAssertTrue(comando.exists, "il comando «\(titolo)» esiste")
+            XCTAssertTrue(comando.isHittable, "il comando «\(titolo)» è agganciabile")
+        }
     }
 }

@@ -20,7 +20,9 @@ final class SchermataBattaglia: UIViewController {
     private let scorrimento = UIScrollView()
     private let vistaGriglia = VistaGriglia()
     private let intestazioneDeck = UILabel()
-    private var pulsantiDeck: [UIButton] = []
+    private let scorrimentoDeck = UIScrollView()
+    private let rigaDeck = UIStackView()
+    private var tessereDeck: [TesseraDeck] = []
     private let colonnaDeck = UIStackView()
     private let pulsanteAnnulla = UIButton(type: .system)
     private let pulsanteAzzera = UIButton(type: .system)
@@ -68,6 +70,35 @@ final class SchermataBattaglia: UIViewController {
         view.addSubview(colonnaDeck)
         colonnaDeck.addArrangedSubview(intestazioneDeck)
 
+        // Le tessere del deck in una riga scorrevole: riquadri di un insieme di
+        // forze, mai una pila che comprime o spinge fuori schermo (00 §1.2).
+        scorrimentoDeck.showsHorizontalScrollIndicator = false
+        rigaDeck.axis = .horizontal
+        rigaDeck.spacing = 8
+        // Poche tessere riempiono la riga e restano tutte in vista; molte tessere
+        // (i rinforzi futuri) faranno scorrere la riga, mai comprimere (00 §1.2).
+        rigaDeck.distribution = .fillEqually
+        rigaDeck.translatesAutoresizingMaskIntoConstraints = false
+        scorrimentoDeck.addSubview(rigaDeck)
+        colonnaDeck.addArrangedSubview(scorrimentoDeck)
+        // Il contenuto di uno scorrevole ha larghezza libera: senza il pareggio
+        // con la finestra le etichette non andrebbero mai a capo e le tessere
+        // uscirebbero sempre di vista. Il pareggio cede solo sotto il minimo.
+        let pareggioLarghezza = rigaDeck.widthAnchor.constraint(
+            equalTo: scorrimentoDeck.frameLayoutGuide.widthAnchor)
+        pareggioLarghezza.priority = UILayoutPriority(800)
+        NSLayoutConstraint.activate([
+            rigaDeck.topAnchor.constraint(equalTo: scorrimentoDeck.contentLayoutGuide.topAnchor),
+            rigaDeck.bottomAnchor.constraint(equalTo: scorrimentoDeck.contentLayoutGuide.bottomAnchor),
+            rigaDeck.leadingAnchor.constraint(equalTo: scorrimentoDeck.contentLayoutGuide.leadingAnchor),
+            rigaDeck.trailingAnchor.constraint(equalTo: scorrimentoDeck.contentLayoutGuide.trailingAnchor),
+            rigaDeck.widthAnchor.constraint(
+                greaterThanOrEqualTo: scorrimentoDeck.frameLayoutGuide.widthAnchor),
+            pareggioLarghezza,
+            scorrimentoDeck.frameLayoutGuide.heightAnchor
+                .constraint(equalTo: scorrimentoDeck.contentLayoutGuide.heightAnchor),
+        ])
+
         // I comandi globali, distanziati dal bordo inferiore e di altezza piena (02 §8.5).
         for (pulsante, azione) in [(pulsanteAnnulla, #selector(annulla)),
                                    (pulsanteAzzera, #selector(azzera)),
@@ -80,11 +111,17 @@ final class SchermataBattaglia: UIViewController {
             pulsante.heightAnchor.constraint(greaterThanOrEqualToConstant: 44).isActive = true
         }
 
+        // L'altezza della griglia è desiderata, non imposta: quando lo spazio manca
+        // la griglia — che resta scorrevole e ingrandibile (00 §10.4) — cede alla
+        // colonna, che non deve mai comprimersi né uscire dallo schermo (00 §1.2).
+        let altezzaGriglia = scorrimento.heightAnchor.constraint(
+            equalTo: view.heightAnchor, multiplier: 0.55)
+        altezzaGriglia.priority = .defaultLow
         NSLayoutConstraint.activate([
             scorrimento.topAnchor.constraint(equalTo: view.safeAreaLayoutGuide.topAnchor),
             scorrimento.leadingAnchor.constraint(equalTo: view.leadingAnchor),
             scorrimento.trailingAnchor.constraint(equalTo: view.trailingAnchor),
-            scorrimento.heightAnchor.constraint(equalTo: view.heightAnchor, multiplier: 0.55),
+            altezzaGriglia,
             colonnaDeck.topAnchor.constraint(equalTo: scorrimento.bottomAnchor, constant: 8),
             colonnaDeck.leadingAnchor.constraint(equalTo: view.leadingAnchor, constant: 16),
             colonnaDeck.trailingAnchor.constraint(equalTo: view.trailingAnchor, constant: -16),
@@ -126,19 +163,16 @@ final class SchermataBattaglia: UIViewController {
     private func montaDeck(stato: StatoBattaglia) {
         intestazioneDeck.text = testi.frase("deck.intestazione").testo
         for indice in (stato.deck[.giocatore] ?? []).indices {
-            let pulsante = UIButton(type: .system)
-            pulsante.tag = indice
-            pulsante.contentHorizontalAlignment = .leading
-            pulsante.titleLabel?.font = .preferredFont(forTextStyle: .body)
-            pulsante.titleLabel?.adjustsFontForContentSizeCategory = true
-            pulsante.heightAnchor.constraint(greaterThanOrEqualToConstant: 44).isActive = true
-            pulsante.addTarget(self, action: #selector(toccaElementoDeck(_:)), for: .touchUpInside)
-            pulsantiDeck.append(pulsante)
-            colonnaDeck.insertArrangedSubview(pulsante, at: 1 + indice)
+            let tessera = TesseraDeck()
+            tessera.tag = indice
+            tessera.accessibilityHint = testi.frase("deck.elemento_indicazione").testo
+            tessera.addTarget(self, action: #selector(toccaElementoDeck(_:)), for: .touchUpInside)
+            tessereDeck.append(tessera)
+            rigaDeck.addArrangedSubview(tessera)
         }
         // L'ordine di lettura dichiarato: celle, deck, annullamento, azzeramento (02 §2.8),
         // poi la resa e la fine del turno (RDA-49).
-        view.accessibilityElements = [vistaGriglia, intestazioneDeck] + pulsantiDeck
+        view.accessibilityElements = [vistaGriglia, intestazioneDeck] + tessereDeck
             + [pulsanteAnnulla, pulsanteAzzera, pulsanteResa, pulsanteFineTurno]
     }
 
@@ -173,12 +207,12 @@ final class SchermataBattaglia: UIViewController {
             if occupante?.parte == .giocatore { tratti.insert(.button) }
             elemento.accessibilityTraits = tratti
         }
-        for pulsante in pulsantiDeck {
-            let etichetta = costruttore.etichettaElementoDeck(indice: pulsante.tag)
-            pulsante.setTitle(etichetta, for: .normal)
-            pulsante.accessibilityLabel = etichetta
-            let esemplari = stato.deck[.giocatore]?[pulsante.tag].esemplari ?? 0
-            pulsante.isEnabled = esemplari > 0 && stato.esito == nil
+        for tessera in tessereDeck {
+            let esemplari = stato.deck[.giocatore]?[tessera.tag].esemplari ?? 0
+            tessera.aggiorna(nome: costruttore.nomeElementoDeck(indice: tessera.tag),
+                             valore: costruttore.valoreElementoDeck(indice: tessera.tag),
+                             selezionata: stato.selezione[.giocatore] == tessera.tag,
+                             attiva: esemplari > 0 && stato.esito == nil)
         }
         pulsanteAnnulla.setTitle(testi.frase("pulsante.annulla").testo, for: .normal)
         pulsanteAzzera.setTitle(testi.frase("pulsante.azzera").testo, for: .normal)
@@ -199,6 +233,15 @@ final class SchermataBattaglia: UIViewController {
     }
 
     // MARK: - Attivazione e pannello (00 §7.4, 02 §9.2.1)
+
+    /// Una voce del pannello nella forma che l'avviso esegue al tocco: il collaudo
+    /// riproduce la sequenza reale (congedo automatico dell'avviso, poi la chiusura).
+    struct VocePannello {
+        let titolo: String
+        let stile: UIAlertAction.Style
+        let esegui: () -> Void
+    }
+    private var vociPannello: [VocePannello] = []
 
     func attiva(_ cella: Cella) -> Bool {
         guard let stato = statoCorrente else { return false }
@@ -226,6 +269,7 @@ final class SchermataBattaglia: UIViewController {
             message: nil, preferredStyle: .alert)
         let vistaAvversari = stato.sciamiOrdinati.filter { $0.parte == .avversario }
         let archetipo = partita.motore.valori.archetipi[sciame.archetipo]!
+        var voci: [VocePannello] = []
 
         // Tiro: bersagli elencati con gittata ed efficacia (02 §8.8, §9.3).
         for bersaglio in vistaAvversari {
@@ -245,7 +289,7 @@ final class SchermataBattaglia: UIViewController {
                                          gittata,
                                          testi.termine(efficacia.rawValue).testo,
                                          testi.frase("proiettile." + proiettile.rawValue).testo).testo
-                pannello.addAction(UIAlertAction(title: titolo, style: .default) { [weak self] _ in
+                voci.append(VocePannello(titolo: titolo, stile: .default) { [weak self] in
                     self?.chiudiPannello(cella: sciame.posizione) { await self?.eseguiComando(comando) }
                 })
             }
@@ -257,14 +301,14 @@ final class SchermataBattaglia: UIViewController {
             let titolo = testi.frase("pannello.ingaggia",
                                      testi.frase("unita." + bersaglio.archetipo).testo,
                                      bersaglio.posizione.riga, bersaglio.posizione.colonna).testo
-            pannello.addAction(UIAlertAction(title: titolo, style: .default) { [weak self] _ in
+            voci.append(VocePannello(titolo: titolo, stile: .default) { [weak self] in
                 self?.chiudiPannello(cella: sciame.posizione) { await self?.eseguiComando(comando) }
             })
         }
         // Movimento per designazione sulla griglia (02 §9.2.1).
         if !stato.impegnato(sciame.id), !sciame.azioneSpesa, stato.parteDiTurno == .giocatore {
-            pannello.addAction(UIAlertAction(
-                title: testi.frase("pannello.designa_movimento").testo, style: .default) { [weak self] _ in
+            voci.append(VocePannello(
+                titolo: testi.frase("pannello.designa_movimento").testo, stile: .default) { [weak self] in
                 guard let self else { return }
                 self.designazione = .movimento(sciame: sciame.id)
                 if let stato = self.statoCorrente { self.aggiorna(con: stato) }
@@ -277,25 +321,37 @@ final class SchermataBattaglia: UIViewController {
         // Evacuazione durante la ritirata (01 §10.4).
         let ritiro = ComandoBattaglia.ritiraUnita(sciame: sciame.id)
         if case .valido(let costi) = partita.motore.valida(ritiro, parte: .giocatore, stato: stato) {
-            pannello.addAction(UIAlertAction(
-                title: testi.frase("pannello.ritira_unita", Int(costi.volume)).testo,
-                style: .default) { [weak self] _ in
+            voci.append(VocePannello(
+                titolo: testi.frase("pannello.ritira_unita", Int(costi.volume)).testo,
+                stile: .default) { [weak self] in
                 self?.chiudiPannello(cella: sciame.posizione) { await self?.eseguiComando(ritiro) }
             })
         }
-        pannello.addAction(UIAlertAction(title: testi.frase("pannello.chiudi").testo,
-                                         style: .cancel) { [weak self] _ in
+        voci.append(VocePannello(titolo: testi.frase("pannello.chiudi").testo,
+                                 stile: .cancel) { [weak self] in
             self?.chiudiPannello(cella: sciame.posizione, poi: nil)
         })
+        for voce in voci {
+            pannello.addAction(UIAlertAction(title: voce.titolo, style: voce.stile) { _ in voce.esegui() })
+        }
+        vociPannello = voci
         present(pannello, animated: false)
     }
 
     /// Alla chiusura del pannello il fuoco torna alla cella d'origine (05 §10.3).
+    /// L'avviso di sistema si congeda DA SOLO al tocco di una voce: congedare qui
+    /// senza pannello presentato congederebbe la schermata dello scontro stessa.
     private func chiudiPannello(cella: Cella, poi azione: (() async -> Void)?) {
-        dismiss(animated: false) { [weak self] in
+        let ripristina: () -> Void = { [weak self] in
             guard let self else { return }
             Fuoco.sposta(a: self.elementi[cella], perche: .richiesto)
             if let azione { Task { await azione() } }
+        }
+        if let pannello = presentedViewController as? UIAlertController,
+           !pannello.isBeingDismissed {
+            pannello.dismiss(animated: false, completion: ripristina)
+        } else {
+            ripristina()
         }
     }
 
@@ -313,11 +369,11 @@ final class SchermataBattaglia: UIViewController {
         }
     }
 
-    @objc private func toccaElementoDeck(_ pulsante: UIButton) {
+    @objc private func toccaElementoDeck(_ tessera: UIControl) {
         guard let stato = statoCorrente else { return }
         designazione = .nessuna
-        let comando: ComandoBattaglia = stato.selezione[.giocatore] == pulsante.tag
-            ? .deseleziona : .seleziona(indiceDeck: pulsante.tag)
+        let comando: ComandoBattaglia = stato.selezione[.giocatore] == tessera.tag
+            ? .deseleziona : .seleziona(indiceDeck: tessera.tag)
         Task { await eseguiComando(comando) }
     }
 
@@ -469,6 +525,7 @@ final class SchermataBattaglia: UIViewController {
     // Attrezzi per le prove ospitate (05 §14.4).
     var elementiPerProva: [Cella: ElementoCella] { elementi }
     var registroFuocoPerProva: [Fuoco.Movimento] { Fuoco.registro }
+    var vociPannelloPerProva: [VocePannello] { vociPannello }
 }
 
 extension SchermataBattaglia: UIScrollViewDelegate {
