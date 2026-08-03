@@ -34,13 +34,26 @@ Un solo profilo: «match AppStore com.scabo.warsense», tipo App Store, identifi
 ./scripts/carica-testflight.sh
 ```
 
+Prima di lanciarlo: aggiornare `note-di-rilascio.txt` (la nota per i tester viene letta da lì al momento del caricamento) e, se è una consegna di fase, alzare `MARKETING_VERSION` in project.yml.
+
 Che cosa fa, nell'ordine: legge le credenziali dal file di configurazione locale; ricava il numero di build interrogando TestFlight (ultimo numero più uno: la regola dei numeri di build, nessuno la aggiorna a mano); esegue l'intero collaudo del pacchetto (`swift test` in `Codice/`) e si ferma se fallisce; rigenera il progetto Xcode con `xcodegen generate` da `Applicazione/project.yml`; archivia (`xcodebuild archive`, configurazione Release, firma manuale con il certificato riusato e il profilo di cui sopra); esporta il pacchetto ipa (`xcodebuild -exportArchive` con `Applicazione/ExportOptions.plist`); carica con `xcrun altool` autenticato con la chiave API; attende l'elaborazione e allega la nota per i tester leggendola da `note-di-rilascio.txt` (se l'attesa scade: `./scripts/nota-testflight.sh <numero>` più tardi).
 
-Numero di VERSIONE (quello di marketing): unica sorgente di verità in `Applicazione/project.yml`, voce `MARKETING_VERSION`. Si cambia lì e da nessun'altra parte. Numero di BUILD: mai scritto a mano, sempre ricavato da TestFlight dallo script.
+Numero di VERSIONE (quello di marketing): unica sorgente di verità in `Applicazione/project.yml`, voce `MARKETING_VERSION`. Si cambia lì e da nessun'altra parte, e si alza a ogni consegna di fase ai tester (0.2.0 = fase B). ATTENZIONE: perché il valore arrivi davvero al pacchetto, l'Info.plist deve dichiarare i RIFERIMENTI e mai valori letterali: `CFBundleShortVersionString: $(MARKETING_VERSION)` e `CFBundleVersion: $(CURRENT_PROJECT_VERSION)` nelle proprietà info di project.yml. Senza, il generatore scrive «1.0» fisso e TestFlight archivia le build sul treno di versione sbagliato (è successo alle build 1 e 2, finite sul treno «1.0»: treno da considerare bruciato; quando arriverà la versione 1.0 vera i numeri di build proseguono comunque dal massimo globale, senza conflitti).
+
+Numero di BUILD: mai scritto a mano, sempre ricavato da TestFlight dallo script (massimo globale su tutti i treni, più uno). Il `CURRENT_PROJECT_VERSION: 1` in project.yml è un segnaposto che lo script sovrascrive a ogni archivio: non aggiornarlo mai a mano. Non lanciare mai due caricamenti in parallelo: il numero si calcola all'inizio e collidrebbe.
+
+VERIFICA DOPO OGNI CARICAMENTO, sempre: build, treno di versione ed elaborazione si controllano dall'esterno con
+
+```
+source ~/Developer/private_keys/scabo_deploy.env && export APP_STORE_CONNECT_API_KEY_ID APP_STORE_CONNECT_API_KEY_ISSUER_ID APP_STORE_CONNECT_API_KEY_PATH
+python3 scripts/asc_api.py GET "/v1/builds?filter[app]=6797306323&limit=3&include=preReleaseVersion"
+```
+
+Non fidarsi dell'esito del solo caricamento: l'errore del treno di versione si vede soltanto da qui.
 
 ## Progetto applicativo
 
-`Applicazione/project.yml` è la sorgente di verità del progetto Xcode; `WarSense.xcodeproj` è generato (`xcodegen generate`) ed è comunque versionato per comodità di chi apre Xcode. Requisito minimo iOS 17 (dal documento di architettura), universale iPhone e iPad. Il pacchetto Swift con tutta la logica sta in `Codice/`; il modulo Segnali compila su ogni piattaforma con le parti di sistema dietro compilazione condizionale (registro delle decisioni, RDA-48). La schermata attuale è provvisoria (nome e versione, leggibile da VoiceOver) e viene sostituita nella fase B.
+`Applicazione/project.yml` è la sorgente di verità del progetto Xcode; `WarSense.xcodeproj` è generato (`xcodegen generate`) ed è comunque versionato per comodità di chi apre Xcode. Requisito minimo iOS 17 (dal documento di architettura), universale iPhone e iPad. Il pacchetto Swift con tutta la logica sta in `Codice/`; il modulo Segnali compila su ogni piattaforma con le parti di sistema dietro compilazione condizionale (registro delle decisioni, RDA-48). Dalla fase B l'applicazione contiene lo scontro accessibile completo; i bersagli di prova del progetto (ospitate e interfaccia) si eseguono con lo schema di test e non entrano nell'archivio.
 
 ## Dichiarazione sulla crittografia
 
@@ -57,5 +70,11 @@ Dopo ogni caricamento: la build compare in TestFlight dopo l'elaborazione (minut
 ## Problemi già incontrati e soluzioni
 
 Primo caricamento respinto dalla convalida di Apple con quattro errori: icona mancante (iPhone e iPad), chiave `CFBundleIconName` assente, orientamenti incompleti per il multitasking di iPad. Soluzione: catalogo risorse `Applicazione/Risorse/Immagini.xcassets` con icona singola 1024×1024 (segnaposto blu, da sostituire con l'icona vera), impostazione `ASSETCATALOG_COMPILER_APPICON_NAME: AppIcon`, e i quattro orientamenti completi in `UISupportedInterfaceOrientations`. Con queste correzioni il caricamento è andato a buon fine (build 1).
+
+Secondo problema (fase B): la versione di marketing non arrivava al pacchetto. Il generatore di progetto scrive nell'Info.plist valori LETTERALI («1.0» e «1») se le chiavi di versione non sono dichiarate esplicitamente come riferimenti; il numero di build passava (perché imposto dallo script alla riga di comando), la versione no, e le build finivano sul treno «1.0». Soluzione: le due chiavi con i riferimenti `$(MARKETING_VERSION)` e `$(CURRENT_PROJECT_VERSION)` nelle proprietà info di project.yml, e la verifica del treno dall'esterno dopo ogni caricamento (comando qui sopra). Verificata con la build 3, correttamente su 0.2.0.
+
+Terzo punto da non dimenticare (non un errore, una regola): ogni volta che si aggiunge o si modifica un file in `Codice/Sources/Contenuti/Valori/` va rigenerato il manifest con le impronte, altrimenti il gioco deriva una versione locale marcata anche per la fabbrica. Lo snippet è nella cronologia (python, sha256 dei file elencati, riscrittura di manifest.json); tenere l'elenco dei file del manifest allineato a ciò che esiste nella cartella.
+
+Nota di protezione già attiva: lo script esegue l'INTERO collaudo del pacchetto prima di archiviare e si ferma se una prova fallisce; non aggirarlo mai. I bersagli di prova del progetto applicativo non entrano nell'archivio (lo schema li dichiara solo per la fase di test), quindi non possono rompere una consegna.
 
 La cache dei Bundle dei testi e le altre questioni di codice stanno in `registro-scostamenti.md`; questo file resta dedicato a infrastruttura, firma e distribuzione. Ogni problema nuovo di questa materia va aggiunto qui con la sua soluzione.

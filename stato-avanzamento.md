@@ -25,7 +25,7 @@ La prova prescritta dalla sezione 2 dell'incarico (catena dei testi esterni) è 
 
 ### Fase B — Lo scontro accessibile: CONCLUSA (in attesa della distribuzione ai tester)
 
-Criterio di uscita (05 §15.3, «scontro completo giocabile solo con VoiceOver, consegnato ai tester»): la parte realizzativa è compiuta e provata; la distribuzione spetta al titolare con `./scripts/carica-testflight.sh` (la nota per i tester è già in `note-di-rilascio.txt`; archivio ed esportazione firmata verificati). Collaudo: 58 prove del pacchetto più 7 fra ospitate e interfaccia sul simulatore, tutte verdi.
+Criterio di uscita (05 §15.3, «scontro completo giocabile solo con VoiceOver, consegnato ai tester»): la parte realizzativa è compiuta e provata; la build 3, versione 0.2.0, è caricata su TestFlight con la nota per i tester allegata ed elaborazione conclusa; al titolare resta soltanto l'assegnazione della build al gruppo di tester su App Store Connect. Le build 1 e 2 giacciono sul treno di versione «1.0» per la sbavatura dell'Info.plist, corretta e documentata nella memoria di infrastruttura. Collaudo: 58 prove del pacchetto più 7 fra ospitate e interfaccia sul simulatore, tutte verdi.
 
 Costruito nella fase B:
 - Campioni committati del giornale con prova di compatibilità (ogni caso di comando; i casi nuovi entrano nei campioni nella stessa modifica).

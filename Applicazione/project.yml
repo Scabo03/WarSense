@@ -30,6 +30,10 @@ targets:
       path: Sorgenti/Info.plist
       properties:
         CFBundleDisplayName: WarSense
+        # La versione ha un'unica sorgente di verità nelle impostazioni: il file
+        # dichiara i riferimenti, mai valori letterali (vedi memoria-infrastruttura).
+        CFBundleShortVersionString: $(MARKETING_VERSION)
+        CFBundleVersion: $(CURRENT_PROJECT_VERSION)
         UILaunchScreen: {}
         # Dichiarazione sulla crittografia: nessun algoritmo di cifratura in uso.
         # Evita la domanda sull'esportazione a ogni caricamento su TestFlight.
@@ -44,7 +48,7 @@ targets:
     settings:
       base:
         PRODUCT_BUNDLE_IDENTIFIER: com.scabo.warsense
-        MARKETING_VERSION: "0.1.0"
+        MARKETING_VERSION: "0.2.0"
         CURRENT_PROJECT_VERSION: 1
         DEVELOPMENT_TEAM: D2KQYQ8YU8
         TARGETED_DEVICE_FAMILY: "1,2"
