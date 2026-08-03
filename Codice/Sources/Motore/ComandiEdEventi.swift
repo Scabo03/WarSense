@@ -9,7 +9,9 @@ public enum ComandoBattaglia: Hashable, Codable, Sendable {
     case piazza(cella: Cella)
     /// Percorso di una o al massimo due celle adiacenti (01 §9.5.0.3).
     case muovi(sciame: IdSciame, percorso: [Cella])
-    case tira(sciame: IdSciame, bersaglio: IdSciame, proiettile: TipoOffesa)
+    /// Il proiettile è proprietà fissa del reparto (01 §3.3.1, versione 3.3):
+    /// il comando non lo trasporta più. Schema del giornale alla versione 2.
+    case tira(sciame: IdSciame, bersaglio: IdSciame)
     case ingaggia(sciame: IdSciame, bersaglio: IdSciame)
     case dichiaraResa
     /// Durante la ritirata combattuta: evacua un'unità non impegnata (01 §10.4).
@@ -60,44 +62,71 @@ public enum EfficaciaQualitativa: String, Codable, Hashable, Sendable {
     case pocoEfficace = "efficacia.poco_efficace"
 }
 
-/// L'esito di un contatto in un giro, per l'annuncio complessivo (01 §9.7.1).
+/// La fascia descrittiva delle perdite (01 §9.7.2, 02 §4.4.5): l'annuncio non
+/// riporta mai numeri di danno. Le soglie sono nei valori (03 §5.14).
+public enum FasciaPerdite: String, Codable, Hashable, Sendable, CaseIterable {
+    case nessuna, lievi, significative, gravi
+}
+
+/// L'esito di un contatto in un giro, per l'annuncio complessivo (01 §9.7.1):
+/// i numeri restano fatti interni, le fasce sono ciò che si annuncia (01 §9.7.2).
 public struct EsitoContatto: Hashable, Codable, Sendable {
     public let partePrimo: Parte
     public let cellaPrimo: Cella
     public let cellaSecondo: Cella
     public let dannoAlPrimo: Int64
     public let dannoAlSecondo: Int64
+    public let fasciaAlPrimo: FasciaPerdite
+    public let fasciaAlSecondo: FasciaPerdite
 
     public init(partePrimo: Parte, cellaPrimo: Cella, cellaSecondo: Cella,
-                dannoAlPrimo: Int64, dannoAlSecondo: Int64) {
+                dannoAlPrimo: Int64, dannoAlSecondo: Int64,
+                fasciaAlPrimo: FasciaPerdite, fasciaAlSecondo: FasciaPerdite) {
         self.partePrimo = partePrimo
         self.cellaPrimo = cellaPrimo
         self.cellaSecondo = cellaSecondo
         self.dannoAlPrimo = dannoAlPrimo
         self.dannoAlSecondo = dannoAlSecondo
+        self.fasciaAlPrimo = fasciaAlPrimo
+        self.fasciaAlSecondo = fasciaAlSecondo
     }
 
     /// Le perdite subite dalla parte indicata in questo contatto.
     public func perdite(di parte: Parte) -> Int64 {
         partePrimo == parte ? dannoAlPrimo : dannoAlSecondo
     }
+
+    /// La fascia delle perdite subite dalla parte indicata.
+    public func fascia(di parte: Parte) -> FasciaPerdite {
+        partePrimo == parte ? fasciaAlPrimo : fasciaAlSecondo
+    }
+
+    /// Stallo: nessuna perdita da ambo i lati (02 §4.4.5).
+    public var stallo: Bool { fasciaAlPrimo == .nessuna && fasciaAlSecondo == .nessuna }
 }
 
 /// Gli eventi astratti del Motore (05 §3.7): fatti, mai annunci (00 §3.2).
+/// Gli eventi che nominano un reparto trasportano archetipo e lettera (01 §9.4.3),
+/// perché l'annuncio designi senza dover interrogare lo stato.
 public enum EventoBattaglia: Hashable, Codable, Sendable {
     case turnoIniziato(parte: Parte, numeroGiro: Int)
-    case piazzamentoConfermato(parte: Parte, sciame: IdSciame, cella: Cella, costo: Int64, residuo: Int64)
+    case piazzamentoConfermato(parte: Parte, sciame: IdSciame, archetipo: IdentificatoreDati,
+                               lettera: Int, cella: Cella, costo: Int64, residuo: Int64)
     case elementoDeckEsaurito(parte: Parte, indice: Int)
-    case spostamentoEseguito(sciame: IdSciame, a: Cella, costo: Int64, residuo: Int64)
-    case tiroEseguito(sciame: IdSciame, bersaglio: IdSciame, danno: Int64, efficacia: EfficaciaQualitativa)
+    case spostamentoEseguito(parte: Parte, sciame: IdSciame, archetipo: IdentificatoreDati,
+                             lettera: Int, a: Cella, costo: Int64, residuo: Int64)
+    case tiroEseguito(parte: Parte, sciame: IdSciame, bersaglio: IdSciame,
+                      bersaglioArchetipo: IdentificatoreDati, bersaglioLettera: Int,
+                      danno: Int64, fascia: FasciaPerdite, efficacia: EfficaciaQualitativa)
     case contattoAvviato(cella: Cella)
     /// Evento aggregato con l'esito di tutti i contatti del giro (05 §3.9).
     case esitoMischiaComplessivo([EsitoContatto])
     case disingaggio(sciame: IdSciame, da: Cella, a: Cella)
-    case sciameDisfatto(sciame: IdSciame, cella: Cella, parte: Parte)
+    case sciameDisfatto(sciame: IdSciame, archetipo: IdentificatoreDati, lettera: Int,
+                        cella: Cella, parte: Parte)
     case munizioniEsaurite(sciame: IdSciame, cella: Cella)
     case resaDichiarata(parte: Parte)
-    case unitaEvacuata(sciame: IdSciame, costo: Int64)
+    case unitaEvacuata(parte: Parte, sciame: IdSciame, costo: Int64)
     case sorpresaConclusa
     case battagliaConclusa(EsitoBattaglia)
 }

@@ -15,8 +15,7 @@
 "errore.dati.identificatore_duplicato" = "Identificatore duplicato in %@: %@";
 "errore.dati.elenco_vuoto" = "Il file %@ non contiene voci";
 "errore.dati.valore_non_positivo" = "Valore non positivo in %@ alla voce %@";
-"errore.dati.gittate_incoerenti" = "Gittate incoerenti in %@ alla voce %@";
-"errore.dati.tiro_incoerente" = "Dotazione e offese da tiro incoerenti in %@ alla voce %@";
+"errore.dati.tiro_incoerente" = "Parametri del tiro incoerenti in %@ alla voce %@";
 "errore.dati.soglia_fuori_intervallo" = "Soglia di disingaggio fuori intervallo in %@ alla voce %@";
 "errore.dati.protezione_mancante" = "Manca il profilo di protezione %@";
 "errore.dati.formato_incoerente" = "Formato di battaglia incoerente: %@";
@@ -34,25 +33,30 @@
 "battaglia.turno_avversario" = "Turno %d, agisce l'avversario";
 "battaglia.turno_avversario.sintetico" = "Turno %d, avversario";
 "battaglia.spostamento" = "Spostato in riga %d, cella %d: costa %d, restano %d";
-"battaglia.tiro_eseguito" = "Tiro eseguito, danno %d, %@";
+"battaglia.tiro_eseguito" = "Tiro su %@ %@ avversario, %@";
+"battaglia.tiro_subito" = "Tiro avversario sul tuo %@ %@, %@";
 "battaglia.mischia_complessiva" = "Esito delle mischie, %d contatti: ";
 "battaglia.mischia_complessiva.sintetico" = "Mischie, %d: ";
-"battaglia.mischia_voce" = "riga %d cella %d, perdite %d contro %d";
+"battaglia.mischia_voce" = "riga %d cella %d, %@, %@";
+"battaglia.mischia_voce_stallo" = "riga %d cella %d, %@";
 "battaglia.mischia_separatore" = "; ";
-"battaglia.disfatto_proprio" = "Un tuo reparto è disfatto in riga %d, cella %d";
-"battaglia.disfatto_avversario" = "Reparto avversario disfatto in riga %d, cella %d";
+"battaglia.disfatto_proprio" = "Il tuo %@ %@ è disfatto in riga %d, cella %d";
+"battaglia.disfatto_avversario" = "%@ %@ avversario disfatto in riga %d, cella %d";
 "battaglia.resa_propria" = "Resa dichiarata: comincia la tua ritirata combattuta";
 "battaglia.resa_avversaria" = "L'avversario si ritira";
 "battaglia.evacuata" = "Unità evacuata: costa %d";
 "battaglia.sorpresa_conclusa" = "Le posizioni sono ora tutte scoperte";
+"battaglia.ingresso_avversario" = "Entra in campo %@ %@ avversario in riga %d, cella %d";
+"battaglia.spostamento_avversario" = "%@ %@ avversario si sposta in riga %d, cella %d";
+"battaglia.evacuata_avversaria" = "L'avversario evacua un'unità";
 
 /* Interfaccia della battaglia (02 §2, §3, §8): testa fissa e contenuti di cella. */
 "cella.testa" = "riga %d, cella %d";
 "cella.libera" = "libera";
 "cella.ostacolo_contenuto" = "ostacolo";
 "cella.occupante" = "%@, %@";
-"cella.occupante_proprio" = "tuo %@";
-"cella.occupante_avversario" = "%@ avversario";
+"cella.occupante_proprio" = "tuo %@ %@";
+"cella.occupante_avversario" = "%@ %@ avversario";
 "cella.disponibile" = "costa %d, restano %d";
 "cella.bersaglio" = "%@, %@";
 "deck.intestazione" = "Riserve da schierare";
@@ -77,8 +81,8 @@
 "pannello.titolo" = "Azioni per riga %d, cella %d";
 "pannello.chiudi" = "Chiudi il pannello";
 "pannello.muovi_qui_vicino" = "Muovi verso una cella adiacente";
-"pannello.tira_su" = "Tira su %@: %@, %@, danno con %@";
-"pannello.ingaggia" = "Ingaggia %@ in riga %d cella %d";
+"pannello.tira_su" = "Tira su %@ %@ avversario, %@";
+"pannello.ingaggia" = "Ingaggia %@ %@ avversario in riga %d cella %d";
 "pannello.ritira_unita" = "Evacua questa unità: costa %d";
 "pannello.designa_movimento" = "Scegli la destinazione sulla griglia";
 "pannello.designazione_avviata" = "Scegli la cella di destinazione e attivala per confermare";
@@ -109,8 +113,6 @@
 "unita.piattaforma_trainata" = "piattaforma trainata";
 "unita.macchina_assedio" = "macchina d'assedio";
 "unita.macchina_tiro" = "macchina da tiro";
-"proiettile.proiettile_leggero" = "proiettile leggero";
-"proiettile.proiettile_pesante" = "proiettile pesante";
 
 /* Avvio, resoconto, impostazioni, apprendimento. */
 "avvio.titolo" = "WarSense";

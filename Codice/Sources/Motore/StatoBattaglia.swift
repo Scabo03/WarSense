@@ -15,6 +15,10 @@ public struct Sciame: Hashable, Codable, Sendable {
     public let parte: Parte
     public let archetipo: IdentificatoreDati
     public let protezione: TipoProtezione
+    /// La lettera del reparto in ordine di piazzamento dentro il proprio
+    /// schieramento, mai riusata (01 §9.4.3): ordinale che la Presentazione
+    /// risolve nel termine chiuso del vocabolario.
+    public let lettera: Int
     /// Atomi con cui l'assetto è stato formato.
     public let atomiIniziali: Int64
     /// Punti vita residui (01 §4.2).
@@ -28,10 +32,10 @@ public struct Sciame: Hashable, Codable, Sendable {
     public var rinforzo: Bool
 
     public init(id: IdSciame, parte: Parte, archetipo: IdentificatoreDati,
-                protezione: TipoProtezione, atomiIniziali: Int64, serbatoio: Int64,
+                protezione: TipoProtezione, lettera: Int, atomiIniziali: Int64, serbatoio: Int64,
                 munizioni: Int, posizione: Cella, azioneSpesa: Bool, rinforzo: Bool) {
         self.id = id; self.parte = parte; self.archetipo = archetipo
-        self.protezione = protezione; self.atomiIniziali = atomiIniziali
+        self.protezione = protezione; self.lettera = lettera; self.atomiIniziali = atomiIniziali
         self.serbatoio = serbatoio; self.munizioni = munizioni
         self.posizione = posizione; self.azioneSpesa = azioneSpesa; self.rinforzo = rinforzo
     }
@@ -123,6 +127,9 @@ public struct StatoBattaglia: Hashable, Codable, Sendable {
     public var deck: [Parte: [ElementoDeck]]
     /// Contatore per gli identificatori, deterministico (05 §2.8).
     public var prossimoIdSciame: Int
+    /// La prossima lettera per parte (01 §9.4.3): cresce a ogni discesa in campo
+    /// e non torna mai indietro, così una lettera non si riusa.
+    public var prossimaLettera: [Parte: Int]
     /// Elemento del deck selezionato per parte (01 §6.6: anche l'interazione si salva).
     public var selezione: [Parte: Int]
 

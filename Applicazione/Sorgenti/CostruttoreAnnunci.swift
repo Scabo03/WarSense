@@ -61,18 +61,15 @@ struct CostruttoreAnnunci {
         }
     }
 
-    /// Il percorso di una o due celle verso la destinazione (01 §9.5.0.3), deterministico.
+    /// Il percorso verso la destinazione: regola di gioco, calcolata dal Motore (00 §3.2).
     func percorsoMovimento(da id: IdSciame, a destinazione: Cella) -> [Cella]? {
-        guard let sciame = stato.sciami[id] else { return nil }
-        let distanza = stato.griglia.distanza(sciame.posizione, destinazione)
-        if distanza == 1 { return [destinazione] }
-        guard distanza == 2 else { return nil }
-        let intermedie = stato.griglia.vicini(di: sciame.posizione)
-            .filter { stato.griglia.adiacenti($0, destinazione)
-                && stato.occupante(di: $0) == nil && !stato.ostacoli.contains($0) }
-            .sorted()
-        guard let via = intermedie.first else { return nil }
-        return [via, destinazione]
+        VistaBattaglia(motore: motore, stato: stato, parte: .giocatore)
+            .percorsoMovimento(da: id, a: destinazione)
+    }
+
+    /// La lettera parlata di un reparto (01 §9.4.3): termine chiuso del vocabolario.
+    func lettera(_ sciame: Sciame) -> String {
+        testi.termine("lettera.\(sciame.lettera)").testo
     }
 
     /// Il contenuto della cella nell'ordine registrato (02 §3.8.1), tagliato dalla coda.
@@ -86,9 +83,10 @@ struct CostruttoreAnnunci {
         }
         var parti: [String] = []
         let nome = testi.frase("unita." + sciame.archetipo).testo
+        // La lettera in posizione fissa subito dopo il nome (01 §9.4.3, 02 §3.8.1).
         parti.append(sciame.parte == .giocatore
-                     ? testi.frase("cella.occupante_proprio", nome).testo
-                     : testi.frase("cella.occupante_avversario", nome).testo)
+                     ? testi.frase("cella.occupante_proprio", nome, lettera(sciame)).testo
+                     : testi.frase("cella.occupante_avversario", nome, lettera(sciame)).testo)
         guard verbosita != .sintetico else { return parti }
         // Anomalie nell'ordine fisso: controllo, munizioni (02 §3.8.1, §8.7.1).
         if stato.impegnato(sciame.id) {

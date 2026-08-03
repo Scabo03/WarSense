@@ -47,7 +47,7 @@ public struct TraduttoreEventi: Sendable {
     /// Il significato di segnale per l'evento, se l'evento ne merita uno.
     public func significato(per evento: EventoBattaglia) -> SignificatoSegnale? {
         switch evento {
-        case .piazzamentoConfermato(let p, _, _, _, _):
+        case .piazzamentoConfermato(let p, _, _, _, _, _, _):
             return p == parte ? .conferma : nil
         case .elementoDeckEsaurito(let p, _):
             return p == parte ? .deckEsaurito : nil
@@ -73,34 +73,70 @@ public struct TraduttoreEventi: Sendable {
         return inflitte >= subite
     }
 
+    /// Il nome parlato di un archetipo e la lettera del reparto (01 §9.4.3):
+    /// termini del vocabolario chiuso, in posizione fissa dopo il nome.
+    private func nome(_ archetipo: IdentificatoreDati) -> String {
+        testi.frase("unita." + archetipo).testo
+    }
+    private func lettera(_ ordinale: Int) -> String {
+        testi.termine("lettera.\(ordinale)").testo
+    }
+    /// La frase chiusa di una fascia, declinata per direzione (02 §4.4.5, §8.9.1).
+    private func fasciaFrase(_ fascia: FasciaPerdite, inflitte: Bool) -> String {
+        let direzione = inflitte ? "inflitte" : "subite"
+        return testi.termine("perdite." + direzione + "." + fascia.rawValue).testo
+    }
+
     /// L'annuncio per l'evento, già risolto nel livello di verbosità e nella lingua.
     /// Restituisce nulla per gli eventi che non producono annuncio proattivo.
+    /// Gli eventi avversari si annunciano senza alcun numero di volume (01 §9.3.7);
+    /// gli esiti dei combattimenti si annunciano in fasce, mai in numeri (01 §9.7.2).
     public func annuncio(per evento: EventoBattaglia, verbosita: Verbosita) -> TestoLocalizzato? {
         switch evento {
         case .turnoIniziato(let p, let giro):
             let chiave = p == parte ? "battaglia.turno_proprio" : "battaglia.turno_avversario"
             return testi.frase(chiave, verbosita: verbosita, giro)
-        case .piazzamentoConfermato(let p, _, _, let costo, let residuo):
-            guard p == parte else { return nil }
+        case .piazzamentoConfermato(let p, _, let archetipo, let letteraOrdinale, let cella, let costo, let residuo):
+            guard p == parte else {
+                // L'ingresso di forze avversarie si annuncia (02 §8.2.1), senza volume.
+                return testi.frase("battaglia.ingresso_avversario", verbosita: verbosita,
+                                   nome(archetipo), lettera(letteraOrdinale), cella.riga, cella.colonna)
+            }
             return testi.frase("battaglia.piazzamento_confermato", verbosita: verbosita,
                                Int(costo), Int(residuo))
         case .elementoDeckEsaurito(let p, _):
             return p == parte ? testi.frase("battaglia.elemento_esaurito", verbosita: verbosita) : nil
-        case .spostamentoEseguito(_, let a, let costo, let residuo):
+        case .spostamentoEseguito(let p, _, let archetipo, let letteraOrdinale, let a, let costo, let residuo):
+            guard p == parte else {
+                return testi.frase("battaglia.spostamento_avversario", verbosita: verbosita,
+                                   nome(archetipo), lettera(letteraOrdinale), a.riga, a.colonna)
+            }
             return testi.frase("battaglia.spostamento", verbosita: verbosita,
                                a.riga, a.colonna, Int(costo), Int(residuo))
-        case .tiroEseguito(_, _, let danno, let efficacia):
-            let termine = testi.termine(efficacia.rawValue).testo
-            return testi.frase("battaglia.tiro_eseguito", verbosita: verbosita, Int(danno), termine)
+        case .tiroEseguito(let p, _, _, let archetipo, let letteraOrdinale, _, let fascia, _):
+            if p == parte {
+                return testi.frase("battaglia.tiro_eseguito", verbosita: verbosita,
+                                   nome(archetipo), lettera(letteraOrdinale),
+                                   fasciaFrase(fascia, inflitte: true))
+            }
+            return testi.frase("battaglia.tiro_subito", verbosita: verbosita,
+                               nome(archetipo), lettera(letteraOrdinale),
+                               fasciaFrase(fascia, inflitte: false))
         case .contattoAvviato(let cella):
             return testi.frase("battaglia.contatto_avviato", verbosita: verbosita, cella.riga, cella.colonna)
         case .esitoMischiaComplessivo(let esiti):
             guard !esiti.isEmpty else { return nil }
-            // Una sola comunicazione ordinata per tutti i contatti (01 §9.7.1).
+            // Una sola comunicazione ordinata per tutti i contatti (01 §9.7.1),
+            // in fasce dal punto di vista di chi ascolta (02 §8.9.1).
             let voci = esiti.map { e in
-                testi.frase("battaglia.mischia_voce", verbosita: verbosita,
-                            e.cellaPrimo.riga, e.cellaPrimo.colonna,
-                            Int(e.dannoAlPrimo), Int(e.dannoAlSecondo)).testo
+                e.stallo
+                    ? testi.frase("battaglia.mischia_voce_stallo", verbosita: verbosita,
+                                  e.cellaPrimo.riga, e.cellaPrimo.colonna,
+                                  testi.termine("esito.stallo").testo).testo
+                    : testi.frase("battaglia.mischia_voce", verbosita: verbosita,
+                                  e.cellaPrimo.riga, e.cellaPrimo.colonna,
+                                  fasciaFrase(e.fascia(di: parte.avversaria), inflitte: true),
+                                  fasciaFrase(e.fascia(di: parte), inflitte: false)).testo
             }
             let separatore = testi.frase("battaglia.mischia_separatore").testo
             return TestoLocalizzato(
@@ -109,15 +145,19 @@ public struct TraduttoreEventi: Sendable {
                 lingua: testi.lingua)
         case .disingaggio(_, _, let a):
             return testi.frase("battaglia.disingaggio", verbosita: verbosita, a.riga, a.colonna)
-        case .sciameDisfatto(_, let cella, let p):
+        case .sciameDisfatto(_, let archetipo, let letteraOrdinale, let cella, let p):
             let chiave = p == parte ? "battaglia.disfatto_proprio" : "battaglia.disfatto_avversario"
-            return testi.frase(chiave, verbosita: verbosita, cella.riga, cella.colonna)
+            return testi.frase(chiave, verbosita: verbosita,
+                               nome(archetipo), lettera(letteraOrdinale), cella.riga, cella.colonna)
         case .munizioniEsaurite(_, let cella):
             return testi.frase("battaglia.munizioni_esaurite", verbosita: verbosita, cella.riga, cella.colonna)
         case .resaDichiarata(let p):
             let chiave = p == parte ? "battaglia.resa_propria" : "battaglia.resa_avversaria"
             return testi.frase(chiave, verbosita: verbosita)
-        case .unitaEvacuata(_, let costo):
+        case .unitaEvacuata(let p, _, let costo):
+            guard p == parte else {
+                return testi.frase("battaglia.evacuata_avversaria", verbosita: verbosita)
+            }
             return testi.frase("battaglia.evacuata", verbosita: verbosita, Int(costo))
         case .sorpresaConclusa:
             return testi.frase("battaglia.sorpresa_conclusa", verbosita: verbosita)

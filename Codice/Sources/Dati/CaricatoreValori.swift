@@ -117,12 +117,13 @@ public enum CaricatoreValori {
             guard a.puntiVitaPerAtomo > 0, a.volumePerAtomo > 0 else {
                 throw ErroreDati(chiave: "errore.dati.valore_non_positivo", file: "archetipi.json", voce: id)
             }
-            // Due gittate: la pericolosità non supera il disturbo (01 §3.4.1: disturbo ≥ pericolosità).
-            guard a.gittataDisturbo >= a.gittataPericolosita else {
-                throw ErroreDati(chiave: "errore.dati.gittate_incoerenti", file: "archetipi.json", voce: id)
-            }
-            // Chi ha offese da tiro ha dotazione, e viceversa.
-            guard (a.offeseTiro.isEmpty) == (a.dotazioneMunizioni == 0) else {
+            // Il tiro è coerente in blocco (01 §3.3.1, §3.4.1 versione 3.3): chi tira ha
+            // proiettile, offesa, gittata e dotazione; chi non tira non ha nulla di ciò.
+            let tira = a.offesaTiro != nil
+            guard (a.proiettile != nil) == tira,
+                  (a.gittata > 0) == tira,
+                  (a.dotazioneMunizioni > 0) == tira,
+                  a.proiettile != .armaDaMischia else {
                 throw ErroreDati(chiave: "errore.dati.tiro_incoerente", file: "archetipi.json", voce: id)
             }
             guard a.sogliaDisingaggio > .zero, a.sogliaDisingaggio <= .uno else {
@@ -147,6 +148,12 @@ public enum CaricatoreValori {
         }
         guard combattimento.efficaciaMinima > .zero else {
             throw ErroreDati(chiave: "errore.dati.efficacia_minima_nulla", file: "combattimento.json")
+        }
+        // Le soglie delle fasce sono crescenti e dentro l'unità (01 §9.7.2, 03 §5.14).
+        guard combattimento.fasciaPerditeLieviFino > .zero,
+              combattimento.fasciaPerditeSignificativeFino > combattimento.fasciaPerditeLieviFino,
+              combattimento.fasciaPerditeSignificativeFino <= .uno else {
+            throw ErroreDati(chiave: "errore.dati.soglia_fuori_intervallo", file: "combattimento.json")
         }
     }
 }

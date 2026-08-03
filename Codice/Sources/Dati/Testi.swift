@@ -32,6 +32,11 @@ public struct Testi: Sendable {
     public struct ManifestTesti: Codable, Sendable {
         public let versione: String
         public let lingue: [String]
+        /// Impronte dei file di testo, come nel manifest dei valori: la copia in
+        /// Documenti si rinfresca quando i byte del manifest cambiano, quindi ogni
+        /// modifica ai testi DEVE rigenerarle. La versione resta ferma: si cambia
+        /// solo su richiesta del titolare (memoria di infrastruttura, regola 5).
+        public let impronte: [String: String]?
     }
 
     /// Carica il pacchetto della lingua indicata dall'albero Testi.

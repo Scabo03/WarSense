@@ -6,7 +6,7 @@ Convenzione: PROVVISORIO = da tarare con le simulazioni o da fissare in sede di 
 
 ## archetipi.json — tutti PROVVISORI
 
-Tutti i parametri dei nove archetipi: punti vita per atomo, capacità offensiva per atomo, gittate (disturbo/pericolosità), volume per atomo, penalità di avanzamento, soglia di disingaggio, sensibilità alla stanchezza, dotazione munizioni, profili di offesa (mischia e tiro). Corrispondono a 03 §5.1, §5.4, §5.6, §5.7, §5.8 e 01 §3.4. I rapporti scelti rispettano i vincoli strutturali (pericolosità ≤ disturbo con rapporto ~1:3 per i tiratori, 01 §3.4.1; penalità alta per le macchine, 01 §8.6; soglie di disingaggio distinte per tipo, 01 §9.8.1), ma i numeri sono segnaposto di lavoro.
+Tutti i parametri dei nove archetipi: punti vita per atomo, capacità offensiva per atomo, gittata utile unica, volume per atomo, penalità di avanzamento, soglia di disingaggio, sensibilità alla stanchezza, dotazione munizioni, proiettile fisso e profili di offesa (mischia e tiro). Corrispondono a 03 §5.1, §5.4, §5.6, §5.7, §5.8 e 01 §3.4 (versione 3.3). Con la gittata unica (01 §3.4.1 v3.3) la gittata di ciascun tiratore è l'ex gittata di disturbo con resa piena (tiratori 6, piattaforma 4, macchina da tiro 8): PROVVISORIA, da tarare secondo 03 §6.4 ridefinita perché il tiro non domini distanze eccessive. Proiettili fissi assegnati (01 §3.3.1 v3.3): tiratori e piattaforma → leggero, macchina da tiro → pesante — PROVVISORI in attesa dei tratti (01 §3.3).
 
 ## offese-e-protezioni.json — PROVVISORI
 
@@ -27,7 +27,7 @@ I quattro coefficienti dei due profili di protezione (para_saturazione/para_perf
 
 - `efficacia_minima` (0.15): frazione della munizione poco adatta, 03 §5.5.
 - `soglia_poco_efficace` (0.5): confine dell'annuncio qualitativo, 01 §9.9.1.
-- `coefficiente_tiro_disturbo` (0.25): resa del tiro entro il solo disturbo, legata all'ampiezza della fascia che uccide, 03 §6.4.
+- `fascia_perdite_lievi_fino` (0.10) e `fascia_perdite_significative_fino` (0.30): soglie delle fasce descrittive degli esiti (01 §9.7.2, 03 §5.14), proporzione del danno sulla consistenza del colpito prima dell'applicazione; sopra la seconda le perdite sono gravi, a zero nessuna perdita. PROVVISORIE, da riesaminare con i ritorni dei tester (RDA-52).
 
 ## caratteristiche-campo.json
 
@@ -63,4 +63,4 @@ La soglia di resa del tattico è tolleranza alle perdite divisa per la propensio
 
 - Fattore di scala della virgola fissa: 1000 (`Scalato.fattore`, RDA-44).
 - Passo delle istantanee: 200 righe di giornale (05 §6.2, dichiarato numero di struttura).
-- Versione dello schema del giornale: 1 (`Fondazione.schemaCorrente`).
+- Versione dello schema del giornale: 2 (`Fondazione.schemaCorrente`; la 2 dalla prima tranche di semplificazioni: il comando di tiro non trasporta più il proiettile).

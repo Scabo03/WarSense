@@ -1,1 +1,11 @@
-{"versione": "0.1.1", "lingue": ["it"]}
+{
+ "versione": "0.1.1",
+ "lingue": [
+  "it"
+ ],
+ "impronte": {
+  "it.lproj/Annunci.strings": "007a3fed90135347888bdec6bd869902012353509c1160c476493511074cc2a8",
+  "it.lproj/Annunci.stringsdict": "9187604d36e60ce5160e524a6bacab9aa365443b55a763df4ee1535eee15d184",
+  "it.lproj/Vocabolario.strings": "16bccc720434cef5165d1d4633ef06a27b1472cbd9241e259dcf399d6970d2a1"
+ }
+}

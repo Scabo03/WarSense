@@ -33,7 +33,8 @@ extension Cella: CodificabileCanonico {
 extension Sciame: CodificabileCanonico {
     public func codifica(in c: inout CodificatoreCanonico) {
         c.intero(id.numero); c.testo(parte.rawValue); c.testo(archetipo)
-        c.testo(protezione.rawValue); c.intero(atomiIniziali); c.intero(serbatoio)
+        c.testo(protezione.rawValue); c.intero(Int64(lettera))
+        c.intero(atomiIniziali); c.intero(serbatoio)
         c.intero(Int64(munizioni)); posizione.codifica(in: &c)
         c.vero(azioneSpesa); c.vero(rinforzo)
     }
@@ -68,6 +69,7 @@ extension StatoBattaglia {
             let ev = evacuati[parte] ?? []
             c.intero(Int64(ev.count))
             for id in ev { c.intero(id.numero) }
+            c.intero(Int64(prossimaLettera[parte] ?? 1))
         }
         c.intero(prossimoIdSciame)
         c.testo(parteDiTurno.rawValue)

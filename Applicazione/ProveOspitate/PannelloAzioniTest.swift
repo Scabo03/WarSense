@@ -93,6 +93,49 @@ final class PannelloAzioniTest: XCTestCase {
         XCTAssertTrue(mosso, "il movimento designato è eseguito (02 §9.2.1)")
     }
 
+    func test_02_9_5_lo_spostamento_non_si_offre_senza_alcuna_destinazione() async throws {
+        let ambiente = try Ambiente()
+        let partita = try await PartitaCorrente(nuova: ambiente)
+        let schermata = SchermataBattaglia(partita: partita)
+        schermata.modalPresentationStyle = .fullScreen
+        radice.present(schermata, animated: false)
+        try await attendi("creazione degli elementi") { !schermata.elementiPerProva.isEmpty }
+
+        // L'angolo (10,1) circondato dai propri: (10,2), (9,1), (9,2) occupate.
+        // Nessuna destinazione esiste, nemmeno a due celle: le intermedie sono piene.
+        _ = try await partita.esegui(.seleziona(indiceDeck: 0))
+        _ = try await partita.esegui(.piazza(cella: Cella(riga: 10, colonna: 1)))
+        _ = try await partita.esegui(.piazza(cella: Cella(riga: 10, colonna: 2)))
+        _ = try await partita.esegui(.piazza(cella: Cella(riga: 9, colonna: 1)))
+        _ = try await partita.esegui(.seleziona(indiceDeck: 1))
+        _ = try await partita.esegui(.piazza(cella: Cella(riga: 9, colonna: 2)))
+        _ = try await partita.esegui(.deseleziona)
+        _ = try await partita.esegui(.fineTurno) // l'azione torna al turno nuovo
+        try await Task.sleep(nanoseconds: 200_000_000)
+
+        XCTAssertTrue(schermata.attiva(Cella(riga: 10, colonna: 1)))
+        try await attendi("apertura del pannello") {
+            schermata.presentedViewController is UIAlertController
+        }
+        let titoli = schermata.vociPannelloPerProva.map(\.titolo)
+        let titoloDesigna = ambiente.testi.frase("pannello.designa_movimento").testo
+        XCTAssertFalse(titoli.contains(titoloDesigna),
+                       "l'azione impossibile in ogni sua forma non si offre (02 §9.5)")
+        XCTAssertTrue(titoli.contains(ambiente.testi.frase("pannello.chiudi").testo))
+
+        // Il reparto con destinazioni, invece, la offre: la regola non si estende oltre.
+        schermata.presentedViewController?.dismiss(animated: false)
+        try await attendi("congedo del pannello") { schermata.presentedViewController == nil }
+        XCTAssertTrue(schermata.attiva(Cella(riga: 9, colonna: 2)))
+        try await attendi("apertura del secondo pannello") {
+            schermata.presentedViewController is UIAlertController
+        }
+        XCTAssertTrue(schermata.vociPannelloPerProva.map(\.titolo).contains(titoloDesigna),
+                      "chi ha destinazioni conserva l'azione di spostamento")
+        schermata.presentedViewController?.dismiss(animated: false)
+        try await attendi("congedo finale") { schermata.presentedViewController == nil }
+    }
+
     func test_02_9_2_1_anche_la_chiusura_del_pannello_non_congeda_la_schermata() async throws {
         let ambiente = try Ambiente()
         let (schermata, _, cella) = try await schermataConTruppaPronta(ambiente)

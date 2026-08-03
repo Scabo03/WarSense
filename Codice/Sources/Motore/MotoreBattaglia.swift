@@ -80,6 +80,16 @@ public struct MotoreBattaglia: Sendable {
         return max(1, Int(coeff.applicato(a: Int64(gittata))))
     }
 
+    /// La fascia descrittiva di un danno (01 §9.7.2): proporzione sulla consistenza
+    /// del colpito immediatamente prima dell'applicazione, soglie dai valori (03 §5.14).
+    public func fascia(danno: Int64, consistenzaPrima: Int64) -> FasciaPerdite {
+        guard danno > 0, consistenzaPrima > 0 else { return .nessuna }
+        let proporzione = Scalato(millesimi: danno * 1000 / consistenzaPrima)
+        if proporzione <= valori.combattimento.fasciaPerditeLieviFino { return .lievi }
+        if proporzione <= valori.combattimento.fasciaPerditeSignificativeFino { return .significative }
+        return .gravi
+    }
+
     /// Proporzione delle perdite sulla base delle sole forze effettivamente impiegate
     /// sul campo (01 §10.2, decisione del titolare): le riserve nel deck non contano.
     /// È la base unica di ogni soglia che dipende dalle perdite subite in battaglia.
@@ -158,7 +168,7 @@ public struct MotoreBattaglia: Sendable {
             guard c <= bilancio.disponibile else { return .nonValido(.volumeInsufficiente) }
             return .valido(CostiDichiarati(volume: c, residuoDopo: bilancio.disponibile - c))
 
-        case .tira(let id, let bersaglioId, let proiettile):
+        case .tira(let id, let bersaglioId):
             guard let sciame = stato.sciami[id], sciame.parte == parte,
                   let bersaglio = stato.sciami[bersaglioId], bersaglio.parte == parte.avversaria else {
                 return .nonValido(.bersaglioNonValido)
@@ -166,10 +176,11 @@ public struct MotoreBattaglia: Sendable {
             guard !stato.impegnato(id) else { return .nonValido(.impegnato) }
             guard !sciame.azioneSpesa else { return .nonValido(.azioneGiaSpesa) }
             let a = archetipo(sciame.archetipo)
-            guard a.offeseTiro[proiettile] != nil else { return .nonValido(.bersaglioNonValido) }
+            guard a.offesaTiro != nil else { return .nonValido(.bersaglioNonValido) }
             guard sciame.munizioni > 0 else { return .nonValido(.munizioniEsaurite) }
+            // Portata binaria (01 §3.4.1 versione 3.3): dentro la gittata unica, o niente.
             let distanza = stato.griglia.distanza(sciame.posizione, bersaglio.posizione)
-            guard distanza <= gittataEffettiva(a.gittataDisturbo, stato: stato) else {
+            guard distanza <= gittataEffettiva(a.gittata, stato: stato) else {
                 return .nonValido(.fuoriTiro)
             }
             return .valido(.nessuno) // il tiro non consuma volume: consuma l'azione e una scarica
@@ -234,9 +245,13 @@ public struct MotoreBattaglia: Sendable {
             let costiDichiarati = valida(comando, parte: parte, stato: stato).costi!
             let id = IdSciame(stato.prossimoIdSciame)
             stato.prossimoIdSciame += 1
+            // La lettera in ordine di piazzamento, mai riusata (01 §9.4.3).
+            let lettera = stato.prossimaLettera[parte] ?? 1
+            stato.prossimaLettera[parte] = lettera + 1
             let a = archetipo(elemento.archetipo)
             let sciame = Sciame(id: id, parte: parte, archetipo: elemento.archetipo,
-                                protezione: elemento.protezione, atomiIniziali: elemento.atomi,
+                                protezione: elemento.protezione, lettera: lettera,
+                                atomiIniziali: elemento.atomi,
                                 serbatoio: elemento.atomi * a.puntiVitaPerAtomo,
                                 munizioni: a.dotazioneMunizioni, posizione: cella,
                                 azioneSpesa: true, // 01 §8.1.2
@@ -246,7 +261,9 @@ public struct MotoreBattaglia: Sendable {
             stato.bilancio[parte]!.spesa += costiDichiarati.volume
             elemento.esemplari -= 1
             stato.deck[parte]![indice] = elemento
-            eventi.append(.piazzamentoConfermato(parte: parte, sciame: id, cella: cella,
+            eventi.append(.piazzamentoConfermato(parte: parte, sciame: id,
+                                                 archetipo: sciame.archetipo, lettera: lettera,
+                                                 cella: cella,
                                                  costo: costiDichiarati.volume,
                                                  residuo: costiDichiarati.residuoDopo))
             if elemento.esemplari == 0 {
@@ -256,29 +273,34 @@ public struct MotoreBattaglia: Sendable {
 
         case .muovi(let id, let percorso):
             let costiDichiarati = valida(comando, parte: parte, stato: stato).costi!
+            let sciame = stato.sciami[id]!
             stato.sciami[id]!.posizione = percorso.last!
             stato.sciami[id]!.azioneSpesa = true
             stato.bilancio[parte]!.spesa += costiDichiarati.volume
-            eventi.append(.spostamentoEseguito(sciame: id, a: percorso.last!,
+            eventi.append(.spostamentoEseguito(parte: parte, sciame: id,
+                                               archetipo: sciame.archetipo, lettera: sciame.lettera,
+                                               a: percorso.last!,
                                                costo: costiDichiarati.volume,
                                                residuo: costiDichiarati.residuoDopo))
 
-        case .tira(let id, let bersaglioId, let proiettile):
+        case .tira(let id, let bersaglioId):
             let sciame = stato.sciami[id]!
             let bersaglio = stato.sciami[bersaglioId]!
             let a = archetipo(sciame.archetipo)
-            let offesa = a.offeseTiro[proiettile]!
-            let distanza = stato.griglia.distanza(sciame.posizione, bersaglio.posizione)
-            let entroPericolosita = distanza <= gittataEffettiva(a.gittataPericolosita, stato: stato)
-            // La fascia che uccide è la pericolosità; entro il solo disturbo il tiro rende una frazione (01 §3.4.1).
-            let coefficiente = entroPericolosita ? Scalato.uno : valori.combattimento.coefficienteTiroDisturbo
-            let inflitto = danno(da: sciame, offesa: offesa, a: bersaglio, coefficiente: coefficiente, stato: stato)
+            // Il proiettile è del reparto (01 §3.3.1); dentro la gittata unica la resa è piena (01 §3.4.1).
+            let offesa = a.offesaTiro!
+            let inflitto = danno(da: sciame, offesa: offesa, a: bersaglio, coefficiente: .uno, stato: stato)
             let qualitativa = efficaciaQualitativa(offesa: offesa,
                                                    protezione: valori.protezioni[bersaglio.protezione]!)
+            let fasciaInflitta = fascia(danno: inflitto, consistenzaPrima: bersaglio.serbatoio)
             stato.sciami[id]!.munizioni -= 1
             stato.sciami[id]!.azioneSpesa = true
             applicaDanno(inflitto, a: bersaglioId, stato: &stato, eventi: &eventi)
-            eventi.append(.tiroEseguito(sciame: id, bersaglio: bersaglioId, danno: inflitto, efficacia: qualitativa))
+            eventi.append(.tiroEseguito(parte: parte, sciame: id, bersaglio: bersaglioId,
+                                        bersaglioArchetipo: bersaglio.archetipo,
+                                        bersaglioLettera: bersaglio.lettera,
+                                        danno: inflitto, fascia: fasciaInflitta,
+                                        efficacia: qualitativa))
             if stato.sciami[id]!.munizioni == 0 {
                 eventi.append(.munizioniEsaurite(sciame: id, cella: stato.sciami[id]!.posizione))
             }
@@ -301,7 +323,7 @@ public struct MotoreBattaglia: Sendable {
             stato.bilancio[parte]!.spesa += costiDichiarati.volume
             stato.evacuati[parte, default: []].append(id)
             stato.sciami[id] = nil
-            eventi.append(.unitaEvacuata(sciame: id, costo: costiDichiarati.volume))
+            eventi.append(.unitaEvacuata(parte: parte, sciame: id, costo: costiDichiarati.volume))
 
         case .fineTurno:
             eventi.append(contentsOf: concludiTurno(&stato))
@@ -396,9 +418,12 @@ public struct MotoreBattaglia: Sendable {
                                coefficiente: .uno, stato: stato)
             danni.append(DannoCalcolato(bersaglio: contatto.secondo, danno: dannoAB))
             danni.append(DannoCalcolato(bersaglio: contatto.primo, danno: dannoBA))
+            // Le fasce sulla consistenza prima dell'applicazione (01 §9.7.2).
             esiti.append(EsitoContatto(partePrimo: a.parte,
                                        cellaPrimo: a.posizione, cellaSecondo: b.posizione,
-                                       dannoAlPrimo: dannoBA, dannoAlSecondo: dannoAB))
+                                       dannoAlPrimo: dannoBA, dannoAlSecondo: dannoAB,
+                                       fasciaAlPrimo: fascia(danno: dannoBA, consistenzaPrima: a.serbatoio),
+                                       fasciaAlSecondo: fascia(danno: dannoAB, consistenzaPrima: b.serbatoio)))
         }
         eventi.append(.esitoMischiaComplessivo(esiti))
         for d in danni { applicaDanno(d.danno, a: d.bersaglio, stato: &stato, eventi: &eventi) }
@@ -448,7 +473,9 @@ public struct MotoreBattaglia: Sendable {
             // Sciame disfatto: lascia il campo (01 §4.3) e i suoi contatti finiscono.
             stato.sciami[id] = nil
             stato.contatti.removeAll { $0.coinvolge(id) }
-            eventi.append(.sciameDisfatto(sciame: id, cella: sciame.posizione, parte: sciame.parte))
+            eventi.append(.sciameDisfatto(sciame: id, archetipo: sciame.archetipo,
+                                          lettera: sciame.lettera,
+                                          cella: sciame.posizione, parte: sciame.parte))
         } else {
             stato.sciami[id] = sciame
         }

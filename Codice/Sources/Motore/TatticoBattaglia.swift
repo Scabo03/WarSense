@@ -147,32 +147,22 @@ public struct TatticoBattaglia: Sendable {
         return nil
     }
 
-    /// Tira al bersaglio più vicino a portata, con il proiettile più efficace;
-    /// entro il solo disturbo tira soltanto chi ha propensione all'attacco alta,
-    /// perché le scariche si conservano per la fascia che uccide (01 §9.6).
+    /// Tira al bersaglio a portata contro cui il proiettile fisso del reparto rende
+    /// di più (01 §3.3.1, §9.9); parità risolte per distanza e poi per identificatore.
     private func comandoDiTiro(sciame: Sciame, nemici: [Sciame],
                                stato: StatoBattaglia) -> ComandoBattaglia? {
         let archetipo = motore.valori.archetipi[sciame.archetipo]!
-        guard !archetipo.offeseTiro.isEmpty, sciame.munizioni > 0 else { return nil }
-        let bersagli = nemici.sorted {
-            let da = stato.griglia.distanza(sciame.posizione, $0.posizione)
-            let db = stato.griglia.distanza(sciame.posizione, $1.posizione)
-            return da != db ? da < db : $0.id < $1.id
+        guard let offesa = archetipo.offesaTiro, sciame.munizioni > 0 else { return nil }
+        let bersagli = nemici.sorted { a, b in
+            let ea = motore.efficacia(offesa: offesa, protezione: motore.valori.protezioni[a.protezione]!)
+            let eb = motore.efficacia(offesa: offesa, protezione: motore.valori.protezioni[b.protezione]!)
+            if ea != eb { return ea > eb }
+            let da = stato.griglia.distanza(sciame.posizione, a.posizione)
+            let db = stato.griglia.distanza(sciame.posizione, b.posizione)
+            return da != db ? da < db : a.id < b.id
         }
         for bersaglio in bersagli {
-            let distanza = stato.griglia.distanza(sciame.posizione, bersaglio.posizione)
-            let entroPericolosita = distanza <= motore.gittataEffettiva(archetipo.gittataPericolosita, stato: stato)
-            guard entroPericolosita || ufficiale.propensioneAttacco >= meta else { continue }
-            // Il proiettile più efficace contro la protezione del bersaglio; parità per nome.
-            let proiettili = archetipo.offeseTiro.keys.sorted { $0.rawValue < $1.rawValue }
-            let scelto = proiettili.max { a, b in
-                let ea = motore.efficacia(offesa: archetipo.offeseTiro[a]!,
-                                          protezione: motore.valori.protezioni[bersaglio.protezione]!)
-                let eb = motore.efficacia(offesa: archetipo.offeseTiro[b]!,
-                                          protezione: motore.valori.protezioni[bersaglio.protezione]!)
-                return ea != eb ? ea < eb : a.rawValue > b.rawValue
-            }!
-            let comando = ComandoBattaglia.tira(sciame: sciame.id, bersaglio: bersaglio.id, proiettile: scelto)
+            let comando = ComandoBattaglia.tira(sciame: sciame.id, bersaglio: bersaglio.id)
             if motore.valida(comando, parte: parte, stato: stato).eValido { return comando }
         }
         return nil

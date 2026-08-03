@@ -50,6 +50,33 @@ public struct VistaBattaglia: Sendable {
         motore.valida(.piazza(cella: cella), parte: parte, stato: stato)
     }
 
+    /// Il percorso di una o due celle verso la destinazione (01 §9.5.0.3), deterministico:
+    /// la via intermedia libera più a ovest. Regola di gioco, quindi vive qui (00 §3.2).
+    public func percorsoMovimento(da id: IdSciame, a destinazione: Cella) -> [Cella]? {
+        guard let sciame = stato.sciami[id] else { return nil }
+        let distanza = stato.griglia.distanza(sciame.posizione, destinazione)
+        if distanza == 1 { return [destinazione] }
+        guard distanza == 2 else { return nil }
+        let intermedie = stato.griglia.vicini(di: sciame.posizione)
+            .filter { stato.griglia.adiacenti($0, destinazione)
+                && stato.occupante(di: $0) == nil && !stato.ostacoli.contains($0) }
+            .sorted()
+        guard let via = intermedie.first else { return nil }
+        return [via, destinazione]
+    }
+
+    /// Vero se il reparto ha almeno una destinazione raggiungibile con il volume
+    /// residuo: quando è falso, l'azione di spostamento non si offre (02 §9.5).
+    public func esisteDestinazione(per id: IdSciame) -> Bool {
+        guard let sciame = stato.sciami[id] else { return false }
+        return stato.griglia.tutteLeCelle.contains { cella in
+            guard stato.griglia.distanza(sciame.posizione, cella) <= 2,
+                  let percorso = percorsoMovimento(da: id, a: cella) else { return false }
+            return motore.valida(.muovi(sciame: id, percorso: percorso),
+                                 parte: parte, stato: stato).eValido
+        }
+    }
+
     /// L'informazione di stato della battaglia (02 §6.4): budget residuo, turno,
     /// riga avversaria più avanzata, righe alla soglia durante la ritirata.
     public struct InformazioneDiStato: Hashable, Sendable {

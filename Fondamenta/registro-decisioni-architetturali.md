@@ -454,3 +454,37 @@ Scelta. La seconda. Ogni schermata ha una prova di raggiungibilità sul formato 
 Motivazione. Un elemento non raggiungibile è una violazione del principio 1, della stessa gravità di un blocco del programma: il collaudo deve poterla vedere prima del dispositivo. La sola prova manuale non scala e arriva tardi; l'automazione senza dichiarazione dei limiti darebbe una falsa completezza (il verde della fase B).
 
 Conseguenze. Le schermate future nascono con la prova di raggiungibilità; l'elenco delle verifiche da dispositivo è un documento vivo, aggiornato quando l'automazione si estende o una prova manuale scopre un buco nuovo.
+
+### RDA-52 — Scala e soglie delle fasce descrittive degli esiti (01 §9.7.2, 03 §5.14)
+
+Problema. La prima tranche di semplificazioni sopprime i numeri di danno dagli annunci dei combattimenti e delega la scala esatta e le soglie alla realizzazione.
+
+Opzioni. Tre fasce; quattro fasce più lo stallo; cinque fasce.
+
+Scelta. Quattro fasce per direzione — nessuna perdita, perdite lievi, perdite significative, perdite gravi — più lo stallo come termine del contatto senza perdite da ambo i lati. Soglie deterministiche calcolate come proporzione del danno sulla consistenza del reparto colpito immediatamente PRIMA dell'applicazione: lievi fino al 10 per cento, significative fino al 30, gravi oltre; nei file di dati (`combattimento.json`) con contrassegno di provvisorietà. Nel vocabolario chiuso le fasce vivono come frasi complete declinate per direzione (perdite inflitte lievi, perdite subite gravi, …), perché l'accordo grammaticale non si costruisca incollando parole (00 §14.2). La stessa scala vale per la mischia e per il tiro: un solo linguaggio (00 §7).
+
+Motivazione. La consistenza prima dell'applicazione è l'unica base che il solo stato conosce al momento dell'evento e rende la fascia indipendente dall'ordine di applicazione dei danni simultanei. Il 10 e il 30 per cento dividono la scala in zone percepibili distinte; sono numeri di lavoro e la taratura appartiene ai ritorni dei tester e alle simulazioni.
+
+Conseguenze. Gli eventi del Motore trasportano la fascia già calcolata (il traduttore non conosce lo stato); i numeri di danno restano fatti interni dell'evento, mai annunciati.
+
+### RDA-53 — Realizzazione delle lettere dei reparti (01 §9.4.3)
+
+Problema. La lettera deve essere stabile per l'intero scontro, mai riusata, identica all'ascolto e alla vista, e sopravvivere a salvataggio e ripresa.
+
+Opzioni. Derivarla ogni volta dall'ordine degli identificatori vivi; conservarla nello stato con un contatore per parte.
+
+Scelta. La seconda: ogni sciame porta la propria lettera come ordinale assegnato al piazzamento, e lo stato conserva la prossima lettera per parte, che cresce e non torna mai indietro; entrambi entrano nell'impronta canonica. La Presentazione risolve l'ordinale nel termine chiuso del vocabolario (`lettera.1` … `lettera.40`: le ventisei singole e poi le doppie), lo annuncia in posizione fissa dopo il nome e lo disegna nella cella.
+
+Motivazione. La derivazione dagli identificatori vivi riuserebbe le lettere quando un reparto esce dal campo, che è precisamente ciò che il titolare vieta; il contatore nello stato rende la regola un fatto del Motore, riproducibile dal giornale e verificabile dall'impronta.
+
+Conseguenze. Sciame e stato crescono di un campo; quaranta voci nel vocabolario chiuso bastano con margine ampio ai formati della prima versione; superarle è un errore visibile (segnaposto), non un silenzio.
+
+### RDA-54 — Il manifest dei testi porta le impronte dei file (03 §9.5)
+
+Problema. La copia dei testi in Documenti si rinfresca soltanto quando i byte del manifest cambiano; con il manifest ridotto a versione e lingue, ogni aggiunta di chiavi obbligava ad alzare la versione — vietato dalla regola del titolare sulle versioni — o lasciava le installazioni esistenti con testi vecchi (accaduto nel collaudo di questa stessa tranche: la lettera non compariva perché la copia del simulatore era stantia).
+
+Opzioni. Alzare la versione dei testi a ogni modifica; confrontare le impronte dei file a ogni avvio; includere le impronte nel manifest, come già fa quello dei valori.
+
+Scelta. La terza, che era l'alternativa già annotata nella memoria di infrastruttura: il manifest dei testi elenca le impronte dei file di lingua e ogni modifica ai testi le rigenera; il confronto dei byte del manifest fa il resto, senza toccare la versione e senza costi d'avvio aggiuntivi.
+
+Conseguenze. Regola operativa nuova nella memoria di infrastruttura: chi tocca un file in `Contenuti/Testi/` rigenera le impronte del manifest, come già per i valori. La versione dei testi resta materia esclusiva del titolare.

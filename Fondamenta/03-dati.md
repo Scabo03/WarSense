@@ -1,6 +1,8 @@
 # Documento dei dati
 
-Documento 03 di 05 — versione 2.0
+Documento 03 di 05 — versione 2.1
+
+Novità della versione 2.1, in conseguenza della prima tranche di semplificazioni decisa dal titolare (01 versione 3.3): la grandezza critica 6.4, cioè l'ampiezza della fascia entro cui il tiro uccide, ha perso oggetto con la gittata unica ed è ridefinita come taratura della gittata utile unica; i coefficienti d'offesa si riferiscono al proiettile fisso di ciascun reparto (5.4); si aggiungono le soglie delle fasce descrittive degli esiti (nuovo punto 5.14), valori con contrassegno di provvisorietà.
 
 Novità della versione 2.0, prodotta nella fase di architettura tecnica: aggiunta la sezione 9 con la struttura dei file dei valori e dei testi definita dal documento 05; aggiunte le grandezze introdotte dalle chiusure dei punti aperti, cioè conoscenza e ricognizione (4.8), stanchezza e manutenzione (4.9), sortita (4.10), soglia distribuita (4.7.3), meteo per stagione (4.11) e caratteristiche del campo (5.12). Come nella versione precedente, il documento registra quali grandezze esistono e quali vincoli rispettano, non i loro valori, che restano materia di taratura.
 
@@ -140,7 +142,7 @@ Le voci sono divise per provenienza del valore: quelle che derivano dalla docume
 
 5.3 Costo aggiuntivo in volume dello spostamento di due celle anziché una. Fonte: documento 01, punto 9.5.0.3.
 
-5.4 Coefficienti di ciascun tipo di munizione, di ciascun tipo di arma da mischia e di ciascun tipo di protezione, con la formula che li combina. Fonte: documento 01, punti 9.9 e 9.9.2.
+5.4 Coefficienti del proiettile fisso di ciascun reparto da tiro (01 §3.3.1, versione 3.3), dell'arma da mischia di ciascun archetipo e di ciascun tipo di protezione, con la formula che li combina. Fonte: documento 01, punti 9.9 e 9.9.2.
 
 5.5 Frazione di danno inflitta dalla munizione o dall'arma poco adatta al bersaglio. Fonte: documento 01, punto 9.9.
 
@@ -160,6 +162,8 @@ Le voci sono divise per provenienza del valore: quelle che derivano dalla docume
 
 5.13 Capacità di volume per turno per ciascun formato di campo, con il rapporto fra primo turno e successivi già registrato al punto 5.2, e ordine interno fisso di risoluzione. Fonte: documento 01, punti 9.3 e 9.3.1.
 
+5.14 Soglie delle fasce descrittive degli esiti dei combattimenti (aggiunto nella versione 2.1). Le fasce di 01 §9.7.2 — nessuna perdita, lievi, significative, gravi — discendono da soglie deterministiche espresse come proporzione del danno sulla consistenza del reparto colpito immediatamente prima dell'applicazione. Le soglie sono decisioni di progetto con contrassegno di provvisorietà, risiedono nel file dei parametri di combattimento e si riesaminano con i ritorni dei tester e con le simulazioni. Fonte: documento 01, punto 9.7.2.
+
 ## 6. Grandezze critiche da tarare con le simulazioni
 
 Le voci di questa sezione non si determinano a tavolino. Il programma di verifica del bilanciamento, separato dal gioco e senza interfaccia, le misura simulando un grande numero di scontri e di partite. Fonte: carta, principio 16.
@@ -170,7 +174,7 @@ Le voci di questa sezione non si determinano a tavolino. Il programma di verific
 
 6.3 Costo di mantenimento dei miglioramenti, che è l'unico freno automatico all'accumulo di forze. Fonte: documento 01, punto 4.14.1.
 
-6.4 Ampiezza della fascia entro cui il tiro uccide, che deve restare stretta. Fonte: documento 01, punto 3.4.1.
+6.4 Taratura della gittata utile unica dei reparti da tiro (ridefinita nella versione 2.1: l'ampiezza della fascia fra le due gittate ha perso oggetto con 01 §3.4.1 versione 3.3). La gittata unica e la resa vanno tarate perché il tiro non domini distanze eccessive, conservando lo spirito del vincolo storico originario. Fonte: documento 01, punto 3.4.1.
 
 6.5 Carattere degli ufficiali avversari, che determina la frequenza effettiva degli scontri. Fonte: documento 01, punto 6.1.3.
 
@@ -208,6 +212,6 @@ Sezione aggiunta nella versione 2.0. La struttura è definita dal documento di a
 
 9.4 Elenco dei file dei valori e corrispondenza con questo documento. fasi.json: basi di fase e progressione monetaria (4.4.2). archetipi.json: i parametri del punto 3.4 del documento 01 come coefficienti, comprese soglie di disingaggio (5.8), dotazioni (5.7), sensibilità alla stanchezza (4.9.1), coefficienti di penalità di avanzamento (5.1). assetti.json: taglie e composizioni (documento 01, punto 4.7). acquisizioni.json: ambiti, ordinamenti, costi, durate, effetti tipizzati (4.7.4). terreni-e-strade.json: costi in giorni e pesi di partenza e arrivo (4.1). meteo.json: probabilità per stagione ed effetti (4.11). opere.json: costi, durate e effetti delle opere permanenti e da campo (4.4.5, 4.5). caratteristiche-campo.json: modificatori (5.12). ufficiali.json: parametri di carattere (6.5). regni.json: differenze di partenza, fissate una volta sola (3.1). vantaggi-nascosti.json: i vantaggi della sezione 7, letti anche dal programma di verifica. minimi.json: i minimi obbligatori della sezione 8. formato-battaglia.json: capacità di volume, riporto, zone e soglie per formato (5.2, 5.10, 5.13). nomi-gruppi.json: la lista chiusa dei nomi propri dei gruppi (documento 01, punto 5.6.0.4). mappe/: un file per mappa, raggruppate per fronte, almeno cinque per fronte (documento 01, punto 5.6.9). aptica.json: i pattern tattili con nomi parlanti (carta, principio 5.5). suoni.json: segnali sonori, ambienti e temi per fase.
 
-9.5 Testi. L'albero Testi contiene un pacchetto di localizzazione per lingua, nel formato di sistema che gestisce i plurali, più il file del vocabolario chiuso con chiavi stabili per insieme e per termine, e il proprio manifest con la versione. Ogni annuncio è una frase intera con segnaposto e dichiara la propria lingua. La versione dei testi non blocca mai l'apertura dei salvataggi. Fonte: carta, principio 14; documento 02, sezioni 4 e 15.
+9.5 Testi. L'albero Testi contiene un pacchetto di localizzazione per lingua, nel formato di sistema che gestisce i plurali, più il file del vocabolario chiuso con chiavi stabili per insieme e per termine, e il proprio manifest con la versione e, dalla versione 2.1 di questo documento, con le impronte dei file: sono le impronte a far rinfrescare la copia in Documenti quando i testi cambiano, sicché la versione resta ferma finché il titolare non ne ordina il cambio. Ogni annuncio è una frase intera con segnaposto e dichiara la propria lingua. La versione dei testi non blocca mai l'apertura dei salvataggi. Fonte: carta, principio 14; documento 02, sezioni 4 e 15.
 
 9.6 Scenari di verifica. Gli scenari del programma di verifica sono anch'essi file dichiarativi, con le soglie di accettazione di ciascuna metrica, così che una misura sia ripetibile e confrontabile nel tempo. Fonte: documento 05, sezione 12.

@@ -57,9 +57,8 @@ public struct DefinizioneArchetipo: Codable, Hashable, Sendable {
     public let puntiVitaPerAtomo: Int64
     /// Capacità offensiva per atomo, in punti di danno base.
     public let capacitaOffensivaPerAtomo: Int64
-    /// Gittata di disturbo e di pericolosità in celle (01 §3.4.1); zero per chi non tira.
-    public let gittataDisturbo: Int
-    public let gittataPericolosita: Int
+    /// La gittata utile unica in celle (01 §3.4.1, versione 3.3); zero per chi non tira.
+    public let gittata: Int
     /// Volume per atomo (01 §3.4.4), seguito incorporato (01 §3.4.5).
     public let volumePerAtomo: Int64
     /// Coefficiente di penalità di avanzamento (01 §8.6).
@@ -72,22 +71,25 @@ public struct DefinizioneArchetipo: Codable, Hashable, Sendable {
     public let dotazioneMunizioni: Int
     /// Offesa in mischia.
     public let offesaMischia: ProfiloOffesa
-    /// Offese da tiro disponibili (vuoto per chi non tira).
-    public let offeseTiro: [TipoOffesa: ProfiloOffesa]
+    /// Il proiettile del reparto, proprietà fissa e dichiarata (01 §3.3.1, versione 3.3);
+    /// assente per chi non tira.
+    public let proiettile: TipoOffesa?
+    /// L'offesa da tiro del proiettile fisso; assente per chi non tira.
+    public let offesaTiro: ProfiloOffesa?
 
     enum CodingKeys: String, CodingKey {
         case identificatore
         case puntiVitaPerAtomo = "punti_vita_per_atomo"
         case capacitaOffensivaPerAtomo = "capacita_offensiva_per_atomo"
-        case gittataDisturbo = "gittata_disturbo"
-        case gittataPericolosita = "gittata_pericolosita"
+        case gittata
         case volumePerAtomo = "volume_per_atomo"
         case penalitaAvanzamento = "penalita_avanzamento"
         case sogliaDisingaggio = "soglia_disingaggio"
         case sensibilitaStanchezza = "sensibilita_stanchezza"
         case dotazioneMunizioni = "dotazione_munizioni"
         case offesaMischia = "offesa_mischia"
-        case offeseTiro = "offese_tiro"
+        case proiettile
+        case offesaTiro = "offesa_tiro"
     }
 }
 
@@ -161,12 +163,15 @@ public struct ParametriCombattimento: Codable, Hashable, Sendable {
     public let efficaciaMinima: Scalato
     /// Soglia sotto la quale l'annuncio dichiara l'offesa poco efficace (01 §9.9.1, 02 §4.4.1.3).
     public let sogliaPocoEfficace: Scalato
-    /// Coefficiente del danno del tiro entro la sola gittata di disturbo (01 §3.4.1).
-    public let coefficienteTiroDisturbo: Scalato
+    /// Soglie delle fasce descrittive degli esiti (01 §9.7.2, 03 §5.14): proporzione
+    /// del danno sulla consistenza del colpito prima dell'applicazione. Provvisorie.
+    public let fasciaPerditeLieviFino: Scalato
+    public let fasciaPerditeSignificativeFino: Scalato
     enum CodingKeys: String, CodingKey {
         case efficaciaMinima = "efficacia_minima"
         case sogliaPocoEfficace = "soglia_poco_efficace"
-        case coefficienteTiroDisturbo = "coefficiente_tiro_disturbo"
+        case fasciaPerditeLieviFino = "fascia_perdite_lievi_fino"
+        case fasciaPerditeSignificativeFino = "fascia_perdite_significative_fino"
     }
 }
 

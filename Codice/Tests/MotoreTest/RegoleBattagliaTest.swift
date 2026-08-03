@@ -250,7 +250,8 @@ final class RegoleBattagliaTest: XCTestCase {
     // MARK: - Offesa, protezione, tiro
 
     func test_01_9_9_efficacia_graduata_mai_nulla() throws {
-        let leggero = valori.archetipi["tiratori"]!.offeseTiro[.proiettileLeggero]!
+        // Il proiettile è proprietà fissa del reparto (01 §3.3.1, versione 3.3).
+        let leggero = valori.archetipi["tiratori"]!.offesaTiro!
         let bene = motore.efficacia(offesa: leggero, protezione: valori.protezioni[.antiPerforazione]!)
         let male = motore.efficacia(offesa: leggero, protezione: valori.protezioni[.antiSaturazione]!)
         XCTAssertGreaterThan(bene, male, "le due protezioni rispondono in modo opposto (01 §3.3.2)")
@@ -261,40 +262,40 @@ final class RegoleBattagliaTest: XCTestCase {
                        .pocoEfficace, "annuncio qualitativo (01 §9.9.1)")
     }
 
-    func test_01_3_4_1_due_gittate_e_fascia_che_uccide() throws {
+    func test_01_3_4_1_gittata_unica_resa_piena_dentro_niente_fuori() throws {
         var stato = try crea(scenarioOrdinario())
-        // Tiratori del giocatore in riga 8; bersagli avversari a distanze diverse.
+        // Tiratori del giocatore in riga 8; bersaglio avversario al limite della gittata.
         esegui(.seleziona(indiceDeck: 1), .giocatore, &stato)
         esegui(.piazza(cella: Cella(riga: 8, colonna: 5)), .giocatore, &stato)
         esegui(.fineTurno, .giocatore, &stato)
         esegui(.seleziona(indiceDeck: 0), .avversario, &stato)
-        esegui(.piazza(cella: Cella(riga: 3, colonna: 5)), .avversario, &stato) // distanza 5: solo disturbo
-        esegui(.piazza(cella: Cella(riga: 2, colonna: 5)), .avversario, &stato) // distanza 6: limite disturbo
+        esegui(.piazza(cella: Cella(riga: 2, colonna: 5)), .avversario, &stato) // distanza 6: limite gittata
         esegui(.fineTurno, .avversario, &stato)
 
         let tiratore = IdSciame(1)
         let vicino = IdSciame(2)
-        // Distanza 5: entro il disturbo (6), oltre la pericolosità (2): danno ridotto.
-        let (statoDopoTiro, eventi) = motore.applica(.tira(sciame: tiratore, bersaglio: vicino,
-                                                           proiettile: .proiettileLeggero),
-                                                     parte: .giocatore, stato: stato)
-        guard case .tiroEseguito(_, _, let dannoDisturbo, _)? =
+        // Dentro la gittata unica la resa è piena: il danno è quello della formula, non una frazione.
+        let a = valori.archetipi["tiratori"]!
+        XCTAssertEqual(stato.griglia.distanza(stato.sciami[tiratore]!.posizione,
+                                              stato.sciami[vicino]!.posizione), a.gittata,
+                       "il bersaglio è al limite esatto della gittata unica")
+        let atomiPrima = stato.sciami[tiratore]!.atomiPresenti(puntiVitaPerAtomo: a.puntiVitaPerAtomo, minimo: 1)
+        let (_, eventi) = motore.applica(.tira(sciame: tiratore, bersaglio: vicino),
+                                         parte: .giocatore, stato: stato)
+        guard case .tiroEseguito(_, _, _, _, _, let dannoInflitto, _, _)? =
                 eventi.first(where: { if case .tiroEseguito = $0 { return true }; return false }) else {
             return XCTFail("nessun tiro eseguito")
         }
-        XCTAssertGreaterThanOrEqual(dannoDisturbo, valori.minimi.dannoMinimo, "mai zero (00 §13.6)")
-        // Il danno a tiro utile sarebbe maggiore: la fascia che uccide è la pericolosità.
-        let a = valori.archetipi["tiratori"]!
-        let eff = motore.efficacia(offesa: a.offeseTiro[.proiettileLeggero]!,
+        let eff = motore.efficacia(offesa: a.offesaTiro!,
                                    protezione: valori.protezioni[.antiSaturazione]!)
-        let atomi = stato.sciami[tiratore]!.atomiPresenti(puntiVitaPerAtomo: a.puntiVitaPerAtomo, minimo: 1)
-        let dannoPieno = eff.applicato(a: a.capacitaOffensivaPerAtomo * atomi)
-        XCTAssertLessThan(dannoDisturbo, dannoPieno, "entro il solo disturbo il tiro rende una frazione")
-        _ = statoDopoTiro
-        // Fuori da ogni gittata: non valido con motivo chiuso.
+        let dannoPieno = max(valori.minimi.dannoMinimo,
+                             eff.applicato(a: a.capacitaOffensivaPerAtomo * atomiPrima))
+        XCTAssertEqual(dannoInflitto, dannoPieno,
+                       "una sola gittata e una sola resa (01 §3.4.1, versione 3.3)")
+        // Fuori portata: non valido con il motivo chiuso. Disponibilità binaria.
         var statoLontano = stato
         statoLontano.sciami[vicino]!.posizione = Cella(riga: 1, colonna: 1)
-        let esito = motore.valida(.tira(sciame: tiratore, bersaglio: vicino, proiettile: .proiettileLeggero),
+        let esito = motore.valida(.tira(sciame: tiratore, bersaglio: vicino),
                                   parte: .giocatore, stato: statoLontano)
         XCTAssertEqual(esito.motivo, .fuoriTiro)
     }
@@ -311,15 +312,14 @@ final class RegoleBattagliaTest: XCTestCase {
         let dotazione = valori.archetipi["tiratori"]!.dotazioneMunizioni
         var esaurite = false
         for _ in 0..<dotazione {
-            let eventi = esegui(.tira(sciame: tiratore, bersaglio: bersaglio, proiettile: .proiettileLeggero),
-                                .giocatore, &stato)
+            let eventi = esegui(.tira(sciame: tiratore, bersaglio: bersaglio), .giocatore, &stato)
             esaurite = esaurite || eventi.contains { if case .munizioniEsaurite = $0 { return true }; return false }
             if stato.esito != nil || stato.sciami[bersaglio] == nil { return } // il bersaglio può cadere prima
             esegui(.fineTurno, .giocatore, &stato)
             esegui(.fineTurno, .avversario, &stato)
         }
         XCTAssertTrue(esaurite, "l'esaurimento è un evento (05 §3.7)")
-        let esito = motore.valida(.tira(sciame: tiratore, bersaglio: bersaglio, proiettile: .proiettileLeggero),
+        let esito = motore.valida(.tira(sciame: tiratore, bersaglio: bersaglio),
                                   parte: .giocatore, stato: stato)
         XCTAssertEqual(esito.motivo, .munizioniEsaurite)
         XCTAssertNotNil(stato.sciami[tiratore], "il reparto resta in campo (01 §9.6.1)")
@@ -333,7 +333,7 @@ final class RegoleBattagliaTest: XCTestCase {
     func test_01_4_3_atomi_per_troncamento_con_minimo_di_uno() throws {
         let archetipo = valori.archetipi["fanteria_leggera"]!
         var sciame = Sciame(id: IdSciame(9), parte: .giocatore, archetipo: "fanteria_leggera",
-                            protezione: .antiSaturazione, atomiIniziali: 5,
+                            protezione: .antiSaturazione, lettera: 1, atomiIniziali: 5,
                             serbatoio: 5 * archetipo.puntiVitaPerAtomo, munizioni: 0,
                             posizione: Cella(riga: 10, colonna: 1), azioneSpesa: false, rinforzo: false)
         XCTAssertEqual(sciame.atomiPresenti(puntiVitaPerAtomo: archetipo.puntiVitaPerAtomo, minimo: 1), 5)
@@ -471,7 +471,7 @@ final class RegoleBattagliaTest: XCTestCase {
         let posNemico = stato.sciami[suo]!.posizione
         let cellaTiratore = stato.griglia.tutteLeCelle.first { cella in
             motore.valida(.piazza(cella: cella), parte: .giocatore, stato: stato).eValido
-                && stato.griglia.distanza(cella, posNemico) <= valori.archetipi["tiratori"]!.gittataDisturbo
+                && stato.griglia.distanza(cella, posNemico) <= valori.archetipi["tiratori"]!.gittata
         }
         let tiratore = IdSciame(stato.prossimoIdSciame)
         esegui(.piazza(cella: try XCTUnwrap(cellaTiratore)), .giocatore, &stato)
@@ -479,8 +479,7 @@ final class RegoleBattagliaTest: XCTestCase {
         esegui(.fineTurno, .avversario, &stato) // il giro nuovo risolve una mischia
 
         // Il proprio reparto non è mai un bersaglio, né di tiro né di ingaggio.
-        XCTAssertEqual(motore.valida(.tira(sciame: tiratore, bersaglio: mio,
-                                           proiettile: .proiettileLeggero),
+        XCTAssertEqual(motore.valida(.tira(sciame: tiratore, bersaglio: mio),
                                      parte: .giocatore, stato: stato).motivo, .bersaglioNonValido)
         XCTAssertFalse(motore.valida(.ingaggia(sciame: tiratore, bersaglio: mio),
                                      parte: .giocatore, stato: stato).eValido)
@@ -491,11 +490,92 @@ final class RegoleBattagliaTest: XCTestCase {
         let serbatoioMioPrima = stato.sciami[mio]!.serbatoio
         let perditeMiePrima = stato.perditeSubite[.giocatore] ?? 0
         let perditeSuePrima = stato.perditeSubite[.avversario] ?? 0
-        esegui(.tira(sciame: tiratore, bersaglio: suo, proiettile: .proiettileLeggero),
-               .giocatore, &stato)
+        esegui(.tira(sciame: tiratore, bersaglio: suo), .giocatore, &stato)
         XCTAssertEqual(stato.sciami[mio]?.serbatoio, serbatoioMioPrima)
         XCTAssertEqual(stato.perditeSubite[.giocatore] ?? 0, perditeMiePrima)
         XCTAssertGreaterThan(stato.perditeSubite[.avversario] ?? 0, perditeSuePrima)
+    }
+
+
+    // MARK: - Lettere dei reparti (01 §9.4.3, versione 3.3)
+
+    func test_01_9_4_3_lettere_in_ordine_di_piazzamento_mai_riusate() throws {
+        var stato = try crea(scenarioOrdinario())
+        esegui(.seleziona(indiceDeck: 0), .giocatore, &stato)
+        esegui(.piazza(cella: Cella(riga: 10, colonna: 1)), .giocatore, &stato)
+        esegui(.piazza(cella: Cella(riga: 10, colonna: 2)), .giocatore, &stato)
+        esegui(.fineTurno, .giocatore, &stato)
+        esegui(.seleziona(indiceDeck: 0), .avversario, &stato)
+        esegui(.piazza(cella: Cella(riga: 1, colonna: 1)), .avversario, &stato)
+        esegui(.fineTurno, .avversario, &stato)
+
+        // Ordine di piazzamento dentro ciascuno schieramento: A e B del giocatore,
+        // A avversaria distinta dalla parte, non dalla lettera.
+        XCTAssertEqual(stato.sciami[IdSciame(1)]?.lettera, 1)
+        XCTAssertEqual(stato.sciami[IdSciame(2)]?.lettera, 2)
+        XCTAssertEqual(stato.sciami[IdSciame(3)]?.lettera, 1)
+        XCTAssertEqual(stato.sciami[IdSciame(3)]?.parte, .avversario)
+
+        // Un reparto esce dal campo: la sua lettera non si riusa, per nessuna ragione.
+        stato.sciami[IdSciame(2)] = nil // uscita simulata dal campo
+        esegui(.seleziona(indiceDeck: 0), .giocatore, &stato)
+        esegui(.piazza(cella: Cella(riga: 10, colonna: 3)), .giocatore, &stato)
+        let nuovo = stato.sciami.values.first { $0.parte == .giocatore && $0.posizione == Cella(riga: 10, colonna: 3) }
+        XCTAssertEqual(nuovo?.lettera, 3, "chi ha imparato che B era un reparto deve potersene fidare (01 §9.4.3)")
+    }
+
+    // MARK: - Fasce descrittive degli esiti (01 §9.7.2, 03 §5.14)
+
+    func test_01_9_7_2_fasce_con_soglie_deterministiche_dai_valori() throws {
+        let stato = try crea(scenarioOrdinario())
+        _ = stato
+        // Le soglie di fabbrica: lievi fino al 10 per cento, significative fino al 30.
+        XCTAssertEqual(motore.fascia(danno: 0, consistenzaPrima: 500), .nessuna)
+        XCTAssertEqual(motore.fascia(danno: 50, consistenzaPrima: 500), .lievi)
+        XCTAssertEqual(motore.fascia(danno: 51, consistenzaPrima: 500), .significative)
+        XCTAssertEqual(motore.fascia(danno: 150, consistenzaPrima: 500), .significative)
+        XCTAssertEqual(motore.fascia(danno: 151, consistenzaPrima: 500), .gravi)
+        XCTAssertEqual(motore.fascia(danno: 500, consistenzaPrima: 500), .gravi)
+    }
+
+    func test_01_9_7_2_gli_esiti_di_mischia_portano_le_fasce() throws {
+        var (stato, mio, suo) = try statoConFronteggiamento()
+        if stato.parteDiTurno != .giocatore { esegui(.fineTurno, stato.parteDiTurno, &stato) }
+        esegui(.ingaggia(sciame: mio, bersaglio: suo), .giocatore, &stato)
+        esegui(.fineTurno, .giocatore, &stato)
+        let eventi = esegui(.fineTurno, .avversario, &stato) // il giro nuovo risolve la mischia
+        guard case .esitoMischiaComplessivo(let esiti)? =
+                eventi.first(where: { if case .esitoMischiaComplessivo = $0 { return true }; return false }),
+              let contatto = esiti.first else {
+            return XCTFail("nessun esito di mischia")
+        }
+        XCTAssertNotEqual(contatto.fasciaAlPrimo, .nessuna, "la mischia continua infligge perdite (01 §9.7)")
+        XCTAssertNotEqual(contatto.fasciaAlSecondo, .nessuna)
+    }
+
+    // MARK: - Nessuna azione impossibile offerta (02 §9.5)
+
+    func test_02_9_5_nessuna_destinazione_quando_il_reparto_e_circondato() throws {
+        var stato = try crea(scenarioOrdinario())
+        esegui(.seleziona(indiceDeck: 0), .giocatore, &stato)
+        // L'angolo (10,1) ha tre vicini: (10,2), (9,1), (9,2). Occupati tutti,
+        // non esiste destinazione, nemmeno a due celle (le intermedie sono piene).
+        esegui(.piazza(cella: Cella(riga: 10, colonna: 1)), .giocatore, &stato)
+        esegui(.piazza(cella: Cella(riga: 10, colonna: 2)), .giocatore, &stato)
+        esegui(.piazza(cella: Cella(riga: 9, colonna: 1)), .giocatore, &stato)
+        esegui(.seleziona(indiceDeck: 1), .giocatore, &stato)
+        esegui(.piazza(cella: Cella(riga: 9, colonna: 2)), .giocatore, &stato)
+        esegui(.fineTurno, .giocatore, &stato)
+        esegui(.fineTurno, .avversario, &stato)
+
+        let vista = VistaBattaglia(motore: motore, stato: stato, parte: .giocatore)
+        let angolo = stato.occupante(di: Cella(riga: 10, colonna: 1))!
+        XCTAssertFalse(angolo.azioneSpesa, "al turno nuovo l\u{2019}azione è tornata")
+        XCTAssertFalse(vista.esisteDestinazione(per: angolo.id),
+                       "nessuna destinazione raggiungibile: l\u{2019}azione non va offerta (02 §9.5)")
+        let libero = stato.occupante(di: Cella(riga: 9, colonna: 2))!
+        XCTAssertTrue(vista.esisteDestinazione(per: libero.id),
+                      "chi ha destinazioni conserva l\u{2019}azione di spostamento")
     }
 
     // MARK: - Determinismo

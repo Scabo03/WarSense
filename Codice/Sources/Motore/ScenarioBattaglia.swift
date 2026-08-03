@@ -85,6 +85,7 @@ public enum FabbricaBattaglia {
             sciami: [:],
             deck: [.giocatore: deckG, .avversario: deckA],
             prossimoIdSciame: 1,
+            prossimaLettera: [.giocatore: 1, .avversario: 1],
             selezione: [:],
             parteDiTurno: scenario.primoOccupante,
             giro: 1,

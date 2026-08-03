@@ -6,9 +6,8 @@
 "cella.troppo_avanzata" = "troppo avanzata";
 "cella.occupata" = "occupata";
 "cella.ostacolo" = "ostacolo";
-"gittata.a_tiro_utile" = "a tiro utile";
-"gittata.a_tiro_di_disturbo" = "a tiro di disturbo";
-"gittata.fuori_tiro" = "fuori tiro";
+"portata.a_portata" = "a portata";
+"portata.fuori_portata" = "fuori portata";
 "controllo.disponibile" = "disponibile";
 "controllo.impegnato" = "impegnato";
 "munizioni.piene" = "munizioni piene";
@@ -37,7 +36,7 @@
 "sortita.imminente" = "sortita imminente";
 "comando.non_valido.azione_gia_spesa" = "azione già spesa";
 "comando.non_valido.volume_insufficiente" = "volume insufficiente";
-"comando.non_valido.fuori_tiro" = "fuori tiro";
+"comando.non_valido.fuori_tiro" = "fuori portata";
 "comando.non_valido.impegnato" = "impegnato";
 "comando.non_valido.munizioni_esaurite" = "munizioni esaurite";
 "comando.non_valido.non_e_il_turno" = "non è il turno";
@@ -47,3 +46,56 @@
 "comando.non_valido.battaglia_conclusa" = "battaglia conclusa";
 "caratteristica.campo_aperto" = "campo aperto";
 "caratteristica.terreno_rotto" = "terreno rotto";
+
+/* Lettere dei reparti (01 §9.4.3, 02 §4.4.5): assegnate per ordine di piazzamento, mai riusate. */
+"lettera.1" = "A";
+"lettera.2" = "B";
+"lettera.3" = "C";
+"lettera.4" = "D";
+"lettera.5" = "E";
+"lettera.6" = "F";
+"lettera.7" = "G";
+"lettera.8" = "H";
+"lettera.9" = "I";
+"lettera.10" = "J";
+"lettera.11" = "K";
+"lettera.12" = "L";
+"lettera.13" = "M";
+"lettera.14" = "N";
+"lettera.15" = "O";
+"lettera.16" = "P";
+"lettera.17" = "Q";
+"lettera.18" = "R";
+"lettera.19" = "S";
+"lettera.20" = "T";
+"lettera.21" = "U";
+"lettera.22" = "V";
+"lettera.23" = "W";
+"lettera.24" = "X";
+"lettera.25" = "Y";
+"lettera.26" = "Z";
+"lettera.27" = "AA";
+"lettera.28" = "AB";
+"lettera.29" = "AC";
+"lettera.30" = "AD";
+"lettera.31" = "AE";
+"lettera.32" = "AF";
+"lettera.33" = "AG";
+"lettera.34" = "AH";
+"lettera.35" = "AI";
+"lettera.36" = "AJ";
+"lettera.37" = "AK";
+"lettera.38" = "AL";
+"lettera.39" = "AM";
+"lettera.40" = "AN";
+
+/* Fasce degli esiti dei combattimenti (01 §9.7.2, 02 §4.4.5): mai numeri di danno. */
+"esito.stallo" = "stallo";
+"perdite.inflitte.nessuna" = "nessuna perdita inflitta";
+"perdite.inflitte.lievi" = "perdite inflitte lievi";
+"perdite.inflitte.significative" = "perdite inflitte significative";
+"perdite.inflitte.gravi" = "perdite inflitte gravi";
+"perdite.subite.nessuna" = "nessuna perdita subita";
+"perdite.subite.lievi" = "perdite subite lievi";
+"perdite.subite.significative" = "perdite subite significative";
+"perdite.subite.gravi" = "perdite subite gravi";

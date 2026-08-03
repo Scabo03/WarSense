@@ -1,1 +1,1 @@
-{"efficacia_minima":0.15,"soglia_poco_efficace":0.5,"coefficiente_tiro_disturbo":0.25}
+{"efficacia_minima":0.15,"soglia_poco_efficace":0.5,"fascia_perdite_lievi_fino":0.1,"fascia_perdite_significative_fino":0.3}

@@ -33,6 +33,8 @@ final class VistaGriglia: UIView {
 
     var griglia: Griglia?
     var coloreCella: ((Cella) -> UIColor?)?
+    /// La lettera del reparto nella cella (01 §9.4.3): ciò che si sente si vede.
+    var testoCella: ((Cella) -> String?)?
 
     static func dimensione(per griglia: Griglia) -> CGSize {
         CGSize(width: margine * 2 + CGFloat(griglia.colonne) * passoX + passoX / 2,
@@ -55,6 +57,16 @@ final class VistaGriglia: UIView {
             percorso.fill()
             UIColor.systemGray3.setStroke()
             percorso.stroke()
+            if let testo = testoCella?(cella) {
+                let attributi: [NSAttributedString.Key: Any] = [
+                    .font: UIFont.systemFont(ofSize: 22, weight: .bold),
+                    .foregroundColor: UIColor.white,
+                ]
+                let misura = (testo as NSString).size(withAttributes: attributi)
+                let origine = CGPoint(x: cornice.midX - misura.width / 2,
+                                      y: cornice.midY - misura.height / 2)
+                (testo as NSString).draw(at: origine, withAttributes: attributi)
+            }
         }
     }
 }

@@ -4,7 +4,7 @@ Documento di lavoro della fase di architettura — versione 1.0
 
 ## 0. Che cosa contiene e come si usa
 
-Ogni requisito numerato dei quattro documenti consolidati — 00 carta dei principi (versione 1.2), 01 progetto del gioco (versione 3.2), 02 accessibilità (versione 2.1), 03 dati (versione 2.0) — in relazione con il punto del documento di architettura (05, versione 1.0, citato come "A") che vi provvede.
+Ogni requisito numerato dei quattro documenti consolidati — 00 carta dei principi (versione 1.2), 01 progetto del gioco (versione 3.3), 02 accessibilità (versione 2.2), 03 dati (versione 2.1) — in relazione con il punto del documento di architettura (05, versione 1.0, citato come "A") che vi provvede.
 
 Dove un requisito non richiede alcuna provvidenza architetturale, la cosa è dichiarata espressamente con la ragione, mai lasciata come omissione: una riga assente sarebbe indistinguibile da una dimenticanza, una riga che dichiara l'assenza di necessità no. I rinvii "RDA-nn" puntano al registro delle decisioni architetturali.
 
@@ -142,11 +142,11 @@ La matrice si legge per documento; l'ordine delle righe segue la numerazione dei
 | 01 §3.2.1 | Cavalleria mobile, non d'urto; inseguimento confinato al campo | A §7.4 (formula danno), A §7.5 (coefficienti) |
 | 01 §3.2.2 | I varchi li produce il disingaggio | Nessuna provvidenza architetturale necessaria — rinvio illustrativo al punto 3.4.2 |
 | 01 §3.3 | Tratti distinguono varianti senza moltiplicare archetipi | A §7.5 (archetipi.json) |
-| 01 §3.3.1 | Due proiettili: leggero satura, pesante perfora | A §7.4 (accoppiamento), A §7.5 |
+| 01 §3.3.1 | Proiettile unico e fisso per reparto (v3.3); due tipi nel mondo | A §7.4 (accoppiamento), A §7.5 |
 | 01 §3.3.2 | Due protezioni opposte; scelta in patria premiata sul campo | A §7.4 (danno per accoppiamento offesa-protezione) |
 | 01 §3.3.3 | Protezione pesante rara in arcaica, diffusa in antica | A §7.5 più 03 §9 |
 | 01 §3.4 | Parametri minimi obbligatori di ogni archetipo | A §7.5 (archetipi.json), A §7.8 (completezza validata) |
-| 01 §3.4.1 | Due gittate: disturbo e pericolosità, fascia letale stretta | A §7.5, A §12.4 (metrica 03 §6.4) |
+| 01 §3.4.1 | Gittata unica e resa unica (v3.3); portata binaria | A §7.5, A §12.4 (metrica 03 §6.4 ridefinita) |
 | 01 §3.4.2 | Tendenza al disingaggio propria di ogni archetipo | A §7.5, A §2.7 |
 | 01 §3.4.3 | Munizioni limitate, tiro deciso a ogni turno | A §2.7, A §7.5 |
 | 01 §3.4.4 | Volume parametro unico per costo e velocità | A §7.5, A §2.6.2 (volume derivato) |
@@ -359,6 +359,9 @@ La matrice si legge per documento; l'ordine delle righe segue la numerazione dei
 | 01 §9.3.6 | Costo sempre ordinario; due sole eccezioni dichiarate | A §7.4, A §3.2 |
 | 01 §9.4 | Informazione completa per tutta la durata | A §2.7 |
 | 01 §9.4.1 | Agisce per primo chi occupava la casella | A §3.9 |
+| 01 §9.4.3 | Lettera stabile per reparto, mai riusata, anche a schermo (v3.3) | A §10.1, A §10.7; stato nel Motore |
+| 01 §9.3.7 | Volume avversario mai comunicato (v3.3) | A §10.7 |
+| 01 §9.7.2 | Esiti in fasce descrittive con soglie nei dati (v3.3) | A §3.7 (eventi), A §10.7; soglie in 03 §5.14 |
 | 01 §9.4.2 | Cella a occupante unico confermata; basi non occupabili | A §2.7 |
 | 01 §9.5 | Reparti a contatto fuori controllo fino al disimpegno | A §2.7 (contatti in corso), A §3.9 |
 | 01 §9.5.0 | Nessun attacco automatico; un'azione per reparto | A §3.4, A §10.4 (azioni dichiarate) |
@@ -472,7 +475,7 @@ La matrice si legge per documento; l'ordine delle righe segue la numerazione dei
 | 02 §3.6 | Annuncio di costo e residuo prima della conferma | A §3.2 |
 | 02 §3.7 | Celle di ostacolo annunciate e non interattive | A §10.1 |
 | 02 §3.7.1 | Sciame misto annunciato col nome, mai coi componenti | A §8.5 |
-| 02 §3.7.2 | Termine di gittata subito dopo la testa fissa | A §8.4, A §10.4 |
+| 02 §3.7.2 | Portata binaria: a portata, fuori portata (v2.2) | A §8.4, A §10.4 |
 | 02 §3.7.3 | Munizioni dichiarate fra le informazioni di stato | A §8.5, A §8.4 |
 | 02 §3.8 | Ordine del contenuto scelto una volta, globale | A §8.5 |
 | 02 §3.8.1 | Ordine registrato delle informazioni dopo la testa fissa | A §8.5, A §10.7 |
@@ -539,7 +542,10 @@ La matrice si legge per documento; l'ordine delle righe segue la numerazione dei
 | 02 §9.1 | Operazioni a due celle: unità, bersaglio, pannello | A §10.4 |
 | 02 §9.2 | Sequenza chiusa al punto 9.2.1 | Nessuna provvidenza architetturale necessaria — rinvio interno al punto 9.2.1 |
 | 02 §9.2.1 | Due vie equivalenti: elenco bersagli oppure designazione | A §10.4, A §3.4 |
-| 02 §9.3 | Tiro esplicito; pannello dichiara dotazione, gittata, effetto | A §10.4, A §3.2 |
+| 02 §9.3 | Tiro esplicito; bersagli a portata con nome, lettera, efficacia (v2.2) | A §10.4, A §3.2 |
+| 02 §9.5 | Azione impossibile in ogni sua forma non offerta (v2.2) | A §10.4 |
+| 02 §6.4.1 | Il volume avversario non compare in alcuna forma (v2.2) | A §10.7 |
+| 02 §8.9.1 | Esiti dei combattimenti in fasce chiuse, mai numeri (v2.2) | A §10.7, A §11.1 |
 | 02 §9.4 | Reparto impegnato: termine chiuso, nessun comando inefficace | A §10.4, A §8.4 |
 | 02 §10.1 | Griglia mai compressa sotto le dimensioni minime | A §10.10, A §10.11 |
 | 02 §10.2 | Griglia ingrandibile e scorrevole, fuoco che trascina vista | A §10.10 |

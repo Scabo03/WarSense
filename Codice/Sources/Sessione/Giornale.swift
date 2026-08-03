@@ -12,7 +12,9 @@ public struct Fondazione: Codable, Sendable {
     public let seme: UInt64
     public let identificatore: String
     public let scenario: ScenarioBattaglia
-    public static let schemaCorrente = 1
+    /// Versione 2 dalla prima tranche di semplificazioni (01 versione 3.3): il
+    /// comando di tiro non trasporta più il proiettile, che è del reparto.
+    public static let schemaCorrente = 2
 
     public init(versioneSchema: Int, versioneValori: String, versioneTesti: String,
                 seme: UInt64, identificatore: String, scenario: ScenarioBattaglia) {

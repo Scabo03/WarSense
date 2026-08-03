@@ -38,6 +38,20 @@ Il collaudo ora accerta la raggiungibilità reale e non la sola dichiarazione: `
 
 Osservazione registrata e volutamente non affrontata: le celle della griglia appaiono più grandi del necessario (da riesaminare con i ritorni dei tester, insieme alla forma del pannello di RDA-49).
 
+#### Prima tranche di semplificazioni dopo la prova su dispositivo (build 6, versione 1.1.0)
+
+Il titolare ha portato a termine uno scontro intero su dispositivo con VoiceOver e ha giudicato lo scontro troppo macchinoso; ne è discesa una tranche di cinque semplificazioni decise, recepite nei consolidati (01 → 3.3, 02 → 2.2, 03 → 2.1) e realizzate:
+
+1. **Gittata unica** (01 §3.4.1): via la doppia gittata e i suoi termini; portata binaria, resa piena entro la gittata; grandezza 03 §6.4 ridefinita.
+2. **Proiettile del reparto** (01 §3.3.1): nessuna scelta di munizione al tiro; l'accoppiamento offesa-protezione resta e l'annuncio qualitativo pure. Il comando di tiro non trasporta più il proiettile: schema del giornale a 2, campioni e i due ori rigenerati con revisione esplicita (attrezzo `RigenerazioneOroTest`, solo con `RIGENERA_ORO`).
+3. **Lettere dei reparti** (01 §9.4.3, RDA-53): assegnate in ordine di piazzamento per parte, mai riusate, nello stato e nell'impronta; annunciate dopo il nome e disegnate nella cella; nel pannello i bersagli si designano per nome e lettera.
+4. **Volume avversario soppresso** (01 §9.3.7): gli annunci delle azioni avversarie non portano numeri di volume; in compenso l'ingresso in campo delle forze avversarie ora si annuncia con nome e lettera, come 02 §8.2.1 già chiedeva e la fase B non faceva.
+5. **Esiti in fasce** (01 §9.7.2, RDA-52): stallo più quattro fasce per direzione, soglie provvisorie al 10 e 30 per cento in combattimento.json; mai numeri di danno negli annunci; la consistenza del reparto resta interrogabile sulla cella.
+
+In più: l'azione di spostamento non si offre quando nessuna destinazione è raggiungibile (02 §9.5, provata anche nel pannello ospitato) e il manifest dei testi porta le impronte dei file (RDA-54), così i testi nuovi raggiungono le installazioni esistenti senza toccare versioni. Collaudo: 65 prove del pacchetto (una saltata: la rigenerazione degli ori) più 11 ospitate e 1 d'interfaccia, tutte verdi.
+
+Da affrontare in seguito, annotato senza realizzarlo né progettarlo (osservazione del titolare): una persona cieca dalla nascita avrebbe grosse difficoltà se non conoscesse bene i rotori; il problema è di apprendimento, non di quantità di opzioni. Serve una **prima battaglia guidata** che insegni i rotori e i gesti mentre si gioca.
+
 Costruito nella fase B:
 - Campioni committati del giornale con prova di compatibilità (ogni caso di comando; i casi nuovi entrano nei campioni nella stessa modifica).
 - Tattico avversario deterministico nel Motore (ufficiali.json, vantaggi-nascosti.json), pompato dalla Sessione; prove dei casi d'angolo delle mischie (contatti multipli, disingaggi doppi) con la precisazione P4; secondo oro con riserve nel mazzo a copertura della base delle perdite (RDA-46).

@@ -37,16 +37,18 @@ final class CaricamentoTest: XCTestCase {
         }
     }
 
-    func test_vincolo_gittate_respinto() throws {
+    func test_01_3_4_1_vincolo_tiro_in_blocco_respinto() throws {
         let copia = try copiaDiLavoro()
         let url = copia.appendingPathComponent("archetipi.json")
         var testo = try String(contentsOf: url, encoding: .utf8)
-        // Rende la pericolosità dei tiratori superiore al disturbo: incoerente (01 §3.4.1).
-        testo = testo.replacingOccurrences(of: "\"gittata_disturbo\":6,\"gittata_pericolosita\":2",
-                                           with: "\"gittata_disturbo\":2,\"gittata_pericolosita\":6")
+        // Un tiratore senza gittata è incoerente: il tiro è un blocco unico
+        // (proiettile, offesa, gittata, dotazione: 01 §3.3.1, §3.4.1 versione 3.3).
+        testo = testo.replacingOccurrences(
+            of: "\"capacita_offensiva_per_atomo\":25,\"gittata\":6",
+            with: "\"capacita_offensiva_per_atomo\":25,\"gittata\":0")
         try testo.write(to: url, atomically: true, encoding: .utf8)
         XCTAssertThrowsError(try CaricatoreValori.carica(da: copia)) { errore in
-            XCTAssertEqual((errore as? ErroreDati)?.chiave, "errore.dati.gittate_incoerenti")
+            XCTAssertEqual((errore as? ErroreDati)?.chiave, "errore.dati.tiro_incoerente")
         }
     }
 
@@ -67,7 +69,7 @@ final class CaricamentoTest: XCTestCase {
         // Ogni chiave di ErroreDati usata dal caricatore deve esistere nella fabbrica (05 §7.8).
         let chiavi = ["errore.dati.file_mancante", "errore.dati.file_malformato",
                       "errore.dati.identificatore_duplicato", "errore.dati.elenco_vuoto",
-                      "errore.dati.valore_non_positivo", "errore.dati.gittate_incoerenti",
+                      "errore.dati.valore_non_positivo",
                       "errore.dati.tiro_incoerente", "errore.dati.soglia_fuori_intervallo",
                       "errore.dati.protezione_mancante", "errore.dati.formato_incoerente",
                       "errore.dati.minimi_sotto_uno", "errore.dati.efficacia_minima_nulla",

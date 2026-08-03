@@ -27,11 +27,14 @@ final class CasiAngoloMischiaTest: XCTestCase {
         for (id, parte, archetipo, cella, atomi) in sciami {
             let a = valori.archetipi[archetipo]!
             stato.sciami[id] = Sciame(id: id, parte: parte, archetipo: archetipo,
-                                      protezione: .antiSaturazione, atomiIniziali: atomi,
+                                      protezione: .antiSaturazione,
+                                      lettera: stato.prossimaLettera[parte] ?? 1,
+                                      atomiIniziali: atomi,
                                       serbatoio: atomi * a.puntiVitaPerAtomo,
                                       munizioni: a.dotazioneMunizioni, posizione: cella,
                                       azioneSpesa: false, rinforzo: false)
             stato.forzeImpegnate[parte, default: 0] += stato.sciami[id]!.serbatoio
+            stato.prossimaLettera[parte] = (stato.prossimaLettera[parte] ?? 1) + 1
             stato.prossimoIdSciame = max(stato.prossimoIdSciame, id.numero + 1)
         }
         return stato

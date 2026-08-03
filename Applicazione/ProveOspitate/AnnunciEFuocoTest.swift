@@ -113,10 +113,13 @@ final class AnnunciEFuocoTest: XCTestCase {
         XCTAssertTrue(schermata.registroFuocoPerProva.isEmpty,
                        "dopo il piazzamento il fuoco resta dove l'utente lo ha lasciato (00 §11.3)")
 
-        // L'etichetta della cella piazzata è stata aggiornata sul posto.
+        // L'etichetta della cella piazzata è stata aggiornata sul posto, con la
+        // lettera in posizione fissa dopo il nome (01 §9.4.3, 02 §3.8.1).
         let etichetta = schermata.elementiPerProva[Cella(riga: 10, colonna: 1)]?.accessibilityLabel ?? ""
-        XCTAssertTrue(etichetta.contains(ambiente.testi.frase("unita.fanteria_leggera").testo),
-                      "aggiornamento sul posto: \(etichetta)")
+        let nomeConLettera = ambiente.testi.frase("unita.fanteria_leggera").testo
+            + " " + ambiente.testi.termine("lettera.1").testo
+        XCTAssertTrue(etichetta.contains(nomeConLettera),
+                      "aggiornamento sul posto con la lettera: \(etichetta)")
     }
 
     func test_00_11_3_esaurimento_del_deck_senza_spostare_il_fuoco() async throws {

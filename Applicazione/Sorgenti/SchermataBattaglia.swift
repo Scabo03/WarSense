@@ -229,6 +229,13 @@ final class SchermataBattaglia: UIViewController {
             guard let sciame = vista.occupanteVisibile(di: cella) else { return nil }
             return sciame.parte == .giocatore ? .systemBlue : .systemRed
         }
+        // La lettera compare anche a schermo: ciò che si sente si vede (01 §9.4.3).
+        vistaGriglia.testoCella = { [weak self] cella in
+            guard let self, let stato = self.statoCorrente else { return nil }
+            let vista = VistaBattaglia(motore: self.partita.motore, stato: stato, parte: .giocatore)
+            guard let sciame = vista.occupanteVisibile(di: cella) else { return nil }
+            return self.costruttore?.lettera(sciame)
+        }
         vistaGriglia.setNeedsDisplay()
     }
 
@@ -271,42 +278,39 @@ final class SchermataBattaglia: UIViewController {
         let archetipo = partita.motore.valori.archetipi[sciame.archetipo]!
         var voci: [VocePannello] = []
 
-        // Tiro: bersagli elencati con gittata ed efficacia (02 §8.8, §9.3).
+        // Tiro: i soli bersagli a portata, con nome, lettera ed efficacia; il
+        // proiettile è del reparto e non si sceglie (02 §9.3, 01 §3.3.1, §3.4.1).
         for bersaglio in vistaAvversari {
-            for proiettile in archetipo.offeseTiro.keys.sorted(by: { $0.rawValue < $1.rawValue }) {
-                let comando = ComandoBattaglia.tira(sciame: sciame.id, bersaglio: bersaglio.id,
-                                                    proiettile: proiettile)
-                guard partita.motore.valida(comando, parte: .giocatore, stato: stato).eValido else { continue }
-                let distanza = stato.griglia.distanza(sciame.posizione, bersaglio.posizione)
-                let gittata = distanza <= archetipo.gittataPericolosita
-                    ? testi.termine("gittata.a_tiro_utile").testo
-                    : testi.termine("gittata.a_tiro_di_disturbo").testo
-                let efficacia = partita.motore.efficaciaQualitativa(
-                    offesa: archetipo.offeseTiro[proiettile]!,
-                    protezione: partita.motore.valori.protezioni[bersaglio.protezione]!)
-                let titolo = testi.frase("pannello.tira_su",
-                                         testi.frase("unita." + bersaglio.archetipo).testo,
-                                         gittata,
-                                         testi.termine(efficacia.rawValue).testo,
-                                         testi.frase("proiettile." + proiettile.rawValue).testo).testo
-                voci.append(VocePannello(titolo: titolo, stile: .default) { [weak self] in
-                    self?.chiudiPannello(cella: sciame.posizione) { await self?.eseguiComando(comando) }
-                })
-            }
+            let comando = ComandoBattaglia.tira(sciame: sciame.id, bersaglio: bersaglio.id)
+            guard partita.motore.valida(comando, parte: .giocatore, stato: stato).eValido else { continue }
+            let efficacia = partita.motore.efficaciaQualitativa(
+                offesa: archetipo.offesaTiro!,
+                protezione: partita.motore.valori.protezioni[bersaglio.protezione]!)
+            let titolo = testi.frase("pannello.tira_su",
+                                     testi.frase("unita." + bersaglio.archetipo).testo,
+                                     costruttore?.lettera(bersaglio) ?? "",
+                                     testi.termine(efficacia.rawValue).testo).testo
+            voci.append(VocePannello(titolo: titolo, stile: .default) { [weak self] in
+                self?.chiudiPannello(cella: sciame.posizione) { await self?.eseguiComando(comando) }
+            })
         }
-        // Ingaggio degli adiacenti (02 §8.8).
+        // Ingaggio degli adiacenti (02 §8.8), designati con nome e lettera (01 §9.4.3).
         for bersaglio in vistaAvversari {
             let comando = ComandoBattaglia.ingaggia(sciame: sciame.id, bersaglio: bersaglio.id)
             guard partita.motore.valida(comando, parte: .giocatore, stato: stato).eValido else { continue }
             let titolo = testi.frase("pannello.ingaggia",
                                      testi.frase("unita." + bersaglio.archetipo).testo,
+                                     costruttore?.lettera(bersaglio) ?? "",
                                      bersaglio.posizione.riga, bersaglio.posizione.colonna).testo
             voci.append(VocePannello(titolo: titolo, stile: .default) { [weak self] in
                 self?.chiudiPannello(cella: sciame.posizione) { await self?.eseguiComando(comando) }
             })
         }
-        // Movimento per designazione sulla griglia (02 §9.2.1).
-        if !stato.impegnato(sciame.id), !sciame.azioneSpesa, stato.parteDiTurno == .giocatore {
+        // Movimento per designazione sulla griglia (02 §9.2.1): l'azione si offre
+        // soltanto se esiste almeno una destinazione raggiungibile (02 §9.5).
+        if !stato.impegnato(sciame.id), !sciame.azioneSpesa, stato.parteDiTurno == .giocatore,
+           VistaBattaglia(motore: partita.motore, stato: stato, parte: .giocatore)
+               .esisteDestinazione(per: sciame.id) {
             voci.append(VocePannello(
                 titolo: testi.frase("pannello.designa_movimento").testo, stile: .default) { [weak self] in
                 guard let self else { return }
