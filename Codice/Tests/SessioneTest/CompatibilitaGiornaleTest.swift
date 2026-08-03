@@ -1,0 +1,59 @@
+import XCTest
+import Sessione
+import Motore
+import Dati
+
+/// Blocco della codifica del giornale (incarico fase B): il giornale è anche il
+/// formato di salvataggio, e se la codifica degli enumerativi con valori associati
+/// si sposta, le partite aperte dei tester non si riaprono più (00 §15).
+/// I campioni committati coprono ogni caso di voce; ogni caso di comando aggiunto
+/// in futuro entra nei campioni nella stessa modifica che lo introduce.
+final class CompatibilitaGiornaleTest: XCTestCase {
+
+    static let campioni = URL(fileURLWithPath: #filePath).deletingLastPathComponent()
+        .appendingPathComponent("CampioniGiornale/campioni.jsonl")
+
+    func test_00_15_i_campioni_committati_si_decodificano_e_ricodificano_identici() throws {
+        let codificatore = JSONEncoder()
+        codificatore.outputFormatting = [.sortedKeys, .withoutEscapingSlashes]
+        let testo = try String(contentsOf: Self.campioni, encoding: .utf8)
+        let righe = testo.split(separator: "\n")
+        XCTAssertGreaterThanOrEqual(righe.count, 11, "un campione per ogni caso di voce")
+        var casiComando = Set<String>()
+        for riga in righe {
+            let dati = Data(riga.utf8)
+            let voce: RigaGiornale
+            do { voce = try JSONDecoder().decode(RigaGiornale.self, from: dati) }
+            catch {
+                return XCTFail("campione non piu decodificabile: la codifica del giornale si e spostata. Riga: \(riga.prefix(80))")
+            }
+            // La ricodifica deve produrre esattamente i byte del campione:
+            // qualunque scarto e un cambiamento di formato di salvataggio.
+            let ricodifica = try codificatore.encode(voce)
+            XCTAssertEqual(String(data: ricodifica, encoding: .utf8), String(riga),
+                           "la ricodifica differisce dal campione committato")
+            if case .comando(_, let comando) = voce.voce {
+                casiComando.insert(etichettaCaso(comando))
+            }
+        }
+        // Ogni caso di comando oggi esistente ha un campione: se si aggiunge un caso
+        // all'enumerativo senza aggiungere il campione, questa prova lo dichiara.
+        let attesi: Set<String> = ["seleziona", "deseleziona", "piazza", "muovi", "tira",
+                                   "ingaggia", "dichiaraResa", "ritiraUnita", "fineTurno"]
+        XCTAssertEqual(casiComando, attesi, "casi di comando senza campione committato")
+    }
+
+    private func etichettaCaso(_ comando: ComandoBattaglia) -> String {
+        switch comando {
+        case .seleziona: return "seleziona"
+        case .deseleziona: return "deseleziona"
+        case .piazza: return "piazza"
+        case .muovi: return "muovi"
+        case .tira: return "tira"
+        case .ingaggia: return "ingaggia"
+        case .dichiaraResa: return "dichiaraResa"
+        case .ritiraUnita: return "ritiraUnita"
+        case .fineTurno: return "fineTurno"
+        }
+    }
+}

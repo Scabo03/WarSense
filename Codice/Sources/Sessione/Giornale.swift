@@ -14,6 +14,16 @@ public struct Fondazione: Codable, Sendable {
     public let scenario: ScenarioBattaglia
     public static let schemaCorrente = 1
 
+    public init(versioneSchema: Int, versioneValori: String, versioneTesti: String,
+                seme: UInt64, identificatore: String, scenario: ScenarioBattaglia) {
+        self.versioneSchema = versioneSchema
+        self.versioneValori = versioneValori
+        self.versioneTesti = versioneTesti
+        self.seme = seme
+        self.identificatore = identificatore
+        self.scenario = scenario
+    }
+
     enum CodingKeys: String, CodingKey {
         case versioneSchema = "versione_schema"
         case versioneValori = "versione_valori"
@@ -35,6 +45,10 @@ public enum VoceGiornale: Codable, Sendable {
 public struct RigaGiornale: Codable, Sendable {
     public let numero: Int
     public let voce: VoceGiornale
+    public init(numero: Int, voce: VoceGiornale) {
+        self.numero = numero
+        self.voce = voce
+    }
 }
 
 /// Il giornale dei comandi: file in appendice, una riga JSON per voce (05 §6.1).
