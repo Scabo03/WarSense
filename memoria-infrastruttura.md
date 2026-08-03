@@ -42,6 +42,8 @@ Numero di VERSIONE (quello di marketing): unica sorgente di verità in `Applicaz
 
 Numero di BUILD: mai scritto a mano, sempre ricavato da TestFlight dallo script (massimo globale su tutti i treni, più uno). Il `CURRENT_PROJECT_VERSION: 1` in project.yml è un segnaposto che lo script sovrascrive a ogni archivio: non aggiornarlo mai a mano. Non lanciare mai due caricamenti in parallelo: il numero si calcola all'inizio e collidrebbe.
 
+REGOLA DEL TITOLARE SULLE VERSIONI (2026-08-03, vincolante): a ogni consegna sale SOLO il numero di build (automatico dallo script). NESSUNA versione — di marketing, dei valori o dei testi — si cambia di propria iniziativa: si cambia soltanto su istruzione esplicita del titolare, e comunque solo per cambiamenti maggiori, mai per correzioni. Avvertenza collegata: il manifest dei testi contiene solo versione e lingue, e la copia in Documenti si rinfresca solo se i byte del manifest cambiano; perciò un'aggiunta di chiavi ai testi, a versione ferma, non raggiunge gli apparecchi con l'app già installata. In quel caso: fermarsi e chiedere al titolare (le alternative sono alzare la versione dei testi su suo ordine, oppure estendere il manifest dei testi con le impronte dei file, come già fa quello dei valori, così il rinfresco diventa automatico senza toccare versioni).
+
 VERIFICA DOPO OGNI CARICAMENTO, sempre: build, treno di versione ed elaborazione si controllano dall'esterno con
 
 ```
