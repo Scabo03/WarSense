@@ -1,0 +1,6 @@
+[
+  {"identificatore": "ufficiale_prova", "propensione_attacco": 0.7, "tolleranza_perdite": 0.5,
+   "tendenza_accerchiamento": 0.3, "propensione_imboscata": 0.4, "propensione_ritirata": 0.5},
+  {"identificatore": "ufficiale_prudente", "propensione_attacco": 0.3, "tolleranza_perdite": 0.3,
+   "tendenza_accerchiamento": 0.6, "propensione_imboscata": 0.6, "propensione_ritirata": 0.7}
+]

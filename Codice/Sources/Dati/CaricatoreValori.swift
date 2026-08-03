@@ -61,6 +61,8 @@ public enum CaricatoreValori {
         let caratteristicheElenco = try leggi([CaratteristicaCampo].self, "caratteristiche-campo.json")
         let minimi = try leggi(Minimi.self, "minimi.json")
         let combattimento = try leggi(ParametriCombattimento.self, "combattimento.json")
+        let ufficialiElenco = try leggi([DefinizioneUfficiale].self, "ufficiali.json")
+        let vantaggi = try leggi(VantaggiNascosti.self, "vantaggi-nascosti.json")
 
         var archetipi: [IdentificatoreDati: DefinizioneArchetipo] = [:]
         for a in archetipiElenco {
@@ -73,6 +75,11 @@ public enum CaricatoreValori {
         for f in formatiElenco { formati[f.identificatore] = f }
         var caratteristiche: [IdentificatoreDati: CaratteristicaCampo] = [:]
         for c in caratteristicheElenco { caratteristiche[c.identificatore] = c }
+        var ufficiali: [IdentificatoreDati: DefinizioneUfficiale] = [:]
+        for u in ufficialiElenco { ufficiali[u.identificatore] = u }
+        guard !ufficiali.isEmpty else {
+            throw ErroreDati(chiave: "errore.dati.elenco_vuoto", file: "ufficiali.json")
+        }
 
         try validaContenuti(archetipi: archetipi, protezioni: protezioni, formati: formati,
                             minimi: minimi, combattimento: combattimento)
@@ -94,7 +101,9 @@ public enum CaricatoreValori {
                              formati: formati,
                              caratteristiche: caratteristiche,
                              minimi: minimi,
-                             combattimento: combattimento)
+                             combattimento: combattimento,
+                             ufficiali: ufficiali,
+                             vantaggi: vantaggi)
     }
 
     /// Validazione dei contenuti (05 §7.8), oltre la forma: completezza e coerenza.

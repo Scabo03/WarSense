@@ -62,7 +62,7 @@ public struct MotoreBattaglia: Sendable {
     }
 
     /// Danno inflitto da uno sciame con una data offesa a un bersaglio (01 §9.2.1).
-    func danno(da attaccante: Sciame, offesa: ProfiloOffesa, a bersaglio: Sciame,
+    public func danno(da attaccante: Sciame, offesa: ProfiloOffesa, a bersaglio: Sciame,
                coefficiente: Scalato, stato: StatoBattaglia) -> Int64 {
         let a = archetipo(attaccante.archetipo)
         let atomi = attaccante.atomiPresenti(puntiVitaPerAtomo: a.puntiVitaPerAtomo,
@@ -403,6 +403,9 @@ public struct MotoreBattaglia: Sendable {
         for d in danni { applicaDanno(d.danno, a: d.bersaglio, stato: &stato, eventi: &eventi) }
 
         // Disingaggi, dopo l'applicazione dei danni (01 §9.8), in ordine deterministico.
+        // Chi si ritrae lascia l'intera mischia: tutti i suoi contatti terminano,
+        // ciascuna coppia entra nella memoria e nel divieto (precisazione P4 del
+        // registro degli scostamenti: il caso dei contatti multipli non era normato).
         for contatto in contattiOrdinati {
             guard stato.contatti.contains(contatto),
                   stato.sciami[contatto.primo] != nil, stato.sciami[contatto.secondo] != nil else { continue }
@@ -422,9 +425,12 @@ public struct MotoreBattaglia: Sendable {
                 let da = sciame.posizione
                 stato.sciami[id]!.posizione = destinazione
                 stato.sciami[id]!.azioneSpesa = true // torna controllabile dal turno successivo (01 §9.8.2)
-                stato.contatti.removeAll { $0 == contatto }
-                stato.coppieStaccate.insert(coppia)
-                stato.divietoIngaggio[coppia] = stato.giro // nessun ingaggio per un turno
+                for terminato in stato.contatti.filter({ $0.coinvolge(id) }) {
+                    let coppiaTerminata = Coppia(terminato.primo, terminato.secondo)
+                    stato.coppieStaccate.insert(coppiaTerminata)
+                    stato.divietoIngaggio[coppiaTerminata] = stato.giro // nessun ingaggio per un turno
+                }
+                stato.contatti.removeAll { $0.coinvolge(id) }
                 eventi.append(.disingaggio(sciame: id, da: da, a: destinazione))
             }
         }

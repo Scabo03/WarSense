@@ -170,6 +170,38 @@ public struct ParametriCombattimento: Codable, Hashable, Sendable {
     }
 }
 
+/// Parametri di carattere di un ufficiale avversario (01 §14.3, 03 §6.5).
+/// Un'unica intelligenza, parametri diversi; tutti provvisori nei file.
+public struct DefinizioneUfficiale: Codable, Hashable, Sendable {
+    public let identificatore: IdentificatoreDati
+    public let propensioneAttacco: Scalato
+    public let tolleranzaPerdite: Scalato
+    public let tendenzaAccerchiamento: Scalato
+    public let propensioneImboscata: Scalato
+    public let propensioneRitirata: Scalato
+    enum CodingKeys: String, CodingKey {
+        case identificatore
+        case propensioneAttacco = "propensione_attacco"
+        case tolleranzaPerdite = "tolleranza_perdite"
+        case tendenzaAccerchiamento = "tendenza_accerchiamento"
+        case propensioneImboscata = "propensione_imboscata"
+        case propensioneRitirata = "propensione_ritirata"
+    }
+}
+
+/// I vantaggi nascosti del giocatore (01 §13, 03 §7): noti al programma di verifica,
+/// che può disattivarli per misurare le probabilità reali (05 §12.5).
+public struct VantaggiNascosti: Codable, Hashable, Sendable {
+    /// L'avversario ritira unità soltanto dalla propria riga più arretrata (01 §13.2).
+    public let ritirataAvversariaSoloUltimaRiga: Bool
+    /// Riduzione della propensione alla ritirata dell'avversario (01 §13.2).
+    public let riduzionePropensioneRitirataAvversaria: Scalato
+    enum CodingKeys: String, CodingKey {
+        case ritirataAvversariaSoloUltimaRiga = "ritirata_avversaria_solo_ultima_riga"
+        case riduzionePropensioneRitirataAvversaria = "riduzione_propensione_ritirata_avversaria"
+    }
+}
+
 /// L'insieme dei valori caricati e validati che il Motore riceve (05 §1.2).
 public struct ValoriDiGioco: Sendable {
     public let versione: String
@@ -184,4 +216,6 @@ public struct ValoriDiGioco: Sendable {
     public let caratteristiche: [IdentificatoreDati: CaratteristicaCampo]
     public let minimi: Minimi
     public let combattimento: ParametriCombattimento
+    public let ufficiali: [IdentificatoreDati: DefinizioneUfficiale]
+    public let vantaggi: VantaggiNascosti
 }

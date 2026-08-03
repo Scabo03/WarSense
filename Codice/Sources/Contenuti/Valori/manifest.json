@@ -5,7 +5,9 @@
   "combattimento.json": "d19eb50acb60bc1862049e591dedfff43024c5c63971294c25d0109afda2dc94",
   "formato-battaglia.json": "d5877cc487278512568a7efec9e76f3195542b3ecb0d23be9f6dc49939a5f290",
   "minimi.json": "d67b738ee9136f09d98382d60c3bd661751943c5caacb5dc1b60e12811df353c",
-  "offese-e-protezioni.json": "bb48b76b1c6f93837850dda262114c4cc4ce9ead5a3c4b463dee75ef65bcc35f"
+  "offese-e-protezioni.json": "bb48b76b1c6f93837850dda262114c4cc4ce9ead5a3c4b463dee75ef65bcc35f",
+  "ufficiali.json": "393ecea12dbcd0b7920ecaa155348cb41365235d5e1f86d5bd610c873f75d11c",
+  "vantaggi-nascosti.json": "9a248bf0ae2ab548e7a1aedf621529e2347a8c0c74fa8e00ef8e2b28897ebaf4"
  },
  "versione": "0.1.0",
  "versioni_compatibili": [

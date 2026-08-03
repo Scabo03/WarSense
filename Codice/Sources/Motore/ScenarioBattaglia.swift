@@ -24,14 +24,19 @@ public struct ScenarioBattaglia: Hashable, Codable, Sendable {
     public let imboscata: Bool
     public let deckGiocatore: [ElementoScenario]
     public let deckAvversario: [ElementoScenario]
+    /// L'ufficiale che comanda la parte avversaria (01 §14.3). Facoltativo per
+    /// compatibilità con i salvataggi anteriori: assente, vale il primo dei dati.
+    public let ufficialeAvversario: IdentificatoreDati?
 
     public init(formato: IdentificatoreDati, caratteristica: IdentificatoreDati,
                 ostacoli: [Cella] = [], primoOccupante: Parte, imboscata: Bool,
-                deckGiocatore: [ElementoScenario], deckAvversario: [ElementoScenario]) {
+                deckGiocatore: [ElementoScenario], deckAvversario: [ElementoScenario],
+                ufficialeAvversario: IdentificatoreDati? = nil) {
         self.formato = formato; self.caratteristica = caratteristica
         self.ostacoli = ostacoli; self.primoOccupante = primoOccupante
         self.imboscata = imboscata
         self.deckGiocatore = deckGiocatore; self.deckAvversario = deckAvversario
+        self.ufficialeAvversario = ufficialeAvversario
     }
 }
 

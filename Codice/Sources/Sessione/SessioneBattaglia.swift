@@ -15,6 +15,8 @@ public actor SessioneBattaglia {
         case giornaleCorrotto(riga: Int)
         case scritturaFallita
         case operazioneNonDisponibile
+        /// Il tattico ha proposto un comando non valido o non conclude il turno.
+        case tatticoBloccato
     }
 
     private let motore: MotoreBattaglia
@@ -107,6 +109,24 @@ public actor SessioneBattaglia {
     /// L'anteprima è la validazione (05 §3.2).
     public func anteprima(_ comando: ComandoBattaglia, parte: Parte) -> EsitoValidazione {
         motore.valida(comando, parte: parte, stato: stato)
+    }
+
+    /// È la Sessione a far agire l'avversario (05 §1.7): interroga il tattico
+    /// finché il suo turno non si chiude, appendendo ogni comando al giornale
+    /// come quelli del giocatore (RDA-42). Restituisce gli eventi nell'ordine.
+    public func eseguiTurnoAvversario(_ tattico: TatticoBattaglia) throws -> [EventoBattaglia] {
+        var eventiRaccolti: [EventoBattaglia] = []
+        var passiDiSicurezza = 0
+        while stato.parteDiTurno == tattico.parte && stato.esito == nil {
+            passiDiSicurezza += 1
+            guard passiDiSicurezza <= 2000 else { throw ErroreSessione.tatticoBloccato }
+            let comando = tattico.prossimoComando(stato: stato)
+            let (esito, eventi) = try esegui(comando, parte: tattico.parte)
+            guard esito.eValido else { throw ErroreSessione.tatticoBloccato }
+            eventiRaccolti.append(contentsOf: eventi)
+            if comando == .fineTurno { break }
+        }
+        return eventiRaccolti
     }
 
     public func vista(per parte: Parte) -> VistaBattaglia {
