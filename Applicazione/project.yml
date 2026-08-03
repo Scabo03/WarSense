@@ -9,6 +9,13 @@ options:
 packages:
   WarSensePacchetto:
     path: ../Codice
+schemes:
+  WarSense:
+    build:
+      targets:
+        WarSense: all
+    test:
+      targets: [WarSenseTest, WarSenseUITest]
 targets:
   WarSense:
     type: application
@@ -27,6 +34,8 @@ targets:
         # Dichiarazione sulla crittografia: nessun algoritmo di cifratura in uso.
         # Evita la domanda sull'esportazione a ogni caricamento su TestFlight.
         ITSAppUsesNonExemptEncryption: false
+        UIFileSharingEnabled: true
+        LSSupportsOpeningDocumentsInPlace: true
         UISupportedInterfaceOrientations:
           - UIInterfaceOrientationPortrait
           - UIInterfaceOrientationPortraitUpsideDown
@@ -49,3 +58,24 @@ targets:
           CODE_SIGN_STYLE: Manual
           CODE_SIGN_IDENTITY: "Apple Distribution"
           PROVISIONING_PROFILE_SPECIFIER: "match AppStore com.scabo.warsense"
+
+  WarSenseTest:
+    type: bundle.unit-test
+    platform: iOS
+    sources: [ProveOspitate]
+    dependencies:
+      - target: WarSense
+    settings:
+      base:
+        GENERATE_INFOPLIST_FILE: YES
+        TEST_HOST: $(BUILT_PRODUCTS_DIR)/WarSense.app/$(BUNDLE_EXECUTABLE_FOLDER_PATH)/WarSense
+        BUNDLE_LOADER: $(TEST_HOST)
+  WarSenseUITest:
+    type: bundle.ui-testing
+    platform: iOS
+    sources: [ProveInterfaccia]
+    dependencies:
+      - target: WarSense
+    settings:
+      base:
+        GENERATE_INFOPLIST_FILE: YES

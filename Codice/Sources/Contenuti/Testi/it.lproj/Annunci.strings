@@ -45,3 +45,115 @@
 "battaglia.resa_avversaria" = "L'avversario si ritira";
 "battaglia.evacuata" = "Unità evacuata: costa %d";
 "battaglia.sorpresa_conclusa" = "Le posizioni sono ora tutte scoperte";
+
+/* Interfaccia della battaglia (02 §2, §3, §8): testa fissa e contenuti di cella. */
+"cella.testa" = "riga %d, cella %d";
+"cella.libera" = "libera";
+"cella.ostacolo_contenuto" = "ostacolo";
+"cella.occupante" = "%@, %@";
+"cella.occupante_proprio" = "tuo %@";
+"cella.occupante_avversario" = "%@ avversario";
+"cella.disponibile" = "costa %d, restano %d";
+"cella.bersaglio" = "%@, %@";
+"deck.intestazione" = "Riserve da schierare";
+"deck.elemento" = "%@, %@, volume %d, %@";
+"deck.selezionato" = "selezionato";
+"deck.rinforzo" = "rinforzo";
+"pulsante.annulla" = "Annulla l'ultima operazione";
+"pulsante.azzera" = "Azzera lo schieramento del turno";
+"pulsante.fine_turno" = "Fine del turno";
+"pulsante.resa" = "Dichiara la resa";
+"battaglia.annuncio_apertura" = "Battaglia su %@, %d righe per %d celle. Il campo è %@";
+"battaglia.stato" = "Volume residuo %d, turno %d";
+"battaglia.stato_riga_avanzata" = ", avversari fino alla riga %d";
+"battaglia.stato_ritirata" = ", %#@righe@ alla soglia della ritirata";
+"battaglia.annullato_conferma" = "Ultima operazione annullata";
+"battaglia.azzerato_conferma" = "Schieramento del turno azzerato";
+"battaglia.niente_da_annullare" = "Niente da annullare in questo turno";
+"battaglia.opacita_avviso" = "Le posizioni avversarie non sono note: lo diverranno al loro prossimo turno";
+
+/* Pannello della cella (00 §7.4, 02 §9). */
+"pannello.titolo" = "Azioni per riga %d, cella %d";
+"pannello.chiudi" = "Chiudi il pannello";
+"pannello.muovi_qui_vicino" = "Muovi verso una cella adiacente";
+"pannello.tira_su" = "Tira su %@: %@, %@, danno con %@";
+"pannello.ingaggia" = "Ingaggia %@ in riga %d cella %d";
+"pannello.ritira_unita" = "Evacua questa unità: costa %d";
+"pannello.designa_movimento" = "Scegli la destinazione sulla griglia";
+"pannello.designazione_avviata" = "Scegli la cella di destinazione e attivala per confermare";
+"pannello.designazione_annullata" = "Designazione annullata";
+"direzione.nord_ovest" = "Vai a nord ovest";
+"direzione.nord_est" = "Vai a nord est";
+"direzione.sud_ovest" = "Vai a sud ovest";
+"direzione.sud_est" = "Vai a sud est";
+"direzione.nord" = "Vai a nord";
+"direzione.sud" = "Vai a sud";
+"direzione.bordo" = "Bordo del campo";
+
+/* Rotori (02 §7.2). */
+"rotore.propri_sciami" = "Tuoi reparti";
+"rotore.propri_senza_azione" = "Tuoi reparti da muovere";
+"rotore.sciami_avversari" = "Reparti avversari";
+"rotore.celle_valide" = "Celle valide";
+"rotore.rinforzi" = "Rinforzi del turno";
+"rotore.ostacoli" = "Ostacoli";
+
+/* Unità (00 §12.2: archetipi per funzione). */
+"unita.fanteria_leggera" = "fanteria leggera";
+"unita.fanteria_pesante" = "fanteria pesante";
+"unita.guardia_elite" = "guardia scelta";
+"unita.tiratori" = "tiratori";
+"unita.cavalleria_ricognizione" = "cavalleria da ricognizione";
+"unita.cavalleria_manovrata" = "cavalleria manovrata";
+"unita.piattaforma_trainata" = "piattaforma trainata";
+"unita.macchina_assedio" = "macchina d'assedio";
+"unita.macchina_tiro" = "macchina da tiro";
+"proiettile.proiettile_leggero" = "proiettile leggero";
+"proiettile.proiettile_pesante" = "proiettile pesante";
+
+/* Avvio, resoconto, impostazioni, apprendimento. */
+"avvio.titolo" = "WarSense";
+"avvio.nuovo_scontro" = "Nuovo scontro di prova";
+"avvio.riprendi" = "Riprendi lo scontro in corso";
+"avvio.impostazioni" = "Impostazioni";
+"avvio.apprendimento" = "Suoni e vibrazioni del gioco";
+"avvio.slot_incompatibile" = "Lo scontro salvato appartiene a valori di versione %@ e questa versione usa %@: non può essere aperto";
+"resoconto.titolo" = "Resoconto della battaglia";
+"resoconto.esito_vittoria" = "Vittoria: l'avversario %@";
+"resoconto.esito_sconfitta" = "Sconfitta: %@";
+"resoconto.modo_ritirata_compiuta" = "si è ritirato";
+"resoconto.modo_annientamento" = "è stato annientato";
+"resoconto.durata" = "Durata: %#@turni@";
+"resoconto.perdite_proprie" = "Perdite tue: %d punti su %d impegnati";
+"resoconto.perdite_inflitte" = "Perdite inflitte: %d punti";
+"resoconto.evacuati" = "Unità evacuate: %d";
+"resoconto.munizioni" = "Scariche residue dei tuoi tiratori: %d";
+"resoconto.riserve" = "Riserve mai schierate: %d";
+"resoconto.torna" = "Torna all'inizio";
+"impostazioni.titolo" = "Impostazioni";
+"impostazioni.verbosita" = "Verbosità degli annunci";
+"impostazioni.verbosita.sintetico" = "Sintetico";
+"impostazioni.verbosita.normale" = "Normale";
+"impostazioni.verbosita.dettagliato" = "Dettagliato";
+"impostazioni.suoni" = "Suoni del gioco";
+"impostazioni.aptica" = "Vibrazioni";
+"impostazioni.intensita" = "Intensità delle vibrazioni";
+"apprendimento.titolo" = "Suoni e vibrazioni";
+"apprendimento.spiegazione" = "Ogni segnale del gioco, con il suo significato. Attiva una voce per risentirla";
+"significato.cambio_riga" = "Cambio di riga sulla griglia";
+"significato.cambio_riga_con_nemici" = "Cambio di riga, con forze avversarie nella riga";
+"significato.marcia_completata" = "Marcia completata";
+"significato.conferma" = "Ordine confermato";
+"significato.annullamento" = "Operazione annullata";
+"significato.mischia_favorevole" = "Esito delle mischie favorevole";
+"significato.mischia_sfavorevole" = "Esito delle mischie sfavorevole";
+"significato.disingaggio" = "Un reparto si è disingaggiato";
+"significato.munizioni_esaurite" = "Munizioni esaurite";
+"significato.deck_esaurito" = "Riserva esaurita";
+"significato.rifornimento_interrotto" = "Rifornimento interrotto";
+"significato.risorsa_insufficiente" = "Risorsa insufficiente";
+"significato.imboscata" = "Imboscata";
+"significato.battaglia_in_sospeso" = "Nuova battaglia in sospeso";
+"significato.sortita" = "Sortita dalla piazzaforte";
+"significato.vincolo_campagna" = "Vincolo fra le campagne";
+"significato.rinforzi_nel_deck" = "Rinforzi arrivati nelle riserve";

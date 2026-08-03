@@ -1,0 +1,476 @@
+import UIKit
+import Dati
+import Motore
+import Segnali
+
+/// La schermata dello scontro (05 §15.3): griglia, deck, comandi globali.
+/// Ordine di lettura dichiarato elemento per elemento (00 §11.5, 02 §2.8);
+/// il fuoco non si sposta mai in modo non richiesto (00 §11.1).
+@MainActor
+final class SchermataBattaglia: UIViewController {
+
+    private let partita: PartitaCorrente
+    private var statoCorrente: StatoBattaglia?
+    private var elementi: [Cella: ElementoCella] = [:]
+    private var ordineCelle: [Cella] = []
+    private var designazione: CostruttoreAnnunci.Designazione = .nessuna
+    private var ultimaRigaDelFuoco: Int?
+    var alTermine: (() -> Void)?
+
+    private let scorrimento = UIScrollView()
+    private let vistaGriglia = VistaGriglia()
+    private let intestazioneDeck = UILabel()
+    private var pulsantiDeck: [UIButton] = []
+    private let colonnaDeck = UIStackView()
+    private let pulsanteAnnulla = UIButton(type: .system)
+    private let pulsanteAzzera = UIButton(type: .system)
+    private let pulsanteResa = UIButton(type: .system)
+    private let pulsanteFineTurno = UIButton(type: .system)
+
+    init(partita: PartitaCorrente) {
+        self.partita = partita
+        super.init(nibName: nil, bundle: nil)
+    }
+    required init?(coder: NSCoder) { nil }
+
+    private var testi: Testi { partita.ambiente.testi }
+    private var costruttore: CostruttoreAnnunci? {
+        guard let stato = statoCorrente else { return nil }
+        return CostruttoreAnnunci(testi: testi, motore: partita.motore,
+                                  stato: stato, verbosita: Impostazioni.verbosita)
+    }
+
+    // MARK: - Impianto
+
+    override func viewDidLoad() {
+        super.viewDidLoad()
+        view.backgroundColor = .systemBackground
+        partita.consegnaEventi = { [weak self] eventi in self?.ricevi(eventi) }
+        montaViste()
+        Task { await avvia() }
+    }
+
+    private func montaViste() {
+        scorrimento.translatesAutoresizingMaskIntoConstraints = false
+        scorrimento.maximumZoomScale = 2.5
+        scorrimento.minimumZoomScale = 0.5
+        scorrimento.delegate = self
+        view.addSubview(scorrimento)
+        scorrimento.addSubview(vistaGriglia)
+
+        intestazioneDeck.font = .preferredFont(forTextStyle: .headline)
+        intestazioneDeck.adjustsFontForContentSizeCategory = true
+        intestazioneDeck.isAccessibilityElement = true
+        intestazioneDeck.accessibilityTraits = .header
+        colonnaDeck.axis = .vertical
+        colonnaDeck.spacing = 6
+        colonnaDeck.translatesAutoresizingMaskIntoConstraints = false
+        view.addSubview(colonnaDeck)
+        colonnaDeck.addArrangedSubview(intestazioneDeck)
+
+        // I comandi globali, distanziati dal bordo inferiore e di altezza piena (02 §8.5).
+        for (pulsante, azione) in [(pulsanteAnnulla, #selector(annulla)),
+                                   (pulsanteAzzera, #selector(azzera)),
+                                   (pulsanteResa, #selector(dichiaraResa)),
+                                   (pulsanteFineTurno, #selector(fineTurno))] {
+            pulsante.addTarget(self, action: azione, for: .touchUpInside)
+            pulsante.titleLabel?.font = .preferredFont(forTextStyle: .body)
+            pulsante.titleLabel?.adjustsFontForContentSizeCategory = true
+            colonnaDeck.addArrangedSubview(pulsante)
+            pulsante.heightAnchor.constraint(greaterThanOrEqualToConstant: 44).isActive = true
+        }
+
+        NSLayoutConstraint.activate([
+            scorrimento.topAnchor.constraint(equalTo: view.safeAreaLayoutGuide.topAnchor),
+            scorrimento.leadingAnchor.constraint(equalTo: view.leadingAnchor),
+            scorrimento.trailingAnchor.constraint(equalTo: view.trailingAnchor),
+            scorrimento.heightAnchor.constraint(equalTo: view.heightAnchor, multiplier: 0.55),
+            colonnaDeck.topAnchor.constraint(equalTo: scorrimento.bottomAnchor, constant: 8),
+            colonnaDeck.leadingAnchor.constraint(equalTo: view.leadingAnchor, constant: 16),
+            colonnaDeck.trailingAnchor.constraint(equalTo: view.trailingAnchor, constant: -16),
+            colonnaDeck.bottomAnchor.constraint(lessThanOrEqualTo: view.safeAreaLayoutGuide.bottomAnchor,
+                                                constant: -24),
+        ])
+    }
+
+    private func avvia() async {
+        let stato = await partita.stato
+        statoCorrente = stato
+        vistaGriglia.griglia = stato.griglia
+        let dimensione = VistaGriglia.dimensione(per: stato.griglia)
+        vistaGriglia.frame = CGRect(origin: .zero, size: dimensione)
+        scorrimento.contentSize = dimensione
+
+        // Gli elementi si creano UNA volta e si aggiornano sul posto (05 §10.1).
+        ordineCelle = stato.griglia.tutteLeCelle // ovest-est, alto-basso (00 §11.5)
+        for cella in ordineCelle {
+            let elemento = ElementoCella(cella: cella, contenitore: vistaGriglia, schermata: self)
+            elemento.accessibilityFrameInContainerSpace = VistaGriglia.cornice(di: cella)
+            elementi[cella] = elemento
+        }
+        vistaGriglia.accessibilityElements = ordineCelle.map { elementi[$0]! }
+        montaDeck(stato: stato)
+        montaRotori()
+        aggiorna(con: stato)
+
+        // Annuncio di apertura (02 §4.4.2) e fuoco sull'intestazione del deck (02 §2.9).
+        if let costruttore {
+            partita.ambiente.segnali.annuncia(
+                TestoLocalizzato(testo: costruttore.annuncioApertura(), lingua: testi.lingua))
+        }
+        let eventi = await partita.eventiIniziali
+        ricevi(eventi)
+        Fuoco.sposta(a: intestazioneDeck, perche: .schermataAperta)
+    }
+
+    private func montaDeck(stato: StatoBattaglia) {
+        intestazioneDeck.text = testi.frase("deck.intestazione").testo
+        for indice in (stato.deck[.giocatore] ?? []).indices {
+            let pulsante = UIButton(type: .system)
+            pulsante.tag = indice
+            pulsante.contentHorizontalAlignment = .leading
+            pulsante.titleLabel?.font = .preferredFont(forTextStyle: .body)
+            pulsante.titleLabel?.adjustsFontForContentSizeCategory = true
+            pulsante.heightAnchor.constraint(greaterThanOrEqualToConstant: 44).isActive = true
+            pulsante.addTarget(self, action: #selector(toccaElementoDeck(_:)), for: .touchUpInside)
+            pulsantiDeck.append(pulsante)
+            colonnaDeck.insertArrangedSubview(pulsante, at: 1 + indice)
+        }
+        // L'ordine di lettura dichiarato: celle, deck, annullamento, azzeramento (02 §2.8),
+        // poi la resa e la fine del turno (RDA-49).
+        view.accessibilityElements = [vistaGriglia, intestazioneDeck] + pulsantiDeck
+            + [pulsanteAnnulla, pulsanteAzzera, pulsanteResa, pulsanteFineTurno]
+    }
+
+    // MARK: - Aggiornamento sul posto (RDA-03)
+
+    private func ricevi(_ eventi: [EventoBattaglia]) {
+        Task { await ricaricaStato() }
+        for evento in eventi {
+            if case .battagliaConclusa = evento {
+                Task { await mostraResoconto() }
+            }
+        }
+    }
+
+    private func ricaricaStato() async {
+        let stato = await partita.stato
+        statoCorrente = stato
+        aggiorna(con: stato)
+    }
+
+    /// Aggiorna etichette e valori degli elementi ESISTENTI: mai ricreare,
+    /// mai toccare il fuoco (00 §11.1, 05 §10.3).
+    private func aggiorna(con stato: StatoBattaglia) {
+        guard let costruttore else { return }
+        for (cella, elemento) in elementi {
+            elemento.accessibilityLabel = costruttore.etichettaCella(cella, designazione: designazione)
+            elemento.accessibilityCustomActions = azioniDirezione(da: cella)
+            let occupante = VistaBattaglia(motore: partita.motore, stato: stato, parte: .giocatore)
+                .occupanteVisibile(di: cella)
+            var tratti: UIAccessibilityTraits = []
+            if stato.ostacoli.contains(cella) { tratti.insert(.notEnabled) }
+            if occupante?.parte == .giocatore { tratti.insert(.button) }
+            elemento.accessibilityTraits = tratti
+        }
+        for pulsante in pulsantiDeck {
+            let etichetta = costruttore.etichettaElementoDeck(indice: pulsante.tag)
+            pulsante.setTitle(etichetta, for: .normal)
+            pulsante.accessibilityLabel = etichetta
+            let esemplari = stato.deck[.giocatore]?[pulsante.tag].esemplari ?? 0
+            pulsante.isEnabled = esemplari > 0 && stato.esito == nil
+        }
+        pulsanteAnnulla.setTitle(testi.frase("pulsante.annulla").testo, for: .normal)
+        pulsanteAzzera.setTitle(testi.frase("pulsante.azzera").testo, for: .normal)
+        pulsanteResa.setTitle(testi.frase("pulsante.resa").testo, for: .normal)
+        pulsanteFineTurno.setTitle(testi.frase("pulsante.fine_turno").testo, for: .normal)
+        let mioTurno = stato.parteDiTurno == .giocatore && stato.esito == nil
+        pulsanteFineTurno.isEnabled = mioTurno
+        pulsanteResa.isEnabled = mioTurno && stato.resaDichiarataDa == nil
+
+        vistaGriglia.coloreCella = { [weak self] cella in
+            guard let self, let stato = self.statoCorrente else { return nil }
+            if stato.ostacoli.contains(cella) { return .systemGray }
+            let vista = VistaBattaglia(motore: self.partita.motore, stato: stato, parte: .giocatore)
+            guard let sciame = vista.occupanteVisibile(di: cella) else { return nil }
+            return sciame.parte == .giocatore ? .systemBlue : .systemRed
+        }
+        vistaGriglia.setNeedsDisplay()
+    }
+
+    // MARK: - Attivazione e pannello (00 §7.4, 02 §9.2.1)
+
+    func attiva(_ cella: Cella) -> Bool {
+        guard let stato = statoCorrente else { return false }
+        if case .movimento(let id) = designazione {
+            guard let percorso = costruttore?.percorsoMovimento(da: id, a: cella) else { return false }
+            designazione = .nessuna
+            Task { await eseguiComando(.muovi(sciame: id, percorso: percorso)) }
+            return true
+        }
+        if stato.selezione[.giocatore] != nil {
+            // Conferma di piazzamento: il fuoco resta sulla cella (00 §11.3).
+            Task { await eseguiComando(.piazza(cella: cella)) }
+            return true
+        }
+        if let occupante = stato.occupante(di: cella), occupante.parte == .giocatore {
+            apriPannello(per: occupante, stato: stato)
+            return true
+        }
+        return false
+    }
+
+    private func apriPannello(per sciame: Sciame, stato: StatoBattaglia) {
+        let pannello = UIAlertController(
+            title: testi.frase("pannello.titolo", sciame.posizione.riga, sciame.posizione.colonna).testo,
+            message: nil, preferredStyle: .alert)
+        let vistaAvversari = stato.sciamiOrdinati.filter { $0.parte == .avversario }
+        let archetipo = partita.motore.valori.archetipi[sciame.archetipo]!
+
+        // Tiro: bersagli elencati con gittata ed efficacia (02 §8.8, §9.3).
+        for bersaglio in vistaAvversari {
+            for proiettile in archetipo.offeseTiro.keys.sorted(by: { $0.rawValue < $1.rawValue }) {
+                let comando = ComandoBattaglia.tira(sciame: sciame.id, bersaglio: bersaglio.id,
+                                                    proiettile: proiettile)
+                guard partita.motore.valida(comando, parte: .giocatore, stato: stato).eValido else { continue }
+                let distanza = stato.griglia.distanza(sciame.posizione, bersaglio.posizione)
+                let gittata = distanza <= archetipo.gittataPericolosita
+                    ? testi.termine("gittata.a_tiro_utile").testo
+                    : testi.termine("gittata.a_tiro_di_disturbo").testo
+                let efficacia = partita.motore.efficaciaQualitativa(
+                    offesa: archetipo.offeseTiro[proiettile]!,
+                    protezione: partita.motore.valori.protezioni[bersaglio.protezione]!)
+                let titolo = testi.frase("pannello.tira_su",
+                                         testi.frase("unita." + bersaglio.archetipo).testo,
+                                         gittata,
+                                         testi.termine(efficacia.rawValue).testo,
+                                         testi.frase("proiettile." + proiettile.rawValue).testo).testo
+                pannello.addAction(UIAlertAction(title: titolo, style: .default) { [weak self] _ in
+                    self?.chiudiPannello(cella: sciame.posizione) { await self?.eseguiComando(comando) }
+                })
+            }
+        }
+        // Ingaggio degli adiacenti (02 §8.8).
+        for bersaglio in vistaAvversari {
+            let comando = ComandoBattaglia.ingaggia(sciame: sciame.id, bersaglio: bersaglio.id)
+            guard partita.motore.valida(comando, parte: .giocatore, stato: stato).eValido else { continue }
+            let titolo = testi.frase("pannello.ingaggia",
+                                     testi.frase("unita." + bersaglio.archetipo).testo,
+                                     bersaglio.posizione.riga, bersaglio.posizione.colonna).testo
+            pannello.addAction(UIAlertAction(title: titolo, style: .default) { [weak self] _ in
+                self?.chiudiPannello(cella: sciame.posizione) { await self?.eseguiComando(comando) }
+            })
+        }
+        // Movimento per designazione sulla griglia (02 §9.2.1).
+        if !stato.impegnato(sciame.id), !sciame.azioneSpesa, stato.parteDiTurno == .giocatore {
+            pannello.addAction(UIAlertAction(
+                title: testi.frase("pannello.designa_movimento").testo, style: .default) { [weak self] _ in
+                guard let self else { return }
+                self.designazione = .movimento(sciame: sciame.id)
+                if let stato = self.statoCorrente { self.aggiorna(con: stato) }
+                self.partita.ambiente.segnali.annuncia(TestoLocalizzato(
+                    testo: self.testi.frase("pannello.designazione_avviata").testo,
+                    lingua: self.testi.lingua))
+                self.chiudiPannello(cella: sciame.posizione, poi: nil)
+            })
+        }
+        // Evacuazione durante la ritirata (01 §10.4).
+        let ritiro = ComandoBattaglia.ritiraUnita(sciame: sciame.id)
+        if case .valido(let costi) = partita.motore.valida(ritiro, parte: .giocatore, stato: stato) {
+            pannello.addAction(UIAlertAction(
+                title: testi.frase("pannello.ritira_unita", Int(costi.volume)).testo,
+                style: .default) { [weak self] _ in
+                self?.chiudiPannello(cella: sciame.posizione) { await self?.eseguiComando(ritiro) }
+            })
+        }
+        pannello.addAction(UIAlertAction(title: testi.frase("pannello.chiudi").testo,
+                                         style: .cancel) { [weak self] _ in
+            self?.chiudiPannello(cella: sciame.posizione, poi: nil)
+        })
+        present(pannello, animated: false)
+    }
+
+    /// Alla chiusura del pannello il fuoco torna alla cella d'origine (05 §10.3).
+    private func chiudiPannello(cella: Cella, poi azione: (() async -> Void)?) {
+        dismiss(animated: false) { [weak self] in
+            guard let self else { return }
+            Fuoco.sposta(a: self.elementi[cella], perche: .richiesto)
+            if let azione { Task { await azione() } }
+        }
+    }
+
+    // MARK: - Comandi
+
+    private func eseguiComando(_ comando: ComandoBattaglia) async {
+        do {
+            let esito = try await partita.esegui(comando)
+            if case .nonValido(let motivo) = esito {
+                partita.ambiente.segnali.annuncia(
+                    TestoLocalizzato(testo: testi.termine(motivo.rawValue).testo, lingua: testi.lingua))
+            }
+        } catch {
+            await ricaricaStato()
+        }
+    }
+
+    @objc private func toccaElementoDeck(_ pulsante: UIButton) {
+        guard let stato = statoCorrente else { return }
+        designazione = .nessuna
+        let comando: ComandoBattaglia = stato.selezione[.giocatore] == pulsante.tag
+            ? .deseleziona : .seleziona(indiceDeck: pulsante.tag)
+        Task { await eseguiComando(comando) }
+    }
+
+    @objc private func annulla() { Task { await operazioneGiornale { try await self.partita.annulla() }
+        .map { self.conferma("battaglia.annullato_conferma", significato: .annullamento) } } }
+
+    @objc private func azzera() { Task { await operazioneGiornale { try await self.partita.azzera() }
+        .map { self.conferma("battaglia.azzerato_conferma", significato: .annullamento) } } }
+
+    private func operazioneGiornale(_ operazione: () async throws -> Void) async -> Void? {
+        do { try await operazione(); await ricaricaStato(); return () }
+        catch {
+            partita.ambiente.segnali.annuncia(TestoLocalizzato(
+                testo: testi.frase("battaglia.niente_da_annullare").testo, lingua: testi.lingua))
+            return nil
+        }
+    }
+
+    private func conferma(_ chiave: String, significato: SignificatoSegnale) {
+        partita.ambiente.segnali.annuncia(
+            TestoLocalizzato(testo: testi.frase(chiave).testo, lingua: testi.lingua),
+            significato: significato)
+    }
+
+    @objc private func dichiaraResa() { Task { await eseguiComando(.dichiaraResa) } }
+    @objc private func fineTurno() {
+        designazione = .nessuna
+        Task { await eseguiComando(.fineTurno) }
+    }
+
+    // MARK: - Fuoco, righe, scorrimento (00 §11.6, §10.4)
+
+    func fuocoArrivato(su cella: Cella) {
+        let cornice = VistaGriglia.cornice(di: cella).insetBy(dx: -40, dy: -40)
+        scorrimento.scrollRectToVisible(cornice, animated: false)
+        if let ultima = ultimaRigaDelFuoco, ultima != cella.riga, let stato = statoCorrente {
+            let vista = VistaBattaglia(motore: partita.motore, stato: stato, parte: .giocatore)
+            let nemiciNellaRiga = (1...stato.griglia.colonne).contains { colonna in
+                vista.occupanteVisibile(di: Cella(riga: cella.riga, colonna: colonna))?.parte == .avversario
+            }
+            partita.ambiente.segnali.segnalaCambioRiga(conNemici: nemiciNellaRiga)
+        }
+        ultimaRigaDelFuoco = cella.riga
+    }
+
+    /// Il tocco magico richiama l'informazione di stato senza lasciare la griglia (02 §6.4, §6.7).
+    override func accessibilityPerformMagicTap() -> Bool {
+        guard let costruttore else { return false }
+        partita.ambiente.segnali.annuncia(
+            TestoLocalizzato(testo: costruttore.informazioneDiStato(), lingua: testi.lingua),
+            interrompente: true)
+        return true
+    }
+
+    /// Il gesto di fuga annulla la designazione in corso (02 §9.2.1).
+    override func accessibilityPerformEscape() -> Bool {
+        if case .movimento = designazione {
+            designazione = .nessuna
+            if let stato = statoCorrente { aggiorna(con: stato) }
+            partita.ambiente.segnali.annuncia(TestoLocalizzato(
+                testo: testi.frase("pannello.designazione_annullata").testo, lingua: testi.lingua))
+            return true
+        }
+        return false
+    }
+
+    // MARK: - Azioni personalizzate: soltanto spostamenti di navigazione (02 §2.7)
+
+    private func azioniDirezione(da cella: Cella) -> [UIAccessibilityCustomAction] {
+        guard let stato = statoCorrente else { return [] }
+        let sfalsata = cella.riga % 2 == 0
+        let destinazioni: [(String, Cella)] = [
+            ("direzione.nord_ovest", Cella(riga: cella.riga - 1, colonna: sfalsata ? cella.colonna : cella.colonna - 1)),
+            ("direzione.nord_est", Cella(riga: cella.riga - 1, colonna: sfalsata ? cella.colonna + 1 : cella.colonna)),
+            ("direzione.sud_ovest", Cella(riga: cella.riga + 1, colonna: sfalsata ? cella.colonna : cella.colonna - 1)),
+            ("direzione.sud_est", Cella(riga: cella.riga + 1, colonna: sfalsata ? cella.colonna + 1 : cella.colonna)),
+        ]
+        return destinazioni.compactMap { chiave, destinazione in
+            guard stato.griglia.contiene(destinazione) else { return nil }
+            let azione = UIAccessibilityCustomAction(
+                name: testi.frase(chiave).testo) { [weak self] _ in
+                guard let self, let elemento = self.elementi[destinazione] else { return false }
+                Fuoco.sposta(a: elemento, perche: .richiesto)
+                return true
+            }
+            return azione
+        }
+    }
+
+    // MARK: - Rotori (00 §10.2, 02 §7.2)
+
+    private func montaRotori() {
+        func rotore(_ chiave: String, celle: @escaping () -> [Cella]) -> UIAccessibilityCustomRotor {
+            UIAccessibilityCustomRotor(name: testi.frase(chiave).testo) { [weak self] richiesta in
+                guard let self else { return nil }
+                let insieme = celle().sorted()
+                guard !insieme.isEmpty else { return nil }
+                let corrente = (richiesta.currentItem.targetElement as? ElementoCella)?.cella
+                let successiva: Cella?
+                if richiesta.searchDirection == .next {
+                    successiva = insieme.first { corrente == nil || corrente! < $0 } ?? insieme.first
+                } else {
+                    successiva = insieme.last { corrente == nil || $0 < corrente! } ?? insieme.last
+                }
+                guard let destinazione = successiva, let elemento = self.elementi[destinazione] else { return nil }
+                return UIAccessibilityCustomRotorItemResult(targetElement: elemento, targetRange: nil)
+            }
+        }
+        view.accessibilityCustomRotors = [
+            rotore("rotore.propri_sciami") { [weak self] in
+                self?.celleSciami(parte: .giocatore) ?? [] },
+            rotore("rotore.propri_senza_azione") { [weak self] in
+                guard let self, let stato = self.statoCorrente else { return [] }
+                return stato.sciamiOrdinati
+                    .filter { $0.parte == .giocatore && !$0.azioneSpesa && !stato.impegnato($0.id) }
+                    .map(\.posizione) },
+            rotore("rotore.sciami_avversari") { [weak self] in
+                self?.celleSciami(parte: .avversario) ?? [] },
+            rotore("rotore.celle_valide") { [weak self] in
+                guard let self, let stato = self.statoCorrente else { return [] }
+                let vista = VistaBattaglia(motore: self.partita.motore, stato: stato, parte: .giocatore)
+                return vista.celleValidePerSelezione().map(\.cella) },
+            rotore("rotore.rinforzi") { [weak self] in
+                guard let self, let stato = self.statoCorrente else { return [] }
+                return stato.sciamiOrdinati.filter { $0.parte == .giocatore && $0.rinforzo }.map(\.posizione) },
+            rotore("rotore.ostacoli") { [weak self] in
+                guard let stato = self?.statoCorrente else { return [] }
+                return Array(stato.ostacoli) },
+        ]
+    }
+
+    private func celleSciami(parte: Parte) -> [Cella] {
+        guard let stato = statoCorrente else { return [] }
+        let vista = VistaBattaglia(motore: partita.motore, stato: stato, parte: .giocatore)
+        return vista.sciamiVisibili.filter { $0.parte == parte }.map(\.posizione)
+    }
+
+    // MARK: - Resoconto
+
+    private func mostraResoconto() async {
+        guard let costruttore else { return }
+        let schermata = SchermataResoconto(voci: costruttore.vociResoconto(), testi: testi)
+        schermata.alTermine = { [weak self] in self?.alTermine?() }
+        schermata.modalPresentationStyle = .fullScreen
+        present(schermata, animated: false)
+        Fuoco.sposta(a: nil, perche: .schermataAperta)
+    }
+
+    // Attrezzi per le prove ospitate (05 §14.4).
+    var elementiPerProva: [Cella: ElementoCella] { elementi }
+    var registroFuocoPerProva: [Fuoco.Movimento] { Fuoco.registro }
+}
+
+extension SchermataBattaglia: UIScrollViewDelegate {
+    func viewForZooming(in scrollView: UIScrollView) -> UIView? { vistaGriglia }
+}

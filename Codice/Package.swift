@@ -22,7 +22,7 @@ let package = Package(
         // Sessione: orchestratore, giornale, istantanee. Importa soltanto Motore, Dati e Foundation.
         .target(name: "Sessione", dependencies: ["Motore", "Dati"]),
         // Contenuti: i file veri (valori, testi). Nessun codice oltre l'esposizione del bundle.
-        .target(name: "Contenuti", resources: [.copy("Valori"), .copy("Testi")]),
+        .target(name: "Contenuti", resources: [.copy("Valori"), .copy("Testi"), .copy("Suoni")]),
         // Segnali: punto centrale dei segnali. Compila su ogni piattaforma: nucleo puro
         // più parti di piattaforma dietro compilazione condizionale (RDA-48).
         .target(name: "Segnali", dependencies: ["Motore", "Dati"]),

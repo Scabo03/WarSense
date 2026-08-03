@@ -1,0 +1,21 @@
+{
+  "commento": "Scenari di scontro (05 §12.2). Lo scenario di prova della fase B: campo grande, mazzi misti, ufficiale ordinario. Numeri provvisori.",
+  "scenario_di_prova": {
+    "formato": "cento",
+    "caratteristica": "campo_aperto",
+    "ostacoli": [{"riga": 5, "colonna": 5}, {"riga": 5, "colonna": 6}, {"riga": 6, "colonna": 5}],
+    "primoOccupante": "giocatore",
+    "imboscata": false,
+    "deckGiocatore": [
+      {"archetipo": "fanteria_leggera", "protezione": "anti_saturazione", "atomi": 5, "esemplari": 3},
+      {"archetipo": "fanteria_pesante", "protezione": "anti_perforazione", "atomi": 5, "esemplari": 2},
+      {"archetipo": "tiratori", "protezione": "anti_saturazione", "atomi": 5, "esemplari": 2}
+    ],
+    "deckAvversario": [
+      {"archetipo": "fanteria_leggera", "protezione": "anti_perforazione", "atomi": 5, "esemplari": 3},
+      {"archetipo": "fanteria_pesante", "protezione": "anti_saturazione", "atomi": 5, "esemplari": 2},
+      {"archetipo": "tiratori", "protezione": "anti_perforazione", "atomi": 5, "esemplari": 2}
+    ],
+    "ufficialeAvversario": "ufficiale_prova"
+  }
+}

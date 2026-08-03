@@ -25,6 +25,29 @@ final class ConfiniTest: XCTestCase {
         "Verifica": ["Foundation", "Sessione", "Motore", "Dati", "Contenuti"],
     ]
 
+    /// Anche la Presentazione rispetta confini dichiarati (05 §1.3): vive nel
+    /// progetto applicativo ma il collaudo la sorveglia dalla stessa sede.
+    static let sorgentiApplicazione = radiceSorgenti
+        .deletingLastPathComponent().deletingLastPathComponent()
+        .appendingPathComponent("Applicazione/Sorgenti")
+    static let importAmmessiApplicazione: Set<String> =
+        ["Foundation", "UIKit", "Dati", "Motore", "Sessione", "Segnali", "Contenuti"]
+
+    func test_05_1_3_confini_della_presentazione() throws {
+        let contenuti = try FileManager.default.contentsOfDirectory(
+            at: Self.sorgentiApplicazione, includingPropertiesForKeys: nil)
+        for file in contenuti.filter({ $0.pathExtension == "swift" }).sorted(by: { $0.path < $1.path }) {
+            let testo = try String(contentsOf: file, encoding: .utf8)
+            for riga in testo.split(separator: "\n") {
+                let pulita = riga.trimmingCharacters(in: .whitespaces)
+                guard pulita.hasPrefix("import ") else { continue }
+                let modulo = String(pulita.dropFirst(7).split(separator: " ")[0].split(separator: ".")[0])
+                XCTAssertTrue(Self.importAmmessiApplicazione.contains(modulo),
+                              "confine violato: Presentazione importa \(modulo) in \(file.lastPathComponent)")
+            }
+        }
+    }
+
     func fileSwift(di bersaglio: String) throws -> [URL] {
         let cartella = Self.radiceSorgenti.appendingPathComponent(bersaglio)
         let contenuti = try FileManager.default.contentsOfDirectory(at: cartella,

@@ -4,4 +4,5 @@ import Foundation
 public enum Contenuti {
     public static var valoriDiFabbrica: URL { Bundle.module.url(forResource: "Valori", withExtension: nil)! }
     public static var testiDiFabbrica: URL { Bundle.module.url(forResource: "Testi", withExtension: nil)! }
+    public static var suoniDiFabbrica: URL { Bundle.module.url(forResource: "Suoni", withExtension: nil)! }
 }

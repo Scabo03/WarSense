@@ -12,4 +12,37 @@
       <key>other</key><string>%d atomi</string>
     </dict>
   </dict>
+  <key>battaglia.stato_ritirata</key>
+  <dict>
+    <key>NSStringLocalizedFormatKey</key><string>, %#@righe@ alla soglia della ritirata</string>
+    <key>righe</key>
+    <dict>
+      <key>NSStringFormatSpecTypeKey</key><string>NSStringPluralRuleType</string>
+      <key>NSStringFormatValueTypeKey</key><string>d</string>
+      <key>one</key><string>%d riga</string>
+      <key>other</key><string>%d righe</string>
+    </dict>
+  </dict>
+  <key>resoconto.durata</key>
+  <dict>
+    <key>NSStringLocalizedFormatKey</key><string>Durata: %#@turni@</string>
+    <key>turni</key>
+    <dict>
+      <key>NSStringFormatSpecTypeKey</key><string>NSStringPluralRuleType</string>
+      <key>NSStringFormatValueTypeKey</key><string>d</string>
+      <key>one</key><string>%d turno</string>
+      <key>other</key><string>%d turni</string>
+    </dict>
+  </dict>
+  <key>deck.esemplari</key>
+  <dict>
+    <key>NSStringLocalizedFormatKey</key><string>%#@esemplari@</string>
+    <key>esemplari</key>
+    <dict>
+      <key>NSStringFormatSpecTypeKey</key><string>NSStringPluralRuleType</string>
+      <key>NSStringFormatValueTypeKey</key><string>d</string>
+      <key>one</key><string>%d esemplare</string>
+      <key>other</key><string>%d esemplari</string>
+    </dict>
+  </dict>
 </dict></plist>
