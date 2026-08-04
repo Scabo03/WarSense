@@ -57,6 +57,35 @@ public struct SondaInvariantiCampagna: Sendable {
         }
     }
 
+    /// I codici di TUTTI gli invarianti sorvegliati, in ordine fisso. Esiste perché
+    /// il collaudo possa pretendere che ciascuno abbia il proprio mutante: senza
+    /// questo elenco, un invariante aggiunto senza mutante passerebbe inosservato,
+    /// ed è esattamente ciò che era accaduto a due di essi nella prima unità.
+    /// Aggiungere un caso all'enumerativo senza aggiungerlo qui fa fallire il
+    /// collaudo, perché il numero dichiarato non corrisponderebbe.
+    public static let codiciNoti: [String] = [
+        "gruppo_in_piu_caselle",
+        "due_gruppi_stessa_casella",
+        "gruppo_fuori_dalla_mappa",
+        "azione_spesa_due_volte",
+        "azione_non_registrata",
+        "gruppo_ha_agito_da_se",
+        "salto_ha_dimenticato",
+        "salto_ha_proposto_chi_ha_agito",
+        "salto_ha_ripetuto",
+        "giorno_non_avanzato",
+        "giorno_avanzato_senza_chiusura",
+        "azione_non_azzerata",
+        "movimento_non_adiacente",
+        "casella_irraggiungibile",
+        "registro_fuori_ordine",
+    ]
+
+    /// Il codice nudo, senza i valori: la parte prima dei due punti.
+    public static func codice(di violazione: Violazione) -> String {
+        String(violazione.description.split(separator: ":")[0])
+    }
+
     public init() {}
 
     // MARK: - Invarianti dello stato

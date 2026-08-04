@@ -2,6 +2,7 @@ import UIKit
 import Dati
 import Motore
 import Segnali
+import Sessione
 
 /// La mappa di campagna (05 §9.3, §15.5): caselle quadrate, comandi globali,
 /// registro. Ordine di lettura dichiarato elemento per elemento (00 §11.5,
@@ -273,20 +274,31 @@ final class SchermataMappaCampagna: UIViewController {
 
     @objc private func annulla() {
         Task { await operazioneGiornale({ try await self.partita.annulla() },
-                                        conferma: "campagna.annullato_conferma") }
+                                        conferma: "campagna.annullato_conferma",
+                                        confermaConRiapertura: "campagna.annullato_giornata_riaperta") }
     }
 
     @objc private func azzera() {
         Task { await operazioneGiornale({ try await self.partita.azzera() },
-                                        conferma: "campagna.azzerato_conferma") }
+                                        conferma: "campagna.azzerato_conferma",
+                                        confermaConRiapertura: "campagna.azzerato_giornata_riaperta") }
     }
 
-    private func operazioneGiornale(_ operazione: () async throws -> Void, conferma chiave: String) async {
+    /// La riapertura della giornata si annuncia con una frase PROPRIA: è un
+    /// cambiamento di stato rilevante e diverso da un annullamento ordinario
+    /// (00 §11.4). Chi ascolta deve sapere non solo che l'ordine è stato ritirato,
+    /// ma che il calendario è tornato indietro.
+    private func operazioneGiornale(_ operazione: () async throws -> SessioneCampagna.EsitoAnnullamento,
+                                    conferma chiave: String,
+                                    confermaConRiapertura chiaveRiapertura: String) async {
         do {
-            try await operazione()
+            let esito = try await operazione()
             await ricaricaStato()
+            let testo = esito.giornataRiaperta
+                ? testi.frase(chiaveRiapertura, esito.giorno).testo
+                : testi.frase(chiave).testo
             partita.ambiente.segnali.annuncia(
-                TestoLocalizzato(testo: testi.frase(chiave).testo, lingua: testi.lingua),
+                TestoLocalizzato(testo: testo, lingua: testi.lingua),
                 significato: .annullamento)
         } catch {
             partita.ambiente.segnali.annuncia(TestoLocalizzato(

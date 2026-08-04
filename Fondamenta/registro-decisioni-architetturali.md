@@ -671,3 +671,27 @@ Scelta. La sonda vive nella libreria di verifica e riceve dall'esterno lo stato,
 Motivazione. Due ragioni distinte. La prima è che il Motore non deve controllare se stesso: un invariante scritto nello stesso momento e nello stesso file della regola ne eredita i punti ciechi. La seconda, e più importante, è che un invariante deve poter essere VIOLATO da una prova: ricevendo dall'esterno ciò che giudica, la sonda si può mettere davanti a uno stato guastato a mano o a un'adiacenza mutilata, e si accerta che se ne accorga. Un invariante che non si è mai visto violare non è un invariante.
 
 Conseguenze. Ogni invariante della campagna ha in collaudo la propria coppia: la corsa vera che non produce violazioni e il mutante che ne produce una. Il costo è qualche parametro in più nelle firme, che è precisamente ciò che rende le prove possibili.
+
+### RDA-70 — L'annullamento riapre la giornata finché non c'è nulla di giocato da disfare (00 §13.8)
+
+Problema. La giornata si chiude quando l'ultimo gruppo riceve il proprio ordine (01 §5.6.0.6). Con la prima realizzazione, quell'ordine era l'unico della giornata che non si potesse ritirare: l'annullamento veniva rifiutato e il giorno restava avanzato. 05 §6.5 elenca infatti «chiusura della giornata di campagna» fra i punti di conferma oltre i quali l'annullamento non retrocede.
+
+Opzioni. Conservare il punto di conferma alla lettera; consentire la riapertura della giornata finché nulla è stato giocato dopo la chiusura.
+
+Scelta. La seconda. L'annullamento ritira l'ultimo ordine impartito quale che sia ciò che gli è seguito, e se la chiusura della giornata è fra quelle cose la giornata si riapre. Lo stesso vale per l'azzeramento, che riapre e svuota la giornata annullabile, cioè la più recente che contenga almeno un ordine.
+
+Motivazione. Tre ragioni, in ordine di forza. La prima è 00 §13.8, che prevale su 05: ogni budget che si consuma richiede l'annullamento dell'ultima operazione, «senza annullamento il giocatore paga un errore di manovra come se fosse stata una scelta tattica», e la giornata è un budget che si consuma. La seconda è che l'ordine più esposto all'errore è proprio l'ultimo, perché il giocatore lo impartisce per muovere un gruppo e ne ottiene per soprammercato un passaggio di giornata che non ha chiesto: un gesto compiuto per fare una cosa ne produceva un'altra, irreversibile e priva di segnale proprio, che per chi ascolta è la combinazione peggiore possibile. La terza è che la ragione per cui 05 §6.5 fa della chiusura un punto di conferma è ciò che la SEGUE — le mosse avversarie e le risoluzioni di fine giornata, come 05 §6.4 dice esplicitamente («finché l'avversario non ha agito») — e in questa unità non esiste né l'una né l'altra cosa: la chiusura incrementa un contatore e riazzera le azioni, e non c'è nulla di giocato che l'annullamento debba disfare.
+
+Conseguenze. Annullando a ritroso si torna indietro di più giornate, un ordine per volta, fino al principio della campagna, ed è provato. Quando lo stratega avversario e le risoluzioni di fine giornata esisteranno, il punto di conferma dovrà tornare a mordere come 05 §6.5 prescrive: il posto dove imporlo è `SessioneCampagna.annulla`, dove la ragione è scritta per esteso. La riapertura si annuncia con una frase propria, distinta da quella dell'annullamento ordinario, perché il calendario tornato indietro è un fatto diverso dal ritiro di un ordine e chi ascolta deve poterli distinguere (00 §11.4).
+
+### RDA-71 — I numeri del resoconto si prendono da un blocco che il programma stampa
+
+Problema. Nel resoconto della prima unità tre numeri non reggevano un controllo aritmetico, e uno di essi contraddiceva la conclusione che gli era stata fatta dire. Nessuno dei tre veniva da un calcolo del programma: erano somme fatte a mente, un conteggio ricordato e una grandezza chiamata con il nome di un'altra.
+
+Opzioni. Ricontrollare a mano con più attenzione; far calcolare al programma tutto ciò che il resoconto cita.
+
+Scelta. La seconda. Il programma di verifica produce una sezione `campagna_riepilogo` che contiene ogni numero destinato al resoconto — totali compresi, sommati dal programma — e una prova pareggia quei totali con le righe di dettaglio, così che il riepilogo non possa discostarsene. Un numero che compaia nel resoconto e non in quella sezione va dichiarato come calcolato a mano nel punto stesso in cui è scritto.
+
+Motivazione. È la stessa ragione per cui esiste il controllo preventivo sul caricamento: una regola si può dimenticare, uno strumento che stampa no. L'attenzione non è una difesa, perché è precisamente ciò che era già stato applicato e che aveva prodotto tre numeri sbagliati su tre.
+
+Conseguenze. Le grandezze omonime ma diverse hanno ora colonne distinte e nomi che non si possono scambiare: `caselle_di_bordo` e `caselle_interne` sono geometria e non dipendono dai gruppi, `con_meno_di_quattro_uscite` e `di_cui_interne` dipendono da dove i gruppi stanno. Il conteggio degli invarianti sorvegliati è anch'esso stampato dal programma, e una prova pretende che ciascuno abbia il proprio mutante.

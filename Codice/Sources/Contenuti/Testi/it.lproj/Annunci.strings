@@ -230,3 +230,9 @@
 "errore.dati.quartier_generale_incoerente" = "Quartier generali incoerenti in %@ alla voce %@";
 "errore.dati.quartier_generale_non_in_ultima_riga" = "Quartier generale fuori dall'ultima riga in %@ alla voce %@";
 "errore.dati.nomi_gruppi_incoerenti" = "L'elenco dei nomi dei gruppi è vuoto o contiene ripetizioni";
+
+/* Annullamento che riapre la giornata (00 §13.8, RDA-70): frase propria, perché
+   il calendario tornato indietro è un cambiamento di stato diverso dal semplice
+   ritiro di un ordine e chi ascolta deve poterli distinguere. */
+"campagna.annullato_giornata_riaperta" = "Ultimo ordine annullato: torna il giorno %d e il gruppo attende di nuovo";
+"campagna.azzerato_giornata_riaperta" = "Ordini azzerati: torna il giorno %d e tutti i gruppi attendono di nuovo";

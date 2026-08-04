@@ -90,6 +90,13 @@ final class PartitaCampagna {
         return esito
     }
 
-    func annulla() async throws { try await sessione.annulla(parte: .giocatore) }
-    func azzera() async throws { try await sessione.azzera(parte: .giocatore) }
+    @discardableResult
+    func annulla() async throws -> SessioneCampagna.EsitoAnnullamento {
+        try await sessione.annulla(parte: .giocatore)
+    }
+
+    @discardableResult
+    func azzera() async throws -> SessioneCampagna.EsitoAnnullamento {
+        try await sessione.azzera(parte: .giocatore)
+    }
 }

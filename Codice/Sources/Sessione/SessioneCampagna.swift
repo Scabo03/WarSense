@@ -116,27 +116,72 @@ public actor SessioneCampagna {
 
     // MARK: - Annullamento e azzeramento (05 §6.4, 00 §13.8)
 
-    /// Ritira l'ultimo ordine del giocatore, mai oltre un punto di conferma
-    /// (05 §6.5): la chiusura della giornata è un punto di conferma, quindi un
-    /// ordine di ieri non si annulla.
-    public func annulla(parte: Parte) throws {
-        guard case .comandoCampagna(let p, _) = giornale.righe.last?.voce, p == parte else {
-            throw ErroreSessione.operazioneNonDisponibile
-        }
-        try ritira(a: giornale.righe.count - 1)
+    /// Che cosa l'annullamento ha fatto. La riapertura della giornata si dichiara
+    /// perché il giocatore possa distinguerla da un annullamento ordinario: è un
+    /// cambiamento di stato rilevante e va annunciato (00 §11.4).
+    public struct EsitoAnnullamento: Hashable, Sendable {
+        public let giornataRiaperta: Bool
+        public let giorno: Int
     }
 
-    /// Ritira tutti gli ordini della giornata corrente, fino al marcatore di
-    /// apertura giornata (05 §6.4).
-    public func azzera(parte: Parte) throws {
-        var indiceMarcatore: Int? = nil
-        for riga in giornale.righe.reversed() {
-            if case .aperturaGiornata = riga.voce { indiceMarcatore = riga.numero; break }
-        }
-        guard let indice = indiceMarcatore, indice + 1 < giornale.righe.count else {
+    /// Ritira l'ultimo ordine impartito, QUALE CHE SIA ciò che gli è seguito.
+    ///
+    /// La giornata è un budget che si consuma, e 00 §13.8 vuole che ogni budget che
+    /// si consuma abbia l'annullamento dell'ultima operazione: «senza annullamento
+    /// il giocatore paga un errore di manovra come se fosse stata una scelta
+    /// tattica». L'ordine più esposto all'errore è proprio l'ultimo della giornata,
+    /// perché il giocatore lo impartisce per muovere un gruppo e ne ottiene per
+    /// soprammercato un passaggio di giornata che non ha chiesto: se quello non si
+    /// annullasse, un gesto compiuto per fare una cosa ne produrrebbe un'altra,
+    /// irreversibile.
+    ///
+    /// 05 §6.5 elenca la chiusura della giornata fra i punti di conferma oltre i
+    /// quali l'annullamento non retrocede. La ragione di quel punto di conferma è
+    /// ciò che SEGUE la chiusura — le mosse avversarie e le risoluzioni di fine
+    /// giornata, come 05 §6.4 dice esplicitamente («finché l'avversario non ha
+    /// agito») — e in questa unità non esiste né l'una né l'altra cosa: la chiusura
+    /// incrementa il contatore e riazzera le azioni, e nulla è stato giocato che
+    /// l'annullamento debba disfare. Quando lo stratega avversario e le risoluzioni
+    /// di fine giornata esisteranno, il punto di conferma tornerà a mordere come il
+    /// documento prescrive, e il posto dove imporlo è questa funzione. Registrato
+    /// come scostamento e in RDA-70.
+    @discardableResult
+    public func annulla(parte: Parte) throws -> EsitoAnnullamento {
+        guard let ultimo = ultimoOrdine(di: parte) else {
             throw ErroreSessione.operazioneNonDisponibile
         }
-        try ritira(a: indice + 1)
+        let giornoPrima = stato.giorno
+        // Si tronca ALLA riga dell'ordine: se ne va l'ordine e con esso ogni
+        // marcatore che gli è seguito, cioè l'apertura della giornata successiva.
+        try ritira(a: ultimo)
+        return EsitoAnnullamento(giornataRiaperta: stato.giorno != giornoPrima, giorno: stato.giorno)
+    }
+
+    /// Ritira tutti gli ordini della giornata annullabile, cioè la più recente che
+    /// ne contenga almeno uno (05 §6.4). Se la giornata corrente si è appena aperta
+    /// perché la precedente si è chiusa, la giornata annullabile è quella chiusa, e
+    /// l'azzeramento la riapre vuota.
+    @discardableResult
+    public func azzera(parte: Parte) throws -> EsitoAnnullamento {
+        guard let ultimo = ultimoOrdine(di: parte) else {
+            throw ErroreSessione.operazioneNonDisponibile
+        }
+        var indiceMarcatore = 0
+        for riga in giornale.righe.prefix(ultimo).reversed() {
+            if case .aperturaGiornata = riga.voce { indiceMarcatore = riga.numero; break }
+        }
+        let giornoPrima = stato.giorno
+        try ritira(a: indiceMarcatore + 1)
+        return EsitoAnnullamento(giornataRiaperta: stato.giorno != giornoPrima, giorno: stato.giorno)
+    }
+
+    /// L'indice di riga dell'ultimo ordine impartito dalla parte, se esiste.
+    private func ultimoOrdine(di parte: Parte) -> Int? {
+        for riga in giornale.righe.reversed() {
+            guard case .comandoCampagna(let p, _) = riga.voce else { continue }
+            return p == parte ? riga.numero : nil
+        }
+        return nil
     }
 
     private func ritira(a numeroRighe: Int) throws {

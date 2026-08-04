@@ -24,7 +24,8 @@ final class FumoDelleSimulazioniTest: XCTestCase {
                        "curva_del_tiro", "accerchiamento",
                        // La campagna entra nel fumo come gli scontri (05 §14.7).
                        "campagna_invarianti", "campagna_passi_per_giornata",
-                       "campagna_attraversamento", "campagna_caselle_raggiungibili"] {
+                       "campagna_attraversamento", "campagna_caselle_raggiungibili",
+                       "campagna_distribuzione_gruppi", "campagna_riepilogo"] {
             XCTAssertTrue(nomi.contains(atteso), "sezione mancante: \(atteso)")
         }
         for sezione in rapporto.sezioni {
@@ -58,6 +59,66 @@ final class FumoDelleSimulazioniTest: XCTestCase {
             XCTAssertEqual(riga[colonna], "0",
                            "violazione di invariante nello scenario \(riga[0]): \(riga[dettaglio])")
         }
+    }
+
+
+    /// Il blocco di riepilogo è ciò da cui il resoconto copia i numeri: se i suoi
+    /// totali potessero discostarsi dalle righe di dettaglio, avrei soltanto
+    /// spostato l'errore dalla mia testa al programma. Questa prova li pareggia.
+    func test_incarico_il_riepilogo_pareggia_con_le_righe_di_dettaglio() throws {
+        let rapporto = try programma(fumo: false).esegui()
+        func sezione(_ nome: String) throws -> Rapporto.Sezione {
+            try XCTUnwrap(rapporto.sezioni.first { $0.nome == nome })
+        }
+        let riepilogo = try sezione("campagna_riepilogo")
+        func valore(_ voce: String) throws -> Int {
+            let riga = try XCTUnwrap(riepilogo.righe.first { $0[0] == voce }, "voce mancante: \(voce)")
+            return try XCTUnwrap(Int(riga[1]))
+        }
+        let invarianti = try sezione("campagna_invarianti")
+        func colonna(_ nome: String) throws -> Int { try XCTUnwrap(invarianti.intestazione.firstIndex(of: nome)) }
+        let cGiornate = try colonna("giornate"), cOrdini = try colonna("ordini")
+        let cViolazioni = try colonna("violazioni"), cSenza = try colonna("senza_destinazione")
+
+        XCTAssertEqual(try valore("scenari_di_campagna_generati"), invarianti.righe.count)
+        XCTAssertEqual(try valore("giornate_generate_in_totale"),
+                       invarianti.righe.reduce(0) { $0 + (Int($1[cGiornate]) ?? 0) })
+        XCTAssertEqual(try valore("ordini_impartiti_in_totale"),
+                       invarianti.righe.reduce(0) { $0 + (Int($1[cOrdini]) ?? 0) })
+        XCTAssertEqual(try valore("violazioni_trovate_in_totale"),
+                       invarianti.righe.reduce(0) { $0 + (Int($1[cViolazioni]) ?? 0) })
+        XCTAssertEqual(try valore("ordini_a_gruppi_senza_alcuna_destinazione"),
+                       invarianti.righe.reduce(0) { $0 + (Int($1[cSenza]) ?? 0) })
+        XCTAssertEqual(try valore("invarianti_sorvegliati"),
+                       SondaInvariantiCampagna.codiciNoti.count)
+
+        // La distribuzione pareggia anch'essa con il dettaglio.
+        let distribuzione = try sezione("campagna_distribuzione_gruppi")
+        XCTAssertEqual(distribuzione.righe.reduce(0) { $0 + (Int($1[2]) ?? 0) },
+                       try valore("giornate_generate_in_totale"))
+    }
+
+    /// La generazione deve coprire la parte alta della distribuzione: gli invarianti
+    /// che si rompono con molti gruppi sparpagliati non sono provati da giornate con
+    /// due gruppi vicini. Nella prima unità la generazione si fermava a cinque
+    /// gruppi e non esercitava mai lo stipamento; questa prova impedisce che ci si
+    /// torni riducendo gli scenari.
+    func test_incarico_6_la_generazione_copre_la_parte_alta_della_distribuzione() throws {
+        let rapporto = try programma(fumo: false).esegui()
+        let distribuzione = try XCTUnwrap(
+            rapporto.sezioni.first { $0.nome == "campagna_distribuzione_gruppi" })
+        let conteggi = distribuzione.righe.compactMap { Int($0[0]) }
+        XCTAssertTrue(conteggi.contains { $0 >= 8 },
+                      "nessuna giornata generata con otto o più gruppi")
+        XCTAssertTrue(conteggi.contains(1), "manca il caso del gruppo solo")
+        XCTAssertGreaterThanOrEqual(Set(conteggi).count, 6,
+                                    "la distribuzione deve toccare almeno sei conteggi diversi")
+        // E lo stipamento va davvero esercitato: se nessun gruppo resta mai senza
+        // destinazione, il caso in cui la marcia non si offre non è stato provato.
+        let riepilogo = try XCTUnwrap(rapporto.sezioni.first { $0.nome == "campagna_riepilogo" })
+        let senza = try XCTUnwrap(riepilogo.righe.first { $0[0] == "ordini_a_gruppi_senza_alcuna_destinazione" })
+        XCTAssertGreaterThan(try XCTUnwrap(Int(senza[1])), 0,
+                             "nessuna corsa ha esercitato lo stipamento")
     }
 
     /// Gli scenari sono file dichiarativi: aggiungerne uno non richiede di toccare
