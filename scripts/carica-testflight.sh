@@ -41,6 +41,32 @@ if massima is not None and segmenti(nuova) < segmenti(massima):
 print(f'versione da caricare: {nuova}; più alta già presente: {massima or \"nessuna\"} — si procede')
 "
 
+# ============================================================================
+# CONTROLLO PREVENTIVO DELLA NOTA PER I TESTER.
+# App Store Connect rifiuta whatsNew oltre i 4000 CARATTERI (non byte) con un
+# 409, e lo fa DOPO che la build è stata caricata: la build resta buona ma
+# arriva ai tester senza nota, e occorre accorgersene e riallegarla a mano.
+# È già accaduto due volte (build 7 e build 12) con la regola scritta nella
+# memoria di infrastruttura e dimenticata da chi la stava applicando: una
+# regola si può dimenticare, un controllo no. Qui si ferma prima di compilare.
+# ============================================================================
+echo "== Controllo preventivo: la nota per i tester sta nel limite =="
+python3 - "$RADICE/note-di-rilascio.txt" <<'PY'
+import pathlib, sys
+percorso = pathlib.Path(sys.argv[1])
+if not percorso.exists():
+    print(f"RIFIUTATO: manca {percorso}"); sys.exit(1)
+testo = percorso.read_text(encoding="utf-8")
+LIMITE = 4000
+if len(testo) > LIMITE:
+    print(f"RIFIUTATO: la nota per i tester ha {len(testo)} caratteri e il limite di "
+          f"App Store Connect è {LIMITE}. Il caricamento andrebbe a buon fine ma la "
+          f"nota verrebbe rifiutata dopo, e la build arriverebbe ai tester senza. "
+          f"Accorciare di almeno {len(testo) - LIMITE} caratteri e rilanciare.")
+    sys.exit(1)
+print(f"nota di {len(testo)} caratteri su {LIMITE}: si procede")
+PY
+
 echo "== Numero di build: massimo su tutto l'account più uno =="
 ULTIMO=$(eval $ASC GET "'/v1/builds?filter[app]=$APP_ID&limit=200'" \
   | python3 -c "import json,sys; d=json.load(sys.stdin)['data']; print(max((int(b['attributes']['version']) for b in d), default=0))")
