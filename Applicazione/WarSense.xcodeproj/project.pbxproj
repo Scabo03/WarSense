@@ -24,6 +24,7 @@
 		9834F71661D44043584E4993 /* PartitaCorrente.swift in Sources */ = {isa = PBXBuildFile; fileRef = 9EF7773BD1ED816307203E97 /* PartitaCorrente.swift */; };
 		A80A0935009DFE78F5115046 /* Sessione in Frameworks */ = {isa = PBXBuildFile; productRef = A916C71FC8064696BB93E31D /* Sessione */; };
 		BE4EC8B2E7DE3588E5B9CFFB /* AppDelegate.swift in Sources */ = {isa = PBXBuildFile; fileRef = 780DA0404CFBE7DD9B420A68 /* AppDelegate.swift */; };
+		C91A79B09526BD853D441712 /* FumoMappaCampagnaTest.swift in Sources */ = {isa = PBXBuildFile; fileRef = D02CD1A940C35DBC8B46486B /* FumoMappaCampagnaTest.swift */; };
 		CBFF38D38162312C41C4C40C /* TesseraDeck.swift in Sources */ = {isa = PBXBuildFile; fileRef = 2056BAAA10D05410497482F4 /* TesseraDeck.swift */; };
 		D5DF93E3EFFA96EC3D8BBDE7 /* MappaCampagnaAccessibileTest.swift in Sources */ = {isa = PBXBuildFile; fileRef = 8F2621F366CE07D66FC6A6EA /* MappaCampagnaAccessibileTest.swift */; };
 		D6B5BFD367B286153800292A /* GrigliaAccessibile.swift in Sources */ = {isa = PBXBuildFile; fileRef = F5CF5758DBDF15E75D992F76 /* GrigliaAccessibile.swift */; };
@@ -75,6 +76,7 @@
 		B61635E47EDED9D5E8A15EA1 /* Codice */ = {isa = PBXFileReference; lastKnownFileType = folder; name = Codice; path = ../Codice; sourceTree = SOURCE_ROOT; };
 		B7792DA00B9CCC289C68A7E6 /* Info.plist */ = {isa = PBXFileReference; lastKnownFileType = text.plist; path = Info.plist; sourceTree = "<group>"; };
 		C50CAE1A5AEB350F4FEDAB36 /* CostruttoreAnnunciCampagna.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = CostruttoreAnnunciCampagna.swift; sourceTree = "<group>"; };
+		D02CD1A940C35DBC8B46486B /* FumoMappaCampagnaTest.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = FumoMappaCampagnaTest.swift; sourceTree = "<group>"; };
 		D05C93D40ACCC919E14E0F90 /* PartitaCampagna.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = PartitaCampagna.swift; sourceTree = "<group>"; };
 		D09017EA703DD5FF54F15458 /* CostruttoreAnnunci.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = CostruttoreAnnunci.swift; sourceTree = "<group>"; };
 		D159331FD8EEFB4F1B728089 /* SchermataRegistro.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SchermataRegistro.swift; sourceTree = "<group>"; };
@@ -130,6 +132,7 @@
 			isa = PBXGroup;
 			children = (
 				921003768253D7D483CCC1D8 /* FumoInterfacciaTest.swift */,
+				D02CD1A940C35DBC8B46486B /* FumoMappaCampagnaTest.swift */,
 			);
 			path = ProveInterfaccia;
 			sourceTree = "<group>";
@@ -331,6 +334,7 @@
 			buildActionMask = 2147483647;
 			files = (
 				33BCAD29CAC0333FB4B83594 /* FumoInterfacciaTest.swift in Sources */,
+				C91A79B09526BD853D441712 /* FumoMappaCampagnaTest.swift in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};

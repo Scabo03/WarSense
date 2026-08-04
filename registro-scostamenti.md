@@ -88,6 +88,16 @@ Aperto dall'accertamento sugli esiti degli scontri (build 6), chiuso dal titolar
 
 02 §6.7 dà al gesto di fuga il compito di risalire «dal pannello alla griglia, dalla mappa alla schermata delle campagne, da questa alla patria»; 02 §9.2.1 gli dà anche quello di annullare una designazione in corso. Sulla mappa i due compiti convivono. Realizzazione: con una designazione in corso il gesto la annulla e non risale; senza designazione risale. Poiché la schermata delle campagne non esiste ancora (fase F), risalire significa in questa unità tornare alla schermata iniziale. La precedenza data all'annullamento è la stessa che 02 §9.2.1 stabilisce per la battaglia.
 
+## P11 — Osservazione: le griglie rispondono all'attivazione assistiva, non al tocco grezzo
+
+**Che cosa si è visto.** Il fumo d'interfaccia della mappa, scritto in questa unità, ha tentato di ordinare a un gruppo toccandone la casella e non ci è riuscito. La causa: le caselle della mappa — e, allo stesso modo, le celle della griglia di battaglia fin dalla fase B — sono elementi accessibili sintetici dentro una vista che non ha alcun riconoscitore di gesto. Rispondono ad `accessibilityActivate`, cioè al doppio tocco della tecnologia assistiva, e non a un tocco grezzo.
+
+**Perché non è un difetto di questa unità.** La mappa si comporta esattamente come la griglia di battaglia, ed è ciò che il principio 7 richiede; il percorso su cui il gioco è costruito è quello assistivo, ed è provato per identità nelle prove ospitate, dove `attiva(_:)` è la stessa porta che l'attivazione assistiva apre.
+
+**Perché va comunque registrato.** Con VoiceOver spento, nessuna delle due griglie è operabile al tocco. 02 §1.3 dichiara che il gioco è pensato anche per giocatori ipovedenti che usano VoiceOver come SUPPORTO: per costoro VoiceOver è attivo e il percorso funziona. Resta però il caso di chi giocasse a VoiceOver spento, che oggi non può ordinare nulla su nessuno dei due piani. È una condizione preesistente alla campagna, riguarda entrambe le griglie e la sua eventuale correzione va fatta sui due piani insieme, mai su uno solo: sarebbe altrimenti la disparità fra i piani che il principio 7 vieta. Non è stata toccata in questa unità perché il perimetro non la comprende.
+
+**Che cosa costerebbe.** Un riconoscitore di tocco su ciascuna vista di griglia che risolva il punto nella cella e chiami la stessa `attiva(_:)`. Nessun cambiamento di regole, nessun cambiamento di stato, nessuna conseguenza sugli annunci.
+
 ## Nessuno scostamento strutturale
 
 Nessun punto dell'architettura è risultato irrealizzabile o errato nella fase A: i confini dei bersagli, il giornale con istantanee, l'impronta canonica, la virgola fissa e la catena dei testi esterni funzionano come dichiarato. I documenti 00–05 non richiedono modifiche.
