@@ -1,6 +1,8 @@
 # Documento di accessibilità
 
-Documento 02 di 05 — versione 2.4
+Documento 02 di 05 — versione 2.5
+
+Novità della versione 2.5, in conseguenza della risoluzione immediata dei contatti (01 §9.7.1): l'annuncio della mischia non è più soltanto complessivo. L'esito di un ingaggio segue immediatamente l'azione che lo ha causato, nella stessa forma già usata per il tiro — una frase sola, in fasce, mai cifre — mentre l'annuncio complessivo resta per le mischie che proseguono e che a inizio giro si risolvono insieme (8.9, nuovo 8.9.2). L'intento della versione 2.2 è conservato: nessuna raffica di esiti da subire.
 
 Novità della versione 2.4, in conseguenza del limite dei bersagli simultanei introdotto da 01 §9.11: il vocabolario chiuso si estende all'insieme delle risposte del bersaglio, con tutti e tre i termini annunciati compreso quello ordinario (4.4.1, 4.4.5); la voce di ingaggio li dichiara in coda all'ordine fisso del punto 9.3.1, dopo ciò che si infligge e prima di nulla; si precisa in 8.9.1 che un contatto può ora produrre perdite in una direzione sola, cosa che le fasce già sanno esprimere.
 
@@ -216,7 +218,9 @@ I requisiti sono numerati. I punti contrassegnati come proposta sono suggeriment
 
 8.8 Annuncio della disponibilità di ingaggio. Poiché non esiste alcun attacco automatico e l'ingaggio si rende disponibile al ricorrere di una condizione di portata, secondo il punto 9.5.0 del documento 01, la disponibilità dell'ingaggio è dichiarata quando si incontra il reparto, insieme ai bersagli che essa consente di raggiungere. Il giocatore non deve dedurre la portata né verificarla cella per cella.
 
-8.9 Annuncio della mischia. L'esito dei combattimenti a contatto è annunciato in una sola comunicazione ordinata all'inizio del turno, comprensiva di tutti i contatti in corso, e non con un annuncio per ciascuna mischia. Il dettaglio di ciascun contatto resta consultabile atterrando sulla cella interessata. Con quattro o cinque contatti simultanei, l'annuncio per singola mischia renderebbe l'inizio di ogni turno una lista di perdite da ascoltare.
+8.9 Annuncio della mischia, riscritto nella versione 2.5. Le occasioni sono due, come le risoluzioni di 01 §9.7.1. Le mischie che proseguono si risolvono insieme all'inizio del giro e si annunciano in una sola comunicazione ordinata, comprensiva di tutti i contatti in corso: con quattro o cinque contatti, l'annuncio per singola mischia renderebbe l'inizio di ogni turno una lista di perdite da ascoltare, ed è il motivo per cui quella forma resta. Il contatto che si forma si risolve invece all'istante e si annuncia da solo, subito dopo l'azione che lo ha causato. Il dettaglio di ciascun contatto resta consultabile atterrando sulla cella interessata.
+
+8.9.2 Perché l'esito immediato non è una raffica. È una frase sola, legata a una sola azione deliberata, esattamente come l'esito del tiro: chi ordina un ingaggio sente che cosa ne è venuto, e chi ordina cinque ingaggi sente cinque conferme di cinque proprie decisioni, non un elenco che arriva tutto insieme senza che nulla lo abbia chiesto. La forma è la stessa del tiro anche nella struttura della frase, secondo il principio 7: il giocatore impara un modo solo. Vale identica per l'ingaggio subito, annunciato quando l'avversario lo compie, come già accade per il tiro subito.
 
 8.9.1 Fasce descrittive (versione 2.2; 01 §9.7.2). Ogni contatto dell'annuncio complessivo, e ogni esito di tiro, si esprime con le fasce chiuse del punto 4.4.5 dal punto di vista del giocatore — perdite inflitte e perdite subite — e mai con numeri di danno. Il contatto senza perdite da ambo i lati si annuncia con il solo termine di stallo. Dalla versione 2.4 un contatto può produrre perdite in una direzione sola, perché il limite dei bersagli simultanei di 01 §9.11 sopprime la risposta dal terzo assalitore in poi: le fasce lo esprimono già senza termini nuovi, dichiarando perdite inflitte da un lato e nessuna perdita subita dall'altro. La consistenza attuale di un reparto resta consultabile interrogando la sua cella, secondo il punto 3.8.1: il racconto dell'esito e il dato di consistenza sono due cose distinte.
 

@@ -550,3 +550,20 @@ Scelta. La seconda. Ogni scenario dichiara i propri assi da un insieme chiuso �
 Motivazione. Introdurre caso dove il gioco non ne ha significherebbe misurare una cosa diversa da quella che si gioca, e violerebbe lo spirito di 01 §12.1. Gli estremi delle forbici sono per di più ciò che 00 §13.2.4 prescrive di provare: la scelta non è un ripiego ma la forma giusta.
 
 Conseguenze. La riproducibilità è totale e collaudata: due corse sugli stessi dati danno lo stesso identico rapporto, carattere per carattere. Quando la fase D introdurrà meteo e guasti, il seme tornerà ad avere oggetto e si affiancherà agli assi sul piano di campagna, senza toglierli.
+
+
+## Parte nona — Decisione della risoluzione immediata
+
+### RDA-60 — Il contatto si risolve quando si forma, i disingaggi restano a inizio giro (01 §9.7.1, §9.8.5)
+
+Problema. La misura della fase C ha mostrato che, con mazzi identici e condotta identica, chi muoveva per primo perdeva in ventuno configurazioni su ventiquattro. La causa era la sequenza del giro: i contatti si risolvevano tutti alla fine, quindi chi si impegnava per primo consegnava all'avversario un turno intero per portargli altri nemici addosso prima di scambiare un colpo.
+
+Opzioni. Cambiare l'ordine dei turni; risolvere ogni contatto quando si forma; risolvere a metà giro.
+
+Scelta. La seconda, per decisione del titolare, che ha escluso di toccare l'ordine dei turni. Un contatto si risolve nell'istante in cui si forma e poi all'inizio di ogni giro finché dura. La risoluzione immediata riguarda il SOLO contatto che si è appena formato; le altre mischie in piedi attendono il giro.
+
+Sotto-decisione presa in corso d'opera e registrata perché non era ovvia: la soglia di disingaggio NON si valuta nello scambio immediato, ma solo a inizio giro. La prima realizzazione la valutava a ogni risoluzione, e il risultato era un reparto che poteva ritrarsi nello stesso turno in cui gli era stato ordinato di attaccare — comportamento che nessuna regola prevede e che 01 §9.8.2 esclude, dichiarando che chi si sfila torna controllabile dal turno successivo. Se ne è accorto il collaudo, che è cominciato a cadere a cascata su fixture che presupponevano contatti stabili.
+
+Motivazione. Agire sulla sequenza anziché sull'ordine dei turni conserva 01 §9.4.1, che il titolare vuole intatto, e colpisce la causa misurata anziché un suo sintomo. Risolvere il solo contatto formato, e non tutti, conserva la simultaneità dove serve e la toglie dove produceva l'ingiustizia.
+
+Conseguenze. La simultaneità resta intera dentro una risoluzione e cade fra risoluzioni diverse dello stesso turno: i posti in mischia e gli insiemi dei concorrenti si leggono all'apertura di ciascuna risoluzione, non una volta per giro (01 §9.11.1, §9.10.2.3 riformulati). L'evento di contatto porta ora il proprio esito, come quello di tiro, e l'annuncio segue l'azione (02 §8.9.2). Tutte le impronte cambiano e i copioni d'oro si rigenerano. Misura dopo la modifica: chi muove per primo perde in tredici configurazioni su ventiquattro, cioè quanto il caso.

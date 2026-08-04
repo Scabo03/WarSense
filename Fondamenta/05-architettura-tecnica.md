@@ -1,6 +1,8 @@
 # Documento di architettura tecnica
 
-Documento 05 di 05 — versione 1.2
+Documento 05 di 05 — versione 1.3
+
+Novità della versione 1.3, in conseguenza della risoluzione immediata dei contatti (01 §9.7.1): l'ordine di risoluzione del turno di battaglia è riscritto al punto 3.9. La simultaneità resta dentro ciascuna risoluzione e cade fra risoluzioni diverse dello stesso turno.
 
 Novità della versione 1.2, alla realizzazione della fase C: il programma di verifica è una LIBRERIA più un guscio da riga di comando, perché il fumo delle simulazioni sia collaudabile come qualunque altro bersaglio (12.1, RDA-58); la variazione delle corse viene dagli assi dichiarati negli scenari e non dai semi, perché la battaglia non contiene alcuna estrazione del caso (12.3); gli scenari sono file dichiarativi con assi di un insieme chiuso (12.2).
 
@@ -116,7 +118,9 @@ Novità della versione 1.1, in conseguenza del limite dei bersagli simultanei di
 
 3.8 Ordine di risoluzione della giornata di campagna (chiusura registrata in 01 §5.6.11): all'apertura della giornata il Motore estrae il meteo, aggiorna provviste, contatori e conoscenza; il giocatore ordina i propri gruppi in qualunque ordine; quando tutti i gruppi del giocatore hanno agito, agiscono i gruppi avversari in ordine deterministico; la giornata si chiude da sé (01 §5.6.0.6) con le risoluzioni di fine giornata: avanzamento delle marce lunghe, scatto delle imboscate, valutazione dei tagli, completamenti, decadimento della conoscenza. Ciò che il giocatore viene a sapere delle mosse avversarie passa esclusivamente dal sottosistema della conoscenza e dal registro.
 
-3.9 Ordine di risoluzione del turno di battaglia. Agisce per primo chi occupava per primo la casella dello scontro (chiusura registrata in 01 §9.4.1); l'imboscata è lo stesso ordine con i turni aggiuntivi e lo sconto (01 §9.3.2). All'inizio di ciascun giro completo il Motore risolve tutte le mischie in corso simultaneamente, applica i disingaggi maturati ed emette un unico evento aggregato con l'esito di tutti i contatti (01 §9.7.1); l'annuncio complessivo lo costruisce Segnali da quell'evento, poiché il Motore non conosce gli annunci (00 §3.2). Poi ciascuna parte, nel proprio turno, rigenera il budget con il riporto e spende azioni e volume; il turno di parte termina con il comando esplicito di fine turno.
+3.9 Ordine di risoluzione del turno di battaglia, riscritto nella versione 1.3. Agisce per primo chi occupava per primo la casella dello scontro (chiusura registrata in 01 §9.4.1); l'imboscata è lo stesso ordine con i turni aggiuntivi e lo sconto (01 §9.3.2). I contatti si risolvono in due occasioni distinte (01 §9.7.1). La prima è l'istante in cui il contatto si forma: il Motore risolve QUEL contatto soltanto ed emette un evento che ne porta l'esito, come già fa per il tiro. La seconda è l'inizio di ciascun giro completo: il Motore risolve insieme tutte le mischie ancora in piedi, applica i disingaggi maturati — che si valutano soltanto qui, secondo 01 §9.8.5 — ed emette un unico evento aggregato. Gli annunci li costruisce Segnali da quegli eventi, poiché il Motore non conosce gli annunci (00 §3.2). Poi ciascuna parte, nel proprio turno, rigenera il budget con il riporto e spende azioni e volume; il turno di parte termina con il comando esplicito di fine turno.
+
+3.9.1 Che cosa resta simultaneo. Dentro UNA risoluzione la simultaneità è intera: si calcolano tutti i danni di tutte le direzioni prima di applicarne uno solo, e i posti in mischia e gli insiemi dei concorrenti si leggono una volta sola dallo stato con cui la risoluzione si apre (01 §9.11.1, §9.10.2.3). Ciò che è caduto è la simultaneità FRA risoluzioni diverse dello stesso turno, ed è precisamente lo scopo della modifica: chi colpisce per primo colpisce prima. Ne discende che l'ordine in cui una parte muove i propri reparti conta, il che non è un effetto collaterale ma la profondità dichiarata da 01 §9.7.1.3.
 
 ---
 

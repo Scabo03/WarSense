@@ -84,6 +84,22 @@ Ori rigenerati con revisione esplicita. Primo oro: stesso esito e stesso vincito
 
 Collaudo: 107 prove del pacchetto (una saltata, la rigenerazione degli ori) più 21 ospitate e 1 d'interfaccia, tutte verdi.
 
+#### Risoluzione immediata dei contatti (build 10, versione 1.1.0)
+
+Il titolare ha deciso di intervenire sulla SEQUENZA e non sull'ordine dei turni, che resta intatto (01 §9.4.1). Un contatto si risolve ora nell'istante in cui si forma, e poi a ogni giro nuovo finché dura (01 → 3.7 §9.7.1, 02 → 2.5 §8.9, 05 → 1.3 §3.9, RDA-60).
+
+**Misura prima e dopo, sulle stesse ventiquattro configurazioni** (mazzi identici o comparabili, ogni combinazione di ufficiali, entrambi i primi occupanti, vantaggi spenti): sconfitto uguale al primo occupante in **21 casi su 24 prima**, in **13 su 24 dopo**. Tredici su ventiquattro è il valore atteso dal caso: la penalità sistematica è sparita. Prima di fidarsi della misura si è verificato che sappia muoversi, dando a una parte un mazzo dimezzato: la misura la vede perdere anche dal lato che altrimenti vince.
+
+**Ordine dei propri reparti**: misurato, cambia l'esito in 5 casi su 6 e ribalta chi perde in 3. Da correggere una presunzione dell'incarico: l'ordine contava GIÀ prima della modifica, nella stessa misura (5 su 6), attraverso tiro e movimento; ciò che è nuovo è che ora conta anche in mischia.
+
+**Sotto-decisione presa in corso d'opera** (RDA-60, 01 §9.8.5): la soglia di disingaggio non si valuta nello scambio immediato ma solo a inizio giro. La prima realizzazione la valutava sempre, e un reparto poteva ritrarsi nello stesso turno in cui gli era stato ordinato di attaccare — che 01 §9.8.2 esclude. L'ha fatto emergere il collaudo, cadendo a cascata su fixture che presupponevano contatti stabili.
+
+**Riformulate le regole che presupponevano la simultaneità**: i posti in mischia (01 §9.11.1) e gli insiemi dei concorrenti (01 §9.10.2.3) si leggono ora all'apertura di CIASCUNA risoluzione, non una volta per giro; dentro una risoluzione la simultaneità resta intera. Aggiunto 01 §9.11.1.1: il posto di un reparto può cambiare fra una risoluzione e l'altra. L'impronta canonica non cambia struttura ma tutti i valori sì.
+
+**Il corpo a corpo continua a non decidere**: nessuno dei 162 duelli uno contro uno si chiude con la dispersione, esattamente come prima. La modifica non ha toccato quel quadro. Riportato e non corretto, come da incarico: è materia di una decisione a sé.
+
+Ori rigenerati: stesso esito e stesso vincitore in entrambi, battaglie più corte (da 8 a 6 giri e da 7 a 6), che è ciò che la risoluzione immediata prevede. Versione dei valori a 0.4.0. Collaudo: 115 prove del pacchetto (una saltata) più 21 ospitate e 1 d'interfaccia.
+
 Da affrontare in seguito, annotato senza realizzarlo né progettarlo (osservazione del titolare): una persona cieca dalla nascita avrebbe grosse difficoltà se non conoscesse bene i rotori; il problema è di apprendimento, non di quantità di opzioni. Serve una **prima battaglia guidata** che insegni i rotori e i gesti mentre si gioca.
 
 Costruito nella fase B:

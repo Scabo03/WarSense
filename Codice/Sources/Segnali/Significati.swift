@@ -55,7 +55,12 @@ public struct TraduttoreEventi: Sendable {
             return esiti.isEmpty ? nil : esitoFavorevole(esiti) ? .mischiaFavorevole : .mischiaSfavorevole
         case .disingaggio: return .disingaggio
         case .munizioniEsaurite: return .munizioniEsaurite
-        case .contattoAvviato: return nil // l'annuncio basta: il segnale arriva con l'esito
+        case .contattoRisolto(let p, _, _, let esito):
+            // Il contatto porta ora il proprio esito: il segnale lo accompagna
+            // subito, con lo stesso segno che l'annuncio complessivo usa a inizio
+            // giro (02 §11.4). Vale per l'ingaggio proprio e per quello subito.
+            _ = p
+            return esitoFavorevole([esito]) ? .mischiaFavorevole : .mischiaSfavorevole
         case .sorpresaConclusa: return .imboscata
         default: return nil
         }
@@ -122,8 +127,19 @@ public struct TraduttoreEventi: Sendable {
             return testi.frase("battaglia.tiro_subito", verbosita: verbosita,
                                nome(archetipo), lettera(letteraOrdinale),
                                fasciaFrase(fascia, inflitte: false))
-        case .contattoAvviato(let cella):
-            return testi.frase("battaglia.contatto_avviato", verbosita: verbosita, cella.riga, cella.colonna)
+        case .contattoRisolto(let p, let archetipo, let letteraOrdinale, let esito):
+            // L'esito segue immediatamente l'azione che lo ha causato, nella stessa
+            // forma del tiro: una frase sola, in fasce, mai cifre (02 §8.9.2).
+            if p == parte {
+                return testi.frase("battaglia.contatto_eseguito", verbosita: verbosita,
+                                   nome(archetipo), lettera(letteraOrdinale),
+                                   fasciaFrase(esito.fascia(di: parte.avversaria), inflitte: true),
+                                   fasciaFrase(esito.fascia(di: parte), inflitte: false))
+            }
+            return testi.frase("battaglia.contatto_subito", verbosita: verbosita,
+                               nome(archetipo), lettera(letteraOrdinale),
+                               fasciaFrase(esito.fascia(di: parte.avversaria), inflitte: true),
+                               fasciaFrase(esito.fascia(di: parte), inflitte: false))
         case .esitoMischiaComplessivo(let esiti):
             guard !esiti.isEmpty else { return nil }
             // Una sola comunicazione ordinata per tutti i contatti (01 §9.7.1),

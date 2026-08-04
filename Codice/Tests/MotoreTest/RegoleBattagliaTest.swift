@@ -537,8 +537,10 @@ final class RegoleBattagliaTest: XCTestCase {
         }
         let tiratore = IdSciame(stato.prossimoIdSciame)
         esegui(.piazza(cella: try XCTUnwrap(cellaTiratore)), .giocatore, &stato)
+        // Un giro intero, perché il tiratore riacquisti la propria azione. Il
+        // contatto si è già risolto all'ingaggio (01 §9.7.1) e prosegue.
         esegui(.fineTurno, .giocatore, &stato)
-        esegui(.fineTurno, .avversario, &stato) // il giro nuovo risolve una mischia
+        esegui(.fineTurno, .avversario, &stato)
 
         // Il proprio reparto non è mai un bersaglio, né di tiro né di ingaggio.
         XCTAssertEqual(motore.valida(.tira(sciame: tiratore, bersaglio: mio),
@@ -546,9 +548,11 @@ final class RegoleBattagliaTest: XCTestCase {
         XCTAssertFalse(motore.valida(.ingaggia(sciame: tiratore, bersaglio: mio),
                                      parte: .giocatore, stato: stato).eValido)
 
-        // Battere un nemico impegnato in mischia con i propri è lecito e senza
+        // Battere un nemico che i propri hanno già affrontato è lecito e senza
         // alcun rischio per i propri: il danno cade soltanto sul bersaglio.
-        XCTAssertTrue(stato.impegnato(suo))
+        // Che il contatto sia ancora in piedi dopo un giro non è la proprietà in
+        // prova e non si pretende: con la risoluzione immediata (01 §9.7.1) uno
+        // scambio può bastare a far scattare la soglia di disingaggio.
         let serbatoioMioPrima = stato.sciami[mio]!.serbatoio
         let perditeMiePrima = stato.perditeSubite[.giocatore] ?? 0
         let perditeSuePrima = stato.perditeSubite[.avversario] ?? 0

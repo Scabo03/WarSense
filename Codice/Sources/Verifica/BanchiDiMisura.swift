@@ -115,18 +115,21 @@ public struct BanchiDiMisura: Sendable {
                         Collocazione(parte: .avversario, archetipo: bersaglio,
                                      protezione: protezione, cella: centro),
                     ])
+                    // Dalla risoluzione immediata (01 §9.7.1) lo scambio comincia
+                    // all'ingaggio: la fotografia si prende PRIMA di ingaggiare.
+                    let inizialeAttaccante = stato.sciami[ids[0]]!.serbatoio
+                    let inizialeBersaglio = stato.sciami[ids[1]]!.serbatoio
                     stato = motore.applica(.ingaggia(sciame: ids[0], bersaglio: ids[1]),
                                            parte: .giocatore, stato: stato).0
-                    let inizialeAttaccante = stato.sciami[ids[0]]!.serbatoio
-                    var primoInflitto: Int64 = 0
-                    var primoSubito: Int64 = 0
+                    var primoInflitto = inizialeBersaglio - (stato.sciami[ids[1]]?.serbatoio ?? 0)
+                    var primoSubito = inizialeAttaccante - (stato.sciami[ids[0]]?.serbatoio ?? 0)
                     var giri = 0
                     while stato.sciami[ids[0]] != nil && stato.sciami[ids[1]] != nil
                             && stato.esito == nil && giri < banchi.giriMassimiDuello {
                         let (dopo, subiti) = giroDiMischia(stato)
                         if giri == 0 {
-                            primoInflitto = subiti[ids[1]] ?? 0
-                            primoSubito = subiti[ids[0]] ?? 0
+                            primoInflitto += subiti[ids[1]] ?? 0
+                            primoSubito += subiti[ids[0]] ?? 0
                         }
                         stato = dopo
                         giri += 1
@@ -232,11 +235,22 @@ public struct BanchiDiMisura: Sendable {
                 + [Collocazione(parte: .avversario, archetipo: banchi.bersaglioDiRiferimento,
                                 protezione: banchi.protezioneDiRiferimento, cella: centro)])
             let idBersaglio = ids.removeLast()
+            // La misura copre l'intero PRIMO scambio: gli ingaggi, che ora si
+            // risolvono all'istante (01 §9.7.1), più la risoluzione d'inizio giro.
+            // Ogni ingaggio si valida, perché uno scambio già avvenuto può aver
+            // disfatto il bersaglio e reso il successivo impossibile.
+            let prima = stato.sciami.mapValues { $0.serbatoio }
             for id in ids {
-                stato = motore.applica(.ingaggia(sciame: id, bersaglio: idBersaglio),
-                                       parte: .giocatore, stato: stato).0
+                let comando = ComandoBattaglia.ingaggia(sciame: id, bersaglio: idBersaglio)
+                guard motore.valida(comando, parte: .giocatore, stato: stato).eValido else { continue }
+                stato = motore.applica(comando, parte: .giocatore, stato: stato).0
             }
-            let (dopo, subiti) = giroDiMischia(stato)
+            let (dopo, dalGiro) = giroDiMischia(stato)
+            var subiti: [IdSciame: Int64] = [:]
+            for (id, consistenza) in prima {
+                subiti[id] = consistenza - (dopo.sciami[id]?.serbatoio ?? 0)
+            }
+            _ = dalGiro
             let inflitto = subiti[idBersaglio] ?? 0
             let subito = ids.reduce(Int64(0)) { $0 + (subiti[$1] ?? 0) }
             esito.append(PassoAccerchiamento(

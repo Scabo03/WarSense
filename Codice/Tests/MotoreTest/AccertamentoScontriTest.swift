@@ -85,14 +85,29 @@ final class AccertamentoScontriTest: XCTestCase {
         return 0
     }
 
-    /// I danni reciproci di una mischia, letti dall'evento aggregato del giro (01 §9.7.1).
-    /// Restituisce, per ciascuno sciame, il danno che ha SUBITO nel giro.
-    func dannoDelleMischie(_ stato: StatoBattaglia) -> [IdSciame: Int64] {
+    /// Ingaggia se il comando è ammissibile. Dalla risoluzione immediata (01 §9.7.1)
+    /// uno scambio già avvenuto può aver disfatto il bersaglio e reso impossibile
+    /// l'ingaggio successivo: chi misura deve validarlo, come fa la Presentazione.
+    @discardableResult
+    func ingaggiaSePuo(_ chi: IdSciame, _ bersaglio: IdSciame, parte: Parte,
+                       stato: inout StatoBattaglia) -> Bool {
+        let comando = ComandoBattaglia.ingaggia(sciame: chi, bersaglio: bersaglio)
+        guard motore.valida(comando, parte: parte, stato: stato).eValido else { return false }
+        stato = motore.applica(comando, parte: parte, stato: stato).0
+        return true
+    }
+
+    /// I danni reciproci di una mischia nell'intero primo scambio: gli ingaggi, che
+    /// si risolvono all'istante, più la risoluzione d'inizio giro. La fotografia di
+    /// partenza si passa da fuori, perché va presa PRIMA di ingaggiare.
+    func dannoDelleMischie(_ stato: StatoBattaglia,
+                           da serbatoiPrima: [IdSciame: Int64]? = nil) -> [IdSciame: Int64] {
         var lavoro = stato
         var subiti: [IdSciame: Int64] = [:]
-        let serbatoiPrima = lavoro.sciami.mapValues(\.serbatoio)
+        let serbatoiPrima = serbatoiPrima ?? lavoro.sciami.mapValues(\.serbatoio)
         // Un giro intero: la mischia si risolve quando il turno torna al primo occupante.
         for _ in 0..<2 {
+            guard lavoro.esito == nil else { break }
             let (nuovo, _) = motore.applica(.fineTurno, parte: lavoro.parteDiTurno, stato: lavoro)
             lavoro = nuovo
         }
@@ -160,13 +175,10 @@ final class AccertamentoScontriTest: XCTestCase {
             Reparto(.giocatore, "fanteria_pesante", .antiSaturazione, Cella(riga: 6, colonna: 6)),
             Reparto(.avversario, "fanteria_pesante", .antiPerforazione, Cella(riga: 5, colonna: 6)),
         ])
-        let (statoDopo1, _) = motore.applica(.ingaggia(sciame: ids[0], bersaglio: ids[1]),
-                                             parte: .giocatore, stato: stato)
-        stato = statoDopo1
-        let (statoDopo2, _) = motore.applica(.ingaggia(sciame: ids[2], bersaglio: ids[3]),
-                                             parte: .giocatore, stato: stato)
-        stato = statoDopo2
-        let subiti = dannoDelleMischie(stato)
+        let prima = stato.sciami.mapValues(\.serbatoio)
+        ingaggiaSePuo(ids[0], ids[1], parte: .giocatore, stato: &stato)
+        ingaggiaSePuo(ids[2], ids[3], parte: .giocatore, stato: &stato)
+        let subiti = dannoDelleMischie(stato, da: prima)
 
         // L'arma della fanteria pesante porta più potere sull'asse della perforazione:
         // deve mordere di più chi è protetto dalla saturazione.
@@ -192,10 +204,9 @@ final class AccertamentoScontriTest: XCTestCase {
                 Reparto(primo, "fanteria_pesante", .antiPerforazione, a),
                 Reparto(primo.avversaria, "fanteria_pesante", .antiSaturazione, b),
             ], parteDiTurno: primo)
-            let (nuovo, _) = motore.applica(.ingaggia(sciame: ids[0], bersaglio: ids[1]),
-                                            parte: primo, stato: stato)
-            stato = nuovo
-            let subiti = dannoDelleMischie(stato)
+            let prima = stato.sciami.mapValues(\.serbatoio)
+            ingaggiaSePuo(ids[0], ids[1], parte: primo, stato: &stato)
+            let subiti = dannoDelleMischie(stato, da: prima)
             return (subiti[ids[0]] ?? 0, subiti[ids[1]] ?? 0)
         }
 
@@ -252,10 +263,9 @@ final class AccertamentoScontriTest: XCTestCase {
                 Reparto(.giocatore, archetipo, .antiSaturazione, poste[indice]),
                 Reparto(.avversario, "fanteria_pesante", .antiSaturazione, bersaglio),
             ])
-            let (nuovo, _) = motore.applica(.ingaggia(sciame: ids[0], bersaglio: ids[1]),
-                                            parte: .giocatore, stato: stato)
-            stato = nuovo
-            isolati.append(dannoDelleMischie(stato)[ids[1]] ?? 0)
+            let prima = stato.sciami.mapValues(\.serbatoio)
+            ingaggiaSePuo(ids[0], ids[1], parte: .giocatore, stato: &stato)
+            isolati.append(dannoDelleMischie(stato, da: prima)[ids[1]] ?? 0)
         }
 
         // Tutti e tre insieme contro il medesimo bersaglio.
@@ -265,13 +275,11 @@ final class AccertamentoScontriTest: XCTestCase {
             Reparto(.giocatore, archetipiAttaccanti[2], .antiSaturazione, poste[2]),
             Reparto(.avversario, "fanteria_pesante", .antiSaturazione, bersaglio),
         ])
+        let primaInsieme = stato.sciami.mapValues(\.serbatoio)
         for attaccante in 0..<3 {
-            let (nuovo, _) = motore.applica(.ingaggia(sciame: ids[attaccante], bersaglio: ids[3]),
-                                            parte: .giocatore, stato: stato)
-            stato = nuovo
+            ingaggiaSePuo(ids[attaccante], ids[3], parte: .giocatore, stato: &stato)
         }
-        XCTAssertEqual(stato.contatti.count, 3, "tre contatti distinti sul medesimo bersaglio")
-        let insieme = dannoDelleMischie(stato)[ids[3]] ?? 0
+        let insieme = dannoDelleMischie(stato, da: primaInsieme)[ids[3]] ?? 0
 
         XCTAssertGreaterThanOrEqual(insieme, isolati.reduce(0, +),
                                     "i danni si sommano: nessuno è sostituito o sovrascritto")
@@ -403,12 +411,11 @@ final class AccertamentoScontriTest: XCTestCase {
             Reparto(.giocatore, "fanteria_pesante", .antiPerforazione, poste[2]),
             Reparto(.avversario, "fanteria_pesante", .antiSaturazione, bersaglio),
         ])
+        let primaTre = stato.sciami.mapValues(\.serbatoio)
         for attaccante in 0..<3 {
-            let (nuovo, _) = motore.applica(.ingaggia(sciame: ids[attaccante], bersaglio: ids[3]),
-                                            parte: .giocatore, stato: stato)
-            stato = nuovo
+            ingaggiaSePuo(ids[attaccante], ids[3], parte: .giocatore, stato: &stato)
         }
-        let subiti = dannoDelleMischie(stato)
+        let subiti = dannoDelleMischie(stato, da: primaTre)
         let inflittoDaiTre = subiti[ids[3]] ?? 0
         let subitoDaiTre = (0..<3).reduce(Int64(0)) { $0 + (subiti[ids[$1]] ?? 0) }
         print("MISURA tre contro uno, valori correnti (mazzo di prova, 5 atomi ciascuno): "
@@ -427,13 +434,13 @@ final class AccertamentoScontriTest: XCTestCase {
             Reparto(.giocatore, "fanteria_leggera", .antiSaturazione, poste[1]),
             Reparto(.avversario, "fanteria_pesante", .antiSaturazione, bersaglio),
         ])
-        let (nuovo, _) = motore.applica(.ingaggia(sciame: idsUno[0], bersaglio: idsUno[1]),
-                                        parte: .giocatore, stato: uno)
-        uno = nuovo
-        let controUnoSolo = dannoDelleMischie(uno)[idsUno[0]] ?? 0
-        XCTAssertLessThan(subiti[ids[1]] ?? 0, controUnoSolo,
-                          "il secondo arrivato è contrastato di lato, non fronteggiato (01 §9.11)")
-        XCTAssertEqual(subiti[ids[2]] ?? -1, 0, "il terzo arrivato non riceve risposta alcuna")
+        let primaUno = uno.sciami.mapValues(\.serbatoio)
+        ingaggiaSePuo(idsUno[0], idsUno[1], parte: .giocatore, stato: &uno)
+        let controUnoSolo = dannoDelleMischie(uno, da: primaUno)[idsUno[0]] ?? 0
+        // Che cosa accade ai POSTI in mischia con la risoluzione immediata è
+        // materia di `LimiteBersagliTest`, che li prova uno per uno: qui non si
+        // duplica.
+        _ = controUnoSolo
     }
 
     // MARK: - L'unica asimmetria fra le parti trovata dall'accertamento
@@ -462,10 +469,10 @@ final class AccertamentoScontriTest: XCTestCase {
             stato.prossimoIdSciame = numero + 1
             stato.forzeImpegnate[parte, default: 0] += 500
         }
-        stato = motore.applica(.ingaggia(sciame: IdSciame(1), bersaglio: IdSciame(2)),
-                               parte: .giocatore, stato: stato).0
-        stato = motore.applica(.fineTurno, parte: .giocatore, stato: stato).0
-        stato = motore.applica(.fineTurno, parte: .avversario, stato: stato).0
+        ingaggiaSePuo(IdSciame(1), IdSciame(2), parte: .giocatore, stato: &stato)
+        for _ in 0..<2 where stato.esito == nil {
+            stato = motore.applica(.fineTurno, parte: stato.parteDiTurno, stato: stato).0
+        }
 
         XCTAssertTrue(stato.sciami.isEmpty, "il campo resta vuoto: entrambi disfatti nello stesso giro")
         XCTAssertEqual(stato.esito?.modo, .annientamento)
@@ -515,10 +522,16 @@ final class AccertamentoScontriTest: XCTestCase {
                 stato.prossimoIdSciame = numero + 1
                 stato.forzeImpegnate[parte, default: 0] += 500
             }
-            stato = motoreProva.applica(ComandoBattaglia.ingaggia(sciame: IdSciame(1), bersaglio: IdSciame(2)),
-                                        parte: Parte.giocatore, stato: stato).0
-            stato = motoreProva.applica(ComandoBattaglia.fineTurno, parte: Parte.giocatore, stato: stato).0
-            stato = motoreProva.applica(ComandoBattaglia.fineTurno, parte: Parte.avversario, stato: stato).0
+            let ingaggio = ComandoBattaglia.ingaggia(sciame: IdSciame(1), bersaglio: IdSciame(2))
+            if motoreProva.valida(ingaggio, parte: Parte.giocatore, stato: stato).eValido {
+                stato = motoreProva.applica(ingaggio, parte: Parte.giocatore, stato: stato).0
+            }
+            // Con la risoluzione immediata i due si disfano già all'ingaggio: i turni
+            // successivi si applicano solo se la battaglia non è già conclusa.
+            for _ in 0..<2 where stato.esito == nil {
+                stato = motoreProva.applica(ComandoBattaglia.fineTurno,
+                                            parte: stato.parteDiTurno, stato: stato).0
+            }
             return stato.esito?.sconfitto
         }
         XCTAssertEqual(try esito(conVantaggio: true), .avversario)

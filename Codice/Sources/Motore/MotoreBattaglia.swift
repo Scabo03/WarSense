@@ -435,11 +435,23 @@ public struct MotoreBattaglia: Sendable {
         case .ingaggia(let id, let bersaglioId):
             let sciame = stato.sciami[id]!
             let bersaglio = stato.sciami[bersaglioId]!
-            stato.contatti.append(Contatto(primo: id, secondo: bersaglioId,
-                                           consistenzaIngressoPrimo: sciame.serbatoio,
-                                           consistenzaIngressoSecondo: bersaglio.serbatoio))
+            let contatto = Contatto(primo: id, secondo: bersaglioId,
+                                    consistenzaIngressoPrimo: sciame.serbatoio,
+                                    consistenzaIngressoSecondo: bersaglio.serbatoio)
+            stato.contatti.append(contatto)
             stato.sciami[id]!.azioneSpesa = true
-            eventi.append(.contattoAvviato(cella: bersaglio.posizione))
+            // Il contatto si risolve nell'istante in cui si forma (01 §9.7.1):
+            // chi ingaggia scambia i colpi subito, senza attendere che entrambe le
+            // parti abbiano finito di agire. Si risolve QUESTO contatto soltanto:
+            // gli altri già in piedi attendono l'inizio del giro nuovo.
+            let (esiti, conseguenze) = risolvi([contatto], stato: &stato, conDisingaggi: false)
+            if let esito = esiti.first {
+                eventi.append(.contattoRisolto(parte: parte,
+                                               bersaglioArchetipo: bersaglio.archetipo,
+                                               bersaglioLettera: bersaglio.lettera,
+                                               esito: esito))
+            }
+            eventi.append(contentsOf: conseguenze)
 
         case .dichiaraResa:
             stato.resaDichiarataDa = parte
@@ -526,25 +538,48 @@ public struct MotoreBattaglia: Sendable {
 
     // MARK: - Risoluzione delle mischie (01 §9.7)
 
+    /// La mischia d'inizio giro: tutti i contatti ancora in piedi si risolvono
+    /// insieme (01 §9.7.1). È la seconda delle due occasioni di risoluzione; la
+    /// prima è l'istante in cui il contatto si forma.
     private func risolviMischie(_ stato: inout StatoBattaglia) -> [EventoBattaglia] {
         guard !stato.contatti.isEmpty else { return [] }
         var eventi: [EventoBattaglia] = []
+        let (esiti, conseguenze) = risolvi(stato.contatti, stato: &stato, conDisingaggi: true)
+        guard !esiti.isEmpty else { return conseguenze }
+        eventi.append(.esitoMischiaComplessivo(esiti))
+        eventi.append(contentsOf: conseguenze)
+        return eventi
+    }
 
-        // Danni simultanei: prima si calcolano tutti, poi si applicano (05 §3.9).
+    /// Risolve i contatti indicati e restituisce gli esiti più le conseguenze
+    /// (reparti disfatti, disingaggi). Dentro UNA risoluzione la simultaneità resta
+    /// intera: si calcolano tutti i danni delle due direzioni di ogni contatto prima
+    /// di applicarne uno solo, e i posti in mischia e gli insiemi dei concorrenti si
+    /// leggono una volta sola dallo stato con cui la risoluzione si apre (01 §9.11.1,
+    /// §9.10.2.3). Ciò che è caduto con la risoluzione immediata è la simultaneità
+    /// FRA risoluzioni diverse dello stesso turno, che è precisamente lo scopo della
+    /// modifica: chi colpisce per primo colpisce prima.
+    /// `conDisingaggi` distingue le due occasioni: lo scambio immediato dell'ingaggio
+    /// non fa scattare la soglia di disingaggio, che resta un fatto d'inizio giro
+    /// (01 §9.8.2, dove il reparto che si sfila torna controllabile dal turno
+    /// successivo). Diversamente un reparto potrebbe ritrarsi nello stesso turno in
+    /// cui gli è stato ordinato di attaccare, che nessuna regola prevede.
+    private func risolvi(_ daRisolvere: [Contatto], stato: inout StatoBattaglia,
+                         conDisingaggi: Bool)
+        -> (esiti: [EsitoContatto], eventi: [EventoBattaglia]) {
+        var eventi: [EventoBattaglia] = []
         struct DannoCalcolato { let bersaglio: IdSciame; let danno: Int64 }
         var danni: [DannoCalcolato] = []
         var esiti: [EsitoContatto] = []
-        let contattiOrdinati = stato.contatti.sorted {
+        let contattiOrdinati = daRisolvere.sorted {
             ($0.primo, $0.secondo) < ($1.primo, $1.secondo)
         }
-        // I coefficienti di accerchiamento si ricavano dallo stato d'ingresso del giro,
-        // prima che qualunque danno sia applicato: l'insieme dei concorrenti è quindi
-        // il medesimo per tutti i contatti, e l'ordine non lo tocca (01 §9.10.2).
         for contatto in contattiOrdinati {
             guard let a = stato.sciami[contatto.primo], let b = stato.sciami[contatto.secondo] else { continue }
             // Ciascuno rende secondo il posto che l'altro occupa nella PROPRIA mischia
-            // (01 §9.11): il posto viene dallo stato d'ingresso del giro, quindi è lo
-            // stesso per tutti i contatti e l'ordine di risoluzione non lo tocca.
+            // (01 §9.11): il posto viene dallo stato con cui questa risoluzione si
+            // apre, quindi è lo stesso per tutti i contatti che vi rientrano e
+            // l'ordine con cui li si percorre non lo tocca.
             // Chi resta oltre il secondo posto non infligge nulla: nessun danno da
             // calcolare, non un danno ridotto a zero (01 §9.11.2).
             let dannoAB = postoInMischia(di: contatto.primo, contro: contatto.secondo, stato: stato)
@@ -570,9 +605,9 @@ public struct MotoreBattaglia: Sendable {
                                        fasciaAlPrimo: fascia(danno: dannoBA, consistenzaPrima: a.serbatoio),
                                        fasciaAlSecondo: fascia(danno: dannoAB, consistenzaPrima: b.serbatoio)))
         }
-        eventi.append(.esitoMischiaComplessivo(esiti))
         for d in danni { applicaDanno(d.danno, a: d.bersaglio, stato: &stato, eventi: &eventi) }
 
+        guard conDisingaggi else { return (esiti, eventi) }
         // Disingaggi, dopo l'applicazione dei danni (01 §9.8), in ordine deterministico.
         // Chi si ritrae lascia l'intera mischia: tutti i suoi contatti terminano,
         // ciascuna coppia entra nella memoria e nel divieto (precisazione P4 del
@@ -605,7 +640,7 @@ public struct MotoreBattaglia: Sendable {
                 eventi.append(.disingaggio(sciame: id, da: da, a: destinazione))
             }
         }
-        return eventi
+        return (esiti, eventi)
     }
 
     private func applicaDanno(_ danno: Int64, a id: IdSciame,

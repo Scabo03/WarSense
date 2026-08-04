@@ -2,7 +2,8 @@
 "battaglia.turno" = "Turno %d";
 "battaglia.piazzamento_confermato" = "Piazzato: costa %d, restano %d";
 "battaglia.elemento_esaurito" = "Elemento esaurito, deselezionato";
-"battaglia.contatto_avviato" = "Contatto in riga %d, cella %d";
+"battaglia.contatto_eseguito" = "Ingaggiato %@ %@ avversario, %@, %@";
+"battaglia.contatto_subito" = "Il tuo %@ %@ è stato ingaggiato, %@, %@";
 "battaglia.disingaggio" = "Un reparto si è disingaggiato in riga %d, cella %d";
 "battaglia.munizioni_esaurite" = "Munizioni esaurite per il reparto in riga %d, cella %d";
 "battaglia.resa_dichiarata" = "Resa dichiarata: comincia la ritirata combattuta";

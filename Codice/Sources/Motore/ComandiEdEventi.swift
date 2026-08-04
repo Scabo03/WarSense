@@ -154,7 +154,11 @@ public enum EventoBattaglia: Hashable, Codable, Sendable {
     case tiroEseguito(parte: Parte, sciame: IdSciame, bersaglio: IdSciame,
                       bersaglioArchetipo: IdentificatoreDati, bersaglioLettera: Int,
                       danno: Int64, fascia: FasciaPerdite, efficacia: EfficaciaQualitativa)
-    case contattoAvviato(cella: Cella)
+    /// Il contatto si è formato e si è RISOLTO nell'istante stesso (01 §9.7.1):
+    /// l'evento porta con sé il suo esito, come già fa il tiro, perché l'annuncio
+    /// segua immediatamente l'azione che lo ha causato (02 §8.9.2).
+    case contattoRisolto(parte: Parte, bersaglioArchetipo: IdentificatoreDati,
+                         bersaglioLettera: Int, esito: EsitoContatto)
     /// Evento aggregato con l'esito di tutti i contatti del giro (05 §3.9).
     case esitoMischiaComplessivo([EsitoContatto])
     case disingaggio(sciame: IdSciame, da: Cella, a: Cella)

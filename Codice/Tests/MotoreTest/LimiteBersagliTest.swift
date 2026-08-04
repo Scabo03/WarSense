@@ -57,29 +57,34 @@ final class LimiteBersagliTest: XCTestCase {
         return (stato, ids)
     }
 
-    /// Un bersaglio avversario circondato da `quanti` assalitori del giocatore,
-    /// che ingaggiano nell'ordine indicato. Restituisce stato, assalitori, bersaglio.
+    /// Un bersaglio avversario circondato da `quanti` assalitori del giocatore.
+    /// Dalla risoluzione immediata (01 §9.7.1) ogni ingaggio scambia i colpi
+    /// all'istante: la fotografia si prende PRIMA di ingaggiare, e ogni ingaggio
+    /// si valida, perché uno scambio già avvenuto può renderne impossibile un altro.
     func mischia(assalitori quanti: Int, ordineIngaggio: [Int]? = nil,
                  archetipoAssalitore: IdentificatoreDati = "fanteria_pesante")
-        throws -> (StatoBattaglia, [IdSciame], IdSciame) {
+        throws -> (StatoBattaglia, [IdSciame], IdSciame, [IdSciame: Int64]) {
         var (stato, ids) = try campo(
             (0..<quanti).map { Posto(parte: .giocatore, archetipo: archetipoAssalitore,
                                      protezione: .antiSaturazione, cella: Self.intorno[$0]) }
             + [Posto(parte: .avversario, archetipo: "guardia_elite",
                      protezione: .antiSaturazione, cella: Self.bersaglio)])
         let idBersaglio = ids.removeLast()
+        let prima = stato.sciami.mapValues(\.serbatoio)
         for indice in ordineIngaggio ?? Array(0..<quanti) {
-            stato = motore.applica(.ingaggia(sciame: ids[indice], bersaglio: idBersaglio),
-                                   parte: .giocatore, stato: stato).0
+            let comando = ComandoBattaglia.ingaggia(sciame: ids[indice], bersaglio: idBersaglio)
+            guard motore.valida(comando, parte: .giocatore, stato: stato).eValido else { continue }
+            stato = motore.applica(comando, parte: .giocatore, stato: stato).0
         }
-        return (stato, ids, idBersaglio)
+        return (stato, ids, idBersaglio, prima)
     }
 
-    /// Il danno subito da ciascuno in un giro di mischia davvero risolto.
-    func subitiInUnGiro(_ stato: StatoBattaglia) -> [IdSciame: Int64] {
+    /// Il danno subito da ciascuno nell'INTERO primo scambio: gli ingaggi, che si
+    /// risolvono all'istante, più la risoluzione d'inizio giro.
+    func subitiNelPrimoScambio(_ stato: StatoBattaglia, prima: [IdSciame: Int64]) -> [IdSciame: Int64] {
         var lavoro = stato
-        let prima = lavoro.sciami.mapValues(\.serbatoio)
         for _ in 0..<2 {
+            guard lavoro.esito == nil else { break }
             lavoro = motore.applica(.fineTurno, parte: lavoro.parteDiTurno, stato: lavoro).0
         }
         return prima.reduce(into: [:]) { esito, voce in
@@ -87,13 +92,18 @@ final class LimiteBersagliTest: XCTestCase {
         }
     }
 
+    /// Il danno subito nel solo giro successivo, a partire dallo stato dato.
+    func subitiInUnGiro(_ stato: StatoBattaglia) -> [IdSciame: Int64] {
+        subitiNelPrimoScambio(stato, prima: stato.sciami.mapValues(\.serbatoio))
+    }
+
     // MARK: - I tre posti (01 §9.11)
 
     /// Il primo arrivato riceve risposta piena, il secondo ridotta, il terzo e il
     /// quarto nessuna. Misurato sul giro risolto, non sui coefficienti.
     func test_01_9_11_al_primo_piena_al_secondo_ridotta_dal_terzo_nessuna() throws {
-        let (stato, assalitori, _) = try mischia(assalitori: 4)
-        let subiti = subitiInUnGiro(stato)
+        let (stato, assalitori, _, prima) = try mischia(assalitori: 4)
+        let subiti = subitiNelPrimoScambio(stato, prima: prima)
         let primo = subiti[assalitori[0]] ?? 0
         let secondo = subiti[assalitori[1]] ?? 0
         let terzo = subiti[assalitori[2]] ?? 0
@@ -115,18 +125,18 @@ final class LimiteBersagliTest: XCTestCase {
         XCTAssertNil(motore.resaDiRisposta(posto: 7))
         // Il caso senza risposta non ricade nel minimo obbligatorio di 00 §13.6:
         // il danno non è ridotto a zero, semplicemente non viene calcolato.
-        let (stato, assalitori, _) = try mischia(assalitori: 3)
-        XCTAssertEqual(subitiInUnGiro(stato)[assalitori[2]] ?? -1, 0)
+        let (stato, assalitori, _, prima) = try mischia(assalitori: 3)
+        XCTAssertEqual(subitiNelPrimoScambio(stato, prima: prima)[assalitori[2]] ?? -1, 0)
         XCTAssertGreaterThanOrEqual(valori.minimi.dannoMinimo, 1, "il minimo esiste ed è aggirato di proposito")
     }
 
     /// Chi colpisce senza ricevere risposta infligge comunque il proprio danno pieno:
     /// il limite riguarda la risposta, non l'offesa di chi arriva (01 §9.11).
     func test_01_9_11_chi_non_riceve_risposta_infligge_ugualmente() throws {
-        let (statoTre, _, bersaglioTre) = try mischia(assalitori: 3)
-        let (statoDue, _, bersaglioDue) = try mischia(assalitori: 2)
-        let inflittoDaTre = subitiInUnGiro(statoTre)[bersaglioTre] ?? 0
-        let inflittoDaDue = subitiInUnGiro(statoDue)[bersaglioDue] ?? 0
+        let (statoTre, _, bersaglioTre, primaTre) = try mischia(assalitori: 3)
+        let (statoDue, _, bersaglioDue, primaDue) = try mischia(assalitori: 2)
+        let inflittoDaTre = subitiNelPrimoScambio(statoTre, prima: primaTre)[bersaglioTre] ?? 0
+        let inflittoDaDue = subitiNelPrimoScambio(statoDue, prima: primaDue)[bersaglioDue] ?? 0
         XCTAssertGreaterThan(inflittoDaTre, inflittoDaDue,
                              "il terzo arrivato colpisce, pur non essendo colpito di ritorno")
     }
@@ -138,10 +148,10 @@ final class LimiteBersagliTest: XCTestCase {
     func test_01_9_11_1_il_posto_segue_l_ordine_di_arrivo_e_non_la_potenza() throws {
         // Tre assalitori identici: se contasse la potenza o la posizione, l'ordine
         // degli ingaggi non cambierebbe nulla. Cambia.
-        let (dritto, assalitoriDritto, _) = try mischia(assalitori: 3, ordineIngaggio: [0, 1, 2])
-        let (rovescio, assalitoriRovescio, _) = try mischia(assalitori: 3, ordineIngaggio: [2, 1, 0])
-        let a = subitiInUnGiro(dritto)
-        let b = subitiInUnGiro(rovescio)
+        let (dritto, assalitoriDritto, _, primaDritto) = try mischia(assalitori: 3, ordineIngaggio: [0, 1, 2])
+        let (rovescio, assalitoriRovescio, _, primaRovescio) = try mischia(assalitori: 3, ordineIngaggio: [2, 1, 0])
+        let a = subitiNelPrimoScambio(dritto, prima: primaDritto)
+        let b = subitiNelPrimoScambio(rovescio, prima: primaRovescio)
         XCTAssertGreaterThan(a[assalitoriDritto[0]] ?? 0, 0, "chi ingaggia per primo è fronteggiato")
         XCTAssertEqual(a[assalitoriDritto[2]] ?? -1, 0, "chi ingaggia per terzo non riceve risposta")
         XCTAssertGreaterThan(b[assalitoriRovescio[2]] ?? 0, 0, "a ordine rovesciato è il terzo a essere fronteggiato")
@@ -154,7 +164,8 @@ final class LimiteBersagliTest: XCTestCase {
     /// simultanea: si ricava dallo stato d'ingresso del giro ed è identico per tutti
     /// i contatti risolti in quel giro (01 §9.11.1).
     func test_01_9_11_1_i_posti_non_dipendono_dall_ordine_di_applicazione() throws {
-        let (stato, assalitori, bersaglio) = try mischia(assalitori: 3)
+        let (stato, assalitori, bersaglio, prima) = try mischia(assalitori: 3)
+        _ = prima
         // Dallo stato d'ingresso: il bersaglio vede i tre nei posti 0, 1, 2.
         for (atteso, assalitore) in assalitori.enumerated() {
             XCTAssertEqual(motore.postoInMischia(di: bersaglio, contro: assalitore, stato: stato), atteso)
@@ -190,7 +201,7 @@ final class LimiteBersagliTest: XCTestCase {
     /// da sé, senza alcuna decisione del giocatore: il terzo diventa secondo e poi
     /// primo. La regola è una sola e vale per ENTRAMBI i posti, non solo per il primo.
     func test_01_9_11_2_i_posti_liberati_scorrono_da_se() throws {
-        let (stato, assalitori, bersaglio) = try mischia(assalitori: 3)
+        let (stato, assalitori, bersaglio, _) = try mischia(assalitori: 3)
         XCTAssertEqual(motore.postoInMischia(di: bersaglio, contro: assalitori[2], stato: stato), 2)
 
         // Esce il PRIMO: il secondo avanza al primo posto, il terzo al secondo.
@@ -217,15 +228,20 @@ final class LimiteBersagliTest: XCTestCase {
     /// durante la risoluzione, senza che il giocatore possa deciderlo: chi è in
     /// mischia è fuori controllo (01 §9.5).
     func test_01_9_11_2_la_successione_non_e_una_decisione_del_giocatore() throws {
-        var (stato, assalitori, bersaglio) = try mischia(assalitori: 3)
+        // Due assalitori, perché il bersaglio sopravviva al primo scambio: con tre
+        // la risoluzione immediata di 01 §9.7.1 lo disfa e non resta nessuna mischia
+        // in cui succedere.
+        var (stato, assalitori, bersaglio, _) = try mischia(assalitori: 2)
         // Il primo arrivato è ridotto al lumicino: cadrà nel giro e lascerà il posto.
         stato.sciami[assalitori[0]]!.serbatoio = 1
-        let terzoPrima = motore.postoInMischia(di: bersaglio, contro: assalitori[2], stato: stato)
-        XCTAssertEqual(terzoPrima, 2)
-        for _ in 0..<2 { stato = motore.applica(.fineTurno, parte: stato.parteDiTurno, stato: stato).0 }
+        XCTAssertEqual(motore.postoInMischia(di: bersaglio, contro: assalitori[1], stato: stato), 1)
+        for _ in 0..<2 {
+            guard stato.esito == nil else { break }
+            stato = motore.applica(.fineTurno, parte: stato.parteDiTurno, stato: stato).0
+        }
         XCTAssertNil(stato.sciami[assalitori[0]], "il primo è caduto")
-        XCTAssertEqual(motore.postoInMischia(di: bersaglio, contro: assalitori[2], stato: stato), 1,
-                       "il terzo è avanzato da sé, senza alcun comando")
+        XCTAssertEqual(motore.postoInMischia(di: bersaglio, contro: assalitori[1], stato: stato), 0,
+                       "il secondo è avanzato da sé al primo posto, senza alcun comando")
     }
 
     // MARK: - Simmetria fra le parti (01 §9.11)
@@ -313,8 +329,8 @@ final class LimiteBersagliTest: XCTestCase {
     /// due situazioni che differiscono solo per quell'ordine si comportano in modo
     /// diverso, quindi non possono avere la stessa impronta.
     func test_05_2_9_l_ordine_di_arrivo_entra_nell_impronta() throws {
-        let (dritto, _, _) = try mischia(assalitori: 3, ordineIngaggio: [0, 1, 2])
-        let (rovescio, _, _) = try mischia(assalitori: 3, ordineIngaggio: [2, 1, 0])
+        let (dritto, _, _, _) = try mischia(assalitori: 3, ordineIngaggio: [0, 1, 2])
+        let (rovescio, _, _, _) = try mischia(assalitori: 3, ordineIngaggio: [2, 1, 0])
         XCTAssertEqual(dritto.sciami.count, rovescio.sciami.count)
         XCTAssertEqual(Set(dritto.contatti.map(\.primo)), Set(rovescio.contatti.map(\.primo)),
                        "gli stessi contatti, in ordine diverso")

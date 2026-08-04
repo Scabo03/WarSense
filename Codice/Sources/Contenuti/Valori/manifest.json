@@ -12,8 +12,8 @@
   "ufficiali.json": "39447ca2b767d7b0a443f69257b67c8c71a3954c3725a3aa2169157c42f595c3",
   "vantaggi-nascosti.json": "65c7d952ce06cd5c9a8b594be77b0cfb3171045d77b6007673299c6b36d253f8"
  },
- "versione": "0.3.0",
+ "versione": "0.4.0",
  "versioni_compatibili": [
-  "0.3.0"
+  "0.4.0"
  ]
 }

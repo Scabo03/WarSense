@@ -203,10 +203,14 @@ final class AccertamentoSecondaProvaTest: XCTestCase {
 
     // MARK: - Cumulatività accertata per invarianza, non per somma
 
-    /// La somma dei danni di più attaccanti non dipende dall'ordine in cui gli
-    /// ingaggi sono stati impartiti. Prova costruita al contrario della prima:
-    /// invece di confrontare la somma con gli addendi, fissa la somma e varia
-    /// l'ordine. Un danno sostituito o sovrascritto dipenderebbe dall'ordine.
+    /// La somma dei danni di più attaccanti che ingaggiano tutti nello STESSO turno
+    /// non dipende dall'ordine in cui gli ingaggi sono impartiti: ciascuno scambia
+    /// i colpi all'istante contro un bersaglio che nessun altro ha ancora toccato in
+    /// quell'istante, e la risoluzione d'inizio giro è una sola e simultanea.
+    /// AVVERTENZA: non è una proprietà generale. Dalla risoluzione immediata
+    /// (01 §9.7.1) l'ordine delle proprie mosse conta, ed è profondità voluta; qui
+    /// si misura il caso in cui non conta, cioè quello in cui nulla si interpone
+    /// fra un ingaggio e l'altro.
     func test_01_9_7_la_somma_dei_danni_non_dipende_dall_ordine_degli_ingaggi() throws {
         let bersaglio = Cella(riga: 5, colonna: 5)
         let poste = [Cella(riga: 6, colonna: 4), Cella(riga: 6, colonna: 5), Cella(riga: 5, colonna: 4)]
@@ -238,8 +242,9 @@ final class AccertamentoSecondaProvaTest: XCTestCase {
     }
 
     /// Ultima contro-prova sulla cumulatività: togliendo un attaccante alla volta
-    /// il danno sul bersaglio deve calare ogni volta. Se un solo danno fosse
-    /// applicato, togliere gli altri non cambierebbe nulla.
+    /// il danno sul bersaglio deve calare ogni volta. Si misura la sola risoluzione
+    /// d'inizio giro, che è UNA risoluzione simultanea: fra risoluzioni diverse la
+    /// simultaneità non esiste più (01 §9.7.1) e il confronto non sarebbe pulito.
     func test_01_9_7_togliere_un_attaccante_riduce_sempre_il_danno_subito() throws {
         let bersaglio = Cella(riga: 5, colonna: 5)
         let poste = [Cella(riga: 6, colonna: 4), Cella(riga: 6, colonna: 5), Cella(riga: 5, colonna: 4)]
@@ -252,12 +257,15 @@ final class AccertamentoSecondaProvaTest: XCTestCase {
                 + [Posto(parte: .avversario, archetipo: "fanteria_pesante",
                          protezione: .antiSaturazione, cella: bersaglio)])
             let idBersaglio = ids.removeLast()
-            for id in ids {
-                stato = motore.applica(.ingaggia(sciame: id, bersaglio: idBersaglio),
-                                       parte: .giocatore, stato: stato).0
-            }
+            // L'intero primo scambio: gli ingaggi, che si risolvono all'istante,
+            // più la risoluzione d'inizio giro.
             let prima = stato.sciami[idBersaglio]!.serbatoio
-            for _ in 0..<2 {
+            for id in ids {
+                let comando = ComandoBattaglia.ingaggia(sciame: id, bersaglio: idBersaglio)
+                guard motore.valida(comando, parte: .giocatore, stato: stato).eValido else { continue }
+                stato = motore.applica(comando, parte: .giocatore, stato: stato).0
+            }
+            for _ in 0..<2 where stato.esito == nil {
                 stato = motore.applica(.fineTurno, parte: stato.parteDiTurno, stato: stato).0
             }
             return prima - (stato.sciami[idBersaglio]?.serbatoio ?? 0)
