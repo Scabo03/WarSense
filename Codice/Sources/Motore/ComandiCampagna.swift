@@ -56,9 +56,9 @@ public enum EsitoValidazioneCampagna: Hashable, Sendable {
 /// Gli eventi astratti della campagna (05 §3.7): fatti, mai annunci (00 §3.2).
 public enum EventoCampagna: Hashable, Codable, Sendable {
     /// Un gruppo è entrato nella casella indicata (01 §5.6.1).
-    case marciaEseguita(gruppo: IdGruppo, indiceNome: Int, da: Cella, a: Cella)
+    case marciaEseguita(gruppo: IdGruppo, nome: IdentificatoreDati, da: Cella, a: Cella)
     /// Un gruppo è rimasto fermo in guardia (01 §5.6.8.1).
-    case presidioOrdinato(gruppo: IdGruppo, indiceNome: Int, casella: Cella)
+    case presidioOrdinato(gruppo: IdGruppo, nome: IdentificatoreDati, casella: Cella)
     /// La giornata si è chiusa perché tutti i gruppi hanno agito (01 §5.6.0.6):
     /// non esiste alcun comando di fine giornata.
     case giornataChiusa(giorno: Int)

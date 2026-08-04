@@ -43,6 +43,8 @@ enum Impostazioni {
 @MainActor
 final class Ambiente {
     let valori: ValoriDiGioco
+    /// I valori del piano di campagna: formati, mappe, nomi dei gruppi (05 §7.6).
+    let valoriCampagna: ValoriCampagna
     let testi: Testi
     let segnali: PuntoSegnali
     /// Vero se il caricamento da Documenti è fallito e si è tornati alla fabbrica.
@@ -62,6 +64,14 @@ final class Ambiente {
             valoriCaricati = try CaricatoreValori.carica(da: Contenuti.valoriDiFabbrica)
             ripiego = true
         }
+        // I valori di campagna seguono la stessa disciplina: da Documenti, con
+        // ripiego dichiarato sulla fabbrica, mai dati misti (05 §7.1).
+        var campagnaCaricata: ValoriCampagna
+        do { campagnaCaricata = try CaricatoreCampagna.carica(da: Ambiente.cartellaValori) }
+        catch {
+            campagnaCaricata = try CaricatoreCampagna.carica(da: Contenuti.valoriDiFabbrica)
+            ripiego = true
+        }
         var testiCaricati: Testi
         do { testiCaricati = try Testi.carica(albero: Ambiente.cartellaTesti, lingua: "it") }
         catch {
@@ -71,6 +81,7 @@ final class Ambiente {
         let definizioni = try DefinizioniSegnali.carica(
             da: ripiego ? Contenuti.valoriDiFabbrica : Ambiente.cartellaValori)
         self.valori = valoriCaricati
+        self.valoriCampagna = campagnaCaricata
         self.testi = testiCaricati
         self.ripiegoSuFabbrica = ripiego
         self.segnali = PuntoSegnali(testi: testiCaricati, definizioni: definizioni,

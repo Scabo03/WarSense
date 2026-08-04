@@ -14,7 +14,7 @@ extension Gruppo: CodificabileCanonico {
     public func codifica(in c: inout CodificatoreCanonico) {
         c.intero(id.numero)
         c.testo(parte.rawValue)
-        c.intero(Int64(indiceNome))
+        c.testo(nome)
         posizione.codifica(in: &c)
         c.vero(azioneSpesa)
     }

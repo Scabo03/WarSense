@@ -60,19 +60,19 @@ public struct MotoreCampagna: Sendable {
         switch comando {
         case .marcia(let idGruppo, let destinazione):
             let partenza = nuovo.gruppi[idGruppo]!.posizione
-            let indiceNome = nuovo.gruppi[idGruppo]!.indiceNome
+            let nome = nuovo.gruppi[idGruppo]!.nome
             nuovo.gruppi[idGruppo]!.posizione = destinazione
             // Ogni azione consuma l'intera giornata del gruppo, la marcia compresa
             // (01 §5.6.0.5): è la regola che rende il turno annunciabile con una
             // frase per gruppo.
             nuovo.gruppi[idGruppo]!.azioneSpesa = true
-            eventi.append(.marciaEseguita(gruppo: idGruppo, indiceNome: indiceNome,
+            eventi.append(.marciaEseguita(gruppo: idGruppo, nome: nome,
                                           da: partenza, a: destinazione))
 
         case .presidio(let idGruppo):
             let gruppo = nuovo.gruppi[idGruppo]!
             nuovo.gruppi[idGruppo]!.azioneSpesa = true
-            eventi.append(.presidioOrdinato(gruppo: idGruppo, indiceNome: gruppo.indiceNome,
+            eventi.append(.presidioOrdinato(gruppo: idGruppo, nome: gruppo.nome,
                                             casella: gruppo.posizione))
         }
 

@@ -1,0 +1,89 @@
+import UIKit
+import Motore
+import Dati
+
+/// L'elemento accessibile di una casella della mappa di campagna (00 §2.3, §2.4):
+/// creato una volta per campagna e aggiornato sul posto, mai ricreato (05 §10.1,
+/// RDA-03). È il gemello di `ElementoCella` della battaglia: stessa struttura,
+/// perché il modello di navigazione è unico (00 §7.1).
+final class ElementoCasella: UIAccessibilityElement {
+    let casella: Cella
+    weak var schermata: SchermataMappaCampagna?
+
+    init(casella: Cella, contenitore: UIView, schermata: SchermataMappaCampagna) {
+        self.casella = casella
+        self.schermata = schermata
+        super.init(accessibilityContainer: contenitore)
+    }
+
+    override func accessibilityActivate() -> Bool {
+        schermata?.attiva(casella) ?? false
+    }
+
+    override func accessibilityElementDidBecomeFocused() {
+        schermata?.fuocoArrivato(su: casella)
+    }
+}
+
+/// La vista della mappa: disegno minimo per chi vede, contenitore degli elementi
+/// accessibili per chi ascolta. I dati sottostanti sono gli stessi (02 §10.3).
+/// Caselle quadrate e non sfalsate: è l'unica differenza geometrica ammessa
+/// rispetto alla griglia di battaglia (00 §7.2).
+final class VistaMappa: UIView {
+    static let passo: CGFloat = 64
+    static let lato: CGFloat = 60
+    static let margine: CGFloat = 12
+
+    var griglia: GrigliaCampagna?
+    var coloreCasella: ((Cella) -> UIColor?)?
+    /// L'iniziale del gruppo presente e i segni della casella: ciò che si sente si vede.
+    var testoCasella: ((Cella) -> String?)?
+    var segnoCasella: ((Cella) -> String?)?
+
+    static func dimensione(per griglia: GrigliaCampagna) -> CGSize {
+        CGSize(width: margine * 2 + CGFloat(griglia.colonne) * passo,
+               height: margine * 2 + CGFloat(griglia.righe) * passo)
+    }
+
+    static func cornice(di casella: Cella) -> CGRect {
+        CGRect(x: margine + CGFloat(casella.colonna - 1) * passo,
+               y: margine + CGFloat(casella.riga - 1) * passo,
+               width: lato, height: lato)
+    }
+
+    override func draw(_ rect: CGRect) {
+        guard let griglia else { return }
+        for casella in griglia.tutteLeCaselle {
+            let cornice = Self.cornice(di: casella).insetBy(dx: 2, dy: 2)
+            let percorso = UIBezierPath(roundedRect: cornice, cornerRadius: 6)
+            (coloreCasella?(casella) ?? UIColor.systemGray6).setFill()
+            percorso.fill()
+            UIColor.systemGray3.setStroke()
+            percorso.stroke()
+            if let segno = segnoCasella?(casella) {
+                disegna(segno, in: cornice, dimensione: 12, peso: .regular,
+                        colore: .secondaryLabel, allineamento: .basso)
+            }
+            if let testo = testoCasella?(casella) {
+                disegna(testo, in: cornice, dimensione: 20, peso: .bold,
+                        colore: .white, allineamento: .centro)
+            }
+        }
+    }
+
+    private enum Allineamento { case centro, basso }
+
+    private func disegna(_ testo: String, in cornice: CGRect, dimensione: CGFloat,
+                         peso: UIFont.Weight, colore: UIColor, allineamento: Allineamento) {
+        let attributi: [NSAttributedString.Key: Any] = [
+            .font: UIFont.systemFont(ofSize: dimensione, weight: peso),
+            .foregroundColor: colore,
+        ]
+        let misura = (testo as NSString).size(withAttributes: attributi)
+        let y = allineamento == .centro
+            ? cornice.midY - misura.height / 2
+            : cornice.maxY - misura.height - 2
+        (testo as NSString).draw(at: CGPoint(x: cornice.midX - misura.width / 2, y: y),
+                                 withAttributes: attributi)
+    }
+}

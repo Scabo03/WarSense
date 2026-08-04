@@ -69,7 +69,7 @@ public enum FabbricaCampagna {
                 throw ErroreScenario.gruppiSovrapposti(casella)
             }
             let id = IdGruppo(prossimoId)
-            gruppi[id] = Gruppo(id: id, parte: .giocatore, indiceNome: prossimoNome,
+            gruppi[id] = Gruppo(id: id, parte: .giocatore, nome: valori.nomiGruppi[prossimoNome],
                                 posizione: casella, azioneSpesa: false)
             prossimoId += 1
             prossimoNome += 1

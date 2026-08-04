@@ -258,10 +258,10 @@ final class RegoleCampagnaTest: XCTestCase {
 
     func test_01_5_6_0_4_ogni_gruppo_riceve_un_nome_proprio_stabile_e_unico() throws {
         let stato = try crea(scenario(gruppi: [(10, 6), (10, 5), (9, 6), (9, 5)]))
-        let indici = stato.gruppiOrdinati.map(\.indiceNome)
+        let indici = stato.gruppiOrdinati.map(\.nome)
         XCTAssertEqual(Set(indici).count, indici.count, "i nomi sono unici nella campagna")
-        for indice in indici {
-            XCTAssertTrue(valoriCampagna.nomiGruppi.indices.contains(indice),
+        for nome in indici {
+            XCTAssertTrue(valoriCampagna.nomiGruppi.contains(nome),
                           "il nome viene dalla lista chiusa dei dati")
         }
     }

@@ -112,3 +112,39 @@
 "perdite.subite.lievi" = "perdite subite lievi";
 "perdite.subite.significative" = "perdite subite significative";
 "perdite.subite.gravi" = "perdite subite gravi";
+
+/* Stati di un gruppo sulla mappa di campagna (01 §5.16.1, 02 §4.4.1.1, §4.4.5).
+   Questa unità realizza i due termini che le regole di questa unità producono;
+   gli altri — in marcia, in agguato, scatto disponibile, e gli stati di
+   rifornimento — entrano con le regole che li generano. I due termini sono brevi
+   e non condividono alcuna parola, come 02 §4.4.1.1 richiede. */
+"gruppo.in_attesa" = "in attesa";
+"gruppo.ha_agito" = "ha agito";
+/* Qualificazione della casella (01 §5.1.2). Il terreno aperto e l'assenza di
+   strada sono la condizione ordinaria e non si annunciano (02 §8.7.1). */
+"terreno.bosco" = "bosco";
+"terreno.acqua" = "acqua";
+"strada.sterrata" = "strada sterrata";
+"strada.battuta" = "strada battuta";
+"strada.lastricata" = "strada lastricata";
+"casella.strettoia" = "strettoia";
+"casella.quartier_generale" = "tuo quartier generale";
+"casella.quartier_generale_avversario" = "quartier generale avversario";
+/* Motivi di non ammissibilità propri della mappa (05 §3.2). Dove la condizione è
+   la stessa della battaglia si riusa il termine di battaglia (00 §7.1). */
+"casella.non_adiacente" = "non adiacente";
+"casella.fuori_mappa" = "fuori dalla mappa";
+"comando.non_valido.gruppo_ignoto" = "gruppo non disponibile";
+/* Nomi dei gruppi (01 §5.6.0.4): elenco chiuso, brevi e stabili. */
+"gruppo.nome.corvo" = "Corvo";
+"gruppo.nome.lupo" = "Lupo";
+"gruppo.nome.falco" = "Falco";
+"gruppo.nome.orso" = "Orso";
+"gruppo.nome.cervo" = "Cervo";
+"gruppo.nome.lince" = "Lince";
+"gruppo.nome.aquila" = "Aquila";
+"gruppo.nome.volpe" = "Volpe";
+"gruppo.nome.ariete" = "Ariete";
+"gruppo.nome.bisonte" = "Bisonte";
+"gruppo.nome.martora" = "Martora";
+"gruppo.nome.stambecco" = "Stambecco";

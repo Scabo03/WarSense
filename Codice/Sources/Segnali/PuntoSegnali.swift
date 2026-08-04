@@ -65,6 +65,17 @@ public final class PuntoSegnali {
         emetti(significato: significato)
     }
 
+    /// L'ingresso per gli eventi della campagna: stesso punto, stessa disciplina.
+    public func segnala(evento: EventoCampagna, per parte: Parte) {
+        let traduttore = TraduttoreEventiCampagna(testi: testi, parte: parte)
+        let p = preferenze()
+        if let annuncio = traduttore.annuncio(per: evento, verbosita: p.verbosita) {
+            accoda(annuncio, interrompente: false)
+        }
+        guard let significato = traduttore.significato(per: evento) else { return }
+        emetti(significato: significato)
+    }
+
     /// I fatti di pura navigazione prodotti dalla Presentazione (00 §11.6, 05 §11.2).
     public func segnalaCambioRiga(conNemici: Bool) {
         emetti(significato: conNemici ? .cambioRigaConNemici : .cambioRiga)

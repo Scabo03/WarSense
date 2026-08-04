@@ -17,15 +17,19 @@ public struct IdGruppo: Hashable, Codable, Sendable, Comparable, CustomStringCon
 public struct Gruppo: Hashable, Codable, Sendable {
     public let id: IdGruppo
     public let parte: Parte
-    /// Indice del nome nell'elenco chiuso e ordinato dei dati (01 §5.6.0.4):
-    /// il nome parlato lo risolve il pacchetto dei testi.
-    public let indiceNome: Int
+    /// La chiave del nome, presa dall'elenco chiuso e ordinato dei dati
+    /// (01 §5.6.0.4): breve, stabile, conservata per tutta l'esistenza del gruppo.
+    /// Il nome parlato lo risolve il pacchetto dei testi, perché è testo (00 §14.1).
+    /// Vive nello stato e non si ricalcola dall'elenco: un gruppo conserva il
+    /// proprio nome anche se l'elenco dei dati cambia.
+    public let nome: IdentificatoreDati
     public var posizione: Cella
     /// Vero se l'azione della giornata è stata spesa (01 §5.6).
     public var azioneSpesa: Bool
 
-    public init(id: IdGruppo, parte: Parte, indiceNome: Int, posizione: Cella, azioneSpesa: Bool) {
-        self.id = id; self.parte = parte; self.indiceNome = indiceNome
+    public init(id: IdGruppo, parte: Parte, nome: IdentificatoreDati,
+                posizione: Cella, azioneSpesa: Bool) {
+        self.id = id; self.parte = parte; self.nome = nome
         self.posizione = posizione; self.azioneSpesa = azioneSpesa
     }
 
