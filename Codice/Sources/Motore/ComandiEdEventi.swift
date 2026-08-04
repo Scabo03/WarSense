@@ -68,6 +68,23 @@ public enum FasciaPerdite: String, Codable, Hashable, Sendable, CaseIterable {
     case nessuna, lievi, significative, gravi
 }
 
+/// La fascia descrittiva della vicinanza al bersaglio nel tiro (01 §9.10.1, 02 §4.4.5):
+/// il modificatore di vicinanza si annuncia così, mai con una cifra. Le soglie
+/// stanno nei valori (03 §5.15).
+public enum FasciaVicinanza: String, Codable, Hashable, Sendable, CaseIterable {
+    case lontano = "vicinanza.lontano"
+    case ravvicinato = "vicinanza.ravvicinato"
+    case aRidosso = "vicinanza.a_ridosso"
+}
+
+/// La fascia descrittiva dell'accerchiamento di un bersaglio (01 §9.10.2, 02 §4.4.5).
+/// `isolato` è la condizione ordinaria e non si annuncia (02 §8.7.1).
+public enum FasciaAccerchiamento: String, Codable, Hashable, Sendable, CaseIterable {
+    case isolato = "accerchiamento.isolato"
+    case stretto = "accerchiamento.stretto"
+    case circondato = "accerchiamento.circondato"
+}
+
 /// L'esito di un contatto in un giro, per l'annuncio complessivo (01 §9.7.1):
 /// i numeri restano fatti interni, le fasce sono ciò che si annuncia (01 §9.7.2).
 public struct EsitoContatto: Hashable, Codable, Sendable {

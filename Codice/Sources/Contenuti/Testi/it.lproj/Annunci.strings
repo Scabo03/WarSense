@@ -81,8 +81,14 @@
 "pannello.titolo" = "Azioni per riga %d, cella %d";
 "pannello.chiudi" = "Chiudi il pannello";
 "pannello.muovi_qui_vicino" = "Muovi verso una cella adiacente";
-"pannello.tira_su" = "Tira su %@ %@ avversario, %@";
-"pannello.ingaggia" = "Ingaggia %@ %@ avversario in riga %d cella %d";
+/* Designazione del bersaglio (02 §9.2.1, §9.3): ordine fisso delle informazioni —
+   bersaglio, efficacia, vicinanza (solo tiro), accerchiamento. Frasi intere e non
+   somme di parole (00 §14.2): la variante con accerchiamento è una frase a sé,
+   perché quando il bersaglio è isolato la voce non deve dirlo (02 §8.7.1). */
+"pannello.tira_su" = "Tira su %@ %@ avversario, %@, %@";
+"pannello.tira_su_accerchiato" = "Tira su %@ %@ avversario, %@, %@, %@";
+"pannello.ingaggia" = "Ingaggia %@ %@ avversario in riga %d cella %d, %@";
+"pannello.ingaggia_accerchiato" = "Ingaggia %@ %@ avversario in riga %d cella %d, %@, %@";
 "pannello.ritira_unita" = "Evacua questa unità: costa %d";
 "pannello.designa_movimento" = "Scegli la destinazione sulla griglia";
 "pannello.designazione_avviata" = "Scegli la cella di destinazione e attivala per confermare";

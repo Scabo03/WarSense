@@ -42,6 +42,22 @@ In fase A un'unica Sessione serve entrambe le parti (il collaudo guida anche l'a
 
 Il pannello della cella è l'avviso di sistema (RDA-49). Al tocco di una voce l'avviso si congeda DA SOLO, e la chiusura della voce corre a congedo già avvenuto o in corso: un congedo incondizionato dentro `chiudiPannello` colpiva allora la schermata dello scontro stessa, riportando all'avvio — per chi ascolta, indistinguibile da un riavvio dell'applicazione (il primo difetto bloccante della prova su dispositivo). Regola realizzativa: la chiusura del pannello congeda soltanto un pannello ancora presentato e non già in congedo; altrimenti ripristina direttamente fuoco e azione. La sequenza reale del tocco è riprodotta da `PannelloAzioniTest` (02 §9.2.1).
 
+## P6 — Punto aperto: chi è sconfitto quando l'annientamento è simultaneo
+
+Emerso dall'accertamento sugli esiti degli scontri (build 6), non da una prova fallita: è il solo punto in cui le due parti non sono trattate allo stesso modo.
+
+**Che cosa non è normato.** 01 §15.2.3 chiude la battaglia «quando uno dei due è stato annientato» e 01 §15.2.2 esclude gli esiti in parità, ma nessuno dei due punti dice che cosa accada quando l'ultimo reparto di ciascuna parte cade nel medesimo giro di mischia — caso raggiungibile, e reso un poco più probabile dall'accerchiamento di 01 §9.10.2, che accresce i danni.
+
+**Come si comporta oggi.** La verifica delle condizioni di chiusura esamina le due parti in ordine fisso e dichiara sconfitta la prima che si trova senza nulla in campo e senza nulla nel mazzo: essendo il giocatore il primo dell'ordine, in caso di annientamento simultaneo risulta sempre sconfitto lui. Il comportamento è deterministico e riproducibile, ma discende dall'ordine di un'enumerazione e non da una decisione di progetto.
+
+**Che cosa si è fatto e che cosa no.** Si è fissato il comportamento con una prova dedicata (`AccertamentoScontriTest.test_01_15_2_3_annientamento_simultaneo_esito_deterministico_e_dichiarato`), così che non possa cambiare in silenzio. NON si è cambiato quale parte risulti sconfitta: scegliere fra il giocatore, l'avversario e una terza via è una decisione di progetto che spetta al titolare, e prenderla qui significherebbe deciderla al suo posto. Non è stata registrata fra i vantaggi nascosti di 01 §13.2 perché va contro il giocatore e non a suo favore.
+
+**Che cosa serve dal titolare.** Una riga in 01 §15.2.3 che dichiari l'esito del caso simultaneo. Fino ad allora vale il comportamento fissato dalla prova.
+
+## P7 — Precisazione: l'efficacia entra anche nella voce di ingaggio
+
+02 §9.2.1 prescrive che, per le azioni con bersaglio, la voce del pannello annunci «il bersaglio con nome e lettera, l'efficacia e ogni costo». Fino alla versione 2.2 dei testi la sola voce di tiro dichiarava l'efficacia; quella di ingaggio dava nome, lettera e posizione, e non l'efficacia — pur valendo per la mischia il medesimo accoppiamento offesa-protezione (01 §9.9.2). Realizzazione: le due voci hanno ora lo stesso ordine fisso di informazioni, chiuso in 02 §9.3.1. Non è uno scostamento dall'architettura ma il colmarne un'omissione, ed è stato fatto nella stessa tranche dei due modificatori perché tocca le medesime frasi.
+
 ## Nessuno scostamento strutturale
 
 Nessun punto dell'architettura è risultato irrealizzabile o errato nella fase A: i confini dei bersagli, il giornale con istantanee, l'impronta canonica, la virgola fissa e la catena dei testi esterni funzionano come dichiarato. I documenti 00–05 non richiedono modifiche.

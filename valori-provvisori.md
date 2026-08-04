@@ -28,6 +28,10 @@ I quattro coefficienti dei due profili di protezione (para_saturazione/para_perf
 - `efficacia_minima` (0.15): frazione della munizione poco adatta, 03 §5.5.
 - `soglia_poco_efficace` (0.5): confine dell'annuncio qualitativo, 01 §9.9.1.
 - `fascia_perdite_lievi_fino` (0.10) e `fascia_perdite_significative_fino` (0.30): soglie delle fasce descrittive degli esiti (01 §9.7.2, 03 §5.14), proporzione del danno sulla consistenza del colpito prima dell'applicazione; sopra la seconda le perdite sono gravi, a zero nessuna perdita. PROVVISORIE, da riesaminare con i ritorni dei tester (RDA-52).
+- `maggiorazione_vicinanza_massima` (0.6): quanto il tiro rende di più alla minima distanza rispetto al limite della gittata (01 §9.10.1, 03 §5.15). PROVVISORIO; grandezza critica 03 §6.10, prima misura.
+- `fascia_vicinanza_lontano_fino` (0.33) e `fascia_vicinanza_ravvicinato_fino` (0.66): soglie delle tre fasce descrittive della vicinanza, sulla prossimità che vale zero al limite della gittata e uno alla minima distanza (01 §9.10.1, 02 §4.4.5, 03 §5.15). PROVVISORIE: divisione in terzi, scelta perché con la gittata sei dei tiratori assegna due distanze a ciascuna fascia.
+- `passo_accerchiamento` (0.15): passo della maggiorazione di accerchiamento, composto col quadrato dei concorrenti eccedenti il primo (01 §9.10.2, 03 §5.16). Ne risultano 1,15 con due concorrenti, 1,60 con tre e 2,35 con quattro. PROVVISORIO; grandezza critica 03 §6.10, seconda misura.
+- `concorrenti_massimi` (4): tetto dei concorrenti conteggiati (01 §9.10.2, 03 §5.16). PROVVISORIO, ancorato al «tre o quattro» del titolare.
 
 ## caratteristiche-campo.json
 
@@ -58,6 +62,8 @@ Intensità, nitidezze e tempi dei pattern e suoni generati: PROVVISORI come resa
 ## Soglia del tattico (formula, non numero)
 
 La soglia di resa del tattico è tolleranza alle perdite divisa per la propensione effettiva alla ritirata: struttura nel codice, numeri nei file (01 §12.1, RDA-46).
+
+MISURA dall'accertamento sugli esiti degli scontri: con l'`ufficiale_prova` di fabbrica (tolleranza 0,5, propensione 0,5) la soglia vale 1,0 delle forze impiegate GIÀ SENZA il vantaggio nascosto, e 3,33 con esso. L'avversario non può quindi arrendersi in nessuna partita, e ogni battaglia si chiude per annientamento o per resa del giocatore. Non è il vantaggio nascosto a produrlo, sono i valori di carattere: la taratura di 03 §6.5 va condotta sapendolo, e il rapporto tolleranza/propensione va portato sotto l'unità perché la resa avversaria sia raggiungibile. Registrato anche in 03 §7.4. Prova che lo fissa: `AccertamentoScontriTest.test_01_13_2_peso_misurato_della_propensione_alla_ritirata_ridotta`.
 
 ## Numeri di struttura (non di gioco, quindi nel codice per 05 §0.4)
 

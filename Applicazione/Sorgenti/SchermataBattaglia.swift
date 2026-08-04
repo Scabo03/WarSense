@@ -275,33 +275,24 @@ final class SchermataBattaglia: UIViewController {
             title: testi.frase("pannello.titolo", sciame.posizione.riga, sciame.posizione.colonna).testo,
             message: nil, preferredStyle: .alert)
         let vistaAvversari = stato.sciamiOrdinati.filter { $0.parte == .avversario }
-        let archetipo = partita.motore.valori.archetipi[sciame.archetipo]!
         var voci: [VocePannello] = []
 
-        // Tiro: i soli bersagli a portata, con nome, lettera ed efficacia; il
-        // proiettile è del reparto e non si sceglie (02 §9.3, 01 §3.3.1, §3.4.1).
+        // Tiro: i soli bersagli a portata, con nome, lettera, efficacia, vicinanza e
+        // accerchiamento; il proiettile è del reparto e non si sceglie
+        // (02 §9.3, 01 §3.3.1, §3.4.1, §9.10.1, §9.10.2). Il testo lo compone il
+        // costruttore degli annunci: la schermata non calcola dati di gioco (00 §3.2).
         for bersaglio in vistaAvversari {
+            guard let titolo = costruttore?.voceTiro(da: sciame.id, su: bersaglio) else { continue }
             let comando = ComandoBattaglia.tira(sciame: sciame.id, bersaglio: bersaglio.id)
-            guard partita.motore.valida(comando, parte: .giocatore, stato: stato).eValido else { continue }
-            let efficacia = partita.motore.efficaciaQualitativa(
-                offesa: archetipo.offesaTiro!,
-                protezione: partita.motore.valori.protezioni[bersaglio.protezione]!)
-            let titolo = testi.frase("pannello.tira_su",
-                                     testi.frase("unita." + bersaglio.archetipo).testo,
-                                     costruttore?.lettera(bersaglio) ?? "",
-                                     testi.termine(efficacia.rawValue).testo).testo
             voci.append(VocePannello(titolo: titolo, stile: .default) { [weak self] in
                 self?.chiudiPannello(cella: sciame.posizione) { await self?.eseguiComando(comando) }
             })
         }
-        // Ingaggio degli adiacenti (02 §8.8), designati con nome e lettera (01 §9.4.3).
+        // Ingaggio degli adiacenti (02 §8.8), designati con nome e lettera (01 §9.4.3),
+        // con efficacia e accerchiamento come ogni azione con bersaglio (02 §9.2.1).
         for bersaglio in vistaAvversari {
+            guard let titolo = costruttore?.voceIngaggio(da: sciame.id, su: bersaglio) else { continue }
             let comando = ComandoBattaglia.ingaggia(sciame: sciame.id, bersaglio: bersaglio.id)
-            guard partita.motore.valida(comando, parte: .giocatore, stato: stato).eValido else { continue }
-            let titolo = testi.frase("pannello.ingaggia",
-                                     testi.frase("unita." + bersaglio.archetipo).testo,
-                                     costruttore?.lettera(bersaglio) ?? "",
-                                     bersaglio.posizione.riga, bersaglio.posizione.colonna).testo
             voci.append(VocePannello(titolo: titolo, stile: .default) { [weak self] in
                 self?.chiudiPannello(cella: sciame.posizione) { await self?.eseguiComando(comando) }
             })

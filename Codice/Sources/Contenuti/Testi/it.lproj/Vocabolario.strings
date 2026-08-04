@@ -15,6 +15,14 @@
 "munizioni.esaurite" = "munizioni esaurite";
 "efficacia.efficace" = "efficace";
 "efficacia.poco_efficace" = "poco efficace";
+/* Vicinanza del bersaglio nel tiro (01 §9.10.1, 02 §4.4.5): mai una cifra. */
+"vicinanza.lontano" = "a distanza";
+"vicinanza.ravvicinato" = "ravvicinato";
+"vicinanza.a_ridosso" = "a ridosso";
+/* Accerchiamento del bersaglio (01 §9.10.2, 02 §4.4.5). Isolato è la condizione
+   ordinaria e non si annuncia, quindi non ha termine. */
+"accerchiamento.stretto" = "stretto";
+"accerchiamento.circondato" = "circondato";
 "stagione.primavera" = "primavera";
 "stagione.estate" = "estate";
 "stagione.autunno" = "autunno";

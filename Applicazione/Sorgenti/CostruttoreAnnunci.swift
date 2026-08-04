@@ -13,6 +13,7 @@ struct CostruttoreAnnunci {
     let verbosita: Verbosita
 
     var valori: ValoriDiGioco { motore.valori }
+    var vista: VistaBattaglia { VistaBattaglia(motore: motore, stato: stato, parte: .giocatore) }
 
     /// La modalità di designazione in corso nella schermata (02 §9.2.1).
     enum Designazione: Equatable {
@@ -106,6 +107,44 @@ struct CostruttoreAnnunci {
             parti.append(testi.frase("battaglia.atomi_presenti", Int(atomi)).testo)
         }
         return parti
+    }
+
+    // MARK: - Designazione del bersaglio (02 §9.2.1, §9.3)
+
+    /// La voce di tiro su un bersaglio, con l'ordine fisso delle informazioni:
+    /// bersaglio con nome e lettera, efficacia (01 §9.9.1), vicinanza (01 §9.10.1)
+    /// e, se il bersaglio non è isolato, accerchiamento (01 §9.10.2). Restituisce
+    /// niente quando il tiro non è ammissibile: un'azione impossibile non si offre (02 §9.5).
+    func voceTiro(da sciame: IdSciame, su bersaglio: Sciame) -> String? {
+        guard let anteprima = vista.anteprimaTiro(da: sciame, su: bersaglio.id),
+              let vicinanza = anteprima.vicinanza else { return nil }
+        let nome = testi.frase("unita." + bersaglio.archetipo).testo
+        if anteprima.accerchiamento == .isolato {
+            return testi.frase("pannello.tira_su", nome, lettera(bersaglio),
+                               testi.termine(anteprima.efficacia.rawValue).testo,
+                               testi.termine(vicinanza.rawValue).testo).testo
+        }
+        return testi.frase("pannello.tira_su_accerchiato", nome, lettera(bersaglio),
+                           testi.termine(anteprima.efficacia.rawValue).testo,
+                           testi.termine(vicinanza.rawValue).testo,
+                           testi.termine(anteprima.accerchiamento.rawValue).testo).testo
+    }
+
+    /// La voce di ingaggio, con lo stesso ordine fisso della voce di tiro, senza la
+    /// vicinanza, che in mischia non esiste. L'efficacia vi compare come 02 §9.2.1
+    /// prescrive per ogni azione con bersaglio.
+    func voceIngaggio(da sciame: IdSciame, su bersaglio: Sciame) -> String? {
+        guard let anteprima = vista.anteprimaIngaggio(da: sciame, su: bersaglio.id) else { return nil }
+        let nome = testi.frase("unita." + bersaglio.archetipo).testo
+        if anteprima.accerchiamento == .isolato {
+            return testi.frase("pannello.ingaggia", nome, lettera(bersaglio),
+                               bersaglio.posizione.riga, bersaglio.posizione.colonna,
+                               testi.termine(anteprima.efficacia.rawValue).testo).testo
+        }
+        return testi.frase("pannello.ingaggia_accerchiato", nome, lettera(bersaglio),
+                           bersaglio.posizione.riga, bersaglio.posizione.colonna,
+                           testi.termine(anteprima.efficacia.rawValue).testo,
+                           testi.termine(anteprima.accerchiamento.rawValue).testo).testo
     }
 
     // MARK: - Deck

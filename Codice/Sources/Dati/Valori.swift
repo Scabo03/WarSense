@@ -167,11 +167,28 @@ public struct ParametriCombattimento: Codable, Hashable, Sendable {
     /// del danno sulla consistenza del colpito prima dell'applicazione. Provvisorie.
     public let fasciaPerditeLieviFino: Scalato
     public let fasciaPerditeSignificativeFino: Scalato
+    /// Maggiorazione massima del tiro alla minima distanza (01 §9.10.1, 03 §5.15):
+    /// al limite della gittata la maggiorazione è nulla, a contatto è questa. Provvisoria.
+    public let maggiorazioneVicinanzaMassima: Scalato
+    /// Soglie delle fasce descrittive della vicinanza (01 §9.10.1, 02 §4.4.5),
+    /// espresse sulla prossimità: zero al limite della gittata, uno a contatto. Provvisorie.
+    public let fasciaVicinanzaLontanoFino: Scalato
+    public let fasciaVicinanzaRavvicinatoFino: Scalato
+    /// Passo della maggiorazione di accerchiamento (01 §9.10.2, 03 §5.16). Provvisorio.
+    public let passoAccerchiamento: Scalato
+    /// Numero massimo di concorrenti che il conteggio dell'accerchiamento considera
+    /// (01 §9.10.2): oltre questo la maggiorazione non cresce più. Provvisorio.
+    public let concorrentiMassimi: Int
     enum CodingKeys: String, CodingKey {
         case efficaciaMinima = "efficacia_minima"
         case sogliaPocoEfficace = "soglia_poco_efficace"
         case fasciaPerditeLieviFino = "fascia_perdite_lievi_fino"
         case fasciaPerditeSignificativeFino = "fascia_perdite_significative_fino"
+        case maggiorazioneVicinanzaMassima = "maggiorazione_vicinanza_massima"
+        case fasciaVicinanzaLontanoFino = "fascia_vicinanza_lontano_fino"
+        case fasciaVicinanzaRavvicinatoFino = "fascia_vicinanza_ravvicinato_fino"
+        case passoAccerchiamento = "passo_accerchiamento"
+        case concorrentiMassimi = "concorrenti_massimi"
     }
 }
 

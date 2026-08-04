@@ -74,10 +74,90 @@ public struct MotoreBattaglia: Sendable {
     }
 
     /// Gittata effettiva con l'eventuale gancio della caratteristica (05 §7.7).
-    func gittataEffettiva(_ gittata: Int, stato: StatoBattaglia) -> Int {
+    public func gittataEffettiva(_ gittata: Int, stato: StatoBattaglia) -> Int {
         guard gittata > 0 else { return 0 }
         let coeff = modificatore(.variazioneGittate, stato)
         return max(1, Int(coeff.applicato(a: Int64(gittata))))
+    }
+
+    // MARK: - Modificatore di vicinanza per il tiro (01 §9.10.1)
+
+    /// Prossimità del bersaglio dentro la gittata: zero al limite della gittata,
+    /// uno alla minima distanza. Deterministica e calcolabile dal solo stato.
+    /// Con gittata di una sola cella ogni bersaglio a portata è alla minima distanza.
+    public func prossimita(distanza: Int, gittata: Int) -> Scalato {
+        guard gittata > 1 else { return .uno }
+        let dentro = min(max(distanza, 1), gittata)
+        return Scalato(millesimi: Int64(gittata - dentro) * 1000 / Int64(gittata - 1))
+    }
+
+    /// Il coefficiente del tiro in funzione della distanza (01 §9.10.1): una formula
+    /// unica più un coefficiente dai valori (00 §13.3). Al limite della gittata vale
+    /// uno esatto, e cresce linearmente fino alla minima distanza.
+    public func coefficienteVicinanza(distanza: Int, gittata: Int) -> Scalato {
+        .uno + valori.combattimento.maggiorazioneVicinanzaMassima
+            * prossimita(distanza: distanza, gittata: gittata)
+    }
+
+    /// La fascia con cui la vicinanza si annuncia (01 §9.10.1), soglie dai valori (03 §5.15).
+    public func fasciaVicinanza(distanza: Int, gittata: Int) -> FasciaVicinanza {
+        let p = prossimita(distanza: distanza, gittata: gittata)
+        if p <= valori.combattimento.fasciaVicinanzaLontanoFino { return .lontano }
+        if p <= valori.combattimento.fasciaVicinanzaRavvicinatoFino { return .ravvicinato }
+        return .aRidosso
+    }
+
+    // MARK: - Modificatore di accerchiamento (01 §9.10.2)
+
+    /// I reparti che concorrono contro un bersaglio: quelli della parte avversa che,
+    /// nello stato corrente e per la sola loro posizione, lo hanno sotto la propria
+    /// offesa — a contatto di mischia oppure con il bersaglio dentro la gittata.
+    /// L'insieme si ricava dal solo stato: non dipende da quali azioni siano già
+    /// state compiute (munizioni spese, azione consumata) né dall'ordine in cui i
+    /// danni si applicano, ed è quindi coerente con la risoluzione simultanea.
+    /// Chi è impegnato in una mischia che non comprende il bersaglio non concorre:
+    /// è trattenuto altrove.
+    public func concorrenti(contro id: IdSciame, stato: StatoBattaglia) -> [IdSciame] {
+        guard let bersaglio = stato.sciami[id] else { return [] }
+        return stato.sciamiOrdinati.compactMap { sciame -> IdSciame? in
+            guard sciame.parte == bersaglio.parte.avversaria else { return nil }
+            let colBersaglio = stato.contatti.contains { $0.coinvolge(sciame.id) && $0.coinvolge(id) }
+            if colBersaglio { return sciame.id }
+            guard !stato.impegnato(sciame.id) else { return nil }
+            let a = archetipo(sciame.archetipo)
+            let distanza = stato.griglia.distanza(sciame.posizione, bersaglio.posizione)
+            let portata = a.offesaTiro != nil ? gittataEffettiva(a.gittata, stato: stato) : 1
+            return distanza <= portata ? sciame.id : nil
+        }
+    }
+
+    /// Il coefficiente dell'accerchiamento (01 §9.10.2): formula unica più un passo
+    /// dai valori (00 §13.3). Cresce col quadrato dei concorrenti eccedenti il primo,
+    /// sicché due stringono moderatamente e tre o quattro assai di più; oltre il
+    /// tetto dichiarato nei valori non cresce più.
+    public func coefficienteAccerchiamento(concorrenti numero: Int) -> Scalato {
+        let contati = Int64(concorrentiContati(numero))
+        let eccedenti = contati - 1
+        return .uno + valori.combattimento.passoAccerchiamento * Scalato(intero: eccedenti * eccedenti)
+    }
+
+    /// La fascia con cui l'accerchiamento si annuncia (01 §9.10.2): isolato è la
+    /// condizione ordinaria e non si annuncia (02 §8.7.1).
+    public func fasciaAccerchiamento(concorrenti numero: Int) -> FasciaAccerchiamento {
+        switch concorrentiContati(numero) {
+        case ...1: return .isolato
+        case 2: return .stretto
+        default: return .circondato
+        }
+    }
+
+    private func concorrentiContati(_ numero: Int) -> Int {
+        max(1, min(numero, valori.combattimento.concorrentiMassimi))
+    }
+
+    /// Il coefficiente di accerchiamento che si applica a chi colpisce quel bersaglio.
+    func accerchiamento(su id: IdSciame, stato: StatoBattaglia) -> Scalato {
+        coefficienteAccerchiamento(concorrenti: concorrenti(contro: id, stato: stato).count)
     }
 
     /// La fascia descrittiva di un danno (01 §9.7.2): proporzione sulla consistenza
@@ -288,8 +368,15 @@ public struct MotoreBattaglia: Sendable {
             let bersaglio = stato.sciami[bersaglioId]!
             let a = archetipo(sciame.archetipo)
             // Il proiettile è del reparto (01 §3.3.1); dentro la gittata unica la resa è piena (01 §3.4.1).
+            // Alla resa piena si applicano i due modificatori: la vicinanza al bersaglio
+            // (01 §9.10.1) e l'accerchiamento del bersaglio (01 §9.10.2).
             let offesa = a.offesaTiro!
-            let inflitto = danno(da: sciame, offesa: offesa, a: bersaglio, coefficiente: .uno, stato: stato)
+            let vicinanza = coefficienteVicinanza(
+                distanza: stato.griglia.distanza(sciame.posizione, bersaglio.posizione),
+                gittata: gittataEffettiva(a.gittata, stato: stato))
+            let inflitto = danno(da: sciame, offesa: offesa, a: bersaglio,
+                                 coefficiente: vicinanza * accerchiamento(su: bersaglioId, stato: stato),
+                                 stato: stato)
             let qualitativa = efficaciaQualitativa(offesa: offesa,
                                                    protezione: valori.protezioni[bersaglio.protezione]!)
             let fasciaInflitta = fascia(danno: inflitto, consistenzaPrima: bersaglio.serbatoio)
@@ -410,12 +497,17 @@ public struct MotoreBattaglia: Sendable {
         let contattiOrdinati = stato.contatti.sorted {
             ($0.primo, $0.secondo) < ($1.primo, $1.secondo)
         }
+        // I coefficienti di accerchiamento si ricavano dallo stato d'ingresso del giro,
+        // prima che qualunque danno sia applicato: l'insieme dei concorrenti è quindi
+        // il medesimo per tutti i contatti, e l'ordine non lo tocca (01 §9.10.2).
         for contatto in contattiOrdinati {
             guard let a = stato.sciami[contatto.primo], let b = stato.sciami[contatto.secondo] else { continue }
             let dannoAB = danno(da: a, offesa: archetipo(a.archetipo).offesaMischia, a: b,
-                               coefficiente: .uno, stato: stato)
+                               coefficiente: accerchiamento(su: contatto.secondo, stato: stato),
+                               stato: stato)
             let dannoBA = danno(da: b, offesa: archetipo(b.archetipo).offesaMischia, a: a,
-                               coefficiente: .uno, stato: stato)
+                               coefficiente: accerchiamento(su: contatto.primo, stato: stato),
+                               stato: stato)
             danni.append(DannoCalcolato(bersaglio: contatto.secondo, danno: dannoAB))
             danni.append(DannoCalcolato(bersaglio: contatto.primo, danno: dannoBA))
             // Le fasce sulla consistenza prima dell'applicazione (01 §9.7.2).

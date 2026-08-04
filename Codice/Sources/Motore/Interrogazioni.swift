@@ -77,6 +77,49 @@ public struct VistaBattaglia: Sendable {
         }
     }
 
+    /// Ciò che serve a decidere quando si designa un bersaglio (02 §9.2.1), tutto
+    /// in forma qualitativa: efficacia dell'offesa (01 §9.9.1), fascia di vicinanza
+    /// per il tiro (01 §9.10.1) e fascia di accerchiamento del bersaglio (01 §9.10.2).
+    /// La Presentazione la annuncia e non la calcola (00 §3.2).
+    public struct AnteprimaBersaglio: Hashable, Sendable {
+        public let efficacia: EfficaciaQualitativa
+        /// Presente per il solo tiro: la mischia non ha distanza da percorrere.
+        public let vicinanza: FasciaVicinanza?
+        public let accerchiamento: FasciaAccerchiamento
+    }
+
+    /// L'anteprima di un tiro, se il comando è ammissibile; altrimenti niente.
+    public func anteprimaTiro(da id: IdSciame, su bersaglioId: IdSciame) -> AnteprimaBersaglio? {
+        guard motore.valida(.tira(sciame: id, bersaglio: bersaglioId),
+                            parte: parte, stato: stato).eValido,
+              let sciame = stato.sciami[id], let bersaglio = stato.sciami[bersaglioId],
+              let archetipo = motore.valori.archetipi[sciame.archetipo],
+              let offesa = archetipo.offesaTiro else { return nil }
+        return AnteprimaBersaglio(
+            efficacia: motore.efficaciaQualitativa(
+                offesa: offesa, protezione: motore.valori.protezioni[bersaglio.protezione]!),
+            vicinanza: motore.fasciaVicinanza(
+                distanza: stato.griglia.distanza(sciame.posizione, bersaglio.posizione),
+                gittata: motore.gittataEffettiva(archetipo.gittata, stato: stato)),
+            accerchiamento: motore.fasciaAccerchiamento(
+                concorrenti: motore.concorrenti(contro: bersaglioId, stato: stato).count))
+    }
+
+    /// L'anteprima di un ingaggio, se il comando è ammissibile; altrimenti niente.
+    public func anteprimaIngaggio(da id: IdSciame, su bersaglioId: IdSciame) -> AnteprimaBersaglio? {
+        guard motore.valida(.ingaggia(sciame: id, bersaglio: bersaglioId),
+                            parte: parte, stato: stato).eValido,
+              let sciame = stato.sciami[id], let bersaglio = stato.sciami[bersaglioId],
+              let archetipo = motore.valori.archetipi[sciame.archetipo] else { return nil }
+        return AnteprimaBersaglio(
+            efficacia: motore.efficaciaQualitativa(
+                offesa: archetipo.offesaMischia,
+                protezione: motore.valori.protezioni[bersaglio.protezione]!),
+            vicinanza: nil,
+            accerchiamento: motore.fasciaAccerchiamento(
+                concorrenti: motore.concorrenti(contro: bersaglioId, stato: stato).count))
+    }
+
     /// L'informazione di stato della battaglia (02 §6.4): budget residuo, turno,
     /// riga avversaria più avanzata, righe alla soglia durante la ritirata.
     public struct InformazioneDiStato: Hashable, Sendable {

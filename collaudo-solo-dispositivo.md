@@ -50,10 +50,22 @@ e ciò che resta fuori è scritto qui.
 
 ## Che cosa provare per primo, dopo questa build
 
-1. Dare ordini: attivare una propria truppa, scegliere una voce del pannello
+1. **La lunghezza delle voci di designazione.** È la novità che rischia di più.
+   La voce di tiro dice ora nome, lettera, efficacia, vicinanza e — se il bersaglio
+   non è isolato — accerchiamento; quella di ingaggio dice nome, lettera, posizione,
+   efficacia e accerchiamento. Il collaudo accerta il contenuto e l'ordine
+   (`DesignazioneBersaglioTest`), non quanto siano faticose da ascoltare in un
+   pannello con più bersagli. Solo l'orecchio può dire se la frase sia diventata
+   troppo lunga e se l'ordine — bersaglio, efficacia, modificatori — sia quello
+   giusto; se non lo è, si cambia in 02 §9.3.1 come modifica unica e globale.
+2. **La distinguibilità dei termini nuovi.** «Stretto» e «circondato» da una parte,
+   «a distanza», «ravvicinato» e «a ridosso» dall'altra: vanno sentiti alla velocità
+   di lettura vera, dove parole simili si confondono. Non sono confondibili sulla
+   carta; lo sono all'ascolto veloce solo il dispositivo lo dice.
+3. Dare ordini: attivare una propria truppa, scegliere una voce del pannello
    (tiro, ingaggio, designazione del movimento) e verificare che l'ordine venga
    eseguito e che si resti nello scontro, con il fuoco sulla cella dell'unità.
-2. Raggiungere TUTTE le riserve del deck a scorrimenti, in ogni turno, e
+4. Raggiungere TUTTE le riserve del deck a scorrimenti, in ogni turno, e
    schierarle tutte.
-3. Il resto come nella nota precedente: fuoco mai mosso da solo, informazioni
+5. Il resto come nella nota precedente: fuoco mai mosso da solo, informazioni
    mancanti, verbosità.

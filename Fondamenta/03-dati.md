@@ -1,6 +1,8 @@
 # Documento dei dati
 
-Documento 03 di 05 — versione 2.1
+Documento 03 di 05 — versione 2.2
+
+Novità della versione 2.2, in conseguenza dei due modificatori di posizione introdotti da 01 §9.10: si aggiungono i valori della vicinanza nel tiro (nuovo punto 5.15) e quelli dell'accerchiamento (nuovo punto 5.16), tutti con contrassegno di provvisorietà; si aggiunge la grandezza critica del loro peso complessivo (nuovo punto 6.10). Si registra inoltre, al punto 7.4, una misura ricavata dall'accertamento sugli esiti degli scontri: con i valori attuali la soglia di resa del tattico avversario è irraggiungibile già prima che il vantaggio nascosto la innalzi, sicché il vantaggio non è oggi la causa del comportamento osservato.
 
 Novità della versione 2.1, in conseguenza della prima tranche di semplificazioni decisa dal titolare (01 versione 3.3): la grandezza critica 6.4, cioè l'ampiezza della fascia entro cui il tiro uccide, ha perso oggetto con la gittata unica ed è ridefinita come taratura della gittata utile unica; i coefficienti d'offesa si riferiscono al proiettile fisso di ciascun reparto (5.4); si aggiungono le soglie delle fasce descrittive degli esiti (nuovo punto 5.14), valori con contrassegno di provvisorietà.
 
@@ -164,6 +166,10 @@ Le voci sono divise per provenienza del valore: quelle che derivano dalla docume
 
 5.14 Soglie delle fasce descrittive degli esiti dei combattimenti (aggiunto nella versione 2.1). Le fasce di 01 §9.7.2 — nessuna perdita, lievi, significative, gravi — discendono da soglie deterministiche espresse come proporzione del danno sulla consistenza del reparto colpito immediatamente prima dell'applicazione. Le soglie sono decisioni di progetto con contrassegno di provvisorietà, risiedono nel file dei parametri di combattimento e si riesaminano con i ritorni dei tester e con le simulazioni. Fonte: documento 01, punto 9.7.2.
 
+5.15 Valori della vicinanza nel tiro (aggiunto nella versione 2.2). Due grandezze, entrambe nel file dei parametri di combattimento e provvisorie. La prima è la maggiorazione alla minima distanza, cioè quanto il tiro renda di più a ridosso rispetto al limite della gittata; al limite della gittata la maggiorazione è nulla per costruzione, e fra i due estremi la formula unica interpola sulla prossimità, che vale zero al limite e uno alla minima distanza. La seconda sono le due soglie che dividono la prossimità nelle tre fasce descrittive del vocabolario chiuso, con lo stesso impianto delle soglie del punto 5.14. Fonte: documento 01, punto 9.10.1.
+
+5.16 Valori dell'accerchiamento (aggiunto nella versione 2.2). Due grandezze, entrambe nel file dei parametri di combattimento e provvisorie. La prima è il passo della maggiorazione, che la formula unica compone col quadrato dei concorrenti eccedenti il primo, sicché due stringono moderatamente e tre o quattro assai di più come il punto 9.10.2 prescrive. La seconda è il tetto dei concorrenti conteggiati, oltre il quale la maggiorazione non cresce più; il tetto esiste perché su griglia esagonale i vicini sono sei e i tiratori a portata possono essere molti di più, e senza tetto un ammassamento produrrebbe maggiorazioni prive di senso. Le fasce descrittive dell'annuncio non hanno soglie proprie nei dati: discendono dai numeri di concorrenti che il punto 9.10.2 dichiara come regola, cioè uno, due, tre o più. Fonte: documento 01, punto 9.10.2.
+
 ## 6. Grandezze critiche da tarare con le simulazioni
 
 Le voci di questa sezione non si determinano a tavolino. Il programma di verifica del bilanciamento, separato dal gioco e senza interfaccia, le misura simulando un grande numero di scontri e di partite. Fonte: carta, principio 16.
@@ -186,6 +192,8 @@ Le voci di questa sezione non si determinano a tavolino. Il programma di verific
 
 6.9 Sbilanciamento dei formati di mappa minori, dove fortezza e torri conferiscono conoscenza piena su tutta la mappa. Fonte: documento 01, punto 5.14.5.2.
 
+6.10 Peso dei due modificatori di posizione (aggiunto nella versione 2.2). Due misure distinte e da prendere insieme. La prima: quanto la vicinanza premi l'avanzata rispetto al costo in volume che l'avanzata comporta, poiché se il premio non copre il costo nessuno avanzerà e il modificatore sarà inerte, mentre se lo supera di molto il tiro da lontano cesserà di avere senso e le battaglie collasseranno a contatto immediato. La seconda: quanto l'accerchiamento debba pesare perché più reparti contro uno prevalgano, tenuto conto che il reparto accerchiato combatte a piena capacità in ciascuno dei contatti che lo stringono e che la sua resa complessiva si moltiplica quindi per il numero degli assalitori. Le due misure interagiscono, perché i tiratori concorrono all'accerchiamento e la loro posizione è governata dalla prima. Fonte: documento 01, punti 9.10.1, 9.10.2 e 16.4.
+
 ## 7. Registro dei vantaggi nascosti del giocatore
 
 7.1 I vantaggi deliberatamente concessi al giocatore vanno noti al programma di verifica, che diversamente misurerebbe probabilità irreali. Fonte: documento 01, sezione 13.
@@ -193,6 +201,10 @@ Le voci di questa sezione non si determinano a tavolino. Il programma di verific
 7.2 Vantaggi attualmente stabiliti: l'avversario può ritirare unità soltanto dalla propria riga più arretrata; la sua propensione alla ritirata è molto bassa.
 
 7.3 Ogni vantaggio nascosto introdotto in seguito va aggiunto qui e al documento 01.
+
+7.4 Misura registrata nella versione 2.2, dall'accertamento sugli esiti degli scontri. La soglia oltre la quale il tattico avversario dichiara la resa è la sua tolleranza alle perdite divisa per la propensione effettiva alla ritirata, ed è espressa come proporzione delle forze impiegate. Con i valori di fabbrica dell'ufficiale di prova la soglia vale l'unità intera già SENZA il vantaggio nascosto, cioè richiederebbe la perdita di tutto ciò che è stato impegnato, e il vantaggio la porta a poco più del triplo. Ne discende un fatto da tenere presente in taratura: il comportamento osservato, cioè un avversario che non si ritira mai e costringe all'annientamento, non è oggi prodotto dal vantaggio nascosto ma dai valori di carattere dell'ufficiale, e ridurre o togliere il vantaggio non lo cambierebbe. Il vantaggio resta registrato e resta reale; ciò che va tarato è il rapporto fra tolleranza alle perdite e propensione alla ritirata del punto 6.5.
+
+7.5 I due modificatori della sezione 9.10 del documento 01 non sono vantaggi nascosti e non entrano in questo registro: valgono per entrambe le parti, e l'accertamento lo ha verificato misurando i danni a parti scambiate.
 
 ## 8. Minimi obbligatori
 

@@ -7,6 +7,7 @@
 	objects = {
 
 /* Begin PBXBuildFile section */
+		116EEE5C15D49181561AFDB5 /* DesignazioneBersaglioTest.swift in Sources */ = {isa = PBXBuildFile; fileRef = 589A5B5EA3AF0D6D1EFB3900 /* DesignazioneBersaglioTest.swift */; };
 		190E7D5DC3B892BF2DFD277B /* SchermateContorno.swift in Sources */ = {isa = PBXBuildFile; fileRef = 44914552A51BDF0197E99DAF /* SchermateContorno.swift */; };
 		33BCAD29CAC0333FB4B83594 /* FumoInterfacciaTest.swift in Sources */ = {isa = PBXBuildFile; fileRef = 921003768253D7D483CCC1D8 /* FumoInterfacciaTest.swift */; };
 		55F02441809BDE8C6D282CC4 /* Dati in Frameworks */ = {isa = PBXBuildFile; productRef = CFCCD206E6A2E53A407BA042 /* Dati */; };
@@ -56,6 +57,7 @@
 		3CAF296EB8CDAA34921D17B6 /* WarSenseTest.xctest */ = {isa = PBXFileReference; includeInIndex = 0; lastKnownFileType = wrapper.cfbundle; path = WarSenseTest.xctest; sourceTree = BUILT_PRODUCTS_DIR; };
 		44914552A51BDF0197E99DAF /* SchermateContorno.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SchermateContorno.swift; sourceTree = "<group>"; };
 		47D2EC331332BE96EB5D410B /* Servizi.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Servizi.swift; sourceTree = "<group>"; };
+		589A5B5EA3AF0D6D1EFB3900 /* DesignazioneBersaglioTest.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = DesignazioneBersaglioTest.swift; sourceTree = "<group>"; };
 		780DA0404CFBE7DD9B420A68 /* AppDelegate.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AppDelegate.swift; sourceTree = "<group>"; };
 		849A458FA8292F265DF9BE68 /* SchermataBattaglia.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SchermataBattaglia.swift; sourceTree = "<group>"; };
 		921003768253D7D483CCC1D8 /* FumoInterfacciaTest.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = FumoInterfacciaTest.swift; sourceTree = "<group>"; };
@@ -139,6 +141,7 @@
 			isa = PBXGroup;
 			children = (
 				1C877A8D5733D587BE7B618F /* AnnunciEFuocoTest.swift */,
+				589A5B5EA3AF0D6D1EFB3900 /* DesignazioneBersaglioTest.swift */,
 				27D480588F693D19D9E50AC7 /* LettoreAccessibilita.swift */,
 				325B59A8BC855637ABF9B2CB /* PannelloAzioniTest.swift */,
 				03ACD38B8C2F68821502F3C4 /* RaggiungibilitaTest.swift */,
@@ -277,6 +280,7 @@
 			buildActionMask = 2147483647;
 			files = (
 				7E69C9F2DB0BBABC72260BBB /* AnnunciEFuocoTest.swift in Sources */,
+				116EEE5C15D49181561AFDB5 /* DesignazioneBersaglioTest.swift in Sources */,
 				72C9006DDA7298DDDD235743 /* LettoreAccessibilita.swift in Sources */,
 				F9D782BD8B4FD18B38DF5922 /* PannelloAzioniTest.swift in Sources */,
 				F153F7238148016D1A99A85F /* RaggiungibilitaTest.swift in Sources */,

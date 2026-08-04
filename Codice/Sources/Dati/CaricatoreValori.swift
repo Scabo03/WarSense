@@ -155,5 +155,19 @@ public enum CaricatoreValori {
               combattimento.fasciaPerditeSignificativeFino <= .uno else {
             throw ErroreDati(chiave: "errore.dati.soglia_fuori_intervallo", file: "combattimento.json")
         }
+        // Fasce della vicinanza: crescenti e dentro l'unità, come quelle delle perdite
+        // (01 §9.10.1). La prossimità su cui si misurano vale da zero a uno.
+        guard combattimento.fasciaVicinanzaLontanoFino > .zero,
+              combattimento.fasciaVicinanzaRavvicinatoFino > combattimento.fasciaVicinanzaLontanoFino,
+              combattimento.fasciaVicinanzaRavvicinatoFino < .uno else {
+            throw ErroreDati(chiave: "errore.dati.soglia_fuori_intervallo", file: "combattimento.json")
+        }
+        // I due modificatori accrescono e non riducono; il conteggio dei concorrenti
+        // deve arrivare almeno a due, perché sotto due non esiste accerchiamento.
+        guard combattimento.maggiorazioneVicinanzaMassima >= .zero,
+              combattimento.passoAccerchiamento >= .zero,
+              combattimento.concorrentiMassimi >= 2 else {
+            throw ErroreDati(chiave: "errore.dati.valore_non_positivo", file: "combattimento.json")
+        }
     }
 }
