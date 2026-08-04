@@ -22,17 +22,23 @@ let package = Package(
         // Sessione: orchestratore, giornale, istantanee. Importa soltanto Motore, Dati e Foundation.
         .target(name: "Sessione", dependencies: ["Motore", "Dati"]),
         // Contenuti: i file veri (valori, testi). Nessun codice oltre l'esposizione del bundle.
-        .target(name: "Contenuti", resources: [.copy("Valori"), .copy("Testi"), .copy("Suoni")]),
+        .target(name: "Contenuti", resources: [.copy("Valori"), .copy("Testi"), .copy("Suoni"),
+                                               .copy("Scenari")]),
         // Segnali: punto centrale dei segnali. Compila su ogni piattaforma: nucleo puro
         // più parti di piattaforma dietro compilazione condizionale (RDA-48).
         .target(name: "Segnali", dependencies: ["Motore", "Dati"]),
-        // Verifica: programma di verifica del bilanciamento, senza interfaccia (fase C).
-        .executableTarget(name: "Verifica", dependencies: ["Sessione", "Motore", "Dati", "Contenuti"]),
+        // Verifica: il programma di verifica del bilanciamento, senza interfaccia (fase C,
+        // 05 §12). È una libreria perché il fumo delle simulazioni sia collaudabile
+        // come qualunque altro bersaglio (05 §14.7, RDA-58); l'eseguibile è il solo
+        // guscio da riga di comando.
+        .target(name: "Verifica", dependencies: ["Sessione", "Motore", "Dati", "Contenuti"]),
+        .executableTarget(name: "StrumentoVerifica", dependencies: ["Verifica"]),
         // Collaudo.
         .testTarget(name: "DatiTest", dependencies: ["Dati", "Contenuti"]),
         .testTarget(name: "MotoreTest", dependencies: ["Motore", "Dati", "Contenuti"]),
         .testTarget(name: "SessioneTest", dependencies: ["Sessione", "Motore", "Dati", "Contenuti"]),
         .testTarget(name: "SegnaliTest", dependencies: ["Segnali", "Dati", "Contenuti"]),
+        .testTarget(name: "VerificaTest", dependencies: ["Verifica", "Motore", "Dati", "Contenuti"]),
         .testTarget(name: "ConfiniTest", dependencies: []),
     ]
 )

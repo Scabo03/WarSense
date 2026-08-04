@@ -23,6 +23,7 @@ final class ConfiniTest: XCTestCase {
         "Contenuti": ["Foundation"],
         "Segnali": ["Foundation", "Motore", "Dati", "UIKit", "CoreHaptics", "AVFoundation"],
         "Verifica": ["Foundation", "Sessione", "Motore", "Dati", "Contenuti"],
+        "StrumentoVerifica": ["Foundation", "Verifica"],
     ]
 
     /// Anche la Presentazione rispetta confini dichiarati (05 §1.3): vive nel

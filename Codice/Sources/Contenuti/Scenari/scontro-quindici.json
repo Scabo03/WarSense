@@ -1,0 +1,44 @@
+{
+  "commento": "Formato minore: griglia da quindici celle, mazzi ridotti. Serve a misurare la durata e gli esiti dove lo spazio manca e i contatti sono immediati.",
+  "identificatore": "scontro_quindici",
+  "formato": "quindici",
+  "caratteristica": "campo_aperto",
+  "ostacoli": [],
+  "deck_giocatore": [
+    {
+      "archetipo": "fanteria_leggera",
+      "protezione": "anti_saturazione",
+      "atomi": 3,
+      "esemplari": 2
+    },
+    {
+      "archetipo": "fanteria_pesante",
+      "protezione": "anti_saturazione",
+      "atomi": 3,
+      "esemplari": 1
+    }
+  ],
+  "deck_avversario": [
+    {
+      "archetipo": "fanteria_leggera",
+      "protezione": "anti_perforazione",
+      "atomi": 3,
+      "esemplari": 2
+    },
+    {
+      "archetipo": "fanteria_pesante",
+      "protezione": "anti_saturazione",
+      "atomi": 3,
+      "esemplari": 1
+    }
+  ],
+  "giri_massimi": 60,
+  "assi": [
+    "primo_occupante",
+    "ufficiali",
+    "vantaggi_nascosti"
+  ],
+  "soglie": {
+    "scarto_vittorie_permille_senza_vantaggi": 250
+  }
+}

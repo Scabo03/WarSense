@@ -1,0 +1,10 @@
+{
+  "commento": "Parametri dei banchi di misura del programma di verifica (05 §12.2). Non sono valori di gioco: sono le condizioni pari in cui le misure si prendono. Cambiarli cambia la misura, non il gioco.",
+  "atomi_di_riferimento": 5,
+  "assalitore_di_riferimento": "fanteria_pesante",
+  "bersaglio_di_riferimento": "fanteria_pesante",
+  "protezione_di_riferimento": "anti_saturazione",
+  "assalitori_massimi": 4,
+  "giri_massimi_duello": 60,
+  "formato_di_prova": "cento"
+}

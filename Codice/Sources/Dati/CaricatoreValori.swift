@@ -164,7 +164,11 @@ public enum CaricatoreValori {
         }
         // I due modificatori accrescono e non riducono; il conteggio dei concorrenti
         // deve arrivare almeno a due, perché sotto due non esiste accerchiamento.
-        guard combattimento.maggiorazioneVicinanzaMassima >= .zero,
+        // La curva del tiro cresce avvicinandosi e non si annulla mai al limite
+        // (01 §9.10.1): al limite la resa è positiva e minore di quella alla minima
+        // distanza. L'accerchiamento accresce e non riduce.
+        guard combattimento.resaTiroAlLimite > .zero,
+              combattimento.resaTiroAllaMinimaDistanza > combattimento.resaTiroAlLimite,
               combattimento.passoAccerchiamento >= .zero,
               combattimento.concorrentiMassimi >= 2 else {
             throw ErroreDati(chiave: "errore.dati.valore_non_positivo", file: "combattimento.json")

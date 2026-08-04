@@ -26,8 +26,12 @@ final class FumoInterfacciaTest: XCTestCase {
         // Le tessere del deck sono elementi propri e davvero raggiungibili
         // (00 §1.2, 02 §8.2): qui risponde il servizio di accessibilità vero, e la
         // prova è il comportamento — il tocco seleziona — non la sola geometria.
+        // Un archetipo può comparire in PIÙ tessere, perché il mazzo può portarne
+        // esemplari di protezione diversa (taratura della fase C): si prende la
+        // prima corrispondenza, non l'unica, altrimenti la ricerca è ambigua.
         for nome in ["fanteria leggera", "fanteria pesante", "tiratori"] {
-            let tessera = app.descendants(matching: .any)[nome]
+            let tessera = app.descendants(matching: .any)
+                .matching(NSPredicate(format: "label == %@", nome)).firstMatch
             XCTAssertTrue(tessera.waitForExistence(timeout: 10),
                           "la tessera «\(nome)» è un elemento a sé")
             tessera.tap()

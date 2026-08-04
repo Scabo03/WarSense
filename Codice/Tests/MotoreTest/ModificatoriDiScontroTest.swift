@@ -109,14 +109,19 @@ final class ModificatoriDiScontroTest: XCTestCase {
     func test_01_9_10_1_al_limite_della_gittata_nessuna_maggiorazione() throws {
         for (identificatore, archetipo) in valori.archetipi.sorted(by: { $0.key < $1.key }) {
             guard archetipo.gittata > 0 else { continue }
+            // Al limite della gittata la resa è quella dichiarata nei dati, ridotta:
+            // il tiro lontano disturba (01 §9.10.1, taratura della fase C).
             XCTAssertEqual(motore.coefficienteVicinanza(distanza: archetipo.gittata,
-                                                        gittata: archetipo.gittata), .uno,
-                           "\(identificatore): al limite della gittata la resa resta quella piena")
+                                                        gittata: archetipo.gittata),
+                           valori.combattimento.resaTiroAlLimite,
+                           "\(identificatore): al limite vale la resa dichiarata")
+            XCTAssertLessThan(valori.combattimento.resaTiroAlLimite, .uno,
+                              "il tiro al limite rende meno dell'accoppiamento nudo")
             XCTAssertEqual(motore.prossimita(distanza: archetipo.gittata, gittata: archetipo.gittata), .zero)
             XCTAssertEqual(motore.prossimita(distanza: 1, gittata: archetipo.gittata), .uno)
-            // Alla minima distanza vale esattamente la maggiorazione dei dati (00 §13.1).
+            // Alla minima distanza vale esattamente l'altro estremo dei dati (00 §13.1).
             XCTAssertEqual(motore.coefficienteVicinanza(distanza: 1, gittata: archetipo.gittata),
-                           .uno + valori.combattimento.maggiorazioneVicinanzaMassima)
+                           valori.combattimento.resaTiroAllaMinimaDistanza)
         }
     }
 
@@ -427,7 +432,8 @@ final class ModificatoriDiScontroTest: XCTestCase {
     func test_00_13_1_i_numeri_dei_due_modificatori_vengono_dai_dati() throws {
         let c = valori.combattimento
         XCTAssertEqual(motore.coefficienteVicinanza(distanza: 1, gittata: 5),
-                       .uno + c.maggiorazioneVicinanzaMassima)
+                       c.resaTiroAllaMinimaDistanza)
+        XCTAssertEqual(motore.coefficienteVicinanza(distanza: 5, gittata: 5), c.resaTiroAlLimite)
         XCTAssertEqual(motore.coefficienteAccerchiamento(concorrenti: 2),
                        .uno + c.passoAccerchiamento)
         XCTAssertEqual(motore.coefficienteAccerchiamento(concorrenti: 3),

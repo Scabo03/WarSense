@@ -524,3 +524,29 @@ Scelta. La seconda, con il verso stabilito dal titolare — sconfitto è l'avver
 Motivazione. La parità avrebbe contraddetto 01 §15.2.2 e obbligato a rifare il resoconto, il ritorno in campagna dei punti da 15.4 a 15.6, che presuppongono un vincitore, e le registrazioni: molte conseguenze per un caso raro. La forma dell'interruttore discende da 03 §7.1 e 05 §12.5: un vantaggio nascosto deve essere disattivabile, altrimenti il programma di verifica misura probabilità irreali. Spento, l'esito torna a cadere sul giocatore: non è una terza regola ma il caso reale che la Verifica deve poter osservare.
 
 Conseguenze. L'annientamento di una sola parte non è toccato. Il caso simultaneo diventa un po' meno raro con il modificatore di accerchiamento, che accresce i danni: ragione in più perché sia normato anziché lasciato all'ordine di un'enumerazione.
+
+## Parte ottava — Decisioni della fase C
+
+### RDA-58 — Il programma di verifica è una libreria più un guscio (05 §12.1)
+
+Problema. 05 §14.7 vuole una corsa breve del programma di verifica dentro il collaudo, e 05 §12.1 lo descrive come eseguibile da riga di comando. Un bersaglio eseguibile non si importa da un bersaglio di prova senza attriti, e il fumo delle simulazioni sarebbe rimasto fuori dal collaudo o vi sarebbe entrato lanciando un processo, che è fragile e lento.
+
+Opzioni. Lasciare tutto nell'eseguibile e collaudarlo lanciandolo come processo; dividere in una libreria di misura più un guscio che si limita a leggere gli argomenti e stampare.
+
+Scelta. La seconda. La libreria `Verifica` contiene scenari, banchi, corse e rapporto; l'eseguibile `StrumentoVerifica` contiene soltanto la lettura degli argomenti e la scrittura dell'uscita. Il collaudo importa la libreria e ne esercita una corsa breve come qualunque altra prova.
+
+Motivazione. Il fumo delle simulazioni è un requisito e non un accessorio (00 §16.1): deve fallire come falliscono le altre prove, nello stesso comando e con lo stesso rapporto. Lanciare un processo avrebbe reso il collaudo dipendente dalla presenza del binario compilato e dall'ambiente.
+
+Conseguenze. Il comando cambia nome: `swift run StrumentoVerifica` in luogo di `swift run Verifica`. I confini fra bersagli valgono anche qui e sono verificati: il guscio importa la sola libreria di misura, e la libreria espone le cartelle di fabbrica perché il guscio non debba importare Contenuti.
+
+### RDA-59 — La variazione viene dagli assi dichiarati, non dai semi (05 §12.3.1)
+
+Problema. 05 §12.6 prevede che ogni riga di uscita porti il seme, perché la misura sia riproducibile. Sul piano di battaglia il seme non ha oggetto: non esiste alcuna estrazione del caso (01 §12.1) e il tattico è deterministico, quindi ogni corsa sulla stessa configurazione dà lo stesso esito e mille semi darebbero mille righe identiche.
+
+Opzioni. Introdurre una perturbazione casuale negli scenari per ottenere una distribuzione; enumerare gli estremi delle forbici come assi dichiarati e fare della configurazione ciò che il seme è altrove.
+
+Scelta. La seconda. Ogni scenario dichiara i propri assi da un insieme chiuso — primo occupante, coppie di ufficiali, vantaggi accesi e spenti, imboscata — e il programma percorre il prodotto in ordine deterministico. La riga di uscita porta la configurazione al posto del seme.
+
+Motivazione. Introdurre caso dove il gioco non ne ha significherebbe misurare una cosa diversa da quella che si gioca, e violerebbe lo spirito di 01 §12.1. Gli estremi delle forbici sono per di più ciò che 00 §13.2.4 prescrive di provare: la scelta non è un ripiego ma la forma giusta.
+
+Conseguenze. La riproducibilità è totale e collaudata: due corse sugli stessi dati danno lo stesso identico rapporto, carattere per carattere. Quando la fase D introdurrà meteo e guasti, il seme tornerà ad avere oggetto e si affiancherà agli assi sul piano di campagna, senza toglierli.

@@ -286,12 +286,17 @@ final class RegoleBattagliaTest: XCTestCase {
                 eventi.first(where: { if case .tiroEseguito = $0 { return true }; return false }) else {
             return XCTFail("nessun tiro eseguito")
         }
+        // Una sola gittata e disponibilità binaria (01 §3.4.1); la resa però non è
+        // unica lungo la gittata (01 §3.4.1.1): al limite vale quella dichiarata nei
+        // dati, che dopo la taratura della fase C è ridotta perché il tiro lontano
+        // disturbi e quello vicino uccida (01 §9.10.1).
         let eff = motore.efficacia(offesa: a.offesaTiro!,
                                    protezione: valori.protezioni[.antiSaturazione]!)
-        let dannoPieno = max(valori.minimi.dannoMinimo,
-                             eff.applicato(a: a.capacitaOffensivaPerAtomo * atomiPrima))
-        XCTAssertEqual(dannoInflitto, dannoPieno,
-                       "una sola gittata e una sola resa (01 §3.4.1, versione 3.3)")
+        let alLimite = max(valori.minimi.dannoMinimo,
+                           (eff * valori.combattimento.resaTiroAlLimite)
+                               .applicato(a: a.capacitaOffensivaPerAtomo * atomiPrima))
+        XCTAssertEqual(dannoInflitto, alLimite,
+                       "al limite della gittata vale la resa dichiarata (01 §9.10.1)")
         // Fuori portata: non valido con il motivo chiuso. Disponibilità binaria.
         var statoLontano = stato
         statoLontano.sciami[vicino]!.posizione = Cella(riga: 1, colonna: 1)
@@ -375,6 +380,63 @@ final class RegoleBattagliaTest: XCTestCase {
         // (01 §10.3, §15.2.2).
         XCTAssertEqual(stato.esito?.sconfitto, .giocatore)
         XCTAssertEqual(stato.esito?.modo, .ritirataCompiuta)
+    }
+
+    // MARK: - Conclusione durante la ritirata combattuta (01 §15.2.3, P8)
+
+    /// Difetto trovato dal programma di verifica della fase C. Il ritirante che
+    /// evacua TUTTO e non ha più riserve resta senza nulla in campo e senza nulla
+    /// nel mazzo: la condizione di annientamento risultava allora vera e la
+    /// battaglia si chiudeva come annientamento, mentre 01 §15.2.3 riserva quel
+    /// modo al caso in cui «nessuno dei due si ritira». Una ritirata riuscita
+    /// veniva quindi raccontata al giocatore come una disfatta.
+    func test_01_15_2_3_la_ritirata_riuscita_non_e_un_annientamento() throws {
+        var stato = try crea(scenarioOrdinario())
+        esegui(.seleziona(indiceDeck: 0), .giocatore, &stato)
+        esegui(.piazza(cella: Cella(riga: 10, colonna: 5)), .giocatore, &stato)
+        esegui(.fineTurno, .giocatore, &stato)
+        esegui(.seleziona(indiceDeck: 0), .avversario, &stato)
+        esegui(.piazza(cella: Cella(riga: 1, colonna: 5)), .avversario, &stato)
+        esegui(.fineTurno, .avversario, &stato)
+        // Il mazzo del giocatore si svuota: resta soltanto ciò che è in campo.
+        stato.deck[.giocatore] = []
+        while stato.giro < valori.formati["cento"]!.sogliaMinimaResaTurni {
+            esegui(.fineTurno, stato.parteDiTurno, &stato)
+        }
+        if stato.parteDiTurno != .giocatore { esegui(.fineTurno, .avversario, &stato) }
+        esegui(.dichiaraResa, .giocatore, &stato)
+        esegui(.ritiraUnita(sciame: IdSciame(1)), .giocatore, &stato)
+
+        XCTAssertEqual(stato.evacuati[.giocatore]?.count, 1, "l'unità è stata salvata, non perduta")
+        XCTAssertEqual(stato.esito?.modo, .ritirataCompiuta,
+                       "chi si ritira compie la ritirata: l'annientamento vale se nessuno si ritira")
+        XCTAssertEqual(stato.esito?.sconfitto, .giocatore, "sconfitto è chi dichiara (01 §15.2.2)")
+    }
+
+    /// Anche quando è l'AVANZANTE a restare senza nulla durante la ritirata, lo
+    /// scontro si chiude come ritirata compiuta e lo sconfitto resta chi si è
+    /// ritirato (01 §15.2.2). Caso non normato dai consolidati: precisazione P8.
+    func test_01_15_2_2_se_l_avanzante_si_esaurisce_lo_sconfitto_resta_il_ritirante() throws {
+        var stato = try crea(scenarioOrdinario())
+        esegui(.seleziona(indiceDeck: 0), .giocatore, &stato)
+        esegui(.piazza(cella: Cella(riga: 10, colonna: 5)), .giocatore, &stato)
+        esegui(.fineTurno, .giocatore, &stato)
+        esegui(.seleziona(indiceDeck: 0), .avversario, &stato)
+        esegui(.piazza(cella: Cella(riga: 1, colonna: 5)), .avversario, &stato)
+        esegui(.fineTurno, .avversario, &stato)
+        while stato.giro < valori.formati["cento"]!.sogliaMinimaResaTurni {
+            esegui(.fineTurno, stato.parteDiTurno, &stato)
+        }
+        if stato.parteDiTurno != .giocatore { esegui(.fineTurno, .avversario, &stato) }
+        esegui(.dichiaraResa, .giocatore, &stato)
+        // L'avanzante sparisce dal campo e dal mazzo mentre la ritirata è in corso.
+        stato.sciami[IdSciame(2)] = nil
+        stato.deck[.avversario] = []
+        esegui(.fineTurno, .giocatore, &stato)
+
+        XCTAssertEqual(stato.esito?.modo, .ritirataCompiuta)
+        XCTAssertEqual(stato.esito?.sconfitto, .giocatore,
+                       "si può perdere avendo inflitto più danni: sconfitto è chi si ritira")
     }
 
     // MARK: - Imboscata

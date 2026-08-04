@@ -1,0 +1,81 @@
+{
+  "commento": "Lo scenario di prova: mazzi resi confrontabili nella taratura della fase C (la fanteria pesante di entrambe le parti è protetta dalla saturazione), ufficiale ordinario, campo grande con tre ostacoli.",
+  "identificatore": "scontro_di_prova",
+  "formato": "cento",
+  "caratteristica": "campo_aperto",
+  "ostacoli": [
+    {
+      "riga": 5,
+      "colonna": 5
+    },
+    {
+      "riga": 5,
+      "colonna": 6
+    },
+    {
+      "riga": 6,
+      "colonna": 5
+    }
+  ],
+  "deck_giocatore": [
+    {
+      "archetipo": "fanteria_leggera",
+      "protezione": "anti_saturazione",
+      "atomi": 5,
+      "esemplari": 3
+    },
+    {
+      "archetipo": "fanteria_pesante",
+      "protezione": "anti_saturazione",
+      "atomi": 5,
+      "esemplari": 2
+    },
+    {
+      "archetipo": "tiratori",
+      "protezione": "anti_perforazione",
+      "atomi": 5,
+      "esemplari": 1
+    },
+    {
+      "archetipo": "tiratori",
+      "protezione": "anti_saturazione",
+      "atomi": 5,
+      "esemplari": 1
+    }
+  ],
+  "deck_avversario": [
+    {
+      "archetipo": "fanteria_leggera",
+      "protezione": "anti_perforazione",
+      "atomi": 5,
+      "esemplari": 1
+    },
+    {
+      "archetipo": "fanteria_leggera",
+      "protezione": "anti_saturazione",
+      "atomi": 5,
+      "esemplari": 2
+    },
+    {
+      "archetipo": "fanteria_pesante",
+      "protezione": "anti_saturazione",
+      "atomi": 5,
+      "esemplari": 2
+    },
+    {
+      "archetipo": "tiratori",
+      "protezione": "anti_saturazione",
+      "atomi": 5,
+      "esemplari": 2
+    }
+  ],
+  "giri_massimi": 80,
+  "assi": [
+    "primo_occupante",
+    "ufficiali",
+    "vantaggi_nascosti"
+  ],
+  "soglie": {
+    "scarto_vittorie_permille_senza_vantaggi": 250
+  }
+}

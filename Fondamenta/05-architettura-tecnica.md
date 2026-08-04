@@ -1,6 +1,8 @@
 # Documento di architettura tecnica
 
-Documento 05 di 05 — versione 1.1
+Documento 05 di 05 — versione 1.2
+
+Novità della versione 1.2, alla realizzazione della fase C: il programma di verifica è una LIBRERIA più un guscio da riga di comando, perché il fumo delle simulazioni sia collaudabile come qualunque altro bersaglio (12.1, RDA-58); la variazione delle corse viene dagli assi dichiarati negli scenari e non dai semi, perché la battaglia non contiene alcuna estrazione del caso (12.3); gli scenari sono file dichiarativi con assi di un insieme chiuso (12.2).
 
 Novità della versione 1.1, in conseguenza del limite dei bersagli simultanei di 01 §9.11: la codifica canonica dell'impronta serializza i contatti nell'ordine di arrivo e non riordinati, poiché quell'ordine è divenuto stato di gioco (2.9, RDA-55); il criterio di incremento della versione dei valori è dichiarato al punto 7.2 e sviluppato in 03 §9.2.1.
 
@@ -278,11 +280,13 @@ Novità della versione 1.1, in conseguenza del limite dei bersagli simultanei di
 
 ## 12. Il programma di verifica
 
-12.1 Forma. Eseguibile SwiftPM da riga di comando, per macOS, senza interfaccia (00 §16.1). Legge gli stessi Contenuti del gioco, o una cartella di valori alternativa indicata a riga di comando; usa Motore e Dati identici al gioco, il che è garantito dal fatto che sono gli stessi bersagli compilati.
+12.1 Forma. Una libreria di misura più un eseguibile SwiftPM da riga di comando, per macOS, senza interfaccia (00 §16.1). La misura sta nella libreria e non nell'eseguibile perché il fumo delle simulazioni del punto 14.7 è collaudo a tutti gli effetti e deve poter importare ciò che misura (RDA-58). Legge gli stessi Contenuti del gioco, o una cartella di valori alternativa indicata a riga di comando, o una cartella di scenari alternativa; usa Motore e Dati identici al gioco, il che è garantito dal fatto che sono gli stessi bersagli compilati. Non contiene alcuna regola propria: fa agire il tattico del Motore su entrambe le parti e applica i comandi del Motore. Se una misura richiede una grandezza che il Motore non espone, la grandezza si espone dal Motore e non si riscrive qui.
 
-12.2 Scenari. Tre famiglie: **scontro singolo** (due schieramenti su un formato, tattici contrapposti con parametri dati), **campagna** (una mappa, due strateghi), **partita lunga** (più anni con inverni, per il costo di mantenimento e la progressione). Gli scenari sono file dichiarativi riutilizzabili, così che una misura sia ripetibile.
+12.2 Scenari. Tre famiglie: **scontro singolo** (due schieramenti su un formato, tattici contrapposti con parametri dati), **campagna** (una mappa, due strateghi), **partita lunga** (più anni con inverni, per il costo di mantenimento e la progressione). Gli scenari sono file dichiarativi riutilizzabili, così che una misura sia ripetibile. Realizzata nella fase C la prima famiglia: ogni scenario dichiara formato, caratteristica, ostacoli, i due mazzi, il tetto dei giri, le soglie di accettazione e gli ASSI lungo cui la misura si ripete. L'insieme degli assi è chiuso, come i ganci delle caratteristiche di campo del punto 7.7, e un asse ignoto è respinto in caricamento anziché ignorato in silenzio. Accanto agli scenari vive un file di parametri dei banchi di misura, che dichiara le condizioni pari in cui le misure controllate si prendono: non sono valori di gioco e non entrano in alcuna formula del Motore.
 
 12.3 Estremi degli intervalli. Ogni campagna di misura prova gli estremi delle forbici e non una sola configurazione (00 §13.2.4), combinando gli estremi delle grandezze sotto esame con i valori centrali delle altre, più le combinazioni peggiori dichiarate nello scenario.
+
+12.3.1 Sul piano di battaglia gli estremi sono l'UNICA sorgente di variazione, e non un complemento dei semi. La battaglia non contiene alcuna estrazione del caso (01 §12.1) e il tattico è deterministico: due corse sulla stessa configurazione danno lo stesso identico esito, e un seme non produrrebbe alcuna distribuzione. La configurazione prende quindi, nelle righe di uscita del punto 12.6, il posto che il seme occupa sul piano di campagna, dove meteo e guasti esistono.
 
 12.4 Metriche. Il programma misura le grandezze del documento 03 §6, ciascuna con uno scenario dedicato: soglia minima di turni prima della resa (03 §6.1), margine di convenienza della ritirata (03 §6.2), costo di mantenimento come freno (03 §6.3), ampiezza della fascia in cui il tiro uccide (03 §6.4), frequenza degli scontri per carattere degli ufficiali (03 §6.5), rapporto volume-profondità e peso della sorpresa (03 §6.6), precisione dell'apporto informativo (03 §6.7), peso della fortezza in difesa (03 §6.8), sbilanciamento dei formati minori (03 §6.9), più le percentuali di esito per configurazione (00 §16.1) e i margini non percepibili giocando (00 §16.2).
 

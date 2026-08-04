@@ -5,7 +5,7 @@ Documento di lavoro della fase 5. Aggiornato al termine di ogni fase e prima del
 ## Dove sono le cose
 
 - Il codice è in `Codice/`: pacchetto SwiftPM con i bersagli di 05 §1.2. I documenti di progetto sono in `Fondamenta/`. Il repository git è alla radice, ramo `principale`.
-- Comandi: `cd Codice && swift test` (tutto il collaudo), `swift run Verifica` (scheletro del programma di verifica), `swift build`.
+- Comandi: `cd Codice && swift test` (tutto il collaudo), `swift run StrumentoVerifica` (programma di verifica del bilanciamento, fase C), `swift build`.
 - Documenti gemelli di questo: `valori-provvisori.md` e `registro-scostamenti.md`, alla radice.
 
 ## Fasi dell'ordine di costruzione (05 §15)
@@ -93,9 +93,23 @@ Costruito nella fase B:
 - La battaglia accessibile in Applicazione/Sorgenti: griglia di elementi persistenti aggiornati sul posto (RDA-03), ordine di lettura dichiarato (02 §2.8 più RDA-49), deck, pannello della cella, designazione sulla griglia (scostamento S2), rotori del campo, tocco magico per lo stato, cambio riga con segnale, annullamento/azzeramento, resoconto (7 voci applicabili), impostazioni, apprendimento dei segnali, avvio con ripresa e rifiuto dei salvataggi incompatibili.
 - Prove del fuoco automatiche (identità degli elementi, registro del guardiano del fuoco), prove degli annunci per contenuto (testa fissa, ordine con selezione, verbosità, vocabolario), fumo d'interfaccia; confini estesi alla Presentazione.
 
-### Fase C — Verifica sugli scontri: NON COMINCIATA
+### Fase C — Verifica sugli scontri: CONCLUSA (build 9)
 
-Da dove partire: l'eseguibile Verifica ha lo scheletro; `ScenarioBattaglia` è già Codable per gli scenari dichiarativi (05 §12.2) e il tattico è riusabile per far giocare le due parti. Servono: lettura degli scenari da cartella, corse ripetute con semi e configurazioni agli estremi delle forbici (00 §13.2.4), metriche di battaglia di 03 §6.1, 6.2, 6.4, 6.6 in uscita CSV/JSON riproducibile (05 §12.6), fumo nel collaudo (05 §14.7). PUNTO DI ARRESTO: dopo la C ci si ferma; la fase D non comincia prima del ritorno dei tester, in nessun caso.
+Criterio di uscita (05 §15.4, «programma di verifica sugli scontri e prima taratura dei valori di battaglia sui numeri, non a impressione»): **superato**. PUNTO DI ARRESTO RISPETTATO: la fase D non è cominciata e non comincia prima del ritorno dei tester.
+
+**Il programma.** Libreria `Verifica` più guscio `StrumentoVerifica` (RDA-58): `swift run StrumentoVerifica`, con `--valori`, `--scenari`, `--uscita`, `--fumo`. Non contiene alcuna regola propria: fa agire il tattico del Motore su ENTRAMBE le parti — condotta pari per costruzione — e applica i comandi del Motore. Dove serviva una grandezza non esposta, la soglia di resa del tattico, è stata esposta dal Motore e non riscritta altrove. Scenari dichiarativi in `Contenuti/Scenari` (tre scontri più i parametri dei banchi), sostituibili senza ricompilare, con assi di un insieme chiuso; un asse ignoto è respinto in caricamento. La variazione viene dagli ESTREMI delle forbici e non dai semi, perché la battaglia non ha alcuna estrazione del caso (RDA-59): due corse sugli stessi dati danno lo stesso identico rapporto, e il collaudo lo verifica. Uscita CSV a sezioni, su schermo o in cartella. Fumo delle simulazioni dentro il collaudo (05 §14.7).
+
+**Nove sezioni di misura:** versione dei valori; esiti per configurazione; riepilogo per scenario e per stato dei vantaggi (modo, durata, vittorie, scarto, soglia); soglie di resa per ufficiale e parte; redditività delle composizioni; bersagli di schieramento reparto per reparto; pesi dei modificatori isolati; curva del tiro per distanza con le fasce; progressione dell'accerchiamento; duelli di ogni archetipo contro ogni altro.
+
+**Un difetto trovato dalla misura e corretto** (scostamento P8, 01 §15.2.3.1): il ritirante che evacuava tutto senza riserve nel mazzo vedeva la propria ritirata riuscita raccontata come annientamento, perché la condizione di annientamento era verificata per prima e senza guardare alla resa. Il vincitore non cambiava, il modo annunciato sì. Non era emerso prima perché scatta solo col mazzo vuoto, e il copione d'oro delle riserve lascia riserve di proposito.
+
+**Una regola cambiata dalla taratura** (01 → 3.6): la curva del tiro va ora da una resa RIDOTTA al limite della gittata a una molto accresciuta alla minima distanza; prima non riduceva mai. Ne discende la riformulazione di 01 §9.9.3, che diceva che i modificatori non riducono mai la resa.
+
+**Sette valori tarati sui numeri** (03 → 2.4, sezione 10 nuova con le misure): i due estremi della curva del tiro, il passo dell'accerchiamento, due parametri di carattere dell'ufficiale ordinario, la propensione all'attacco del prudente, la riduzione della propensione alla ritirata avversaria, e le composizioni dei due mazzi. Ciascuno con la misura che lo giustifica, in `valori-provvisori.md` e in 03 §5.15.1, §5.16.1, §5.18.1, §6.5.1, §7.4.1.
+
+**Restano da tarare** e non sono tarabili ora: il costo dell'ammassamento oltre il secondo assalitore (03 §6.10.3), che chiede fianchi da scoprire e quindi la fase D; lo sbilanciamento del formato minore (03 §6.9), che chiede scenari realistici di quel formato; i tre parametri di carattere che governano imboscata e accerchiamento (03 §6.5.2); il margine di convenienza della ritirata (03 §6.2), il costo di mantenimento (§6.3) e tutte le grandezze di campagna, che presuppongono il piano che non esiste.
+
+Collaudo: 115 prove del pacchetto (una saltata: la rigenerazione degli ori) più 21 ospitate e 1 d'interfaccia.
 
 ### Vecchio elenco della fase B (superato, conservato per riferimento)
 
@@ -119,7 +133,9 @@ Applicato l'incarico di intervento sulle chiusure: la base delle perdite per la 
 
 ## Avvertenze per chi riprende
 
-- Il guidatore tattico dentro `SessioneBattagliaTest.giocaBattagliaCompleta` è un attrezzo di prova, non il tattico avversario: quello va scritto nel Motore (05 §5.3).
+- Il guidatore tattico dentro `SessioneBattagliaTest.giocaBattagliaCompleta` è un attrezzo di prova, non il tattico avversario: quello vive nel Motore (05 §5.3) e il programma di verifica lo usa per entrambe le parti.
+- Il programma di verifica si lancia con `swift run StrumentoVerifica` (NON `swift run Verifica`: `Verifica` è la libreria, RDA-58). Prima di tarare qualunque valore si esegue una corsa e si legge la misura; nessun valore si cambia a occhio.
+- La frequenza di vittoria delle due parti si legge sulle sole corse a VANTAGGI SPENTI: accesi, lo scarto misura quanto valgono i vantaggi, che è un'asimmetria voluta (03 §7.4.2).
 - La riproduzione d'oro si rigenera SOLO con revisione esplicita: aggiornare insieme `giornale.jsonl` e `impronta.txt` in `Codice/Tests/SessioneTest/RiproduzioneOro/` e dichiararlo nel commit.
 - Il manifest dei valori contiene le impronte reali dei file: chi modifica un file di valori di fabbrica deve rigenerare le impronte (script Python inline usato in fase A, vedi cronologia git) altrimenti la versione diventa localmente derivata anche in fabbrica. Lo stesso vale per il manifest dei testi (RDA-54). Le VERSIONI dei due manifest non si toccano mai di propria iniziativa: solo su istruzione del titolare.
 - L'accerchiamento di 01 §9.10.2 dà finalmente un effetto meccanico alla `tendenza_accerchiamento` degli ufficiali, che oggi governa soltanto l'ordine delle celle di piazzamento: il tattico non cerca ancora l'accerchiamento e non evita di esserne vittima. Non è stato toccato in questa tranche perché l'incarico non lo chiedeva; è il primo posto dove guardare quando si vorrà rendere l'avversario più competente.

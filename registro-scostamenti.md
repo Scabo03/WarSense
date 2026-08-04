@@ -54,6 +54,16 @@ Aperto dall'accertamento sugli esiti degli scontri (build 6), chiuso dal titolar
 
 02 §9.2.1 prescrive che, per le azioni con bersaglio, la voce del pannello annunci «il bersaglio con nome e lettera, l'efficacia e ogni costo». Fino alla versione 2.2 dei testi la sola voce di tiro dichiarava l'efficacia; quella di ingaggio dava nome, lettera e posizione, e non l'efficacia — pur valendo per la mischia il medesimo accoppiamento offesa-protezione (01 §9.9.2). Realizzazione: le due voci hanno ora lo stesso ordine fisso di informazioni, chiuso in 02 §9.3.1. Non è uno scostamento dall'architettura ma il colmarne un'omissione, ed è stato fatto nella stessa tranche dei due modificatori perché tocca le medesime frasi.
 
+## P8 — Difetto trovato dal programma di verifica: la ritirata riuscita raccontata come annientamento
+
+**Che cosa è successo.** La prima corsa del programma di verifica della fase C ha mostrato righe incoerenti: battaglie chiuse per annientamento in cui la parte annientata aveva perduto meno punti vita di quanti ne avesse impegnati, e ne aveva evacuati alcuni. La sonda ha chiarito: il ritirante che evacua TUTTO e non ha più riserve nel mazzo resta senza nulla in campo e senza nulla nel mazzo, e la condizione di annientamento — verificata per prima e senza guardare alla resa — risultava vera.
+
+**Perché è un difetto e non una scelta.** 01 §15.2.3 riserva l'annientamento al caso in cui «nessuno dei due si ritira». Il vincitore non cambiava, ma il MODO sì, e il modo è ciò che il resoconto di fine battaglia annuncia al giocatore (01 §15.3.1): una ritirata riuscita, cioè l'esito migliore che una battaglia perduta consenta, veniva raccontata come una disfatta totale. Il difetto non era emerso prima perché scatta soltanto quando il ritirante ha anche il mazzo vuoto: il secondo copione d'oro, che pure si chiude per resa, lascia riserve nel mazzo di proposito.
+
+**Che cosa si è fatto.** Dichiarata la resa, la conclusione è ora governata dalla sola ritirata combattuta e il modo è sempre la ritirata compiuta. Aggiunta la condizione, prima non normata, in cui è l'AVANZANTE a restare senza nulla: la ritirata è riuscita e lo sconfitto resta chi si è ritirato, per 01 §15.2.2. Recepito in 01 §15.2.3.1; due prove dedicate, una per ciascuno dei due casi.
+
+**Che cosa insegna.** È il primo difetto che il collaudo non aveva trovato e la misura sì. Le prove verificavano ciascuna regola per conto proprio; il programma di verifica ha fatto interagire resa, evacuazione e mazzo vuoto in una configurazione che nessuna prova aveva composto. È esattamente il motivo per cui 00 §16.1 vuole la misura accanto al collaudo.
+
 ## Nessuno scostamento strutturale
 
 Nessun punto dell'architettura è risultato irrealizzabile o errato nella fase A: i confini dei bersagli, il giornale con istantanee, l'impronta canonica, la virgola fissa e la catena dei testi esterni funzionano come dichiarato. I documenti 00–05 non richiedono modifiche.

@@ -91,11 +91,15 @@ public struct MotoreBattaglia: Sendable {
         return Scalato(millesimi: Int64(gittata - dentro) * 1000 / Int64(gittata - 1))
     }
 
-    /// Il coefficiente del tiro in funzione della distanza (01 §9.10.1): una formula
-    /// unica più un coefficiente dai valori (00 §13.3). Al limite della gittata vale
-    /// uno esatto, e cresce linearmente fino alla minima distanza.
+    /// La resa del tiro in funzione della distanza (01 §9.10.1): una formula unica
+    /// che interpola fra i due estremi dichiarati nei valori (00 §13.3). Al limite
+    /// della gittata il tiro rende meno dell'accoppiamento, cioè disturba; alla
+    /// minima distanza rende molto di più, cioè uccide. È il solo modificatore che
+    /// può ridurre la resa, e la riduzione è dichiarata in 01 §9.9.3.
     public func coefficienteVicinanza(distanza: Int, gittata: Int) -> Scalato {
-        .uno + valori.combattimento.maggiorazioneVicinanzaMassima
+        let c = valori.combattimento
+        return c.resaTiroAlLimite
+            + (c.resaTiroAllaMinimaDistanza - c.resaTiroAlLimite)
             * prossimita(distanza: distanza, gittata: gittata)
     }
 
@@ -629,6 +633,33 @@ public struct MotoreBattaglia: Sendable {
         guard stato.esito == nil else { return }
         let f = formato(stato)
 
+        // Con la resa già dichiarata la conclusione è governata dalla ritirata
+        // combattuta (01 §10.3) e lo sconfitto è chi l'ha dichiarata, qualunque cosa
+        // accada sul campo (01 §15.2.2). L'annientamento non la scavalca: 01 §15.2.3
+        // lo prevede «se nessuno dei due si ritira», e il ritirante che ha evacuato
+        // tutto ha compiuto la ritirata, non è stato annientato.
+        if let ritirante = stato.resaDichiarataDa {
+            let avanzante = ritirante.avversaria
+            let sogliaRaggiunta = stato.sciami.values.contains { sciame in
+                guard sciame.parte == avanzante else { return false }
+                return stato.griglia.avanzamento(di: sciame.posizione, per: avanzante)
+                    >= stato.griglia.righe - 1 - f.righeSogliaRitirata
+            }
+            let ritiranteVuoto = !stato.sciami.values.contains { $0.parte == ritirante }
+            // Caso non normato dai consolidati (precisazione P8): se è l'avanzante a
+            // restare senza nulla, la ritirata è riuscita e lo scontro finisce; lo
+            // sconfitto resta chi si è ritirato, per 01 §15.2.2.
+            let avanzanteVuoto = !stato.sciami.values.contains { $0.parte == avanzante }
+                && !(stato.deck[avanzante] ?? []).contains { $0.esemplari > 0 }
+            if sogliaRaggiunta || ritiranteVuoto || avanzanteVuoto {
+                let esito = EsitoBattaglia(sconfitto: ritirante, modo: .ritirataCompiuta,
+                                           turni: stato.giro)
+                stato.esito = esito
+                eventi.append(.battagliaConclusa(esito))
+            }
+            return
+        }
+
         // Annientamento: nessuno sciame in campo e nessun esemplare nel deck.
         let annientate = Parte.allCases.filter { parte in
             !stato.sciami.values.contains { $0.parte == parte }
@@ -651,21 +682,5 @@ public struct MotoreBattaglia: Sendable {
             return
         }
 
-        // Fine della ritirata combattuta: l'avanzante raggiunge la riga di soglia (01 §10.3),
-        // oppure il ritirante non ha più nulla in campo.
-        if let ritirante = stato.resaDichiarataDa {
-            let avanzante = ritirante.avversaria
-            let sogliaRaggiunta = stato.sciami.values.contains { sciame in
-                guard sciame.parte == avanzante else { return false }
-                return stato.griglia.avanzamento(di: sciame.posizione, per: avanzante)
-                    >= stato.griglia.righe - 1 - f.righeSogliaRitirata
-            }
-            let ritiranteVuoto = !stato.sciami.values.contains { $0.parte == ritirante }
-            if sogliaRaggiunta || ritiranteVuoto {
-                let esito = EsitoBattaglia(sconfitto: ritirante, modo: .ritirataCompiuta, turni: stato.giro)
-                stato.esito = esito
-                eventi.append(.battagliaConclusa(esito))
-            }
-        }
     }
 }

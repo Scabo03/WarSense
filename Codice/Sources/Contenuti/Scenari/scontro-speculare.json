@@ -1,0 +1,56 @@
+{
+  "commento": "Banco di controllo: mazzi identici alle due parti. Serve a isolare l'asimmetria strutturale (ordine dei turni, vantaggi nascosti) da quella delle composizioni. Qui lo scarto fra le vittorie deve essere piccolo per costruzione.",
+  "identificatore": "scontro_speculare",
+  "formato": "cento",
+  "caratteristica": "campo_aperto",
+  "ostacoli": [],
+  "deck_giocatore": [
+    {
+      "archetipo": "fanteria_leggera",
+      "protezione": "anti_saturazione",
+      "atomi": 5,
+      "esemplari": 3
+    },
+    {
+      "archetipo": "fanteria_pesante",
+      "protezione": "anti_saturazione",
+      "atomi": 5,
+      "esemplari": 2
+    },
+    {
+      "archetipo": "tiratori",
+      "protezione": "anti_perforazione",
+      "atomi": 5,
+      "esemplari": 2
+    }
+  ],
+  "deck_avversario": [
+    {
+      "archetipo": "fanteria_leggera",
+      "protezione": "anti_saturazione",
+      "atomi": 5,
+      "esemplari": 3
+    },
+    {
+      "archetipo": "fanteria_pesante",
+      "protezione": "anti_saturazione",
+      "atomi": 5,
+      "esemplari": 2
+    },
+    {
+      "archetipo": "tiratori",
+      "protezione": "anti_perforazione",
+      "atomi": 5,
+      "esemplari": 2
+    }
+  ],
+  "giri_massimi": 80,
+  "assi": [
+    "primo_occupante",
+    "ufficiali",
+    "vantaggi_nascosti"
+  ],
+  "soglie": {
+    "scarto_vittorie_permille_senza_vantaggi": 250
+  }
+}

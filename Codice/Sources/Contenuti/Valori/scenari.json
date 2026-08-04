@@ -1,20 +1,75 @@
 {
-  "commento": "Scenari di scontro (05 §12.2). Lo scenario di prova della fase B: campo grande, mazzi misti, ufficiale ordinario. Numeri provvisori.",
+  "commento": "Scenari di scontro (05 §12.2). Lo scenario di prova, con le composizioni rese confrontabili nella taratura della fase C: la fanteria pesante di entrambe le parti è protetta dalla saturazione, e i punti vita esposti al tiro avverso sono pari (400 contro 500). I mazzi restano diversi: il giocatore ha tiratori di protezione mista, l'avversario fanteria leggera di protezione mista. Numeri provvisori.",
   "scenario_di_prova": {
     "formato": "cento",
     "caratteristica": "campo_aperto",
-    "ostacoli": [{"riga": 5, "colonna": 5}, {"riga": 5, "colonna": 6}, {"riga": 6, "colonna": 5}],
+    "ostacoli": [
+      {
+        "riga": 5,
+        "colonna": 5
+      },
+      {
+        "riga": 5,
+        "colonna": 6
+      },
+      {
+        "riga": 6,
+        "colonna": 5
+      }
+    ],
     "primoOccupante": "giocatore",
     "imboscata": false,
     "deckGiocatore": [
-      {"archetipo": "fanteria_leggera", "protezione": "anti_saturazione", "atomi": 5, "esemplari": 3},
-      {"archetipo": "fanteria_pesante", "protezione": "anti_perforazione", "atomi": 5, "esemplari": 2},
-      {"archetipo": "tiratori", "protezione": "anti_saturazione", "atomi": 5, "esemplari": 2}
+      {
+        "archetipo": "fanteria_leggera",
+        "protezione": "anti_saturazione",
+        "atomi": 5,
+        "esemplari": 3
+      },
+      {
+        "archetipo": "fanteria_pesante",
+        "protezione": "anti_saturazione",
+        "atomi": 5,
+        "esemplari": 2
+      },
+      {
+        "archetipo": "tiratori",
+        "protezione": "anti_perforazione",
+        "atomi": 5,
+        "esemplari": 1
+      },
+      {
+        "archetipo": "tiratori",
+        "protezione": "anti_saturazione",
+        "atomi": 5,
+        "esemplari": 1
+      }
     ],
     "deckAvversario": [
-      {"archetipo": "fanteria_leggera", "protezione": "anti_perforazione", "atomi": 5, "esemplari": 3},
-      {"archetipo": "fanteria_pesante", "protezione": "anti_saturazione", "atomi": 5, "esemplari": 2},
-      {"archetipo": "tiratori", "protezione": "anti_perforazione", "atomi": 5, "esemplari": 2}
+      {
+        "archetipo": "fanteria_leggera",
+        "protezione": "anti_perforazione",
+        "atomi": 5,
+        "esemplari": 1
+      },
+      {
+        "archetipo": "fanteria_leggera",
+        "protezione": "anti_saturazione",
+        "atomi": 5,
+        "esemplari": 2
+      },
+      {
+        "archetipo": "fanteria_pesante",
+        "protezione": "anti_saturazione",
+        "atomi": 5,
+        "esemplari": 2
+      },
+      {
+        "archetipo": "tiratori",
+        "protezione": "anti_saturazione",
+        "atomi": 5,
+        "esemplari": 2
+      }
     ],
     "ufficialeAvversario": "ufficiale_prova"
   }

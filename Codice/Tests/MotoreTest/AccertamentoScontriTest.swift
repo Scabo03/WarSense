@@ -300,11 +300,15 @@ final class AccertamentoScontriTest: XCTestCase {
                     Cella(riga: 8 - a.gittata, colonna: 5)),
         ])
         let inflitto = dannoDelTiro(idsNudo[0], idsNudo[1], parte: .giocatore, stato: nudo)
-        let atteso = motore.efficacia(offesa: a.offesaTiro!,
-                                      protezione: valori.protezioni[.antiPerforazione]!)
+        // Al limite della gittata agisce il solo modificatore di vicinanza, con la
+        // resa dichiarata nei dati (01 §9.10.1): il danno è quello dell'accoppiamento
+        // per quella resa, e nient'altro vi entra.
+        let atteso = (motore.efficacia(offesa: a.offesaTiro!,
+                                       protezione: valori.protezioni[.antiPerforazione]!)
+                      * valori.combattimento.resaTiroAlLimite)
             .applicato(a: a.capacitaOffensivaPerAtomo * 5)
         XCTAssertEqual(inflitto, atteso,
-                       "senza modificatori il danno esce dalla sola formula: nessun vantaggio vi entra")
+                       "il danno esce dalla formula più i soli modificatori dichiarati")
 
         // E a qualunque distanza, con o senza concorrenti, il danno non dipende da
         // quale parte tiri: i vantaggi nascosti non toccano il combattimento.
@@ -335,12 +339,14 @@ final class AccertamentoScontriTest: XCTestCase {
 
         XCTAssertGreaterThan(sogliaConVantaggio, sogliaSenzaVantaggio,
                              "il vantaggio alza la soglia: l'avversario si arrende più tardi")
-        // Il fatto che conta per il titolare: già SENZA il vantaggio la soglia
-        // raggiunge o supera l'unità, cioè la totalità delle forze impiegate.
-        // La resa avversaria è quindi irraggiungibile per costruzione dei valori,
-        // e il vantaggio nascosto non ne è la causa: la causa sono i valori.
-        XCTAssertGreaterThanOrEqual(sogliaSenzaVantaggio, .uno,
-                                    "con i valori di fabbrica la resa avversaria è già irraggiungibile senza vantaggio")
+        // Dopo la taratura della fase C entrambe le soglie sono RAGGIUNGIBILI: la
+        // resa avversaria resta rara, perché la soglia è alta, ma non è più
+        // impossibile. Prima della taratura valeva l'unità intera già senza il
+        // vantaggio, e ogni battaglia doveva chiudersi per annientamento (03 §7.4).
+        XCTAssertLessThan(sogliaSenzaVantaggio, .uno,
+                          "la soglia di base è raggiungibile")
+        XCTAssertLessThan(sogliaConVantaggio, .uno,
+                          "anche con il vantaggio la resa avversaria resta possibile (01 §10.7)")
         print("MISURA vantaggi-nascosti: soglia di resa avversaria senza vantaggio = "
               + "\(Double(sogliaSenzaVantaggio.grezzo) / 1000) delle forze impiegate; "
               + "con vantaggio = \(Double(sogliaConVantaggio.grezzo) / 1000)")

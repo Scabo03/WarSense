@@ -2,7 +2,9 @@
 
 Documento di lavoro della fase 5. Ogni numero introdotto per far funzionare il codice, in attesa della taratura con le simulazioni. Un valore provvisorio che non risulti da questo elenco è un difetto (incarico fase 5, sezione 3). Nessun numero di gioco vive nel codice: tutti stanno nei file di `Codice/Sources/Contenuti/Valori/`.
 
-Convenzione: PROVVISORIO = da tarare con le simulazioni o da fissare in sede di definizione dei valori; FISSATO = deciso dai consolidati, non si tocca qui.
+Convenzione: PROVVISORIO = da tarare con le simulazioni o da fissare in sede di definizione dei valori; FISSATO = deciso dai consolidati, non si tocca qui; TARATO = non più provvisorio, perché una misura del programma di verifica lo giustifica, con il rinvio alla misura.
+
+Dalla fase C esiste il programma di verifica: `swift run StrumentoVerifica`. Un valore si toglie da questo elenco soltanto quando una sua misura esiste ed è riportata nel documento 03; non si toglie mai perché è parso ragionevole.
 
 ## archetipi.json — tutti PROVVISORI
 
@@ -28,13 +30,11 @@ I quattro coefficienti dei due profili di protezione (para_saturazione/para_perf
 - `efficacia_minima` (0.15): frazione della munizione poco adatta, 03 §5.5.
 - `soglia_poco_efficace` (0.5): confine dell'annuncio qualitativo, 01 §9.9.1.
 - `fascia_perdite_lievi_fino` (0.10) e `fascia_perdite_significative_fino` (0.30): soglie delle fasce descrittive degli esiti (01 §9.7.2, 03 §5.14), proporzione del danno sulla consistenza del colpito prima dell'applicazione; sopra la seconda le perdite sono gravi, a zero nessuna perdita. PROVVISORIE, da riesaminare con i ritorni dei tester (RDA-52).
-- `maggiorazione_vicinanza_massima` (0.6): quanto il tiro rende di più alla minima distanza rispetto al limite della gittata (01 §9.10.1, 03 §5.15). PROVVISORIO; grandezza critica 03 §6.10, prima misura.
+- `resa_tiro_al_limite` (0.7) e `resa_tiro_alla_minima_distanza` (2.4): i due estremi della curva del tiro (01 §9.10.1, 03 §5.15). TARATI in fase C — sostituiscono `maggiorazione_vicinanza_massima` (0.6), che non riduceva mai al limite. Misura: 03 §10.3 e §5.15.1. Criterio: contro un bersaglio ben scelto le perdite vanno da LIEVI al limite della gittata a GRAVI alla minima distanza; con i valori precedenti restavano significative a ogni distanza e la fascia annunciata non cambiava mai.
 - `fascia_vicinanza_lontano_fino` (0.33) e `fascia_vicinanza_ravvicinato_fino` (0.66): soglie delle tre fasce descrittive della vicinanza, sulla prossimità che vale zero al limite della gittata e uno alla minima distanza (01 §9.10.1, 02 §4.4.5, 03 §5.15). PROVVISORIE: divisione in terzi, scelta perché con la gittata sei dei tiratori assegna due distanze a ciascuna fascia.
-- `passo_accerchiamento` (0.15): passo della maggiorazione di accerchiamento, composto col quadrato dei concorrenti eccedenti il primo (01 §9.10.2, 03 §5.16). Ne risultano 1,15 con due concorrenti, 1,60 con tre e 2,35 con quattro. PROVVISORIO; grandezza critica 03 §6.10, seconda misura.
-- `concorrenti_massimi` (4): tetto dei concorrenti conteggiati (01 §9.10.2, 03 §5.16). PROVVISORIO, ancorato al «tre o quattro» del titolare.
-- `resa_contro_secondo_bersaglio` (0.5): il malus del secondo bersaglio, espresso come resa conservata (01 §9.11, 03 §5.17). Contro il primo la resa è piena, dal terzo non c'è risposta: non esistono altre voci, perché il numero massimo di nemici cui si risponde è una regola e non un valore. PROVVISORIO. Vincolo di validazione: strettamente fra zero e uno.
-
-PROPOSTA DI REVISIONE NON APPLICATA, dalla misura dell'effetto congiunto (03 §6.10.1 e §6.10.2): con il limite dei bersagli in vigore, `passo_accerchiamento` a 0.15 porta tre assalitori ad annientare il bersaglio in un solo giro. Proposto 0.08 (dà 1,08 a due concorrenti, 1,32 a tre, 1,72 a quattro). Non applicato: i valori sono taratura e la scelta è del titolare.
+- `passo_accerchiamento` (0.08): passo della maggiorazione, composto col quadrato dei concorrenti eccedenti il primo (01 §9.10.2, 03 §5.16). Ne risultano 1,08 con due concorrenti, 1,32 con tre e 1,72 con quattro. TARATO in fase C, era 0.15. Misura: 03 §10.4 e §5.16.1, spazzata su sette valori. Criterio: tre assalitori non devono annientare in un solo giro, quattro possono; banda ammessa 0.04–0.12, scelto il punto di margine maggiore.
+- `concorrenti_massimi` (4): tetto dei concorrenti conteggiati (01 §9.10.2, 03 §5.16). PROVVISORIO: il criterio della spazzata non lo tocca, perché a quattro assalitori il bersaglio cade comunque nel primo giro e il tetto non si distingue.
+- `resa_contro_secondo_bersaglio` (0.5): il malus del secondo bersaglio, espresso come resa conservata (01 §9.11, 03 §5.17). Contro il primo la resa è piena, dal terzo non c'è risposta: non esistono altre voci, perché il numero massimo di nemici cui si risponde è una regola e non un valore. PROVVISORIO: nessun banco lo isola ancora, perché il suo effetto si vede solo dentro la progressione dell'accerchiamento, dove si somma al passo. Vincolo di validazione: strettamente fra zero e uno.
 
 ## caratteristiche-campo.json
 
@@ -45,19 +45,25 @@ PROPOSTA DI REVISIONE NON APPLICATA, dalla misura dell'effetto congiunto (03 §6
 
 Tutti a 1, come impone 00 §13.6 (minimo di uno dove il troncamento darebbe zero); l'elenco dei casi è 03 §8.2.
 
-## ufficiali.json — PROVVISORI
+## ufficiali.json — due parametri TARATI, tre PROVVISORI
 
-I cinque parametri di carattere dei due ufficiali di prova (propensione all'attacco, tolleranza alle perdite, tendenza all'accerchiamento, propensione all'imboscata, propensione alla ritirata). Grandezza critica 03 §6.5: il carattere determina la frequenza effettiva degli scontri, taratura con le simulazioni.
+- `ufficiale_prova.tolleranza_perdite` (0.4, era 0.5) e `propensione_ritirata` (0.8, era 0.5): TARATI in fase C. La soglia di resa è la prima divisa per la seconda e valeva l'unità intera, cioè la perdita di TUTTE le forze impiegate: irraggiungibile, e nessuna battaglia poteva chiudersi per resa. Ora vale mezzo. Misura: 03 §6.5.1 e §10.6.
+- `ufficiale_prudente.propensione_attacco` (0.6, era 0.3): TARATO in fase C. Sotto la metà il tattico non avanza né ingaggia mai: due prudenti contrapposti restavano immobili e un quarto delle configurazioni non concludeva. Misura: 03 §6.5.1.
+- Restano PROVVISORI: `tendenza_accerchiamento`, `propensione_imboscata` per entrambi, e `tolleranza_perdite`/`propensione_ritirata` del prudente. Nessun banco li misura ancora: imboscata e accerchiamento dell'avversario chiedono scenari che la fase D fornirà (03 §6.5.2).
 
 ## vantaggi-nascosti.json
 
 - Ritirata avversaria dalla sola ultima riga: FISSATO — 01 §13.2.
-- Riduzione della propensione alla ritirata avversaria (0.3): PROVVISORIO — «molto bassa» di 01 §13.2, misura da tarare (03 §7).
+- Riduzione della propensione alla ritirata avversaria (0.6, era 0.3): TARATA in fase C. Con 0.3 la soglia di resa dell'avversario superava il triplo delle forze impiegate: il vantaggio non rendeva rara la ritirata avversaria, la rendeva impossibile, che non è ciò che 01 §10.7 chiede. Con 0.6 vale poco più di otto decimi: rara e possibile. Misura: 03 §7.4.1 e §10.2.
 - `annientamento_simultaneo_al_giocatore` (vero): FISSATO — 01 §15.2.5, decisione del titolare. Non è una misura ma un interruttore: acceso, sconfitto è l'avversario; spento, l'esito torna al giocatore ed è la forma in cui la Verifica misura il caso reale (05 §12.5, RDA-57).
 
-## scenari.json — PROVVISORI
+## scenari.json — composizioni TARATE, il resto PROVVISORIO
 
-Composizione dei mazzi dello scontro di prova, ostacoli, ufficiale assegnato: numeri di lavoro per la fase B, senza pretesa di equilibrio.
+Composizioni dei due mazzi: TARATE in fase C (03 §5.18.1, misura §10.5). La fanteria pesante di entrambe le parti porta ora protezione anti-saturazione; la differenza fra i mazzi sta nelle protezioni miste degli altri reparti. I punti vita esposti a un tiro efficace passano da 1400 contro 2300 a 400 contro 500, e la frequenza di vittoria a vantaggi spenti da sette contro uno a quattro contro quattro. Restano PROVVISORI ostacoli, taglie degli sciami e ufficiale assegnato.
+
+## Scenari del programma di verifica (Contenuti/Scenari) — PROVVISORI
+
+Tetti dei giri, assi dichiarati e soglie di accettazione dei tre scenari di misura. Non sono valori di gioco: cambiarli cambia la misura, non il gioco. La soglia dichiarata è lo scarto massimo fra le vittorie a vantaggi spenti, a 250 per mille per tutti e tre; con otto configurazioni la granularità è di 125 per mille e una soglia più stretta sarebbe soddisfacibile solo dal pareggio esatto (03 §10.9). Lo stesso vale per `banchi.json`, che dichiara le condizioni pari dei banchi controllati.
 
 ## aptica.json e suoni.json
 

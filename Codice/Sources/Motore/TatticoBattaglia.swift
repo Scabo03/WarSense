@@ -44,15 +44,25 @@ public struct TatticoBattaglia: Sendable {
 
     // MARK: - Resa e ritirata
 
-    /// La resa conviene quando le perdite superano la tolleranza rapportata alla
-    /// propensione: con la propensione ridotta dal vantaggio nascosto la soglia
-    /// sale e la resa resta possibile ma rara (01 §13.2).
-    private func convieneLaResa(stato: StatoBattaglia) -> Bool {
-        let perdite = motore.proporzionePerdite(per: parte, stato: stato)
+    /// La soglia di perdite oltre la quale il tattico dichiara la resa, espressa
+    /// come proporzione delle forze impiegate (01 §10.2, RDA-46): tolleranza alle
+    /// perdite divisa per la propensione effettiva alla ritirata. Oltre l'unità la
+    /// soglia è irraggiungibile e la resa non avviene mai.
+    ///
+    /// È pubblica perché il programma di verifica la misuri leggendola, anziché
+    /// riscrivere altrove la formula (05 §12, incarico della fase C).
+    public var sogliaDiResa: Scalato {
         let propensione = propensioneRitirataEffettiva
-        guard propensione > .zero else { return false }
-        let soglia = ufficiale.tolleranzaPerdite / propensione
-        return perdite >= soglia
+        guard propensione > .zero else { return Scalato(intero: Int64.max / Scalato.fattore) }
+        return ufficiale.tolleranzaPerdite / propensione
+    }
+
+    /// La resa conviene quando le perdite raggiungono la soglia (01 §13.2): con la
+    /// propensione ridotta dal vantaggio nascosto la soglia sale e la resa resta
+    /// possibile ma rara.
+    private func convieneLaResa(stato: StatoBattaglia) -> Bool {
+        guard propensioneRitirataEffettiva > .zero else { return false }
+        return motore.proporzionePerdite(per: parte, stato: stato) >= sogliaDiResa
     }
 
     private func comandoDiRitirata(stato: StatoBattaglia) -> ComandoBattaglia? {
