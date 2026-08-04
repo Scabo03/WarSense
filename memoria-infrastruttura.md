@@ -89,6 +89,8 @@ Terzo problema (seguito diretto del secondo): quella correzione, ripristinando l
 
 Terzo punto da non dimenticare (non un errore, una regola): ogni volta che si aggiunge o si modifica un file in `Codice/Sources/Contenuti/Valori/` va rigenerato il manifest con le impronte, altrimenti il gioco deriva una versione locale marcata anche per la fabbrica. Lo snippet è nella cronologia (python, sha256 dei file elencati, riscrittura di manifest.json); tenere l'elenco dei file del manifest allineato a ciò che esiste nella cartella.
 
+Quarto problema (build 7): la nota per i tester è stata rifiutata con `409 ENTITY_ERROR.ATTRIBUTE.INVALID.TOO_LONG` su `whatsNew`. App Store Connect accetta al massimo 4000 caratteri per quel campo; la nota ne aveva 4160. Il caricamento della build NON ne risente — era già andato a buon fine — e lo script lo dice, indicando di rieseguire `./scripts/nota-testflight.sh <numero>` più tardi. Soluzione applicata: nota accorciata a circa 3400 caratteri e riallegata con quel comando. Regola pratica: prima di caricare, `wc -m note-di-rilascio.txt` e restare sotto i 4000; conviene stare abbondantemente sotto, perché il limite è sui caratteri e non sui byte.
+
 Nota di protezione già attiva: lo script esegue l'INTERO collaudo del pacchetto prima di archiviare e si ferma se una prova fallisce; non aggirarlo mai. I bersagli di prova del progetto applicativo non entrano nell'archivio (lo schema li dichiara solo per la fase di test), quindi non possono rompere una consegna.
 
 La cache dei Bundle dei testi e le altre questioni di codice stanno in `registro-scostamenti.md`; questo file resta dedicato a infrastruttura, firma e distribuzione. Ogni problema nuovo di questa materia va aggiunto qui con la sua soluzione.
