@@ -6,4 +6,9 @@ import Contenuti
 public enum Ambiente {
     public static var valoriDiFabbrica: URL { Contenuti.valoriDiFabbrica }
     public static var scenariDiFabbrica: URL { Contenuti.scenariDiVerifica }
+    /// Gli scenari di campagna stanno in una sottocartella, perché il caricatore
+    /// degli scenari di scontro legge tutti i file della propria cartella.
+    public static var scenariCampagnaDiFabbrica: URL {
+        Contenuti.scenariDiVerifica.appendingPathComponent("Campagne")
+    }
 }
