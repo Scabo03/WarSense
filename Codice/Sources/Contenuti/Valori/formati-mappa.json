@@ -1,0 +1,17 @@
+[
+ {
+  "identificatore": "quattro",
+  "righe": 4,
+  "colonne": 4
+ },
+ {
+  "identificatore": "sei",
+  "righe": 6,
+  "colonne": 6
+ },
+ {
+  "identificatore": "dieci",
+  "righe": 10,
+  "colonne": 10
+ }
+]

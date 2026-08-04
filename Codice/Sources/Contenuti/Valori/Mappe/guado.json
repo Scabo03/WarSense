@@ -1,0 +1,21 @@
+{
+ "identificatore": "guado",
+ "formato": "quattro",
+ "caselle": [
+  { "riga": 1, "colonna": 2, "strada": "battuta" },
+  { "riga": 1, "colonna": 4, "terreno": "bosco" },
+  { "riga": 2, "colonna": 1, "terreno": "acqua" },
+  { "riga": 2, "colonna": 2, "terreno": "acqua", "strada": "battuta" },
+  { "riga": 2, "colonna": 3, "terreno": "acqua" },
+  { "riga": 2, "colonna": 4, "terreno": "acqua" },
+  { "riga": 3, "colonna": 1, "terreno": "bosco" },
+  { "riga": 3, "colonna": 2, "strada": "battuta" },
+  { "riga": 3, "colonna": 4, "terreno": "bosco" },
+  { "riga": 4, "colonna": 2, "strada": "battuta" }
+ ],
+ "strettoia": null,
+ "quartier_generali": {
+  "giocatore": { "riga": 4, "colonna": 2 },
+  "avversario": { "riga": 1, "colonna": 2 }
+ }
+}

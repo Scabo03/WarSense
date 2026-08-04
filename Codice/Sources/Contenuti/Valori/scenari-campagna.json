@@ -1,0 +1,27 @@
+{
+ "campagna_piccola": {
+  "mappa": "guado",
+  "gruppi_giocatore": [
+   { "riga": 4, "colonna": 2 },
+   { "riga": 4, "colonna": 3 }
+  ]
+ },
+ "campagna_media": {
+  "mappa": "istmo",
+  "gruppi_giocatore": [
+   { "riga": 6, "colonna": 3 },
+   { "riga": 6, "colonna": 2 },
+   { "riga": 5, "colonna": 4 }
+  ]
+ },
+ "campagna_grande": {
+  "mappa": "pianura_lunga",
+  "gruppi_giocatore": [
+   { "riga": 10, "colonna": 6 },
+   { "riga": 10, "colonna": 5 },
+   { "riga": 9, "colonna": 6 },
+   { "riga": 9, "colonna": 5 },
+   { "riga": 10, "colonna": 7 }
+  ]
+ }
+}

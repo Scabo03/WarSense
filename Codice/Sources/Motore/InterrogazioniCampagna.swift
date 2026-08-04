@@ -1,0 +1,107 @@
+import Foundation
+import Dati
+
+/// Le interrogazioni di sola lettura per la Presentazione (05 §9.4). La
+/// Presentazione non calcola mai un dato di gioco: se un'informazione non è
+/// ottenibile con un'interrogazione, si aggiunge l'interrogazione qui.
+public struct VistaCampagna: Sendable {
+    let motore: MotoreCampagna
+    let stato: StatoCampagna
+    let parte: Parte
+
+    public init(motore: MotoreCampagna, stato: StatoCampagna, parte: Parte) {
+        self.motore = motore; self.stato = stato; self.parte = parte
+    }
+
+    // MARK: - Contenuto della casella
+
+    public func occupante(di casella: Cella) -> Gruppo? { stato.occupante(di: casella, parte: parte) }
+    public func terreno(di casella: Cella) -> TerrenoCasella { stato.mappa.terreno(di: casella) }
+    public func strada(di casella: Cella) -> TipoStrada { stato.mappa.strada(di: casella) }
+    public func eStrettoia(_ casella: Cella) -> Bool { stato.mappa.strettoia == casella }
+    public func quartierGeneraleSu(_ casella: Cella) -> Parte? { stato.mappa.quartierGeneraleSu(casella) }
+
+    // MARK: - Destinazioni
+
+    /// Le destinazioni valide per un gruppo, in ordine di lettura. È l'anteprima
+    /// annunciata (05 §3.2) e alimenta la designazione sulla mappa (02 §9.2.1).
+    public func destinazioniValide(per id: IdGruppo) -> [Cella] {
+        guard let gruppo = stato.gruppi[id] else { return [] }
+        return stato.griglia.vicini(di: gruppo.posizione)
+            .filter { motore.valida(.marcia(gruppo: id, a: $0), parte: parte, stato: stato).eValido }
+            .sorted()
+    }
+
+    /// Vero se il gruppo ha almeno una destinazione raggiungibile: quando è falso,
+    /// l'azione di marcia non si offre affatto (02 §9.5).
+    public func esisteDestinazione(per id: IdGruppo) -> Bool { !destinazioniValide(per: id).isEmpty }
+
+    /// L'esito di validazione di una marcia sulla casella: l'anteprima annunciata.
+    public func anteprimaMarcia(da id: IdGruppo, a casella: Cella) -> EsitoValidazioneCampagna {
+        motore.valida(.marcia(gruppo: id, a: casella), parte: parte, stato: stato)
+    }
+
+    // MARK: - Orientamento (01 §5.16)
+
+    /// Il primo strato dell'orientamento: l'informazione di stato, richiamabile in
+    /// qualunque momento senza abbandonare la mappa (01 §5.16, 02 §6.5.1.3).
+    /// L'ordine dei campi è quello fisso di 02 §6.5.1.3, ridotto a ciò che esiste
+    /// in questa unità: giorno, gruppi che hanno agito sul totale. Stagione, marce,
+    /// scatti, provviste, battaglie in sospeso e vincolo fra campagne appartengono
+    /// alle unità che li introducono e non si annunciano a vuoto (02 §8.7.1).
+    public struct InformazioneDiStato: Hashable, Sendable {
+        public let giorno: Int
+        public let gruppiCheHannoAgito: Int
+        public let gruppiTotali: Int
+    }
+
+    public var informazioneDiStato: InformazioneDiStato {
+        let miei = stato.gruppi(di: parte)
+        return InformazioneDiStato(giorno: stato.giorno,
+                                   gruppiCheHannoAgito: miei.filter(\.azioneSpesa).count,
+                                   gruppiTotali: miei.count)
+    }
+
+    /// Il secondo strato: il salto diretto al prossimo gruppo che non ha ancora
+    /// agito (01 §5.16, 02 §7.3.1). Non è una comodità accessoria ma la
+    /// contropartita della struttura a un'azione per gruppo.
+    ///
+    /// Il prossimo è quello che segue la casella indicata nell'ordine di lettura,
+    /// e si riparte dal primo quando non ne resta alcuno dopo: chi salta ripetuta-
+    /// mente percorre tutti i gruppi in attesa e non si ferma sull'ultimo.
+    public func prossimoGruppoInAttesa(dopo casella: Cella?) -> Gruppo? {
+        let attesa = stato.gruppiInAttesa(di: parte)
+        guard !attesa.isEmpty else { return nil }
+        guard let casella else { return attesa.first }
+        return attesa.first { casella < $0.posizione } ?? attesa.first
+    }
+
+    public func gruppoPrecedenteInAttesa(prima casella: Cella?) -> Gruppo? {
+        let attesa = stato.gruppiInAttesa(di: parte)
+        guard !attesa.isEmpty else { return nil }
+        guard let casella else { return attesa.last }
+        return attesa.last { $0.posizione < casella } ?? attesa.last
+    }
+
+    /// Gli insiemi dei rotori realizzati in questa unità (02 §7.3): le proprie
+    /// formazioni e i propri gruppi che non hanno ancora agito. Gli altri rotori
+    /// dell'elenco dipendono da regole che questa unità non realizza.
+    public var casellePropriFormazioni: [Cella] { stato.gruppi(di: parte).map(\.posizione).sorted() }
+    public var caselleGruppiInAttesa: [Cella] { stato.gruppiInAttesa(di: parte).map(\.posizione).sorted() }
+
+    // MARK: - Registro (01 §5.17, 02 §6.6)
+
+    /// Le voci in ordine dal più recente al meno recente, così che scorrendo si
+    /// vada indietro nel tempo e ci si fermi alle cose già sentite (02 §6.6).
+    public var registroDalPiuRecente: [VoceRegistro] { stato.registro.reversed() }
+
+    // MARK: - Misure di percorribilità (per il programma di verifica)
+
+    /// Le caselle raggiungibili da una casella entro una giornata: con una sola
+    /// azione per gruppo e uno scatto di una casella, sono i vicini validi.
+    public func caselleRaggiungibiliInUnaGiornata(da casella: Cella) -> [Cella] {
+        stato.griglia.vicini(di: casella)
+            .filter { stato.occupante(di: $0, parte: parte) == nil }
+            .sorted()
+    }
+}
