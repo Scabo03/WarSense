@@ -10,3 +10,7 @@
 {"numero":9,"voce":{"comando":{"comando":{"fineTurno":{}},"parte":"avversario"}}}
 {"numero":10,"voce":{"inizioTurno":{"giro":7,"parte":"giocatore"}}}
 {"numero":11,"voce":{"fondazione":{"_0":{"identificatore":"campione-ufficiale","scenario":{"caratteristica":"terreno_rotto","deckAvversario":[{"archetipo":"macchina_tiro","atomi":1,"esemplari":1,"protezione":"anti_saturazione"}],"deckGiocatore":[{"archetipo":"guardia_elite","atomi":4,"esemplari":1,"protezione":"anti_perforazione"}],"formato":"cento","imboscata":false,"ostacoli":[],"primoOccupante":"avversario","ufficialeAvversario":"ufficiale_prudente"},"seme":777,"versione_schema":2,"versione_testi":"0.1.0","versione_valori":"0.1.0"}}}}
+{"numero":12,"voce":{"fondazioneCampagna":{"_0":{"identificatore":"campione-campagna","scenario":{"gruppi_giocatore":[{"colonna":2,"riga":4},{"colonna":3,"riga":4}],"mappa":"guado"},"seme":4242,"versione_schema":1,"versione_testi":"0.1.0","versione_valori":"0.1.0"}}}}
+{"numero":13,"voce":{"comandoCampagna":{"comando":{"marcia":{"a":{"colonna":2,"riga":3},"gruppo":{"numero":1}}},"parte":"giocatore"}}}
+{"numero":14,"voce":{"comandoCampagna":{"comando":{"presidio":{"gruppo":{"numero":2}}},"parte":"giocatore"}}}
+{"numero":15,"voce":{"aperturaGiornata":{"giorno":2}}}

@@ -661,3 +661,54 @@ La matrice si legge per documento; l'ordine delle righe segue la numerazione dei
 | 03 §9.4 | Elenco dei file dei valori e corrispondenze | A §7.5, A §7.6 |
 | 03 §9.5 | Testi: pacchetti per lingua, vocabolario chiuso, manifest | A §8.1, A §8.2, A §8.3, A §8.4, A §8.6 |
 | 03 §9.6 | Scenari di verifica dichiarativi con soglie di accettazione | A §12.2, A §12.6 |
+
+---
+
+## Aggiornamento della prima unità della fase D — la mappa navigabile
+
+I requisiti che questa unità realizza, con il punto del codice che vi provvede e la prova che lo verifica. Le righe assenti da questo elenco NON sono dimenticanze: sono i requisiti della campagna che questa unità lascia deliberatamente fuori, elencati per intero in coda.
+
+| Requisito | Sintesi | Realizzazione | Prova |
+|---|---|---|---|
+| 01 §5.1 | Caselle quadrate, adiacenza ortogonale, quattro vicini, tre formati | `GrigliaCampagna`, `formati-mappa.json` | `RegoleCampagnaTest` (adiacenza, bordi, formati) |
+| 01 §5.1.2 | Qualificazione delle caselle; mappa interamente percorribile | `TerrenoCasella`, `MappaCampagna.terreno` | `RegoleCampagnaTest.test_01_5_1_2_*` |
+| 01 §5.1.3 | Strettoia, al più una, non in ogni mappa | `DefinizioneMappa.strettoia`, validazione | `RegoleCampagnaTest`, `CaricamentoCampagnaTest` |
+| 01 §5.2.1 | Quartier generale, perno della mappa | `MappaCampagna.quartierGenerale` | `RegoleCampagnaTest.test_01_5_14_3_2_*` |
+| 01 §5.5.3 | Rete stradale con tipi diversi di strada | `TipoStrada`, dichiarata per casella | `RegoleCampagnaTest.test_01_5_1_2_la_casella_dichiara_*` |
+| 01 §5.6 | Un'azione al giorno per gruppo | `MotoreCampagna.valida` | `RegoleCampagnaTest.test_01_5_6_*` |
+| 01 §5.6.0.1 | Numero dei gruppi libero, nessun tetto | `ScenarioCampagna.gruppiGiocatore` | `BancoCampagna` (da 1 a 8 gruppi) |
+| 01 §5.6.0.4 | Nome proprio breve e stabile da lista chiusa | `Gruppo.nome`, `nomi-gruppi.json` (RDA-65) | `RegoleCampagnaTest`, `TraduttoreCampagnaTest` |
+| 01 §5.6.0.5 | Ogni azione consuma l'intera giornata del gruppo | `MotoreCampagna.applica` | `RegoleCampagnaTest.test_01_5_6_0_5_*` |
+| 01 §5.6.0.6 | Chiusura automatica; stare fermi è un'azione | `chiudiLaGiornataSeServe`, `.presidio` (RDA-61) | `RegoleCampagnaTest`, `MappaCampagnaAccessibileTest` |
+| 01 §5.6.0.2 | Al più una propria formazione per casella | validazione della marcia | `RegoleCampagnaTest.test_01_5_6_0_2_*` |
+| 01 §5.6.3.1 | Nessun percorso di più caselle in un turno | `.marcia` su casella adiacente | `RegoleCampagnaTest.test_01_5_6_3_1_*` |
+| 01 §5.14.4.1 | Il tipo di strada fa parte di ciò che la casella dichiara | `CostruttoreAnnunciCampagna` | `MappaCampagnaAccessibileTest` |
+| 01 §5.16 | Tre strati di orientamento | stato, salto, dichiarazione del gruppo | `RegoleCampagnaTest`, banco delle misure |
+| 01 §5.16.1 | Stati del gruppo, vocabolario chiuso | `StatoGruppo` ridotto a due termini | `RegoleCampagnaTest`, `TraduttoreCampagnaTest` |
+| 01 §5.17 | Registro cronologico dei fatti non decisi | `VoceRegistro`, `SchermataRegistro` | `RegoleCampagnaTest`, `MappaCampagnaAccessibileTest` |
+| 02 §2.3 | Quattro vicini: est, ovest, nord, sud | `GrigliaCampagna.vicini` | `RegoleCampagnaTest` |
+| 02 §2.5 | Due azioni personalizzate sulla mappa | `azioniDirezione` | `MappaCampagnaAccessibileTest.test_02_2_5_*` |
+| 02 §2.8 | Ordine di lettura dichiarato | `view.accessibilityElements` | `MappaCampagnaAccessibileTest.test_02_2_8_*` |
+| 02 §3.8.1 | Ordine registrato dopo la testa fissa (RDA-63) | `contenutoCasella` | `MappaCampagnaAccessibileTest` |
+| 02 §6.5.1.3 | Formato dell'informazione di stato | `informazioneDiStato` | `RegoleCampagnaTest.test_02_6_5_1_3_*` |
+| 02 §6.6 | Registro come elenco di voci con salto al luogo (RDA-67) | `SchermataRegistro` | `MappaCampagnaAccessibileTest.test_02_6_6_*` |
+| 02 §6.7 | Tocco magico e gesto di fuga (P10) | `accessibilityPerformMagicTap`, `...Escape` | solo dispositivo per i gesti reali |
+| 02 §7.3 | Rotori della mappa, per gli insiemi che esistono | `montaRotori` | `MappaCampagnaAccessibileTest.test_02_7_3_*` |
+| 02 §9.2.1 | Sequenza a due caselle con designazione | designazione della marcia | `MappaCampagnaAccessibileTest` |
+| 02 §9.5 | Azione impossibile non offerta | `esisteDestinazione` | `MappaCampagnaAccessibileTest.test_01_5_16_*` |
+| 05 §2.6 | Stato di campagna: data, mappa, gruppi, registro | `StatoCampagna` | `RegoleCampagnaTest` |
+| 05 §2.9 | Impronta canonica | `StatoCampagna.impronta()` | `RegoleCampagnaTest.test_05_2_9_*` |
+| 05 §3.3 | Comandi di campagna dall'elenco chiuso di 01 §5.6.8.1 | `ComandoCampagna` (due delle sedici voci) | `CompatibilitaGiornaleTest` |
+| 05 §6.1–6.5 | Giornale, istantanee, ripresa, annullamento, azzeramento | `SessioneCampagna` | `SessioneCampagnaTest` |
+| 05 §6.6 | Salvataggi versionati | ripresa con rifiuto dichiarato | `SessioneCampagnaTest.test_00_15_2_*` |
+| 05 §7.6 | Mappe come file dichiarativi (S4) | `Valori/Mappe/`, `CaricatoreCampagna` | `CaricamentoCampagnaTest` |
+| 05 §7.8 | Validazione con rapporto a chiavi | `CaricatoreCampagna.valida` | `CaricamentoCampagnaTest` (undici respinte volute) |
+| 05 §10.1 | Elementi persistenti aggiornati sul posto | `ElementoCasella` | `MappaCampagnaAccessibileTest.test_00_11_1_*` |
+| 05 §12.2 | Scenari di verifica dichiarativi | `Scenari/Campagne/campagne.json` | `InvariantiCampagnaTest` |
+| 05 §12.4 | Metriche riportate dal programma di verifica | quattro sezioni di campagna | `FumoDelleSimulazioniTest` |
+
+### Che cosa questa unità lascia fuori, e dove sta scritto
+
+Rifornimento e regola del taglio (01 §5.2.2), autonomia e sosta con raccolta (01 §5.6.5), stanchezza e manutenzione (01 §5.7), marcia lunga e costo in giorni (01 §5.6.3), marcia forzata e secondo scatto (01 §5.6.4), divisione e riunione (01 §5.6.0.2–0.3), riordino degli assetti (01 §4.8), conoscenza e ricognizione (01 §5.3, §5.4), imboscata (01 §5.11), opere da campo e permanenti (01 §5.14), sabotaggio e studio approfondito (01 §5.10.2), aggiramento (01 §5.13), innesco e rifiuto della battaglia (01 §6), piazzeforti e assedi (01 §8 bis), stagioni e meteo (01 §5.9), regno e inverno (01 §5.5, §5.9.1), campagne contemporanee e architettura a tre livelli (01 §5.6.9, §5.6.10), avversario sulla mappa (05 §5.3, lo stratega).
+
+Ne discendono per conseguenza, e restano anch'essi fuori: gli stati del gruppo diversi da «in attesa» e «ha agito» (02 §4.4.5), gli stati di conoscenza (02 §4.2), i rotori di 02 §7.3 diversi dai due realizzati, le voci del registro diverse dall'apertura della giornata, e la coerenza fra città e strade richiesta da 05 §7.8, poiché le città appartengono alle unità che le rendono utili.

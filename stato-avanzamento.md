@@ -5,7 +5,8 @@ Documento di lavoro della fase 5. Aggiornato al termine di ogni fase e prima del
 ## Dove sono le cose
 
 - Il codice è in `Codice/`: pacchetto SwiftPM con i bersagli di 05 §1.2. I documenti di progetto sono in `Fondamenta/`. Il repository git è alla radice, ramo `principale`.
-- Comandi: `cd Codice && swift test` (tutto il collaudo), `swift run StrumentoVerifica` (programma di verifica del bilanciamento, fase C), `swift build`.
+- Comandi: `cd Codice && swift test` (tutto il collaudo), `swift run StrumentoVerifica` (programma di verifica: scontri e campagna), `swift build`. Le prove ospitate e d'interfaccia si eseguono dal progetto applicativo con lo schema di test.
+- Dopo QUALUNQUE modifica a un file in `Contenuti/Valori/` o `Contenuti/Testi/`: `python3 scripts/rigenera-impronte.py`, nella stessa modifica. Senza, le installazioni esistenti restano con dati stantii (memoria di infrastruttura, regola 6). Lo script non tocca mai le versioni.
 - Documenti gemelli di questo: `valori-provvisori.md` e `registro-scostamenti.md`, alla radice.
 
 ## Fasi dell'ordine di costruzione (05 §15)
@@ -139,7 +140,33 @@ Da dove partire:
 5. Prove XCUITest del fuoco (05 §14.4, regole a–e di 05 §10.3).
 Criterio di uscita: scontro completo giocabile solo con VoiceOver, consegnato ai tester via TestFlight (00 §16.3). Punto di arresto: nessun lavoro della fase D prima del ritorno dei tester; la fase C è parallela a quell'attesa.
 
-### Fasi C–G: NON COMINCIATE
+### Fase D — La campagna singola: COMINCIATA, prima unità conclusa
+
+Criterio di uscita della fase (05 §15.5, «una campagna su una mappa, con battaglie vere, giocabile e riproducibile»): **non ancora raggiunto**, e non lo sarà finché non esisteranno rifornimento, conoscenza, imboscata, avversario e innesco della battaglia. Questa è la PRIMA UNITÀ di quella fase, e si è chiusa da sola.
+
+#### Unità 1 — La mappa di campagna navigabile (build 11, versione 1.1.0)
+
+Il ritorno dei tester sullo scontro non ha prodotto modifiche: il punto di arresto è caduto e la fase D si è aperta. L'unità realizza la mappa percorribile e comprensibile senza vedere lo schermo, e nient'altro: l'elenco di ciò che resta fuori è nella matrice di copertura, in coda.
+
+**Che cosa esiste ora.** Mappa a caselle quadrate con adiacenza ortogonale e senza diagonali, nei tre formati di 01 §5.1 (quattro, sei, dieci), le cui dimensioni stanno in `formati-mappa.json` e non nel codice. Tre mappe dichiarative in `Valori/Mappe/` con terreno (aperto, bosco, acqua), tipo di strada (nessuna, sterrata, battuta, lastricata), strettoia facoltativa e i due quartier generali. Gruppi propri in numero libero, con nome proprio da un elenco chiuso, che dichiarano il proprio stato con il vocabolario ridotto a ciò che esiste — «in attesa», «ha agito». Giornata a un'azione per gruppo, con due sole azioni delle sedici di 01 §5.6.8.1: marcia di una casella adiacente e presidio. Informazione di stato al tocco magico, salto diretto al prossimo gruppo in attesa, registro degli eventi con voci che dichiarano il giorno. Ingresso dalla schermata iniziale con tre voci, una per formato.
+
+**La decisione più delicata: il giornale.** Il giornale è anche il formato di salvataggio, e la campagna vi aggiunge tre casi nuovi. Nell'ordine, e prima di toccare nulla: si è fissata la codifica dei casi esistenti (nomi dei casi di voce e di comando, ricodifica byte per byte dei campioni committati) e si è aggiunta la riapertura, dal percorso reale, di un salvataggio della build distribuita a battaglia IN CORSO. Entrambe verdi PRIMA dell'aggiunta e rieseguite dopo: la codifica sintetizzata usa il nome del caso e non la sua posizione, quindi aggiungere non sposta nulla. Non è servito incrementare la versione del formato né rifiutare alcuna partita. La campagna vive inoltre in uno slot proprio, e una prova accerta che il salvataggio di battaglia continui a riaprirsi sulla stessa impronta (RDA-66).
+
+**Versione dei valori: valutata e lasciata a 0.4.0.** Il criterio è 03 §9.2.1: la versione sale quando cambia una regola che incide sul modo in cui una partita in corso si svolgerebbe. Nessuna regola della battaglia è stata toccata, e nessuna campagna in corso può esistere, essendo la prima. I file nuovi entrano nel manifest con le proprie impronte, a versione ferma; le impronte si rigenerano ora con `scripts/rigenera-impronte.py`.
+
+**Il programma di verifica esteso, in due mestieri distinti.** Gli INVARIANTI: `SondaInvariantiCampagna`, che vive fuori dal Motore e riceve dall'esterno ciò che giudica, proprio perché una prova possa darle in pasto un caso guasto (RDA-69). Sorveglia dodici condizioni — gruppo in due caselle, due gruppi in una casella, gruppo fuori mappa, azione spesa due volte, gruppo che agisce da sé, salto che dimentica o ripete o propone chi ha già agito, giorno fermo o all'indietro o avanzato senza chiusura, azioni non azzerate, movimento non adiacente, casella percorribile irraggiungibile, registro fuori ordine. Corsa: 160 giornate su quattro scenari dichiarativi, 440 ordini, ZERO violazioni; due corse danno la stessa impronta. **Per ciascun invariante esiste anche il mutante**, cioè uno stato o una transizione guastati a mano, e ciascuno viene visto: un invariante che non si è mai visto violare non è un invariante.
+
+Le MISURE, che nessuna taratura ha seguito: passi per chiudere una giornata con e senza il salto diretto; giornate per attraversare la mappa nei tre formati (3, 5, 10, cioè una casella al giorno); caselle raggiungibili in una giornata (mediana 3 sul quattro e sul sei, 4 sul dieci).
+
+**Che cosa il programma di verifica NON può dire**, ed è iscritto in `collaudo-solo-dispositivo.md`: se una persona che non vede si faccia un'immagine mentale della mappa, cioè se sappia dove sono le cose senza riesplorarle. È la domanda su cui il progetto è costruito e la risponde soltanto il titolare, sul dispositivo.
+
+**Punti chiusi**, ciascuno con la ragione nel registro delle decisioni: RDA-61 (la giornata si chiude da sé: l'incarico diceva «su comando del giocatore», 01 §5.6.0.6 dice il contrario, e ha prevalso il consolidato), RDA-62 (la mappa riusa la cella della battaglia; il termine parlato è «casella»), RDA-63 (il quartier generale è geografia della mappa e occupa il posto delle opere nell'annuncio), RDA-64 (la chiusura della giornata non aggiunge un sedicesimo significato tattile), RDA-65 (il nome del gruppo è una chiave nello stato, non un indice), RDA-66 (casi nuovi nel giornale esistente, slot separati), RDA-67 (le voci di registro senza luogo non sono attivabili e lo dichiarano), RDA-68 (all'apertura il fuoco va al primo gruppo in attesa), RDA-69 (la sonda degli invarianti sta fuori dal Motore). Più due precisazioni, P9 e P10, e uno scostamento di percorso, S4.
+
+**Un punto lasciato APERTO di proposito** (scostamento S5): 01 §5.1 dichiara tre formati, ma 01 §5.14.5.1 ne nomina un quarto, l'otto per otto, «il più frequente fra i formati minori». La discrepanza riguarda la portata della conoscenza, che è fuori perimetro; chiuderla senza il codice che la mette alla prova costerebbe, lasciarla aperta no. Aggiungere un formato è comunque una voce in un file di dati e nessuna riga di programma.
+
+Collaudo: 189 prove del pacchetto (una saltata: la rigenerazione degli ori) più 31 ospitate e 1 d'interfaccia, tutte verdi.
+
+### Fasi E–G: NON COMINCIATE
 
 La fase C ha già lo scheletro dell'eseguibile `Verifica` e la forma degli scenari (`ScenarioBattaglia` è Codable proprio per gli scenari dichiarativi di 05 §12.2).
 
@@ -156,3 +183,7 @@ Applicato l'incarico di intervento sulle chiusure: la base delle perdite per la 
 - Il manifest dei valori contiene le impronte reali dei file: chi modifica un file di valori di fabbrica deve rigenerare le impronte (script Python inline usato in fase A, vedi cronologia git) altrimenti la versione diventa localmente derivata anche in fabbrica. Lo stesso vale per il manifest dei testi (RDA-54). Le VERSIONI dei due manifest non si toccano mai di propria iniziativa: solo su istruzione del titolare.
 - L'accerchiamento di 01 §9.10.2 dà finalmente un effetto meccanico alla `tendenza_accerchiamento` degli ufficiali, che oggi governa soltanto l'ordine delle celle di piazzamento: il tattico non cerca ancora l'accerchiamento e non evita di esserne vittima. Non è stato toccato in questa tranche perché l'incarico non lo chiedeva; è il primo posto dove guardare quando si vorrà rendere l'avversario più competente.
 - `Parte` vive in Dati ed è riesportata dal Motore (`@_exported import enum Dati.Parte` in Esagoni.swift).
+- La campagna e la battaglia condividono `Cella` e il giornale, e NIENT'ALTRO: griglie, stati, comandi, motori, sessioni e schermate sono distinti (`*Campagna`). Gli slot di partita sono cartelle diverse.
+- Chi aggiunge un caso a `ComandoBattaglia`, a `ComandoCampagna` o a `VoceGiornale` DEVE aggiungere il campione corrispondente in `Tests/SessioneTest/CampioniGiornale/campioni.jsonl` nella stessa modifica: `CompatibilitaGiornaleTest` lo pretende e fallisce altrimenti. Nessun caso si rinomina né si sposta: la codifica usa il nome del caso come chiave, e rinominarne uno rende illeggibili i giornali già scritti.
+- Il giornale dichiara la propria natura dalla prima riga: `fondazione` per uno scontro, `fondazioneCampagna` per una campagna. `Giornale.apri` accetta entrambe; ciascuna Sessione legge la propria.
+- La sonda degli invarianti di campagna riceve dall'esterno ciò che giudica (stato, transizione, sequenza del salto, adiacenza) proprio perché le prove possano darle un caso guasto. Chi la modifica conservi quella forma, altrimenti i mutanti non sono più scrivibili (RDA-69).

@@ -64,6 +64,40 @@ Aperto dall'accertamento sugli esiti degli scontri (build 6), chiuso dal titolar
 
 **Che cosa insegna.** È il primo difetto che il collaudo non aveva trovato e la misura sì. Le prove verificavano ciascuna regola per conto proprio; il programma di verifica ha fatto interagire resa, evacuazione e mazzo vuoto in una configurazione che nessuna prova aveva composto. È esattamente il motivo per cui 00 §16.1 vuole la misura accanto al collaudo.
 
+## S4 — Le mappe stanno in `Valori/Mappe/` e non in `mappe/<fronte>/`
+
+**Che cosa è successo.** 05 §7.5 colloca le mappe in `mappe/<fronte>/<mappa>.json`. I fronti sono la materia della fase F (05 §15.7): non esistono, e inventarne uno per contenere tre mappe di prova avrebbe significato scegliere adesso una struttura che quella fase deve poter decidere.
+
+**Che cosa si è fatto.** Le mappe stanno in `Valori/Mappe/<mappa>.json`, un albero piatto. Il caricatore legge tutti i file della cartella, quale che sia il loro nome, e la mappa dichiara il proprio identificatore: introdurre il livello del fronte richiederà di leggere una cartella in più, non di cambiare la forma dei file né lo stato.
+
+**Perché non tocca i documenti.** 05 §7.6, che descrive che cosa una mappa dichiara, è rispettato per intero. Il solo percorso cambia, e cambierà ancora quando i fronti esisteranno.
+
+## S5 — Discrepanza sui formati di mappa, NON chiusa
+
+**Che cosa è successo.** 01 §5.1 dichiara «tre formati fissi»: quattro per quattro, sei per sei, dieci per dieci. Ma 01 §5.14.5 e §5.14.5.1, scritti a proposito della conoscenza conferita da fortezze e torri, nominano un formato OTTO per otto e lo dicono «il più frequente fra i formati minori».
+
+**Che cosa si è fatto.** Nulla, di proposito. Questa unità realizza i tre formati di 01 §5.1, che è il punto che definisce la mappa; l'otto per otto compare soltanto in un punto che riguarda la portata della conoscenza, materia esclusa dal perimetro. Le dimensioni stanno nei dati e non nel codice: aggiungere un quarto formato è una voce in `formati-mappa.json` e nessuna riga di programma.
+
+**Perché resta aperta.** Chiuderla richiederebbe di decidere se i formati siano tre o quattro, e la decisione appartiene al titolare insieme alla disciplina della conoscenza. Lasciarla aperta non costa nulla; chiuderla senza il codice che la mette alla prova costerebbe.
+
+## P9 — Precisazione: il registro si apre da un comando globale e non da un gesto
+
+02 §6.7 chiude i gesti fissi a tre — tocco magico, gesto di fuga, rotore delle campagne attive — e nessuno dei tre apre il registro; 02 §6.6 descrive il registro ma non dice da dove vi si entri. Realizzazione: il registro è il primo dei comandi globali che seguono le caselle nell'ordine di lettura, cioè si raggiunge a scorrimenti come l'annullamento e l'azzeramento. Non si è aggiunto alcun gesto, perché i tre di 02 §6.7 sono chiusi, né alcuna azione personalizzata, perché quelle contengono soltanto spostamenti di navigazione (02 §2.7). Da riportare in 02 §6.6 se una versione futura vorrà la regola esplicita.
+
+## P10 — Precisazione: sulla mappa il gesto di fuga senza designazione risale di un livello
+
+02 §6.7 dà al gesto di fuga il compito di risalire «dal pannello alla griglia, dalla mappa alla schermata delle campagne, da questa alla patria»; 02 §9.2.1 gli dà anche quello di annullare una designazione in corso. Sulla mappa i due compiti convivono. Realizzazione: con una designazione in corso il gesto la annulla e non risale; senza designazione risale. Poiché la schermata delle campagne non esiste ancora (fase F), risalire significa in questa unità tornare alla schermata iniziale. La precedenza data all'annullamento è la stessa che 02 §9.2.1 stabilisce per la battaglia.
+
+## P11 — Osservazione: le griglie rispondono all'attivazione assistiva, non al tocco grezzo
+
+**Che cosa si è visto.** Il fumo d'interfaccia della mappa, scritto in questa unità, ha tentato di ordinare a un gruppo toccandone la casella e non ci è riuscito. La causa: le caselle della mappa — e, allo stesso modo, le celle della griglia di battaglia fin dalla fase B — sono elementi accessibili sintetici dentro una vista che non ha alcun riconoscitore di gesto. Rispondono ad `accessibilityActivate`, cioè al doppio tocco della tecnologia assistiva, e non a un tocco grezzo.
+
+**Perché non è un difetto di questa unità.** La mappa si comporta esattamente come la griglia di battaglia, ed è ciò che il principio 7 richiede; il percorso su cui il gioco è costruito è quello assistivo, ed è provato per identità nelle prove ospitate, dove `attiva(_:)` è la stessa porta che l'attivazione assistiva apre.
+
+**Perché va comunque registrato.** Con VoiceOver spento, nessuna delle due griglie è operabile al tocco. 02 §1.3 dichiara che il gioco è pensato anche per giocatori ipovedenti che usano VoiceOver come SUPPORTO: per costoro VoiceOver è attivo e il percorso funziona. Resta però il caso di chi giocasse a VoiceOver spento, che oggi non può ordinare nulla su nessuno dei due piani. È una condizione preesistente alla campagna, riguarda entrambe le griglie e la sua eventuale correzione va fatta sui due piani insieme, mai su uno solo: sarebbe altrimenti la disparità fra i piani che il principio 7 vieta. Non è stata toccata in questa unità perché il perimetro non la comprende.
+
+**Che cosa costerebbe.** Un riconoscitore di tocco su ciascuna vista di griglia che risolva il punto nella cella e chiami la stessa `attiva(_:)`. Nessun cambiamento di regole, nessun cambiamento di stato, nessuna conseguenza sugli annunci.
+
 ## Nessuno scostamento strutturale
 
 Nessun punto dell'architettura è risultato irrealizzabile o errato nella fase A: i confini dei bersagli, il giornale con istantanee, l'impronta canonica, la virgola fissa e la catena dei testi esterni funzionano come dichiarato. I documenti 00–05 non richiedono modifiche.

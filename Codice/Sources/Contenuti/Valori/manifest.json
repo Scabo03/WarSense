@@ -1,12 +1,18 @@
 {
  "impronte": {
+  "Mappe/guado.json": "49b659ebe940fa2fdd59cb8951547614a5e51ad5599992e94de316dd359ad212",
+  "Mappe/istmo.json": "fdc04def29fef543031d964dc8450f7d182cc7c368295117965d62d03251dc0e",
+  "Mappe/pianura-lunga.json": "6f2270bc2744a78cb6eb684c74b81ac5b7b1f981ef954ce80d8f7a12ff275424",
   "aptica.json": "e4c296f884a0cd43d8e2245cb5d923d1b4cb2f90a04bf1c80d380e194856fc2e",
   "archetipi.json": "d249d957d14dd2fa845bc85d3e1214e4fdab9f3257b489e4ffa32193da1e569a",
   "caratteristiche-campo.json": "cda6b75ef6bd34f3445ce5ce803ca32d7bbea2b21169e0fef243bf1ab467793f",
   "combattimento.json": "0050bd6e7aed3e35543d1b69e4cebe2aca29b81786b07ddf2ebf1cb4d2cdf158",
+  "formati-mappa.json": "3adc8adb22315fba1f4610622e8f6e9ee03e891311f024774a99a19bfdbea4e7",
   "formato-battaglia.json": "d5877cc487278512568a7efec9e76f3195542b3ecb0d23be9f6dc49939a5f290",
   "minimi.json": "d67b738ee9136f09d98382d60c3bd661751943c5caacb5dc1b60e12811df353c",
+  "nomi-gruppi.json": "9ca67b318cef18f01b622ee09740476e9f5e0b5849e9b4df66c4b2e1a73f8a46",
   "offese-e-protezioni.json": "bb48b76b1c6f93837850dda262114c4cc4ce9ead5a3c4b463dee75ef65bcc35f",
+  "scenari-campagna.json": "2cd73b335e01660deee426b2f4009ae0f88af91fba57f183e7c223fb261eb2eb",
   "scenari.json": "c7617df35ae7dd7b5f27a45c0cd970451e22ee311f614badc0a2d69267341d2a",
   "suoni.json": "ccdadb8399bdf155ac910dc099877395f95061ec76825304279a2277e8eb665f",
   "ufficiali.json": "39447ca2b767d7b0a443f69257b67c8c71a3954c3725a3aa2169157c42f595c3",

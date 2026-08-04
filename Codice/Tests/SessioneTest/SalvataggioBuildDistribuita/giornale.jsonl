@@ -1,0 +1,15 @@
+{"numero":0,"voce":{"fondazione":{"_0":{"identificatore":"prova-fase-a","scenario":{"caratteristica":"campo_aperto","deckAvversario":[{"archetipo":"fanteria_leggera","atomi":3,"esemplari":2,"protezione":"anti_saturazione"}],"deckGiocatore":[{"archetipo":"fanteria_pesante","atomi":3,"esemplari":2,"protezione":"anti_perforazione"}],"formato":"quindici","imboscata":false,"ostacoli":[],"primoOccupante":"giocatore"},"seme":42,"versione_schema":2,"versione_testi":"0.1.0","versione_valori":"0.4.0"}}}}
+{"numero":1,"voce":{"inizioTurno":{"giro":1,"parte":"giocatore"}}}
+{"numero":2,"voce":{"comando":{"comando":{"seleziona":{"indiceDeck":0}},"parte":"giocatore"}}}
+{"numero":3,"voce":{"comando":{"comando":{"piazza":{"cella":{"colonna":2,"riga":3}}},"parte":"giocatore"}}}
+{"numero":4,"voce":{"comando":{"comando":{"piazza":{"cella":{"colonna":3,"riga":3}}},"parte":"giocatore"}}}
+{"numero":5,"voce":{"comando":{"comando":{"fineTurno":{}},"parte":"giocatore"}}}
+{"numero":6,"voce":{"inizioTurno":{"giro":1,"parte":"avversario"}}}
+{"numero":7,"voce":{"comando":{"comando":{"seleziona":{"indiceDeck":0}},"parte":"avversario"}}}
+{"numero":8,"voce":{"comando":{"comando":{"piazza":{"cella":{"colonna":2,"riga":2}}},"parte":"avversario"}}}
+{"numero":9,"voce":{"comando":{"comando":{"piazza":{"cella":{"colonna":3,"riga":2}}},"parte":"avversario"}}}
+{"numero":10,"voce":{"comando":{"comando":{"fineTurno":{}},"parte":"avversario"}}}
+{"numero":11,"voce":{"inizioTurno":{"giro":2,"parte":"giocatore"}}}
+{"numero":12,"voce":{"comando":{"comando":{"ingaggia":{"bersaglio":{"numero":3},"sciame":{"numero":1}}},"parte":"giocatore"}}}
+{"numero":13,"voce":{"comando":{"comando":{"ingaggia":{"bersaglio":{"numero":3},"sciame":{"numero":2}}},"parte":"giocatore"}}}
+{"numero":14,"voce":{"comando":{"comando":{"fineTurno":{}},"parte":"giocatore"}}}

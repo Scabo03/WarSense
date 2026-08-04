@@ -9,13 +9,18 @@ public struct ProgrammaDiVerifica: Sendable {
 
     public let cartellaValori: URL
     public let cartellaScenari: URL
+    /// La cartella degli scenari di campagna. Assente, la campagna non si misura:
+    /// il programma resta utile anche a chi vuole i soli scontri.
+    public let cartellaScenariCampagna: URL?
     /// Se vero, la corsa è breve: un solo scenario e i soli banchi essenziali.
     /// È la forma che entra nel collaudo come fumo delle simulazioni (05 §14.7).
     public let fumo: Bool
 
-    public init(cartellaValori: URL, cartellaScenari: URL, fumo: Bool = false) {
+    public init(cartellaValori: URL, cartellaScenari: URL,
+                cartellaScenariCampagna: URL? = nil, fumo: Bool = false) {
         self.cartellaValori = cartellaValori
         self.cartellaScenari = cartellaScenari
+        self.cartellaScenariCampagna = cartellaScenariCampagna
         self.fumo = fumo
     }
 
@@ -39,7 +44,86 @@ public struct ProgrammaDiVerifica: Sendable {
         rapporto.aggiungi(try sezioneCurvaDelTiro(banchi: banchi))
         rapporto.aggiungi(try sezioneAccerchiamento(banchi: banchi))
         if !fumo { rapporto.aggiungi(try sezioneDuelli(banchi: banchi)) }
+        if let cartellaScenariCampagna {
+            let scenariCampagna = try ScenariCampagna.carica(da: cartellaScenariCampagna)
+            let valoriCampagna = try CaricatoreCampagna.carica(da: cartellaValori)
+            let banco = BancoCampagna(
+                motore: MotoreCampagna(valori: valori, valoriCampagna: valoriCampagna),
+                valoriCampagna: valoriCampagna, scenari: scenariCampagna)
+            for sezione in try sezioniDiCampagna(banco: banco, scenari: scenariCampagna) {
+                rapporto.aggiungi(sezione)
+            }
+        }
         return rapporto
+    }
+
+    // MARK: - Sezioni della campagna
+
+    /// Due mestieri distinti, come l'incarico chiede di tenerli: gli INVARIANTI, che
+    /// non ammettono eccezioni e la cui uscita è un conteggio di violazioni che deve
+    /// valere zero; e le MISURE, che sono numeri da leggere e che in questa sessione
+    /// non giustificano alcuna taratura.
+    func sezioniDiCampagna(banco: BancoCampagna,
+                           scenari: ScenariCampagna) throws -> [Rapporto.Sezione] {
+        var sezioni: [Rapporto.Sezione] = []
+
+        var righeInvarianti: [[String]] = []
+        let giornate = fumo ? min(4, scenari.giornateGenerate) : scenari.giornateGenerate
+        for voce in scenari.scenari {
+            let corsa = try banco.corri(voce, giornate: giornate)
+            righeInvarianti.append([corsa.identificatore, corsa.mappa, String(corsa.gruppi),
+                                    String(corsa.giornate), String(corsa.ordini),
+                                    String(corsa.marce), String(corsa.presidi),
+                                    String(corsa.violazioni.count),
+                                    corsa.violazioni.joined(separator: ";"),
+                                    corsa.improntaFinale])
+        }
+        sezioni.append(Rapporto.Sezione(
+            nome: "campagna_invarianti",
+            intestazione: ["scenario", "mappa", "gruppi", "giornate", "ordini", "marce",
+                           "presidi", "violazioni", "dettaglio", "impronta_finale"],
+            righe: righeInvarianti))
+
+        var righePassi: [[String]] = []
+        for mappa in banco.valoriCampagna.mappe.keys.sorted() {
+            for gruppi in scenari.gruppiPerLaMisuraDeiPassi {
+                guard let passi = try banco.misuraPassi(mappa: mappa, gruppi: gruppi) else { continue }
+                righePassi.append([mappa, String(passi.gruppi), String(passi.conIlSalto),
+                                   String(passi.senzaIlSalto),
+                                   String(passi.senzaIlSalto - passi.conIlSalto)])
+            }
+        }
+        sezioni.append(Rapporto.Sezione(
+            nome: "campagna_passi_per_giornata",
+            intestazione: ["mappa", "gruppi", "con_il_salto", "senza_il_salto", "scarto"],
+            righe: righePassi))
+
+        var righeAttraversamento: [[String]] = []
+        for mappa in banco.valoriCampagna.mappe.keys.sorted() {
+            guard let misura = try banco.misuraAttraversamento(mappa: mappa) else { continue }
+            righeAttraversamento.append([misura.mappa, misura.formato, String(misura.lato),
+                                         String(misura.distanza), String(misura.giornate)])
+        }
+        sezioni.append(Rapporto.Sezione(
+            nome: "campagna_attraversamento",
+            intestazione: ["mappa", "formato", "lato", "distanza_in_caselle", "giornate"],
+            righe: righeAttraversamento))
+
+        var righeRaggiungibili: [[String]] = []
+        for mappa in banco.valoriCampagna.mappe.keys.sorted() {
+            guard let misura = try banco.misuraRaggiungibili(mappa: mappa) else { continue }
+            let d = misura.distribuzione
+            righeRaggiungibili.append([misura.mappa, String(d.quanti), String(d.minimo),
+                                       String(d.mediana), String(d.massimo), String(d.media),
+                                       String(misura.caselleDiBordo)])
+        }
+        sezioni.append(Rapporto.Sezione(
+            nome: "campagna_caselle_raggiungibili",
+            intestazione: ["mappa", "caselle", "minimo", "mediana", "massimo", "media",
+                           "caselle_sotto_quattro"],
+            righe: righeRaggiungibili))
+
+        return sezioni
     }
 
     // MARK: - Sezioni

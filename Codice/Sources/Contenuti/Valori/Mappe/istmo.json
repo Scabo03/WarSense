@@ -1,0 +1,29 @@
+{
+ "identificatore": "istmo",
+ "formato": "sei",
+ "caselle": [
+  { "riga": 1, "colonna": 3, "strada": "lastricata" },
+  { "riga": 1, "colonna": 5, "terreno": "bosco" },
+  { "riga": 2, "colonna": 1, "terreno": "acqua" },
+  { "riga": 2, "colonna": 3, "strada": "lastricata" },
+  { "riga": 2, "colonna": 6, "terreno": "acqua" },
+  { "riga": 3, "colonna": 1, "terreno": "acqua" },
+  { "riga": 3, "colonna": 2, "terreno": "acqua" },
+  { "riga": 3, "colonna": 3, "strada": "lastricata" },
+  { "riga": 3, "colonna": 4, "terreno": "acqua" },
+  { "riga": 3, "colonna": 5, "terreno": "acqua" },
+  { "riga": 3, "colonna": 6, "terreno": "acqua" },
+  { "riga": 4, "colonna": 2, "terreno": "bosco" },
+  { "riga": 4, "colonna": 3, "strada": "lastricata" },
+  { "riga": 4, "colonna": 5, "terreno": "bosco" },
+  { "riga": 5, "colonna": 3, "strada": "sterrata" },
+  { "riga": 5, "colonna": 4, "strada": "sterrata" },
+  { "riga": 5, "colonna": 6, "terreno": "bosco" },
+  { "riga": 6, "colonna": 3, "strada": "sterrata" }
+ ],
+ "strettoia": { "riga": 3, "colonna": 3 },
+ "quartier_generali": {
+  "giocatore": { "riga": 6, "colonna": 3 },
+  "avversario": { "riga": 1, "colonna": 3 }
+ }
+}

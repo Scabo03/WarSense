@@ -167,3 +167,66 @@
 "significato.sortita" = "Sortita dalla piazzaforte";
 "significato.vincolo_campagna" = "Vincolo fra le campagne";
 "significato.rinforzi_nel_deck" = "Rinforzi arrivati nelle riserve";
+
+/* Piano di campagna — annunci degli eventi (05 §10.7): frasi intere con
+   segnaposto, mai somme di parole (00 §14.2). */
+"campagna.marcia_eseguita" = "%@ marcia in riga %d, casella %d";
+"campagna.marcia_eseguita.sintetico" = "%@ in riga %d, casella %d";
+"campagna.presidio_ordinato" = "%@ presidia in riga %d, casella %d";
+"campagna.presidio_ordinato.sintetico" = "%@ presidia";
+"campagna.giornata_aperta" = "Giornata conclusa: comincia il giorno %d";
+"campagna.giornata_aperta.sintetico" = "Giorno %d";
+
+/* Registro degli eventi (01 §5.17, 02 §6.6): ogni voce è una frase compiuta che
+   dichiara il giorno cui si riferisce. */
+"registro.giornata_aperta" = "Giorno %d: si apre la giornata";
+"registro.titolo" = "Registro della campagna";
+"registro.vuoto" = "Il registro non contiene ancora alcun fatto";
+"registro.senza_luogo" = "Questa voce non riguarda un luogo della mappa";
+"registro.apri" = "Registro della campagna";
+"registro.chiudi" = "Chiudi il registro";
+
+/* Mappa di campagna — interfaccia (02 §2, §3, §6). La testa fissa ha la stessa
+   struttura di quella di battaglia (00 §7.1): riga, poi posizione nella riga. */
+"casella.testa" = "riga %d, casella %d";
+"casella.libera" = "libera";
+"casella.occupante_proprio" = "tuo %@, %@";
+"casella.disponibile" = "raggiungibile";
+"campagna.annuncio_apertura" = "Mappa %@, %d righe per %d caselle. Il tuo quartier generale è in riga %d, casella %d";
+"campagna.stato" = "Giorno %d. Hanno agito %d gruppi su %d";
+"campagna.stato_tutti_fermi" = "Giorno %d. Nessun gruppo ha ancora agito, sono %d";
+"campagna.annullato_conferma" = "Ultimo ordine annullato";
+"campagna.azzerato_conferma" = "Ordini della giornata azzerati";
+"campagna.niente_da_annullare" = "Niente da annullare in questa giornata";
+"campagna.slot_incompatibile" = "La campagna salvata appartiene a valori di versione %@ e questa versione usa %@: non può essere aperta";
+
+/* Pannello della casella (00 §7.4, 02 §9). Un'azione impossibile in ogni sua
+   forma non compare affatto (02 §9.5). */
+"pannello.casella_titolo" = "Azioni per %@ in riga %d, casella %d";
+"pannello.designa_marcia" = "Marcia: scegli la casella sulla mappa";
+"pannello.marcia_designazione_avviata" = "Scegli la casella di destinazione e attivala per confermare";
+"pannello.presidio" = "Presidia: resta fermo in guardia";
+
+/* Rotori della mappa di campagna (02 §7.3). */
+"rotore.proprie_formazioni" = "Tue formazioni";
+"rotore.gruppi_in_attesa" = "Gruppi da muovere";
+
+/* Nomi parlati delle mappe di prova. */
+"mappa.guado" = "Guado";
+"mappa.istmo" = "Istmo";
+"mappa.pianura_lunga" = "Pianura lunga";
+
+/* Avvio della campagna. */
+"avvio.nuova_campagna_piccola" = "Nuova campagna, mappa piccola";
+"avvio.nuova_campagna_media" = "Nuova campagna, mappa media";
+"avvio.nuova_campagna_grande" = "Nuova campagna, mappa grande";
+"avvio.riprendi_campagna" = "Riprendi la campagna in corso";
+
+/* Errori dei dati di campagna (05 §7.8): chiavi risolte sulla copia di fabbrica. */
+"errore.dati.formato_ignoto" = "Formato di mappa ignoto in %@: %@";
+"errore.dati.casella_fuori_mappa" = "Casella fuori dai confini in %@ alla voce %@";
+"errore.dati.casella_ripetuta" = "Casella dichiarata due volte in %@ alla voce %@";
+"errore.dati.strettoia_fuori_mappa" = "Strettoia fuori dai confini in %@ alla voce %@";
+"errore.dati.quartier_generale_incoerente" = "Quartier generali incoerenti in %@ alla voce %@";
+"errore.dati.quartier_generale_non_in_ultima_riga" = "Quartier generale fuori dall'ultima riga in %@ alla voce %@";
+"errore.dati.nomi_gruppi_incoerenti" = "L'elenco dei nomi dei gruppi è vuoto o contiene ripetizioni";

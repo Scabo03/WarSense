@@ -46,7 +46,16 @@ final class SchermataAvvio: UIViewController {
         if PartitaCorrente.esisteScontroInCorso() {
             aggiungiPulsante("avvio.riprendi", #selector(riprendi))
         }
+        // La campagna vive in uno slot proprio: le sue voci si aggiungono senza
+        // toccare quelle dello scontro, e la ripresa di una battaglia salvata
+        // resta esattamente dov'era.
+        if PartitaCampagna.esisteCampagnaInCorso() {
+            aggiungiPulsante("avvio.riprendi_campagna", #selector(riprendiCampagna))
+        }
         aggiungiPulsante("avvio.nuovo_scontro", #selector(nuovoScontro))
+        aggiungiPulsante("avvio.nuova_campagna_piccola", #selector(nuovaCampagnaPiccola))
+        aggiungiPulsante("avvio.nuova_campagna_media", #selector(nuovaCampagnaMedia))
+        aggiungiPulsante("avvio.nuova_campagna_grande", #selector(nuovaCampagnaGrande))
         aggiungiPulsante("avvio.impostazioni", #selector(apriImpostazioni))
         aggiungiPulsante("avvio.apprendimento", #selector(apriApprendimento))
     }
@@ -84,6 +93,42 @@ final class SchermataAvvio: UIViewController {
 
     private func presentaBattaglia(_ partita: PartitaCorrente) {
         let schermata = SchermataBattaglia(partita: partita)
+        schermata.modalPresentationStyle = .fullScreen
+        schermata.alTermine = { [weak self] in
+            self?.dismiss(animated: false)
+            Fuoco.sposta(a: nil, perche: .schermataAperta)
+        }
+        present(schermata, animated: false)
+        Fuoco.azzeraRegistro()
+    }
+
+    @objc private func nuovaCampagnaPiccola() { nuovaCampagna(.piccola) }
+    @objc private func nuovaCampagnaMedia() { nuovaCampagna(.media) }
+    @objc private func nuovaCampagnaGrande() { nuovaCampagna(.grande) }
+
+    private func nuovaCampagna(_ taglia: PartitaCampagna.Taglia) {
+        Task {
+            do { try await presentaMappa(PartitaCampagna(nuova: ambiente, taglia: taglia)) }
+            catch { }
+        }
+    }
+
+    @objc private func riprendiCampagna() {
+        Task {
+            do { try await presentaMappa(PartitaCampagna(riprendi: ambiente)) }
+            catch let errore as SessioneCampagna.ErroreSessione {
+                // Un salvataggio incompatibile si dichiara e non si apre (00 §15.2).
+                if case .salvataggioIncompatibile(let attesa, let trovata) = errore {
+                    ambiente.segnali.annuncia(TestoLocalizzato(
+                        testo: testi.frase("campagna.slot_incompatibile", trovata, attesa).testo,
+                        lingua: testi.lingua), interrompente: true)
+                }
+            } catch { }
+        }
+    }
+
+    private func presentaMappa(_ partita: PartitaCampagna) {
+        let schermata = SchermataMappaCampagna(partita: partita)
         schermata.modalPresentationStyle = .fullScreen
         schermata.alTermine = { [weak self] in
             self?.dismiss(animated: false)

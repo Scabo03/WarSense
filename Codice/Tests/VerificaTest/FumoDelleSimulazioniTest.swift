@@ -11,7 +11,9 @@ final class FumoDelleSimulazioniTest: XCTestCase {
 
     func programma(fumo: Bool = true) -> ProgrammaDiVerifica {
         ProgrammaDiVerifica(cartellaValori: Contenuti.valoriDiFabbrica,
-                            cartellaScenari: Contenuti.scenariDiVerifica, fumo: fumo)
+                            cartellaScenari: Contenuti.scenariDiVerifica,
+                            cartellaScenariCampagna: Verifica.Ambiente.scenariCampagnaDiFabbrica,
+                            fumo: fumo)
     }
 
     func test_05_14_7_il_fumo_delle_simulazioni_corre_e_produce_ogni_sezione() throws {
@@ -19,7 +21,10 @@ final class FumoDelleSimulazioniTest: XCTestCase {
         let nomi = rapporto.sezioni.map(\.nome)
         for atteso in ["versione", "scontri", "riepilogo_scontri", "soglie_di_resa",
                        "composizioni", "bersagli_di_schieramento", "modificatori",
-                       "curva_del_tiro", "accerchiamento"] {
+                       "curva_del_tiro", "accerchiamento",
+                       // La campagna entra nel fumo come gli scontri (05 §14.7).
+                       "campagna_invarianti", "campagna_passi_per_giornata",
+                       "campagna_attraversamento", "campagna_caselle_raggiungibili"] {
             XCTAssertTrue(nomi.contains(atteso), "sezione mancante: \(atteso)")
         }
         for sezione in rapporto.sezioni {
@@ -39,6 +44,20 @@ final class FumoDelleSimulazioniTest: XCTestCase {
         let seconda = try programma().esegui().testo
         XCTAssertEqual(prima, seconda, "due corse identiche devono dare lo stesso rapporto")
         XCTAssertFalse(prima.isEmpty)
+    }
+
+    /// La sezione degli invarianti di campagna non ammette eccezioni: la colonna
+    /// delle violazioni vale zero su ogni scenario, altrimenti la corsa ha trovato
+    /// un difetto e il collaudo lo dichiara qui, non in un rapporto da leggere.
+    func test_incarico_6_il_fumo_non_trova_alcuna_violazione_di_campagna() throws {
+        let rapporto = try programma().esegui()
+        let sezione = try XCTUnwrap(rapporto.sezioni.first { $0.nome == "campagna_invarianti" })
+        let colonna = try XCTUnwrap(sezione.intestazione.firstIndex(of: "violazioni"))
+        let dettaglio = try XCTUnwrap(sezione.intestazione.firstIndex(of: "dettaglio"))
+        for riga in sezione.righe {
+            XCTAssertEqual(riga[colonna], "0",
+                           "violazione di invariante nello scenario \(riga[0]): \(riga[dettaglio])")
+        }
     }
 
     /// Gli scenari sono file dichiarativi: aggiungerne uno non richiede di toccare

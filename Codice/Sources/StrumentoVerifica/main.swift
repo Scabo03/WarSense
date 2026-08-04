@@ -8,9 +8,11 @@ import Verifica
 // Uso:
 //   swift run StrumentoVerifica
 //   swift run StrumentoVerifica --valori <cartella> --scenari <cartella> --uscita <cartella> --fumo
+//   swift run StrumentoVerifica --scenari-campagna <cartella> | --senza-campagna
 
 var cartellaValori = Ambiente.valoriDiFabbrica
 var cartellaScenari = Ambiente.scenariDiFabbrica
+var cartellaScenariCampagna: URL? = Ambiente.scenariCampagnaDiFabbrica
 var cartellaUscita: URL?
 var fumo = false
 
@@ -30,6 +32,12 @@ while let argomento = argomenti.first {
         guard let valore = argomenti.first else { break }
         argomenti.removeFirst()
         cartellaUscita = URL(fileURLWithPath: valore)
+    case "--scenari-campagna":
+        guard let valore = argomenti.first else { break }
+        argomenti.removeFirst()
+        cartellaScenariCampagna = URL(fileURLWithPath: valore)
+    case "--senza-campagna":
+        cartellaScenariCampagna = nil
     case "--fumo":
         fumo = true
     default:
@@ -40,7 +48,9 @@ while let argomento = argomenti.first {
 
 do {
     let programma = ProgrammaDiVerifica(cartellaValori: cartellaValori,
-                                        cartellaScenari: cartellaScenari, fumo: fumo)
+                                        cartellaScenari: cartellaScenari,
+                                        cartellaScenariCampagna: cartellaScenariCampagna,
+                                        fumo: fumo)
     let rapporto = try programma.esegui()
     if let cartellaUscita {
         try rapporto.scrivi(in: cartellaUscita)

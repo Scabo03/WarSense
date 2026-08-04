@@ -34,13 +34,59 @@ public struct Fondazione: Codable, Sendable {
     }
 }
 
+/// L'atto di fondazione di una campagna. Caso a sé e non riuso di `Fondazione`,
+/// perché lo scenario che vi si iscrive è di natura diversa: mescolarli avrebbe
+/// reso opzionale un campo dell'atto di fondazione della battaglia, e un campo
+/// opzionale in più nel formato di salvataggio è un rischio senza contropartita.
+public struct FondazioneCampagna: Codable, Sendable {
+    public let versioneSchema: Int
+    public let versioneValori: String
+    public let versioneTesti: String
+    public let seme: UInt64
+    public let identificatore: String
+    public let scenario: ScenarioCampagna
+    /// Versione 1: la prima forma dell'atto di fondazione di una campagna.
+    public static let schemaCorrente = 1
+
+    public init(versioneSchema: Int, versioneValori: String, versioneTesti: String,
+                seme: UInt64, identificatore: String, scenario: ScenarioCampagna) {
+        self.versioneSchema = versioneSchema
+        self.versioneValori = versioneValori
+        self.versioneTesti = versioneTesti
+        self.seme = seme
+        self.identificatore = identificatore
+        self.scenario = scenario
+    }
+
+    enum CodingKeys: String, CodingKey {
+        case versioneSchema = "versione_schema"
+        case versioneValori = "versione_valori"
+        case versioneTesti = "versione_testi"
+        case seme, identificatore, scenario
+    }
+}
+
 /// Le voci del giornale (05 §6.1): comandi e marcatori. La codifica è stabile:
-/// i casi si aggiungono, non si rinominano.
+/// i casi si AGGIUNGONO, non si rinominano e non si riordinano.
+///
+/// La codifica sintetizzata degli enumerativi con valori associati usa il NOME del
+/// caso come chiave e non la sua posizione: aggiungere un caso non tocca la
+/// codifica degli altri, rinominarne uno rende illeggibili i giornali già scritti.
+/// I tre casi della campagna sono quindi aggiunti in coda e i campioni committati
+/// dei tre casi preesistenti continuano a ricodificarsi byte per byte identici
+/// (`CompatibilitaGiornaleTest`).
 public enum VoceGiornale: Codable, Sendable {
     case fondazione(Fondazione)
     case comando(parte: Parte, comando: ComandoBattaglia)
     /// Marcatore di inizio turno: bersaglio dell'azzeramento (05 §6.4) e punto di conferma (05 §6.5).
     case inizioTurno(parte: Parte, giro: Int)
+    /// Atto di fondazione di una campagna (05 §2.10).
+    case fondazioneCampagna(FondazioneCampagna)
+    /// Un comando di campagna (05 §3.3).
+    case comandoCampagna(parte: Parte, comando: ComandoCampagna)
+    /// Marcatore di apertura giornata: bersaglio dell'azzeramento sulla mappa di
+    /// campagna (05 §6.4) e punto di conferma (05 §6.5).
+    case aperturaGiornata(giorno: Int)
 }
 
 /// Una riga del giornale, numerata progressivamente.
@@ -73,14 +119,23 @@ public final class Giornale {
         case fondazioneMancante
     }
 
-    /// Apre un giornale nuovo, scrivendo l'atto di fondazione.
+    /// Apre un giornale nuovo, scrivendo l'atto di fondazione della battaglia.
     public static func nuovo(a percorso: URL, fondazione: Fondazione) throws -> Giornale {
+        try nuovo(a: percorso, atto: .fondazione(fondazione))
+    }
+
+    /// Apre un giornale nuovo, scrivendo l'atto di fondazione della campagna.
+    public static func nuovo(a percorso: URL, fondazione: FondazioneCampagna) throws -> Giornale {
+        try nuovo(a: percorso, atto: .fondazioneCampagna(fondazione))
+    }
+
+    private static func nuovo(a percorso: URL, atto: VoceGiornale) throws -> Giornale {
         FileManager.default.createFile(atPath: percorso.path, contents: nil)
         guard let maniglia = try? FileHandle(forWritingTo: percorso) else {
             throw ErroreGiornale.percorsoNonScrivibile
         }
         let giornale = Giornale(percorso: percorso, maniglia: maniglia, righe: [])
-        try giornale.appendi(.fondazione(fondazione))
+        try giornale.appendi(atto)
         return giornale
     }
 
@@ -105,7 +160,11 @@ public final class Giornale {
         if byteValidi < contenuto.count {
             try contenuto.prefix(byteValidi).write(to: percorso, options: .atomic)
         }
-        guard case .fondazione = righe.first?.voce else { throw ErroreGiornale.fondazioneMancante }
+        // La prima riga è sempre un atto di fondazione, di battaglia o di campagna.
+        switch righe.first?.voce {
+        case .fondazione, .fondazioneCampagna: break
+        default: throw ErroreGiornale.fondazioneMancante
+        }
         guard let maniglia = try? FileHandle(forWritingTo: percorso) else {
             throw ErroreGiornale.percorsoNonScrivibile
         }
@@ -122,6 +181,11 @@ public final class Giornale {
     public var fondazione: Fondazione {
         if case .fondazione(let f) = righe[0].voce { return f }
         preconditionFailure("giornale.senza.fondazione")
+    }
+
+    public var fondazioneCampagna: FondazioneCampagna {
+        if case .fondazioneCampagna(let f) = righe[0].voce { return f }
+        preconditionFailure("giornale.senza.fondazione.campagna")
     }
 
     /// Appende e conferma su disco prima di restituire (05 §6.1).
