@@ -239,6 +239,165 @@ final class InvariantiCampagnaTest: XCTestCase {
             .contains { $0.hasPrefix("registro_fuori_ordine") })
     }
 
+
+    // MARK: - I due invarianti che nella prima unità erano rimasti senza mutante
+
+    func test_mutante_un_azione_ordinata_e_non_registrata_viene_vista() throws {
+        // Il comando è stato impartito ma l'azione del gruppo NON risulta spesa:
+        // il gruppo potrebbe agire di nuovo nella stessa giornata.
+        let prima = try stato(gruppi: [(10, 6), (10, 5)])
+        let id = prima.gruppiOrdinati[0].id
+        let dopo = prima // nulla è cambiato: l'azione non è stata registrata
+        XCTAssertTrue(descrizioni(sonda.controlla(prima: prima, comando: .presidio(gruppo: id),
+                                                  dopo: dopo, eventi: [],
+                                                  adiacenti: prima.griglia.adiacenti))
+            .contains { $0.hasPrefix("azione_non_registrata") },
+            "la sonda non vede un ordine che non ha speso l'azione")
+    }
+
+    func test_mutante_il_giorno_che_avanza_senza_chiusura_viene_visto() throws {
+        // Il giorno cambia mentre qualcuno deve ancora agire: la giornata sarebbe
+        // avanzata da sé, che è ciò che l'incarico chiama azione automatica.
+        let prima = try stato(gruppi: [(10, 6), (10, 5)])
+        let id = prima.gruppiOrdinati[0].id
+        var dopo = prima
+        dopo.gruppi[id]!.azioneSpesa = true
+        dopo.giorno = prima.giorno + 1
+        XCTAssertTrue(descrizioni(sonda.controlla(prima: prima, comando: .presidio(gruppo: id),
+                                                  dopo: dopo, eventi: [],
+                                                  adiacenti: prima.griglia.adiacenti))
+            .contains { $0.hasPrefix("giorno_avanzato_senza_chiusura") },
+            "la sonda non vede il giorno avanzare senza che la giornata si sia chiusa")
+    }
+
+    // MARK: - La guardia: nessun invariante senza mutante
+
+    /// Ogni invariante sorvegliato deve avere almeno un mutante che lo fa scattare.
+    /// Nella prima unità due invarianti su quindici ne erano privi e nessuno se ne
+    /// era accorto, perché il conto lo tenevo io a mente. Qui lo tiene una prova:
+    /// la tavola dei mutanti va estesa insieme all'enumerativo, o il collaudo cade.
+    func test_incarico_6_ogni_invariante_ha_almeno_un_mutante_che_lo_fa_scattare() throws {
+        var visti = Set<String>()
+        for (nome, produci) in try tavolaDeiMutanti() {
+            let violazioni = produci()
+            XCTAssertFalse(violazioni.isEmpty, "il mutante «\(nome)» non fa scattare nulla")
+            visti.formUnion(violazioni.map(SondaInvariantiCampagna.codice(di:)))
+        }
+        let noti = Set(SondaInvariantiCampagna.codiciNoti)
+        XCTAssertEqual(noti.subtracting(visti), [],
+                       "invarianti sorvegliati senza alcun mutante che li faccia scattare")
+        XCTAssertEqual(visti.subtracting(noti), [],
+                       "un mutante produce un codice che non compare fra quelli noti")
+    }
+
+    /// La tavola dei mutanti: nome e chiusura che produce le violazioni. Ciascuno
+    /// ha anche la propria prova dedicata sopra, che dice quale difetto descrive;
+    /// qui servono tutti insieme per la guardia di copertura.
+    private func tavolaDeiMutanti() throws -> [(String, () -> [SondaInvariantiCampagna.Violazione])] {
+        let base = try stato(gruppi: [(10, 6), (10, 5), (9, 6)])
+        let ids = base.gruppiOrdinati.map(\.id)
+        let griglia = base.griglia
+        let motore = self.motore!
+        let sonda = self.sonda
+
+        func statoCon(_ modifica: (inout StatoCampagna) -> Void) -> StatoCampagna {
+            var s = base; modifica(&s); return s
+        }
+
+        return [
+            ("gruppo_in_piu_caselle", {
+                sonda.controlla(stato: statoCon { s in
+                    let primo = s.gruppiOrdinati[0]
+                    s.gruppi[IdGruppo(99)] = Gruppo(id: primo.id, parte: .giocatore, nome: primo.nome,
+                                                    posizione: Cella(riga: 8, colonna: 6), azioneSpesa: false)
+                })
+            }),
+            ("due_gruppi_stessa_casella", {
+                sonda.controlla(stato: statoCon { s in
+                    s.gruppi[ids[1]]!.posizione = s.gruppi[ids[0]]!.posizione
+                })
+            }),
+            ("gruppo_fuori_dalla_mappa", {
+                sonda.controlla(stato: statoCon { s in
+                    s.gruppi[ids[0]]!.posizione = Cella(riga: 99, colonna: 99)
+                })
+            }),
+            ("registro_fuori_ordine", {
+                sonda.controlla(stato: statoCon { s in
+                    s.registro.append(VoceRegistro(numero: 1, giorno: 5, fatto: .giornataAperta, luogo: nil))
+                    s.registro.append(VoceRegistro(numero: 2, giorno: 2, fatto: .giornataAperta, luogo: nil))
+                })
+            }),
+            ("azione_spesa_due_volte", {
+                let prima = statoCon { s in s.gruppi[ids[0]]!.azioneSpesa = true }
+                let (dopo, eventi) = motore.applica(.presidio(gruppo: ids[0]), parte: .giocatore, stato: base)
+                return sonda.controlla(prima: prima, comando: .presidio(gruppo: ids[0]),
+                                       dopo: dopo, eventi: eventi, adiacenti: griglia.adiacenti)
+            }),
+            ("azione_non_registrata", {
+                sonda.controlla(prima: base, comando: .presidio(gruppo: ids[0]),
+                                dopo: base, eventi: [], adiacenti: griglia.adiacenti)
+            }),
+            ("gruppo_ha_agito_da_se", {
+                let dopo = statoCon { s in
+                    s.gruppi[ids[0]]!.azioneSpesa = true
+                    s.gruppi[ids[1]]!.azioneSpesa = true
+                }
+                return sonda.controlla(prima: base, comando: .presidio(gruppo: ids[0]),
+                                       dopo: dopo, eventi: [], adiacenti: griglia.adiacenti)
+            }),
+            ("giorno_avanzato_senza_chiusura", {
+                let dopo = statoCon { s in
+                    s.gruppi[ids[0]]!.azioneSpesa = true
+                    s.giorno += 1
+                }
+                return sonda.controlla(prima: base, comando: .presidio(gruppo: ids[0]),
+                                       dopo: dopo, eventi: [], adiacenti: griglia.adiacenti)
+            }),
+            ("giorno_non_avanzato", {
+                sonda.controlla(prima: base, comando: .presidio(gruppo: ids[0]),
+                                dopo: statoCon { s in s.gruppi[ids[0]]!.azioneSpesa = false },
+                                eventi: [.giornataChiusa(giorno: 1), .giornataAperta(giorno: 1)],
+                                adiacenti: griglia.adiacenti)
+            }),
+            ("azione_non_azzerata", {
+                let dopo = statoCon { s in
+                    s.giorno += 1
+                    for g in s.gruppiOrdinati { s.gruppi[g.id]!.azioneSpesa = true }
+                }
+                return sonda.controlla(prima: base, comando: .presidio(gruppo: ids[0]),
+                                       dopo: dopo, eventi: [.giornataChiusa(giorno: 1),
+                                                            .giornataAperta(giorno: 2)],
+                                       adiacenti: griglia.adiacenti)
+            }),
+            ("movimento_non_adiacente", {
+                let lontana = Cella(riga: 5, colonna: 1)
+                let dopo = statoCon { s in
+                    s.gruppi[ids[0]]!.posizione = lontana
+                    s.gruppi[ids[0]]!.azioneSpesa = true
+                }
+                return sonda.controlla(prima: base, comando: .marcia(gruppo: ids[0], a: lontana),
+                                       dopo: dopo, eventi: [], adiacenti: griglia.adiacenti)
+            }),
+            ("salto_ha_dimenticato", {
+                sonda.controllaSalto(stato: base, sequenza: Array(ids.dropLast()))
+            }),
+            ("salto_ha_proposto_chi_ha_agito", {
+                let s = statoCon { s in s.gruppi[ids[0]]!.azioneSpesa = true }
+                return sonda.controllaSalto(stato: s, sequenza: ids)
+            }),
+            ("salto_ha_ripetuto", {
+                sonda.controllaSalto(stato: base, sequenza: [ids[0], ids[0], ids[1], ids[2]])
+            }),
+            ("casella_irraggiungibile", {
+                let piccola = GrigliaCampagna(righe: 6, colonne: 6)
+                return sonda.controllaRaggiungibilita(
+                    griglia: piccola, da: Cella(riga: 1, colonna: 1),
+                    vicini: { c in piccola.vicini(di: c).filter { $0.riga <= c.riga } })
+            }),
+        ]
+    }
+
     // MARK: - Attrezzo
 
     private func banchino() throws -> BancoCampagna {

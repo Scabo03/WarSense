@@ -139,6 +139,79 @@ final class RegoleCampagnaTest: XCTestCase {
         }
     }
 
+
+    // MARK: - 01 §5.6.0.2 — uscite libere e caselle di bordo sono due cose diverse
+
+    /// Fissa la semantica di «caselle raggiungibili in una giornata», che il
+    /// resoconto della prima unità aveva confuso con «caselle di bordo».
+    ///
+    /// Le due grandezze differiscono, e differiscono di poco: una casella INTERNA
+    /// adiacente a un proprio gruppo ha quattro vicine ma tre uscite libere,
+    /// perché la casella del gruppo non è disponibile (01 §5.6.0.2, al più una
+    /// propria formazione per casella). Con un solo gruppo sulla mappa la
+    /// differenza è esattamente di una casella, ed è la casella a nord del
+    /// quartier generale. Non è un difetto: è la regola. Ma i due numeri vanno
+    /// chiamati con due nomi diversi, e questa prova impedisce che tornino uno.
+    func test_01_5_6_0_2_le_uscite_libere_non_sono_le_caselle_di_bordo() throws {
+        for identificatore in valoriCampagna.mappe.keys.sorted() {
+            let definizione = valoriCampagna.mappe[identificatore]!
+            let formato = valoriCampagna.formatiMappa[definizione.formato]!
+            let qg = Cella(riga: definizione.quartierGenerali.giocatore.riga,
+                           colonna: definizione.quartierGenerali.giocatore.colonna)
+            let stato = try crea(ScenarioCampagna(
+                mappa: identificatore,
+                gruppiGiocatore: [.init(riga: qg.riga, colonna: qg.colonna)]))
+            let vista = VistaCampagna(motore: motore, stato: stato, parte: .giocatore)
+            let griglia = stato.griglia
+
+            func diBordo(_ c: Cella) -> Bool {
+                c.riga == 1 || c.riga == formato.righe || c.colonna == 1 || c.colonna == formato.colonne
+            }
+            let bordo = griglia.tutteLeCaselle.filter(diBordo).count
+            let interne = griglia.tutteLeCaselle.count - bordo
+            XCTAssertEqual(bordo, 4 * formato.righe - 4, "il bordo è geometria: quattro lati meno gli angoli contati due volte")
+            XCTAssertEqual(interne, (formato.righe - 2) * (formato.colonne - 2))
+
+            let conMenoDiQuattroUscite = griglia.tutteLeCaselle.filter {
+                vista.caselleRaggiungibiliInUnaGiornata(da: $0).count < 4
+            }
+            let interneConMenoDiQuattro = conMenoDiQuattroUscite.filter { !diBordo($0) }
+            XCTAssertEqual(interneConMenoDiQuattro.count, 1,
+                           "con un solo gruppo la differenza fra le due grandezze è di una casella: \(identificatore)")
+            // Ed è la casella a nord del quartier generale, cioè quella su cui il
+            // gruppo confina verso l'interno della mappa.
+            XCTAssertEqual(interneConMenoDiQuattro.first,
+                           Cella(riga: qg.riga - 1, colonna: qg.colonna),
+                           "mappa \(identificatore)")
+            XCTAssertEqual(conMenoDiQuattroUscite.count, bordo + 1,
+                           "mappa \(identificatore): bordo geometrico più la casella accanto al gruppo")
+        }
+    }
+
+    /// La casella che ha una uscita in meno resta pienamente raggiungibile e
+    /// pienamente percorribile: nessun giocatore la incontrerebbe come diversa
+    /// dalle altre. È la differenza fra un numero mal chiamato e un difetto.
+    func test_01_5_1_2_la_casella_accanto_al_gruppo_resta_raggiungibile_e_percorribile() throws {
+        let definizione = valoriCampagna.mappe["pianura_lunga"]!
+        let qg = Cella(riga: definizione.quartierGenerali.giocatore.riga,
+                       colonna: definizione.quartierGenerali.giocatore.colonna)
+        let vicina = Cella(riga: qg.riga - 1, colonna: qg.colonna)
+        // Un secondo gruppo, collocato di fianco, può marciarvi dentro.
+        var stato = try crea(ScenarioCampagna(
+            mappa: "pianura_lunga",
+            gruppiGiocatore: [.init(riga: qg.riga, colonna: qg.colonna),
+                              .init(riga: vicina.riga, colonna: vicina.colonna - 1)]))
+        let secondo = stato.gruppiOrdinati[1].id
+        XCTAssertTrue(motore.valida(.marcia(gruppo: secondo, a: vicina),
+                                    parte: .giocatore, stato: stato).eValido,
+                      "la casella accanto al gruppo si raggiunge come qualunque altra")
+        esegui(.marcia(gruppo: secondo, a: vicina), &stato)
+        XCTAssertEqual(stato.gruppi[secondo]!.posizione, vicina)
+        // E la si raggiunge anche dal gruppo che le sta a sud, una volta libera.
+        XCTAssertEqual(stato.griglia.vicini(di: vicina).count, 4,
+                       "geometricamente ha quattro vicine, come ogni casella interna")
+    }
+
     // MARK: - 01 §5.6 — la giornata: un'azione per gruppo
 
     func test_01_5_6_ogni_gruppo_dispone_di_una_sola_azione_al_giorno() throws {

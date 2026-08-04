@@ -126,3 +126,14 @@ sta il fiume e da che parte corre la strada. Poi verificare.
 7. **Le tre mappe.** Il quattro per quattro è minuscolo e serve a imparare; il sei
    per sei ha la strettoia; il dieci per dieci è il formato vero. Vale la pena
    provarle in quest'ordine.
+
+### Aggiunta dopo l'accertamento sui numeri (build 12)
+
+9. **L'annullamento che riapre la giornata.** Dai l'ordine all'ultimo gruppo, senti
+   la giornata chiudersi, poi tocca Annulla. Devi sentire una frase che dice che si
+   torna al giorno precedente e che il gruppo attende di nuovo. Verifica che sia
+   distinguibile dall'annullamento ordinario, e che continuando ad annullare si
+   torni indietro di più giornate.
+10. **Che cosa si sente alla chiusura.** Sono due frasi: la conferma del tuo ordine
+   e «Giornata conclusa: comincia il giorno N». Il collaudo fissa che siano quelle e
+   in quell'ordine; se bastino a farti accorgere del cambio di giornata lo dici tu.

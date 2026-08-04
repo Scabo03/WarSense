@@ -65,6 +65,11 @@ public struct BancoCampagna: Sendable {
         public let ordini: Int
         public let marce: Int
         public let presidi: Int
+        /// Ordini impartiti a un gruppo che NON aveva alcuna destinazione libera:
+        /// è il caso di stipamento, quello in cui l'azione di marcia non si offre
+        /// affatto (02 §9.5). Se questo numero è zero, la corsa non ha esercitato
+        /// lo stipamento, per quanti gruppi vi fossero.
+        public let senzaDestinazione: Int
         public let violazioni: [String]
         public let improntaFinale: String
     }
@@ -83,7 +88,7 @@ public struct BancoCampagna: Sendable {
             scenario: ScenarioCampagna(mappa: voce.mappa, gruppiGiocatore: voce.gruppi),
             valori: valoriCampagna)
         var violazioni = Set<String>()
-        var ordini = 0, marce = 0, presidi = 0
+        var ordini = 0, marce = 0, presidi = 0, senzaDestinazione = 0
         violazioni.formUnion(sonda.controlla(stato: stato).map(\.description))
 
         let giornoIniziale = stato.giorno
@@ -104,6 +109,7 @@ public struct BancoCampagna: Sendable {
             // Regola fissa: si presidia quando la giornata è multipla di tre, o
             // quando non esiste alcuna destinazione. Deterministica, senza caso.
             let comando: ComandoCampagna
+            if destinazioni.isEmpty { senzaDestinazione += 1 }
             if destinazioni.isEmpty || stato.giorno % 3 == 0 {
                 comando = .presidio(gruppo: gruppo.id)
                 presidi += 1
@@ -129,6 +135,7 @@ public struct BancoCampagna: Sendable {
         return Corsa(identificatore: voce.identificatore, mappa: voce.mappa,
                      gruppi: voce.gruppi.count, giornate: stato.giorno - giornoIniziale,
                      ordini: ordini, marce: marce, presidi: presidi,
+                     senzaDestinazione: senzaDestinazione,
                      violazioni: violazioni.sorted(), improntaFinale: stato.impronta())
     }
 
@@ -259,12 +266,30 @@ public struct BancoCampagna: Sendable {
 
     /// Quante caselle sono raggiungibili in una giornata da ciascuna casella della
     /// mappa. Con una sola azione per gruppo e lo scatto di una casella, sono i
-    /// vicini ortogonali liberi: la distribuzione dice quanto la mappa si stringe
-    /// ai bordi, che è ciò che chi ascolta deve poter prevedere.
+    /// vicini ortogonali LIBERI.
+    ///
+    /// Le uscite libere e le caselle di bordo sono due grandezze DIVERSE, e la
+    /// misura le tiene separate perché il resoconto della prima unità le aveva
+    /// confuse. Il bordo è geometria e non cambia mai; le uscite libere dipendono
+    /// da dove stanno i gruppi, perché una casella occupata da una propria
+    /// formazione non è disponibile (01 §5.6.0.2). Una casella interna adiacente a
+    /// un proprio gruppo ha quattro vicine e tre uscite: è interna e ha meno di
+    /// quattro uscite, e chiamarla «di bordo» è sbagliato.
     public struct Raggiungibili: Sendable {
         public let mappa: IdentificatoreDati
         public let distribuzione: Distribuzione
+        /// Geometria pura: le caselle su un lato della mappa. Non dipende dai gruppi.
         public let caselleDiBordo: Int
+        /// Geometria pura: il complemento del bordo.
+        public let caselleInterne: Int
+        /// Occupazione: le caselle da cui, nella configurazione misurata, si esce
+        /// verso meno di quattro caselle libere.
+        public let conMenoDiQuattroUscite: Int
+        /// Di quelle, quante sono INTERNE, cioè quante devono la propria strettezza
+        /// alla presenza di un gruppo e non alla forma della mappa.
+        public let interneConMenoDiQuattroUscite: Int
+        /// I gruppi presenti nella configurazione con cui la misura è presa.
+        public let gruppiPresenti: Int
     }
 
     public func misuraRaggiungibili(mappa identificatore: IdentificatoreDati) throws
@@ -277,11 +302,22 @@ public struct BancoCampagna: Sendable {
                                         colonna: definizione.quartierGenerali.giocatore.colonna)]),
             valori: valoriCampagna)
         let vista = VistaCampagna(motore: motore, stato: stato, parte: .giocatore)
-        let conteggi = stato.griglia.tutteLeCaselle.map {
+        let griglia = stato.griglia
+        func diBordo(_ c: Cella) -> Bool {
+            c.riga == 1 || c.riga == griglia.righe || c.colonna == 1 || c.colonna == griglia.colonne
+        }
+        let conteggi = griglia.tutteLeCaselle.map {
             vista.caselleRaggiungibiliInUnaGiornata(da: $0).count
+        }
+        let strette = griglia.tutteLeCaselle.filter {
+            vista.caselleRaggiungibiliInUnaGiornata(da: $0).count < 4
         }
         return Raggiungibili(mappa: identificatore,
                              distribuzione: Distribuzione(conteggi),
-                             caselleDiBordo: conteggi.filter { $0 < 4 }.count)
+                             caselleDiBordo: griglia.tutteLeCaselle.filter(diBordo).count,
+                             caselleInterne: griglia.tutteLeCaselle.filter { !diBordo($0) }.count,
+                             conMenoDiQuattroUscite: strette.count,
+                             interneConMenoDiQuattroUscite: strette.filter { !diBordo($0) }.count,
+                             gruppiPresenti: stato.gruppi.count)
     }
 }

@@ -67,13 +67,16 @@ public struct ProgrammaDiVerifica: Sendable {
                            scenari: ScenariCampagna) throws -> [Rapporto.Sezione] {
         var sezioni: [Rapporto.Sezione] = []
 
-        var righeInvarianti: [[String]] = []
+        // Ogni scenario si corre UNA volta sola: le sezioni che ne derivano
+        // leggono le stesse corse, così non possono divergere fra loro.
         let giornate = fumo ? min(4, scenari.giornateGenerate) : scenari.giornateGenerate
-        for voce in scenari.scenari {
-            let corsa = try banco.corri(voce, giornate: giornate)
+        let corse = try scenari.scenari.map { try banco.corri($0, giornate: giornate) }
+        var righeInvarianti: [[String]] = []
+        for corsa in corse {
             righeInvarianti.append([corsa.identificatore, corsa.mappa, String(corsa.gruppi),
                                     String(corsa.giornate), String(corsa.ordini),
                                     String(corsa.marce), String(corsa.presidi),
+                                    String(corsa.senzaDestinazione),
                                     String(corsa.violazioni.count),
                                     corsa.violazioni.joined(separator: ";"),
                                     corsa.improntaFinale])
@@ -81,7 +84,8 @@ public struct ProgrammaDiVerifica: Sendable {
         sezioni.append(Rapporto.Sezione(
             nome: "campagna_invarianti",
             intestazione: ["scenario", "mappa", "gruppi", "giornate", "ordini", "marce",
-                           "presidi", "violazioni", "dettaglio", "impronta_finale"],
+                           "presidi", "senza_destinazione", "violazioni", "dettaglio",
+                           "impronta_finale"],
             righe: righeInvarianti))
 
         var righePassi: [[String]] = []
@@ -109,21 +113,79 @@ public struct ProgrammaDiVerifica: Sendable {
             intestazione: ["mappa", "formato", "lato", "distanza_in_caselle", "giornate"],
             righe: righeAttraversamento))
 
+        // Bordo e interno sono GEOMETRIA e non dipendono dai gruppi; le uscite
+        // libere dipendono da dove i gruppi stanno, perché una casella occupata da
+        // una propria formazione non è disponibile (01 §5.6.0.2). Le due grandezze
+        // hanno colonne distinte perché il resoconto della prima unità le aveva
+        // confuse, chiamando «caselle di bordo» quelle con meno di quattro uscite.
         var righeRaggiungibili: [[String]] = []
         for mappa in banco.valoriCampagna.mappe.keys.sorted() {
             guard let misura = try banco.misuraRaggiungibili(mappa: mappa) else { continue }
             let d = misura.distribuzione
-            righeRaggiungibili.append([misura.mappa, String(d.quanti), String(d.minimo),
-                                       String(d.mediana), String(d.massimo), String(d.media),
-                                       String(misura.caselleDiBordo)])
+            righeRaggiungibili.append([misura.mappa, String(d.quanti),
+                                       String(misura.caselleDiBordo), String(misura.caselleInterne),
+                                       String(misura.gruppiPresenti),
+                                       String(d.minimo), String(d.mediana), String(d.massimo),
+                                       String(d.media), String(misura.conMenoDiQuattroUscite),
+                                       String(misura.interneConMenoDiQuattroUscite)])
         }
         sezioni.append(Rapporto.Sezione(
             nome: "campagna_caselle_raggiungibili",
-            intestazione: ["mappa", "caselle", "minimo", "mediana", "massimo", "media",
-                           "caselle_sotto_quattro"],
+            intestazione: ["mappa", "caselle", "caselle_di_bordo", "caselle_interne",
+                           "gruppi_nella_misura", "uscite_minimo", "uscite_mediana",
+                           "uscite_massimo", "uscite_media", "con_meno_di_quattro_uscite",
+                           "di_cui_interne"],
             righe: righeRaggiungibili))
 
+        // La distribuzione dei gruppi nelle giornate generate: gli invarianti che si
+        // rompono con molti gruppi sparpagliati non sono provati da giornate con due
+        // gruppi vicini, e senza questa sezione non si vede quale parte della
+        // distribuzione la generazione copra davvero.
+        var perGruppi: [Int: (giornate: Int, ordini: Int, scenari: Int)] = [:]
+        for corsa in corse {
+            let vecchio = perGruppi[corsa.gruppi] ?? (0, 0, 0)
+            perGruppi[corsa.gruppi] = (vecchio.giornate + corsa.giornate,
+                                       vecchio.ordini + corsa.ordini, vecchio.scenari + 1)
+        }
+        sezioni.append(Rapporto.Sezione(
+            nome: "campagna_distribuzione_gruppi",
+            intestazione: ["gruppi", "scenari", "giornate", "ordini"],
+            righe: perGruppi.keys.sorted().map { g in
+                [String(g), String(perGruppi[g]!.scenari), String(perGruppi[g]!.giornate),
+                 String(perGruppi[g]!.ordini)]
+            }))
+
+        sezioni.append(riepilogo(banco: banco, scenari: scenari,
+                                 righeInvarianti: righeInvarianti, perGruppi: perGruppi))
         return sezioni
+    }
+
+    /// IL BLOCCO UNICO dei numeri destinati al resoconto (incarico: «fa' in modo che
+    /// i numeri destinati al resoconto siano prodotti dal programma in un blocco
+    /// unico»). Ogni cifra che il resoconto cita deve comparire qui; una cifra che
+    /// non compaia qui va dichiarata come calcolata a mano nel punto stesso in cui
+    /// è scritta. I totali sono sommati dal programma proprio perché non li sommi
+    /// più io: nella prima unità le somme le avevo fatte a mente, e una era sbagliata.
+    func riepilogo(banco: BancoCampagna, scenari: ScenariCampagna,
+                   righeInvarianti: [[String]],
+                   perGruppi: [Int: (giornate: Int, ordini: Int, scenari: Int)]) -> Rapporto.Sezione {
+        var voci: [[String]] = []
+        func voce(_ nome: String, _ valore: Int) { voci.append([nome, String(valore)]) }
+
+        voce("scenari_di_campagna_generati", scenari.scenari.count)
+        voce("giornate_generate_in_totale", perGruppi.values.reduce(0) { $0 + $1.giornate })
+        voce("ordini_impartiti_in_totale", perGruppi.values.reduce(0) { $0 + $1.ordini })
+        let violazioni = righeInvarianti.reduce(0) { $0 + (Int($1[8]) ?? 0) }
+        voce("violazioni_trovate_in_totale", violazioni)
+        voce("ordini_a_gruppi_senza_alcuna_destinazione",
+             righeInvarianti.reduce(0) { $0 + (Int($1[7]) ?? 0) })
+        voce("gruppi_minimo_nelle_giornate_generate", perGruppi.keys.min() ?? 0)
+        voce("gruppi_massimo_nelle_giornate_generate", perGruppi.keys.max() ?? 0)
+        voce("invarianti_sorvegliati", SondaInvariantiCampagna.codiciNoti.count)
+        voce("formati_di_mappa", banco.valoriCampagna.formatiMappa.count)
+        voce("mappe_disponibili", banco.valoriCampagna.mappe.count)
+        return Rapporto.Sezione(nome: "campagna_riepilogo",
+                                intestazione: ["voce", "valore"], righe: voci)
     }
 
     // MARK: - Sezioni

@@ -68,8 +68,13 @@ si chiude solo quando tutti i gruppi hanno ricevuto un ordine.
    nient'altro che tu non abbia deciso tu.
 
 Ci sono anche **Annulla** e **Azzera**, come in battaglia: il primo ritira
-l'ultimo ordine, il secondo tutti quelli della giornata. Chiusa la giornata non si
-torna indietro.
+l'ultimo ordine, il secondo tutti quelli della giornata. **Anche l'ordine che ha
+chiuso la giornata si annulla**: se lo ritiri, la giornata si riapre e il giorno
+torna indietro, e il gioco te lo dice con una frase apposita. Continuando ad
+annullare si torna indietro di più giornate, un ordine per volta. Nella prima
+versione non era così, ed era un difetto: proprio l'ordine con cui è più facile
+sbagliare — l'ultimo, quello che senza volerlo fa passare il giorno — era l'unico
+che non si potesse ritirare.
 
 ## Che cosa conviene provare per primo
 

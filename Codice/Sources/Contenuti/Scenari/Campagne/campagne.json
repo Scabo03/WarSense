@@ -1,40 +1,317 @@
 {
  "giornate_generate": 40,
- "gruppi_per_la_misura_dei_passi": [1, 2, 3, 4, 5, 6, 8],
+ "gruppi_per_la_misura_dei_passi": [
+  1,
+  2,
+  3,
+  4,
+  5,
+  6,
+  8
+ ],
  "scenari": [
   {
    "identificatore": "guado_due_gruppi",
    "mappa": "guado",
    "gruppi": [
-    { "riga": 4, "colonna": 2 },
-    { "riga": 4, "colonna": 3 }
+    {
+     "riga": 4,
+     "colonna": 2
+    },
+    {
+     "riga": 4,
+     "colonna": 3
+    }
    ]
   },
   {
    "identificatore": "istmo_tre_gruppi",
    "mappa": "istmo",
    "gruppi": [
-    { "riga": 6, "colonna": 3 },
-    { "riga": 6, "colonna": 2 },
-    { "riga": 5, "colonna": 4 }
+    {
+     "riga": 6,
+     "colonna": 3
+    },
+    {
+     "riga": 6,
+     "colonna": 2
+    },
+    {
+     "riga": 5,
+     "colonna": 4
+    }
    ]
   },
   {
    "identificatore": "pianura_cinque_gruppi",
    "mappa": "pianura_lunga",
    "gruppi": [
-    { "riga": 10, "colonna": 6 },
-    { "riga": 10, "colonna": 5 },
-    { "riga": 9, "colonna": 6 },
-    { "riga": 9, "colonna": 5 },
-    { "riga": 10, "colonna": 7 }
+    {
+     "riga": 10,
+     "colonna": 6
+    },
+    {
+     "riga": 10,
+     "colonna": 5
+    },
+    {
+     "riga": 9,
+     "colonna": 6
+    },
+    {
+     "riga": 9,
+     "colonna": 5
+    },
+    {
+     "riga": 10,
+     "colonna": 7
+    }
    ]
   },
   {
    "identificatore": "pianura_gruppo_solo",
    "mappa": "pianura_lunga",
    "gruppi": [
-    { "riga": 10, "colonna": 6 }
+    {
+     "riga": 10,
+     "colonna": 6
+    }
+   ]
+  },
+  {
+   "identificatore": "pianura_quattro_gruppi",
+   "mappa": "pianura_lunga",
+   "gruppi": [
+    {
+     "riga": 10,
+     "colonna": 1
+    },
+    {
+     "riga": 10,
+     "colonna": 4
+    },
+    {
+     "riga": 9,
+     "colonna": 8
+    },
+    {
+     "riga": 8,
+     "colonna": 2
+    }
+   ]
+  },
+  {
+   "identificatore": "pianura_otto_sparpagliati",
+   "mappa": "pianura_lunga",
+   "gruppi": [
+    {
+     "riga": 1,
+     "colonna": 1
+    },
+    {
+     "riga": 1,
+     "colonna": 10
+    },
+    {
+     "riga": 3,
+     "colonna": 5
+    },
+    {
+     "riga": 5,
+     "colonna": 2
+    },
+    {
+     "riga": 6,
+     "colonna": 9
+    },
+    {
+     "riga": 8,
+     "colonna": 4
+    },
+    {
+     "riga": 10,
+     "colonna": 1
+    },
+    {
+     "riga": 10,
+     "colonna": 10
+    }
+   ]
+  },
+  {
+   "identificatore": "pianura_dodici_sparpagliati",
+   "mappa": "pianura_lunga",
+   "gruppi": [
+    {
+     "riga": 1,
+     "colonna": 2
+    },
+    {
+     "riga": 1,
+     "colonna": 7
+    },
+    {
+     "riga": 2,
+     "colonna": 4
+    },
+    {
+     "riga": 3,
+     "colonna": 9
+    },
+    {
+     "riga": 4,
+     "colonna": 1
+    },
+    {
+     "riga": 5,
+     "colonna": 6
+    },
+    {
+     "riga": 6,
+     "colonna": 3
+    },
+    {
+     "riga": 7,
+     "colonna": 8
+    },
+    {
+     "riga": 8,
+     "colonna": 5
+    },
+    {
+     "riga": 9,
+     "colonna": 10
+    },
+    {
+     "riga": 10,
+     "colonna": 2
+    },
+    {
+     "riga": 10,
+     "colonna": 8
+    }
+   ]
+  },
+  {
+   "identificatore": "istmo_otto_stipati",
+   "mappa": "istmo",
+   "gruppi": [
+    {
+     "riga": 5,
+     "colonna": 1
+    },
+    {
+     "riga": 5,
+     "colonna": 2
+    },
+    {
+     "riga": 5,
+     "colonna": 3
+    },
+    {
+     "riga": 5,
+     "colonna": 4
+    },
+    {
+     "riga": 6,
+     "colonna": 1
+    },
+    {
+     "riga": 6,
+     "colonna": 2
+    },
+    {
+     "riga": 6,
+     "colonna": 3
+    },
+    {
+     "riga": 6,
+     "colonna": 4
+    }
+   ]
+  },
+  {
+   "identificatore": "guado_sei_su_sedici_caselle",
+   "mappa": "guado",
+   "gruppi": [
+    {
+     "riga": 3,
+     "colonna": 1
+    },
+    {
+     "riga": 3,
+     "colonna": 2
+    },
+    {
+     "riga": 3,
+     "colonna": 3
+    },
+    {
+     "riga": 4,
+     "colonna": 1
+    },
+    {
+     "riga": 4,
+     "colonna": 2
+    },
+    {
+     "riga": 4,
+     "colonna": 3
+    }
+   ]
+  },
+  {
+   "identificatore": "guado_dodici_su_sedici_caselle",
+   "mappa": "guado",
+   "gruppi": [
+    {
+     "riga": 1,
+     "colonna": 1
+    },
+    {
+     "riga": 1,
+     "colonna": 2
+    },
+    {
+     "riga": 1,
+     "colonna": 3
+    },
+    {
+     "riga": 1,
+     "colonna": 4
+    },
+    {
+     "riga": 2,
+     "colonna": 1
+    },
+    {
+     "riga": 2,
+     "colonna": 2
+    },
+    {
+     "riga": 2,
+     "colonna": 3
+    },
+    {
+     "riga": 2,
+     "colonna": 4
+    },
+    {
+     "riga": 3,
+     "colonna": 1
+    },
+    {
+     "riga": 3,
+     "colonna": 2
+    },
+    {
+     "riga": 3,
+     "colonna": 3
+    },
+    {
+     "riga": 3,
+     "colonna": 4
+    }
    ]
   }
  ]

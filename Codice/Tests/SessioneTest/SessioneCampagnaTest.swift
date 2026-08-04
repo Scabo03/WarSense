@@ -171,29 +171,22 @@ final class SessioneCampagnaTest: XCTestCase {
         XCTAssertEqual(dopo, apertura, "la giornata torna com'era all'apertura")
     }
 
-    func test_05_6_5_l_annullamento_non_retrocede_oltre_la_chiusura_della_giornata() async throws {
-        let sessione = try await nuova(try slot(), scenario(gruppi: [(10, 6)]))
-        let id = await sessione.stato.gruppiOrdinati[0].id
-        _ = try await sessione.esegui(.presidio(gruppo: id), parte: .giocatore)
-        let giorno = await sessione.stato.giorno
-        XCTAssertEqual(giorno, 2, "la giornata si è chiusa")
-        // La chiusura è un punto di conferma: l'ordine di ieri non si annulla.
-        do {
-            try await sessione.annulla(parte: .giocatore)
-            XCTFail("l'annullamento ha superato un punto di conferma")
-        } catch let errore as SessioneCampagna.ErroreSessione {
-            guard case .operazioneNonDisponibile = errore else {
-                return XCTFail("motivo sbagliato: \(errore)")
-            }
-        }
-        do {
-            try await sessione.azzera(parte: .giocatore)
-            XCTFail("l'azzeramento ha superato un punto di conferma")
-        } catch let errore as SessioneCampagna.ErroreSessione {
-            guard case .operazioneNonDisponibile = errore else {
-                return XCTFail("motivo sbagliato: \(errore)")
-            }
-        }
+    /// SOSTITUITA. Questa prova pretendeva che l'annullamento si fermasse alla
+    /// chiusura della giornata, per la lettura letterale di 05 §6.5. Era la
+    /// realizzazione di un difetto: l'ordine più esposto all'errore — l'ultimo
+    /// della giornata, che la chiude come effetto non richiesto — era l'unico
+    /// che non si potesse ritirare, contro 00 §13.8. Il comportamento voluto è ora
+    /// in `AnnullamentoGiornataTest`; qui resta il solo caso che continua a valere.
+    func test_05_6_4_l_annullamento_ritira_un_ordine_per_volta() async throws {
+        let sessione = try await nuova(try slot(), scenario(gruppi: [(10, 6), (10, 5), (9, 6)]))
+        let ids = await sessione.stato.gruppiOrdinati.map(\.id)
+        _ = try await sessione.esegui(.presidio(gruppo: ids[0]), parte: .giocatore)
+        let dopoIlPrimo = await sessione.impronta()
+        _ = try await sessione.esegui(.presidio(gruppo: ids[1]), parte: .giocatore)
+        try await sessione.annulla(parte: .giocatore)
+        let dopoAnnullamento = await sessione.impronta()
+        XCTAssertEqual(dopoAnnullamento, dopoIlPrimo,
+                       "si ritira l'ultimo ordine, non due")
     }
 
     func test_05_6_4_dopo_l_annullamento_il_giornale_contiene_le_mosse_e_non_i_ripensamenti() async throws {
