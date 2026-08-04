@@ -48,7 +48,7 @@ e ciò che resta fuori è scritto qui.
    deve restare integra e la griglia cedere spazio; oltre una certa taglia il
    comportamento va osservato sul dispositivo.
 
-## Che cosa provare per primo, dopo questa build
+## Che cosa provare per primo, dopo la build precedente (lo scontro)
 
 1. **La lunghezza delle voci di designazione.** È la novità che rischia di più, ed
    è cresciuta ancora. La voce di tiro dice nome, lettera, efficacia, vicinanza e —
@@ -74,3 +74,55 @@ e ciò che resta fuori è scritto qui.
    schierarle tutte.
 5. Il resto come nella nota precedente: fuoco mai mosso da solo, informazioni
    mancanti, verbosità.
+
+
+---
+
+## La mappa di campagna — che cosa il collaudo non può dire
+
+La prima unità della fase D aggiunge la mappa di campagna. Le prove automatiche vi
+si applicano già per intero — ordine di lettura effettivo, cornici, bersagli di
+almeno 44 punti, elementi mai ricreati, fuoco mai mosso da solo
+(`MappaCampagnaAccessibileTest`) — e il programma di verifica ne sorveglia gli
+invarianti su centosessanta giornate generate. Restano fuori le cose seguenti.
+
+### La domanda su cui il progetto intero è costruito
+
+**Una persona che non vede si fa un'immagine mentale della mappa?** Cioè: dopo
+qualche giornata, sa DOVE stanno le cose — il proprio quartier generale, il bosco,
+il fiume, la strada, i propri gruppi — senza doverle riesplorare ogni volta?
+
+Il programma di verifica non può rispondere, e nessuna misura lo potrà mai. Può
+dire quanti passi costa chiudere una giornata; non può dire se dopo dieci giornate
+il giocatore abbia in testa una mappa o soltanto un elenco di caselle. La risposta
+la dà soltanto il titolare, sul dispositivo, giocando. È la verifica più importante
+di questa unità e va fatta per prima.
+
+Un modo concreto per provarlo: dopo cinque o sei giornate, senza toccare lo
+schermo, provare a dire ad alta voce dove si trova ciascuno dei propri gruppi, dove
+sta il fiume e da che parte corre la strada. Poi verificare.
+
+### Le altre verifiche che restano al dispositivo
+
+1. **Il costo reale di un'operazione.** La misura dei passi usa un modello
+   dichiarato: tre gesti per ordinare un gruppo con il salto diretto. Solo il
+   dispositivo dice quanti gesti servano davvero, e se il modello vada corretto.
+2. **Il salto diretto ai gruppi da muovere.** È un rotore personalizzato, e i
+   rotori non sono simulabili nelle prove ospitate: vanno provati a mano, verificando
+   che il giro sia completo, che non ripeta nessuno e che riparta dal primo.
+3. **Le due azioni personalizzate nord e sud.** Che ci siano è provato; che siano
+   comode da raggiungere con lo scorrimento verticale, no.
+4. **La lunghezza dell'annuncio di casella.** Con occupante, quartier generale,
+   terreno, strada e strettoia la frase può farsi lunga. Il livello sintetico tiene
+   la sola identità di ciò che occupa; il normale dice tutto. Solo l'orecchio dice
+   se il normale sia troppo, e se convenga tagliare prima.
+5. **Il registro.** Le voci si leggono; il salto al luogo del fatto NON è
+   esercitabile in questa unità, perché tutti i fatti oggi annotati sono di
+   calendario e non hanno luogo (RDA-67). Vale la pena verificare che una voce non
+   attivabile non sembri un difetto.
+6. **La chiusura della giornata.** Non ha segnale tattile né sonoro proprio, per la
+   ragione dichiarata in RDA-64. Va verificato che non passi inosservata: se passa,
+   la decisione si riapre.
+7. **Le tre mappe.** Il quattro per quattro è minuscolo e serve a imparare; il sei
+   per sei ha la strettoia; il dieci per dieci è il formato vero. Vale la pena
+   provarle in quest'ordine.

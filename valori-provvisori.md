@@ -80,3 +80,29 @@ MISURA dall'accertamento sugli esiti degli scontri: con l'`ufficiale_prova` di f
 - Fattore di scala della virgola fissa: 1000 (`Scalato.fattore`, RDA-44).
 - Passo delle istantanee: 200 righe di giornale (05 §6.2, dichiarato numero di struttura).
 - Versione dello schema del giornale: 2 (`Fondazione.schemaCorrente`; la 2 dalla prima tranche di semplificazioni: il comando di tiro non trasporta più il proiettile).
+
+## Valori della campagna — prima unità della fase D
+
+Questa unità introduce POCHISSIMI numeri, ed è voluto: le grandezze della campagna — costo in giorni dello scatto, pesi della casella di partenza e di arrivo, costo fisso della strettoia, effetto del tipo di strada, autonomia, malus della marcia forzata e della mancanza di provviste, decadimento della conoscenza (03 §4.1–4.9) — appartengono tutte a unità successive e restano da determinare come il documento 03 le registra. Introdurne uno adesso, senza il codice che lo mette alla prova, significherebbe inventare un numero.
+
+### formati-mappa.json — FISSATI
+
+Le dimensioni dei tre formati: quattro per quattro, sei per sei, dieci per dieci. FISSATI da 01 §5.1, che li dichiara «tre formati fissi». Non sono taratura e non si toccano qui. Stanno nei dati e non nel codice perché il codice non deve conoscere alcuna dimensione, non perché siano da tarare.
+
+Discrepanza aperta e non chiusa: 01 §5.14.5.1 nomina anche un formato otto per otto. Vedi il registro degli scostamenti, S5.
+
+### Mappe/*.json — CONTENUTO, non valori
+
+Terreni, strade, strettoie e posizioni dei quartier generali delle tre mappe di prova non sono valori di bilanciamento ma contenuto (05 §7.6, «le mappe sono contenuto, non codice»). Non si tarano: si disegnano. Le tre di questa unità servono a percorrere i tre formati e non pretendono di essere mappe definitive; ciascun fronte ne richiederà almeno cinque (01 §5.6.9).
+
+### nomi-gruppi.json — CONTENUTO
+
+Le dodici chiavi dei nomi dei gruppi. Non sono valori: sono l'elenco chiuso e prevedibile che 01 §5.6.0.4 richiede. Il numero dodici è la sola scelta, ed è capienza, non taratura: nulla impedisce di allungarlo, e la validazione respinge un elenco più corto del numero di gruppi che uno scenario chiede.
+
+### Scenari/Campagne/campagne.json — PARAMETRI DI MISURA, non valori di gioco
+
+`giornate_generate` (40) e `gruppi_per_la_misura_dei_passi` (da 1 a 8) governano quanto a lungo il programma di verifica generi giornate e su quali conteggi di gruppi misuri il costo di chiusura. Come i parametri dei banchi di scontro, non entrano in alcuna formula del Motore: cambiarli cambia la misura, non il gioco.
+
+### Il modello dei passi — DICHIARATO, non tarato
+
+La misura del costo di chiusura di una giornata usa un modello dichiarato in `BancoCampagna`: con il salto diretto ordinare un gruppo costa tre passi (salto, attivazione della casella, scelta della voce); senza il salto, al posto del salto occorrono gli scorrimenti che separano le due caselle nell'ordine di lettura. Non è un valore di gioco e non risiede nei file dei valori: è l'unità di misura, e come tale va discussa, non tarata. Se la prova su dispositivo mostrasse che il costo reale di un'operazione è diverso, si corregge il modello e si rilegge la misura.

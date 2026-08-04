@@ -567,3 +567,107 @@ Sotto-decisione presa in corso d'opera e registrata perché non era ovvia: la so
 Motivazione. Agire sulla sequenza anziché sull'ordine dei turni conserva 01 §9.4.1, che il titolare vuole intatto, e colpisce la causa misurata anziché un suo sintomo. Risolvere il solo contatto formato, e non tutti, conserva la simultaneità dove serve e la toglie dove produceva l'ingiustizia.
 
 Conseguenze. La simultaneità resta intera dentro una risoluzione e cade fra risoluzioni diverse dello stesso turno: i posti in mischia e gli insiemi dei concorrenti si leggono all'apertura di ciascuna risoluzione, non una volta per giro (01 §9.11.1, §9.10.2.3 riformulati). L'evento di contatto porta ora il proprio esito, come quello di tiro, e l'annuncio segue l'azione (02 §8.9.2). Tutte le impronte cambiano e i copioni d'oro si rigenerano. Misura dopo la modifica: chi muove per primo perde in tredici configurazioni su ventiquattro, cioè quanto il caso.
+
+## Parte decima — Decisioni della prima unità della fase D (la mappa navigabile)
+
+### RDA-61 — La giornata si chiude da sé, e non esiste alcun comando di fine giornata (01 §5.6.0.6)
+
+Problema. L'incarico della sessione dice che «la giornata si chiude su comando del giocatore», mentre 01 §5.6.0.6 stabilisce che «il turno di campagna si chiude automaticamente quando tutti i gruppi hanno agito, e non esiste alcun comando di fine giornata», regola richiamata da 05 §3.8 e da 01 §5.6.9.2. Le due formulazioni non possono valere insieme.
+
+Opzioni. Aggiungere un comando esplicito di fine giornata, seguendo la lettera dell'incarico; conservare la chiusura automatica del consolidato.
+
+Scelta. La chiusura automatica. La frase dell'incarico si legge come descrizione di ciò che accade: la giornata si chiude PER EFFETTO dell'ultimo ordine del giocatore e mai per iniziativa del programma, e la frase che segue nell'incarico stesso — «nessuna azione automatica» — chiede precisamente questo, cioè che nessun gruppo agisca da sé.
+
+Motivazione. 01 §5.6.0.6 è una decisione presa, e l'incarico vieta di riaprire decisioni prese; 05 §0.3 fa inoltre prevalere il consolidato sulle regole di gioco. La lettura adottata le concilia entrambe senza forzare nessuna delle due. Se il titolare volesse davvero un comando esplicito, la modifica costa una voce di comando e un pulsante, mentre l'errore opposto avrebbe contraddetto una regola scritta.
+
+Conseguenze. Stare fermi resta un'azione ordinabile e non un'omissione: il presidio esiste proprio perché la giornata possa chiudersi anche quando non si vuole marciare. Un invariante del programma di verifica sorveglia che nessun gruppo spenda l'azione senza averne ricevuto l'ordine.
+
+### RDA-62 — La mappa riusa la cella della battaglia; il termine parlato è «casella»
+
+Problema. La mappa di campagna ha bisogno di un tipo per la posizione e di una testa fissa per l'annuncio. Il principio 7 ammette una sola differenza fra i due piani, cioè il numero di celle vicine.
+
+Opzioni. Un tipo di posizione proprio della campagna; il riuso di `Cella`, che la battaglia già usa come coppia riga-colonna.
+
+Scelta. Il riuso di `Cella`, con una `GrigliaCampagna` propria per la sola adiacenza. Nell'annuncio la testa fissa conserva la stessa struttura — riga, poi posizione nella riga — e cambia la sola parola: «riga 7, casella 4» sulla mappa, «riga 7, cella 4» in battaglia.
+
+Motivazione. Riga e colonna significano la stessa cosa sui due piani, l'ordine di lettura è lo stesso, e un tipo gemello avrebbe soltanto duplicato le conversioni. Sulla parola: i consolidati chiamano «caselle» quelle della mappa e «celle» quelle della griglia, e seguirli evita che il documento e la voce dicano cose diverse; ciò che il principio 7 protegge è la STRUTTURA dell'annuncio, che resta identica.
+
+Conseguenze. Ordine di lettura, ordinamento dei rotori e impronte funzionano sui due piani con lo stesso codice. Se le prove con i tester mostrassero che le due parole confondono, la materia si riapre cambiando una chiave di testo.
+
+### RDA-63 — Il quartier generale è geografia dichiarata dalla mappa e occupa il posto delle opere nell'annuncio
+
+Problema. 02 §3.8.1 fissa l'ordine delle informazioni dopo la testa fissa e nomina «le opere presenti nella casella», ma il quartier generale non è un'opera: è il perno della mappa (01 §5.2.1) ed esiste prima di qualunque costruzione.
+
+Scelta. I due quartier generali sono parte della definizione della mappa, come 05 §7.6 già prevede, e ciascuno sta in ultima riga dalla propria parte (01 §5.14.3.2), il che la validazione impone. Nell'annuncio occupano il posto delle opere: dopo l'occupante, prima del terreno.
+
+Motivazione. È il posto che l'ordine registrato assegna a ciò che sta stabilmente nella casella e non vi si muove. Collocarlo altrove avrebbe richiesto di riaprire 02 §3.8.1, che è chiuso.
+
+Conseguenze. La posizione del quartier generale avversario è nota fin dall'inizio, come le regole già prevedono (01 §5.14.3.2 la dà per acquisita). Non è informazione di ricognizione e non passa dagli stati di conoscenza.
+
+### RDA-64 — La chiusura della giornata non aggiunge un significato tattile
+
+Problema. Il cambio di giornata è un fatto rilevante, ma 02 §11.5 chiude il tetto dei significati a quindici e 02 §11.7.1 chiude anche l'elenco degli eventi che restano fuori dal tetto con suono dedicato. Il cambio di giornata non compare in nessuno dei due.
+
+Opzioni. Aggiungere un sedicesimo significato; riusare un significato esistente; lasciare il solo annuncio.
+
+Scelta. Il solo annuncio, senza segnale proprio.
+
+Motivazione. La chiusura arriva sempre nell'istante immediatamente successivo a un ordine del giocatore, che porta già il segnale di conferma: un secondo segnale a un decimo di secondo dal primo sarebbe carico senza informazione. L'annuncio è testo, non si perde, e il fatto resta recuperabile nel registro (02 §6.6.1), che è il canale di recupero dichiarato per la mappa di campagna. Riusare un significato altrui avrebbe rotto la corrispondenza uno a uno fra segnale e significato.
+
+Conseguenze. Se la prova su dispositivo mostrasse che il cambio di giornata passa inosservato, la materia si riapre e richiede una versione nuova di 02 §11.7.1, non una modifica locale.
+
+### RDA-65 — Il nome del gruppo vive nello stato come chiave, non come indice
+
+Problema. I nomi dei gruppi vengono da un elenco chiuso e ordinato dei dati (01 §5.6.0.4). Il gruppo può portarne l'indice oppure la chiave.
+
+Scelta. La chiave, iscritta nello stato alla nascita del gruppo.
+
+Motivazione. Il nome è «breve e stabile, che conserva per tutta la propria esistenza». Con l'indice, allungare o riordinare l'elenco nei dati rinominerebbe i gruppi delle partite in corso; con la chiave, il nome resta quello ricevuto. La chiave entra inoltre nell'impronta e negli eventi, sicché Segnali risolve il nome parlato senza dover leggere i valori di campagna.
+
+Conseguenze. L'elenco dei nomi si può ampliare senza toccare i salvataggi. Un nome tolto dall'elenco lascerebbe un gruppo con una chiave irrisolvibile: il collaudo verifica che ogni chiave dell'elenco abbia il proprio testo, e togliere una chiave in uso resta una modifica da fare con revisione esplicita.
+
+### RDA-66 — I comandi di campagna si aggiungono al giornale esistente; la campagna vive in uno slot proprio
+
+Problema. Il giornale è anche il formato di salvataggio (05 §6.1). La campagna vi aggiunge una famiglia intera di comandi, ed è il caso che la fase B aveva segnalato come pericoloso.
+
+Opzioni. Un formato di giornale separato per la campagna; casi nuovi nello stesso enumerativo.
+
+Scelta. Casi nuovi nello stesso enumerativo — `fondazioneCampagna`, `comandoCampagna`, `aperturaGiornata` — e slot di partita distinti sul disco.
+
+Motivazione. La codifica sintetizzata degli enumerativi con valori associati usa il NOME del caso come chiave e non la sua posizione: aggiungere un caso non tocca la codifica degli altri. Il fatto non è stato dato per buono ma provato, e nell'ordine giusto: i campioni dei tre casi preesistenti e un salvataggio della build distribuita sono stati fissati e visti verdi PRIMA dell'aggiunta, e rieseguiti dopo. Due formati separati avrebbero raddoppiato la macchina della persistenza — appendice confermata, istantanee, troncamento atomico, ripresa — per non condividere nulla.
+
+Conseguenze. Una partita di battaglia in corso non si accorge dell'esistenza della campagna. Un giornale dichiara la propria natura dalla prima riga, e la Sessione competente la legge. Ogni caso nuovo che verrà entra nei campioni committati nella stessa modifica che lo introduce, come la prova impone.
+
+### RDA-67 — Le voci di registro prive di luogo non sono attivabili e lo dichiarano
+
+Problema. 02 §6.6 vuole che ogni voce del registro consenta, attivandola, di portare il fuoco sul luogo del fatto. Alcuni fatti non hanno luogo: il cambio di stagione, l'apertura della giornata.
+
+Opzioni. Dare comunque un luogo convenzionale, per esempio il quartier generale; rendere la voce non attivabile.
+
+Scelta. La voce non è attivabile, ha il tratto di testo statico e dichiara nel proprio suggerimento che non riguarda un luogo della mappa.
+
+Motivazione. Un salto che porta in un posto che non c'entra è peggio della sua assenza, e violerebbe 02 §4.4.3, secondo cui il gioco non dichiara mai il falso. Il silenzio, invece, non è distinguibile da un difetto (00 §9.1): per questo la ragione si annuncia.
+
+Conseguenze. In questa unità tutte le voci sono di calendario e nessuna è attivabile, perché i fatti con un luogo — mosse avversarie, rifornimento interrotto, imboscata scattata, marcia lunga compiuta — appartengono tutti a unità successive. Il salto è realizzato e provato, ma nessun fatto di questa unità lo esercita: è dichiarato nel resoconto e nell'elenco delle verifiche su dispositivo.
+
+### RDA-68 — Il fuoco all'apertura della mappa va al primo gruppo che attende una decisione
+
+Problema. 02 §2.9 fissa il fuoco d'apertura della battaglia sull'intestazione del deck. La mappa non ha deck, e il punto non ha equivalente scritto.
+
+Opzioni. La prima casella della mappa; il proprio quartier generale; il primo gruppo che non ha ancora agito.
+
+Scelta. Il primo gruppo in attesa, nell'ordine di lettura.
+
+Motivazione. È il luogo da cui la giornata comincia, ed è coerente con lo spirito di 02 §2.9, che posa il fuoco dove l'azione comincia e non dove la griglia comincia. Le altre due scelte avrebbero costretto a un viaggio prima di poter fare qualunque cosa.
+
+Conseguenze. Ad apertura di una giornata già interamente ordinata — caso possibile riprendendo una campagna — non esiste alcun gruppo in attesa e il fuoco resta all'inizio della schermata. Il tocco magico dice in ogni caso a che punto è la giornata.
+
+### RDA-69 — La sonda degli invarianti vive fuori dal Motore e riceve dall'esterno ciò che giudica
+
+Problema. Gli invarianti della campagna vanno sorvegliati, e la tentazione naturale è metterli dentro il Motore, dove i dati sono a portata di mano.
+
+Scelta. La sonda vive nella libreria di verifica e riceve dall'esterno lo stato, la transizione, la sequenza del salto e la funzione di adiacenza.
+
+Motivazione. Due ragioni distinte. La prima è che il Motore non deve controllare se stesso: un invariante scritto nello stesso momento e nello stesso file della regola ne eredita i punti ciechi. La seconda, e più importante, è che un invariante deve poter essere VIOLATO da una prova: ricevendo dall'esterno ciò che giudica, la sonda si può mettere davanti a uno stato guastato a mano o a un'adiacenza mutilata, e si accerta che se ne accorga. Un invariante che non si è mai visto violare non è un invariante.
+
+Conseguenze. Ogni invariante della campagna ha in collaudo la propria coppia: la corsa vera che non produce violazioni e il mutante che ne produce una. Il costo è qualche parametro in più nelle firme, che è precisamente ciò che rende le prove possibili.
