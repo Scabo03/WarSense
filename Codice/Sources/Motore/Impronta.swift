@@ -79,8 +79,13 @@ extension StatoBattaglia {
         case .opacita: c.intero(2); c.intero(0)
         case .trasparente: c.intero(3); c.intero(0)
         }
+        // I contatti si codificano NELL'ORDINE DI ARRIVO e non riordinati: dal limite
+        // dei bersagli simultanei (01 §9.11) quell'ordine decide chi riceve risposta
+        // piena, chi ridotta e chi nessuna, quindi è stato di gioco a tutti gli
+        // effetti. Un'impronta che lo riordinasse darebbe lo stesso valore a due
+        // situazioni che si comportano in modo diverso (05 §2.9, RDA-55).
         c.intero(Int64(contatti.count))
-        for contatto in contatti.sorted(by: { ($0.primo, $0.secondo) < ($1.primo, $1.secondo) }) {
+        for contatto in contatti {
             c.intero(contatto.primo.numero); c.intero(contatto.secondo.numero)
             c.intero(contatto.consistenzaIngressoPrimo); c.intero(contatto.consistenzaIngressoSecondo)
         }

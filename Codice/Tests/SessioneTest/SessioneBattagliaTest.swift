@@ -194,14 +194,21 @@ final class SessioneBattagliaTest: XCTestCase {
             .appendingPathComponent("valori-futuri-\(UUID().uuidString)")
         try FileManager.default.copyItem(at: Contenuti.valoriDiFabbrica, to: copia)
         addTeardownBlock { try? FileManager.default.removeItem(at: copia) }
+        // La versione futura si ricava da quella corrente e non si scrive a mano:
+        // così la prova non va ritoccata a ogni incremento della versione dei valori
+        // (03 §9.2.1, che ne prescrive uno a ogni cambiamento di regole).
         let manifestURL = copia.appendingPathComponent("manifest.json")
-        var manifesto = try String(contentsOf: manifestURL, encoding: .utf8)
-        manifesto = manifesto
-            .replacingOccurrences(of: "\"versione\": \"0.1.0\"", with: "\"versione\": \"0.2.0\"")
-            .replacingOccurrences(of: "\"0.1.0\"\n ]", with: "\"0.2.0\"\n ]")
-        try manifesto.write(to: manifestURL, atomically: true, encoding: .utf8)
+        var manifesto = try JSONSerialization.jsonObject(
+            with: Data(contentsOf: manifestURL)) as! [String: Any]
+        let versioneCorrente = valori.versione
+        let futura = versioneCorrente + ".futura"
+        manifesto["versione"] = futura
+        manifesto["versioni_compatibili"] = [futura]
+        try JSONSerialization.data(withJSONObject: manifesto).write(to: manifestURL)
         let valoriFuturi = try CaricatoreValori.carica(da: copia)
-        XCTAssertEqual(valoriFuturi.versione, "0.2.0")
+        XCTAssertEqual(valoriFuturi.versione, futura)
+        XCTAssertFalse(valoriFuturi.versioniCompatibili.contains(versioneCorrente),
+                       "la versione futura non dichiara compatibilità con quella corrente")
 
         do {
             _ = try await SessioneBattaglia(riprendi: cartella, valori: valoriFuturi)
@@ -210,8 +217,11 @@ final class SessioneBattagliaTest: XCTestCase {
             guard case .salvataggioIncompatibile(let attesa, let trovata) = errore else {
                 return XCTFail("errore sbagliato: \(errore)")
             }
-            XCTAssertEqual(attesa, "0.2.0")
-            XCTAssertEqual(trovata, "0.1.0")
+            // L'annuncio nomina le versioni attesa e trovata (05 §6.6). Le impronte
+            // della copia non coincidono più con il manifest riscritto, quindi la
+            // versione attesa porta il suffisso locale di RDA-45: si confronta la base.
+            XCTAssertTrue(attesa.hasPrefix(futura), "attesa: \(attesa)")
+            XCTAssertTrue(trovata.hasPrefix(versioneCorrente), "trovata: \(trovata)")
         }
     }
 

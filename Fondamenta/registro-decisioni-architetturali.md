@@ -488,3 +488,39 @@ Opzioni. Alzare la versione dei testi a ogni modifica; confrontare le impronte d
 Scelta. La terza, che era l'alternativa già annotata nella memoria di infrastruttura: il manifest dei testi elenca le impronte dei file di lingua e ogni modifica ai testi le rigenera; il confronto dei byte del manifest fa il resto, senza toccare la versione e senza costi d'avvio aggiuntivi.
 
 Conseguenze. Regola operativa nuova nella memoria di infrastruttura: chi tocca un file in `Contenuti/Testi/` rigenera le impronte del manifest, come già per i valori. La versione dei testi resta materia esclusiva del titolare.
+
+## Parte settima — Decisioni del limite dei bersagli simultanei
+
+### RDA-55 — I contatti entrano nell'impronta nell'ordine di arrivo (05 §2.9)
+
+Problema. Il limite dei bersagli simultanei (01 §9.11) fa dipendere la risposta di un reparto dall'ordine in cui i nemici lo hanno ingaggiato. Fino alla versione precedente la codifica canonica dell'impronta ordinava i contatti per identificatore, sul presupposto — allora vero — che il loro ordine fosse irrilevante. Con la regola nuova due stati identici in tutto salvo l'ordine di arrivo si comportano in modo diverso e avrebbero avuto la stessa impronta.
+
+Opzioni. Conservare l'ordinamento e aggiungere allo stato un campo esplicito con il posto di ciascun contatto; serializzare i contatti nel loro ordine di elenco.
+
+Scelta. La seconda. L'elenco dei contatti è già in ordine di arrivo per costruzione — vi si appende all'ingaggio e se ne rimuove senza riordinare — ed è deterministico, perché discende dalla sequenza dei comandi del giornale. Serializzarlo così è insieme canonico e corretto, e non aggiunge alcun campo allo stato.
+
+Motivazione. Un campo esplicito con i posti sarebbe stato un secondo luogo della verità da tenere in sincronia con l'elenco a ogni disfacimento e a ogni disingaggio, cioè esattamente la duplicazione che 05 §2.7 evita derivando i fatti anziché copiarli. Il criterio generale che ne discende è ora scritto in 05 §2.9: la canonicità serve a distinguere stati diversi, quindi non può cancellare un ordine significante.
+
+Conseguenze. Tutte le impronte cambiano e i copioni d'oro si rigenerano; la successione automatica nei posti liberati (01 §9.11.2) diventa gratuita, perché rimuovere un contatto fa scorrere in avanti i successivi senza alcun codice dedicato.
+
+### RDA-56 — Il posto si legge dall'elenco, e il terzo non produce danno anziché produrne zero
+
+Problema. Realizzare 01 §9.11 senza rompere la simultaneità della risoluzione (01 §9.7.1) e senza cadere nel minimo obbligatorio di 00 §13.6, che riporterebbe a uno qualunque danno calcolato con coefficiente nullo.
+
+Scelta. Il posto di un nemico è l'indice del suo contatto fra i contatti di quel reparto, letto dallo stato con cui il giro si apre; i posti si leggono una volta sola, prima di applicare qualunque danno, quindi valgono identici per tutti i contatti del giro e l'ordine interno di risoluzione — che il Motore percorre per identificatore — non li tocca. La resa di risposta è piena al posto zero, il valore dei dati al posto uno, e ASSENTE dal posto due: la funzione restituisce un opzionale vuoto e il Motore non calcola alcun danno, invece di calcolarne uno con coefficiente nullo.
+
+Motivazione. La distinzione fra «danno nullo» e «nessun danno» non è formale: 00 §13.6 impone il minimo di uno dove il troncamento potrebbe produrre zero, e un coefficiente nullo vi ricadrebbe, facendo passare un punto di danno dove la regola ne vuole nessuno. Il minimo esiste contro il troncamento, non contro l'assenza di un colpo.
+
+Conseguenze. Un contatto può produrre perdite in una direzione sola; le fasce descrittive lo esprimono già (02 §8.9.1) e nessun termine nuovo è servito. La soglia di disingaggio non scatta mai per chi non riceve risposta, il che è dichiarato in 01 §9.11.2.1.
+
+### RDA-57 — L'annientamento simultaneo è un interruttore nei vantaggi nascosti (01 §15.2.5)
+
+Problema. Con entrambe le parti annientate nello stesso giro, 01 §15.2.3 non designa lo sconfitto e 01 §15.2.2 vieta la parità. Il comportamento precedente lo assegnava al giocatore per l'ordine di un'enumerazione, cioè per caso.
+
+Opzioni. Introdurre un esito di parità; assegnare l'esito con una regola dichiarata.
+
+Scelta. La seconda, con il verso stabilito dal titolare — sconfitto è l'avversario — e la regola iscritta fra i vantaggi nascosti, quindi nel file `vantaggi-nascosti.json` come interruttore booleano e non nel codice.
+
+Motivazione. La parità avrebbe contraddetto 01 §15.2.2 e obbligato a rifare il resoconto, il ritorno in campagna dei punti da 15.4 a 15.6, che presuppongono un vincitore, e le registrazioni: molte conseguenze per un caso raro. La forma dell'interruttore discende da 03 §7.1 e 05 §12.5: un vantaggio nascosto deve essere disattivabile, altrimenti il programma di verifica misura probabilità irreali. Spento, l'esito torna a cadere sul giocatore: non è una terza regola ma il caso reale che la Verifica deve poter osservare.
+
+Conseguenze. L'annientamento di una sola parte non è toccato. Il caso simultaneo diventa un po' meno raro con il modificatore di accerchiamento, che accresce i danni: ragione in più perché sia normato anziché lasciato all'ordine di un'enumerazione.

@@ -409,7 +409,15 @@ final class ModificatoriDiScontroTest: XCTestCase {
               + "ne subiscono \(subito) in totale")
         // Prima dei modificatori i tre infliggevano 258 punti a giro (accertamento).
         XCTAssertGreaterThan(inflitto, 258, "l'accerchiamento accresce ciò che i tre infliggono")
-        XCTAssertEqual(subito, 416, "e non tocca ciò che l'accerchiato infligge a ciascuno")
+        // Il rovescio della medaglia non è più simmetrico: dal limite dei bersagli
+        // simultanei (01 §9.11) l'accerchiato risponde ad al massimo due, e i 416
+        // punti che restituiva alla data dell'accertamento sono ora molti meno.
+        // L'accerchiamento resta comunque un premio a chi stringe e mai a chi è stretto.
+        XCTAssertLessThan(subito, 416)
+        for indice in 0..<3 {
+            XCTAssertEqual(motore.concorrenti(contro: ids[indice], stato: stato).count, 1,
+                           "contro ciascun assalitore l'accerchiato resta isolato")
+        }
     }
 
     // MARK: - Nessun numero di gioco fuori dai dati (00 §13.1)

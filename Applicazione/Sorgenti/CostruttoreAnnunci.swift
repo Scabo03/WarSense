@@ -132,19 +132,23 @@ struct CostruttoreAnnunci {
 
     /// La voce di ingaggio, con lo stesso ordine fisso della voce di tiro, senza la
     /// vicinanza, che in mischia non esiste. L'efficacia vi compare come 02 §9.2.1
-    /// prescrive per ogni azione con bersaglio.
+    /// prescrive per ogni azione con bersaglio; in coda la risposta che il bersaglio
+    /// opporrebbe (01 §9.11.3, 02 §9.3.1): prima ciò che si infligge, poi ciò che si riceve.
     func voceIngaggio(da sciame: IdSciame, su bersaglio: Sciame) -> String? {
-        guard let anteprima = vista.anteprimaIngaggio(da: sciame, su: bersaglio.id) else { return nil }
+        guard let anteprima = vista.anteprimaIngaggio(da: sciame, su: bersaglio.id),
+              let risposta = anteprima.risposta else { return nil }
         let nome = testi.frase("unita." + bersaglio.archetipo).testo
         if anteprima.accerchiamento == .isolato {
             return testi.frase("pannello.ingaggia", nome, lettera(bersaglio),
                                bersaglio.posizione.riga, bersaglio.posizione.colonna,
-                               testi.termine(anteprima.efficacia.rawValue).testo).testo
+                               testi.termine(anteprima.efficacia.rawValue).testo,
+                               testi.termine(risposta.rawValue).testo).testo
         }
         return testi.frase("pannello.ingaggia_accerchiato", nome, lettera(bersaglio),
                            bersaglio.posizione.riga, bersaglio.posizione.colonna,
                            testi.termine(anteprima.efficacia.rawValue).testo,
-                           testi.termine(anteprima.accerchiamento.rawValue).testo).testo
+                           testi.termine(anteprima.accerchiamento.rawValue).testo,
+                           testi.termine(risposta.rawValue).testo).testo
     }
 
     // MARK: - Deck

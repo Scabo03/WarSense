@@ -179,6 +179,11 @@ public struct ParametriCombattimento: Codable, Hashable, Sendable {
     /// Numero massimo di concorrenti che il conteggio dell'accerchiamento considera
     /// (01 §9.10.2): oltre questo la maggiorazione non cresce più. Provvisorio.
     public let concorrentiMassimi: Int
+    /// Il malus del secondo bersaglio (01 §9.11), espresso come resa conservata:
+    /// un reparto già impegnato si difende di lato e rende questa frazione contro
+    /// il secondo nemico. Contro il primo rende per intero, dal terzo non risponde
+    /// affatto. Provvisorio.
+    public let resaControSecondoBersaglio: Scalato
     enum CodingKeys: String, CodingKey {
         case efficaciaMinima = "efficacia_minima"
         case sogliaPocoEfficace = "soglia_poco_efficace"
@@ -189,6 +194,7 @@ public struct ParametriCombattimento: Codable, Hashable, Sendable {
         case fasciaVicinanzaRavvicinatoFino = "fascia_vicinanza_ravvicinato_fino"
         case passoAccerchiamento = "passo_accerchiamento"
         case concorrentiMassimi = "concorrenti_massimi"
+        case resaControSecondoBersaglio = "resa_contro_secondo_bersaglio"
     }
 }
 
@@ -218,9 +224,15 @@ public struct VantaggiNascosti: Codable, Hashable, Sendable {
     public let ritirataAvversariaSoloUltimaRiga: Bool
     /// Riduzione della propensione alla ritirata dell'avversario (01 §13.2).
     public let riduzionePropensioneRitirataAvversaria: Scalato
+    /// L'annientamento simultaneo non si risolve a sfavore del giocatore (01 §13.2,
+    /// §15.2.5): quando entrambe le parti restano senza nulla nello stesso giro,
+    /// sconfitto è l'avversario. A falso vale il comportamento opposto, che esiste
+    /// soltanto perché il programma di verifica misuri le probabilità reali (05 §12.5).
+    public let annientamentoSimultaneoAlGiocatore: Bool
     enum CodingKeys: String, CodingKey {
         case ritirataAvversariaSoloUltimaRiga = "ritirata_avversaria_solo_ultima_riga"
         case riduzionePropensioneRitirataAvversaria = "riduzione_propensione_ritirata_avversaria"
+        case annientamentoSimultaneoAlGiocatore = "annientamento_simultaneo_al_giocatore"
     }
 }
 

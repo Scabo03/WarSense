@@ -42,17 +42,13 @@ In fase A un'unica Sessione serve entrambe le parti (il collaudo guida anche l'a
 
 Il pannello della cella è l'avviso di sistema (RDA-49). Al tocco di una voce l'avviso si congeda DA SOLO, e la chiusura della voce corre a congedo già avvenuto o in corso: un congedo incondizionato dentro `chiudiPannello` colpiva allora la schermata dello scontro stessa, riportando all'avvio — per chi ascolta, indistinguibile da un riavvio dell'applicazione (il primo difetto bloccante della prova su dispositivo). Regola realizzativa: la chiusura del pannello congeda soltanto un pannello ancora presentato e non già in congedo; altrimenti ripristina direttamente fuoco e azione. La sequenza reale del tocco è riprodotta da `PannelloAzioniTest` (02 §9.2.1).
 
-## P6 — Punto aperto: chi è sconfitto quando l'annientamento è simultaneo
+## P6 — CHIUSO: chi è sconfitto quando l'annientamento è simultaneo
 
-Emerso dall'accertamento sugli esiti degli scontri (build 6), non da una prova fallita: è il solo punto in cui le due parti non sono trattate allo stesso modo.
+Aperto dall'accertamento sugli esiti degli scontri (build 6), chiuso dal titolare nella tranche successiva.
 
-**Che cosa non è normato.** 01 §15.2.3 chiude la battaglia «quando uno dei due è stato annientato» e 01 §15.2.2 esclude gli esiti in parità, ma nessuno dei due punti dice che cosa accada quando l'ultimo reparto di ciascuna parte cade nel medesimo giro di mischia — caso raggiungibile, e reso un poco più probabile dall'accerchiamento di 01 §9.10.2, che accresce i danni.
+**Che cosa non era normato.** 01 §15.2.3 chiudeva la battaglia «quando uno dei due è stato annientato» e 01 §15.2.2 escludeva la parità, ma nessuno dei due diceva che cosa accada quando l'ultimo reparto di ciascuna parte cade nel medesimo giro. La realizzazione lo risolveva per l'ordine di un'enumerazione, e sempre a sfavore del giocatore.
 
-**Come si comporta oggi.** La verifica delle condizioni di chiusura esamina le due parti in ordine fisso e dichiara sconfitta la prima che si trova senza nulla in campo e senza nulla nel mazzo: essendo il giocatore il primo dell'ordine, in caso di annientamento simultaneo risulta sempre sconfitto lui. Il comportamento è deterministico e riproducibile, ma discende dall'ordine di un'enumerazione e non da una decisione di progetto.
-
-**Che cosa si è fatto e che cosa no.** Si è fissato il comportamento con una prova dedicata (`AccertamentoScontriTest.test_01_15_2_3_annientamento_simultaneo_esito_deterministico_e_dichiarato`), così che non possa cambiare in silenzio. NON si è cambiato quale parte risulti sconfitta: scegliere fra il giocatore, l'avversario e una terza via è una decisione di progetto che spetta al titolare, e prenderla qui significherebbe deciderla al suo posto. Non è stata registrata fra i vantaggi nascosti di 01 §13.2 perché va contro il giocatore e non a suo favore.
-
-**Che cosa serve dal titolare.** Una riga in 01 §15.2.3 che dichiari l'esito del caso simultaneo. Fino ad allora vale il comportamento fissato dalla prova.
+**Come è stato chiuso.** Il titolare ha stabilito che l'annientamento simultaneo non può risolversi a sfavore del giocatore. Fra le due strade previste — un esito di parità oppure l'assegnazione — si è scelta l'assegnazione, perché la parità avrebbe contraddetto 01 §15.2.2 e obbligato a rifare resoconto, ritorno in campagna e registrazioni, mentre l'assegnazione tocca una riga di regola. La regola è ora 01 §15.2.5, è iscritta fra i vantaggi nascosti (01 §13.2, 03 §7.2) e vive nei dati come interruttore disattivabile dal programma di verifica (RDA-57). Coperta da tre prove: l'esito assegnato, l'interruttore spento, e l'annientamento di una sola parte lasciato invariato.
 
 ## P7 — Precisazione: l'efficacia entra anche nella voce di ingaggio
 

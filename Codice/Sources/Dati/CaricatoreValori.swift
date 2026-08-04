@@ -169,5 +169,12 @@ public enum CaricatoreValori {
               combattimento.concorrentiMassimi >= 2 else {
             throw ErroreDati(chiave: "errore.dati.valore_non_positivo", file: "combattimento.json")
         }
+        // La resa contro il secondo bersaglio è una riduzione: sta fra zero escluso
+        // e l'unità esclusa (01 §9.11). A uno il malus sparirebbe, a zero la
+        // condizione ridotta si confonderebbe con l'assenza di risposta.
+        guard combattimento.resaControSecondoBersaglio > .zero,
+              combattimento.resaControSecondoBersaglio < .uno else {
+            throw ErroreDati(chiave: "errore.dati.soglia_fuori_intervallo", file: "combattimento.json")
+        }
     }
 }

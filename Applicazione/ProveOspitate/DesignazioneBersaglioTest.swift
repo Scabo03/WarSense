@@ -140,6 +140,71 @@ final class DesignazioneBersaglioTest: XCTestCase {
                       "il tiratore che tiene il bersaglio sotto tiro si vede nell'annuncio")
     }
 
+    // MARK: - Risposta del bersaglio (01 §9.11.3, 02 §4.4.5)
+
+    /// La voce di ingaggio dichiara SEMPRE quale risposta il bersaglio opporrebbe,
+    /// e i tre termini si succedono man mano che il bersaglio viene impegnato:
+    /// risposta piena, risposta di lato, nessuna risposta.
+    func test_01_9_11_3_la_voce_di_ingaggio_dichiara_sempre_la_risposta() throws {
+        let bersaglio = Cella(riga: 5, colonna: 5)
+        // I vicini di (5,5): (5,4), (5,6), (4,4), (4,5), (6,4), (6,5).
+        let poste = [Cella(riga: 6, colonna: 5), Cella(riga: 6, colonna: 4),
+                     Cella(riga: 5, colonna: 4), Cella(riga: 5, colonna: 6)]
+        var termini: [String] = []
+        // Con zero, uno e due nemici già a contatto, chi designa riceverebbe
+        // rispettivamente risposta piena, ridotta e nessuna.
+        for giaImpegnati in 0...2 {
+            var (stato, ids) = try campo(
+                (0...giaImpegnati).map { (Parte.giocatore, "fanteria_pesante",
+                                          TipoProtezione.antiSaturazione, poste[$0]) }
+                + [(.avversario, "guardia_elite", .antiSaturazione, bersaglio)])
+            let idBersaglio = ids.removeLast()
+            // Il designante è l'ULTIMO dell'elenco: gli altri hanno già ingaggiato.
+            let designante = ids.removeLast()
+            for id in ids {
+                stato = motore.applica(ComandoBattaglia.ingaggia(sciame: id, bersaglio: idBersaglio),
+                                       parte: Parte.giocatore, stato: stato).0
+            }
+            let voce = try XCTUnwrap(costruttore(stato).voceIngaggio(
+                da: designante, su: stato.sciami[idBersaglio]!))
+            let atteso = ambiente.testi.termine(
+                motore.rispostaAttesa(ingaggiando: idBersaglio, stato: stato).rawValue).testo
+            XCTAssertTrue(voce.contains(atteso),
+                          "con \(giaImpegnati) già a contatto la voce dichiara «\(atteso)»: \(voce)")
+            XCTAssertFalse(voce.contains(Testi.segnaposto), "chiave irrisolta: \(voce)")
+            termini.append(atteso)
+        }
+        XCTAssertEqual(Set(termini).count, TipoRisposta.allCases.count,
+                       "i tre termini si succedono davvero: \(termini)")
+        // La condizione ordinaria si annuncia anch'essa, in deroga dichiarata a 02 §8.7:
+        // il silenzio non sarebbe distinguibile dal non aver sentito (01 §9.11.3).
+        XCTAssertEqual(termini[0], ambiente.testi.termine(TipoRisposta.piena.rawValue).testo)
+    }
+
+    /// I tre termini sono distinti l'uno dall'altro: sono segnali, non frasi (02 §4.1).
+    func test_02_4_4_5_i_tre_termini_della_risposta_sono_distinti() throws {
+        let termini = TipoRisposta.allCases.map { ambiente.testi.termine($0.rawValue).testo }
+        XCTAssertEqual(Set(termini).count, termini.count, "nessun termine ripetuto: \(termini)")
+        for termine in termini {
+            XCTAssertFalse(termine.isEmpty)
+            XCTAssertNil(termine.rangeOfCharacter(from: .decimalDigits), "nessuna cifra: \(termine)")
+        }
+    }
+
+    /// Il tiro non porta la risposta: la risposta è di mischia e il tiro non ne
+    /// provoca alcuna (02 §9.3.1).
+    func test_02_9_3_1_la_voce_di_tiro_non_porta_la_risposta() throws {
+        let (stato, ids) = try campo([
+            (.giocatore, "tiratori", .antiSaturazione, Cella(riga: 9, colonna: 5)),
+            (.avversario, "fanteria_pesante", .antiPerforazione, Cella(riga: 8, colonna: 5)),
+        ])
+        let voce = try XCTUnwrap(costruttore(stato).voceTiro(da: ids[0], su: stato.sciami[ids[1]]!))
+        for risposta in TipoRisposta.allCases {
+            XCTAssertFalse(voce.contains(ambiente.testi.termine(risposta.rawValue).testo),
+                           "la voce di tiro non dichiara risposte: \(voce)")
+        }
+    }
+
     // MARK: - Ordine fisso delle informazioni (02 §3.8, §9.2.1)
 
     /// L'ordine è dichiarato e identico nelle due voci: bersaglio, efficacia,
@@ -166,6 +231,15 @@ final class DesignazioneBersaglioTest: XCTestCase {
             XCTAssertLessThan(posizioneEfficacia, posizioneStretto,
                               "poi l'efficacia, infine i modificatori: \(voce)")
         }
+        // Nella voce di ingaggio la risposta chiude la frase: prima ciò che si
+        // infligge, poi ciò che si riceve (02 §9.3.1).
+        let ingaggio = try XCTUnwrap(c.voceIngaggio(da: ids[0], su: bersaglio))
+        let risposta = ambiente.testi.termine(
+            motore.rispostaAttesa(ingaggiando: bersaglio.id, stato: stato).rawValue).testo
+        let posizioneRisposta = try XCTUnwrap(ingaggio.range(of: risposta)).lowerBound
+        let posizioneStretto = try XCTUnwrap(ingaggio.range(of: stretto)).lowerBound
+        XCTAssertLessThan(posizioneStretto, posizioneRisposta,
+                          "la risposta chiude la voce di ingaggio: \(ingaggio)")
     }
 
     /// Un'azione non ammissibile non produce alcuna voce: non si offre (02 §9.5).

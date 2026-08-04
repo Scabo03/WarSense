@@ -87,8 +87,8 @@
    perché quando il bersaglio è isolato la voce non deve dirlo (02 §8.7.1). */
 "pannello.tira_su" = "Tira su %@ %@ avversario, %@, %@";
 "pannello.tira_su_accerchiato" = "Tira su %@ %@ avversario, %@, %@, %@";
-"pannello.ingaggia" = "Ingaggia %@ %@ avversario in riga %d cella %d, %@";
-"pannello.ingaggia_accerchiato" = "Ingaggia %@ %@ avversario in riga %d cella %d, %@, %@";
+"pannello.ingaggia" = "Ingaggia %@ %@ avversario in riga %d cella %d, %@, %@";
+"pannello.ingaggia_accerchiato" = "Ingaggia %@ %@ avversario in riga %d cella %d, %@, %@, %@";
 "pannello.ritira_unita" = "Evacua questa unità: costa %d";
 "pannello.designa_movimento" = "Scegli la destinazione sulla griglia";
 "pannello.designazione_avviata" = "Scegli la cella di destinazione e attivala per confermare";

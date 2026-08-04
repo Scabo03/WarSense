@@ -77,6 +77,25 @@ public enum FasciaVicinanza: String, Codable, Hashable, Sendable, CaseIterable {
     case aRidosso = "vicinanza.a_ridosso"
 }
 
+/// La risposta che un bersaglio opporrebbe a chi lo ingaggia (01 §9.11, 02 §4.4.5).
+/// Un reparto risponde ad al massimo due nemici: al primo per intero, al secondo
+/// con la resa ridotta, dal terzo in poi per nulla. Tutte e tre le condizioni si
+/// annunciano, perché tutte e tre cambiano la decisione.
+public enum TipoRisposta: String, Codable, Hashable, Sendable, CaseIterable {
+    case piena = "risposta.piena"
+    case ridotta = "risposta.ridotta"
+    case nessuna = "risposta.nessuna"
+
+    /// La condizione che compete a chi occupa quel posto nella mischia del bersaglio.
+    public init(posto: Int) {
+        switch posto {
+        case 0: self = .piena
+        case 1: self = .ridotta
+        default: self = .nessuna
+        }
+    }
+}
+
 /// La fascia descrittiva dell'accerchiamento di un bersaglio (01 §9.10.2, 02 §4.4.5).
 /// `isolato` è la condizione ordinaria e non si annuncia (02 §8.7.1).
 public enum FasciaAccerchiamento: String, Codable, Hashable, Sendable, CaseIterable {

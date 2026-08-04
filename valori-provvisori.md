@@ -32,6 +32,9 @@ I quattro coefficienti dei due profili di protezione (para_saturazione/para_perf
 - `fascia_vicinanza_lontano_fino` (0.33) e `fascia_vicinanza_ravvicinato_fino` (0.66): soglie delle tre fasce descrittive della vicinanza, sulla prossimità che vale zero al limite della gittata e uno alla minima distanza (01 §9.10.1, 02 §4.4.5, 03 §5.15). PROVVISORIE: divisione in terzi, scelta perché con la gittata sei dei tiratori assegna due distanze a ciascuna fascia.
 - `passo_accerchiamento` (0.15): passo della maggiorazione di accerchiamento, composto col quadrato dei concorrenti eccedenti il primo (01 §9.10.2, 03 §5.16). Ne risultano 1,15 con due concorrenti, 1,60 con tre e 2,35 con quattro. PROVVISORIO; grandezza critica 03 §6.10, seconda misura.
 - `concorrenti_massimi` (4): tetto dei concorrenti conteggiati (01 §9.10.2, 03 §5.16). PROVVISORIO, ancorato al «tre o quattro» del titolare.
+- `resa_contro_secondo_bersaglio` (0.5): il malus del secondo bersaglio, espresso come resa conservata (01 §9.11, 03 §5.17). Contro il primo la resa è piena, dal terzo non c'è risposta: non esistono altre voci, perché il numero massimo di nemici cui si risponde è una regola e non un valore. PROVVISORIO. Vincolo di validazione: strettamente fra zero e uno.
+
+PROPOSTA DI REVISIONE NON APPLICATA, dalla misura dell'effetto congiunto (03 §6.10.1 e §6.10.2): con il limite dei bersagli in vigore, `passo_accerchiamento` a 0.15 porta tre assalitori ad annientare il bersaglio in un solo giro. Proposto 0.08 (dà 1,08 a due concorrenti, 1,32 a tre, 1,72 a quattro). Non applicato: i valori sono taratura e la scelta è del titolare.
 
 ## caratteristiche-campo.json
 
@@ -50,6 +53,7 @@ I cinque parametri di carattere dei due ufficiali di prova (propensione all'atta
 
 - Ritirata avversaria dalla sola ultima riga: FISSATO — 01 §13.2.
 - Riduzione della propensione alla ritirata avversaria (0.3): PROVVISORIO — «molto bassa» di 01 §13.2, misura da tarare (03 §7).
+- `annientamento_simultaneo_al_giocatore` (vero): FISSATO — 01 §15.2.5, decisione del titolare. Non è una misura ma un interruttore: acceso, sconfitto è l'avversario; spento, l'esito torna al giocatore ed è la forma in cui la Verifica misura il caso reale (05 §12.5, RDA-57).
 
 ## scenari.json — PROVVISORI
 

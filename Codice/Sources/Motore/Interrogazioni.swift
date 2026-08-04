@@ -86,6 +86,10 @@ public struct VistaBattaglia: Sendable {
         /// Presente per il solo tiro: la mischia non ha distanza da percorrere.
         public let vicinanza: FasciaVicinanza?
         public let accerchiamento: FasciaAccerchiamento
+        /// Presente per il solo ingaggio (01 §9.11.3): la risposta che il bersaglio
+        /// opporrebbe a chi lo ingaggia adesso. Il tiro non ne riceve alcuna, poiché
+        /// la risposta è di mischia.
+        public let risposta: TipoRisposta?
     }
 
     /// L'anteprima di un tiro, se il comando è ammissibile; altrimenti niente.
@@ -102,7 +106,8 @@ public struct VistaBattaglia: Sendable {
                 distanza: stato.griglia.distanza(sciame.posizione, bersaglio.posizione),
                 gittata: motore.gittataEffettiva(archetipo.gittata, stato: stato)),
             accerchiamento: motore.fasciaAccerchiamento(
-                concorrenti: motore.concorrenti(contro: bersaglioId, stato: stato).count))
+                concorrenti: motore.concorrenti(contro: bersaglioId, stato: stato).count),
+            risposta: nil)
     }
 
     /// L'anteprima di un ingaggio, se il comando è ammissibile; altrimenti niente.
@@ -117,7 +122,8 @@ public struct VistaBattaglia: Sendable {
                 protezione: motore.valori.protezioni[bersaglio.protezione]!),
             vicinanza: nil,
             accerchiamento: motore.fasciaAccerchiamento(
-                concorrenti: motore.concorrenti(contro: bersaglioId, stato: stato).count))
+                concorrenti: motore.concorrenti(contro: bersaglioId, stato: stato).count),
+            risposta: motore.rispostaAttesa(ingaggiando: bersaglioId, stato: stato))
     }
 
     /// L'informazione di stato della battaglia (02 §6.4): budget residuo, turno,

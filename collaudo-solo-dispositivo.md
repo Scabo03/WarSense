@@ -50,18 +50,23 @@ e ciò che resta fuori è scritto qui.
 
 ## Che cosa provare per primo, dopo questa build
 
-1. **La lunghezza delle voci di designazione.** È la novità che rischia di più.
-   La voce di tiro dice ora nome, lettera, efficacia, vicinanza e — se il bersaglio
-   non è isolato — accerchiamento; quella di ingaggio dice nome, lettera, posizione,
-   efficacia e accerchiamento. Il collaudo accerta il contenuto e l'ordine
-   (`DesignazioneBersaglioTest`), non quanto siano faticose da ascoltare in un
-   pannello con più bersagli. Solo l'orecchio può dire se la frase sia diventata
-   troppo lunga e se l'ordine — bersaglio, efficacia, modificatori — sia quello
-   giusto; se non lo è, si cambia in 02 §9.3.1 come modifica unica e globale.
-2. **La distinguibilità dei termini nuovi.** «Stretto» e «circondato» da una parte,
-   «a distanza», «ravvicinato» e «a ridosso» dall'altra: vanno sentiti alla velocità
-   di lettura vera, dove parole simili si confondono. Non sono confondibili sulla
-   carta; lo sono all'ascolto veloce solo il dispositivo lo dice.
+1. **La lunghezza delle voci di designazione.** È la novità che rischia di più, ed
+   è cresciuta ancora. La voce di tiro dice nome, lettera, efficacia, vicinanza e —
+   se il bersaglio non è isolato — accerchiamento; quella di ingaggio dice nome,
+   lettera, posizione, efficacia, eventuale accerchiamento e SEMPRE la risposta
+   attesa. Il collaudo accerta contenuto e ordine (`DesignazioneBersaglioTest`), non
+   quanto siano faticose da ascoltare in un pannello con più bersagli. Solo
+   l'orecchio può dire se la frase sia diventata troppo lunga e se l'ordine —
+   bersaglio, efficacia, ciò che infliggo, ciò che ricevo — sia quello giusto; se
+   non lo è, si cambia in 02 §9.3.1 come modifica unica e globale. Da valutare in
+   particolare se la risposta debba tacere quando è piena, cioè nella condizione
+   ordinaria: oggi si annuncia sempre, per la ragione dichiarata in 01 §9.11.3.
+2. **La distinguibilità dei termini nuovi.** Tre insiemi ormai: «stretto» e
+   «circondato»; «a distanza», «ravvicinato» e «a ridosso»; «risposta piena»,
+   «risposta di lato» e «nessuna risposta». Vanno sentiti alla velocità di lettura
+   vera, dove parole simili si confondono — e i primi due termini della risposta
+   condividono la parola d'apertura. Non sono confondibili sulla carta; se lo sono
+   all'ascolto veloce, solo il dispositivo lo dice.
 3. Dare ordini: attivare una propria truppa, scegliere una voce del pannello
    (tiro, ingaggio, designazione del movimento) e verificare che l'ordine venga
    eseguito e che si resti nello scontro, con il fuoco sulla cella dell'unità.

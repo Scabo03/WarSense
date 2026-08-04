@@ -160,6 +160,42 @@ public struct MotoreBattaglia: Sendable {
         coefficienteAccerchiamento(concorrenti: concorrenti(contro: id, stato: stato).count)
     }
 
+    // MARK: - Limite dei bersagli simultanei (01 §9.11)
+
+    /// Il posto che un nemico occupa nella mischia di un reparto, contato dall'ordine
+    /// di arrivo dei contatti e non dalla potenza né dalla posizione (01 §9.11.1).
+    /// Zero è il primo arrivato, uno il secondo, due e oltre quelli che restano fuori.
+    /// L'elenco dei contatti conserva l'ordine di arrivo per costruzione: si appende
+    /// all'ingaggio e si rimuove senza riordinare, quindi il posto si ricava dal solo
+    /// stato ed è indipendente dall'ordine in cui i danni si applicano.
+    public func postoInMischia(di id: IdSciame, contro nemico: IdSciame,
+                               stato: StatoBattaglia) -> Int? {
+        stato.contatti
+            .filter { $0.coinvolge(id) }
+            .firstIndex { $0.coinvolge(nemico) }
+    }
+
+    /// La resa con cui un reparto risponde al nemico che occupa quel posto (01 §9.11):
+    /// piena al primo, ridotta dal malus dei dati al secondo, nessuna dal terzo in poi.
+    /// Il caso senza risposta restituisce niente e non un coefficiente nullo, perché
+    /// un danno calcolato con coefficiente nullo risalirebbe al minimo di 00 §13.6:
+    /// qui il danno non è ridotto a zero, semplicemente non c'è.
+    public func resaDiRisposta(posto: Int) -> Scalato? {
+        switch posto {
+        case 0: return .uno
+        case 1: return valori.combattimento.resaControSecondoBersaglio
+        default: return nil
+        }
+    }
+
+    /// La condizione di risposta che il designante riceverebbe ingaggiando quel
+    /// bersaglio (01 §9.11.3): dipende da quanti nemici il bersaglio già fronteggia,
+    /// poiché chi sopraggiunge occupa il posto successivo.
+    public func rispostaAttesa(ingaggiando bersaglio: IdSciame, stato: StatoBattaglia) -> TipoRisposta {
+        let occupati = stato.contatti.filter { $0.coinvolge(bersaglio) }.count
+        return TipoRisposta(posto: occupati)
+    }
+
     /// La fascia descrittiva di un danno (01 §9.7.2): proporzione sulla consistenza
     /// del colpito immediatamente prima dell'applicazione, soglie dai valori (03 §5.14).
     public func fascia(danno: Int64, consistenzaPrima: Int64) -> FasciaPerdite {
@@ -502,12 +538,25 @@ public struct MotoreBattaglia: Sendable {
         // il medesimo per tutti i contatti, e l'ordine non lo tocca (01 §9.10.2).
         for contatto in contattiOrdinati {
             guard let a = stato.sciami[contatto.primo], let b = stato.sciami[contatto.secondo] else { continue }
-            let dannoAB = danno(da: a, offesa: archetipo(a.archetipo).offesaMischia, a: b,
-                               coefficiente: accerchiamento(su: contatto.secondo, stato: stato),
-                               stato: stato)
-            let dannoBA = danno(da: b, offesa: archetipo(b.archetipo).offesaMischia, a: a,
-                               coefficiente: accerchiamento(su: contatto.primo, stato: stato),
-                               stato: stato)
+            // Ciascuno rende secondo il posto che l'altro occupa nella PROPRIA mischia
+            // (01 §9.11): il posto viene dallo stato d'ingresso del giro, quindi è lo
+            // stesso per tutti i contatti e l'ordine di risoluzione non lo tocca.
+            // Chi resta oltre il secondo posto non infligge nulla: nessun danno da
+            // calcolare, non un danno ridotto a zero (01 §9.11.2).
+            let dannoAB = postoInMischia(di: contatto.primo, contro: contatto.secondo, stato: stato)
+                .flatMap(resaDiRisposta(posto:))
+                .map { resa in
+                    danno(da: a, offesa: archetipo(a.archetipo).offesaMischia, a: b,
+                          coefficiente: resa * accerchiamento(su: contatto.secondo, stato: stato),
+                          stato: stato)
+                } ?? 0
+            let dannoBA = postoInMischia(di: contatto.secondo, contro: contatto.primo, stato: stato)
+                .flatMap(resaDiRisposta(posto:))
+                .map { resa in
+                    danno(da: b, offesa: archetipo(b.archetipo).offesaMischia, a: a,
+                          coefficiente: resa * accerchiamento(su: contatto.primo, stato: stato),
+                          stato: stato)
+                } ?? 0
             danni.append(DannoCalcolato(bersaglio: contatto.secondo, danno: dannoAB))
             danni.append(DannoCalcolato(bersaglio: contatto.primo, danno: dannoBA))
             // Le fasce sulla consistenza prima dell'applicazione (01 §9.7.2).
@@ -581,15 +630,25 @@ public struct MotoreBattaglia: Sendable {
         let f = formato(stato)
 
         // Annientamento: nessuno sciame in campo e nessun esemplare nel deck.
-        for parte in Parte.allCases {
-            let inCampo = stato.sciami.values.contains { $0.parte == parte }
-            let nelDeck = (stato.deck[parte] ?? []).contains { $0.esemplari > 0 }
-            if !inCampo && !nelDeck {
-                let esito = EsitoBattaglia(sconfitto: parte, modo: .annientamento, turni: stato.giro)
-                stato.esito = esito
-                eventi.append(.battagliaConclusa(esito))
-                return
+        let annientate = Parte.allCases.filter { parte in
+            !stato.sciami.values.contains { $0.parte == parte }
+                && !(stato.deck[parte] ?? []).contains { $0.esemplari > 0 }
+        }
+        if !annientate.isEmpty {
+            // Annientamento simultaneo (01 §15.2.5): la parità non esiste (01 §15.2.2)
+            // e l'esito va assegnato. Non può risolversi a sfavore del giocatore: è
+            // un vantaggio nascosto dichiarato (01 §13.2), e come tale sta nei dati
+            // perché il programma di verifica possa disattivarlo (05 §12.5).
+            let sconfitto: Parte
+            if annientate.count == Parte.allCases.count {
+                sconfitto = valori.vantaggi.annientamentoSimultaneoAlGiocatore ? .avversario : .giocatore
+            } else {
+                sconfitto = annientate[0]
             }
+            let esito = EsitoBattaglia(sconfitto: sconfitto, modo: .annientamento, turni: stato.giro)
+            stato.esito = esito
+            eventi.append(.battagliaConclusa(esito))
+            return
         }
 
         // Fine della ritirata combattuta: l'avanzante raggiunge la riga di soglia (01 §10.3),

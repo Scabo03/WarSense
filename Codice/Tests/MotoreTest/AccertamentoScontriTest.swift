@@ -377,12 +377,18 @@ final class AccertamentoScontriTest: XCTestCase {
               + "\(controAntiPerforazione) punti, contro anti-saturazione \(controAntiSaturazione) punti")
     }
 
-    /// Osservazione 3. Il reparto accerchiato combatte a piena capacità in CIASCUNO
-    /// dei contatti che lo stringono: la sua resa complessiva si moltiplica per il
-    /// numero degli assalitori, mentre quella degli assalitori resta la propria.
-    /// Non è un difetto — 01 §9.7 non prevede alcuna divisione della resa — ma è
-    /// la ragione misurata per cui tre reparti contro uno non prevalgono.
-    func test_01_9_7_il_reparto_stretto_da_tre_rende_per_tre() throws {
+    /// Osservazione 3. Alla data dell'accertamento il reparto accerchiato combatteva
+    /// a piena capacità in CIASCUNO dei contatti che lo stringevano: tre assalitori
+    /// gli infliggevano 258 punti a giro e ne subivano 416, cioè uno scambio in
+    /// perdita. Non era un difetto — 01 §9.7 non prevedeva alcuna divisione della
+    /// resa — ma era la ragione misurata per cui tre contro uno non prevaleva.
+    ///
+    /// Il titolare ha poi stabilito il limite dei bersagli simultanei (01 §9.11),
+    /// che sostituisce quel comportamento. Questa prova resta a presidiare la
+    /// misura nella configurazione di riferimento e a fissare il verso del
+    /// cambiamento: lo scambio, prima in perdita, deve ora concludersi a favore
+    /// dei tre. Il dettaglio della nuova regola sta in `LimiteBersagliTest`.
+    func test_01_9_11_il_reparto_stretto_da_tre_non_rende_piu_per_tre() throws {
         let bersaglio = Cella(riga: 5, colonna: 5)
         let poste = [Cella(riga: 6, colonna: 4), Cella(riga: 6, colonna: 5), Cella(riga: 5, colonna: 4)]
         var (stato, ids) = try campo([
@@ -404,7 +410,13 @@ final class AccertamentoScontriTest: XCTestCase {
               + "(\(subiti[ids[0]] ?? 0) ai tiratori, \(subiti[ids[1]] ?? 0) alla fanteria leggera, "
               + "\(subiti[ids[2]] ?? 0) alla fanteria pesante)")
         XCTAssertGreaterThan(subitoDaiTre, 0)
-        // Il fatto strutturale: la resa dell'accerchiato non si divide fra i contatti.
+        XCTAssertGreaterThan(inflittoDaiTre, subitoDaiTre,
+                             "con il limite dei bersagli lo scambio si è rovesciato a favore dei tre")
+        XCTAssertLessThan(subitoDaiTre, 416,
+                          "l'accerchiato non rende più tre volte: alla data dell'accertamento erano 416")
+
+        // Il fatto che è cambiato: l'accerchiato non colpisce più ciascun assalitore
+        // come se fosse solo. Il secondo arrivato riceve la resa ridotta e il terzo nulla.
         var (uno, idsUno) = try campo([
             Reparto(.giocatore, "fanteria_leggera", .antiSaturazione, poste[1]),
             Reparto(.avversario, "fanteria_pesante", .antiSaturazione, bersaglio),
@@ -413,25 +425,19 @@ final class AccertamentoScontriTest: XCTestCase {
                                         parte: .giocatore, stato: uno)
         uno = nuovo
         let controUnoSolo = dannoDelleMischie(uno)[idsUno[0]] ?? 0
-        XCTAssertEqual(subiti[ids[1]] ?? 0, controUnoSolo,
-                       "l'accerchiato colpisce ciascun assalitore come se fosse solo")
+        XCTAssertLessThan(subiti[ids[1]] ?? 0, controUnoSolo,
+                          "il secondo arrivato è contrastato di lato, non fronteggiato (01 §9.11)")
+        XCTAssertEqual(subiti[ids[2]] ?? -1, 0, "il terzo arrivato non riceve risposta alcuna")
     }
 
     // MARK: - L'unica asimmetria fra le parti trovata dall'accertamento
 
-    /// Annientamento simultaneo. Quando l'ultimo reparto di ciascuna parte cade nel
-    /// medesimo giro di mischia, 01 §15.2.3 non dice chi abbia perso: dichiara che
-    /// la battaglia si conclude «quando uno dei due è stato annientato» e 01 §15.2.2
-    /// esclude gli esiti in parità, ma il caso simultaneo non è normato. La
-    /// realizzazione lo risolve oggi in modo deterministico e sempre a sfavore del
-    /// giocatore, per l'ordine in cui le due parti vengono esaminate.
-    ///
-    /// È l'unica asimmetria fra le parti che l'accertamento ha trovato, ed è l'unica
-    /// non registrata fra i vantaggi nascosti di 01 §13.2 — dove peraltro non
-    /// starebbe, perché va contro il giocatore e non a suo favore. La prova la fissa
-    /// perché non cambi in silenzio; quale delle due parti debba risultare sconfitta
-    /// è decisione del titolare e non si prende qui (registro degli scostamenti, P6).
-    func test_01_15_2_3_annientamento_simultaneo_esito_deterministico_e_dichiarato() throws {
+    /// Annientamento simultaneo (01 §15.2.5, chiuso dal titolare). Quando l'ultimo
+    /// reparto di ciascuna parte cade nel medesimo giro, la parità non esiste
+    /// (01 §15.2.2) e l'esito va assegnato: non può risolversi a sfavore del
+    /// giocatore, ed è quindi un vantaggio nascosto dichiarato (01 §13.2), che
+    /// come tale vive nei dati perché la Verifica possa disattivarlo (05 §12.5).
+    func test_01_15_2_5_annientamento_simultaneo_assegnato_al_giocatore() throws {
         let vuoto = ScenarioBattaglia.ElementoScenario(
             archetipo: "fanteria_leggera", protezione: .antiSaturazione, atomi: 5, esemplari: 0)
         let scenario = ScenarioBattaglia(formato: "cento", caratteristica: "campo_aperto",
@@ -457,7 +463,87 @@ final class AccertamentoScontriTest: XCTestCase {
 
         XCTAssertTrue(stato.sciami.isEmpty, "il campo resta vuoto: entrambi disfatti nello stesso giro")
         XCTAssertEqual(stato.esito?.modo, .annientamento)
-        XCTAssertEqual(stato.esito?.sconfitto, .giocatore,
-                       "comportamento odierno, deterministico e da sottoporre al titolare (P6)")
+        XCTAssertEqual(stato.esito?.sconfitto, .avversario,
+                       "l'annientamento simultaneo non si risolve a sfavore del giocatore (01 §15.2.5)")
+        XCTAssertTrue(valori.vantaggi.annientamentoSimultaneoAlGiocatore,
+                      "è un vantaggio nascosto e sta nei dati, non nel codice (01 §13.2, 03 §7.2)")
+    }
+
+    /// Il vantaggio è disattivabile, perché il programma di verifica misuri le
+    /// probabilità reali (05 §12.5, 03 §7.1): spento, l'esito simultaneo torna
+    /// a cadere sul giocatore. Il caso NON simultaneo non ne è toccato in alcun modo.
+    func test_05_12_5_il_vantaggio_dell_annientamento_simultaneo_e_disattivabile() throws {
+        // Il vantaggio si spegne come lo spegnerà la Verifica: sui file, in una
+        // cartella di valori alternativa (05 §12.1, §12.5), non con una scorciatoia
+        // di collaudo. Così la prova accerta anche che l'interruttore sia davvero
+        // nei dati e non nel codice.
+        func valoriCon(vantaggio acceso: Bool) throws -> ValoriDiGioco {
+            let cartella = FileManager.default.temporaryDirectory
+                .appendingPathComponent("valori-vantaggi-\(acceso)-\(UUID().uuidString)")
+            try FileManager.default.copyItem(at: Contenuti.valoriDiFabbrica, to: cartella)
+            addTeardownBlock { try? FileManager.default.removeItem(at: cartella) }
+            let file = cartella.appendingPathComponent("vantaggi-nascosti.json")
+            var voci = try JSONSerialization.jsonObject(with: Data(contentsOf: file)) as! [String: Any]
+            voci["annientamento_simultaneo_al_giocatore"] = acceso
+            try JSONSerialization.data(withJSONObject: voci).write(to: file)
+            return try CaricatoreValori.carica(da: cartella)
+        }
+
+        func esito(conVantaggio: Bool) throws -> Parte? {
+            let valoriProva = try valoriCon(vantaggio: conVantaggio)
+            XCTAssertEqual(valoriProva.vantaggi.annientamentoSimultaneoAlGiocatore, conVantaggio)
+            let motoreProva = MotoreBattaglia(valori: valoriProva)
+            let vuoto = ScenarioBattaglia.ElementoScenario(
+                archetipo: "fanteria_leggera", protezione: .antiSaturazione, atomi: 5, esemplari: 0)
+            let scenario = ScenarioBattaglia(formato: "cento", caratteristica: "campo_aperto",
+                                             primoOccupante: .giocatore, imboscata: false,
+                                             deckGiocatore: [vuoto], deckAvversario: [vuoto])
+            var stato = try FabbricaBattaglia.crea(scenario: scenario, valori: valoriProva).0
+            for (numero, parte, cella) in [(1, Parte.giocatore, Cella(riga: 6, colonna: 5)),
+                                           (2, Parte.avversario, Cella(riga: 5, colonna: 5))] {
+                let id = IdSciame(numero)
+                stato.sciami[id] = Sciame(id: id, parte: parte, archetipo: "fanteria_leggera",
+                                          protezione: .antiSaturazione, lettera: 1, atomiIniziali: 5,
+                                          serbatoio: 1, munizioni: 0, posizione: cella,
+                                          azioneSpesa: false, rinforzo: false)
+                stato.prossimoIdSciame = numero + 1
+                stato.forzeImpegnate[parte, default: 0] += 500
+            }
+            stato = motoreProva.applica(ComandoBattaglia.ingaggia(sciame: IdSciame(1), bersaglio: IdSciame(2)),
+                                        parte: Parte.giocatore, stato: stato).0
+            stato = motoreProva.applica(ComandoBattaglia.fineTurno, parte: Parte.giocatore, stato: stato).0
+            stato = motoreProva.applica(ComandoBattaglia.fineTurno, parte: Parte.avversario, stato: stato).0
+            return stato.esito?.sconfitto
+        }
+        XCTAssertEqual(try esito(conVantaggio: true), .avversario)
+        XCTAssertEqual(try esito(conVantaggio: false), .giocatore,
+                       "spento il vantaggio, la Verifica misura il caso reale")
+    }
+
+    /// L'annientamento di una sola parte non è toccato: chi resta senza nulla perde,
+    /// e il vantaggio non vi entra (01 §15.2.3).
+    func test_01_15_2_3_l_annientamento_di_una_sola_parte_resta_invariato() throws {
+        for perdente in Parte.allCases {
+            let vuoto = ScenarioBattaglia.ElementoScenario(
+                archetipo: "fanteria_leggera", protezione: .antiSaturazione, atomi: 5, esemplari: 0)
+            let pieno = ScenarioBattaglia.ElementoScenario(
+                archetipo: "fanteria_leggera", protezione: .antiSaturazione, atomi: 5, esemplari: 1)
+            let scenario = ScenarioBattaglia(
+                formato: "cento", caratteristica: "campo_aperto",
+                primoOccupante: .giocatore, imboscata: false,
+                deckGiocatore: [perdente == .giocatore ? vuoto : pieno],
+                deckAvversario: [perdente == .avversario ? vuoto : pieno])
+            var stato = try FabbricaBattaglia.crea(scenario: scenario, valori: valori).0
+            // Un solo reparto in campo, della parte che NON deve perdere.
+            let id = IdSciame(1)
+            stato.sciami[id] = Sciame(id: id, parte: perdente.avversaria, archetipo: "fanteria_leggera",
+                                      protezione: .antiSaturazione, lettera: 1, atomiIniziali: 5,
+                                      serbatoio: 500, munizioni: 0, posizione: Cella(riga: 5, colonna: 5),
+                                      azioneSpesa: false, rinforzo: false)
+            stato.prossimoIdSciame = 2
+            stato = motore.applica(.fineTurno, parte: .giocatore, stato: stato).0
+            XCTAssertEqual(stato.esito?.sconfitto, perdente)
+            XCTAssertEqual(stato.esito?.modo, .annientamento)
+        }
     }
 }

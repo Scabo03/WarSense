@@ -23,6 +23,11 @@
    ordinaria e non si annuncia, quindi non ha termine. */
 "accerchiamento.stretto" = "stretto";
 "accerchiamento.circondato" = "circondato";
+/* Risposta del bersaglio a chi lo ingaggia (01 §9.11, 02 §4.4.5): tutte e tre le
+   condizioni si annunciano, perché tutte e tre cambiano la decisione. */
+"risposta.piena" = "risposta piena";
+"risposta.ridotta" = "risposta di lato";
+"risposta.nessuna" = "nessuna risposta";
 "stagione.primavera" = "primavera";
 "stagione.estate" = "estate";
 "stagione.autunno" = "autunno";
