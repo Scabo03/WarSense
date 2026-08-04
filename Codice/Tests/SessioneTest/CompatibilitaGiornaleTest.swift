@@ -20,6 +20,7 @@ final class CompatibilitaGiornaleTest: XCTestCase {
         let righe = testo.split(separator: "\n")
         XCTAssertGreaterThanOrEqual(righe.count, 11, "un campione per ogni caso di voce")
         var casiComando = Set<String>()
+        var casiVoce = Set<String>()
         for riga in righe {
             let dati = Data(riga.utf8)
             let voce: RigaGiornale
@@ -35,12 +36,29 @@ final class CompatibilitaGiornaleTest: XCTestCase {
             if case .comando(_, let comando) = voce.voce {
                 casiComando.insert(etichettaCaso(comando))
             }
+            casiVoce.formUnion(try chiaviDiPrimoLivelloDellaVoce(dati))
         }
         // Ogni caso di comando oggi esistente ha un campione: se si aggiunge un caso
         // all'enumerativo senza aggiungere il campione, questa prova lo dichiara.
         let attesi: Set<String> = ["seleziona", "deseleziona", "piazza", "muovi", "tira",
                                    "ingaggia", "dichiaraResa", "ritiraUnita", "fineTurno"]
         XCTAssertEqual(casiComando, attesi, "casi di comando senza campione committato")
+
+        // I nomi dei casi di VOCE sono anch'essi formato di salvataggio: la codifica
+        // sintetizzata degli enumerativi con valori associati usa il NOME del caso
+        // come chiave, non la sua posizione. Rinominare un caso, o cambiarne la
+        // forma, rende illeggibili i giornali già scritti; AGGIUNGERE un caso non
+        // tocca gli altri, ed è ciò che la campagna fa. Questa prova fissa i nomi
+        // esistenti perché l'aggiunta resti un'aggiunta.
+        XCTAssertEqual(casiVoce, ["fondazione", "comando", "inizioTurno"],
+                       "un caso di VoceGiornale è stato rinominato o spostato: i salvataggi esistenti non si riaprono (00 §15)")
+    }
+
+    /// Le chiavi di primo livello dell'oggetto `voce`: il nome del caso codificato.
+    private func chiaviDiPrimoLivelloDellaVoce(_ dati: Data) throws -> Set<String> {
+        guard let radice = try JSONSerialization.jsonObject(with: dati) as? [String: Any],
+              let voce = radice["voce"] as? [String: Any] else { return [] }
+        return Set(voce.keys)
     }
 
     private func etichettaCaso(_ comando: ComandoBattaglia) -> String {
