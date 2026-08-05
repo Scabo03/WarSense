@@ -9,6 +9,22 @@ import UIKit
 final class TesseraDeck: UIControl {
     private let etichettaNome = UILabel()
     private let etichettaDettaglio = UILabel()
+    /// L'etichetta invisibile che RISERVA l'altezza dello stato più lungo.
+    ///
+    /// Il difetto che chiude: selezionando una tessera il suo valore guadagna il
+    /// termine «selezionato» (02 §8.2), la riga va a capo e la tessera cresceva di
+    /// diciotto punti. La colonna del deck cresceva con essa e la griglia, che le
+    /// cede spazio (RDA-50, scostamento S3), perdeva altrettanto dalla propria
+    /// porzione visibile — proprio fra il selezionare e il piazzare, e proprio sul
+    /// bordo inferiore, dove sta la zona di schieramento (01 §8.2.1). Le celle di
+    /// quella zona uscivano di vista mentre la cornice che l'accessibilità riporta
+    /// restava quella di prima, perché è la posizione nel CONTENUTO: chi toccava
+    /// dove la cella era annunciata non toccava la cella.
+    ///
+    /// La riserva non taglia nulla di ciò che si vede: il testo disegnato continua
+    /// a dire quanto la voce annuncia (00 §1.2), e l'altezza è quella che servirà,
+    /// non una costante — si adatta quindi alle taglie d'accessibilità.
+    private let etichettaDiRiserva = UILabel()
 
     override init(frame: CGRect) {
         super.init(frame: frame)
@@ -22,7 +38,29 @@ final class TesseraDeck: UIControl {
         etichettaDettaglio.adjustsFontForContentSizeCategory = true
         etichettaDettaglio.textColor = .secondaryLabel
         etichettaDettaglio.numberOfLines = 0
-        let colonna = UIStackView(arrangedSubviews: [etichettaNome, etichettaDettaglio])
+        etichettaDiRiserva.font = etichettaDettaglio.font
+        etichettaDiRiserva.adjustsFontForContentSizeCategory = true
+        etichettaDiRiserva.numberOfLines = 0
+        etichettaDiRiserva.alpha = 0
+        etichettaDiRiserva.isAccessibilityElement = false
+        // I due testi occupano lo stesso posto: il riquadro prende l'altezza del
+        // più alto, che è sempre quello di riserva.
+        let riquadroDettaglio = UIView()
+        riquadroDettaglio.isUserInteractionEnabled = false
+        for etichetta in [etichettaDiRiserva, etichettaDettaglio] {
+            etichetta.translatesAutoresizingMaskIntoConstraints = false
+            riquadroDettaglio.addSubview(etichetta)
+            NSLayoutConstraint.activate([
+                etichetta.topAnchor.constraint(equalTo: riquadroDettaglio.topAnchor),
+                etichetta.leadingAnchor.constraint(equalTo: riquadroDettaglio.leadingAnchor),
+                etichetta.trailingAnchor.constraint(equalTo: riquadroDettaglio.trailingAnchor),
+                etichetta.bottomAnchor.constraint(lessThanOrEqualTo: riquadroDettaglio.bottomAnchor),
+            ])
+        }
+        etichettaDiRiserva.bottomAnchor
+            .constraint(equalTo: riquadroDettaglio.bottomAnchor).isActive = true
+
+        let colonna = UIStackView(arrangedSubviews: [etichettaNome, riquadroDettaglio])
         colonna.axis = .vertical
         colonna.spacing = 2
         colonna.isUserInteractionEnabled = false
@@ -41,10 +79,19 @@ final class TesseraDeck: UIControl {
     }
     required init?(coder: NSCoder) { nil }
 
+    /// Il testo che la tessera DISEGNA, per il collaudo: deve dire quanto la voce
+    /// annuncia (00 §1.2), e nessuna correzione di disposizione può tagliarlo.
+    var dettaglioDisegnatoPerProva: String? { etichettaDettaglio.text }
+
     /// Aggiornamento sul posto (RDA-03): l'oggetto resta, cambiano le proprietà.
-    func aggiorna(nome: String, valore: String, selezionata: Bool, attiva: Bool) {
+    /// - Parameter valoreDiRiserva: il valore come sarebbe nello stato più lungo,
+    ///   cioè quello selezionato. Non si disegna e non si annuncia: serve soltanto
+    ///   a riservare l'altezza, così che selezionare non muova la disposizione.
+    func aggiorna(nome: String, valore: String, valoreDiRiserva: String,
+                  selezionata: Bool, attiva: Bool) {
         etichettaNome.text = nome
         etichettaDettaglio.text = valore
+        etichettaDiRiserva.text = valoreDiRiserva
         accessibilityLabel = nome
         accessibilityValue = valore
         isSelected = selezionata

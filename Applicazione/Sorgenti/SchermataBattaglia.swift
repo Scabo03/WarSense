@@ -211,6 +211,8 @@ final class SchermataBattaglia: UIViewController {
             let esemplari = stato.deck[.giocatore]?[tessera.tag].esemplari ?? 0
             tessera.aggiorna(nome: costruttore.nomeElementoDeck(indice: tessera.tag),
                              valore: costruttore.valoreElementoDeck(indice: tessera.tag),
+                             valoreDiRiserva: costruttore.valoreElementoDeck(
+                                indice: tessera.tag, comeSelezionato: true),
                              selezionata: stato.selezione[.giocatore] == tessera.tag,
                              attiva: esemplari > 0 && stato.esito == nil)
         }
@@ -524,6 +526,7 @@ final class SchermataBattaglia: UIViewController {
     /// La griglia come `VistaACaselle`: le prove del tocco diretto girano
     /// con lo stesso corpo sui due piani (02 §2.11, RDA-78).
     var grigliaPerProva: VistaACaselle { vistaGriglia }
+    var tesserePerProva: [TesseraDeck] { rigaDeck.arrangedSubviews.compactMap { $0 as? TesseraDeck } }
 }
 
 extension SchermataBattaglia: UIScrollViewDelegate {

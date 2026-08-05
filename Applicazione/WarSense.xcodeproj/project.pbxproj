@@ -25,6 +25,7 @@
 		873D9C045E99E55A19A8AC00 /* Servizi.swift in Sources */ = {isa = PBXBuildFile; fileRef = 47D2EC331332BE96EB5D410B /* Servizi.swift */; };
 		8C28A2B62F03F542DD08122D /* Contenuti in Frameworks */ = {isa = PBXBuildFile; productRef = 4EA3C58AA15BA2930E7F7E45 /* Contenuti */; };
 		939EB534A7DF2E8F28165724 /* SchermataMappaCampagna.swift in Sources */ = {isa = PBXBuildFile; fileRef = 33237A45EB1B4EBEA09B1769 /* SchermataMappaCampagna.swift */; };
+		94A9A556DB6F6992ED60E383 /* StabilitaDellaDisposizioneTest.swift in Sources */ = {isa = PBXBuildFile; fileRef = 026CC99253672C0BE5244297 /* StabilitaDellaDisposizioneTest.swift */; };
 		97001026DB01BF5F115E1088 /* Immagini.xcassets in Resources */ = {isa = PBXBuildFile; fileRef = 1D9A4053BF022DBABE96D5E9 /* Immagini.xcassets */; };
 		9834F71661D44043584E4993 /* PartitaCorrente.swift in Sources */ = {isa = PBXBuildFile; fileRef = 9EF7773BD1ED816307203E97 /* PartitaCorrente.swift */; };
 		A80A0935009DFE78F5115046 /* Sessione in Frameworks */ = {isa = PBXBuildFile; productRef = A916C71FC8064696BB93E31D /* Sessione */; };
@@ -61,6 +62,7 @@
 /* End PBXContainerItemProxy section */
 
 /* Begin PBXFileReference section */
+		026CC99253672C0BE5244297 /* StabilitaDellaDisposizioneTest.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = StabilitaDellaDisposizioneTest.swift; sourceTree = "<group>"; };
 		03ACD38B8C2F68821502F3C4 /* RaggiungibilitaTest.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = RaggiungibilitaTest.swift; sourceTree = "<group>"; };
 		10A40D60A1907135F70F1FB4 /* ToccoDirettoTest.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ToccoDirettoTest.swift; sourceTree = "<group>"; };
 		1BE339E6703B78CDC77E5B87 /* RegistroVisibileTest.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = RegistroVisibileTest.swift; sourceTree = "<group>"; };
@@ -186,6 +188,7 @@
 				325B59A8BC855637ABF9B2CB /* PannelloAzioniTest.swift */,
 				03ACD38B8C2F68821502F3C4 /* RaggiungibilitaTest.swift */,
 				1BE339E6703B78CDC77E5B87 /* RegistroVisibileTest.swift */,
+				026CC99253672C0BE5244297 /* StabilitaDellaDisposizioneTest.swift */,
 				10A40D60A1907135F70F1FB4 /* ToccoDirettoTest.swift */,
 			);
 			path = ProveOspitate;
@@ -330,6 +333,7 @@
 				F9D782BD8B4FD18B38DF5922 /* PannelloAzioniTest.swift in Sources */,
 				F153F7238148016D1A99A85F /* RaggiungibilitaTest.swift in Sources */,
 				45C1B6E90486F2F6078B2B8B /* RegistroVisibileTest.swift in Sources */,
+				94A9A556DB6F6992ED60E383 /* StabilitaDellaDisposizioneTest.swift in Sources */,
 				09CFF70CB8EC19E916A3C7BA /* ToccoDirettoTest.swift in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;

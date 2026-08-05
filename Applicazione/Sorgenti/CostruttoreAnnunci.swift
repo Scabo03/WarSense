@@ -167,7 +167,11 @@ struct CostruttoreAnnunci {
     /// Il valore annunciato di un elemento del deck, in ordine fisso: atomi,
     /// volume, esemplari residui, selezione (02 §8.2). Mai tagliato: sono le
     /// informazioni con cui si decide lo schieramento.
-    func valoreElementoDeck(indice: Int) -> String {
+    /// - Parameter comeSelezionato: forza la forma più lunga, quella con il termine
+    ///   di selezione. Serve alla tessera per riservare l'altezza dello stato più
+    ///   lungo e non muovere la disposizione quando la selezione cambia: il valore
+    ///   così ottenuto non si annuncia e non si disegna.
+    func valoreElementoDeck(indice: Int, comeSelezionato: Bool = false) -> String {
         guard let elemento = elementoDeck(indice) else { return "" }
         let volume = elemento.atomi * valori.archetipi[elemento.archetipo]!.volumePerAtomo
         var parti = [
@@ -175,7 +179,7 @@ struct CostruttoreAnnunci {
             testi.frase("deck.volume", Int(volume)).testo,
             testi.frase("deck.esemplari", elemento.esemplari).testo,
         ]
-        if stato.selezione[.giocatore] == indice {
+        if comeSelezionato || stato.selezione[.giocatore] == indice {
             parti.append(testi.frase("deck.selezionato").testo)
         }
         return parti.joined(separator: ", ")

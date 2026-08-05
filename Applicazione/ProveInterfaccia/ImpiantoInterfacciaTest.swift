@@ -253,25 +253,24 @@ final class ImpiantoInterfacciaTest: XCTestCase {
                                  + "\(sparite)")
     }
 
-    // MARK: - 00 §7.1 — il piano della battaglia: meccanismo noto, prova ancora assente
+    // MARK: - 00 §7.1 — il piano della battaglia: un difetto corretto, la prova ancora assente
     //
-    // **Che cosa è stato accertato il 2026-08-05.** La cornice che il servizio di
-    // accessibilità riporta per una cella FUORI dalla porzione visibile di un
-    // contenitore scorrevole è la sua posizione nel CONTENUTO e non sullo schermo:
-    // può cadere dentro la finestra, e perfino sopra la colonna dei comandi, senza
-    // che in quel punto sia disegnata la cella. Toccarla non fa nulla, perché il
-    // dito colpisce ciò che è davvero disegnato lì. Misurato sulla mappa grande —
-    // che è scorrevole quanto la griglia di battaglia: la casella del proprio
-    // gruppo riportava cornice a y=592 con i comandi a y=623, dunque «dentro la
-    // finestra e sopra i comandi», e il tocco non apriva nulla; dopo UN solo
-    // scorrimento la cornice passava a y=475 e il tocco apriva il pannello.
+    // **Corretto in questa sessione, ed era un difetto del gioco.** Selezionare una
+    // tessera del deck ne faceva crescere il valore di una riga («selezionato»,
+    // 02 §8.2): la colonna del deck cresceva di diciotto punti e la griglia, che le
+    // cede spazio (RDA-50), perdeva altrettanto di porzione visibile — proprio fra
+    // il selezionare e il piazzare, e proprio sul bordo inferiore, dove sta la zona
+    // di schieramento (01 §8.2.1). Misurato: la cella di riga 8 colonna 1 ha il
+    // centro a y=502, e la porzione visibile finiva a y=507,7 prima della selezione
+    // e a y=489,7 dopo. La cornice riportata dall'accessibilità restava però
+    // (44, 472, 60, 60), perché è la posizione nel CONTENUTO: chi toccava dove la
+    // cella era annunciata non toccava la cella. `TesseraDeck` riserva ora l'altezza
+    // dello stato più lungo, e `StabilitaDellaDisposizioneTest` è la prova rossa.
     //
-    // Non è quindi un difetto del riconoscitore (RDA-78) né del gioco: il dito, a
-    // differenza della voce, non ha scorrimento automatico verso l'elemento.
-    //
-    // **Che cosa resta aperto.** Sulla GRIGLIA DI BATTAGLIA lo stesso rimedio non
-    // basta: portando in vista una cella della zona di schieramento — con
-    // scorrimenti sulla finestra e con scorrimenti dentro la griglia, otto tentativi
-    // per ciascuna via — il tocco non schiera. Il fenomeno non coincide dunque con
-    // quello della mappa, o non del tutto. Vedi lo scostamento S10.
+    // **Che cosa resta.** Nemmeno con la disposizione ferma il tocco sintetizzato
+    // riesce a schierare: una cella della zona arretrata non entra INTERAMENTE nella
+    // porzione visibile, e scorrere non basta. Vedi lo scostamento S10. Ciò che è
+    // provato: l'equivalenza fra le due porte sui due piani
+    // (`ToccoDirettoTest`), un ordine impartito con il tocco vero sulla mappa
+    // (`test_01_5_6_…`), e la stabilità della disposizione (sopra).
 }
