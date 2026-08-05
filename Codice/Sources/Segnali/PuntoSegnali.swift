@@ -36,6 +36,25 @@ public final class PuntoSegnali {
     private var codaAnnunci: [NSAttributedString] = []
     private var annuncioInCorso = false
 
+    /// Gli annunci che questo punto ha emesso, dal più vecchio.
+    ///
+    /// Non è un canale nuovo e non esiste per il collaudo: è il contenuto della coda
+    /// che questo punto già tiene, reso interrogabile nel luogo che lo produce. Un
+    /// annuncio è oggi l'unica traccia di un comando RIFIUTATO — il giornale
+    /// registra i comandi validi (05 §6.1) e un rifiuto non vi lascia nulla — sicché
+    /// senza questo elenco non esiste modo, per nessuno, di sapere che cosa il gioco
+    /// abbia rifiutato durante una partita. È inoltre la sostanza di cui 00 §6.4 ha
+    /// bisogno: ciò che è affidato a un canale effimero deve restare recuperabile.
+    public private(set) var annunciPronunciati: [TestoLocalizzato] = []
+
+    /// Il tetto dell'elenco: numero di STRUTTURA e non di gioco (05 §0.4), come il
+    /// passo delle istantanee del giornale. Oltre il tetto si perdono i più vecchi.
+    public static let tettoDegliAnnunciConservati = 500
+
+    /// Azzera l'elenco. Serve a chi voglia osservare ciò che accade da un istante in
+    /// poi senza confonderlo con ciò che era già stato detto.
+    public func azzeraAnnunciPronunciati() { annunciPronunciati = [] }
+
     public init(testi: Testi, definizioni: DefinizioniSegnali, cartellaSuoni: URL,
                 preferenze: @escaping @MainActor () -> Preferenze) {
         self.testi = testi
@@ -102,6 +121,11 @@ public final class PuntoSegnali {
     // MARK: - Coda degli annunci (05 §11.6)
 
     private func accoda(_ testo: TestoLocalizzato, interrompente: Bool) {
+        annunciPronunciati.append(testo)
+        if annunciPronunciati.count > Self.tettoDegliAnnunciConservati {
+            annunciPronunciati.removeFirst(
+                annunciPronunciati.count - Self.tettoDegliAnnunciConservati)
+        }
         let attribuito = NSAttributedString(string: testo.testo, attributes: [
             .accessibilitySpeechLanguage: testo.lingua, // 00 §14.4
         ])
