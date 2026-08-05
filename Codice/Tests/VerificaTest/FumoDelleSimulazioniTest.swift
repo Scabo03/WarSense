@@ -24,7 +24,7 @@ final class FumoDelleSimulazioniTest: XCTestCase {
                        "curva_del_tiro", "accerchiamento",
                        // La campagna entra nel fumo come gli scontri (05 §14.7).
                        "campagna_invarianti", "campagna_passi_per_giornata",
-                       "campagna_attraversamento", "campagna_caselle_raggiungibili",
+                       "campagna_distanze", "campagna_uscite_libere",
                        "campagna_distribuzione_gruppi", "campagna_riepilogo"] {
             XCTAssertTrue(nomi.contains(atteso), "sezione mancante: \(atteso)")
         }
@@ -119,6 +119,81 @@ final class FumoDelleSimulazioniTest: XCTestCase {
         let senza = try XCTUnwrap(riepilogo.righe.first { $0[0] == "ordini_a_gruppi_senza_alcuna_destinazione" })
         XCTAssertGreaterThan(try XCTUnwrap(Int(senza[1])), 0,
                              "nessuna corsa ha esercitato lo stipamento")
+    }
+
+    /// La misura del costo di chiusura di una giornata è una CURVA e non un punto:
+    /// deve coprire tutto l'intervallo dei gruppi generati e le due disposizioni,
+    /// perché il numero dei gruppi e la loro dispersione sono cause distinte. Nella
+    /// prima unità di questa misura esisteva un punto solo.
+    func test_incarico_7_la_misura_dei_passi_e_una_curva_e_non_un_punto() throws {
+        let rapporto = try programma(fumo: false).esegui()
+        let sezione = try XCTUnwrap(rapporto.sezioni.first { $0.nome == "campagna_passi_per_giornata" })
+        func colonna(_ nome: String) throws -> Int {
+            try XCTUnwrap(sezione.intestazione.firstIndex(of: nome), "colonna mancante: \(nome)")
+        }
+        let cMappa = try colonna("mappa"), cDisposizione = try colonna("disposizione")
+        let cGruppi = try colonna("gruppi")
+        let cConIlSalto = try colonna("con_il_salto"), cSenza = try colonna("senza_il_salto")
+
+        let gruppi = Set(sezione.righe.compactMap { Int($0[cGruppi]) })
+        XCTAssertGreaterThanOrEqual(gruppi.count, 12,
+                                    "la curva deve avere almeno dodici punti in ascissa")
+        XCTAssertEqual(gruppi.min(), 1)
+        XCTAssertEqual(gruppi.max(), 12)
+        XCTAssertEqual(Set(sezione.righe.map { $0[cDisposizione] }),
+                       Set(BancoCampagna.Disposizione.allCases.map(\.rawValue)),
+                       "entrambe le disposizioni, raccolti e sparpagliati")
+
+        // Il costo con il salto è lineare nel numero dei gruppi e indifferente alla
+        // dispersione: è ciò che il salto diretto compra, e va misurato, non detto.
+        for riga in sezione.righe {
+            let n = try XCTUnwrap(Int(riga[cGruppi]))
+            XCTAssertEqual(Int(riga[cConIlSalto]), n * 3,
+                           "con il salto ogni gruppo costa tre passi, \(riga[cMappa])")
+            XCTAssertGreaterThanOrEqual(try XCTUnwrap(Int(riga[cSenza])), n * 2)
+        }
+        // Senza il salto la dispersione non fa mai risparmiare, e sulla mappa grande
+        // — dove c'è spazio perché le due disposizioni differiscano davvero — costa
+        // strettamente di più. Sul quattro per quattro con molti gruppi le due
+        // disposizioni coincidono, perché i gruppi riempiono la mappa: non è una
+        // smentita, è il caso limite dello stipamento.
+        var almenoUnaDifferenzaStretta = false
+        for mappa in Set(sezione.righe.map { $0[cMappa] }) {
+            for n in gruppi where n > 1 {
+                let righe = sezione.righe.filter { $0[cMappa] == mappa && Int($0[cGruppi]) == n }
+                guard righe.count == 2 else { continue }
+                let raccolti = try XCTUnwrap(righe.first { $0[cDisposizione] == "raccolti" })
+                let sparsi = try XCTUnwrap(righe.first { $0[cDisposizione] == "sparpagliati" })
+                let costoSparsi = try XCTUnwrap(Int(sparsi[cSenza]))
+                let costoRaccolti = try XCTUnwrap(Int(raccolti[cSenza]))
+                XCTAssertGreaterThanOrEqual(costoSparsi, costoRaccolti,
+                                            "\(mappa) con \(n) gruppi: la dispersione fa risparmiare?")
+                if costoSparsi > costoRaccolti { almenoUnaDifferenzaStretta = true }
+            }
+        }
+        XCTAssertTrue(almenoUnaDifferenzaStretta,
+                      "la dispersione non pesa in alcun punto della curva: la misura non la vede")
+    }
+
+    /// Le colonne dichiarano la grandezza che stampano. La distanza fra i due
+    /// quartier generali non è la traversata della mappa, e le due compaiono
+    /// affiancate proprio perché non si possano leggere l'una per l'altra.
+    func test_incarico_7_le_colonne_delle_distanze_nominano_cio_che_misurano() throws {
+        let rapporto = try programma(fumo: false).esegui()
+        let sezione = try XCTUnwrap(rapporto.sezioni.first { $0.nome == "campagna_distanze" })
+        XCTAssertEqual(sezione.intestazione,
+                       ["mappa", "formato", "lato", "distanza_fra_quartier_generali",
+                        "distanza_massima_fra_due_caselle", "giornate_per_congiungerli"])
+        let cLato = try XCTUnwrap(sezione.intestazione.firstIndex(of: "lato"))
+        let cQg = try XCTUnwrap(sezione.intestazione.firstIndex(of: "distanza_fra_quartier_generali"))
+        let cMax = try XCTUnwrap(sezione.intestazione.firstIndex(of: "distanza_massima_fra_due_caselle"))
+        for riga in sezione.righe {
+            let lato = try XCTUnwrap(Int(riga[cLato]))
+            XCTAssertEqual(Int(riga[cMax]), (lato - 1) * 2,
+                           "la distanza massima è quella fra angoli opposti")
+            XCTAssertLessThanOrEqual(try XCTUnwrap(Int(riga[cQg])), try XCTUnwrap(Int(riga[cMax])),
+                                     "i due quartier generali non possono distare più del massimo")
+        }
     }
 
     /// Gli scenari sono file dichiarativi: aggiungerne uno non richiede di toccare

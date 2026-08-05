@@ -21,7 +21,7 @@ public struct MotoreCampagna: Sendable {
     public func valida(_ comando: ComandoCampagna, parte: Parte,
                        stato: StatoCampagna) -> EsitoValidazioneCampagna {
         switch comando {
-        case .marcia(let idGruppo, let destinazione):
+        case .marcia(let idGruppo, let destinazione, let giorni):
             guard let gruppo = stato.gruppi[idGruppo], gruppo.parte == parte else {
                 return .nonValido(.gruppoIgnoto)
             }
@@ -35,6 +35,12 @@ public struct MotoreCampagna: Sendable {
             guard stato.occupante(di: destinazione, parte: parte) == nil else {
                 return .nonValido(.occupata)
             }
+            // Il costo dichiarato dal comando dev'essere quello che i dati
+            // prescrivono per quello scatto: un comando che ne porti un altro non
+            // è un comando del gioco (01 §5.6.3.1).
+            guard giorni == costoInGiorni(da: gruppo.posizione, a: destinazione, stato: stato) else {
+                return .nonValido(.costoNonCoerente)
+            }
             return .valido
 
         case .presidio(let idGruppo):
@@ -44,6 +50,22 @@ public struct MotoreCampagna: Sendable {
             guard !gruppo.azioneSpesa else { return .nonValido(.azioneGiaSpesa) }
             return .valido
         }
+    }
+
+    // MARK: - Costo in giorni dello scatto (01 §5.6.3.1, §5.6.3.2)
+
+    /// I giorni necessari a entrare nella casella di arrivo venendo da quella di
+    /// partenza. È UNA SOLA grandezza, come 01 §5.6.3.2 impone: su di essa
+    /// agiranno, senza regole che si sommino in modo opaco, la natura delle due
+    /// caselle con pesi distinti, il volume della colonna, il tipo di strada e il
+    /// costo fisso della strettoia. Nessuno di quei fattori esiste in questa
+    /// unità: il valore è quello dichiarato nei dati, uguale per ogni coppia di
+    /// caselle, e vale uno. La firma è già quella definitiva, perché il punto in
+    /// cui il costo si calcola non debba spostarsi quando i fattori arriveranno.
+    public func costoInGiorni(da partenza: Cella, a arrivo: Cella,
+                              stato: StatoCampagna) -> Int {
+        _ = (partenza, arrivo, stato)
+        return valoriCampagna.marcia.costoGiorniBase
     }
 
     // MARK: - Applicazione (05 §3.1)
@@ -58,7 +80,7 @@ public struct MotoreCampagna: Sendable {
         var eventi: [EventoCampagna] = []
 
         switch comando {
-        case .marcia(let idGruppo, let destinazione):
+        case .marcia(let idGruppo, let destinazione, _):
             let partenza = nuovo.gruppi[idGruppo]!.posizione
             let nome = nuovo.gruppi[idGruppo]!.nome
             nuovo.gruppi[idGruppo]!.posizione = destinazione
@@ -68,12 +90,14 @@ public struct MotoreCampagna: Sendable {
             nuovo.gruppi[idGruppo]!.azioneSpesa = true
             eventi.append(.marciaEseguita(gruppo: idGruppo, nome: nome,
                                           da: partenza, a: destinazione))
+            annota(.marciaOrdinata(gruppo: nome, da: partenza, a: destinazione), in: &nuovo)
 
         case .presidio(let idGruppo):
             let gruppo = nuovo.gruppi[idGruppo]!
             nuovo.gruppi[idGruppo]!.azioneSpesa = true
             eventi.append(.presidioOrdinato(gruppo: idGruppo, nome: gruppo.nome,
                                             casella: gruppo.posizione))
+            annota(.presidioOrdinato(gruppo: gruppo.nome, casella: gruppo.posizione), in: &nuovo)
         }
 
         eventi.append(contentsOf: chiudiLaGiornataSeServe(&nuovo))
@@ -92,15 +116,20 @@ public struct MotoreCampagna: Sendable {
         var eventi: [EventoCampagna] = [.giornataChiusa(giorno: chiuso)]
         stato.giorno += 1
         for id in stato.gruppi.keys.sorted() { stato.gruppi[id]!.azioneSpesa = false }
-        annota(.giornataAperta, luogo: nil, in: &stato)
+        // L'apertura della giornata NON produce una voce di registro. Il giorno è
+        // una proprietà di ciascuna voce (02 §6.6) e non un fatto a sé: un elemento
+        // che dichiarasse soltanto l'inizio di una giornata occuperebbe una
+        // posizione nell'elenco senza portare informazione. Resta l'annuncio, che
+        // il cambiamento di stato rilevante richiede (00 §11.4).
         eventi.append(.giornataAperta(giorno: stato.giorno))
         return eventi
     }
 
-    /// Annota nel registro un fatto che il giocatore non ha deciso (01 §5.17.1).
-    func annota(_ fatto: FattoRegistrato, luogo: Cella?, in stato: inout StatoCampagna) {
+    /// Annota un fatto nel registro della campagna (01 §5.17, 02 §6.6). Il giorno
+    /// è quello corrente al momento del fatto e resta scritto nella voce.
+    public func annota(_ fatto: FattoRegistrato, in stato: inout StatoCampagna) {
         stato.registro.append(VoceRegistro(numero: stato.prossimoNumeroVoce,
-                                           giorno: stato.giorno, fatto: fatto, luogo: luogo))
+                                           giorno: stato.giorno, fatto: fatto))
         stato.prossimoNumeroVoce += 1
     }
 }

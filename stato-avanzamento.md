@@ -140,7 +140,7 @@ Da dove partire:
 5. Prove XCUITest del fuoco (05 §14.4, regole a–e di 05 §10.3).
 Criterio di uscita: scontro completo giocabile solo con VoiceOver, consegnato ai tester via TestFlight (00 §16.3). Punto di arresto: nessun lavoro della fase D prima del ritorno dei tester; la fase C è parallela a quell'attesa.
 
-### Fase D — La campagna singola: COMINCIATA, prima unità conclusa
+### Fase D — La campagna singola: COMINCIATA, seconda unità conclusa
 
 Criterio di uscita della fase (05 §15.5, «una campagna su una mappa, con battaglie vere, giocabile e riproducibile»): **non ancora raggiunto**, e non lo sarà finché non esisteranno rifornimento, conoscenza, imboscata, avversario e innesco della battaglia. Questa è la PRIMA UNITÀ di quella fase, e si è chiusa da sola.
 
@@ -180,7 +180,23 @@ Il titolare ha sottoposto a controllo aritmetico tre numeri del resoconto della 
 
 **Che cosa sente il giocatore alla chiusura della giornata**, fissato da una prova e non descritto a memoria: due frasi, «Corvo presidia in riga 4, casella 2» e «Giornata conclusa: comincia il giorno 2», più il segnale di conferma dell'ordine. La chiusura non ha segnale proprio (RDA-64) e non ha frase propria: la racconta l'apertura.
 
-Collaudo: 204 prove del pacchetto (una saltata) più 31 ospitate e 2 d'interfaccia, tutte verdi.
+Collaudo alla fine della prima unità: 204 prove del pacchetto (una saltata) più 31 ospitate e 2 d'interfaccia, tutte verdi.
+
+#### Seconda unità — registro, annuncio, confine dell'annullamento, costo in giorni
+
+Nata da due difetti riferiti da chi ha usato il gioco e da tre decisioni del titolare.
+
+**Registro** (`FattoRegistrato`, `SchermataRegistro`, `TraduttoreEventiCampagna.voceDiRegistro`). I fatti annotati sono ora `marciaOrdinata`, `presidioOrdinato`, `ordineAnnullato`, `giornataAzzerata`; `giornataAperta` è soppresso, perché il giorno è una proprietà di ciascuna voce e non una voce a sé. Deroga dichiarata a 01 §5.17.1, che escludeva gli ordini del giocatore (scostamento S8, RDA-72). Le voci prive di luogo sono `UILabel` con tratto di testo statico e non più pulsanti disabilitati: il colore dello stato inattivo dava un contrasto di 1,68 contro 1 sul fondo di sistema, cioè un elemento agganciabile dalla voce e invisibile all'occhio. Prova di classe che misura i PIXEL, non le proprietà: `RegistroVisibileTest`, con il proprio mutante.
+
+**Annuncio di casella** (`VistaCampagna.vociDiCasella`, RDA-74). Le caratteristiche della casella hanno un elenco solo, da cui derivano sia la frase sia i segni disegnati: la divergenza fra il piano sonoro e quello visivo è ora impedita dal compilatore. Le frasi del registro hanno un solo autore, il traduttore dei Segnali. Il difetto riferito sull'annuncio in designazione non è stato riprodotto: vedi P12.
+
+**Confine dell'annullamento** (`SessioneCampagna.ordineDentroIlConfine`, RDA-73, S9). Annullamento pieno dentro la giornata; l'ordine che ha chiuso la precedente è annullabile finché nella giornata nuova non è accaduto nulla; oltre, rifiuto con termine proprio. Il confine vive nel giornale (`VoceGiornale.annullamentoCampagna`) e non nello stato, perché lo stato si ricostruisce riapplicando i comandi e il confine sparirebbe alla ripresa.
+
+**Costo in giorni** (`ValoriMarcia`, `MotoreCampagna.costoInGiorni`, `ComandoCampagna.marcia(gruppo:a:giorni:)`, RDA-75). Valore esplicito nei dati, oggi uno; il comando lo trasporta; `FondazioneCampagna.schemaCorrente` sale a 2. L'identità fra una casella e una giornata non è una regola: è il caso particolare che quel valore produce, ed è dichiarato tale.
+
+**Misure** (`BancoCampagna.Disposizione`, `misuraDistanzaFraQuartierGenerali`). Il costo di chiusura di una giornata si misura da uno a dodici gruppi, sui tre formati, con i gruppi raccolti presso il quartier generale e sparpagliati. La sezione `campagna_attraversamento` è ora `campagna_distanze`, con `distanza_fra_quartier_generali` accanto a `distanza_massima_fra_due_caselle`; `campagna_caselle_raggiungibili` è `campagna_uscite_libere` e l'interrogazione `caselleRaggiungibiliInUnaGiornata` è `usciteLibere`, perché il nome presupponeva l'identità casella-giornata.
+
+Collaudo alla fine della seconda unità: 217 prove del pacchetto (una saltata) più 42 ospitate e 2 d'interfaccia, tutte verdi.
 
 ### Fasi E–G: NON COMINCIATE
 
@@ -203,3 +219,8 @@ Applicato l'incarico di intervento sulle chiusure: la base delle perdite per la 
 - Chi aggiunge un caso a `ComandoBattaglia`, a `ComandoCampagna` o a `VoceGiornale` DEVE aggiungere il campione corrispondente in `Tests/SessioneTest/CampioniGiornale/campioni.jsonl` nella stessa modifica: `CompatibilitaGiornaleTest` lo pretende e fallisce altrimenti. Nessun caso si rinomina né si sposta: la codifica usa il nome del caso come chiave, e rinominarne uno rende illeggibili i giornali già scritti.
 - Il giornale dichiara la propria natura dalla prima riga: `fondazione` per uno scontro, `fondazioneCampagna` per una campagna. `Giornale.apri` accetta entrambe; ciascuna Sessione legge la propria.
 - La sonda degli invarianti di campagna riceve dall'esterno ciò che giudica (stato, transizione, sequenza del salto, adiacenza) proprio perché le prove possano darle un caso guasto. Chi la modifica conservi quella forma, altrimenti i mutanti non sono più scrivibili (RDA-69).
+- La regola sulla FORMA DEI RESOCONTI di sessione è in `forma-dei-resoconti.md`, che è memoria permanente: si scrivono per un lettore tecnico, e la prescrizione opposta è revocata. Richiamata anche in `memoria-infrastruttura.md`.
+- Il REGISTRO della campagna vive nello stato, che si ricostruisce riapplicando i comandi del giornale: un fatto che l'annullamento deve poter lasciare dietro di sé — l'annullamento stesso — non può stare nel solo stato, e ha una voce propria nel giornale (RDA-73). Chi aggiungerà altri fatti che sopravvivono a un troncamento faccia lo stesso.
+- Il CONFINE dell'annullamento si legge dal giornale e non dallo stato, per la stessa ragione. Chi lo tocca esegua `AnnullamentoGiornataTest`, che contiene la prova della sopravvivenza alla ripresa.
+- Ciò che una casella DICHIARA sta in `VistaCampagna.vociDiCasella` e in nessun altro posto: chi aggiunge una caratteristica la aggiunge lì, e il compilatore lo obbliga a darle sia una frase sia un segno disegnato (RDA-74).
+- Il COSTO IN GIORNI dello scatto vale uno e viene dai dati. Non è una regola: è una semplificazione provvisoria (RDA-75, `valori-provvisori.md`). Nessuna sessione futura la citi come decisione presa per rifiutarne la modifica.

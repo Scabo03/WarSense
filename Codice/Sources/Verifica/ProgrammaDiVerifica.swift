@@ -88,30 +88,47 @@ public struct ProgrammaDiVerifica: Sendable {
                            "impronta_finale"],
             righe: righeInvarianti))
 
+        // La curva, non il punto: il costo di chiusura di una giornata si misura su
+        // tutto l'intervallo di copertura e nelle due disposizioni, perché il
+        // numero dei gruppi e la loro dispersione sono due cause distinte e una
+        // misura sola non le distingue.
         var righePassi: [[String]] = []
         for mappa in banco.valoriCampagna.mappe.keys.sorted() {
-            for gruppi in scenari.gruppiPerLaMisuraDeiPassi {
-                guard let passi = try banco.misuraPassi(mappa: mappa, gruppi: gruppi) else { continue }
-                righePassi.append([mappa, String(passi.gruppi), String(passi.conIlSalto),
-                                   String(passi.senzaIlSalto),
-                                   String(passi.senzaIlSalto - passi.conIlSalto)])
+            for disposizione in BancoCampagna.Disposizione.allCases {
+                for gruppi in scenari.gruppiPerLaMisuraDeiPassi {
+                    guard let passi = try banco.misuraPassi(mappa: mappa, gruppi: gruppi,
+                                                            disposizione: disposizione)
+                    else { continue }
+                    righePassi.append([mappa, disposizione.rawValue, String(passi.gruppi),
+                                       String(passi.conIlSalto), String(passi.senzaIlSalto),
+                                       String(passi.senzaIlSalto - passi.conIlSalto),
+                                       String(passi.conIlSalto / passi.gruppi),
+                                       String(passi.senzaIlSalto / passi.gruppi)])
+                }
             }
         }
         sezioni.append(Rapporto.Sezione(
             nome: "campagna_passi_per_giornata",
-            intestazione: ["mappa", "gruppi", "con_il_salto", "senza_il_salto", "scarto"],
+            intestazione: ["mappa", "disposizione", "gruppi", "con_il_salto", "senza_il_salto",
+                           "scarto", "con_il_salto_per_gruppo", "senza_il_salto_per_gruppo"],
             righe: righePassi))
 
-        var righeAttraversamento: [[String]] = []
+        // La distanza fra i due quartier generali, affiancata alla distanza massima
+        // fra due caselle: due grandezze diverse, due colonne che non si scambiano.
+        var righeDistanze: [[String]] = []
         for mappa in banco.valoriCampagna.mappe.keys.sorted() {
-            guard let misura = try banco.misuraAttraversamento(mappa: mappa) else { continue }
-            righeAttraversamento.append([misura.mappa, misura.formato, String(misura.lato),
-                                         String(misura.distanza), String(misura.giornate)])
+            guard let misura = try banco.misuraDistanzaFraQuartierGenerali(mappa: mappa)
+            else { continue }
+            righeDistanze.append([misura.mappa, misura.formato, String(misura.lato),
+                                  String(misura.distanzaFraQuartierGenerali),
+                                  String(misura.distanzaMassimaFraDueCaselle),
+                                  String(misura.giornatePerCongiungerli)])
         }
         sezioni.append(Rapporto.Sezione(
-            nome: "campagna_attraversamento",
-            intestazione: ["mappa", "formato", "lato", "distanza_in_caselle", "giornate"],
-            righe: righeAttraversamento))
+            nome: "campagna_distanze",
+            intestazione: ["mappa", "formato", "lato", "distanza_fra_quartier_generali",
+                           "distanza_massima_fra_due_caselle", "giornate_per_congiungerli"],
+            righe: righeDistanze))
 
         // Bordo e interno sono GEOMETRIA e non dipendono dai gruppi; le uscite
         // libere dipendono da dove i gruppi stanno, perché una casella occupata da
@@ -120,7 +137,7 @@ public struct ProgrammaDiVerifica: Sendable {
         // confuse, chiamando «caselle di bordo» quelle con meno di quattro uscite.
         var righeRaggiungibili: [[String]] = []
         for mappa in banco.valoriCampagna.mappe.keys.sorted() {
-            guard let misura = try banco.misuraRaggiungibili(mappa: mappa) else { continue }
+            guard let misura = try banco.misuraUsciteLibere(mappa: mappa) else { continue }
             let d = misura.distribuzione
             righeRaggiungibili.append([misura.mappa, String(d.quanti),
                                        String(misura.caselleDiBordo), String(misura.caselleInterne),
@@ -130,7 +147,7 @@ public struct ProgrammaDiVerifica: Sendable {
                                        String(misura.interneConMenoDiQuattroUscite)])
         }
         sezioni.append(Rapporto.Sezione(
-            nome: "campagna_caselle_raggiungibili",
+            nome: "campagna_uscite_libere",
             intestazione: ["mappa", "caselle", "caselle_di_bordo", "caselle_interne",
                            "gruppi_nella_misura", "uscite_minimo", "uscite_mediana",
                            "uscite_massimo", "uscite_media", "con_meno_di_quattro_uscite",
@@ -184,6 +201,10 @@ public struct ProgrammaDiVerifica: Sendable {
         voce("invarianti_sorvegliati", SondaInvariantiCampagna.codiciNoti.count)
         voce("formati_di_mappa", banco.valoriCampagna.formatiMappa.count)
         voce("mappe_disponibili", banco.valoriCampagna.mappe.count)
+        voce("costo_in_giorni_dello_scatto", banco.valoriCampagna.marcia.costoGiorniBase)
+        voce("gruppi_minimo_nella_misura_dei_passi", scenari.gruppiPerLaMisuraDeiPassi.min() ?? 0)
+        voce("gruppi_massimo_nella_misura_dei_passi", scenari.gruppiPerLaMisuraDeiPassi.max() ?? 0)
+        voce("disposizioni_nella_misura_dei_passi", BancoCampagna.Disposizione.allCases.count)
         return Rapporto.Sezione(nome: "campagna_riepilogo",
                                 intestazione: ["voce", "valore"], righe: voci)
     }

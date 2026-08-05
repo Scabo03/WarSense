@@ -674,6 +674,8 @@ Conseguenze. Ogni invariante della campagna ha in collaudo la propria coppia: la
 
 ### RDA-70 — L'annullamento riapre la giornata finché non c'è nulla di giocato da disfare (00 §13.8)
 
+**SUPERATA da RDA-73 (decisione del titolare).** La deroga qui concessa — annullamento illimitato all'indietro fino al principio della campagna — è stata rimossa: il confine di 05 §6.5 vale adesso e non quando l'avversario comparirà. Resta valida di questa voce la parte che riguarda l'ordine che chiude la giornata, che continua ad annullarsi. Storia in S9.
+
 Problema. La giornata si chiude quando l'ultimo gruppo riceve il proprio ordine (01 §5.6.0.6). Con la prima realizzazione, quell'ordine era l'unico della giornata che non si potesse ritirare: l'annullamento veniva rifiutato e il giorno restava avanzato. 05 §6.5 elenca infatti «chiusura della giornata di campagna» fra i punti di conferma oltre i quali l'annullamento non retrocede.
 
 Opzioni. Conservare il punto di conferma alla lettera; consentire la riapertura della giornata finché nulla è stato giocato dopo la chiusura.
@@ -695,3 +697,71 @@ Scelta. La seconda. Il programma di verifica produce una sezione `campagna_riepi
 Motivazione. È la stessa ragione per cui esiste il controllo preventivo sul caricamento: una regola si può dimenticare, uno strumento che stampa no. L'attenzione non è una difesa, perché è precisamente ciò che era già stato applicato e che aveva prodotto tre numeri sbagliati su tre.
 
 Conseguenze. Le grandezze omonime ma diverse hanno ora colonne distinte e nomi che non si possono scambiare: `caselle_di_bordo` e `caselle_interne` sono geometria e non dipendono dai gruppi, `con_meno_di_quattro_uscite` e `di_cui_interne` dipendono da dove i gruppi stanno. Il conteggio degli invarianti sorvegliati è anch'esso stampato dal programma, e una prova pretende che ciascuno abbia il proprio mutante.
+
+### RDA-72 — Il registro annota gli ordini del giocatore finché non esistono altri fatti (01 §5.17, §5.17.1)
+
+Problema. 01 §5.17.1 esclude dal registro gli ordini del giocatore. Nel perimetro della prima unità di campagna non esiste alcun fatto non deciso dal giocatore: mosse avversarie, rifornimento, imboscate, marce lunghe e stagioni appartengono tutte a unità successive. Applicata alla lettera, la regola produce un registro vuoto, e la prima unità lo aveva riempito con l'unica cosa rimasta, l'apertura della giornata.
+
+Opzioni. Lasciare il registro con le sole voci di calendario; lasciarlo vuoto e dichiararlo; annotarvi gli ordini impartiti e i loro annullamenti.
+
+Scelta. La terza, per decisione del titolare. Vi entrano marcia e presidio con il gruppo e le caselle, e gli annullamenti.
+
+Motivazione. Il criterio di accettazione è la ragione che 01 §5.17 dichiara: senza il registro ogni annuncio che passa mentre il giocatore fa altro è perduto, mentre chi guarda ha il riquadro davanti. Un registro di sole voci di calendario non recupera nulla, e per di più il salto al luogo del fatto — che 02 §6.6 prescrive — non è mai esercitabile, perché una data non ha luogo. Un registro vuoto sarebbe onesto ma lascerebbe la funzione non provata fino all'unità che porterà i fatti avversari. Gli ordini sono ciò che nel perimetro avviene, e l'annullamento in particolare è un fatto che il giocatore può volere ricostruire, essendo diventato frequente.
+
+Conseguenze. La deroga è dichiarata e limitata: quando i fatti non decisi dal giocatore esisteranno, 01 §5.17.1 va confermato — togliendo allora gli ordini — oppure modificato con una versione nuova del documento. Registrata come scostamento S8. Gli annullamenti non possono vivere nel solo stato, che si ricostruisce riapplicando i comandi: hanno una voce propria nel giornale (RDA-73).
+
+### RDA-73 — Il confine dell'annullamento sta nel giornale, non nello stato (00 §13.8, 05 §6.5)
+
+Problema. Ripristinare il punto di conferma di 05 §6.5 alla chiusura della giornata senza rendere di nuovo irreversibile l'ordine impartito all'ultimo gruppo, che 00 §13.8 vuole annullabile. Le due cose sembrano incompatibili, perché quell'ordine appartiene alla giornata che si è chiusa.
+
+Opzioni. Rifiutare l'annullamento appena la giornata si chiude, cioè la build 11; consentirlo sempre, cioè RDA-70; consentirlo finché la giornata nuova è intatta.
+
+Scelta. La terza. Un ordine è annullabile quando segue l'ultima apertura di giornata; l'ordine che la precede — quello la cui conferma ha chiuso la giornata prima — è annullabile finché nella giornata nuova non è accaduto nulla, né un ordine né un annullamento. Oltre quel punto il rifiuto è dichiarato con il termine chiuso `campagna.non_si_torna_oltre_la_giornata`. L'azzeramento segue la stessa regola.
+
+Motivazione. È la sola lettura sotto la quale entrambe le prescrizioni valgono: l'annullamento ritira sempre l'ULTIMO GESTO del giocatore, quale che sia la giornata cui l'ordine appartiene, e si ferma appena quel gesto non è più l'ultimo. È anche la sola sotto la quale il rifiuto al confine sia una situazione raggiungibile e quindi provabile: con la lettura puramente «giornata corrente» si tornerebbe indietro una giornata alla volta senza fine, che è esattamente il comportamento da rimuovere.
+
+Dove vive il confine, e perché lì. Nel GIORNALE, come voce `annullamentoCampagna(giorno:azzeramento:)`, e non nello stato. Lo stato si ricostruisce riapplicando i comandi: dopo un annullamento sarebbe byte per byte indistinguibile da una giornata appena aperta, e il confine sparirebbe alla prima ripresa della campagna — cioè al riavvio dell'applicazione, che è il momento in cui i difetti di questa specie si manifestano. La stessa voce serve al registro, perché l'annullamento è un fatto avvenuto (RDA-72): una riga sola per due esigenze che vogliono entrambe sopravvivere alla ricostruzione.
+
+Conseguenze. L'annullamento non riporta più lo stato ESATTAMENTE com'era: la partita sì — posizioni, azioni spese, giorno — ma il registro cresce di una voce, e l'impronta cambia di conseguenza. Le prove confrontano perciò la partita e non l'impronta, e verificano a parte che il registro sia cresciuto. Il giornale rigiocato dà lo stesso stato, registro compreso, anche cancellando le istantanee. Sostituisce RDA-70, la cui deroga è tolta; la vicenda è in S9.
+
+### RDA-74 — Ciò che una casella dichiara sta in un elenco solo (02 §3.8.1, 00 §1.2)
+
+Problema. Le caratteristiche di una casella erano enumerate in tre punti indipendenti della Presentazione: quello che le annunciava, quello che decideva se dire «libera», e quello che disegnava i segni per chi guarda. Nulla obbligava a tenerli allineati.
+
+Opzioni. Lasciarli separati con la disciplina di aggiornarli insieme; ricavarli tutti da un elenco unico.
+
+Scelta. Un elenco unico, `VistaCampagna.vociDiCasella(_:)`, che restituisce ciò che la casella dichiara nell'ordine registrato da 02 §3.8.1. La frase e il segno si ottengono attraversando quell'elenco con due enumerazioni esaustive.
+
+Motivazione. Una caratteristica aggiunta all'annuncio e dimenticata nel disegno — o viceversa — sarebbe una divergenza fra il piano sonoro e quello visivo, cioè la classe di difetto che 00 §1.2 vieta e che questa sessione ha dovuto correggere nel registro. Con un elenco solo la divergenza non è impedita dalla disciplina ma dal compilatore: chi aggiunge un caso all'enumerativo è obbligato a dargli sia una frase sia un segno. L'elenco vive nelle interrogazioni del Motore e non nella Presentazione, perché è un dato di gioco e la Presentazione non ne calcola alcuno (00 §3.2).
+
+Conseguenze. L'elenco è il punto in cui entreranno lo stato di conoscenza, le anomalie dell'occupante e le note di zona quando esisteranno, e vi entreranno una volta sola. Le frasi del registro hanno subito la stessa riduzione: le componeva sia il traduttore dei Segnali sia il costruttore degli annunci, e ora le compone il solo traduttore.
+
+### RDA-75 — Il costo in giorni dello scatto viaggia dentro il comando di marcia (01 §5.6.3.1)
+
+Problema. Dare esistenza al costo in giorni dello spostamento senza realizzare la marcia lunga, e impedire che il caso particolare oggi realizzato — un giorno per casella — si consolidi come regola.
+
+Opzioni. Lasciare il costo implicito e introdurlo con la marcia lunga; calcolarlo al bisogno dal Motore; farlo trasportare dal comando.
+
+Scelta. Il valore vive nei dati (`marcia-campagna.json`, `costo_giorni_base`, oggi uno), il Motore lo espone con la firma definitiva `costoInGiorni(da:a:stato:)`, e il comando `.marcia(gruppo:a:giorni:)` lo trasporta. La validazione rifiuta un comando che dichiari un costo diverso da quello prescritto, con il proprio motivo del vocabolario chiuso.
+
+Motivazione. Il giornale è anche il formato di salvataggio: una campagna ripresa deve ripercorrere gli scatti che è costata, non quelli che costerebbero con i dati di oggi. Il costo dentro il comando lo garantisce, e la validazione impedisce che un giornale estraneo introduca un costo arbitrario. La firma è già quella definitiva perché il punto in cui il costo si calcola non debba spostarsi quando arriveranno i pesi della casella di partenza e di arrivo, il volume della colonna, la strada e la strettoia: 01 §5.6.3.2 vuole che agiscano tutti sulla MEDESIMA grandezza, senza regole che si sommino in modo opaco, e quella grandezza ora esiste.
+
+Conseguenze. `FondazioneCampagna.schemaCorrente` sale da 1 a 2 e i giornali di campagna precedenti si dichiarano e non si aprono (00 §15.2); il campione committato del comando di marcia è stato riscritto nella stessa modifica. Con il valore pari a uno il comportamento osservabile non cambia in alcun punto. Il valore è iscritto fra quelli provvisori con il contrassegno di provvisorietà.
+
+### RDA-76 — Annullamento e revoca sono due cose diverse e non si confondono (00 §13.8, 01 §5.6.3.3)
+
+Problema. Con le marce di più giorni compariranno due operazioni che a parole si somigliano e che nel gioco non hanno nulla in comune. Registrare adesso la distinzione impedisce che la prima si allarghi fino a coprire la seconda.
+
+La distinzione. L'ANNULLAMENTO corregge un errore di comando: è gratuito, non è una mossa di gioco, non lascia conseguenze, e vale entro il confine della giornata in corso secondo RDA-73. La REVOCA dell'ordine di marcia è una mossa di gioco: 01 §5.6.3.3 stabilisce che «l'ordine di marcia si può revocare in qualunque momento, perdendo tutti i giorni già spesi», e 01 §5.6.8.1 la elenca fra le operazioni che NON sono azioni e non consumano la giornata. Si paga con la perdita dei giorni, non con l'azione.
+
+Conseguenze. La revoca non si realizza in questa sessione. Quando si realizzerà, non passerà dal comando di annullamento né dal giornale come troncamento: sarà un comando proprio, che si aggiunge alla sequenza invece di toglierne, perché la perdita dei giorni è un fatto di partita e non un ripensamento. La conseguenza va dichiarata prima della conferma, come 01 §5.6.3.5 prescrive.
+
+### RDA-77 — Il termine dell'ordine di restare fermi è «presidio», ed è già nei documenti (01 §5.6.8.1)
+
+Problema. L'incarico della seconda unità segnalava che «presidiare» non figurasse nei documenti e portasse con sé un significato che il progetto non gli attribuisce, chiedendo di ricondurlo al vocabolario chiuso.
+
+Accertamento. La premessa non regge: 01 §5.6.8.1, che chiude nella fase di architettura l'elenco delle sedici azioni di giornata, elenca testualmente «presidio, cioè restare fermi in guardia (5.6.0.6)». Il termine è quindi documentato, ed è il nome dell'azione. Le altre cose che 01 §5.6.0.6 nomina come ragioni per restare fermi — raccogliere risorse, riordinarsi, riposare — sono nello stesso elenco AZIONI DISTINTE: sosta con raccolta automatica (5.6.5), riordino degli assetti (4.8), riposo (5.6.4.4). Il presidio non le assorbe e non pretende di farlo.
+
+Scelta. Si conserva «presidio», con la glossa dei documenti. Il termine non appartiene al vocabolario chiuso di 02 §4.4.5, che elenca STATI e non azioni: lo stato di un gruppo che ha presidiato è «ha agito», come dopo qualunque altra azione. L'invariabilità di 02 §4.1 è comunque rispettata: tutte le occorrenze nei testi usano la stessa radice — `pannello.presidio`, `campagna.presidio_ordinato`, `registro.presidio_ordinato` — e nessun sinonimo compare in alcun punto.
+
+Conseguenze. Nessuna modifica ai testi. Se una revisione futura vorrà elencare anche i nomi delle AZIONI in 02 §4.4.5, il posto è quello e la voce esiste già altrove; oggi il documento 02 non li elenca, e aggiungerveli sarebbe una modifica al documento e non una correzione.

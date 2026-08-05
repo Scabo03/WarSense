@@ -134,7 +134,7 @@ public struct SondaInvariantiCampagna: Sendable {
         var violazioni: [Violazione] = []
         let idAgente: IdGruppo
         switch comando {
-        case .marcia(let id, let destinazione):
+        case .marcia(let id, let destinazione, _):
             idAgente = id
             if let partenza = prima.gruppi[id]?.posizione, !adiacenti(partenza, destinazione) {
                 violazioni.append(.movimentoFraCaselleNonAdiacenti(

@@ -178,11 +178,16 @@
 "campagna.giornata_aperta.sintetico" = "Giorno %d";
 
 /* Registro degli eventi (01 §5.17, 02 §6.6): ogni voce è una frase compiuta che
-   dichiara il giorno cui si riferisce. */
-"registro.giornata_aperta" = "Giorno %d: si apre la giornata";
+   dichiara il giorno cui si riferisce. Il giorno è una PROPRIETÀ della voce e non
+   una voce a sé: l'apertura di una giornata non produce alcuna riga. */
+"registro.marcia_ordinata" = "Giorno %1$d: %2$@ marcia in riga %3$d, casella %4$d";
+"registro.presidio_ordinato" = "Giorno %1$d: %2$@ presidia in riga %3$d, casella %4$d";
+"registro.ordine_annullato" = "Giorno %d: ordine annullato";
+"registro.giornata_azzerata" = "Giorno %d: ordini della giornata azzerati";
 "registro.titolo" = "Registro della campagna";
 "registro.vuoto" = "Il registro non contiene ancora alcun fatto";
 "registro.senza_luogo" = "Questa voce non riguarda un luogo della mappa";
+"registro.con_luogo" = "Attiva per portare il fuoco sul luogo del fatto";
 "registro.apri" = "Registro della campagna";
 "registro.chiudi" = "Chiudi il registro";
 
@@ -199,6 +204,7 @@
 "campagna.azzerato_conferma" = "Ordini della giornata azzerati";
 "campagna.niente_da_annullare" = "Niente da annullare in questa giornata";
 "campagna.slot_incompatibile" = "La campagna salvata appartiene a valori di versione %@ e questa versione usa %@: non può essere aperta";
+"campagna.slot_schema_incompatibile" = "La campagna salvata è stata scritta in un formato precedente e non può essere aperta. Comincia una campagna nuova";
 
 /* Pannello della casella (00 §7.4, 02 §9). Un'azione impossibile in ogni sua
    forma non compare affatto (02 §9.5). */

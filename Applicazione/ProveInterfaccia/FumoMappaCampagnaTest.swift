@@ -47,12 +47,14 @@ final class FumoMappaCampagnaTest: XCTestCase {
         // (`MappaCampagnaAccessibileTest`), dove è osservabile per identità.
         // L'osservazione sul tocco grezzo è registrata (registro degli scostamenti).
 
-        // Il registro si apre e contiene la voce di apertura della giornata (02 §6.6).
+        // Il registro si apre. All'apertura della campagna non è ancora avvenuto
+        // nulla — l'apertura della giornata NON è un fatto da annotare (02 §6.6) —
+        // e il registro lo dichiara invece di presentarsi muto (00 §9.1).
         app.buttons["Registro della campagna"].tap()
-        let voce = app.descendants(matching: .any)
-            .matching(NSPredicate(format: "label BEGINSWITH %@", "Giorno 1")).firstMatch
-        XCTAssertTrue(voce.waitForExistence(timeout: 5),
-                      "ogni voce del registro è un elemento a sé che dichiara il giorno")
+        let vuoto = app.descendants(matching: .any)
+            .matching(NSPredicate(format: "label CONTAINS %@", "non contiene ancora")).firstMatch
+        XCTAssertTrue(vuoto.waitForExistence(timeout: 5),
+                      "il registro vuoto lo dichiara")
         app.buttons["Chiudi il registro"].tap()
         XCTAssertTrue(primaCasella.waitForExistence(timeout: 5), "si torna alla mappa")
     }

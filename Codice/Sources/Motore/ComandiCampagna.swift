@@ -11,11 +11,15 @@ import Dati
 /// restare fermi. Le altre quattordici appartengono alle unità che le introducono
 /// e non si dichiarano a vuoto.
 public enum ComandoCampagna: Hashable, Codable, Sendable {
-    /// Marcia in una casella adiacente (01 §5.6.1). In questa unità lo scatto
-    /// costa sempre una giornata: il costo in giorni, che dipende dal terreno,
-    /// dalla strada e dal volume della colonna (01 §5.6.3.2), è dell'unità
-    /// successiva insieme alla marcia lunga.
-    case marcia(gruppo: IdGruppo, a: Cella)
+    /// Marcia in una casella adiacente (01 §5.6.1), con il COSTO IN GIORNI dello
+    /// scatto (01 §5.6.3.1). Il costo viaggia dentro il comando e non si ricalcola
+    /// alla riapplicazione: il giornale è anche il formato di salvataggio, e una
+    /// campagna ripresa deve ripercorrere gli scatti che è costata, non quelli che
+    /// costerebbero oggi. Il valore viene dai dati (`marcia-campagna.json`) e in
+    /// questa unità vale sempre uno: la marcia lunga, i pesi della casella di
+    /// partenza e di arrivo, il volume della colonna, la strada e la strettoia
+    /// (01 §5.6.3.2, §5.6.3.3) appartengono all'unità successiva.
+    case marcia(gruppo: IdGruppo, a: Cella, giorni: Int)
     /// Presidio: restare fermi in guardia (01 §5.6.0.6, §5.6.8.1). Stare fermi è
     /// un'azione ordinabile e non un'omissione: un gruppo che non ha agito è
     /// sempre un gruppo che attende una decisione.
@@ -39,6 +43,16 @@ public enum MotivoNonValidoCampagna: String, Codable, Hashable, Sendable, CaseIt
     case fuoriMappa = "casella.fuori_mappa"
     /// Nuovo della campagna: il gruppo indicato non esiste o non è del giocatore.
     case gruppoIgnoto = "comando.non_valido.gruppo_ignoto"
+    /// Nuovo della campagna: il costo in giorni dichiarato dal comando non è
+    /// quello che i dati prescrivono per quello scatto (01 §5.6.3.1). Non nasce
+    /// da un gesto del giocatore — la Presentazione il costo lo chiede al Motore —
+    /// ma da un giornale estraneo o manomesso, e va dichiarato come ogni altro
+    /// rifiuto invece di essere applicato in silenzio.
+    case costoNonCoerente = "comando.non_valido.costo_non_coerente"
+    /// Nuovo della campagna: l'annullamento non retrocede oltre la giornata in
+    /// corso (05 §6.5). Non è il rifiuto di un comando ma di un annullamento, e
+    /// riusa questo insieme perché il vocabolario dei motivi è uno solo (00 §9.4).
+    case oltreLaGiornataInCorso = "campagna.non_si_torna_oltre_la_giornata"
 }
 
 /// Esito della validazione di un comando di campagna: la validazione e l'anteprima

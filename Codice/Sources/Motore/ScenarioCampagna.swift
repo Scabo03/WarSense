@@ -75,16 +75,13 @@ public enum FabbricaCampagna {
             prossimoNome += 1
         }
 
-        // Il primo giorno si apre come ogni altro, e la sua apertura è il primo
-        // fatto del registro (01 §5.17.1): senza, il registro nascerebbe muto e
-        // la prima giornata sarebbe l'unica non annotata.
-        var stato = StatoCampagna(mappa: mappa, giorno: 1, gruppi: gruppi,
-                                  prossimoIdGruppo: prossimoId,
-                                  prossimoIndiceNome: prossimoNome,
-                                  registro: [], prossimoNumeroVoce: 0)
-        stato.registro.append(VoceRegistro(numero: 0, giorno: 1,
-                                           fatto: .giornataAperta, luogo: nil))
-        stato.prossimoNumeroVoce = 1
-        return stato
+        // Il registro nasce vuoto e la schermata lo dichiara: l'apertura di una
+        // giornata non è un fatto da annotare, perché il giorno è una proprietà di
+        // ciascuna voce (02 §6.6) e un elemento che dichiarasse soltanto l'inizio
+        // di una giornata occuperebbe una posizione senza portare informazione.
+        return StatoCampagna(mappa: mappa, giorno: 1, gruppi: gruppi,
+                             prossimoIdGruppo: prossimoId,
+                             prossimoIndiceNome: prossimoNome,
+                             registro: [], prossimoNumeroVoce: 0)
     }
 }

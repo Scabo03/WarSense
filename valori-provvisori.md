@@ -83,7 +83,11 @@ MISURA dall'accertamento sugli esiti degli scontri: con l'`ufficiale_prova` di f
 
 ## Valori della campagna — prima unità della fase D
 
-Questa unità introduce POCHISSIMI numeri, ed è voluto: le grandezze della campagna — costo in giorni dello scatto, pesi della casella di partenza e di arrivo, costo fisso della strettoia, effetto del tipo di strada, autonomia, malus della marcia forzata e della mancanza di provviste, decadimento della conoscenza (03 §4.1–4.9) — appartengono tutte a unità successive e restano da determinare come il documento 03 le registra. Introdurne uno adesso, senza il codice che lo mette alla prova, significherebbe inventare un numero.
+Questa unità introduce POCHISSIMI numeri, ed è voluto: le grandezze della campagna — costo in giorni dello scatto, pesi della casella di partenza e di arrivo, costo fisso della strettoia, effetto del tipo di strada, autonomia, malus della marcia forzata e della mancanza di provviste, decadimento della conoscenza (03 §4.1–4.9) — appartengono tutte a unità successive e restano da determinare come il documento 03 le registra. Introdurne uno adesso, senza il codice che lo mette alla prova, significherebbe inventare un numero. UNA eccezione, aggiunta nella seconda unità: il costo in giorni dello scatto, che non è un numero nuovo ma il valore esplicito di ciò che il codice già faceva implicitamente, ed è iscritto qui sotto.
+
+### marcia-campagna.json — PROVVISORIO
+
+- `costo_giorni_base` (1): PROVVISORIO. È il costo in giorni dello scatto fra due caselle adiacenti (01 §5.6.3.1). Il valore uno realizza il CASO PARTICOLARE della prima unità e non è una regola: 01 §5.6.3.2 stabilisce che sulla medesima grandezza agiscano, in un solo numero e senza regole che si sommino in modo opaco, la natura della casella di partenza e quella di arrivo con pesi distinti, il volume della colonna, il tipo di strada e il costo fisso della strettoia. Nessuno di quei fattori esiste ancora; quando esisteranno, questa voce si scomporrà nei loro pesi e il costo cesserà di valere uno. Da tarare in sede di definizione dei valori, insieme al resto di 01 §16.3 («il costo in giorni dello scatto per tipo di terreno e di strada, con i pesi rispettivi della casella di partenza e di arrivo»). Il minimo di uno è FISSATO da 00 §13.6 e imposto dal caricatore. Decisione architetturale: RDA-75.
 
 ### formati-mappa.json — FISSATI
 

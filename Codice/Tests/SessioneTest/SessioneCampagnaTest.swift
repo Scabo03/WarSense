@@ -75,7 +75,7 @@ final class SessioneCampagnaTest: XCTestCase {
                 let destinazioni = vista.destinazioniValide(per: gruppo.id)
                 let comando: ComandoCampagna = destinazioni.isEmpty
                     ? .presidio(gruppo: gruppo.id)
-                    : .marcia(gruppo: gruppo.id, a: destinazioni[gruppo.id.numero % destinazioni.count])
+                    : .marcia(gruppo: gruppo.id, a: destinazioni[gruppo.id.numero % destinazioni.count], giorni: 1)
                 _ = try await sessione.esegui(comando, parte: .giocatore)
             }
         }
@@ -147,27 +147,40 @@ final class SessioneCampagnaTest: XCTestCase {
 
     // MARK: - 05 §6.4, 00 §13.8 — annullamento e azzeramento
 
+    /// La PARTITA torna dov'era; il registro no, perché l'annullamento è a sua
+    /// volta un fatto avvenuto e resta annotato (01 §5.17). L'impronta comprende il
+    /// registro, e il confronto si fa quindi sulle posizioni e sul giorno.
+    private func partita(_ stato: StatoCampagna) -> String {
+        stato.gruppiOrdinati
+            .map { "\($0.id.numero)@\($0.posizione.riga)-\($0.posizione.colonna):\($0.azioneSpesa)" }
+            .joined(separator: "|") + "#giorno=\(stato.giorno)"
+    }
+
     func test_05_6_4_l_annullamento_ritira_l_ultimo_ordine_e_ricostruisce_lo_stato() async throws {
         let sessione = try await nuova(try slot(), scenario())
-        let prima = await sessione.impronta()
+        let prima = await partita(sessione.stato)
+        let improntaPrima = await sessione.impronta()
         let id = await sessione.stato.gruppiOrdinati[0].id
-        _ = try await sessione.esegui(.marcia(gruppo: id, a: Cella(riga: 10, colonna: 7)),
+        _ = try await sessione.esegui(.marcia(gruppo: id, a: Cella(riga: 10, colonna: 7), giorni: 1),
                                       parte: .giocatore)
         let dopo = await sessione.impronta()
-        XCTAssertNotEqual(dopo, prima)
+        XCTAssertNotEqual(dopo, improntaPrima)
         try await sessione.annulla(parte: .giocatore)
-        let ripristinata = await sessione.impronta()
+        let ripristinata = await partita(sessione.stato)
         XCTAssertEqual(ripristinata, prima, "l'annullamento riporta esattamente allo stato di prima")
+        let registro = await sessione.stato.registro
+        XCTAssertEqual(registro.last?.fatto, .ordineAnnullato,
+                       "l'annullamento resta annotato: è un fatto avvenuto")
     }
 
     func test_05_6_4_l_azzeramento_ritira_tutti_gli_ordini_della_giornata() async throws {
         let sessione = try await nuova(try slot(), scenario(gruppi: [(10, 6), (10, 5), (9, 6)]))
-        let apertura = await sessione.impronta()
+        let apertura = await partita(sessione.stato)
         let ids = await sessione.stato.gruppiOrdinati.map(\.id)
         _ = try await sessione.esegui(.presidio(gruppo: ids[0]), parte: .giocatore)
         _ = try await sessione.esegui(.presidio(gruppo: ids[1]), parte: .giocatore)
         try await sessione.azzera(parte: .giocatore)
-        let dopo = await sessione.impronta()
+        let dopo = await partita(sessione.stato)
         XCTAssertEqual(dopo, apertura, "la giornata torna com'era all'apertura")
     }
 
@@ -181,10 +194,10 @@ final class SessioneCampagnaTest: XCTestCase {
         let sessione = try await nuova(try slot(), scenario(gruppi: [(10, 6), (10, 5), (9, 6)]))
         let ids = await sessione.stato.gruppiOrdinati.map(\.id)
         _ = try await sessione.esegui(.presidio(gruppo: ids[0]), parte: .giocatore)
-        let dopoIlPrimo = await sessione.impronta()
+        let dopoIlPrimo = await partita(sessione.stato)
         _ = try await sessione.esegui(.presidio(gruppo: ids[1]), parte: .giocatore)
         try await sessione.annulla(parte: .giocatore)
-        let dopoAnnullamento = await sessione.impronta()
+        let dopoAnnullamento = await partita(sessione.stato)
         XCTAssertEqual(dopoAnnullamento, dopoIlPrimo,
                        "si ritira l'ultimo ordine, non due")
     }
@@ -193,7 +206,7 @@ final class SessioneCampagnaTest: XCTestCase {
         let cartella = try slot()
         let sessione = try await nuova(cartella, scenario())
         let id = await sessione.stato.gruppiOrdinati[0].id
-        _ = try await sessione.esegui(.marcia(gruppo: id, a: Cella(riga: 10, colonna: 7)),
+        _ = try await sessione.esegui(.marcia(gruppo: id, a: Cella(riga: 10, colonna: 7), giorni: 1),
                                       parte: .giocatore)
         try await sessione.annulla(parte: .giocatore)
         let contenuto = try String(contentsOf: cartella.appendingPathComponent("giornale.jsonl"),

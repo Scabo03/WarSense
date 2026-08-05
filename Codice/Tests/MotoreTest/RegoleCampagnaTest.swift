@@ -142,8 +142,11 @@ final class RegoleCampagnaTest: XCTestCase {
 
     // MARK: - 01 §5.6.0.2 — uscite libere e caselle di bordo sono due cose diverse
 
-    /// Fissa la semantica di «caselle raggiungibili in una giornata», che il
-    /// resoconto della prima unità aveva confuso con «caselle di bordo».
+    /// Fissa la semantica delle USCITE LIBERE, che il resoconto della prima unità
+    /// aveva confuso con le «caselle di bordo». Il nome precedente — «caselle
+    /// raggiungibili in una giornata» — presupponeva inoltre l'identità fra una
+    /// casella e una giornata, che non è una regola ma il caso particolare
+    /// prodotto dal costo in giorni pari a uno (01 §5.6.3.1).
     ///
     /// Le due grandezze differiscono, e differiscono di poco: una casella INTERNA
     /// adiacente a un proprio gruppo ha quattro vicine ma tre uscite libere,
@@ -173,7 +176,7 @@ final class RegoleCampagnaTest: XCTestCase {
             XCTAssertEqual(interne, (formato.righe - 2) * (formato.colonne - 2))
 
             let conMenoDiQuattroUscite = griglia.tutteLeCaselle.filter {
-                vista.caselleRaggiungibiliInUnaGiornata(da: $0).count < 4
+                vista.usciteLibere(da: $0).count < 4
             }
             let interneConMenoDiQuattro = conMenoDiQuattroUscite.filter { !diBordo($0) }
             XCTAssertEqual(interneConMenoDiQuattro.count, 1,
@@ -202,10 +205,10 @@ final class RegoleCampagnaTest: XCTestCase {
             gruppiGiocatore: [.init(riga: qg.riga, colonna: qg.colonna),
                               .init(riga: vicina.riga, colonna: vicina.colonna - 1)]))
         let secondo = stato.gruppiOrdinati[1].id
-        XCTAssertTrue(motore.valida(.marcia(gruppo: secondo, a: vicina),
+        XCTAssertTrue(motore.valida(.marcia(gruppo: secondo, a: vicina, giorni: 1),
                                     parte: .giocatore, stato: stato).eValido,
                       "la casella accanto al gruppo si raggiunge come qualunque altra")
-        esegui(.marcia(gruppo: secondo, a: vicina), &stato)
+        esegui(.marcia(gruppo: secondo, a: vicina, giorni: 1), &stato)
         XCTAssertEqual(stato.gruppi[secondo]!.posizione, vicina)
         // E la si raggiunge anche dal gruppo che le sta a sud, una volta libera.
         XCTAssertEqual(stato.griglia.vicini(di: vicina).count, 4,
@@ -221,7 +224,7 @@ final class RegoleCampagnaTest: XCTestCase {
         XCTAssertTrue(stato.gruppi[id]!.azioneSpesa)
         XCTAssertEqual(motore.valida(.presidio(gruppo: id), parte: .giocatore, stato: stato).motivo,
                        .azioneGiaSpesa, "un gruppo non agisce due volte nella stessa giornata")
-        XCTAssertEqual(motore.valida(.marcia(gruppo: id, a: Cella(riga: 9, colonna: 6)),
+        XCTAssertEqual(motore.valida(.marcia(gruppo: id, a: Cella(riga: 9, colonna: 6), giorni: 1),
                                      parte: .giocatore, stato: stato).motivo,
                        .azioneGiaSpesa, "vale per qualunque azione, non solo per quella già scelta")
     }
@@ -230,7 +233,7 @@ final class RegoleCampagnaTest: XCTestCase {
         var stato = try crea(scenario())
         let id = stato.gruppiOrdinati[0].id
         let partenza = stato.gruppi[id]!.posizione
-        esegui(.marcia(gruppo: id, a: Cella(riga: 10, colonna: 7)), &stato)
+        esegui(.marcia(gruppo: id, a: Cella(riga: 10, colonna: 7), giorni: 1), &stato)
         XCTAssertEqual(stato.gruppi[id]!.posizione, Cella(riga: 10, colonna: 7))
         XCTAssertNotEqual(stato.gruppi[id]!.posizione, partenza)
         XCTAssertTrue(stato.gruppi[id]!.azioneSpesa)
@@ -241,10 +244,10 @@ final class RegoleCampagnaTest: XCTestCase {
         let id = stato.gruppiOrdinati[0].id
         let posizione = stato.gruppi[id]!.posizione
         let lontana = Cella(riga: posizione.riga - 2, colonna: posizione.colonna)
-        XCTAssertEqual(motore.valida(.marcia(gruppo: id, a: lontana),
+        XCTAssertEqual(motore.valida(.marcia(gruppo: id, a: lontana, giorni: 1),
                                      parte: .giocatore, stato: stato).motivo, .nonAdiacente)
         let diagonale = Cella(riga: posizione.riga - 1, colonna: posizione.colonna - 1)
-        XCTAssertEqual(motore.valida(.marcia(gruppo: id, a: diagonale),
+        XCTAssertEqual(motore.valida(.marcia(gruppo: id, a: diagonale, giorni: 1),
                                      parte: .giocatore, stato: stato).motivo, .nonAdiacente,
                        "la diagonale non è adiacenza (01 §5.1)")
     }
@@ -254,18 +257,18 @@ final class RegoleCampagnaTest: XCTestCase {
         let primo = stato.gruppiOrdinati[0].id
         let secondo = stato.gruppiOrdinati[1].id
         let dove = stato.gruppi[secondo]!.posizione
-        XCTAssertEqual(motore.valida(.marcia(gruppo: primo, a: dove),
+        XCTAssertEqual(motore.valida(.marcia(gruppo: primo, a: dove, giorni: 1),
                                      parte: .giocatore, stato: stato).motivo, .occupata)
         // Liberata la casella, la marcia diventa valida: il divieto è di posizione.
-        esegui(.marcia(gruppo: secondo, a: Cella(riga: 9, colonna: 5)), &stato)
-        XCTAssertTrue(motore.valida(.marcia(gruppo: primo, a: dove),
+        esegui(.marcia(gruppo: secondo, a: Cella(riga: 9, colonna: 5), giorni: 1), &stato)
+        XCTAssertTrue(motore.valida(.marcia(gruppo: primo, a: dove, giorni: 1),
                                     parte: .giocatore, stato: stato).eValido)
     }
 
     func test_01_5_1_la_marcia_fuori_mappa_e_respinta_con_il_proprio_motivo() throws {
         let stato = try crea(scenario(mappa: "guado", gruppi: [(4, 2)]))
         let id = stato.gruppiOrdinati[0].id
-        XCTAssertEqual(motore.valida(.marcia(gruppo: id, a: Cella(riga: 5, colonna: 2)),
+        XCTAssertEqual(motore.valida(.marcia(gruppo: id, a: Cella(riga: 5, colonna: 2), giorni: 1),
                                      parte: .giocatore, stato: stato).motivo, .fuoriMappa)
     }
 
@@ -341,16 +344,43 @@ final class RegoleCampagnaTest: XCTestCase {
 
     // MARK: - 01 §5.17 — il registro
 
-    func test_01_5_17_il_registro_annota_i_fatti_non_decisi_dal_giocatore() throws {
+    /// Il registro annota ciò che avviene nel perimetro di questa unità, cioè gli
+    /// ordini impartiti ai gruppi (scostamento S8, RDA-72). Nasce vuoto: senza
+    /// fatti non c'è nulla da annotare.
+    func test_01_5_17_il_registro_annota_gli_ordini_impartiti_ai_gruppi() throws {
+        var stato = try crea(scenario(gruppi: [(10, 6), (10, 5)]))
+        XCTAssertTrue(stato.registro.isEmpty, "il registro nasce vuoto: nulla è ancora avvenuto")
+        let ids = stato.gruppiOrdinati.map(\.id)
+        esegui(.presidio(gruppo: ids[0]), &stato)
+        XCTAssertEqual(stato.registro.count, 1, "l'ordine impartito è un fatto avvenuto")
+        XCTAssertEqual(stato.registro[0].giorno, 1, "la voce dichiara il giorno cui si riferisce")
+        guard case .presidioOrdinato(let nome, let casella) = stato.registro[0].fatto else {
+            return XCTFail("il fatto annotato non è l'ordine di presidio")
+        }
+        XCTAssertEqual(nome, stato.gruppi[ids[0]]!.nome)
+        XCTAssertEqual(casella, Cella(riga: 10, colonna: 6))
+        XCTAssertEqual(stato.registro[0].luogo, casella, "la voce porta al luogo del fatto")
+
+        esegui(.marcia(gruppo: ids[1], a: Cella(riga: 9, colonna: 5), giorni: 1), &stato)
+        XCTAssertEqual(stato.registro.count, 2)
+        XCTAssertEqual(stato.registro[1].luogo, Cella(riga: 9, colonna: 5),
+                       "il luogo della marcia è la casella di arrivo")
+    }
+
+    /// Il giorno è una PROPRIETÀ di ciascuna voce e non una voce a sé: l'apertura
+    /// di una giornata non produce alcuna riga di registro (02 §6.6).
+    func test_02_6_6_l_apertura_della_giornata_non_e_una_voce_di_registro() throws {
         var stato = try crea(scenario(gruppi: [(10, 6)]))
-        XCTAssertEqual(stato.registro.count, 1, "l'apertura del primo giorno è già annotata")
-        XCTAssertEqual(stato.registro[0].giorno, 1)
         let id = stato.gruppiOrdinati[0].id
         esegui(.presidio(gruppo: id), &stato)
-        XCTAssertEqual(stato.registro.count, 2, "l'apertura della giornata nuova è un fatto")
-        XCTAssertEqual(stato.registro[1].giorno, 2, "la voce dichiara il giorno cui si riferisce")
-        // Gli ordini del giocatore non vi entrano (01 §5.17.1).
-        XCTAssertTrue(stato.registro.allSatisfy { $0.fatto == .giornataAperta })
+        XCTAssertEqual(stato.giorno, 2, "la giornata si è chiusa e la nuova si è aperta")
+        XCTAssertEqual(stato.registro.count, 1,
+                       "una voce sola: l'ordine. L'apertura della giornata non ne aggiunge")
+        XCTAssertTrue(stato.registro.allSatisfy {
+            if case .marciaOrdinata = $0.fatto { return true }
+            if case .presidioOrdinato = $0.fatto { return true }
+            return false
+        }, "nessuna voce di calendario nel registro")
     }
 
     func test_02_6_6_il_registro_si_legge_dal_piu_recente_al_meno_recente() throws {
@@ -358,9 +388,12 @@ final class RegoleCampagnaTest: XCTestCase {
         let id = stato.gruppiOrdinati[0].id
         for _ in 0..<3 { esegui(.presidio(gruppo: id), &stato) }
         let vista = VistaCampagna(motore: motore, stato: stato, parte: .giocatore)
+        let numeri = vista.registroDalPiuRecente.map(\.numero)
+        XCTAssertEqual(numeri, numeri.sorted(by: >), "dal più recente al meno recente")
         let giorni = vista.registroDalPiuRecente.map(\.giorno)
-        XCTAssertEqual(giorni, giorni.sorted(by: >), "dal più recente al meno recente")
-        XCTAssertEqual(giorni.first, stato.giorno)
+        XCTAssertEqual(giorni, giorni.sorted(by: >), "i giorni scendono con le voci")
+        XCTAssertEqual(giorni.first, stato.giorno - 1,
+                       "l'ultimo ordine appartiene alla giornata che ha chiuso")
     }
 
     // MARK: - 00 §3.1 — determinismo
@@ -368,7 +401,7 @@ final class RegoleCampagnaTest: XCTestCase {
     func test_00_3_1_stesso_comando_su_stesso_stato_stesso_esito() throws {
         let stato = try crea(scenario())
         let id = stato.gruppiOrdinati[0].id
-        let comando = ComandoCampagna.marcia(gruppo: id, a: Cella(riga: 10, colonna: 7))
+        let comando = ComandoCampagna.marcia(gruppo: id, a: Cella(riga: 10, colonna: 7), giorni: 1)
         let (unoStato, unoEventi) = motore.applica(comando, parte: .giocatore, stato: stato)
         let (dueStato, dueEventi) = motore.applica(comando, parte: .giocatore, stato: stato)
         XCTAssertEqual(unoStato.impronta(), dueStato.impronta())
@@ -378,9 +411,9 @@ final class RegoleCampagnaTest: XCTestCase {
     func test_05_2_9_l_impronta_distingue_stati_che_si_comportano_diversamente() throws {
         let stato = try crea(scenario(gruppi: [(10, 6), (10, 5)]))
         let ids = stato.gruppiOrdinati.map(\.id)
-        let (a, _) = motore.applica(.marcia(gruppo: ids[0], a: Cella(riga: 9, colonna: 6)),
+        let (a, _) = motore.applica(.marcia(gruppo: ids[0], a: Cella(riga: 9, colonna: 6), giorni: 1),
                                     parte: .giocatore, stato: stato)
-        let (b, _) = motore.applica(.marcia(gruppo: ids[0], a: Cella(riga: 10, colonna: 7)),
+        let (b, _) = motore.applica(.marcia(gruppo: ids[0], a: Cella(riga: 10, colonna: 7), giorni: 1),
                                     parte: .giocatore, stato: stato)
         XCTAssertNotEqual(a.impronta(), b.impronta(), "posizioni diverse, impronte diverse")
         let (c, _) = motore.applica(.presidio(gruppo: ids[0]), parte: .giocatore, stato: stato)

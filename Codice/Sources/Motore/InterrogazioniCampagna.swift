@@ -21,14 +21,65 @@ public struct VistaCampagna: Sendable {
     public func eStrettoia(_ casella: Cella) -> Bool { stato.mappa.strettoia == casella }
     public func quartierGeneraleSu(_ casella: Cella) -> Parte? { stato.mappa.quartierGeneraleSu(casella) }
 
+    /// Ciò che una casella dichiara, in UN SOLO elenco ordinato e in un solo punto
+    /// del programma (02 §3.8.1, principio 7).
+    ///
+    /// Prima esistevano tre enumerazioni parallele delle stesse caratteristiche —
+    /// quella che le annunciava, quella che decideva se dire «libera» e quella che
+    /// le disegnava — e nulla obbligava a tenerle allineate: una caratteristica
+    /// aggiunta all'una e dimenticata nelle altre sarebbe stata una divergenza fra
+    /// il piano visivo e quello sonoro, che è la classe di difetto che 00 §1.2
+    /// vieta. Con un elenco solo la divergenza è impossibile per COSTRUZIONE e non
+    /// per disciplina: chi aggiunge un caso all'enumerativo è obbligato dal
+    /// compilatore a dargli una frase e un segno (RDA-74).
+    ///
+    /// L'ordine è quello registrato da 02 §3.8.1, ridotto a ciò che esiste in
+    /// questa unità: occupante, quartier generale (che occupa il posto delle opere,
+    /// RDA-63), terreno, strada, note di zona. Le voci che non si applicano si
+    /// saltano senza lasciare traccia; i tagli di verbosità partono dalla coda.
+    public enum VoceDiCasella: Hashable, Sendable {
+        case occupante(Gruppo)
+        case quartierGenerale(Parte)
+        case terreno(TerrenoCasella)
+        case strada(TipoStrada)
+        case strettoia
+    }
+
+    public func vociDiCasella(_ casella: Cella) -> [VoceDiCasella] {
+        var voci: [VoceDiCasella] = []
+        if let gruppo = occupante(di: casella) { voci.append(.occupante(gruppo)) }
+        if let parte = quartierGeneraleSu(casella) { voci.append(.quartierGenerale(parte)) }
+        let terreno = terreno(di: casella)
+        if terreno != .aperto { voci.append(.terreno(terreno)) }
+        let strada = strada(di: casella)
+        if strada != .nessuna { voci.append(.strada(strada)) }
+        if eStrettoia(casella) { voci.append(.strettoia) }
+        return voci
+    }
+
     // MARK: - Destinazioni
+
+    /// Il costo in giorni dello scatto verso una casella adiacente (01 §5.6.3.1).
+    /// La Presentazione non lo calcola mai: lo chiede qui (00 §3.2).
+    public func costoInGiorni(da partenza: Cella, a arrivo: Cella) -> Int {
+        motore.costoInGiorni(da: partenza, a: arrivo, stato: stato)
+    }
+
+    /// Il comando di marcia già formato, con il costo che i dati prescrivono: è
+    /// l'unico modo in cui la Presentazione lo costruisce, così che il costo non
+    /// possa essere inventato altrove (00 §3.2, 00 §13.1).
+    public func comandoDiMarcia(per id: IdGruppo, a casella: Cella) -> ComandoCampagna? {
+        guard let gruppo = stato.gruppi[id] else { return nil }
+        return .marcia(gruppo: id, a: casella,
+                       giorni: costoInGiorni(da: gruppo.posizione, a: casella))
+    }
 
     /// Le destinazioni valide per un gruppo, in ordine di lettura. È l'anteprima
     /// annunciata (05 §3.2) e alimenta la designazione sulla mappa (02 §9.2.1).
     public func destinazioniValide(per id: IdGruppo) -> [Cella] {
         guard let gruppo = stato.gruppi[id] else { return [] }
         return stato.griglia.vicini(di: gruppo.posizione)
-            .filter { motore.valida(.marcia(gruppo: id, a: $0), parte: parte, stato: stato).eValido }
+            .filter { anteprimaMarcia(da: id, a: $0).eValido }
             .sorted()
     }
 
@@ -38,7 +89,10 @@ public struct VistaCampagna: Sendable {
 
     /// L'esito di validazione di una marcia sulla casella: l'anteprima annunciata.
     public func anteprimaMarcia(da id: IdGruppo, a casella: Cella) -> EsitoValidazioneCampagna {
-        motore.valida(.marcia(gruppo: id, a: casella), parte: parte, stato: stato)
+        guard let comando = comandoDiMarcia(per: id, a: casella) else {
+            return .nonValido(.gruppoIgnoto)
+        }
+        return motore.valida(comando, parte: parte, stato: stato)
     }
 
     // MARK: - Orientamento (01 §5.16)
@@ -97,9 +151,16 @@ public struct VistaCampagna: Sendable {
 
     // MARK: - Misure di percorribilità (per il programma di verifica)
 
-    /// Le caselle raggiungibili da una casella entro una giornata: con una sola
-    /// azione per gruppo e uno scatto di una casella, sono i vicini validi.
-    public func caselleRaggiungibiliInUnaGiornata(da casella: Cella) -> [Cella] {
+    /// Le USCITE LIBERE di una casella: i vicini ortogonali non occupati.
+    ///
+    /// Si chiamava «caselle raggiungibili in una giornata», e quel nome
+    /// presupponeva l'identità fra una casella e una giornata, che non è una regola
+    /// ma il caso particolare prodotto dal costo in giorni pari a uno (01 §5.6.3.1).
+    /// Con un costo maggiore la stessa casella resterebbe un'uscita libera senza
+    /// essere raggiungibile in una giornata, e il nome direbbe il falso: è la stessa
+    /// classe di errore delle caselle di bordo scambiate per quelle con meno di
+    /// quattro uscite.
+    public func usciteLibere(da casella: Cella) -> [Cella] {
         stato.griglia.vicini(di: casella)
             .filter { stato.occupante(di: $0, parte: parte) == nil }
             .sorted()
