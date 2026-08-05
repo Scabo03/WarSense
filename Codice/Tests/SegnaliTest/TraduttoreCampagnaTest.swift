@@ -101,8 +101,8 @@ final class TraduttoreCampagnaTest: XCTestCase {
     }
 
     func test_02_6_6_ogni_fatto_del_registro_ha_la_propria_frase_compiuta() throws {
-        for fatto in FattoRegistrato.allCases {
-            let voce = VoceRegistro(numero: 0, giorno: 7, fatto: fatto, luogo: nil)
+        for fatto in FattoRegistrato.casiDiRiferimento {
+            let voce = VoceRegistro(numero: 0, giorno: 7, fatto: fatto)
             let frase = traduttore.voceDiRegistro(voce)
             XCTAssertFalse(frase.testo.contains(Testi.segnaposto), "manca la frase per \(fatto)")
             XCTAssertTrue(frase.testo.contains("7"), "la voce dichiara il giorno cui si riferisce")

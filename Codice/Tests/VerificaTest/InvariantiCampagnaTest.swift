@@ -122,7 +122,7 @@ final class InvariantiCampagnaTest: XCTestCase {
         var dopo = prima
         dopo.gruppi[id]!.posizione = lontana
         dopo.gruppi[id]!.azioneSpesa = true
-        let violazioni = sonda.controlla(prima: prima, comando: .marcia(gruppo: id, a: lontana),
+        let violazioni = sonda.controlla(prima: prima, comando: .marcia(gruppo: id, a: lontana, giorni: 1),
                                          dopo: dopo, eventi: [], adiacenti: prima.griglia.adiacenti)
         XCTAssertTrue(descrizioni(violazioni).contains { $0 == "movimento_non_adiacente:da=10-6:a=5-1" },
                       "la sonda non vede un movimento fra caselle non adiacenti")
@@ -233,8 +233,8 @@ final class InvariantiCampagnaTest: XCTestCase {
 
     func test_mutante_un_registro_fuori_ordine_viene_visto() throws {
         var guasto = try stato(gruppi: [(10, 6)])
-        guasto.registro.append(VoceRegistro(numero: 1, giorno: 5, fatto: .giornataAperta, luogo: nil))
-        guasto.registro.append(VoceRegistro(numero: 2, giorno: 2, fatto: .giornataAperta, luogo: nil))
+        guasto.registro.append(VoceRegistro(numero: 1, giorno: 5, fatto: .ordineAnnullato))
+        guasto.registro.append(VoceRegistro(numero: 2, giorno: 2, fatto: .ordineAnnullato))
         XCTAssertTrue(descrizioni(sonda.controlla(stato: guasto))
             .contains { $0.hasPrefix("registro_fuori_ordine") })
     }
@@ -324,8 +324,8 @@ final class InvariantiCampagnaTest: XCTestCase {
             }),
             ("registro_fuori_ordine", {
                 sonda.controlla(stato: statoCon { s in
-                    s.registro.append(VoceRegistro(numero: 1, giorno: 5, fatto: .giornataAperta, luogo: nil))
-                    s.registro.append(VoceRegistro(numero: 2, giorno: 2, fatto: .giornataAperta, luogo: nil))
+                    s.registro.append(VoceRegistro(numero: 1, giorno: 5, fatto: .ordineAnnullato))
+                    s.registro.append(VoceRegistro(numero: 2, giorno: 2, fatto: .ordineAnnullato))
                 })
             }),
             ("azione_spesa_due_volte", {
@@ -376,7 +376,7 @@ final class InvariantiCampagnaTest: XCTestCase {
                     s.gruppi[ids[0]]!.posizione = lontana
                     s.gruppi[ids[0]]!.azioneSpesa = true
                 }
-                return sonda.controlla(prima: base, comando: .marcia(gruppo: ids[0], a: lontana),
+                return sonda.controlla(prima: base, comando: .marcia(gruppo: ids[0], a: lontana, giorni: 1),
                                        dopo: dopo, eventi: [], adiacenti: griglia.adiacenti)
             }),
             ("salto_ha_dimenticato", {

@@ -20,12 +20,28 @@ extension Gruppo: CodificabileCanonico {
     }
 }
 
+extension FattoRegistrato: CodificabileCanonico {
+    /// La chiave del testo identifica il caso; poi i suoi valori, nell'ordine
+    /// dichiarato. Due voci di registro che raccontano fatti diversi devono
+    /// produrre byte diversi, altrimenti l'impronta non distingue due cronache.
+    public func codifica(in c: inout CodificatoreCanonico) {
+        c.testo(chiaveTesto)
+        switch self {
+        case .marciaOrdinata(let gruppo, let da, let a):
+            c.testo(gruppo); da.codifica(in: &c); a.codifica(in: &c)
+        case .presidioOrdinato(let gruppo, let casella):
+            c.testo(gruppo); casella.codifica(in: &c)
+        case .ordineAnnullato, .giornataAzzerata:
+            break
+        }
+    }
+}
+
 extension VoceRegistro: CodificabileCanonico {
     public func codifica(in c: inout CodificatoreCanonico) {
         c.intero(Int64(numero))
         c.intero(Int64(giorno))
-        c.testo(fatto.rawValue)
-        c.opzionale(luogo) { cc, cella in cella.codifica(in: &cc) }
+        fatto.codifica(in: &c)
     }
 }
 

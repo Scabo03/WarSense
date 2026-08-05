@@ -45,8 +45,10 @@ public struct FondazioneCampagna: Codable, Sendable {
     public let seme: UInt64
     public let identificatore: String
     public let scenario: ScenarioCampagna
-    /// Versione 1: la prima forma dell'atto di fondazione di una campagna.
-    public static let schemaCorrente = 1
+    /// Versione 2 da quando il comando di marcia trasporta il costo in giorni dello
+    /// scatto (01 §5.6.3.1): un giornale di versione 1 porta comandi di marcia
+    /// senza quel campo e non si riapre, come 00 §15.2 impone.
+    public static let schemaCorrente = 2
 
     public init(versioneSchema: Int, versioneValori: String, versioneTesti: String,
                 seme: UInt64, identificatore: String, scenario: ScenarioCampagna) {
@@ -87,6 +89,17 @@ public enum VoceGiornale: Codable, Sendable {
     /// Marcatore di apertura giornata: bersaglio dell'azzeramento sulla mappa di
     /// campagna (05 §6.4) e punto di conferma (05 §6.5).
     case aperturaGiornata(giorno: Int)
+    /// Un annullamento o un azzeramento avvenuto sulla mappa di campagna.
+    ///
+    /// Serve a due cose insieme, ed è voluto che sia una sola riga. È il FATTO che
+    /// il registro annota (01 §5.17): un annullamento è accaduto, e il giornale è
+    /// l'unico posto dove possa sopravvivere, perché lo stato si ricostruisce
+    /// riapplicando i comandi e un ordine ritirato non lascia in esso alcuna
+    /// traccia. Ed è il CONFINE di 05 §6.5: la sua presenza dopo l'ultima apertura
+    /// di giornata dice che nella giornata corrente è già accaduto qualcosa, e
+    /// quindi che l'ordine con cui la precedente si è chiusa non è più l'ultimo
+    /// gesto del giocatore ma un ordine di una giornata passata.
+    case annullamentoCampagna(giorno: Int, azzeramento: Bool)
 }
 
 /// Una riga del giornale, numerata progressivamente.

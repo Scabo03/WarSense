@@ -47,6 +47,15 @@ public enum CaricatoreCampagna {
             throw ErroreDati(chiave: "errore.dati.nomi_gruppi_incoerenti", file: "nomi-gruppi.json")
         }
 
+        // Il costo in giorni dello scatto (01 §5.6.3.1): valore esplicito nei dati,
+        // mai una costante nel codice (00 §13.1). Il minimo è uno, perché uno scatto
+        // a costo zero sarebbe il difetto sfruttabile che 00 §13.6 vieta.
+        let marcia = try leggi(ValoriMarcia.self, "marcia-campagna.json")
+        guard marcia.costoGiorniBase >= 1 else {
+            throw ErroreDati(chiave: "errore.dati.costo_marcia_incoerente",
+                             file: "marcia-campagna.json")
+        }
+
         // Le mappe sono un albero di file: ciascuna è contenuto a sé (05 §7.6).
         let cartellaDelleMappe = cartella.appendingPathComponent(cartellaMappe)
         let contenuti = (try? FileManager.default.contentsOfDirectory(
@@ -66,7 +75,8 @@ public enum CaricatoreCampagna {
             throw ErroreDati(chiave: "errore.dati.elenco_vuoto", file: cartellaMappe)
         }
 
-        return ValoriCampagna(formatiMappa: formati, mappe: mappe, nomiGruppi: nomi.chiavi)
+        return ValoriCampagna(formatiMappa: formati, mappe: mappe,
+                              nomiGruppi: nomi.chiavi, marcia: marcia)
     }
 
     /// Coerenza di una mappa (05 §7.8): formato noto, caselle dentro i confini e

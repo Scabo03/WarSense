@@ -118,10 +118,22 @@ final class SchermataAvvio: UIViewController {
             do { try await presentaMappa(PartitaCampagna(riprendi: ambiente)) }
             catch let errore as SessioneCampagna.ErroreSessione {
                 // Un salvataggio incompatibile si dichiara e non si apre (00 §15.2).
-                if case .salvataggioIncompatibile(let attesa, let trovata) = errore {
+                // Le due incompatibilità sono distinte: quella dei VALORI, che dice
+                // quali versioni sono in gioco, e quella dello SCHEMA del giornale,
+                // che nasce dal formato di salvataggio e non ha versioni da citare.
+                // Tacere la seconda lascerebbe il giocatore davanti a un comando
+                // che non fa nulla, che è ciò che 00 §15.2 vieta.
+                switch errore {
+                case .salvataggioIncompatibile(let attesa, let trovata):
                     ambiente.segnali.annuncia(TestoLocalizzato(
                         testo: testi.frase("campagna.slot_incompatibile", trovata, attesa).testo,
                         lingua: testi.lingua), interrompente: true)
+                case .schemaIncompatibile:
+                    ambiente.segnali.annuncia(TestoLocalizzato(
+                        testo: testi.frase("campagna.slot_schema_incompatibile").testo,
+                        lingua: testi.lingua), interrompente: true)
+                default:
+                    break
                 }
             } catch { }
         }

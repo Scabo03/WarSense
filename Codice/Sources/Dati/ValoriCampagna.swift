@@ -113,9 +113,37 @@ public struct NomiGruppi: Codable, Hashable, Sendable {
     public let chiavi: [IdentificatoreDati]
 }
 
+/// I valori della marcia (01 §5.6.3.1, §5.6.3.2). La velocità di una colonna si
+/// manifesta come NUMERO DI GIORNI necessari a entrare in una casella adiacente:
+/// non esistono percorsi di più caselle in un turno, e la casella resta l'unità
+/// dello spostamento.
+///
+/// Su quella medesima grandezza — un solo numero, senza regole che si sommino in
+/// modo opaco — agiranno la natura della casella di partenza e quella della casella
+/// di arrivo con pesi distinti, il volume della colonna, il tipo di strada e il
+/// costo fisso della strettoia (01 §5.6.3.2). Nessuno di quei fattori esiste in
+/// questa unità: il costo vale oggi `costo_giorni_base` per ogni coppia di caselle,
+/// ed è una SEMPLIFICAZIONE PROVVISORIA dichiarata, non una regola (valori-provvisori).
+public struct ValoriMarcia: Codable, Hashable, Sendable {
+    /// Il costo in giorni dello scatto fra due caselle adiacenti. Provvisorio: uno.
+    public let costoGiorniBase: Int
+    public init(costoGiorniBase: Int) { self.costoGiorniBase = costoGiorniBase }
+    enum CodingKeys: String, CodingKey { case costoGiorniBase = "costo_giorni_base" }
+}
+
 /// I valori del piano di campagna caricati e validati.
 public struct ValoriCampagna: Sendable {
     public let formatiMappa: [IdentificatoreDati: FormatoMappa]
     public let mappe: [IdentificatoreDati: DefinizioneMappa]
     public let nomiGruppi: [IdentificatoreDati]
+    public let marcia: ValoriMarcia
+
+    public init(formatiMappa: [IdentificatoreDati: FormatoMappa],
+                mappe: [IdentificatoreDati: DefinizioneMappa],
+                nomiGruppi: [IdentificatoreDati], marcia: ValoriMarcia) {
+        self.formatiMappa = formatiMappa
+        self.mappe = mappe
+        self.nomiGruppi = nomiGruppi
+        self.marcia = marcia
+    }
 }

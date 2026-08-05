@@ -10,10 +10,19 @@ import Motore
 /// più recente al meno recente, così che scorrendo si vada indietro nel tempo e ci
 /// si fermi alle cose già sentite.
 ///
-/// Le voci prive di luogo — i fatti di calendario — non sono attivabili: non
-/// esistendo una casella cui saltare, un comando che non porta da nessuna parte
-/// sarebbe peggio della sua assenza. Lo dichiarano nel proprio suggerimento,
+/// Le voci prive di luogo — gli annullamenti — non sono attivabili: non esistendo
+/// una casella cui saltare, un comando che non porta da nessuna parte sarebbe
+/// peggio della sua assenza (RDA-67). Lo dichiarano nel proprio suggerimento,
 /// perché il silenzio non è distinguibile da un difetto (00 §9.1).
+///
+/// Quelle voci sono TESTO STATICO e non pulsanti disabilitati. La distinzione non
+/// è di forma: un pulsante disabilitato disegna il proprio titolo con il colore
+/// dello stato inattivo, che sul fondo della schermata ha un contrasto intorno a
+/// 1,7 contro 1 — leggibile dalla voce e invisibile all'occhio. Era l'immagine
+/// speculare delle tessere accessibili di altezza zero della fase B: là un
+/// elemento visibile e non agganciabile, qui un elemento agganciabile e non
+/// visibile, e in entrambi i casi la divergenza fra i due piani che 00 §1.2 vieta.
+/// Non riguarda i soli ipovedenti di 02 §1.3: riguarda chiunque guardi lo schermo.
 @MainActor
 final class SchermataRegistro: UIViewController {
 
@@ -34,7 +43,8 @@ final class SchermataRegistro: UIViewController {
     }
     required init?(coder: NSCoder) { nil }
 
-    private var pulsantiVoce: [UIButton] = []
+    /// Gli elementi delle voci, nell'ordine dell'elenco: attrezzo per le prove (05 §14.4).
+    private(set) var vociVisibili: [UIView] = []
 
     override func viewDidLoad() {
         super.viewDidLoad()
@@ -75,26 +85,39 @@ final class SchermataRegistro: UIViewController {
         }
 
         for voce in voci {
-            let pulsante = UIButton(type: .system)
-            pulsante.setTitle(voce.frase, for: .normal)
-            pulsante.contentHorizontalAlignment = .leading
-            pulsante.titleLabel?.numberOfLines = 0
-            pulsante.titleLabel?.font = .preferredFont(forTextStyle: .body)
-            pulsante.titleLabel?.adjustsFontForContentSizeCategory = true
-            pulsante.heightAnchor.constraint(greaterThanOrEqualToConstant: 44).isActive = true
-            // Ogni voce è UN elemento che si annuncia in una frase compiuta (02 §6.6).
-            pulsante.accessibilityLabel = voce.frase
+            // Ogni voce è UN elemento che si annuncia in una frase compiuta (02 §6.6),
+            // e in entrambi i casi il testo è disegnato con il colore ordinario del
+            // testo: ciò che la voce legge, l'occhio lo vede.
             if let luogo = voce.luogo {
+                let pulsante = UIButton(type: .system)
+                pulsante.setTitle(voce.frase, for: .normal)
+                pulsante.contentHorizontalAlignment = .leading
+                pulsante.titleLabel?.numberOfLines = 0
+                pulsante.titleLabel?.font = .preferredFont(forTextStyle: .body)
+                pulsante.titleLabel?.adjustsFontForContentSizeCategory = true
+                pulsante.heightAnchor.constraint(greaterThanOrEqualToConstant: 44).isActive = true
+                pulsante.accessibilityLabel = voce.frase
+                pulsante.accessibilityHint = testi.frase("registro.con_luogo").testo
                 pulsante.addAction(UIAction { [weak self] _ in
                     self?.dismiss(animated: false) { self?.alSalto?(luogo) }
                 }, for: .touchUpInside)
+                vociVisibili.append(pulsante)
+                colonna.addArrangedSubview(pulsante)
             } else {
-                pulsante.isEnabled = false
-                pulsante.accessibilityTraits = [.staticText]
-                pulsante.accessibilityHint = testi.frase("registro.senza_luogo").testo
+                let etichetta = UILabel()
+                etichetta.text = voce.frase
+                etichetta.numberOfLines = 0
+                etichetta.font = .preferredFont(forTextStyle: .body)
+                etichetta.adjustsFontForContentSizeCategory = true
+                etichetta.textColor = .label
+                etichetta.isAccessibilityElement = true
+                etichetta.accessibilityLabel = voce.frase
+                etichetta.accessibilityTraits = [.staticText]
+                etichetta.accessibilityHint = testi.frase("registro.senza_luogo").testo
+                etichetta.heightAnchor.constraint(greaterThanOrEqualToConstant: 44).isActive = true
+                vociVisibili.append(etichetta)
+                colonna.addArrangedSubview(etichetta)
             }
-            pulsantiVoce.append(pulsante)
-            colonna.addArrangedSubview(pulsante)
         }
 
         let chiudi = UIButton(type: .system)

@@ -8,6 +8,13 @@ import Dati
 /// si sposta, le partite aperte dei tester non si riaprono più (00 §15).
 /// I campioni committati coprono ogni caso di voce; ogni caso di comando aggiunto
 /// in futuro entra nei campioni nella stessa modifica che lo introduce.
+///
+/// I campioni della CAMPAGNA sono stati riscritti quando il comando di marcia ha
+/// preso il costo in giorni (01 §5.6.3.1): non è una deriva silenziosa del formato
+/// ma un cambiamento deliberato, e la sua contropartita è l'incremento di
+/// `FondazioneCampagna.schemaCorrente` da 1 a 2, che fa dichiarare e non aprire i
+/// giornali di campagna precedenti (00 §15.2). I campioni della BATTAGLIA non sono
+/// stati toccati, e continuano a ricodificarsi byte per byte identici.
 final class CompatibilitaGiornaleTest: XCTestCase {
 
     static let campioni = URL(fileURLWithPath: #filePath).deletingLastPathComponent()
@@ -59,7 +66,8 @@ final class CompatibilitaGiornaleTest: XCTestCase {
         // campioni sono state accodate DOPO che le dodici preesistenti avevano
         // superato la ricodifica byte per byte con i casi nuovi già in enumerativo.
         XCTAssertEqual(casiVoce, ["fondazione", "comando", "inizioTurno",
-                                  "fondazioneCampagna", "comandoCampagna", "aperturaGiornata"],
+                                  "fondazioneCampagna", "comandoCampagna", "aperturaGiornata",
+                                  "annullamentoCampagna"],
                        "un caso di VoceGiornale è stato rinominato o spostato: i salvataggi esistenti non si riaprono (00 §15)")
     }
 

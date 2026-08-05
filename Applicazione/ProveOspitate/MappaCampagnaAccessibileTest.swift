@@ -30,6 +30,13 @@ final class MappaCampagnaAccessibileTest: XCTestCase {
         }
         try await Task.sleep(nanoseconds: 200_000_000)
         finestra.layoutIfNeeded()
+        // Una schermata lasciata con un avviso presentato impedisce le presentazioni
+        // delle prove successive: si congeda tutto alla fine di ciascuna.
+        addTeardownBlock { @MainActor in
+            schermata.presentedViewController?.dismiss(animated: false)
+            finestra.isHidden = true
+            finestra.rootViewController = nil
+        }
         return (schermata, finestra, ambiente)
     }
 
@@ -183,7 +190,7 @@ final class MappaCampagnaAccessibileTest: XCTestCase {
     func test_02_6_6_il_registro_e_un_elenco_di_voci_e_non_una_tabella() async throws {
         let ambiente = try Ambiente()
         let schermata = SchermataRegistro(voci: [
-            .init(frase: "Giorno 2: si apre la giornata", luogo: nil),
+            .init(frase: "Giorno 2: ordine annullato", luogo: nil),
             .init(frase: "Giorno 1: un fatto con luogo", luogo: Cella(riga: 3, colonna: 4)),
         ], testi: ambiente.testi)
         let finestra = UIWindow(frame: Self.schermoPiccolo)
@@ -194,11 +201,12 @@ final class MappaCampagnaAccessibileTest: XCTestCase {
 
         let ordine = LettoreAccessibilita.ordineDiLettura(radice: schermata.view!)
         let etichette = ordine.map { LettoreAccessibilita.etichetta(di: $0) }
-        XCTAssertTrue(etichette.contains("Giorno 2: si apre la giornata"),
+        XCTAssertTrue(etichette.contains("Giorno 2: ordine annullato"),
                       "ogni voce è un elemento a sé che si annuncia in una frase compiuta")
         // La voce senza luogo esiste, si legge, e non si attiva: nulla cui saltare.
-        let senzaLuogo = ordine.first { LettoreAccessibilita.etichetta(di: $0).contains("Giorno 2") }
-        XCTAssertEqual((senzaLuogo as? UIButton)?.isEnabled, false)
+        let senzaLuogo = try XCTUnwrap(ordine.first {
+            LettoreAccessibilita.etichetta(di: $0).contains("Giorno 2") })
+        XCTAssertTrue(senzaLuogo.accessibilityTraits.contains(.staticText))
         let conLuogo = ordine.first { LettoreAccessibilita.etichetta(di: $0).contains("Giorno 1") }
         XCTAssertEqual((conLuogo as? UIButton)?.isEnabled, true,
                        "la voce con un luogo consente di saltarvi (02 §6.6)")
@@ -206,5 +214,74 @@ final class MappaCampagnaAccessibileTest: XCTestCase {
             XCTAssertNil(LettoreAccessibilita.motivoNonAgganciabile(elemento, schermo: finestra.bounds),
                          "voce del registro non agganciabile: «\(LettoreAccessibilita.etichetta(di: elemento))»")
         }
+    }
+
+    /// Il registro contiene gli ordini impartiti ai gruppi, ciascuno con il proprio
+    /// giorno e il proprio luogo (01 §5.17, scostamento S8). Nella prima unità
+    /// conteneva soltanto voci di calendario, e il salto al luogo del fatto non era
+    /// mai esercitabile.
+    func test_01_5_17_il_registro_contiene_gli_ordini_con_il_loro_luogo() async throws {
+        let (schermata, _, ambiente) = try await mappaAperta(taglia: .media)
+        let stato = try XCTUnwrap(schermata.statoPerProva)
+        let gruppo = stato.gruppiOrdinati[0]
+        let destinazione = try XCTUnwrap(
+            stato.griglia.vicini(di: gruppo.posizione).first { stato.occupante(di: $0) == nil })
+        await schermata.eseguiPerProva(
+            .marcia(gruppo: gruppo.id, a: destinazione,
+                    giorni: partitaMotore(schermata).costoInGiorni(da: gruppo.posizione,
+                                                                   a: destinazione, stato: stato)))
+        let dopo = try XCTUnwrap(schermata.statoPerProva)
+        XCTAssertEqual(dopo.registro.count, 1)
+        let voce = try XCTUnwrap(dopo.registro.first)
+        XCTAssertEqual(voce.luogo, destinazione, "la voce porta al luogo del fatto")
+
+        let costruttore = CostruttoreAnnunciCampagna(testi: ambiente.testi,
+                                                     motore: partitaMotore(schermata),
+                                                     stato: dopo, verbosita: .normale)
+        let frase = costruttore.voceDiRegistro(voce)
+        XCTAssertFalse(frase.contains(Testi.segnaposto), "chiave irrisolta nella voce: \(frase)")
+        XCTAssertTrue(frase.contains("\(voce.giorno)"), "la voce dichiara il giorno")
+        XCTAssertTrue(frase.contains(costruttore.nomeGruppo(dopo.gruppi[gruppo.id]!)),
+                      "la voce dichiara quale gruppo: \(frase)")
+    }
+
+    /// Il salto dalla voce al luogo del fatto (02 §6.6), esercitabile per la prima
+    /// volta: il fuoco arriva sulla casella e la casella si annuncia.
+    func test_02_6_6_attivare_una_voce_porta_il_fuoco_sul_luogo_del_fatto() async throws {
+        let (schermata, _, _) = try await mappaAperta(taglia: .media)
+        let stato = try XCTUnwrap(schermata.statoPerProva)
+        let gruppo = stato.gruppiOrdinati[0]
+        let destinazione = try XCTUnwrap(
+            stato.griglia.vicini(di: gruppo.posizione).first { stato.occupante(di: $0) == nil })
+        await schermata.eseguiPerProva(
+            .marcia(gruppo: gruppo.id, a: destinazione,
+                    giorni: partitaMotore(schermata).costoInGiorni(da: gruppo.posizione,
+                                                                   a: destinazione, stato: stato)))
+        schermata.apriRegistroPerProva()
+        for _ in 0..<50 where schermata.presentedViewController == nil {
+            try await Task.sleep(nanoseconds: 20_000_000)
+        }
+        try await Task.sleep(nanoseconds: 100_000_000)
+        let registro = try XCTUnwrap(schermata.presentedViewController as? SchermataRegistro)
+        registro.loadViewIfNeeded()
+        let voce = try XCTUnwrap(registro.vociVisibili.first as? UIButton,
+                                 "la voce con un luogo è attivabile")
+
+        Fuoco.azzeraRegistro()
+        voce.sendActions(for: .touchUpInside)
+        try await Task.sleep(nanoseconds: 300_000_000)
+        XCTAssertNil(schermata.presentedViewController, "il registro si congeda prima del salto")
+        XCTAssertTrue(schermata.registroFuocoPerProva.contains(.richiesto),
+                      "il fuoco è stato portato sul luogo del fatto")
+        // La casella su cui il fuoco arriva si annuncia: la sua etichetta è
+        // completa e dichiara il gruppo che vi si trova.
+        let elemento = try XCTUnwrap(schermata.elementiPerProva[destinazione])
+        let etichetta = try XCTUnwrap(elemento.accessibilityLabel)
+        XCTAssertTrue(etichetta.contains("\(destinazione.riga)"))
+        XCTAssertFalse(etichetta.contains(Testi.segnaposto))
+    }
+
+    private func partitaMotore(_ schermata: SchermataMappaCampagna) -> MotoreCampagna {
+        schermata.motorePerProva
     }
 }

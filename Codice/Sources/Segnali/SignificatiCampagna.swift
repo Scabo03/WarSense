@@ -55,11 +55,20 @@ public struct TraduttoreEventiCampagna: Sendable {
         }
     }
 
-    /// La frase di una voce del registro (02 §6.6): compiuta, con il giorno dichiarato.
+    /// La frase di una voce del registro (02 §6.6): compiuta, con il giorno
+    /// dichiarato, una frase intera per ciascun fatto e mai una somma di parole
+    /// (00 §14.2). È l'UNICO punto del programma che compone le frasi del registro:
+    /// finché ne esistevano due — una qui e una nella Presentazione — nulla
+    /// obbligava le due a dire la stessa cosa.
     public func voceDiRegistro(_ voce: VoceRegistro) -> TestoLocalizzato {
+        let chiave = voce.fatto.chiaveTesto
         switch voce.fatto {
-        case .giornataAperta:
-            return testi.frase("registro.giornata_aperta", voce.giorno)
+        case .marciaOrdinata(let gruppo, _, let a):
+            return testi.frase(chiave, voce.giorno, nome(gruppo), a.riga, a.colonna)
+        case .presidioOrdinato(let gruppo, let casella):
+            return testi.frase(chiave, voce.giorno, nome(gruppo), casella.riga, casella.colonna)
+        case .ordineAnnullato, .giornataAzzerata:
+            return testi.frase(chiave, voce.giorno)
         }
     }
 }

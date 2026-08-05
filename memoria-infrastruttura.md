@@ -94,4 +94,8 @@ Quarto problema (build 7): la nota per i tester è stata rifiutata con `409 ENTI
 
 Nota di protezione già attiva: lo script esegue l'INTERO collaudo del pacchetto prima di archiviare e si ferma se una prova fallisce; non aggirarlo mai. I bersagli di prova del progetto applicativo non entrano nell'archivio (lo schema li dichiara solo per la fase di test), quindi non possono rompere una consegna.
 
+## Forma dei resoconti di sessione
+
+La regola sta in `forma-dei-resoconti.md`, che è memoria permanente al pari di questo file e va letto da ogni sessione che debba consegnare un resoconto. In sintesi, dal 2026-08-05 per decisione del titolare: **il resoconto si scrive per un lettore tecnico**, con i nomi reali di tipi, file, funzioni e prove; è REVOCATA la prescrizione precedente che li voleva scritti per una persona priva di competenze tecniche, perché i resoconti non li legge il titolare direttamente ma un modello che li verifica e li distilla, e semplificarli fa perdere precisione due volte. Restano in vigore la regola dei numeri (nessun numero senza l'enunciato di ciò che dimostra, e sempre dal blocco stampato dal programma: RDA-71) e l'obbligo di dichiarare ciò che non è stato verificato. L'unico artefatto che resta in linguaggio non tecnico è la nota per i tester, `note-di-rilascio.txt`, con il limite di lunghezza della regola 4 qui sopra.
+
 La cache dei Bundle dei testi e le altre questioni di codice stanno in `registro-scostamenti.md`; questo file resta dedicato a infrastruttura, firma e distribuzione. Ogni problema nuovo di questa materia va aggiunto qui con la sua soluzione.

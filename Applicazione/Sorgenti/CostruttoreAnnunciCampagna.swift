@@ -1,6 +1,7 @@
 import Foundation
 import Dati
 import Motore
+import Segnali
 
 /// Costruisce le etichette e i valori degli elementi accessibili della mappa
 /// (05 §10.7), con la stessa disciplina del costruttore di battaglia: testa fissa
@@ -41,47 +42,68 @@ struct CostruttoreAnnunciCampagna {
         return parti.joined(separator: ", ")
     }
 
-    /// Il contenuto nell'ordine registrato da 02 §3.8.1, ridotto a ciò che esiste:
-    /// occupante con il proprio stato, poi il quartier generale (che occupa il posto
-    /// delle opere presenti nella casella), poi terreno e tipo di strada, infine le
-    /// note di zona, cioè la strettoia. Lo stato di conoscenza, le anomalie
-    /// dell'occupante e la zona di rifornimento appartengono a unità successive e si
-    /// saltano senza lasciare traccia.
+    /// Il contenuto nell'ordine registrato da 02 §3.8.1, ricavato dall'UNICO elenco
+    /// di ciò che la casella dichiara (`VistaCampagna.vociDiCasella`). Lo stato di
+    /// conoscenza, le anomalie dell'occupante e la zona di rifornimento
+    /// appartengono a unità successive e si saltano senza lasciare traccia.
+    ///
+    /// Il ciclo su quell'elenco non ha un ramo di ripiego: un caso aggiunto
+    /// all'enumerativo senza la propria frase non compila. È così che la
+    /// separazione fra il piano sonoro e quello visivo diventa impossibile per
+    /// costruzione anziché per disciplina (RDA-74).
     ///
     /// I tagli di verbosità partono dalla coda: il livello sintetico tiene la sola
     /// identità di ciò che occupa la casella, come fa quello di battaglia. Fra
     /// normale e dettagliato non c'è differenza finché la coda ha tre sole voci.
     private func contenutoCasella(_ casella: Cella) -> [String] {
+        let voci = vista.vociDiCasella(casella)
         var parti: [String] = []
-        if let gruppo = vista.occupante(di: casella) {
-            parti.append(testi.frase("casella.occupante_proprio",
-                                     nomeGruppo(gruppo),
-                                     testi.termine(gruppo.statoDichiarato.rawValue).testo).testo)
-        } else if verbosita != .sintetico, !haSegni(casella) {
+        for voce in voci {
+            if case .occupante = voce {} else if verbosita == .sintetico { break }
+            parti.append(frase(di: voce))
+        }
+        // «Libera» si dice soltanto quando la casella non dichiara nulla: una
+        // casella con acqua o con una strada non è vuota di informazione.
+        if voci.isEmpty, verbosita != .sintetico {
             parti.append(testi.frase("casella.libera").testo)
         }
-        guard verbosita != .sintetico else { return parti }
-
-        if let parte = vista.quartierGeneraleSu(casella) {
-            parti.append(testi.termine(parte == .giocatore
-                                       ? "casella.quartier_generale"
-                                       : "casella.quartier_generale_avversario").testo)
-        }
-        let terreno = vista.terreno(di: casella)
-        if terreno != .aperto { parti.append(testi.termine("terreno." + terreno.rawValue).testo) }
-        let strada = vista.strada(di: casella)
-        if strada != .nessuna { parti.append(testi.termine("strada." + strada.rawValue).testo) }
-        if vista.eStrettoia(casella) { parti.append(testi.termine("casella.strettoia").testo) }
         return parti
     }
 
-    /// Vero se la casella dichiara qualcosa oltre alla propria posizione: allora
-    /// «libera» non si dice, perché la casella non è vuota di informazione.
-    private func haSegni(_ casella: Cella) -> Bool {
-        vista.quartierGeneraleSu(casella) != nil
-            || vista.terreno(di: casella) != .aperto
-            || vista.strada(di: casella) != .nessuna
-            || vista.eStrettoia(casella)
+    /// La frase di una voce di casella. Esaustiva per costruzione.
+    private func frase(di voce: VistaCampagna.VoceDiCasella) -> String {
+        switch voce {
+        case .occupante(let gruppo):
+            return testi.frase("casella.occupante_proprio", nomeGruppo(gruppo),
+                               testi.termine(gruppo.statoDichiarato.rawValue).testo).testo
+        case .quartierGenerale(let parte):
+            return testi.termine(parte == .giocatore
+                                 ? "casella.quartier_generale"
+                                 : "casella.quartier_generale_avversario").testo
+        case .terreno(let terreno):
+            return testi.termine("terreno." + terreno.rawValue).testo
+        case .strada(let strada):
+            return testi.termine("strada." + strada.rawValue).testo
+        case .strettoia:
+            return testi.termine("casella.strettoia").testo
+        }
+    }
+
+    /// Il segno disegnato per una voce di casella: la controparte visiva della
+    /// frase, presa dalla medesima enumerazione e quindi mai in ritardo su di essa.
+    private func segno(di voce: VistaCampagna.VoceDiCasella) -> String? {
+        switch voce {
+        case .occupante(let gruppo): return inizialeGruppo(gruppo)
+        case .quartierGenerale(let parte): return parte == .giocatore ? "Q" : "q"
+        case .terreno(let terreno):
+            switch terreno {
+            case .bosco: return "B"
+            case .acqua: return "A"
+            case .aperto: return nil
+            }
+        case .strada: return "="
+        case .strettoia: return "><"
+        }
     }
 
     /// Il nome parlato di un gruppo (01 §5.6.0.4): termine del vocabolario chiuso.
@@ -95,17 +117,13 @@ struct CostruttoreAnnunciCampagna {
     }
 
     /// I segni disegnati sulla casella per chi guarda, nello stesso ordine in cui
-    /// si annunciano: quartier generale, terreno, strada, strettoia.
+    /// si annunciano e ricavati dallo STESSO elenco: ciò che si sente si vede.
+    /// L'occupante è escluso perché ha già il proprio segno al centro della casella.
     func segniCasella(_ casella: Cella) -> String? {
-        var segni: [String] = []
-        if vista.quartierGeneraleSu(casella) != nil { segni.append("Q") }
-        switch vista.terreno(di: casella) {
-        case .bosco: segni.append("B")
-        case .acqua: segni.append("A")
-        case .aperto: break
+        let segni = vista.vociDiCasella(casella).compactMap { voce -> String? in
+            if case .occupante = voce { return nil }
+            return segno(di: voce)
         }
-        if vista.strada(di: casella) != .nessuna { segni.append("=") }
-        if vista.eStrettoia(casella) { segni.append("><") }
         return segni.isEmpty ? nil : segni.joined()
     }
 
@@ -143,9 +161,10 @@ struct CostruttoreAnnunciCampagna {
     // MARK: - Registro (01 §5.17, 02 §6.6)
 
     /// La frase compiuta di una voce del registro, che dichiara il giorno.
+    /// La compone il traduttore dei Segnali e non questa struttura: le frasi del
+    /// registro hanno UN SOLO autore, altrimenti le due sedi che le producevano
+    /// potevano dire cose diverse dello stesso fatto.
     func voceDiRegistro(_ voce: VoceRegistro) -> String {
-        switch voce.fatto {
-        case .giornataAperta: return testi.frase("registro.giornata_aperta", voce.giorno).testo
-        }
+        TraduttoreEventiCampagna(testi: testi, parte: .giocatore).voceDiRegistro(voce).testo
     }
 }

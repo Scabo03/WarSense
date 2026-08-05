@@ -116,10 +116,13 @@ sta il fiume e da che parte corre la strada. Poi verificare.
    terreno, strada e strettoia la frase può farsi lunga. Il livello sintetico tiene
    la sola identità di ciò che occupa; il normale dice tutto. Solo l'orecchio dice
    se il normale sia troppo, e se convenga tagliare prima.
-5. **Il registro.** Le voci si leggono; il salto al luogo del fatto NON è
-   esercitabile in questa unità, perché tutti i fatti oggi annotati sono di
-   calendario e non hanno luogo (RDA-67). Vale la pena verificare che una voce non
-   attivabile non sembri un difetto.
+5. **Il registro.** Le voci si leggono, e dalla seconda unità il salto al luogo del
+   fatto è esercitabile: le voci degli ordini portano alla casella. Restano non
+   attivabili le voci degli annullamenti, che non hanno luogo (RDA-67): vale la pena
+   verificare che non sembrino un difetto e che il suggerimento che ne dà la ragione
+   arrivi. Vale la pena verificare anche che, dopo qualche giornata, il registro
+   resti percorribile: ogni ordine è una voce, e con dodici gruppi sono dodici voci
+   al giorno.
 6. **La chiusura della giornata.** Non ha segnale tattile né sonoro proprio, per la
    ragione dichiarata in RDA-64. Va verificato che non passi inosservata: se passa,
    la decisione si riapre.
@@ -132,8 +135,35 @@ sta il fiume e da che parte corre la strada. Poi verificare.
 9. **L'annullamento che riapre la giornata.** Dai l'ordine all'ultimo gruppo, senti
    la giornata chiudersi, poi tocca Annulla. Devi sentire una frase che dice che si
    torna al giorno precedente e che il gruppo attende di nuovo. Verifica che sia
-   distinguibile dall'annullamento ordinario, e che continuando ad annullare si
-   torni indietro di più giornate.
+   distinguibile dall'annullamento ordinario. **Aggiornato alla seconda unità
+   (RDA-73):** continuando ad annullare NON si torna più indietro di più giornate.
+   Dopo aver ordinato o annullato qualcosa nella giornata nuova, l'annullamento
+   dell'ordine che ha chiuso la precedente viene rifiutato con il termine «non si
+   torna oltre la giornata in corso». Va verificato che il rifiuto si SENTA e che
+   non si confonda con «niente da annullare», che è un motivo diverso.
 10. **Che cosa si sente alla chiusura.** Sono due frasi: la conferma del tuo ordine
    e «Giornata conclusa: comincia il giorno N». Il collaudo fissa che siano quelle e
    in quell'ordine; se bastino a farti accorgere del cambio di giornata lo dici tu.
+
+### Aggiunta della seconda unità della fase D (registro, annuncio, confine)
+
+11. **Il contrasto del testo, ovunque e non solo nel registro.** Il difetto del
+   registro era un testo agganciabile dalla voce e invisibile all'occhio, e la
+   prova che ora lo impedisce misura i pixel disegnati, non le proprietà degli
+   oggetti (`RegistroVisibileTest`). Vale però per il solo registro: le altre
+   schermate non sono misurate così, perché su una griglia di caselle vuote la
+   misura non direbbe nulla. Chi guarda lo schermo controlli che non esistano altri
+   testi sbiaditi, in particolare dove un comando è disabilitato per ragioni di
+   gioco — resa e fine turno in battaglia — dove il grigio è invece corretto.
+12. **L'annuncio della casella durante la designazione di una marcia.** Il difetto
+   riferito non è stato riprodotto (scostamento P12): sulla stringa che VoiceOver
+   legge, la designazione contiene sempre l'annuncio di esplorazione per intero.
+   Ciò che il collaudo non può accertare è come quella stringa venga PRONUNCIATA
+   con VoiceOver realmente attivo, né se la condizione osservata dipendesse da uno
+   stato che la riproduzione non ha raggiunto. Vale la pena rifare la prova sul
+   dispositivo, su una casella con acqua della mappa media o grande, e riferire la
+   frase esatta che si sente.
+13. **Il rotore delle voci di registro non ancora consultate** (02 §7.3, 00 §10.2)
+   NON esiste: la mappa offre due rotori soli, le proprie formazioni e i gruppi da
+   muovere. Ora che il registro ha contenuto, l'assenza si sente. Vedi il resoconto
+   per la collocazione.

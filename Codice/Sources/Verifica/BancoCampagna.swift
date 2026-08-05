@@ -114,8 +114,10 @@ public struct BancoCampagna: Sendable {
                 comando = .presidio(gruppo: gruppo.id)
                 presidi += 1
             } else {
-                comando = .marcia(gruppo: gruppo.id,
-                                  a: destinazioni[gruppo.id.numero % destinazioni.count])
+                let destinazione = destinazioni[gruppo.id.numero % destinazioni.count]
+                // Il comando lo forma l'interrogazione, che vi mette il costo in
+                // giorni prescritto dai dati: nemmeno il banco lo inventa.
+                comando = vista.comandoDiMarcia(per: gruppo.id, a: destinazione)!
                 marce += 1
             }
             let prima = stato
@@ -166,9 +168,22 @@ public struct BancoCampagna: Sendable {
     /// lettura fra la casella dove si è e quella del gruppo successivo. Il conteggio
     /// riguarda il presidio, che è l'azione più breve: isola così il costo della
     /// NAVIGAZIONE, che è ciò che la misura vuole vedere.
+    /// Come i gruppi stanno sulla mappa quando la misura è presa. Le due
+    /// disposizioni non sono un dettaglio: la prima giornata di una campagna ha i
+    /// gruppi tutti presso il quartier generale, e dopo qualche giornata di marcia
+    /// li ha sparsi. Se il costo dipendesse dalla dispersione e non dal numero, una
+    /// misura sola non lo direbbe.
+    public enum Disposizione: String, Sendable, CaseIterable {
+        /// Ammassati intorno al proprio quartier generale, nell'ordine di lettura.
+        case raccolti
+        /// A distanza pari lungo l'ordine di lettura, dalla prima all'ultima casella.
+        case sparpagliati
+    }
+
     public struct Passi: Sendable {
         public let gruppi: Int
         public let mappa: IdentificatoreDati
+        public let disposizione: Disposizione
         public let conIlSalto: Int
         public let senzaIlSalto: Int
     }
@@ -176,22 +191,41 @@ public struct BancoCampagna: Sendable {
     static let passiPerOrdine = 2 // attivazione della casella, scelta della voce
     static let passiDelSalto = 1
 
-    public func misuraPassi(mappa identificatore: IdentificatoreDati,
-                            gruppi: Int) throws -> Passi? {
-        guard let definizione = valoriCampagna.mappe[identificatore],
-              let formato = valoriCampagna.formatiMappa[definizione.formato] else { return nil }
-        // I gruppi si dispongono a distanza pari lungo l'ordine di lettura, dalla
-        // prima all'ultima casella: disposizione fissa, ripetibile e rappresentativa
-        // del caso reale, in cui esploratori, colonna principale e distaccamenti
-        // stanno in punti diversi della mappa. Ammassarli in un angolo darebbe una
-        // misura più favorevole al solo scorrimento di quanto la partita non sia.
-        let griglia = GrigliaCampagna(righe: formato.righe, colonne: formato.colonne)
+    /// Le caselle su cui disporre i gruppi, per disposizione. Deterministica: la
+    /// stessa richiesta dà sempre le stesse caselle.
+    static func caselleDellaDisposizione(_ disposizione: Disposizione, gruppi: Int,
+                                         griglia: GrigliaCampagna,
+                                         quartierGenerale: Cella) -> [Cella]? {
         let tutte = griglia.tutteLeCaselle
         guard gruppi >= 1, gruppi <= tutte.count else { return nil }
-        let caselle: [Cella] = gruppi == 1
-            ? [tutte[tutte.count / 2]]
-            : (0..<gruppi).map { tutte[$0 * (tutte.count - 1) / (gruppi - 1)] }
-        guard Set(caselle).count == gruppi else { return nil }
+        switch disposizione {
+        case .sparpagliati:
+            let caselle: [Cella] = gruppi == 1
+                ? [tutte[tutte.count / 2]]
+                : (0..<gruppi).map { tutte[$0 * (tutte.count - 1) / (gruppi - 1)] }
+            return Set(caselle).count == gruppi ? caselle : nil
+        case .raccolti:
+            // Le più vicine al proprio quartier generale, a parità di distanza
+            // nell'ordine di lettura: è la configurazione di apertura di campagna.
+            let caselle = tutte.sorted {
+                let da = griglia.distanza(quartierGenerale, $0)
+                let db = griglia.distanza(quartierGenerale, $1)
+                return da == db ? $0 < $1 : da < db
+            }.prefix(gruppi)
+            return Array(caselle).sorted()
+        }
+    }
+
+    public func misuraPassi(mappa identificatore: IdentificatoreDati, gruppi: Int,
+                            disposizione: Disposizione) throws -> Passi? {
+        guard let definizione = valoriCampagna.mappe[identificatore],
+              let formato = valoriCampagna.formatiMappa[definizione.formato] else { return nil }
+        let griglia = GrigliaCampagna(righe: formato.righe, colonne: formato.colonne)
+        let quartierGenerale = Cella(riga: definizione.quartierGenerali.giocatore.riga,
+                                     colonna: definizione.quartierGenerali.giocatore.colonna)
+        guard let caselle = Self.caselleDellaDisposizione(
+            disposizione, gruppi: gruppi, griglia: griglia,
+            quartierGenerale: quartierGenerale) else { return nil }
         let stato = try FabbricaCampagna.crea(
             scenario: ScenarioCampagna(
                 mappa: identificatore,
@@ -210,25 +244,39 @@ public struct BancoCampagna: Sendable {
             senza += abs(indice(posizione) - corrente) + Self.passiPerOrdine
             corrente = indice(posizione)
         }
-        return Passi(gruppi: gruppi, mappa: identificatore,
+        return Passi(gruppi: gruppi, mappa: identificatore, disposizione: disposizione,
                      conIlSalto: conIlSalto, senzaIlSalto: senza)
     }
 
-    // MARK: - Misura: giornate per attraversare la mappa
+    // MARK: - Misura: distanza fra i due quartier generali
 
-    /// Quante giornate servono ad attraversare la mappa, dal proprio quartier
-    /// generale a quello avversario, marciando ogni giorno. Si gioca davvero: il
-    /// numero esce dalle regole e non da una formula scritta qui.
-    public struct Attraversamento: Sendable {
+    /// Quanto distano fra loro i due quartier generali, e quante giornate costa
+    /// congiungerli marciando ogni giorno. Si gioca davvero: il numero esce dalle
+    /// regole e non da una formula scritta qui.
+    ///
+    /// La grandezza misurata è la DISTANZA FRA I DUE QUARTIER GENERALI e non
+    /// l'attraversamento della mappa, che è un'altra cosa e vale di più: sul
+    /// formato quattro per quattro i due quartier generali distano tre caselle,
+    /// mentre la distanza massima fra due caselle qualunque è sei. È la stessa
+    /// classe di errore già corretta sulle caselle con meno di quattro uscite —
+    /// una grandezza chiamata con il nome di un'altra — e per questo le due
+    /// compaiono ora affiancate, così che nessuna delle due possa essere letta
+    /// per l'altra.
+    public struct DistanzaFraQuartierGenerali: Sendable {
         public let mappa: IdentificatoreDati
         public let formato: IdentificatoreDati
         public let lato: Int
-        public let distanza: Int
-        public let giornate: Int
+        /// La distanza ortogonale fra il proprio quartier generale e quello avverso.
+        public let distanzaFraQuartierGenerali: Int
+        /// La distanza massima fra due caselle qualunque della mappa: la traversata
+        /// effettiva, cioè da un angolo all'angolo opposto.
+        public let distanzaMassimaFraDueCaselle: Int
+        /// Le giornate spese a congiungerli marciando ogni giorno.
+        public let giornatePerCongiungerli: Int
     }
 
-    public func misuraAttraversamento(mappa identificatore: IdentificatoreDati) throws
-        -> Attraversamento? {
+    public func misuraDistanzaFraQuartierGenerali(mappa identificatore: IdentificatoreDati) throws
+        -> DistanzaFraQuartierGenerali? {
         guard let definizione = valoriCampagna.mappe[identificatore],
               let formato = valoriCampagna.formatiMappa[definizione.formato] else { return nil }
         let partenza = Cella(riga: definizione.quartierGenerali.giocatore.riga,
@@ -251,15 +299,18 @@ public struct BancoCampagna: Sendable {
             let prossima = qui.riga != arrivo.riga
                 ? Cella(riga: qui.riga + (arrivo.riga > qui.riga ? 1 : -1), colonna: qui.colonna)
                 : Cella(riga: qui.riga, colonna: qui.colonna + (arrivo.colonna > qui.colonna ? 1 : -1))
-            guard motore.valida(.marcia(gruppo: id, a: prossima),
-                                parte: .giocatore, stato: stato).eValido else { break }
-            (stato, _) = motore.applica(.marcia(gruppo: id, a: prossima),
-                                        parte: .giocatore, stato: stato)
+            let vista = VistaCampagna(motore: motore, stato: stato, parte: .giocatore)
+            guard let comando = vista.comandoDiMarcia(per: id, a: prossima),
+                  motore.valida(comando, parte: .giocatore, stato: stato).eValido else { break }
+            (stato, _) = motore.applica(comando, parte: .giocatore, stato: stato)
         }
-        return Attraversamento(mappa: identificatore, formato: definizione.formato,
-                               lato: formato.righe,
-                               distanza: stato.griglia.distanza(partenza, arrivo),
-                               giornate: stato.giorno - giornoIniziale)
+        let griglia = stato.griglia
+        return DistanzaFraQuartierGenerali(
+            mappa: identificatore, formato: definizione.formato, lato: formato.righe,
+            distanzaFraQuartierGenerali: griglia.distanza(partenza, arrivo),
+            distanzaMassimaFraDueCaselle: griglia.distanza(
+                Cella(riga: 1, colonna: 1), Cella(riga: griglia.righe, colonna: griglia.colonne)),
+            giornatePerCongiungerli: stato.giorno - giornoIniziale)
     }
 
     // MARK: - Misura: caselle raggiungibili in una giornata
@@ -275,7 +326,7 @@ public struct BancoCampagna: Sendable {
     /// formazione non è disponibile (01 §5.6.0.2). Una casella interna adiacente a
     /// un proprio gruppo ha quattro vicine e tre uscite: è interna e ha meno di
     /// quattro uscite, e chiamarla «di bordo» è sbagliato.
-    public struct Raggiungibili: Sendable {
+    public struct UsciteLibere: Sendable {
         public let mappa: IdentificatoreDati
         public let distribuzione: Distribuzione
         /// Geometria pura: le caselle su un lato della mappa. Non dipende dai gruppi.
@@ -292,8 +343,8 @@ public struct BancoCampagna: Sendable {
         public let gruppiPresenti: Int
     }
 
-    public func misuraRaggiungibili(mappa identificatore: IdentificatoreDati) throws
-        -> Raggiungibili? {
+    public func misuraUsciteLibere(mappa identificatore: IdentificatoreDati) throws
+        -> UsciteLibere? {
         guard let definizione = valoriCampagna.mappe[identificatore] else { return nil }
         let stato = try FabbricaCampagna.crea(
             scenario: ScenarioCampagna(
@@ -307,12 +358,12 @@ public struct BancoCampagna: Sendable {
             c.riga == 1 || c.riga == griglia.righe || c.colonna == 1 || c.colonna == griglia.colonne
         }
         let conteggi = griglia.tutteLeCaselle.map {
-            vista.caselleRaggiungibiliInUnaGiornata(da: $0).count
+            vista.usciteLibere(da: $0).count
         }
         let strette = griglia.tutteLeCaselle.filter {
-            vista.caselleRaggiungibiliInUnaGiornata(da: $0).count < 4
+            vista.usciteLibere(da: $0).count < 4
         }
-        return Raggiungibili(mappa: identificatore,
+        return UsciteLibere(mappa: identificatore,
                              distribuzione: Distribuzione(conteggi),
                              caselleDiBordo: griglia.tutteLeCaselle.filter(diBordo).count,
                              caselleInterne: griglia.tutteLeCaselle.filter { !diBordo($0) }.count,

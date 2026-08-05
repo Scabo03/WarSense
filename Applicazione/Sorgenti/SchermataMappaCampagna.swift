@@ -192,8 +192,13 @@ final class SchermataMappaCampagna: UIViewController {
     func attiva(_ casella: Cella) -> Bool {
         guard let stato = statoCorrente else { return false }
         if case .marcia(let id) = designazione {
+            // Il comando lo forma l'interrogazione, che vi mette il costo in giorni
+            // prescritto dai dati: la Presentazione non calcola dati di gioco
+            // (00 §3.2) e non conosce alcun numero (00 §13.1).
+            guard let comando = costruttore?.vista.comandoDiMarcia(per: id, a: casella)
+            else { return false }
             designazione = .nessuna
-            Task { await eseguiComando(.marcia(gruppo: id, a: casella)) }
+            Task { await eseguiComando(comando) }
             return true
         }
         guard let gruppo = stato.occupante(di: casella) else { return false }
@@ -300,6 +305,13 @@ final class SchermataMappaCampagna: UIViewController {
             partita.ambiente.segnali.annuncia(
                 TestoLocalizzato(testo: testo, lingua: testi.lingua),
                 significato: .annullamento)
+        } catch SessioneCampagna.ErroreSessione.oltreLaGiornataInCorso {
+            // Il rifiuto al confine non è silenzioso e ha un motivo PROPRIO, distinto
+            // da «niente da annullare»: c'è qualcosa da annullare, ed è fuori portata
+            // (00 §9, principio 9; 05 §6.5).
+            partita.ambiente.segnali.annuncia(TestoLocalizzato(
+                testo: testi.termine(MotivoNonValidoCampagna.oltreLaGiornataInCorso.rawValue).testo,
+                lingua: testi.lingua))
         } catch {
             partita.ambiente.segnali.annuncia(TestoLocalizzato(
                 testo: testi.frase("campagna.niente_da_annullare").testo, lingua: testi.lingua))
@@ -414,6 +426,12 @@ final class SchermataMappaCampagna: UIViewController {
     var statoPerProva: StatoCampagna? { statoCorrente }
     var registroFuocoPerProva: [Fuoco.Movimento] { Fuoco.registro }
     func eseguiPerProva(_ comando: ComandoCampagna) async { await eseguiComando(comando) }
+    func apriRegistroPerProva() { apriRegistro() }
+    var motorePerProva: MotoreCampagna { partita.motore }
+    func avviaDesignazionePerProva(gruppo: IdGruppo) {
+        designazione = .marcia(gruppo: gruppo)
+        if let stato = statoCorrente { aggiorna(con: stato) }
+    }
 }
 
 extension SchermataMappaCampagna: UIScrollViewDelegate {
