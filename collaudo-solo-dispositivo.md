@@ -202,3 +202,30 @@ scostamento S10: la catena intera (una partita giocata dall'interfaccia contro l
 stessa sequenza applicata direttamente) e il tocco sintetizzato su una griglia
 scorrevole. Finché restano aperte, che l'ordine impartito al dito arrivi al gioco è
 provato sulla sola mappa di campagna.
+
+### Aggiunta della sessione della freschezza e del tocco in battaglia (2026-08-05)
+
+18. **L'esplorazione al tatto sopra la colonna dei comandi e sopra il deck.**
+   Accertato in processo che la cornice riportata dall'accessibilità per una casella
+   fuori dalla porzione visibile del contenitore scorrevole è la sua posizione nel
+   CONTENUTO e non sullo schermo: sulla mappa grande il centro della casella del
+   proprio gruppo cade dove è disegnato un comando globale, e in battaglia la cella
+   di riga 10 cade dove è disegnata una tessera del deck. **Non verificato**, e non
+   verificabile qui: se VoiceOver, appoggiando il dito su quella zona, annunci la
+   casella invece del comando o della tessera. Richiede il servizio di accessibilità
+   reale. Va provato appoggiando il dito sulla colonna dei comandi e sul deck e
+   ascoltando che cosa viene annunciato.
+   **Portata del rimedio, se il difetto esistesse.** Riportare la cornice soltanto
+   per gli elementi dentro la porzione visibile obbligherebbe a riformulare
+   `RaggiungibilitaTest`, che oggi pretende una cornice non degenere per OGNI
+   elemento del percorso di lettura (00 §1.2): con il rimedio, gli elementi fuori
+   vista ne avrebbero una degenere e la prova fallirebbe su di essi. Andrebbe quindi
+   distinto «non agganciabile» da «fuori dalla porzione visibile ma raggiungibile
+   scorrendo», che oggi la prova non distingue. Non realizzato.
+
+19. **Il dito e la disposizione che si muove.** Corretto in questa sessione un
+   difetto per cui selezionare una tessera del deck spostava di diciotto punti il
+   confine inferiore della griglia, portando fuori vista la zona di schieramento
+   proprio fra il selezionare e il piazzare. Va verificato sul dispositivo che
+   selezionando una tessera nulla si sposti sotto il dito, e in particolare che le
+   celle delle righe arretrate restino dove erano.

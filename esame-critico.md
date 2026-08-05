@@ -451,8 +451,10 @@ Fonte: `git log --format='%h|%ad|%s' --date=format:'%Y-%m-%d %H:%M'`, 39 commit 
 | Risoluzione immediata | `71db5e6` | 01 v3.7, RDA-60 | build 10; 115 prove |
 | Fase D unità 1 | `123c7a9`→`0d6f43d` | mappa di campagna navigabile | build 11; **189 prove**; quattro numeri sbagliati nel resoconto |
 | Accertamento numeri | `fe52cb0`→`3e58fcb` | S6, S7, RDA-70/71; controllo sulla nota | build 12; **204 prove** |
-| Fase D unità 2 | `61a90e6`, `6c2829d` | registro, annuncio, confine, costo in giorni | **217 prove**; nota rifiutata di nuovo |
+| Fase D unità 2 | `61a90e6`, `6c2829d` | registro, annuncio, confine, costo in giorni | **build 13**; **217 prove**; nota rifiutata di nuovo |
 | Dimensionamento | `349ee17` | `impatto-marcia-lunga.md` | — |
+
+**Correzione del 2026-08-05.** La riga della seconda unità della fase D non portava alcun numero di build, e l'omissione era un errore: quella sessione **caricò la build 13** e non lo scrisse in alcun documento. L'accertamento è in `build-caricate.md`: il campo `whatsNew` della build 13, letto per interfaccia di programmazione, è identico al contenuto di `note-di-rilascio.txt` al commit `61a90e6`, e l'unico procedimento che alleghi quella nota è `scripts/carica-testflight.sh`. Il §3.4 di questo documento non ne risente, perché non si occupa di build; ne risente questa tabella, ora corretta. Dal 2026-08-05 la divergenza non è più possibile senza che qualcuno se ne accorga: `scripts/controlla-build.py` confronta il registro con App Store Connect e rifiuta il caricamento successivo.
 
 Densità: 39 commit e 17 845 righe di Swift aggiunte in 61 ore di calendario.
 

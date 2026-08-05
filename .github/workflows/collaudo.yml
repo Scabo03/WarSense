@@ -27,7 +27,8 @@ jobs:
         run: brew install xcodegen
       - name: Collaudo completo (pacchetto, ospitate, interfaccia)
         run: ./scripts/collaudo-completo.sh
-      - name: La nota per il titolare nomina solo ciò che il codice espone
-        # Il solo controllo di vocabolario: quello di freschezza sta nel
-        # caricamento, perché è lì che la nota viene consegnata.
-        run: python3 scripts/controlla-nota-titolare.py --solo-vocabolario
+      - name: I documenti consegnati nominano solo ciò che il codice espone
+        # Si saltano i controlli che chiedono il programma di verifica o la
+        # cronologia: misure e freschezza stanno nel caricamento, che è il momento
+        # in cui i documenti vengono davvero consegnati.
+        run: python3 scripts/controlla-note.py --senza-programma
