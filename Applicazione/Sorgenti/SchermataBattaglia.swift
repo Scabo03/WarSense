@@ -521,6 +521,9 @@ final class SchermataBattaglia: UIViewController {
     var elementiPerProva: [Cella: ElementoCella] { elementi }
     var registroFuocoPerProva: [Fuoco.Movimento] { Fuoco.registro }
     var vociPannelloPerProva: [VocePannello] { vociPannello }
+    /// La griglia come `VistaACaselle`: le prove del tocco diretto girano
+    /// con lo stesso corpo sui due piani (02 §2.11, RDA-78).
+    var grigliaPerProva: VistaACaselle { vistaGriglia }
 }
 
 extension SchermataBattaglia: UIScrollViewDelegate {

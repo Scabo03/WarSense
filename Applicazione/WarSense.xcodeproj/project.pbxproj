@@ -7,10 +7,13 @@
 	objects = {
 
 /* Begin PBXBuildFile section */
+		09CFF70CB8EC19E916A3C7BA /* ToccoDirettoTest.swift in Sources */ = {isa = PBXBuildFile; fileRef = 10A40D60A1907135F70F1FB4 /* ToccoDirettoTest.swift */; };
 		116EEE5C15D49181561AFDB5 /* DesignazioneBersaglioTest.swift in Sources */ = {isa = PBXBuildFile; fileRef = 589A5B5EA3AF0D6D1EFB3900 /* DesignazioneBersaglioTest.swift */; };
 		190E7D5DC3B892BF2DFD277B /* SchermateContorno.swift in Sources */ = {isa = PBXBuildFile; fileRef = 44914552A51BDF0197E99DAF /* SchermateContorno.swift */; };
+		321465D14C83340BB6030A0F /* CatenaInterfacciaMotoreTest.swift in Sources */ = {isa = PBXBuildFile; fileRef = 2F77F23D7958A0EE7DC80E0A /* CatenaInterfacciaMotoreTest.swift */; };
 		33BCAD29CAC0333FB4B83594 /* FumoInterfacciaTest.swift in Sources */ = {isa = PBXBuildFile; fileRef = 921003768253D7D483CCC1D8 /* FumoInterfacciaTest.swift */; };
 		35D13AF917D421DA151C322C /* PartitaCampagna.swift in Sources */ = {isa = PBXBuildFile; fileRef = D05C93D40ACCC919E14E0F90 /* PartitaCampagna.swift */; };
+		4019BE980D8938B2E6B4D120 /* ImpiantoInterfacciaTest.swift in Sources */ = {isa = PBXBuildFile; fileRef = 75B409D97C3092A3CC3CDA17 /* ImpiantoInterfacciaTest.swift */; };
 		45C1B6E90486F2F6078B2B8B /* RegistroVisibileTest.swift in Sources */ = {isa = PBXBuildFile; fileRef = 1BE339E6703B78CDC77E5B87 /* RegistroVisibileTest.swift */; };
 		55F02441809BDE8C6D282CC4 /* Dati in Frameworks */ = {isa = PBXBuildFile; productRef = CFCCD206E6A2E53A407BA042 /* Dati */; };
 		5F9166348949834153CEF7FA /* SchermataBattaglia.swift in Sources */ = {isa = PBXBuildFile; fileRef = 849A458FA8292F265DF9BE68 /* SchermataBattaglia.swift */; };
@@ -34,6 +37,7 @@
 		E24D2DCC36AA253024D4016A /* VistaMappa.swift in Sources */ = {isa = PBXBuildFile; fileRef = 5159B9BE60E2EEEA1817D003 /* VistaMappa.swift */; };
 		E3377223A159BC8874F878FF /* CostruttoreAnnunci.swift in Sources */ = {isa = PBXBuildFile; fileRef = D09017EA703DD5FF54F15458 /* CostruttoreAnnunci.swift */; };
 		F153F7238148016D1A99A85F /* RaggiungibilitaTest.swift in Sources */ = {isa = PBXBuildFile; fileRef = 03ACD38B8C2F68821502F3C4 /* RaggiungibilitaTest.swift */; };
+		F821EB8F313205F3828A2128 /* VistaACaselle.swift in Sources */ = {isa = PBXBuildFile; fileRef = 9D136B104384C6AF309293B3 /* VistaACaselle.swift */; };
 		F9D782BD8B4FD18B38DF5922 /* PannelloAzioniTest.swift in Sources */ = {isa = PBXBuildFile; fileRef = 325B59A8BC855637ABF9B2CB /* PannelloAzioniTest.swift */; };
 		FC1C2BFD8B30FA33CFF6F12C /* SchermataRegistro.swift in Sources */ = {isa = PBXBuildFile; fileRef = D159331FD8EEFB4F1B728089 /* SchermataRegistro.swift */; };
 /* End PBXBuildFile section */
@@ -57,12 +61,14 @@
 
 /* Begin PBXFileReference section */
 		03ACD38B8C2F68821502F3C4 /* RaggiungibilitaTest.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = RaggiungibilitaTest.swift; sourceTree = "<group>"; };
+		10A40D60A1907135F70F1FB4 /* ToccoDirettoTest.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ToccoDirettoTest.swift; sourceTree = "<group>"; };
 		1BE339E6703B78CDC77E5B87 /* RegistroVisibileTest.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = RegistroVisibileTest.swift; sourceTree = "<group>"; };
 		1C877A8D5733D587BE7B618F /* AnnunciEFuocoTest.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AnnunciEFuocoTest.swift; sourceTree = "<group>"; };
 		1D9A4053BF022DBABE96D5E9 /* Immagini.xcassets */ = {isa = PBXFileReference; lastKnownFileType = folder.assetcatalog; path = Immagini.xcassets; sourceTree = "<group>"; };
 		2056BAAA10D05410497482F4 /* TesseraDeck.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = TesseraDeck.swift; sourceTree = "<group>"; };
 		20FCEB4CE0D4D3CD0648E660 /* WarSense.app */ = {isa = PBXFileReference; includeInIndex = 0; lastKnownFileType = wrapper.application; path = WarSense.app; sourceTree = BUILT_PRODUCTS_DIR; };
 		27D480588F693D19D9E50AC7 /* LettoreAccessibilita.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = LettoreAccessibilita.swift; sourceTree = "<group>"; };
+		2F77F23D7958A0EE7DC80E0A /* CatenaInterfacciaMotoreTest.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = CatenaInterfacciaMotoreTest.swift; sourceTree = "<group>"; };
 		325B59A8BC855637ABF9B2CB /* PannelloAzioniTest.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = PannelloAzioniTest.swift; sourceTree = "<group>"; };
 		33237A45EB1B4EBEA09B1769 /* SchermataMappaCampagna.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SchermataMappaCampagna.swift; sourceTree = "<group>"; };
 		3CAF296EB8CDAA34921D17B6 /* WarSenseTest.xctest */ = {isa = PBXFileReference; includeInIndex = 0; lastKnownFileType = wrapper.cfbundle; path = WarSenseTest.xctest; sourceTree = BUILT_PRODUCTS_DIR; };
@@ -70,12 +76,14 @@
 		47D2EC331332BE96EB5D410B /* Servizi.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Servizi.swift; sourceTree = "<group>"; };
 		5159B9BE60E2EEEA1817D003 /* VistaMappa.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = VistaMappa.swift; sourceTree = "<group>"; };
 		589A5B5EA3AF0D6D1EFB3900 /* DesignazioneBersaglioTest.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = DesignazioneBersaglioTest.swift; sourceTree = "<group>"; };
+		75B409D97C3092A3CC3CDA17 /* ImpiantoInterfacciaTest.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ImpiantoInterfacciaTest.swift; sourceTree = "<group>"; };
 		780DA0404CFBE7DD9B420A68 /* AppDelegate.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AppDelegate.swift; sourceTree = "<group>"; };
 		849A458FA8292F265DF9BE68 /* SchermataBattaglia.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SchermataBattaglia.swift; sourceTree = "<group>"; };
 		88D7A0731824F60DFDBEED2D /* AnnuncioDiCasellaTest.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AnnuncioDiCasellaTest.swift; sourceTree = "<group>"; };
 		8F2621F366CE07D66FC6A6EA /* MappaCampagnaAccessibileTest.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = MappaCampagnaAccessibileTest.swift; sourceTree = "<group>"; };
 		921003768253D7D483CCC1D8 /* FumoInterfacciaTest.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = FumoInterfacciaTest.swift; sourceTree = "<group>"; };
 		95889945EEE20611E0341AC7 /* WarSenseUITest.xctest */ = {isa = PBXFileReference; includeInIndex = 0; lastKnownFileType = wrapper.cfbundle; path = WarSenseUITest.xctest; sourceTree = BUILT_PRODUCTS_DIR; };
+		9D136B104384C6AF309293B3 /* VistaACaselle.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = VistaACaselle.swift; sourceTree = "<group>"; };
 		9EF7773BD1ED816307203E97 /* PartitaCorrente.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = PartitaCorrente.swift; sourceTree = "<group>"; };
 		B61635E47EDED9D5E8A15EA1 /* Codice */ = {isa = PBXFileReference; lastKnownFileType = folder; name = Codice; path = ../Codice; sourceTree = SOURCE_ROOT; };
 		B7792DA00B9CCC289C68A7E6 /* Info.plist */ = {isa = PBXFileReference; lastKnownFileType = text.plist; path = Info.plist; sourceTree = "<group>"; };
@@ -127,6 +135,7 @@
 				44914552A51BDF0197E99DAF /* SchermateContorno.swift */,
 				47D2EC331332BE96EB5D410B /* Servizi.swift */,
 				2056BAAA10D05410497482F4 /* TesseraDeck.swift */,
+				9D136B104384C6AF309293B3 /* VistaACaselle.swift */,
 				5159B9BE60E2EEEA1817D003 /* VistaMappa.swift */,
 			);
 			path = Sorgenti;
@@ -137,6 +146,7 @@
 			children = (
 				921003768253D7D483CCC1D8 /* FumoInterfacciaTest.swift */,
 				D02CD1A940C35DBC8B46486B /* FumoMappaCampagnaTest.swift */,
+				75B409D97C3092A3CC3CDA17 /* ImpiantoInterfacciaTest.swift */,
 			);
 			path = ProveInterfaccia;
 			sourceTree = "<group>";
@@ -166,12 +176,14 @@
 			children = (
 				1C877A8D5733D587BE7B618F /* AnnunciEFuocoTest.swift */,
 				88D7A0731824F60DFDBEED2D /* AnnuncioDiCasellaTest.swift */,
+				2F77F23D7958A0EE7DC80E0A /* CatenaInterfacciaMotoreTest.swift */,
 				589A5B5EA3AF0D6D1EFB3900 /* DesignazioneBersaglioTest.swift */,
 				27D480588F693D19D9E50AC7 /* LettoreAccessibilita.swift */,
 				8F2621F366CE07D66FC6A6EA /* MappaCampagnaAccessibileTest.swift */,
 				325B59A8BC855637ABF9B2CB /* PannelloAzioniTest.swift */,
 				03ACD38B8C2F68821502F3C4 /* RaggiungibilitaTest.swift */,
 				1BE339E6703B78CDC77E5B87 /* RegistroVisibileTest.swift */,
+				10A40D60A1907135F70F1FB4 /* ToccoDirettoTest.swift */,
 			);
 			path = ProveOspitate;
 			sourceTree = "<group>";
@@ -308,12 +320,14 @@
 			files = (
 				7E69C9F2DB0BBABC72260BBB /* AnnunciEFuocoTest.swift in Sources */,
 				C00890F2F953EE7041175812 /* AnnuncioDiCasellaTest.swift in Sources */,
+				321465D14C83340BB6030A0F /* CatenaInterfacciaMotoreTest.swift in Sources */,
 				116EEE5C15D49181561AFDB5 /* DesignazioneBersaglioTest.swift in Sources */,
 				72C9006DDA7298DDDD235743 /* LettoreAccessibilita.swift in Sources */,
 				D5DF93E3EFFA96EC3D8BBDE7 /* MappaCampagnaAccessibileTest.swift in Sources */,
 				F9D782BD8B4FD18B38DF5922 /* PannelloAzioniTest.swift in Sources */,
 				F153F7238148016D1A99A85F /* RaggiungibilitaTest.swift in Sources */,
 				45C1B6E90486F2F6078B2B8B /* RegistroVisibileTest.swift in Sources */,
+				09CFF70CB8EC19E916A3C7BA /* ToccoDirettoTest.swift in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -333,6 +347,7 @@
 				190E7D5DC3B892BF2DFD277B /* SchermateContorno.swift in Sources */,
 				873D9C045E99E55A19A8AC00 /* Servizi.swift in Sources */,
 				CBFF38D38162312C41C4C40C /* TesseraDeck.swift in Sources */,
+				F821EB8F313205F3828A2128 /* VistaACaselle.swift in Sources */,
 				E24D2DCC36AA253024D4016A /* VistaMappa.swift in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
@@ -343,6 +358,7 @@
 			files = (
 				33BCAD29CAC0333FB4B83594 /* FumoInterfacciaTest.swift in Sources */,
 				C91A79B09526BD853D441712 /* FumoMappaCampagnaTest.swift in Sources */,
+				4019BE980D8938B2E6B4D120 /* ImpiantoInterfacciaTest.swift in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};

@@ -28,8 +28,10 @@ final class ElementoCasella: UIAccessibilityElement {
 /// La vista della mappa: disegno minimo per chi vede, contenitore degli elementi
 /// accessibili per chi ascolta. I dati sottostanti sono gli stessi (02 §10.3).
 /// Caselle quadrate e non sfalsate: è l'unica differenza geometrica ammessa
-/// rispetto alla griglia di battaglia (00 §7.2).
-final class VistaMappa: UIView {
+/// rispetto alla griglia di battaglia (00 §7.2). Il tocco diretto viene da
+/// `VistaACaselle`, condivisa con la griglia di battaglia: i due piani non possono
+/// divergere su questo, perché la realizzazione è una sola (02 §2.11, RDA-78).
+final class VistaMappa: VistaACaselle {
     static let passo: CGFloat = 64
     static let lato: CGFloat = 60
     static let margine: CGFloat = 12
