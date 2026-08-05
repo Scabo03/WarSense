@@ -30,4 +30,4 @@ accaduto.
 
 | n. | data | materia | incarico | resoconto |
 |---|---|---|---|---|
-| 01 | 2026-08-05 | tocco diretto, impianto di prova sul simulatore, tre cancelli | [incarico](01-2026-08-05-tocco-diretto-e-cancelli-incarico.md) | in corso |
+| 01 | 2026-08-05 | tocco diretto, impianto di prova sul simulatore, tre cancelli | [incarico](01-2026-08-05-tocco-diretto-e-cancelli-incarico.md) | [resoconto](01-2026-08-05-tocco-diretto-e-cancelli-resoconto.md) |
