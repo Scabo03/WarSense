@@ -135,6 +135,16 @@ Questa domanda il programma di verifica non può risponderla, e non potrà mai. 
 dirmi quanti gesti costa una giornata, e me lo dice; non può dirmi se una mappa si
 è formata nella tua testa. Sei tu l'unico che può.
 
+## Che cosa è cambiato sotto, e non si vede
+
+Niente di ciò che segue tocca il gioco: sono strumenti, e li nomino perché tu
+sappia che cosa protegge adesso il lavoro. Una partita giocata dall'inizio
+toccando le caselle viene confrontata, a ogni collaudo, con la stessa partita
+fatta eseguire al motore senza interfaccia: se le due divergessero, vorrebbe dire
+che l'interfaccia sta decidendo qualcosa per conto proprio, e il collaudo si
+ferma. E il gioco ora tiene memoria di ciò che ti ha detto, così che un ordine
+rifiutato lasci una traccia invece di sparire.
+
 ## Le altre cose da guardare
 
 1. **Il dito e la voce devono fare la stessa cosa.** È la novità di questa build.

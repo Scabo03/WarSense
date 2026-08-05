@@ -212,6 +212,18 @@ Non è un'unità della fase D: non aggiunge regole, non tara valori, non estende
 
 Collaudo alla fine della sessione: 218 prove del pacchetto (una saltata), 50 ospitate, 8 d'interfaccia, tutte verdi.
 
+#### Sessione della catena e delle sessioni complete (nessun perimetro di gioco toccato)
+
+**La catena intera è verde** (`CatenaInterfacciaMotoreTest`): una campagna giocata dall'interfaccia sui tre formati dà la stessa impronta, lo stesso calendario e lo stesso registro della medesima sequenza applicata da una Sessione senza interfaccia. Cinque anelli, ciascuno con il proprio pretesto, e ciascuno visto fallire togliendolo. **La causa che la teneva rossa non era un rifiuto**: il ciclo attendeva `azioneSpesa == true` sull'ordine che chiude la giornata, condizione falsa per costruzione perché la chiusura azzera le azioni nello stesso passo. Il sospetto sul costo in giorni era infondato.
+
+**I rifiuti lasciano ora una traccia leggibile**: `PuntoSegnali.annunciPronunciati` conserva ciò che il punto ha detto, nel luogo che lo produce. Serviva perché un comando respinto non entra nel giornale, e senza quella traccia la prova della catena passerebbe anche con metà degli ordini respinti.
+
+**Il tocco sintetizzato su griglia scorrevole**: meccanismo trovato e chiuso per la mappa (la cornice riportata per una casella fuori vista è la posizione nel CONTENUTO, non sullo schermo); il caso della battaglia resta aperto in S10.
+
+**Le sessioni complete** (`SessioniComplete.swift`, `SessioniCompleteTest`): 144 sessioni di campagna e 32 di battaglia, con sette invarianti di ACCUMULO che il passo non può violare, ciascuno con il proprio mutante. I numeri stanno nel blocco `sessioni_riepilogo`, pareggiato con il dettaglio da una prova.
+
+Collaudo alla fine della sessione: 232 prove del pacchetto (una saltata), 53 ospitate, 8 d'interfaccia. Build 14 su TestFlight.
+
 ### Fasi E–G: NON COMINCIATE
 
 La fase C ha già lo scheletro dell'eseguibile `Verifica` e la forma degli scenari (`ScenarioBattaglia` è Codable proprio per gli scenari dichiarativi di 05 §12.2).
@@ -235,7 +247,8 @@ Applicato l'incarico di intervento sulle chiusure: la base delle perdite per la 
 - La sonda degli invarianti di campagna riceve dall'esterno ciò che giudica (stato, transizione, sequenza del salto, adiacenza) proprio perché le prove possano darle un caso guasto. Chi la modifica conservi quella forma, altrimenti i mutanti non sono più scrivibili (RDA-69).
 - Il dimensionamento dell'unità successiva — la marcia di più giorni — è in `impatto-marcia-lunga.md`: che cosa regge senza modifiche, che cosa va rifatto, quale portata ha sul formato di salvataggio. La conclusione operativa è che la risoluzione di fine giornata va costruita PRIMA della marcia lunga e non insieme.
 - Gli INCARICHI ricevuti e i resoconti consegnati si conservano in `Incarichi/`, versionati e verbatim. Prima del 2026-08-05 non se ne conservava traccia, e `esame-critico.md` ha dovuto dichiarare non verificabile il confronto fra richiesto e realizzato.
-- Il COLLAUDO COMPLETO si esegue con `./scripts/collaudo-completo.sh`, che è anche il cancello del caricamento e dell'integrazione continua. `swift test` da solo copre 218 prove su 276.
+- Il COLLAUDO COMPLETO si esegue con `./scripts/collaudo-completo.sh`, che è anche il cancello del caricamento e dell'integrazione continua. `swift test` da solo copre 232 prove su 293.
+- Gli invarianti sono di due specie e non vanno confusi: quelli di PASSO in `SondaInvariantiCampagna`, quelli di ACCUMULO in `SondaSessioneCampagna` e `SondaSessioneBattaglia`. Chi ne aggiunge uno gli scrive il mutante: due prove distinte lo pretendono.
 - La regola sulla FORMA DEI RESOCONTI di sessione è in `forma-dei-resoconti.md`, che è memoria permanente: si scrivono per un lettore tecnico, e la prescrizione opposta è revocata. Richiamata anche in `memoria-infrastruttura.md`.
 - Il REGISTRO della campagna vive nello stato, che si ricostruisce riapplicando i comandi del giornale: un fatto che l'annullamento deve poter lasciare dietro di sé — l'annullamento stesso — non può stare nel solo stato, e ha una voce propria nel giornale (RDA-73). Chi aggiungerà altri fatti che sopravvivono a un troncamento faccia lo stesso.
 - Il CONFINE dell'annullamento si legge dal giornale e non dallo stato, per la stessa ragione. Chi lo tocca esegua `AnnullamentoGiornataTest`, che contiene la prova della sopravvivenza alla ripresa.
