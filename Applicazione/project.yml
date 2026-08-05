@@ -71,6 +71,11 @@ targets:
     sources: [ProveOspitate]
     dependencies:
       - target: WarSense
+      # Le prove ospitate giocano le sessioni che il programma di verifica genera:
+      # la lista è una sola (05 §12.4). Il confine di 05 §1.3 vale per la
+      # Presentazione, non per un bersaglio di prova, che non entra nell'archivio.
+      - package: WarSensePacchetto
+        products: [Verifica]
     settings:
       base:
         GENERATE_INFOPLIST_FILE: YES

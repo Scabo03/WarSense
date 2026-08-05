@@ -13,6 +13,12 @@ let package = Package(
         .library(name: "Sessione", targets: ["Sessione"]),
         .library(name: "Contenuti", targets: ["Contenuti"]),
         .library(name: "Segnali", targets: ["Segnali"]),
+        // Verifica è un prodotto perché il collaudo OSPITATO possa giocare le
+        // stesse sessioni che il programma di verifica genera, con una lista sola.
+        // Il confine di 05 §1.3 resta intero: la Presentazione non la importa, e
+        // `ConfiniTest.test_05_1_3_confini_della_presentazione` lo sorveglia; i
+        // bersagli di prova non entrano nell'archivio (memoria di infrastruttura).
+        .library(name: "Verifica", targets: ["Verifica"]),
     ],
     targets: [
         // Dati: caricamento e validazione dei file dei valori e dei testi. Importa soltanto Foundation.

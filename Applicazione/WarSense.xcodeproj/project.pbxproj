@@ -10,11 +10,13 @@
 		09CFF70CB8EC19E916A3C7BA /* ToccoDirettoTest.swift in Sources */ = {isa = PBXBuildFile; fileRef = 10A40D60A1907135F70F1FB4 /* ToccoDirettoTest.swift */; };
 		116EEE5C15D49181561AFDB5 /* DesignazioneBersaglioTest.swift in Sources */ = {isa = PBXBuildFile; fileRef = 589A5B5EA3AF0D6D1EFB3900 /* DesignazioneBersaglioTest.swift */; };
 		190E7D5DC3B892BF2DFD277B /* SchermateContorno.swift in Sources */ = {isa = PBXBuildFile; fileRef = 44914552A51BDF0197E99DAF /* SchermateContorno.swift */; };
+		2C201369597A009507BC172C /* Verifica in Frameworks */ = {isa = PBXBuildFile; productRef = 63388568CF69F6ECF3CB5E3C /* Verifica */; };
 		321465D14C83340BB6030A0F /* CatenaInterfacciaMotoreTest.swift in Sources */ = {isa = PBXBuildFile; fileRef = 2F77F23D7958A0EE7DC80E0A /* CatenaInterfacciaMotoreTest.swift */; };
 		33BCAD29CAC0333FB4B83594 /* FumoInterfacciaTest.swift in Sources */ = {isa = PBXBuildFile; fileRef = 921003768253D7D483CCC1D8 /* FumoInterfacciaTest.swift */; };
 		35D13AF917D421DA151C322C /* PartitaCampagna.swift in Sources */ = {isa = PBXBuildFile; fileRef = D05C93D40ACCC919E14E0F90 /* PartitaCampagna.swift */; };
 		4019BE980D8938B2E6B4D120 /* ImpiantoInterfacciaTest.swift in Sources */ = {isa = PBXBuildFile; fileRef = 75B409D97C3092A3CC3CDA17 /* ImpiantoInterfacciaTest.swift */; };
 		45C1B6E90486F2F6078B2B8B /* RegistroVisibileTest.swift in Sources */ = {isa = PBXBuildFile; fileRef = 1BE339E6703B78CDC77E5B87 /* RegistroVisibileTest.swift */; };
+		4F7ECFCC6A61E15D90A39997 /* SessioniPerInterfacciaTest.swift in Sources */ = {isa = PBXBuildFile; fileRef = 7088EBAC70470929FF7BA18A /* SessioniPerInterfacciaTest.swift */; };
 		55F02441809BDE8C6D282CC4 /* Dati in Frameworks */ = {isa = PBXBuildFile; productRef = CFCCD206E6A2E53A407BA042 /* Dati */; };
 		5F9166348949834153CEF7FA /* SchermataBattaglia.swift in Sources */ = {isa = PBXBuildFile; fileRef = 849A458FA8292F265DF9BE68 /* SchermataBattaglia.swift */; };
 		72C9006DDA7298DDDD235743 /* LettoreAccessibilita.swift in Sources */ = {isa = PBXBuildFile; fileRef = 27D480588F693D19D9E50AC7 /* LettoreAccessibilita.swift */; };
@@ -78,6 +80,7 @@
 		47D2EC331332BE96EB5D410B /* Servizi.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Servizi.swift; sourceTree = "<group>"; };
 		5159B9BE60E2EEEA1817D003 /* VistaMappa.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = VistaMappa.swift; sourceTree = "<group>"; };
 		589A5B5EA3AF0D6D1EFB3900 /* DesignazioneBersaglioTest.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = DesignazioneBersaglioTest.swift; sourceTree = "<group>"; };
+		7088EBAC70470929FF7BA18A /* SessioniPerInterfacciaTest.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SessioniPerInterfacciaTest.swift; sourceTree = "<group>"; };
 		75B409D97C3092A3CC3CDA17 /* ImpiantoInterfacciaTest.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ImpiantoInterfacciaTest.swift; sourceTree = "<group>"; };
 		780DA0404CFBE7DD9B420A68 /* AppDelegate.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AppDelegate.swift; sourceTree = "<group>"; };
 		849A458FA8292F265DF9BE68 /* SchermataBattaglia.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SchermataBattaglia.swift; sourceTree = "<group>"; };
@@ -107,6 +110,14 @@
 				55F02441809BDE8C6D282CC4 /* Dati in Frameworks */,
 				8C28A2B62F03F542DD08122D /* Contenuti in Frameworks */,
 				7A5079BF5C38019EE9CE070D /* Segnali in Frameworks */,
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
+		729465D0BB27C8083468E370 /* Frameworks */ = {
+			isa = PBXFrameworksBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+				2C201369597A009507BC172C /* Verifica in Frameworks */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -185,6 +196,7 @@
 				325B59A8BC855637ABF9B2CB /* PannelloAzioniTest.swift */,
 				03ACD38B8C2F68821502F3C4 /* RaggiungibilitaTest.swift */,
 				1BE339E6703B78CDC77E5B87 /* RegistroVisibileTest.swift */,
+				7088EBAC70470929FF7BA18A /* SessioniPerInterfacciaTest.swift */,
 				026CC99253672C0BE5244297 /* StabilitaDellaDisposizioneTest.swift */,
 				10A40D60A1907135F70F1FB4 /* ToccoDirettoTest.swift */,
 			);
@@ -209,6 +221,7 @@
 			buildConfigurationList = 74B06031F0A434EA418B6BBD /* Build configuration list for PBXNativeTarget "WarSenseTest" */;
 			buildPhases = (
 				739CB62F3D38E3667239127E /* Sources */,
+				729465D0BB27C8083468E370 /* Frameworks */,
 			);
 			buildRules = (
 			);
@@ -217,6 +230,7 @@
 			);
 			name = WarSenseTest;
 			packageProductDependencies = (
+				63388568CF69F6ECF3CB5E3C /* Verifica */,
 			);
 			productName = WarSenseTest;
 			productReference = 3CAF296EB8CDAA34921D17B6 /* WarSenseTest.xctest */;
@@ -330,6 +344,7 @@
 				F9D782BD8B4FD18B38DF5922 /* PannelloAzioniTest.swift in Sources */,
 				F153F7238148016D1A99A85F /* RaggiungibilitaTest.swift in Sources */,
 				45C1B6E90486F2F6078B2B8B /* RegistroVisibileTest.swift in Sources */,
+				4F7ECFCC6A61E15D90A39997 /* SessioniPerInterfacciaTest.swift in Sources */,
 				94A9A556DB6F6992ED60E383 /* StabilitaDellaDisposizioneTest.swift in Sources */,
 				09CFF70CB8EC19E916A3C7BA /* ToccoDirettoTest.swift in Sources */,
 			);
@@ -667,6 +682,10 @@
 		4EA3C58AA15BA2930E7F7E45 /* Contenuti */ = {
 			isa = XCSwiftPackageProductDependency;
 			productName = Contenuti;
+		};
+		63388568CF69F6ECF3CB5E3C /* Verifica */ = {
+			isa = XCSwiftPackageProductDependency;
+			productName = Verifica;
 		};
 		A916C71FC8064696BB93E31D /* Sessione */ = {
 			isa = XCSwiftPackageProductDependency;
