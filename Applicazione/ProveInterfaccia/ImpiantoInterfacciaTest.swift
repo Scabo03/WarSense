@@ -253,15 +253,25 @@ final class ImpiantoInterfacciaTest: XCTestCase {
                                  + "\(sparite)")
     }
 
-    // MARK: - 00 §7.1 — il piano della battaglia, e ciò che qui resta scoperto
+    // MARK: - 00 §7.1 — il piano della battaglia: meccanismo noto, prova ancora assente
     //
-    // La prova gemella sul piano della battaglia — selezionare una tessera del deck
-    // e schierare toccando una cella della propria zona — NON è in questo impianto,
-    // e la sua assenza è dichiarata invece che taciuta: vedi lo scostamento S10 nel
-    // registro. Il tocco sintetizzato da XCUITest non produce il piazzamento su una
-    // griglia SCORREVOLE, e la causa non è stata accertata. Ciò che è provato:
-    // l'equivalenza fra le due porte sul piano della battaglia sta nelle prove
-    // ospitate (`ToccoDirettoTest.test_02_2_11_in_battaglia_il_dito_apre_lo_stesso_
-    // pannello_della_voce`), e l'ordine impartito con il tocco VERO è provato qui
-    // sulla mappa di campagna (`test_01_5_6_un_ordine_dato_al_dito_arriva_al_gioco`).
+    // **Che cosa è stato accertato il 2026-08-05.** La cornice che il servizio di
+    // accessibilità riporta per una cella FUORI dalla porzione visibile di un
+    // contenitore scorrevole è la sua posizione nel CONTENUTO e non sullo schermo:
+    // può cadere dentro la finestra, e perfino sopra la colonna dei comandi, senza
+    // che in quel punto sia disegnata la cella. Toccarla non fa nulla, perché il
+    // dito colpisce ciò che è davvero disegnato lì. Misurato sulla mappa grande —
+    // che è scorrevole quanto la griglia di battaglia: la casella del proprio
+    // gruppo riportava cornice a y=592 con i comandi a y=623, dunque «dentro la
+    // finestra e sopra i comandi», e il tocco non apriva nulla; dopo UN solo
+    // scorrimento la cornice passava a y=475 e il tocco apriva il pannello.
+    //
+    // Non è quindi un difetto del riconoscitore (RDA-78) né del gioco: il dito, a
+    // differenza della voce, non ha scorrimento automatico verso l'elemento.
+    //
+    // **Che cosa resta aperto.** Sulla GRIGLIA DI BATTAGLIA lo stesso rimedio non
+    // basta: portando in vista una cella della zona di schieramento — con
+    // scorrimenti sulla finestra e con scorrimenti dentro la griglia, otto tentativi
+    // per ciascuna via — il tocco non schiera. Il fenomeno non coincide dunque con
+    // quello della mappa, o non del tutto. Vedi lo scostamento S10.
 }

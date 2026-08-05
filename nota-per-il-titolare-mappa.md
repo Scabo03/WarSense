@@ -14,7 +14,9 @@ esista nel gioco; le virgolette alte sono citazioni di altra natura.
 
 ## Che cos'è cambiato in questa build
 
-Tre cose, e nessuna tocca lo scontro.
+Tre cose, e nessuna tocca lo scontro. **È la prima build che ti arriva con il
+tocco diretto**: le due precedenti correzioni sono state fatte e provate, ma non
+erano ancora salite sui dispositivi.
 
 **Le caselle si toccano con il dito.** Fino a ieri le caselle della mappa — e
 anche le celle della griglia di battaglia — rispondevano soltanto al doppio tocco
@@ -26,6 +28,14 @@ saperlo.
 
 **Il registro e l'annullamento sono quelli della build precedente**, descritti qui
 sotto perché la nota vecchia li descriveva ancora come erano due build fa.
+
+**Una cosa da sapere sul dito, sulle mappe grandi e sullo scontro.** Quando la
+griglia è più grande dello schermo, il dito può toccare soltanto ciò che è
+davvero in vista: per raggiungere una casella più in basso bisogna prima far
+scorrere la griglia. La voce invece ci arriva da sé, perché quando il cursore si
+sposta su una casella fuori vista è il gioco a portarla in vista. Non è un
+difetto, ma è un'asimmetria fra i due modi: dimmi se giocando la senti come
+scomoda, perché in quel caso si può fare qualcosa.
 
 **Il collaudo automatico ora gira tutto prima di ogni caricamento.** Prima ne
 girava una parte, e la parte che non girava era proprio quella che prova
