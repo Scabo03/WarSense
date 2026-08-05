@@ -800,8 +800,32 @@ Problema. `nota-per-il-titolare-mappa.md` è il documento su cui il titolare si 
 
 Opzioni. Una prescrizione in `forma-dei-resoconti.md`; oppure un controllo che rifiuti il caricamento.
 
-Scelta. Il controllo, `scripts/controlla-nota-titolare.py`, invocato da `carica-testflight.sh` prima di qualunque compilazione e, nella sola parte del vocabolario, dall'integrazione continua.
+Scelta. Il controllo, invocato da `carica-testflight.sh` prima di qualunque compilazione e, nella sola parte che non chiede il programma di verifica, dall'integrazione continua. **Dal 2026-08-05 lo script si chiama `scripts/controlla-note.py` e vale per due documenti**: vedi RDA-81.
 
 Motivazione. La prescrizione è la forma che in questo progetto viene disattesa; il rifiuto è la forma che non lo è mai stata. Non è un'opinione: è il confronto fra i due documenti destinati allo stesso lettore.
 
 Delimitazione, dichiarata perché non sia mai scambiata per copertura piena. Il controllo giudica quattro cose: che la nota esista e non sia vuota; che ogni nome citato fra virgolette basse sia il valore di una chiave dei cataloghi di testo o un gesto il cui metodo esiste nei sorgenti; che ogni numero del corpo provenga da una misura dichiarata e pari a ciò che il programma di verifica stampa oggi; e che la nota non sia più vecchia dell'ultimo commit che ha toccato il codice. NON giudica le affermazioni di COMPORTAMENTO in prosa, che non sono riducibili a un nome né a un numero. Su quelle agisce soltanto il controllo di freschezza, che obbliga a rileggerle a ogni modifica del codice: ed è il controllo che avrebbe impedito tutte e quattro le affermazioni false, perché nessuna era un errore di misura e tutte erano affermazioni divenute false sotto una nota che nessuno rileggeva.
+
+### RDA-81 — I documenti consegnati stanno in una tabella che dichiara chi è protetto da che cosa
+
+Problema. Tre volte lo stesso errore, e la terza è la prova che la forma della protezione contava più del suo contenuto. `nota-per-il-titolare-mappa.md` aveva quattro affermazioni false su quattro; è stata messa dietro un controllo. `note-di-rilascio.txt`, stesso destinatario, è partita con la build 14 descrivendo la build precedente — perché il controllo che la proteggeva ne verificava la LUNGHEZZA e non l'ATTUALITÀ. Le due protezioni vivevano in due posti diversi (una dentro `carica-testflight.sh`, l'altra in uno script a sé) e la differenza non era leggibile da nessuna parte.
+
+Opzioni. Applicare tutti i controlli a tutti i documenti; oppure duplicare il controllo di freschezza nel secondo posto; oppure una tabella che dichiari, documento per documento, l'insieme dei controlli cui è soggetto.
+
+Scelta. La tabella, in `scripts/controlla-note.py`. Una sola realizzazione per ciascun controllo; `DOCUMENTI` elenca `note-di-rilascio.txt` con esistenza, lunghezza e freschezza, e `nota-per-il-titolare-*.md` con esistenza, vocabolario, misure, cifre e freschezza.
+
+Motivazione. Applicare tutto a tutti sarebbe stato falso: il controllo del vocabolario pretende la convenzione delle virgolette basse, che la nota per i tester non usa, e sarebbe stato vacuo o costretto. Duplicare la freschezza avrebbe rimesso in piedi la condizione da cui il difetto è nato, cioè due protezioni in due posti. La tabella non aggiunge un controllo: rende LEGGIBILE quale documento è protetto da che cosa, sicché un artefatto consegnato senza riga si veda a colpo d'occhio.
+
+Conseguenze. Il controllo di freschezza sulla nota per i tester è stato visto rifiutare sul caso vero, non su uno costruito: al momento in cui è stato installato, `note-di-rilascio.txt` era al commit `2d3c546` e il codice a `f3c8288`, e lo script si è fermato con uscita 1. Verificato inoltre che avrebbe impedito l'episodio della build 14: allora la nota era a `61a90e6` (09:47) e il codice a `6b0caf8` (13:47).
+
+### RDA-82 — Il registro delle build e il confronto con App Store Connect
+
+Problema. La build 13 esisteva sui server di Apple e nessun documento del progetto la registrava; `esame-critico.md` §4.1 e un resoconto dicevano entrambi che l'ultima fosse la 12. È l'unica catena del progetto che nessun controllo interno poteva verificare, perché l'altro capo non sta nel repository.
+
+Opzioni. Affidare la registrazione alla disciplina di chi carica, come fino a ieri; oppure un registro scritto dallo script con un controllo che lo confronti con i server.
+
+Scelta. `build-caricate.md`, scritto da `scripts/carica-testflight.sh` a caricamento riuscito, e `scripts/controlla-build.py`, che confronta il registro con App Store Connect e rifiuta il caricamento successivo se divergono in un verso o nell'altro.
+
+Motivazione. Il passo che è mancato è precisamente quello umano: la sessione che caricò la 13 fece tutto il resto e non scrisse la riga. Uno strumento che la scrive da sé toglie il passo; un controllo che rifiuta al caricamento successivo prende anche i caricamenti fatti altrove.
+
+Conseguenze. Gira soltanto al caricamento, perché chiede le credenziali di App Store Connect, che non esistono nell'integrazione continua né devono esistervi. Le righe da 1 a 14 sono RICOSTRUITE dall'istante di caricamento contro la cronologia, e il registro lo dichiara riga per riga; quella della 13 è inoltre accertata per confronto del campo `whatsNew`.

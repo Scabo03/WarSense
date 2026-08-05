@@ -41,32 +41,6 @@ if massima is not None and segmenti(nuova) < segmenti(massima):
 print(f'versione da caricare: {nuova}; più alta già presente: {massima or \"nessuna\"} — si procede')
 "
 
-# ============================================================================
-# CONTROLLO PREVENTIVO DELLA NOTA PER I TESTER.
-# App Store Connect rifiuta whatsNew oltre i 4000 CARATTERI (non byte) con un
-# 409, e lo fa DOPO che la build è stata caricata: la build resta buona ma
-# arriva ai tester senza nota, e occorre accorgersene e riallegarla a mano.
-# È già accaduto due volte (build 7 e build 12) con la regola scritta nella
-# memoria di infrastruttura e dimenticata da chi la stava applicando: una
-# regola si può dimenticare, un controllo no. Qui si ferma prima di compilare.
-# ============================================================================
-echo "== Controllo preventivo: la nota per i tester sta nel limite =="
-python3 - "$RADICE/note-di-rilascio.txt" <<'PY'
-import pathlib, sys
-percorso = pathlib.Path(sys.argv[1])
-if not percorso.exists():
-    print(f"RIFIUTATO: manca {percorso}"); sys.exit(1)
-testo = percorso.read_text(encoding="utf-8")
-LIMITE = 4000
-if len(testo) > LIMITE:
-    print(f"RIFIUTATO: la nota per i tester ha {len(testo)} caratteri e il limite di "
-          f"App Store Connect è {LIMITE}. Il caricamento andrebbe a buon fine ma la "
-          f"nota verrebbe rifiutata dopo, e la build arriverebbe ai tester senza. "
-          f"Accorciare di almeno {len(testo) - LIMITE} caratteri e rilanciare.")
-    sys.exit(1)
-print(f"nota di {len(testo)} caratteri su {LIMITE}: si procede")
-PY
-
 echo "== Numero di build: massimo su tutto l'account più uno =="
 ULTIMO=$(eval $ASC GET "'/v1/builds?filter[app]=$APP_ID&limit=200'" \
   | python3 -c "import json,sys; d=json.load(sys.stdin)['data']; print(max((int(b['attributes']['version']) for b in d), default=0))")
@@ -74,15 +48,27 @@ NUOVO=$((ULTIMO + 1))
 echo "massimo: $ULTIMO -> nuovo: $NUOVO"
 
 # ============================================================================
-# CONTROLLO PREVENTIVO DELLA NOTA PER IL TITOLARE.
-# È il documento su cui il titolare si forma il giudizio sul lavoro, ed era
-# l'unico che nessuno rileggeva: due commit su trentanove e quattro affermazioni
-# false su quattro alla verifica dell'esame critico. La nota di rilascio, stesso
-# destinatario e quattordici commit su trentanove, è coerente per una sola
-# ragione — che il caricamento si ferma se manca. Qui la stessa protezione.
+# CONTROLLO PREVENTIVO DEI DOCUMENTI CONSEGNATI A CHI USA IL GIOCO.
+# Un solo comando per tutti: `scripts/controlla-note.py` porta la tabella di
+# quale documento è protetto da quali controlli. Prima erano due protezioni
+# diverse in due posti diversi — la nota per i tester controllata solo nella
+# LUNGHEZZA dentro questo script, la nota per il titolare controllata a fondo
+# altrove — e la differenza non era visibile da nessuna parte: la nota per i
+# tester è partita con la build 14 descrivendo la build precedente.
 # ============================================================================
-echo "== Controllo preventivo: la nota per il titolare =="
-python3 "$RADICE/scripts/controlla-nota-titolare.py"
+echo "== Controllo preventivo: i documenti consegnati =="
+python3 "$RADICE/scripts/controlla-note.py"
+
+# ============================================================================
+# CONTROLLO PREVENTIVO DELLA CORRISPONDENZA CON APP STORE CONNECT.
+# È l'unica catena del progetto che nessun controllo interno può verificare, e il
+# 2026-08-05 se ne è avuta la prova: la build 13 esisteva sui server e nessun
+# documento la registrava. Qui si rifiuta se il registro e i server divergono, in
+# entrambi i versi; la riga della build nuova la scrive lo script alla fine, così
+# che il passo umano — quello che è mancato — non esista più.
+# ============================================================================
+echo "== Controllo preventivo: registro delle build e App Store Connect =="
+python3 "$RADICE/scripts/controlla-build.py"
 
 echo "== Collaudo COMPLETO prima del caricamento (pacchetto, ospitate, interfaccia) =="
 # Un solo elenco di ciò che «tutto» significa, condiviso con l'integrazione
@@ -110,5 +96,8 @@ xcrun altool --upload-app -f "$CARTELLA_BUILD/esportazione/WarSense.ipa" -t ios 
 echo "== Nota di rilascio (attende l'elaborazione della build) =="
 "$RADICE/scripts/nota-testflight.sh" "$NUOVO" || \
   echo "Nota non ancora allegata: rieseguire scripts/nota-testflight.sh $NUOVO quando la build risulta elaborata."
+
+echo "== Registrazione della build nel registro =="
+python3 "$RADICE/scripts/controlla-build.py" --appendi "$NUOVO"
 
 echo "== Fatto: build $NUOVO caricata =="
