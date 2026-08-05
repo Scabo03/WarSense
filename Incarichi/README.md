@@ -30,6 +30,7 @@ accaduto.
 
 | n. | data | materia | incarico | resoconto |
 |---|---|---|---|---|
+| 04 | 2026-08-05 | sessioni per l'interfaccia, manifest dei testi, conteggio delle prove | [incarico](04-2026-08-05-sessioni-per-interfaccia-incarico.md) | [resoconto](04-2026-08-05-sessioni-per-interfaccia-resoconto.md) |
 | 03 | 2026-08-05 | freschezza delle note, build 13, tocco in battaglia | [incarico](03-2026-08-05-freschezza-e-tocco-battaglia-incarico.md) | [resoconto](03-2026-08-05-freschezza-e-tocco-battaglia-resoconto.md) |
 | 02 | 2026-08-05 | catena intera, tocco sintetizzato, sessioni complete | [incarico](02-2026-08-05-catena-e-sessioni-complete-incarico.md) | [resoconto](02-2026-08-05-catena-e-sessioni-complete-resoconto.md) |
 | 01 | 2026-08-05 | tocco diretto, impianto di prova sul simulatore, tre cancelli | [incarico](01-2026-08-05-tocco-diretto-e-cancelli-incarico.md) | [resoconto](01-2026-08-05-tocco-diretto-e-cancelli-resoconto.md) |
