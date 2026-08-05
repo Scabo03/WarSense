@@ -189,3 +189,15 @@ La prova è ora `CatenaInterfacciaMotoreTest.test_00_3_1_una_campagna_giocata_al
 **Perché è registrato qui e non nascosto in una prova indebolita.** Le due prove sono state tolte, non adattate fino a passare. Una prova che passa senza verificare è peggio di una prova assente, perché la sua assenza almeno si vede.
 
 **Che cosa NON è stato dichiarato coperto.** L'ordine di lettura attraverso XCUITest: misurato che `XCUIApplication.descendants` percorre la gerarchia delle viste e ignora `accessibilityElements` — sulla mappa piccola i comandi globali compaiono agli indici 6–9, prima delle sedici caselle. L'ordine effettivo resta verificato dalle prove ospitate, che leggono `accessibilityElements`, e l'impianto d'interfaccia verifica invece la COMPLETEZZA dell'albero.
+
+## S11 — Le sessioni di battaglia non passano per l'interfaccia, e la ragione è un numero
+
+**Che cosa l'incarico chiedeva.** Che l'intero insieme delle sessioni generate, campagna e battaglia, passasse per l'interfaccia e non un campione, con il costo in tempo dichiarato non negoziabile perché sette minuti erano ritenuti accettabili.
+
+**Che cosa è stato fatto.** Le sessioni di CAMPAGNA passano ora per l'interfaccia tutte: 144 su 144 generate, 3744 ordini, in `SessioniPerInterfacciaTest.test_00_3_1_ogni_sessione_generata_giocata_al_dito_da_lo_stesso_stato`. Ciascuna è confrontata con la corsa del Motore sulla medesima configurazione e deve dare la stessa impronta.
+
+**Che cosa NON è stato fatto, e perché.** Le sessioni di BATTAGLIA restano al Motore. Il banco ne genera 32 per un totale di 130 322 comandi (`#sessioni_riepilogo`, voce `comandi_nelle_sessioni_di_battaglia`). Il costo per ordine misurato sulle sessioni di campagna passate per l'interfaccia è 0,3362 secondi (stampato da `MISURA sessioni per interfaccia`): 130 322 ordini a quel costo sono **dell'ordine delle dodici ore**. Non è una valutazione di comodo ed è verificabile rifacendo la moltiplicazione.
+
+**Che cosa costerebbe farle davvero.** Oltre al tempo, un traduttore da comando a tocchi per ciascuno dei nove casi di `ComandoBattaglia` — selezione dal deck, piazzamento, movimento per designazione, tiro e ingaggio dal pannello, ritiro, resa, fine turno — mentre per la campagna ne bastano due. Non è stato scritto.
+
+**Il costo misurato, che va riportato al titolare.** Le sole sessioni di campagna per l'interfaccia costano **1258,6 secondi**, cioè venti minuti e cinquanta secondi: tre volte la stima di sette minuti su cui la decisione di tenerle nel collaudo di ogni caricamento era stata presa. La decisione resta in vigore e non è stata riaperta qui; il numero però è diverso da quello su cui fu presa, e va saputo.

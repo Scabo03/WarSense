@@ -200,21 +200,8 @@ public struct BancoSessioniCampagna: Sendable {
                 sondaDiPasso.controllaSalto(stato: stato,
                                             sequenza: sequenzaDelSalto(vista, stato))
                     .map(\.description))
-            guard let gruppo = vista.prossimoGruppoInAttesa(dopo: nil) else { break }
-
-            // Condotta deterministica, senza alcuna estrazione (RDA-59): si marcia
-            // sulla destinazione scelta dal numero del gruppo e dal giorno, si
-            // presidia quando il giorno è multiplo di tre o quando non esiste
-            // destinazione alcuna.
-            let destinazioni = vista.destinazioniValide(per: gruppo.id)
-            let comando: ComandoCampagna
-            if destinazioni.isEmpty || stato.giorno % 3 == 0 {
-                comando = .presidio(gruppo: gruppo.id)
-            } else {
-                let indice = (gruppo.id.numero &+ stato.giorno) % destinazioni.count
-                let scelta = condotta == .avanti ? indice : destinazioni.count - 1 - indice
-                comando = vista.comandoDiMarcia(per: gruppo.id, a: destinazioni[scelta])!
-            }
+            guard let comando = Self.prossimoOrdine(stato: stato, vista: vista,
+                                                    condotta: condotta) else { break }
             let prima = stato
             let (dopo, eventi) = motore.applica(comando, parte: .giocatore, stato: stato)
             violazioniDiPasso.formUnion(
@@ -245,6 +232,29 @@ public struct BancoSessioniCampagna: Sendable {
                         improntaFinale: stato.impronta())
     }
 
+    /// LA CONDOTTA, in un punto solo. Deterministica e senza alcuna estrazione
+    /// (RDA-59): il gruppo è quello che il salto diretto propone — cioè la sequenza
+    /// che compirebbe chi si affida al salto — e l'ordine è il presidio quando il
+    /// giorno è multiplo di tre o quando non esiste destinazione alcuna, la marcia
+    /// altrimenti, sulla destinazione scelta dal numero del gruppo e dal giorno.
+    ///
+    /// Sta qui e non nei due chiamanti perché il banco la gioca nel Motore e il
+    /// collaudo ospitato la gioca al dito: due condotte separate divergerebbero, ed
+    /// è già accaduto — la prima stesura sceglieva il gruppo con `gruppiOrdinati` da
+    /// un lato e con il salto dall'altro, e le impronte non coincidevano appena i
+    /// gruppi erano più d'uno.
+    public static func prossimoOrdine(stato: StatoCampagna, vista: VistaCampagna,
+                                      condotta: Condotta) -> ComandoCampagna? {
+        guard let gruppo = vista.prossimoGruppoInAttesa(dopo: nil) else { return nil }
+        let destinazioni = vista.destinazioniValide(per: gruppo.id)
+        if destinazioni.isEmpty || stato.giorno % 3 == 0 {
+            return .presidio(gruppo: gruppo.id)
+        }
+        let indice = (gruppo.id.numero &+ stato.giorno) % destinazioni.count
+        let scelta = condotta == .avanti ? indice : destinazioni.count - 1 - indice
+        return vista.comandoDiMarcia(per: gruppo.id, a: destinazioni[scelta])
+    }
+
     /// Riapplica una sequenza di comandi a uno stato nato dalla fabbrica e
     /// restituisce l'impronta finale. È la rigiocatura di 05 §13.2 al livello del
     /// Motore: il giornale su disco e le istantanee sono materia della Sessione.
@@ -272,10 +282,28 @@ public struct BancoSessioniCampagna: Sendable {
     /// Tutte le sessioni da giocare: ogni formato di mappa, ogni conteggio di gruppi
     /// da uno al massimo che la mappa consente, le due disposizioni. Non sono
     /// configurazioni comode: il massimo è il caso limite dello stipamento.
-    public func tutteLeSessioni(mappe: [IdentificatoreDati: DefinizioneMappa],
-                                formati: [IdentificatoreDati: FormatoMappa],
-                                gruppiMassimi: Int, giornate: Int) throws -> [Sessione] {
-        var esito: [Sessione] = []
+    /// La CONFIGURAZIONE di una sessione: che cosa la individua, senza giocarla.
+    /// Esiste perché l'elenco delle sessioni abbia una definizione sola: il banco
+    /// le gioca nel Motore, e il collaudo ospitato gioca le stesse attraverso
+    /// l'interfaccia. Due elenchi separati sarebbero divergiti al primo cambiamento.
+    public struct Configurazione: Sendable, Hashable {
+        public let mappa: IdentificatoreDati
+        public let gruppi: [ScenarioCampagna.GruppoIniziale]
+        public let disposizione: Disposizione
+        public let condotta: Condotta
+        public var scenario: ScenarioCampagna {
+            ScenarioCampagna(mappa: mappa, gruppiGiocatore: gruppi)
+        }
+    }
+
+    /// Tutte le configurazioni da giocare: ogni formato di mappa, ogni conteggio di
+    /// gruppi da uno al massimo che la mappa consente, le due disposizioni, le due
+    /// condotte. Non sono configurazioni comode: il massimo è il caso limite dello
+    /// stipamento.
+    public func configurazioni(mappe: [IdentificatoreDati: DefinizioneMappa],
+                               formati: [IdentificatoreDati: FormatoMappa],
+                               gruppiMassimi: Int) -> [Configurazione] {
+        var esito: [Configurazione] = []
         for identificatore in mappe.keys.sorted() {
             guard let definizione = mappe[identificatore],
                   let formato = formati[definizione.formato] else { continue }
@@ -285,9 +313,9 @@ public struct BancoSessioniCampagna: Sendable {
                     let posti = posizioni(quanti: quanti, formato: formato,
                                           disposizione: disposizione)
                     for condotta in Condotta.allCases {
-                        esito.append(try gioca(mappa: identificatore, gruppi: posti,
-                                               disposizione: disposizione, condotta: condotta,
-                                               giornate: giornate))
+                        esito.append(Configurazione(mappa: identificatore, gruppi: posti,
+                                                    disposizione: disposizione,
+                                                    condotta: condotta))
                     }
                 }
             }
@@ -295,9 +323,17 @@ public struct BancoSessioniCampagna: Sendable {
         return esito
     }
 
+    public func tutteLeSessioni(mappe: [IdentificatoreDati: DefinizioneMappa],
+                                formati: [IdentificatoreDati: FormatoMappa],
+                                gruppiMassimi: Int, giornate: Int) throws -> [Sessione] {
+        try configurazioni(mappe: mappe, formati: formati, gruppiMassimi: gruppiMassimi)
+            .map { try gioca(mappa: $0.mappa, gruppi: $0.gruppi, disposizione: $0.disposizione,
+                             condotta: $0.condotta, giornate: giornate) }
+    }
+
     /// Le posizioni iniziali: raccolte presso l'angolo del proprio quartier generale
     /// oppure sparpagliate a passo fisso sulla mappa. Deterministiche entrambe.
-    private func posizioni(quanti: Int, formato: FormatoMappa,
+    func posizioni(quanti: Int, formato: FormatoMappa,
                            disposizione: Disposizione) -> [ScenarioCampagna.GruppoIniziale] {
         let caselle = (1...formato.righe).flatMap { riga in
             (1...formato.colonne).map { (riga, $0) }

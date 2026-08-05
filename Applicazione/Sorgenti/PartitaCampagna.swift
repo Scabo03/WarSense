@@ -46,19 +46,34 @@ final class PartitaCampagna {
         return scenario
     }
 
-    /// Crea una campagna nuova, sostituendo l'eventuale slot precedente.
-    init(nuova ambiente: Ambiente, taglia: Taglia) async throws {
+    /// Crea una campagna nuova da uno SCENARIO qualunque, sostituendo l'eventuale
+    /// slot precedente.
+    ///
+    /// È la forma che il gioco richiede, non un'aggiunta per il collaudo. Le tre
+    /// `Taglia` sono campagne di prova, come il loro stesso commento dichiara:
+    /// quando esisteranno i fronti, 01 §5.6.9 vuole più campagne aperte insieme,
+    /// ciascuna su una mappa propria e con almeno cinque mappe per fronte, e
+    /// 01 §5.6.10 fa entrare nella mappa dalla schermata delle campagne, scegliendo
+    /// una località. La schermata aprirà allora la campagna scelta a partire dal suo
+    /// scenario, non da uno di tre formati fissi. L'inizializzatore per taglia è il
+    /// riparo provvisorio e delega a questo.
+    init(nuova ambiente: Ambiente, scenario: ScenarioCampagna) async throws {
         self.ambiente = ambiente
         self.motore = MotoreCampagna(valori: ambiente.valori,
                                      valoriCampagna: ambiente.valoriCampagna)
         try? FileManager.default.removeItem(at: Self.cartellaCampagna)
         var generatore = SystemRandomNumberGenerator()
         self.sessione = try await SessioneCampagna(
-            nuova: Self.scenario(taglia), valori: ambiente.valori,
+            nuova: scenario, valori: ambiente.valori,
             valoriCampagna: ambiente.valoriCampagna,
             versioneTesti: ambiente.testi.versione,
             cartella: Self.cartellaCampagna,
             seme: generatore.next(), identificatore: UUID().uuidString)
+    }
+
+    /// Le tre campagne di prova, per identificatore di taglia.
+    convenience init(nuova ambiente: Ambiente, taglia: Taglia) async throws {
+        try await self.init(nuova: ambiente, scenario: Self.scenario(taglia))
     }
 
     /// Riprende la campagna salvata dal giornale (00 §3.5, 05 §6.3).
