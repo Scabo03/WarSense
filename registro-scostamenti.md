@@ -98,6 +98,8 @@ Aperto dall'accertamento sugli esiti degli scontri (build 6), chiuso dal titolar
 
 **Che cosa costerebbe.** Un riconoscitore di tocco su ciascuna vista di griglia che risolva il punto nella cella e chiami la stessa `attiva(_:)`. Nessun cambiamento di regole, nessun cambiamento di stato, nessuna conseguenza sugli annunci.
 
+**CHIUSO il 2026-08-05 (RDA-78).** Corretto sui due piani insieme, come questa voce prescriveva. La realizzazione differisce dal rimedio qui indicato in un punto, e in meglio: il riconoscitore non chiama `attiva(_:)` — che sarebbe stato un secondo ramo da tenere allineato al primo — ma risolve il punto nell'ELEMENTO e ne invoca `accessibilityActivate()`, cioè esattamente il metodo che la tecnologia assistiva invoca. Il percorso è uno solo per costruzione e non per disciplina. Il riconoscitore vive in `VistaACaselle`, base condivisa da `VistaGriglia` e `VistaMappa`: la divergenza fra i due piani che questa voce temeva non è scrivibile. La prova che falliva prima è `ToccoDirettoTest.test_02_2_11_le_due_griglie_hanno_un_percorso_per_il_tocco_diretto`, rossa su entrambi i piani con il riconoscitore disinstallato.
+
 ## S6 — Il resoconto della prima unità conteneva tre numeri non misurati, e uno era sbagliato
 
 **Che cosa è successo.** Il titolare ha sottoposto a controllo aritmetico tre numeri del resoconto della prima unità della fase D. L'accertamento ha stabilito questo, e va scritto senza attenuarlo.

@@ -428,6 +428,10 @@ final class SchermataMappaCampagna: UIViewController {
     func eseguiPerProva(_ comando: ComandoCampagna) async { await eseguiComando(comando) }
     func apriRegistroPerProva() { apriRegistro() }
     var motorePerProva: MotoreCampagna { partita.motore }
+    /// La mappa come `VistaACaselle`: le prove del tocco diretto girano con
+    /// lo stesso corpo sui due piani (02 §2.11, RDA-78).
+    var grigliaPerProva: VistaACaselle { vistaMappa }
+    var partitaPerProva: PartitaCampagna { partita }
     func avviaDesignazionePerProva(gruppo: IdGruppo) {
         designazione = .marcia(gruppo: gruppo)
         if let stato = statoCorrente { aggiorna(con: stato) }

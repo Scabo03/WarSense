@@ -765,3 +765,43 @@ Accertamento. La premessa non regge: 01 §5.6.8.1, che chiude nella fase di arch
 Scelta. Si conserva «presidio», con la glossa dei documenti. Il termine non appartiene al vocabolario chiuso di 02 §4.4.5, che elenca STATI e non azioni: lo stato di un gruppo che ha presidiato è «ha agito», come dopo qualunque altra azione. L'invariabilità di 02 §4.1 è comunque rispettata: tutte le occorrenze nei testi usano la stessa radice — `pannello.presidio`, `campagna.presidio_ordinato`, `registro.presidio_ordinato` — e nessun sinonimo compare in alcun punto.
 
 Conseguenze. Nessuna modifica ai testi. Se una revisione futura vorrà elencare anche i nomi delle AZIONI in 02 §4.4.5, il posto è quello e la voce esiste già altrove; oggi il documento 02 non li elenca, e aggiungerveli sarebbe una modifica al documento e non una correzione.
+
+## Parte undicesima — Decisioni della sessione degli strumenti e dei cancelli
+
+### RDA-78 — Il tocco diretto attiva per la stessa porta dell'attivazione assistiva (02 §2.11, 00 §7.2)
+
+Problema. Le caselle delle due griglie erano elementi accessibili sintetici dentro una vista priva di riconoscitori di gesto: rispondevano soltanto ad `accessibilityActivate`. Con VoiceOver spento nessuna delle due griglie era operabile, e nessuna prova d'interfaccia poteva esercitare il gioco, perché una prova d'interfaccia tocca a dito. L'osservazione stava come scostamento P11 dal 2026-08-04 con il rimedio già indicato e mai realizzato.
+
+Opzioni. Un riconoscitore per ciascuna vista che risolva il punto e chiami `attiva(_:)` sulla schermata, come P11 proponeva; oppure un riconoscitore in una base condivisa che risolva il punto nell'ELEMENTO e ne invochi `accessibilityActivate()`.
+
+Scelta. La seconda, in `VistaACaselle`, da cui `VistaGriglia` e `VistaMappa` ereditano. Il tocco non chiama una seconda realizzazione dell'attivazione: chiama esattamente il metodo che la tecnologia assistiva invoca.
+
+Motivazione. La prima opzione lascia due rami da tenere allineati, ed è la forma di difetto che questo progetto produce con maggiore regolarità: una regola scritta («i due percorsi devono fare la stessa cosa») anziché uno stato reso impossibile. Con la seconda non esiste un secondo ramo. La base è condivisa fra i due piani per la stessa ragione: P11 avvertiva che correggerne uno solo sarebbe stata la disparità che il principio 7 vieta, e con una realizzazione sola la divergenza non è scrivibile.
+
+Delimitazione, che è il punto per cui questa voce esiste. NON è l'esplorazione libera a tocco diretto di 02 §2.12, esclusa dalla prima versione: quella riceve i tocchi grezzi per ANNUNCIARE ciò che il dito attraversa mentre scorre, ed è una modalità di lettura. Qui il tocco ATTIVA, come su qualunque controllo del sistema, e `TesseraDeck` lo faceva già dalla fase B nel verso opposto (l'attivazione assistiva vi chiama `sendActions(for: .touchUpInside)`). Chi trovasse 02 §2.12 citato contro questa correzione legga qui: sono due cose diverse, e 02 §2.11 chiede espressamente la simmetria che questa realizza.
+
+Conseguenze. Con VoiceOver in funzione il riconoscitore non entra mai in azione, perché il tocco singolo è consumato dalla tecnologia assistiva: le due porte non si sovrappongono e nessuna attivazione si conta due volte. Le prove d'interfaccia possono ora esercitare il gioco, che è la condizione dell'impianto sul simulatore. `ToccoDirettoTest` copre entrambi i piani con lo stesso corpo, compreso il caso della casella vuota e del margine, e `test_00_1_2_ogni_casella_e_risolvibile_dal_punto_del_proprio_centro` pretende che ogni elemento dichiarato sia raggiungibile dal dito nel proprio centro, sicché un elemento futuro raggiungibile da una porta sola fallisce senza che nessuno debba ricordarsi di scrivergli la prova.
+
+### RDA-79 — La copertura del formato di salvataggio è imposta da una catena che non compila (00 §15)
+
+Problema. `CompatibilitaGiornaleTest` confrontava i casi trovati nei campioni committati con un insieme di nomi scritto a mano. Un caso aggiunto a `VoceGiornale`, a `ComandoBattaglia` o a `ComandoCampagna` senza il proprio campione non compariva né nei campioni né nel letterale: i due insiemi restavano uguali e la prova PASSAVA. La protezione che `stato-avanzamento.md` le attribuiva non esisteva per nessuno dei tre tipi. L'esame critico l'aveva rilevata per `VoceGiornale` e attribuita a torto agli altri due: l'esaustività di `etichettaCaso` obbligava a NOMINARE il caso nuovo, non a dargli un campione.
+
+Opzioni. Un elenco statico di casi di riferimento come quello di `FattoRegistrato`, che resta una lista scritta a mano; oppure uno specchio `CaseIterable` legato al tipo vero da due funzioni totali.
+
+Scelta. Lo specchio. Per ciascuno dei tre tipi esiste un enumerativo senza valori associati, `specie(di:)` che va dal tipo vero allo specchio, ed `esemplare(di:)` che va dallo specchio al tipo vero costruendo un valore.
+
+Motivazione. Swift non sa enumerare un enumerativo con valori associati, quindi una lista scritta a mano c'è comunque: la questione è se sia possibile lasciarla incompleta. Con lo specchio non lo è. Aggiungere un caso al tipo vero non compila `specie(di:)`; aggiungerlo allo specchio per far compilare quella non compila `esemplare(di:)`, che obbliga a costruire il valore; e a quel punto la prova pretende che la chiave codificata di quel valore compaia nei campioni. Due dei tre anelli sono errori di compilazione.
+
+Conseguenze. La catena è stata percorsa a rovescio per verificarla, aggiungendo un caso finto a `VoceGiornale`: primo anello, `specie(di:)` non compila; secondo, `esemplare(di:)` non compila; terzo, la prova fallisce dichiarando il caso privo di campione. Serviva adesso e non alla prossima unità perché RDA-76 e `impatto-marcia-lunga.md` §7 stabiliscono che la revoca della marcia introdurrà un caso nuovo proprio in `VoceGiornale`.
+
+### RDA-80 — La nota per il titolare sta dietro un cancello, non dietro una prescrizione
+
+Problema. `nota-per-il-titolare-mappa.md` è il documento su cui il titolare si forma il giudizio sul lavoro, ed è l'unico che nessuno rilegge: due commit su trentanove, e quattro affermazioni false su quattro alla verifica dell'esame critico. `note-di-rilascio.txt` ha lo stesso destinatario, quattordici commit su trentanove ed è coerente, per una ragione sola: `carica-testflight.sh` rifiuta il caricamento se manca o se supera il limite.
+
+Opzioni. Una prescrizione in `forma-dei-resoconti.md`; oppure un controllo che rifiuti il caricamento.
+
+Scelta. Il controllo, `scripts/controlla-nota-titolare.py`, invocato da `carica-testflight.sh` prima di qualunque compilazione e, nella sola parte del vocabolario, dall'integrazione continua.
+
+Motivazione. La prescrizione è la forma che in questo progetto viene disattesa; il rifiuto è la forma che non lo è mai stata. Non è un'opinione: è il confronto fra i due documenti destinati allo stesso lettore.
+
+Delimitazione, dichiarata perché non sia mai scambiata per copertura piena. Il controllo giudica quattro cose: che la nota esista e non sia vuota; che ogni nome citato fra virgolette basse sia il valore di una chiave dei cataloghi di testo o un gesto il cui metodo esiste nei sorgenti; che ogni numero del corpo provenga da una misura dichiarata e pari a ciò che il programma di verifica stampa oggi; e che la nota non sia più vecchia dell'ultimo commit che ha toccato il codice. NON giudica le affermazioni di COMPORTAMENTO in prosa, che non sono riducibili a un nome né a un numero. Su quelle agisce soltanto il controllo di freschezza, che obbliga a rileggerle a ogni modifica del codice: ed è il controllo che avrebbe impedito tutte e quattro le affermazioni false, perché nessuna era un errore di misura e tutte erano affermazioni divenute false sotto una nota che nessuno rileggeva.

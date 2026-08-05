@@ -25,7 +25,9 @@ final class ElementoCella: UIAccessibilityElement {
 
 /// La vista della griglia: disegno minimo per chi vede, contenitore degli elementi
 /// accessibili per chi ascolta. I dati sottostanti sono gli stessi (02 §10.3).
-final class VistaGriglia: UIView {
+/// Da `VistaACaselle` eredita il tocco diretto: le celle si attivano al dito e alla
+/// voce per la stessa porta (02 §2.11, RDA-78).
+final class VistaGriglia: VistaACaselle {
     static let passoX: CGFloat = 64
     static let passoY: CGFloat = 56
     static let lato: CGFloat = 60

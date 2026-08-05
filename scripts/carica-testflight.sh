@@ -73,8 +73,21 @@ ULTIMO=$(eval $ASC GET "'/v1/builds?filter[app]=$APP_ID&limit=200'" \
 NUOVO=$((ULTIMO + 1))
 echo "massimo: $ULTIMO -> nuovo: $NUOVO"
 
-echo "== Collaudo del pacchetto prima del caricamento =="
-(cd "$RADICE/Codice" && swift test 2>&1 | tail -2)
+# ============================================================================
+# CONTROLLO PREVENTIVO DELLA NOTA PER IL TITOLARE.
+# È il documento su cui il titolare si forma il giudizio sul lavoro, ed era
+# l'unico che nessuno rileggeva: due commit su trentanove e quattro affermazioni
+# false su quattro alla verifica dell'esame critico. La nota di rilascio, stesso
+# destinatario e quattordici commit su trentanove, è coerente per una sola
+# ragione — che il caricamento si ferma se manca. Qui la stessa protezione.
+# ============================================================================
+echo "== Controllo preventivo: la nota per il titolare =="
+python3 "$RADICE/scripts/controlla-nota-titolare.py"
+
+echo "== Collaudo COMPLETO prima del caricamento (pacchetto, ospitate, interfaccia) =="
+# Un solo elenco di ciò che «tutto» significa, condiviso con l'integrazione
+# continua. Si ferma al primo fallimento: `set -e` lo propaga.
+"$RADICE/scripts/collaudo-completo.sh"
 
 echo "== Generazione del progetto e archivio =="
 (cd "$RADICE/Applicazione" && xcodegen generate)
