@@ -53,6 +53,10 @@ public struct ProgrammaDiVerifica: Sendable {
             for sezione in try sezioniDiCampagna(banco: banco, scenari: scenariCampagna) {
                 rapporto.aggiungi(sezione)
             }
+            for sezione in try sezioniDelleSessioni(valori: valori, valoriCampagna: valoriCampagna,
+                                                    motore: motore, scenari: scenari) {
+                rapporto.aggiungi(sezione)
+            }
         }
         return rapporto
     }
@@ -207,6 +211,123 @@ public struct ProgrammaDiVerifica: Sendable {
         voce("disposizioni_nella_misura_dei_passi", BancoCampagna.Disposizione.allCases.count)
         return Rapporto.Sezione(nome: "campagna_riepilogo",
                                 intestazione: ["voce", "valore"], righe: voci)
+    }
+
+    // MARK: - Sessioni complete (campagna e battaglia)
+
+    /// Le sessioni INTERE, che è cosa diversa dalle giornate isolate e dagli scontri
+    /// del banco: qui si sorvegliano anche gli invarianti che soltanto l'accumularsi
+    /// dello stato può violare (`SondaSessioneCampagna`, `SondaSessioneBattaglia`).
+    /// Nel fumo si riduce il numero di sessioni, mai la qualità degli invarianti.
+    func sezioniDelleSessioni(valori: ValoriDiGioco, valoriCampagna: ValoriCampagna,
+                              motore: MotoreBattaglia,
+                              scenari: [ScenarioDiVerifica]) throws -> [Rapporto.Sezione] {
+        let motoreCampagna = MotoreCampagna(valori: valori, valoriCampagna: valoriCampagna)
+        let bancoC = BancoSessioniCampagna(motore: motoreCampagna, valoriCampagna: valoriCampagna)
+        let sessioniC = try bancoC.tutteLeSessioni(
+            mappe: valoriCampagna.mappe, formati: valoriCampagna.formatiMappa,
+            gruppiMassimi: fumo ? 2 : 12, giornate: fumo ? 3 : 12)
+
+        var righeC: [[String]] = []
+        for s in sessioniC {
+            righeC.append([s.mappa, String(s.gruppi), s.disposizione.rawValue, s.condotta.rawValue,
+                           String(s.giornate), String(s.ordini),
+                           String(s.violazioniDiPasso.count + s.violazioniDiSessione.count),
+                           (s.violazioniDiPasso + s.violazioniDiSessione).joined(separator: ";"),
+                           s.improntaFinale])
+        }
+        let sezioneC = Rapporto.Sezione(
+            nome: "sessioni_campagna",
+            intestazione: ["mappa", "gruppi", "disposizione", "condotta", "giornate", "ordini",
+                           "violazioni", "dettaglio", "impronta_finale"],
+            righe: righeC)
+
+        let bancoB = BancoSessioniBattaglia(motore: motore)
+        let composizioni = composizioniDiMazzo(scenari: scenari)
+        var righeB: [[String]] = []
+        var sessioniB: [BancoSessioniBattaglia.Sessione] = []
+        let ufficiali = valori.ufficiali.keys.sorted()
+        for composizione in composizioni {
+            for primo in [Parte.giocatore, .avversario] {
+                for ufficiale in (fumo ? Array(ufficiali.prefix(1)) : ufficiali) {
+                    for imboscata in (fumo ? [false] : [false, true]) {
+                        let s = try bancoB.gioca(composizione, formato: scenari[0].formato,
+                                                 caratteristica: scenari[0].caratteristica,
+                                                 primoOccupante: primo, ufficiale: ufficiale,
+                                                 imboscata: imboscata,
+                                                 giriMassimi: scenari[0].giriMassimi)
+                        sessioniB.append(s)
+                        righeB.append([s.composizione, String(describing: s.primoOccupante),
+                                       s.ufficiale, String(s.imboscata),
+                                       String(s.concluso), String(s.giri), String(s.comandi),
+                                       String(s.riserveRimaste), String(s.violazioni.count),
+                                       s.violazioni.joined(separator: ";")])
+                    }
+                }
+            }
+        }
+        let sezioneB = Rapporto.Sezione(
+            nome: "sessioni_battaglia",
+            intestazione: ["composizione", "primo_occupante", "ufficiale", "imboscata",
+                           "conclusa", "giri", "comandi",
+                           "riserve_rimaste", "violazioni", "dettaglio"],
+            righe: righeB)
+
+        return [sezioneC, sezioneB, riepilogoDelleSessioni(sessioniC, sessioniB)]
+    }
+
+    /// Il blocco unico dei numeri delle sessioni: i totali li somma il programma,
+    /// e una prova li pareggia con le righe di dettaglio (RDA-71).
+    func riepilogoDelleSessioni(_ campagna: [BancoSessioniCampagna.Sessione],
+                                _ battaglia: [BancoSessioniBattaglia.Sessione]) -> Rapporto.Sezione {
+        var voci: [[String]] = []
+        func voce(_ nome: String, _ valore: Int) { voci.append([nome, String(valore)]) }
+        voce("sessioni_di_campagna_giocate", campagna.count)
+        voce("giornate_giocate_nelle_sessioni", campagna.reduce(0) { $0 + $1.giornate })
+        voce("ordini_impartiti_nelle_sessioni", campagna.reduce(0) { $0 + $1.ordini })
+        voce("violazioni_nelle_sessioni_di_campagna",
+             campagna.reduce(0) { $0 + $1.violazioniDiPasso.count + $1.violazioniDiSessione.count })
+        voce("gruppi_minimo_nelle_sessioni", campagna.map(\.gruppi).min() ?? 0)
+        voce("gruppi_massimo_nelle_sessioni", campagna.map(\.gruppi).max() ?? 0)
+        voce("mappe_percorse_dalle_sessioni", Set(campagna.map(\.mappa)).count)
+        voce("disposizioni_percorse", Set(campagna.map(\.disposizione.rawValue)).count)
+        voce("condotte_percorse", Set(campagna.map(\.condotta.rawValue)).count)
+        voce("sessioni_di_battaglia_giocate", battaglia.count)
+        voce("sessioni_di_battaglia_concluse", battaglia.filter(\.concluso).count)
+        voce("comandi_nelle_sessioni_di_battaglia", battaglia.reduce(0) { $0 + $1.comandi })
+        voce("sessioni_di_battaglia_con_riserve_rimaste",
+             battaglia.filter { $0.riserveRimaste > 0 }.count)
+        voce("violazioni_nelle_sessioni_di_battaglia", battaglia.reduce(0) { $0 + $1.violazioni.count })
+        voce("invarianti_di_sessione_campagna", SondaSessioneCampagna.codiciNoti.count)
+        voce("invarianti_di_sessione_battaglia", SondaSessioneBattaglia.codiciNoti.count)
+        return Rapporto.Sezione(nome: "sessioni_riepilogo",
+                                intestazione: ["voce", "valore"], righe: voci)
+    }
+
+    /// Le composizioni di mazzo che i copioni esistenti NON producono. Gli scenari
+    /// dichiarativi danno i due mazzi tarati; qui si aggiungono i casi limite, e in
+    /// particolare quello che lascia forze in riserva a fine battaglia, perché il
+    /// deck è riserva vera per tutta la durata (01 §9.3.5).
+    func composizioniDiMazzo(scenari: [ScenarioDiVerifica]) -> [BancoSessioniBattaglia.Composizione] {
+        let base = scenari[0]
+        let pieno = base.deckGiocatore
+        let minimo = Array(pieno.prefix(1))
+        // Il mazzo abbondante: gli stessi elementi con esemplari moltiplicati, così
+        // che il volume non basti a schierarli tutti e qualcosa resti in riserva.
+        let abbondante = pieno.map {
+            ScenarioBattaglia.ElementoScenario(archetipo: $0.archetipo, protezione: $0.protezione,
+                                               atomi: $0.atomi, esemplari: $0.esemplari * 3)
+        }
+        let unSoloArchetipo = pieno.prefix(1).map {
+            ScenarioBattaglia.ElementoScenario(archetipo: $0.archetipo, protezione: $0.protezione,
+                                               atomi: $0.atomi, esemplari: 4)
+        }
+        return [
+            .init(nome: "pari", giocatore: pieno, avversario: base.deckAvversario),
+            .init(nome: "abbondante_contro_pieno", giocatore: abbondante, avversario: pieno),
+            .init(nome: "minimo_contro_pieno", giocatore: minimo, avversario: pieno),
+            .init(nome: "un_solo_archetipo", giocatore: unSoloArchetipo, avversario: unSoloArchetipo),
+        ]
     }
 
     // MARK: - Sezioni
