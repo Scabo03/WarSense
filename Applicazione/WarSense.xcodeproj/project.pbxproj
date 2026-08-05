@@ -15,7 +15,6 @@
 		35D13AF917D421DA151C322C /* PartitaCampagna.swift in Sources */ = {isa = PBXBuildFile; fileRef = D05C93D40ACCC919E14E0F90 /* PartitaCampagna.swift */; };
 		4019BE980D8938B2E6B4D120 /* ImpiantoInterfacciaTest.swift in Sources */ = {isa = PBXBuildFile; fileRef = 75B409D97C3092A3CC3CDA17 /* ImpiantoInterfacciaTest.swift */; };
 		45C1B6E90486F2F6078B2B8B /* RegistroVisibileTest.swift in Sources */ = {isa = PBXBuildFile; fileRef = 1BE339E6703B78CDC77E5B87 /* RegistroVisibileTest.swift */; };
-		4E3055C299C3D50428F7325E /* SondaScorrevoleTest.swift in Sources */ = {isa = PBXBuildFile; fileRef = D7DF6F6693FDED177E55DADA /* SondaScorrevoleTest.swift */; };
 		55F02441809BDE8C6D282CC4 /* Dati in Frameworks */ = {isa = PBXBuildFile; productRef = CFCCD206E6A2E53A407BA042 /* Dati */; };
 		5F9166348949834153CEF7FA /* SchermataBattaglia.swift in Sources */ = {isa = PBXBuildFile; fileRef = 849A458FA8292F265DF9BE68 /* SchermataBattaglia.swift */; };
 		72C9006DDA7298DDDD235743 /* LettoreAccessibilita.swift in Sources */ = {isa = PBXBuildFile; fileRef = 27D480588F693D19D9E50AC7 /* LettoreAccessibilita.swift */; };
@@ -95,7 +94,6 @@
 		D05C93D40ACCC919E14E0F90 /* PartitaCampagna.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = PartitaCampagna.swift; sourceTree = "<group>"; };
 		D09017EA703DD5FF54F15458 /* CostruttoreAnnunci.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = CostruttoreAnnunci.swift; sourceTree = "<group>"; };
 		D159331FD8EEFB4F1B728089 /* SchermataRegistro.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SchermataRegistro.swift; sourceTree = "<group>"; };
-		D7DF6F6693FDED177E55DADA /* SondaScorrevoleTest.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SondaScorrevoleTest.swift; sourceTree = "<group>"; };
 		F5CF5758DBDF15E75D992F76 /* GrigliaAccessibile.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = GrigliaAccessibile.swift; sourceTree = "<group>"; };
 /* End PBXFileReference section */
 
@@ -151,7 +149,6 @@
 				921003768253D7D483CCC1D8 /* FumoInterfacciaTest.swift */,
 				D02CD1A940C35DBC8B46486B /* FumoMappaCampagnaTest.swift */,
 				75B409D97C3092A3CC3CDA17 /* ImpiantoInterfacciaTest.swift */,
-				D7DF6F6693FDED177E55DADA /* SondaScorrevoleTest.swift */,
 			);
 			path = ProveInterfaccia;
 			sourceTree = "<group>";
@@ -366,7 +363,6 @@
 				33BCAD29CAC0333FB4B83594 /* FumoInterfacciaTest.swift in Sources */,
 				C91A79B09526BD853D441712 /* FumoMappaCampagnaTest.swift in Sources */,
 				4019BE980D8938B2E6B4D120 /* ImpiantoInterfacciaTest.swift in Sources */,
-				4E3055C299C3D50428F7325E /* SondaScorrevoleTest.swift in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
