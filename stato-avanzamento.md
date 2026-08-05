@@ -198,6 +198,20 @@ Nata da due difetti riferiti da chi ha usato il gioco e da tre decisioni del tit
 
 Collaudo alla fine della seconda unità: 217 prove del pacchetto (una saltata) più 42 ospitate e 2 d'interfaccia, tutte verdi.
 
+#### Sessione degli strumenti e dei cancelli (nessun perimetro di gioco toccato)
+
+Non è un'unità della fase D: non aggiunge regole, non tara valori, non estende il gioco. Chiude tre cancelli, corregge il tocco diretto e costruisce l'impianto di prova sul simulatore. Nasce da `esame-critico.md`, che aveva stabilito il fatto su cui la sessione è costruita: in questo progetto le regole scritte vengono disattese e i controlli che rifiutano no.
+
+**I tre cancelli.** `scripts/collaudo-completo.sh` è ora la sola definizione di «tutto il collaudo» — pacchetto, ospitate, interfaccia — e la invocano sia `.github/workflows/collaudo.yml` sia `scripts/carica-testflight.sh`; prima entrambi si fermavano a `swift test` e le 44 prove di livello applicativo non erano cancello per nulla. `CompatibilitaGiornaleTest` lega i tre tipi del formato di salvataggio a uno specchio `CaseIterable` con due funzioni esaustive, sicché un caso nuovo non compila finché non se ne dichiara la specie e non se ne costruisce l'esemplare, e la prova poi fallisce finché il campione manca (RDA-79). `scripts/controlla-nota-titolare.py` rifiuta il caricamento se la nota per il titolare manca, nomina qualcosa che il codice non espone, porta un numero che il programma di verifica non produce più, o è più vecchia dell'ultimo commit del codice (RDA-80). Ciascuno dei tre è stato visto rifiutare prima di essere considerato attivo.
+
+**Il tocco diretto (RDA-78, P11 chiuso).** `VistaACaselle` è la base condivisa da `VistaGriglia` e `VistaMappa`: il riconoscitore risolve il punto nell'elemento e ne invoca `accessibilityActivate()`, cioè la stessa porta della tecnologia assistiva. Nessun secondo ramo da tenere allineato; la divergenza fra i due piani non è scrivibile. Prova rossa prima della correzione: `ToccoDirettoTest.test_02_2_11_le_due_griglie_hanno_un_percorso_per_il_tocco_diretto`, su entrambi i piani.
+
+**L'impianto d'interfaccia, consegnato INCOMPLETO.** `ImpiantoInterfacciaTest` (sei prove) esercita il gioco attraverso il servizio di accessibilità vero; `CatenaInterfacciaMotoreTest` accerta che l'etichetta esposta coincida con quella che il Motore prescrive. Mancano due verifiche che l'incarico chiedeva, e mancano dichiarate: la catena intera e il tocco sintetizzato su una griglia scorrevole. Che cosa è stato escluso, che cosa è emerso e che cosa resta ignoto è in `registro-scostamenti.md`, S10. **Chi riprende comincia da lì.**
+
+**Le partite simulate non sono state cominciate.** Erano la sesta sezione dell'incarico e non è stata aperta, per non consegnarla a metà.
+
+Collaudo alla fine della sessione: 218 prove del pacchetto (una saltata), 50 ospitate, 8 d'interfaccia, tutte verdi.
+
 ### Fasi E–G: NON COMINCIATE
 
 La fase C ha già lo scheletro dell'eseguibile `Verifica` e la forma degli scenari (`ScenarioBattaglia` è Codable proprio per gli scenari dichiarativi di 05 §12.2).
@@ -220,6 +234,8 @@ Applicato l'incarico di intervento sulle chiusure: la base delle perdite per la 
 - Il giornale dichiara la propria natura dalla prima riga: `fondazione` per uno scontro, `fondazioneCampagna` per una campagna. `Giornale.apri` accetta entrambe; ciascuna Sessione legge la propria.
 - La sonda degli invarianti di campagna riceve dall'esterno ciò che giudica (stato, transizione, sequenza del salto, adiacenza) proprio perché le prove possano darle un caso guasto. Chi la modifica conservi quella forma, altrimenti i mutanti non sono più scrivibili (RDA-69).
 - Il dimensionamento dell'unità successiva — la marcia di più giorni — è in `impatto-marcia-lunga.md`: che cosa regge senza modifiche, che cosa va rifatto, quale portata ha sul formato di salvataggio. La conclusione operativa è che la risoluzione di fine giornata va costruita PRIMA della marcia lunga e non insieme.
+- Gli INCARICHI ricevuti e i resoconti consegnati si conservano in `Incarichi/`, versionati e verbatim. Prima del 2026-08-05 non se ne conservava traccia, e `esame-critico.md` ha dovuto dichiarare non verificabile il confronto fra richiesto e realizzato.
+- Il COLLAUDO COMPLETO si esegue con `./scripts/collaudo-completo.sh`, che è anche il cancello del caricamento e dell'integrazione continua. `swift test` da solo copre 218 prove su 276.
 - La regola sulla FORMA DEI RESOCONTI di sessione è in `forma-dei-resoconti.md`, che è memoria permanente: si scrivono per un lettore tecnico, e la prescrizione opposta è revocata. Richiamata anche in `memoria-infrastruttura.md`.
 - Il REGISTRO della campagna vive nello stato, che si ricostruisce riapplicando i comandi del giornale: un fatto che l'annullamento deve poter lasciare dietro di sé — l'annullamento stesso — non può stare nel solo stato, e ha una voce propria nel giornale (RDA-73). Chi aggiungerà altri fatti che sopravvivono a un troncamento faccia lo stesso.
 - Il CONFINE dell'annullamento si legge dal giornale e non dallo stato, per la stessa ragione. Chi lo tocca esegua `AnnullamentoGiornataTest`, che contiene la prova della sopravvivenza alla ripresa.

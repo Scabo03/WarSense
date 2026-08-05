@@ -167,3 +167,38 @@ sta il fiume e da che parte corre la strada. Poi verificare.
    NON esiste: la mappa offre due rotori soli, le proprie formazioni e i gruppi da
    muovere. Ora che il registro ha contenuto, l'assenza si sente. Vedi il resoconto
    per la collocazione.
+
+### Aggiunta della sessione degli strumenti e dei cancelli (2026-08-05)
+
+**Che cosa l'impianto d'interfaccia sul simulatore NON può verificare, e che non
+va mai dichiarato coperto.** Dalla correzione del tocco diretto (RDA-78) esiste
+`ImpiantoInterfacciaTest`, che esercita il gioco attraverso il servizio di
+accessibilità vero: tocca, legge, verifica. Non verifica quattro cose.
+
+14. **La pronuncia.** Il servizio con sintesi vocale non esiste nel simulatore.
+   L'impianto legge la stringa che l'interfaccia espone; la frase che una voce
+   pronuncia alla velocità di chi gioca resta materia del dispositivo.
+15. **Il fuoco di VoiceOver.** Non è osservabile da un processo di prova. L'impianto
+   verifica che la schermata non venga sostituita e che gli elementi non spariscano:
+   è condizione necessaria, non sufficiente. Il guardiano del fuoco si osserva nelle
+   prove ospitate, il fuoco vero solo qui.
+16. **La comprensibilità di una frase e l'orientabilità della mappa.** Restano la
+   domanda su cui il progetto è costruito, e nessuna misura le risponderà mai.
+17. **L'aptica e i suoni**, che il simulatore non produce.
+
+**Novità da provare per prima, in questa build: il dito.** Le caselle delle due
+griglie rispondono ora al tocco diretto oltre che all'attivazione di VoiceOver, per
+la stessa porta. Va provato con VoiceOver ACCESO — dove il tocco singolo resta
+esplorazione e il doppio tocco attiva, e nulla deve contarsi due volte — e con
+VoiceOver SPENTO, dove prima nessuna delle due griglie era operabile.
+
+**Asimmetria emersa e non corretta.** La voce che arriva su una casella fuori vista
+la porta in vista da sé (00 §10.4); il dito no, deve scorrere. Sulla mappa grande e
+sulla griglia da cento celle vale la pena verificare quanto costi raggiungere col
+dito le righe arretrate, che sono la zona di schieramento.
+
+**Due verifiche che l'impianto avrebbe dovuto portare e non porta**, registrate come
+scostamento S10: la catena intera (una partita giocata dall'interfaccia contro la
+stessa sequenza applicata direttamente) e il tocco sintetizzato su una griglia
+scorrevole. Finché restano aperte, che l'ordine impartito al dito arrivi al gioco è
+provato sulla sola mappa di campagna.
