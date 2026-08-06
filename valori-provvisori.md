@@ -121,6 +121,11 @@ Introdotti dall'incarico 10 dopo la misura del corpo a corpo (incarico 09), gius
 
 - `archetipi.json`, campo `soglia_disingaggio`, **tre fasce** (RDA-87): bassa **0,12** (`tiratori`, `piattaforma_trainata`, `macchina_tiro`); media **0,6** (`fanteria_leggera`, `cavalleria_ricognizione`, `cavalleria_manovrata`); alta **0,9** (`fanteria_pesante`, `macchina_assedio`). La chiave è ASSENTE per `guardia_elite` (reparto elitario, RDA-88): non è un valore, è l'assenza della soglia. Misura di separazione: `mischia_fasce` di `swift run StrumentoVerifica` dà mediana 1 / 4 / 8 scambi per bassa / media / alta.
 - `combattimento.json`, `coefficiente_logoramento_soglia` = **0,5** (RDA-90): coefficiente della formula unica `sogliaDisingaggioEffettiva`. Zero lo disattiva. PROVVISORIO.
-- `combattimento.json`, `soglia_al_secondo_contatto` = **falso** (RDA-91): interruttore dell'esame congiunto con la regola del secondo contatto. Falso conserva il comportamento distribuito. PROVVISORIO, in attesa della decisione del titolare fra conservare la regola, il solo coefficiente, o la sola regola; i numeri sono nella misura `secondo_contatto`.
 
-La versione dei valori è salita a **0.6.0** (RDA-91): incremento dovuto, non discrezionale, perché queste regole incidono su come una partita in corso si svolgerebbe.
+### Élite storiche e ripiego di banda (incarico 11)
+
+- `archetipi.json`, `elite_fase` (RDA-92): élite antica `guardia_elite = antica`, élite arcaica `piattaforma_trainata = arcaica`, fondate sulla ricerca storica (fonti in RDA-92). Non sono numeri di taratura ma un'assegnazione storica; restano rivedibili dal titolare, non provvisori nel senso della taratura.
+- `archetipi.json`, `guardia_elite.soglia_disingaggio` = **0,9**: banda di RIPIEGO per le fasi in cui la guardia d'élite non è élite. PROVVISORIA e non esercitata (`guardia_elite` è antica-solo per la ricerca, quindi sempre élite in gioco); il comportamento accettato in antica — soglia assente — è invariato.
+- L'interruttore `soglia_al_secondo_contatto` è RIMOSSO (RDA-95, decisione del titolare): non è più un valore provvisorio.
+
+La versione dei valori è salita a **0.7.0** (RDA-92): incremento dovuto, non discrezionale, perché cambia il reparto élite e il formato dello stato (campo `fase`), che incidono su come una partita in corso si svolgerebbe. (Era 0.6.0 dall'incarico 10, RDA-91.)

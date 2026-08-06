@@ -1,23 +1,21 @@
-# Nota per il titolare — le soglie di disingaggio, il logoramento e la guardia scelta
+# Nota per il titolare — l'élite storica di ciascuna fase e le chiusure del corpo a corpo
 
-Questa build realizza le decisioni che hai preso dopo la misura del corpo a corpo. Non tocca la mappa, il tiro, il piazzamento né le tessere del deck: cambia soltanto come i reparti si comportano quando sono in mischia. La cosa da provare è questa.
+Questa build assegna il reparto che non si sfila mai — l'élite — al reparto che la ricerca storica indica come superiore per addestramento e disciplina, uno per fase, invece di un archetipo dedicato. Non tocca la taratura delle soglie, che hai accettato.
 
-## Che cosa cambia, e che cosa devi sentire
+## Chi è l'élite di ciascuna fase, e perché
 
-**I reparti pesanti reggono molto più a lungo dei tiratori prima di sfilarsi.** Ci sono tre andature distinte, e devono essere distinguibili all'ascolto, non solo diverse sulla carta. I reparti da tiro e da distanza — i tiratori, la piattaforma, la macchina da tiro — si sfilano quasi subito: nelle misure la loro soglia scatta in mediana dopo un solo scambio. La fanteria leggera e la cavalleria stanno a metà: la soglia scatta in mediana dopo quattro scambi. La fanteria pesante e la macchina d'assedio reggono: dopo otto scambi. Mettili nella stessa mischia e ascolta se la differenza è netta. Se un tiratore e una fanteria pesante ti sembrano sfilarsi quasi insieme, dimmelo, perché è la differenza che questa taratura deve farti sentire.
+Prima, la verifica che veniva prima di tutto: la «guardia scelta» NON è un reparto inventato in una sessione di realizzazione. È uno dei nove archetipi decisi dai documenti fin dall'inizio, creato con tutti gli altri. Non c'era nulla da riparare, e la sessione è proseguita.
 
-<!-- misura: mischia_fasce | 120 | scatta_mediana=1 -->
-<!-- misura: mischia_fasce | 600 | scatta_mediana=4 -->
-<!-- misura: mischia_fasce | 900 | scatta_mediana=8 -->
+Nella **fase antica** l'élite è la «guardia scelta»: sono gli Immortali persiani e gli opliti spartani, che la ricerca documenta come corpi scelti per addestramento e disciplina. Nella **fase arcaica** l'élite è la «piattaforma trainata», cioè il carro da guerra dell'aristocrazia dei maryannu: la ricerca mostra che nell'età del bronzo la corazza di metallo era «oggetto da principe, non da reparto», e che l'élite combattente vera era quella sul carro. La stessa piattaforma, in epoca antica, non è più l'élite: è materiale datato e si sfila come gli altri.
 
-**Le mischie possono ora concludersi con la distruzione di un reparto.** Prima quasi nessuna ci arrivava: tutti si sfilavano prima. Ora un reparto che regge, o che non ha dove ritirarsi, può essere disfatto sul posto. In una mischia lunga fra reparti che tengono, aspettati che uno dei due possa cadere.
+## Che cosa devi provare
 
-**La guardia scelta non si sfila mai da sé, ma la puoi ritirare tu.** La «guardia scelta» è il reparto d'élite: non si sfila mai automaticamente, e per questo può essere distrutta se la lasci in mischia. In cambio è l'unico reparto che puoi togliere dal contatto con un tuo ordine. Quando è a contatto, fra le sue azioni compare «Disingaggia dalla mischia». Provala: deve comparire solo per la guardia scelta e solo quando è a contatto, e per nessun altro reparto.
+Quando hai in campo il reparto élite della fase, fra le sue informazioni senti che è un «reparto scelto: per l'addestramento superiore resta ai tuoi ordini anche in mischia». Devi sentirlo prima di ingaggiare, sul tuo reparto come su quello avversario, perché è ciò su cui decidi. La ragione è l'addestramento, non un numero.
 
-## Che cosa NON è cambiato e resta da fare
+La cosa più importante: la soglia — cioè quanto un reparto regge prima di sfilarsi — NON si annuncia più in alcuna forma, e questo è voluto. Non deve esserci alcun numero né alcuna misura che ti dica quanto manca a un reparto per cedere: il gioco vuole che tu decida dalla situazione, non leggendo cifre. Se in qualche punto senti annunciata una soglia o una percentuale di tenuta, dimmelo, perché è un difetto.
 
-La soglia di un reparto — cioè quanto regge prima di sfilarsi — non è ancora annunciata fra le sue informazioni: oggi la scopri solo giocando. È annotato come cosa da fare in un incarico proprio, non in questo. Anche il fatto che la guardia scelta non si sfila mai, e che può sfilarsi su ordine, non è ancora detto prima di ingaggiare: lo si impara provando.
+Le tre andature restano riconoscibili dal solo nome: i reparti da tiro si sfilano presto, la fanteria leggera e la cavalleria a metà, la fanteria pesante e la macchina d'assedio reggono. L'élite, che dal nome non sempre si riconosce, ha l'annuncio proprio.
 
-## Una avvertenza sui salvataggi
+## Avvertenza sui salvataggi
 
-Cambiando le regole della mischia, una battaglia lasciata a metà con la build precedente non si riapre più: il gioco te lo dichiara invece di aprirla su uno stato sbagliato. Per provare, comincia una battaglia nuova. I numeri delle soglie sono provvisori: servono i tuoi ritorni per tararli.
+Cambiando il reparto élite e il modo in cui una battaglia si svolge, una partita lasciata a metà con la build precedente non si riapre più: il gioco te lo dichiara invece di aprirla sbagliata. Comincia una battaglia nuova per provare. Lo scorrimento della mappa quando il dito passa ai comandi resta com'è: l'hai giudicato accettabile, e ora è registrato come voluto.

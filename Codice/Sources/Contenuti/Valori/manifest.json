@@ -4,9 +4,9 @@
   "Mappe/istmo.json": "fdc04def29fef543031d964dc8450f7d182cc7c368295117965d62d03251dc0e",
   "Mappe/pianura-lunga.json": "6f2270bc2744a78cb6eb684c74b81ac5b7b1f981ef954ce80d8f7a12ff275424",
   "aptica.json": "e4c296f884a0cd43d8e2245cb5d923d1b4cb2f90a04bf1c80d380e194856fc2e",
-  "archetipi.json": "a27b99b6dab8c6547026d81500a568455634e51574ee318500938ade67807c18",
+  "archetipi.json": "7e5accc502b50e25b24a4d0f4810129fddd57a68ebaf5c154a0c07e6a79b22e7",
   "caratteristiche-campo.json": "cda6b75ef6bd34f3445ce5ce803ca32d7bbea2b21169e0fef243bf1ab467793f",
-  "combattimento.json": "383528bbfb8b7b0880c7723cc60954e5537a3067233ae7c8c8266a2dd3058803",
+  "combattimento.json": "b2b1b8a8085864bb61c310986865bcf9bd2520c05bc8399509ddc4e9b94dbd94",
   "formati-mappa.json": "3adc8adb22315fba1f4610622e8f6e9ee03e891311f024774a99a19bfdbea4e7",
   "formato-battaglia.json": "d5877cc487278512568a7efec9e76f3195542b3ecb0d23be9f6dc49939a5f290",
   "marcia-campagna.json": "a6523f631ed19239ebe132dcd7b1776c5a41c58b9a3cb65dd5e3891d11513ef8",
@@ -19,8 +19,8 @@
   "ufficiali.json": "39447ca2b767d7b0a443f69257b67c8c71a3954c3725a3aa2169157c42f595c3",
   "vantaggi-nascosti.json": "65c7d952ce06cd5c9a8b594be77b0cfb3171045d77b6007673299c6b36d253f8"
  },
- "versione": "0.6.0",
+ "versione": "0.7.0",
  "versioni_compatibili": [
-  "0.6.0"
+  "0.7.0"
  ]
 }

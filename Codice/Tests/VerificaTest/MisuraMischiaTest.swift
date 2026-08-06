@@ -291,55 +291,48 @@ final class MisuraMischiaTest: XCTestCase {
                        "il reparto elitario non raggiunge mai la propria soglia perché non ne ha")
     }
 
-    // MARK: - Incarico 10: l'interruttore del secondo contatto cambia il comportamento
+    // MARK: - Incarico 11: la regola del secondo contatto è sempre presente (interruttore rimosso)
 
-    /// Il cancello dell'interruttore del secondo contatto (01 §9.8.3, incarico 10): con la
-    /// regola presente (falso) una coppia già staccata che riattacca non ha più soglia e si
-    /// combatte fino alla dispersione; con la regola tolta (vero) la soglia opera di nuovo e
-    /// il reparto può sfilarsi. Se l'interruttore non cambiasse nulla, non sarebbe un
-    /// interruttore: la prova lo vede rifiutare entrambi gli stati.
-    func test_incarico10_l_interruttore_del_secondo_contatto_cambia_il_disingaggio() throws {
-        func siSfilaAlSecondoContatto(regolaTolta: Bool) throws -> Bool {
-            let sost = [ValoriVariati.Sostituzione(file: "combattimento.json",
-                                                   chiave: "soglia_al_secondo_contatto", valore: regolaTolta)]
-            return try ValoriVariati.con(base: Contenuti.valoriDiFabbrica, sostituendo: sost) { valori in
-                let motore = MotoreBattaglia(valori: valori)
-                let scenario = ScenarioBattaglia(formato: "cento", caratteristica: "campo_aperto",
-                                                 primoOccupante: .giocatore, imboscata: false,
-                                                 deckGiocatore: [], deckAvversario: [])
-                var s = try FabbricaBattaglia.crea(scenario: scenario, valori: valori).0
-                let a = valori.archetipi["fanteria_leggera"]!
-                func poni(_ id: Int, _ p: Parte, _ cella: Cella) {
-                    s.sciami[IdSciame(id)] = Sciame(id: IdSciame(id), parte: p, archetipo: "fanteria_leggera",
-                                                    protezione: .antiSaturazione, lettera: id, atomiIniziali: 5,
-                                                    serbatoio: 5 * a.puntiVitaPerAtomo, munizioni: 0,
-                                                    posizione: cella, azioneSpesa: false, rinforzo: false)
-                    s.forzeImpegnate[p, default: 0] += 5 * a.puntiVitaPerAtomo
-                }
-                poni(1, .giocatore, Cella(riga: 6, colonna: 5))
-                poni(2, .avversario, Cella(riga: 5, colonna: 5))
-                s.prossimoIdSciame = 3
-                s.prossimaLettera = [.giocatore: 2, .avversario: 2]
-                // La coppia si è GIÀ staccata: questo è il secondo contatto (01 §9.8.3).
-                s.coppieStaccate.insert(Coppia(IdSciame(1), IdSciame(2)))
-                s = motore.applica(.ingaggia(sciame: IdSciame(1), bersaglio: IdSciame(2)),
-                                   parte: .giocatore, stato: s).0
-                var giri = 0
-                while s.sciami[IdSciame(1)] != nil && s.sciami[IdSciame(2)] != nil
-                        && s.esito == nil && giri < 40 {
-                    let (dopo, eventi) = motore.applica(.fineTurno, parte: s.parteDiTurno, stato: s)
-                    s = dopo
-                    if eventi.contains(where: { if case .disingaggio = $0 { return true }; return false }) {
-                        return true
-                    }
-                    giri += 1
-                }
-                return false
-            }
+    /// Il cancello della regola del secondo contatto confermata (01 §9.8.3, incarico 11,
+    /// quarta decisione): l'interruttore è rimosso e la regola vale sempre. Una coppia già
+    /// staccata che torna a contatto NON ha più soglia e combatte fino alla dispersione:
+    /// nessun disingaggio, uno dei due è distrutto. Se la regola non valesse più, il reparto
+    /// si sfilerebbe di nuovo: la prova rifiuta quello stato.
+    func test_incarico11_il_secondo_contatto_combatte_fino_alla_dispersione() throws {
+        let valori = try CaricatoreValori.carica(da: Contenuti.valoriDiFabbrica)
+        let motore = MotoreBattaglia(valori: valori)
+        let scenario = ScenarioBattaglia(formato: "cento", caratteristica: "campo_aperto",
+                                         primoOccupante: .giocatore, imboscata: false,
+                                         deckGiocatore: [], deckAvversario: [])
+        var s = try FabbricaBattaglia.crea(scenario: scenario, valori: valori).0
+        let a = valori.archetipi["fanteria_leggera"]!
+        func poni(_ id: Int, _ p: Parte, _ cella: Cella) {
+            s.sciami[IdSciame(id)] = Sciame(id: IdSciame(id), parte: p, archetipo: "fanteria_leggera",
+                                            protezione: .antiSaturazione, lettera: id, atomiIniziali: 5,
+                                            serbatoio: 5 * a.puntiVitaPerAtomo, munizioni: 0,
+                                            posizione: cella, azioneSpesa: false, rinforzo: false)
+            s.forzeImpegnate[p, default: 0] += 5 * a.puntiVitaPerAtomo
         }
-        XCTAssertFalse(try siSfilaAlSecondoContatto(regolaTolta: false),
-                       "regola presente: al secondo contatto nessuna soglia, si combatte fino alla dispersione")
-        XCTAssertTrue(try siSfilaAlSecondoContatto(regolaTolta: true),
-                      "regola tolta: al secondo contatto la soglia opera di nuovo e il reparto si sfila")
+        poni(1, .giocatore, Cella(riga: 6, colonna: 5))
+        poni(2, .avversario, Cella(riga: 5, colonna: 5))
+        s.prossimoIdSciame = 3
+        s.prossimaLettera = [.giocatore: 2, .avversario: 2]
+        // La coppia si è GIÀ staccata: questo è il secondo contatto (01 §9.8.3).
+        s.coppieStaccate.insert(Coppia(IdSciame(1), IdSciame(2)))
+        s = motore.applica(.ingaggia(sciame: IdSciame(1), bersaglio: IdSciame(2)),
+                           parte: .giocatore, stato: s).0
+        var disingaggiato = false
+        var giri = 0
+        while s.sciami[IdSciame(1)] != nil && s.sciami[IdSciame(2)] != nil && s.esito == nil && giri < 40 {
+            let (dopo, eventi) = motore.applica(.fineTurno, parte: s.parteDiTurno, stato: s)
+            s = dopo
+            if eventi.contains(where: { if case .disingaggio = $0 { return true }; return false }) {
+                disingaggiato = true; break
+            }
+            giri += 1
+        }
+        XCTAssertFalse(disingaggiato, "al secondo contatto non opera più alcuna soglia: nessun disingaggio")
+        XCTAssertTrue(s.sciami[IdSciame(1)] == nil || s.sciami[IdSciame(2)] == nil,
+                      "si combatte fino alla dispersione: uno dei due è distrutto")
     }
 }

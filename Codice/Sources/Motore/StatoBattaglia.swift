@@ -121,6 +121,9 @@ public struct StatoBattaglia: Hashable, Codable, Sendable {
     public let ostacoli: Set<Cella>
     /// Chi occupava per primo la casella e agisce per primo (01 §9.4.1).
     public let primoOccupante: Parte
+    /// La fase storica della battaglia (01 §2.3, §2.4; incarico 11): determina quale
+    /// archetipo sia l'élite senza soglia di disingaggio (`DefinizioneArchetipo.eliteFase`).
+    public let fase: Fase
 
     // Forze.
     public var sciami: [IdSciame: Sciame]

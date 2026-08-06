@@ -339,11 +339,11 @@ public struct MotoreBattaglia: Sendable {
             return .valido(CostiDichiarati(volume: c, residuoDopo: bilancio.disponibile - c))
 
         case .disingaggiaSuOrdine(let id):
-            // Riservato al reparto elitario (soglia assente) e solo quando è a contatto:
+            // Riservato al reparto ÉLITE della fase corrente e solo quando è a contatto:
             // è l'unico sul quale il controllo non si perde del tutto quando ingaggia
-            // (01 §9.5, incarico 10, terza decisione). L'azione impossibile non si offre.
+            // (01 §9.5, incarico 10 terza decisione, incarico 11). L'azione impossibile non si offre.
             guard let sciame = stato.sciami[id], sciame.parte == parte,
-                  archetipo(sciame.archetipo).sogliaDisingaggio == nil,
+                  archetipo(sciame.archetipo).eliteFase == stato.fase,
                   stato.impegnato(id) else {
                 return .nonValido(.bersaglioNonValido)
             }
@@ -636,15 +636,16 @@ public struct MotoreBattaglia: Sendable {
             guard stato.contatti.contains(contatto),
                   stato.sciami[contatto.primo] != nil, stato.sciami[contatto.secondo] != nil else { continue }
             let coppia = Coppia(contatto.primo, contatto.secondo)
-            // Regola del secondo contatto (01 §9.8.3): una coppia già staccata non ha più
-            // soglia, a meno che l'interruttore `sogliaAlSecondoContatto` non la riabiliti —
-            // è l'interruttore con cui l'esame congiunto dell'incarico 10 misura le due vie.
-            guard valori.combattimento.sogliaAlSecondoContatto
-                    || !stato.coppieStaccate.contains(coppia) else { continue }
+            // Regola del secondo contatto (01 §9.8.3), confermata dal titolare (incarico 11,
+            // quarta decisione): una coppia già staccata non ha più soglia e combatte fino
+            // alla dispersione. Non è più opzionale.
+            guard !stato.coppieStaccate.contains(coppia) else { continue }
             for (id, ingresso) in [(contatto.primo, contatto.consistenzaIngressoPrimo),
                                    (contatto.secondo, contatto.consistenzaIngressoSecondo)] {
                 guard let sciame = stato.sciami[id], stato.contatti.contains(contatto) else { continue }
-                // Soglia assente = reparto elitario: non si sfila mai (incarico 10, seconda decisione).
+                // Élite della fase corrente: non si sfila mai (incarico 11). L'élite si
+                // determina dalla coppia archetipo-fase, non dall'assenza della soglia.
+                guard archetipo(sciame.archetipo).eliteFase != stato.fase else { continue }
                 guard let sogliaBase = archetipo(sciame.archetipo).sogliaDisingaggio else { continue }
                 let perdite = ingresso - sciame.serbatoio
                 let sogliaEff = sogliaDisingaggioEffettiva(base: sogliaBase, sciame: sciame,

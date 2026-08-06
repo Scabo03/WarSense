@@ -135,6 +135,15 @@ public enum CaricatoreValori {
                 }
             }
         }
+        // Al più un archetipo è l'élite di ciascuna fase (incarico 11): due archetipi che
+        // rivendicano l'élite della stessa fase sono uno stato sbagliato, respinto qui.
+        for fase in Fase.allCases {
+            let elite = archetipi.values.filter { $0.eliteFase == fase }
+            guard elite.count <= 1 else {
+                throw ErroreDati(chiave: "errore.dati.elite_di_fase_duplicata", file: "archetipi.json",
+                                 voce: fase.rawValue)
+            }
+        }
         for tipo in TipoProtezione.allCases where protezioni[tipo] == nil {
             throw ErroreDati(chiave: "errore.dati.protezione_mancante", file: "offese-e-protezioni.json", voce: tipo.rawValue)
         }

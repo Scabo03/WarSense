@@ -18,6 +18,7 @@
 "errore.dati.valore_non_positivo" = "Valore non positivo in %@ alla voce %@";
 "errore.dati.tiro_incoerente" = "Parametri del tiro incoerenti in %@ alla voce %@";
 "errore.dati.soglia_fuori_intervallo" = "Soglia di disingaggio fuori intervallo in %@ alla voce %@";
+"errore.dati.elite_di_fase_duplicata" = "Due archetipi élite per la stessa fase in %@ alla voce %@";
 "errore.dati.protezione_mancante" = "Manca il profilo di protezione %@";
 "errore.dati.formato_incoerente" = "Formato di battaglia incoerente: %@";
 "errore.dati.minimi_sotto_uno" = "I minimi obbligatori non possono essere inferiori a uno";
@@ -105,6 +106,7 @@
 "pannello.ingaggia_accerchiato" = "Ingaggia %@ %@ avversario in riga %d cella %d, %@, %@, %@";
 "pannello.ritira_unita" = "Evacua questa unità: costa %d";
 "pannello.disingaggia" = "Disingaggia dalla mischia";
+"battaglia.reparto_elite" = "reparto scelto: per l'addestramento superiore resta ai tuoi ordini anche in mischia";
 "pannello.designa_movimento" = "Scegli la destinazione sulla griglia";
 "pannello.designazione_avviata" = "Scegli la cella di destinazione e attivala per confermare";
 "pannello.designazione_annullata" = "Designazione annullata";

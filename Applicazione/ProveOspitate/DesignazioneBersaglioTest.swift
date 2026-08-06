@@ -303,4 +303,29 @@ final class DesignazioneBersaglioTest: XCTestCase {
         XCTAssertTrue(schermata.vociPannelloPerProva.contains { $0.titolo == attesa },
                       "il pannello offre la voce di tiro completa: \(schermata.vociPannelloPerProva.map(\.titolo))")
     }
+
+    /// Incarico 11, terza decisione: il reparto élite della fase è annunciato fra le sue
+    /// informazioni, riconoscibile prima di ingaggiare, per la ragione dell'addestramento
+    /// superiore. In antica l'élite è `guardia_elite`; un reparto ordinario non porta
+    /// l'annuncio. Prima decisione: la soglia di disingaggio NON si annuncia in alcuna forma.
+    func test_incarico11_l_elite_e_annunciata_e_la_soglia_no() throws {
+        let (stato, ids) = try campo([
+            (.giocatore, "fanteria_pesante", .antiSaturazione, Cella(riga: 6, colonna: 5)),
+            (.avversario, "guardia_elite", .antiSaturazione, Cella(riga: 5, colonna: 5)),
+        ])
+        let frase = ambiente.testi.frase("battaglia.reparto_elite").testo
+        let cellaElite = stato.sciami[ids[1]]!.posizione
+        let cellaOrdinaria = stato.sciami[ids[0]]!.posizione
+        let annuncioElite = costruttore(stato).etichettaCella(cellaElite)
+        let annuncioOrdinario = costruttore(stato).etichettaCella(cellaOrdinaria)
+        XCTAssertTrue(annuncioElite.contains(frase),
+                      "il reparto élite della fase è annunciato: \(annuncioElite)")
+        XCTAssertFalse(annuncioOrdinario.contains(frase),
+                       "un reparto ordinario non è annunciato come élite: \(annuncioOrdinario)")
+        // La soglia (fanteria_pesante 0,9 = 900 permille) non compare in alcuna forma.
+        for annuncio in [annuncioElite, annuncioOrdinario] {
+            XCTAssertFalse(annuncio.contains("900") || annuncio.contains("0,9") || annuncio.contains("0.9"),
+                           "la soglia di disingaggio non si annuncia (incarico 11, prima decisione): \(annuncio)")
+        }
+    }
 }
