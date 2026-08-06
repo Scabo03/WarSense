@@ -14,35 +14,34 @@ esista nel gioco; le virgolette alte sono citazioni di altra natura.
 
 ## Che cos'è cambiato in questa build, e le tre cose da provare per prime
 
-Questa build corregge il difetto per cui, sulla griglia di battaglia, dopo aver
-scelto una tessera dal mazzo non si riusciva a piazzare il reparto sulle celle in
-fondo. Non tocca lo scontro, né le regole: le partite in corso si riaprono.
+Questa build corregge il difetto più grave che avevi trovato sul dispositivo:
+girando il telefono in orizzontale, o con i caratteri di sistema molto grandi, la
+griglia della battaglia e la mappa della campagna sparivano, e non ci si arrivava
+nemmeno con la voce. Ora la griglia c'è sempre. Non tocca lo scontro né le regole:
+le partite in corso si riaprono.
 
 Ci sono tre cose da provare, e conviene provarle in quest'ordine.
 
-1. **Il piazzamento di un reparto dopo aver scelto una tessera, sulle celle della
-   fila più arretrata.** È la cosa che era rotta ed è stata corretta. Sulla griglia
-   di battaglia, scegli una tessera dal mazzo e poi tocca col dito una cella per
-   piazzarvi il reparto. Prima, scegliere la tessera faceva scorrere di poco la
-   griglia verso l'alto, e il dito che mirava a una cella della fila più arretrata
-   la mancava: toccava dove la cella era annunciata, ma la cella non era più lì.
-   Ora la griglia non si muove più alla scelta della tessera. Prova proprio le
-   celle in fondo: se un piazzamento manca ancora il bersaglio, dimmelo.
+1. **Girando il telefono in orizzontale, la griglia deve esserci ed essere
+   raggiungibile.** In battaglia, ruota il telefono: la griglia deve restare, e le
+   celle devono raggiungersi col dito e con la voce. Prima la banda in basso — le
+   tessere e i comandi — si prendeva tutta l'altezza e alla griglia non restava
+   nulla; ora quella banda scorre da sé e lascia sempre alla griglia almeno una
+   riga intera di celle. Se in orizzontale la griglia sparisce o non si raggiunge,
+   dimmelo: era il difetto più grave.
 
-2. **Il tocco diretto su una casella della mappa grande che sta fuori dalla parte
-   visibile.** Quando la mappa è più grande dello schermo, il dito raggiunge
-   soltanto ciò che è davvero in vista: per una casella più in basso bisogna prima
-   far scorrere. Il dito non scorre da solo — la voce sì, perché quando il cursore
-   va su una casella fuori vista è il gioco a portarla in vista. Prova a toccare
-   una casella fuori dalla parte visibile, prima e dopo aver fatto scorrere, e
-   dimmi se l'asimmetria fra dito e voce ti pesa.
+2. **Con i caratteri più grandi, la griglia deve esserci.** Aumenta la dimensione
+   dei caratteri nelle impostazioni di sistema, fino alle più grandi, sia in
+   verticale sia in orizzontale: la griglia non deve collassare. Vale per la
+   battaglia e per la mappa di campagna, in tutti e tre i formati.
 
-3. **Che cosa senti esplorando col dito sopra la zona dei comandi, in basso.**
-   Passando il dito nella fascia bassa dello schermo — quella del mazzo e dei
-   comandi — potresti sentir annunciare una cella della griglia là dove sullo
-   schermo non c'è disegnata alcuna cella. Se ti capita, dimmi dov'era il dito e
-   che cosa hai sentito: è un punto che sto ancora verificando, e la tua prova sul
-   dispositivo è quella che decide.
+3. **Le tessere del deck nella forma nuova.** Le tessere in basso sono ora riquadri
+   piccoli, alti circa la metà di prima: al centro una sigla di una o due lettere
+   per l'archetipo — un segnaposto, i simboli veri arriveranno —, il nome in
+   piccolo, e due quadratini con atomi e volume. Provale al dito: devono toccarsi
+   comodamente. E alla voce devono annunciarsi esattamente come prima: archetipo,
+   atomi, volume. La sigla e i quadratini sono soltanto per l'occhio e non si devono
+   sentire; se senti una sigla, o un numero due volte, dimmelo.
 
 Restano vere, e descritte qui sotto, le cose della mappa di campagna già presenti:
 il tocco diretto sulle caselle, il registro, l'annullamento entro la giornata. E il
