@@ -30,6 +30,7 @@ accaduto.
 
 | n. | data | materia | incarico | resoconto |
 |---|---|---|---|---|
+| 08 | 2026-08-06 | deck a riquadri, griglia che sparisce in orizzontale, scorrimento anticipato | [incarico](08-2026-08-06-deck-riquadri-griglia-orizzontale-incarico.md) | [resoconto](08-2026-08-06-deck-riquadri-griglia-orizzontale-resoconto.md) |
 | 07 | 2026-08-06 | misura di S10, due chiarimenti sui numeri | [incarico](07-2026-08-06-misura-s10-e-chiarimenti-incarico.md) | [resoconto](07-2026-08-06-misura-s10-e-chiarimenti-resoconto.md) |
 | 06 | 2026-08-06 | caricamento build 15, spostamento sessioni complete, tre questioni | [incarico](06-2026-08-06-caricamento-spostamento-tre-questioni-incarico.md) | [resoconto](06-2026-08-06-caricamento-spostamento-tre-questioni-resoconto.md) |
 | 05 | 2026-08-06 | chiarimento delle contraddizioni (richiesta e risposta) | [richiesta](05-2026-08-06-chiarimento-contraddizioni-richiesta.md) | [risposta](05-2026-08-06-chiarimento-contraddizioni-risposta.md) |
