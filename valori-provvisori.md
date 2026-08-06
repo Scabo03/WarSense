@@ -110,3 +110,7 @@ Le dodici chiavi dei nomi dei gruppi. Non sono valori: sono l'elenco chiuso e pr
 ### Il modello dei passi — DICHIARATO, non tarato
 
 La misura del costo di chiusura di una giornata usa un modello dichiarato in `BancoCampagna`: con il salto diretto ordinare un gruppo costa tre passi (salto, attivazione della casella, scelta della voce); senza il salto, al posto del salto occorrono gli scorrimenti che separano le due caselle nell'ordine di lettura. Non è un valore di gioco e non risiede nei file dei valori: è l'unità di misura, e come tale va discussa, non tarata. Se la prova su dispositivo mostrasse che il costo reale di un'operazione è diverso, si corregge il modello e si rilegge la misura.
+
+### Sigle degli archetipi sulla tessera del deck — SEGNAPOSTO, non forma definitiva
+
+Le sigle di una o due lettere mostrate al centro della tessera del deck sono il **segnaposto testuale** dei simboli grafici, che non esistono ancora (RDA-85, incarico 08). Stanno nei testi come `deck.sigla.<archetipo>`: in italiano FL, FP, GE, TR, CR, CM, PT, MA, MT; in inglese (pacchetto `en.lproj`, non ancora caricabile) LI, HI, EG, SK, RC, MC, TP, SE, AR. Sono decorazione visiva, escluse dall'albero accessibile e mai annunciate. **Provvisorie per costruzione**: un lavoro successivo le sostituirà con simboli grafici, e finché ciò non avviene nessuna sessione deve scambiarle per la forma definitiva. Le lettere non sono un valore di gioco — sono un'abbreviazione del nome dell'archetipo — e vivono nei file dei testi, non nel codice.
