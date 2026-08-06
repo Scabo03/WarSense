@@ -44,6 +44,12 @@ public struct ProgrammaDiVerifica: Sendable {
         rapporto.aggiungi(try sezioneCurvaDelTiro(banchi: banchi))
         rapporto.aggiungi(try sezioneAccerchiamento(banchi: banchi))
         if !fumo { rapporto.aggiungi(try sezioneDuelli(banchi: banchi)) }
+        if !fumo {
+            for sezione in try sezioniMischia(valori: valori, parametriBanchi: caricati.banchi,
+                                              scenari: scenari) {
+                rapporto.aggiungi(sezione)
+            }
+        }
         if let cartellaScenariCampagna {
             let scenariCampagna = try ScenariCampagna.carica(da: cartellaScenariCampagna)
             let valoriCampagna = try CaricatoreCampagna.carica(da: cartellaValori)
@@ -547,5 +553,286 @@ public struct ProgrammaDiVerifica: Sendable {
                  String($0.giri), String($0.prevale), String($0.consistenzaResiduaPermille),
                  $0.modoDiFine]
             })
+    }
+
+    // MARK: - Misura del corpo a corpo (incarico 09)
+
+    /// Le sezioni della mischia. La fotografia si prende a soglia ATTIVA (il regime del
+    /// gioco distribuito); il quadro per la distruzione e i modificatori congiunti si
+    /// prendono a soglia DISATTIVATA, che è l'artificio di misura di
+    /// `ValoriVariati.disingaggioDisattivato` (soglia portata a 1,0 su ogni archetipo,
+    /// dal caricatore vero). La provenienza delle perdite si legge su tutte le battaglie
+    /// che il programma genera. Chiude il blocco unico di riepilogo, da cui il resoconto
+    /// copia i numeri e che una prova pareggia con le righe di dettaglio (RDA-71).
+    func sezioniMischia(valori: ValoriDiGioco, parametriBanchi: ParametriBanchi,
+                        scenari: [ScenarioDiVerifica]) throws -> [Rapporto.Sezione] {
+        let soglieReali = valori.archetipi.mapValues { $0.sogliaDisingaggio }
+
+        // Fotografia: soglia attiva.
+        let banchiAttivi = BanchiDiMisura(motore: MotoreBattaglia(valori: valori), banchi: parametriBanchi)
+        let fotografia = try banchiAttivi.corseMischia(soglieReali: soglieReali)
+
+        // Crux, distruzione e accerchiamento congiunto: soglia disattivata.
+        let (accoppiamenti, accerchiata) = try ValoriVariati.con(
+            base: cartellaValori, inElenco: ValoriVariati.disingaggioDisattivato) { valoriDisattivati in
+            let b = BanchiDiMisura(motore: MotoreBattaglia(valori: valoriDisattivati), banchi: parametriBanchi)
+            return (try b.corseMischia(soglieReali: soglieReali), try b.mischiaAccerchiata())
+        }
+
+        // Provenienza delle perdite su tutte le battaglie generate.
+        let provenienze = try provenienzaDiTutteLeBattaglie(valori: valori, scenari: scenari)
+
+        func vincitore(_ c: BanchiDiMisura.CorsaMischia) -> String {
+            switch c.esito {
+            case "disfatta_bersaglio": return "attaccante"
+            case "disfatta_attaccante": return "bersaglio"
+            case "disfatta_reciproca": return "nessuno"
+            default: return "nessuno_al_tetto"
+            }
+        }
+
+        // Sezione crux: turni per distruggere il bersaglio accanto ai turni per scattare
+        // la sua soglia, per ciascun accoppiamento. È il dato su cui il titolare decide.
+        var righeCrux: [[String]] = []
+        for c in accoppiamenti {
+            let inflittoPermille = c.inflittoPrimoScambio * 1000 / max(1, c.ingressoBersaglio)
+            let scattaPrima = c.turnoSogliaBersaglio > 0
+                && (c.turnoDistruzioneBersaglio == 0 || c.turnoSogliaBersaglio < c.turnoDistruzioneBersaglio)
+            let divario = (c.turnoDistruzioneBersaglio > 0 && c.turnoSogliaBersaglio > 0)
+                ? String(c.turnoDistruzioneBersaglio - c.turnoSogliaBersaglio) : ""
+            righeCrux.append([
+                c.attaccante, c.bersaglio, c.protezione.rawValue,
+                String(c.ingressoBersaglio), String(c.inflittoPrimoScambio),
+                String(inflittoPermille), String((soglieReali[c.bersaglio] ?? .uno).grezzo),
+                String(c.turnoSogliaBersaglio), String(c.turnoDistruzioneBersaglio),
+                String(scattaPrima), divario, vincitore(c),
+                String(c.turnoDistruzioneAttaccante),
+            ])
+        }
+        let sezioneCrux = Rapporto.Sezione(
+            nome: "mischia_accoppiamenti",
+            intestazione: ["attaccante", "bersaglio", "protezione", "ingresso_bersaglio",
+                           "inflitto_primo_scambio", "inflitto_primo_scambio_permille_bersaglio",
+                           "soglia_bersaglio_permille", "turni_soglia_bersaglio",
+                           "turni_distruzione_bersaglio", "soglia_scatta_prima", "divario",
+                           "vincitore", "turni_distruzione_attaccante"],
+            righe: righeCrux)
+
+        // Sezione fotografia: che cosa accade oggi (soglia attiva).
+        let sezioneFotografia = Rapporto.Sezione(
+            nome: "mischia_fotografia",
+            intestazione: ["attaccante", "bersaglio", "protezione", "esito", "scambi",
+                           "chi_si_sfila", "perdite_permille_chi_si_sfila", "turni_soglia_bersaglio",
+                           "residuo_bersaglio_permille", "residuo_attaccante_permille"],
+            righe: fotografia.map {
+                [$0.attaccante, $0.bersaglio, $0.protezione.rawValue, $0.esito, String($0.scambi),
+                 $0.chiSiSfila, String($0.perditeChiSiSfilaPermille), String($0.turnoSogliaBersaglio),
+                 String($0.residuoBersaglioPermille), String($0.residuoAttaccantePermille)]
+            })
+
+        // Sezione modificatori congiunti: accerchiamento e limite dei bersagli insieme.
+        let sezioneAccerchiata = Rapporto.Sezione(
+            nome: "mischia_modificatori_congiunti",
+            intestazione: ["assalitori", "coefficiente_accerchiamento_permille", "inflitto_primo_giro",
+                           "subito_primo_giro", "rapporto_permille", "scambi_per_distruggere",
+                           "bersaglio_giu_a_primo_giro"],
+            righe: accerchiata.map {
+                [String($0.assalitori), String($0.coefficienteAccerchiamentoPermille),
+                 String($0.inflittoPrimoGiro), String($0.subitoPrimoGiro), String($0.rapportoPermille),
+                 String($0.scambiPerDistruggere), String($0.bersaglioGiuAPrimoGiro)]
+            })
+
+        // Sezione provenienza: per singola battaglia.
+        let sezioneProvenienza = Rapporto.Sezione(
+            nome: "provenienza_perdite",
+            intestazione: ["famiglia", "etichetta", "perdite_tiro_giocatore", "perdite_tiro_avversario",
+                           "perdite_mischia_giocatore", "perdite_mischia_avversario",
+                           "distruzioni_in_mischia", "distruzioni_in_tiro", "conclusa", "modo"],
+            righe: provenienze.map {
+                [$0.famiglia, $0.etichetta,
+                 String($0.tiroG), String($0.tiroA), String($0.mischiaG), String($0.mischiaA),
+                 String($0.distMischia), String($0.distTiro), String($0.concluso), $0.modo]
+            })
+
+        let riepilogo = riepilogoMischia(fotografia: fotografia, accoppiamenti: accoppiamenti,
+                                         accerchiata: accerchiata, provenienze: provenienze,
+                                         soglieReali: soglieReali)
+
+        return [sezioneCrux, sezioneFotografia, sezioneAccerchiata, sezioneProvenienza, riepilogo]
+    }
+
+    /// Una riga di provenienza per singola battaglia, con la famiglia da cui viene.
+    struct RigaProvenienza {
+        let famiglia: String
+        let etichetta: String
+        let tiroG: Int64
+        let tiroA: Int64
+        let mischiaG: Int64
+        let mischiaA: Int64
+        let distMischia: Int
+        let distTiro: Int
+        let concluso: Bool
+        let modo: String
+    }
+
+    /// La provenienza delle perdite su TUTTE le battaglie che il programma genera: gli
+    /// scontri del banco, sotto i due regimi dei vantaggi nascosti come nel resto del
+    /// rapporto, e le trentadue sessioni complete di battaglia. Ogni battaglia è
+    /// rigiocata identica dal medesimo tattico del Motore e la provenienza si legge dallo
+    /// stato che il gioco produce (incarico 09, quarto).
+    func provenienzaDiTutteLeBattaglie(valori: ValoriDiGioco,
+                                       scenari: [ScenarioDiVerifica]) throws -> [RigaProvenienza] {
+        var righe: [RigaProvenienza] = []
+
+        // Famiglia "scontri": ogni scenario, ogni configurazione, sotto i due regimi.
+        for accesi in [true, false] {
+            let sostituzioni = accesi ? [] : ValoriVariati.vantaggiSpenti
+            try ValoriVariati.con(base: cartellaValori, sostituendo: sostituzioni) { valoriV in
+                let motore = MotoreBattaglia(valori: valoriV)
+                let prov = ProvenienzaBattaglia(motore: motore)
+                let ufficiali = valoriV.ufficiali.keys.sorted()
+                for scenario in scenari {
+                    for config in BancoScontri.configurazioni(di: scenario, ufficiali: ufficiali)
+                    where config.vantaggiAccesi == accesi {
+                        let sb = ScenarioBattaglia(
+                            formato: scenario.formato, caratteristica: scenario.caratteristica,
+                            ostacoli: scenario.ostacoli, primoOccupante: config.primoOccupante,
+                            imboscata: config.imboscata,
+                            deckGiocatore: scenario.deckGiocatore, deckAvversario: scenario.deckAvversario,
+                            ufficialeAvversario: config.ufficialeAvversario)
+                        let stato = try FabbricaBattaglia.crea(scenario: sb, valori: valoriV).0
+                        let uG = valoriV.ufficiali[config.ufficialeGiocatore]!
+                        let uA = valoriV.ufficiali[config.ufficialeAvversario]!
+                        let tattici: [Parte: TatticoBattaglia] = [
+                            .giocatore: TatticoBattaglia(motore: motore, ufficiale: uG, parte: .giocatore),
+                            .avversario: TatticoBattaglia(motore: motore, ufficiale: uA, parte: .avversario),
+                        ]
+                        let e = prov.replica(stato: stato, tattici: tattici,
+                                             giriMassimi: scenario.giriMassimi)
+                        let etichetta = [scenario.identificatore, config.primoOccupante.rawValue,
+                                         config.ufficialeGiocatore, config.ufficialeAvversario,
+                                         accesi ? "vantaggi" : "spenti",
+                                         config.imboscata ? "imboscata" : "aperto"].joined(separator: "|")
+                        righe.append(rigaProvenienza(famiglia: "scontri", etichetta: etichetta, esito: e))
+                    }
+                }
+            }
+        }
+
+        // Famiglia "sessioni": le trentadue sessioni complete di battaglia.
+        let motoreBase = MotoreBattaglia(valori: valori)
+        let provBase = ProvenienzaBattaglia(motore: motoreBase)
+        let ufficiali = valori.ufficiali.keys.sorted()
+        for composizione in composizioniDiMazzo(scenari: scenari) {
+            for primo in [Parte.giocatore, .avversario] {
+                for ufficiale in ufficiali {
+                    for imboscata in [false, true] {
+                        let sb = ScenarioBattaglia(
+                            formato: scenari[0].formato, caratteristica: scenari[0].caratteristica,
+                            primoOccupante: primo, imboscata: imboscata,
+                            deckGiocatore: composizione.giocatore, deckAvversario: composizione.avversario,
+                            ufficialeAvversario: ufficiale)
+                        let stato = try FabbricaBattaglia.crea(scenario: sb, valori: valori).0
+                        let u = valori.ufficiali[ufficiale]!
+                        let tattici: [Parte: TatticoBattaglia] = [
+                            .giocatore: TatticoBattaglia(motore: motoreBase, ufficiale: u, parte: .giocatore),
+                            .avversario: TatticoBattaglia(motore: motoreBase, ufficiale: u, parte: .avversario),
+                        ]
+                        let e = provBase.replica(stato: stato, tattici: tattici,
+                                                 giriMassimi: scenari[0].giriMassimi)
+                        let etichetta = [composizione.nome, primo.rawValue, ufficiale,
+                                         imboscata ? "imboscata" : "aperto"].joined(separator: "|")
+                        righe.append(rigaProvenienza(famiglia: "sessioni", etichetta: etichetta, esito: e))
+                    }
+                }
+            }
+        }
+        return righe
+    }
+
+    private func rigaProvenienza(famiglia: String, etichetta: String,
+                                 esito e: ProvenienzaBattaglia.Esito) -> RigaProvenienza {
+        RigaProvenienza(
+            famiglia: famiglia, etichetta: etichetta,
+            tiroG: e.perditeTiro[.giocatore] ?? 0, tiroA: e.perditeTiro[.avversario] ?? 0,
+            mischiaG: e.perditeMischia[.giocatore] ?? 0, mischiaA: e.perditeMischia[.avversario] ?? 0,
+            distMischia: e.distruzioniInMischia, distTiro: e.distruzioniInTiro,
+            concluso: e.concluso, modo: e.modo)
+    }
+
+    /// Il blocco unico dei numeri della mischia. I totali li somma il programma, e la
+    /// prova `MisuraMischiaTest` li pareggia con le righe di dettaglio (RDA-71).
+    func riepilogoMischia(fotografia: [BanchiDiMisura.CorsaMischia],
+                          accoppiamenti: [BanchiDiMisura.CorsaMischia],
+                          accerchiata: [BanchiDiMisura.MischiaAccerchiata],
+                          provenienze: [RigaProvenienza],
+                          soglieReali: [IdentificatoreDati: Scalato]) -> Rapporto.Sezione {
+        var voci: [[String]] = []
+        func voce(_ nome: String, _ valore: Int) { voci.append([nome, String(valore)]) }
+
+        // Primo: la fotografia (soglia attiva).
+        voce("accoppiamenti_totali", fotografia.count)
+        func conta(_ righe: [BanchiDiMisura.CorsaMischia], _ esito: String) -> Int {
+            righe.filter { $0.esito == esito }.count
+        }
+        let disingaggi = fotografia.filter { $0.chiSiSfila != "" }
+        voce("fotografia_disingaggio", disingaggi.count)
+        voce("fotografia_disfatta_bersaglio", conta(fotografia, "disfatta_bersaglio"))
+        voce("fotografia_disfatta_attaccante", conta(fotografia, "disfatta_attaccante"))
+        voce("fotografia_disfatta_reciproca", conta(fotografia, "disfatta_reciproca"))
+        voce("fotografia_tetto", conta(fotografia, "tetto"))
+        let durata = Distribuzione(fotografia.map(\.scambi))
+        voce("contatto_scambi_minimo", durata.minimo)
+        voce("contatto_scambi_mediana", durata.mediana)
+        voce("contatto_scambi_massimo", durata.massimo)
+        voce("contatto_scambi_media", durata.media)
+        let perditeSfila = Distribuzione(disingaggi.map { Int($0.perditeChiSiSfilaPermille) })
+        voce("disingaggio_perdite_permille_minimo", perditeSfila.minimo)
+        voce("disingaggio_perdite_permille_mediana", perditeSfila.mediana)
+        voce("disingaggio_perdite_permille_massimo", perditeSfila.massimo)
+        voce("disingaggio_perdite_permille_media", perditeSfila.media)
+
+        // Secondo e terzo: distruzione a soglia disattivata.
+        voce("distruzione_bersaglio_conteggio", conta(accoppiamenti, "disfatta_bersaglio"))
+        voce("distruzione_attaccante_conteggio", conta(accoppiamenti, "disfatta_attaccante"))
+        voce("distruzione_reciproca_conteggio", conta(accoppiamenti, "disfatta_reciproca"))
+        voce("distruzione_tetto_conteggio", conta(accoppiamenti, "tetto"))
+        let scattaPrima = accoppiamenti.filter {
+            $0.turnoSogliaBersaglio > 0
+                && ($0.turnoDistruzioneBersaglio == 0 || $0.turnoSogliaBersaglio < $0.turnoDistruzioneBersaglio)
+        }.count
+        voce("accoppiamenti_soglia_scatta_prima_della_distruzione", scattaPrima)
+        let divari = accoppiamenti.compactMap { c -> Int? in
+            (c.turnoDistruzioneBersaglio > 0 && c.turnoSogliaBersaglio > 0)
+                ? c.turnoDistruzioneBersaglio - c.turnoSogliaBersaglio : nil
+        }
+        let distribuzioneDivari = Distribuzione(divari)
+        voce("divario_soglia_distruzione_minimo", distribuzioneDivari.minimo)
+        voce("divario_soglia_distruzione_mediana", distribuzioneDivari.mediana)
+        voce("divario_soglia_distruzione_massimo", distribuzioneDivari.massimo)
+
+        // Quinto: modificatori congiunti.
+        voce("accerchiamento_scambi_distruzione_uno_assalitore",
+             accerchiata.first { $0.assalitori == 1 }?.scambiPerDistruggere ?? 0)
+        voce("accerchiamento_scambi_distruzione_massimo_assalitori",
+             accerchiata.last?.scambiPerDistruggere ?? 0)
+
+        // Quarto: provenienza delle perdite su tutte le battaglie generate.
+        voce("battaglie_generate_totali", provenienze.count)
+        let tiro = provenienze.reduce(Int64(0)) { $0 + $1.tiroG + $1.tiroA }
+        let mischia = provenienze.reduce(Int64(0)) { $0 + $1.mischiaG + $1.mischiaA }
+        let totale = tiro + mischia
+        voce("perdite_da_tiro_totali", Int(tiro))
+        voce("perdite_da_mischia_totali", Int(mischia))
+        voce("perdite_totali", Int(totale))
+        voce("perdite_da_tiro_permille", Int(totale > 0 ? tiro * 1000 / totale : 0))
+        voce("perdite_da_mischia_permille", Int(totale > 0 ? mischia * 1000 / totale : 0))
+        voce("battaglie_senza_distruzione_in_mischia",
+             provenienze.filter { $0.distMischia == 0 }.count)
+        voce("battaglie_con_distruzione_in_mischia",
+             provenienze.filter { $0.distMischia > 0 }.count)
+
+        return Rapporto.Sezione(nome: "mischia_riepilogo",
+                                intestazione: ["voce", "valore"], righe: voci)
     }
 }
