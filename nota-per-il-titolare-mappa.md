@@ -12,35 +12,41 @@ Convenzione di questa nota: le virgolette basse racchiudono soltanto ciò che il
 gioco dice o mostra davvero, e il controllo pretende che ogni nome così citato
 esista nel gioco; le virgolette alte sono citazioni di altra natura.
 
-## Che cos'è cambiato in questa build
+## Che cos'è cambiato in questa build, e le tre cose da provare per prime
 
-Tre cose, e nessuna tocca lo scontro. **È la prima build che ti arriva con il
-tocco diretto**: le due precedenti correzioni sono state fatte e provate, ma non
-erano ancora salite sui dispositivi.
+Questa build corregge il difetto per cui, sulla griglia di battaglia, dopo aver
+scelto una tessera dal mazzo non si riusciva a piazzare il reparto sulle celle in
+fondo. Non tocca lo scontro, né le regole: le partite in corso si riaprono.
 
-**Le caselle si toccano con il dito.** Fino a ieri le caselle della mappa — e
-anche le celle della griglia di battaglia — rispondevano soltanto al doppio tocco
-di VoiceOver. Chi guardava lo schermo senza VoiceOver acceso non poteva ordinare
-nulla, su nessuno dei due piani. Ora rispondono a tutt'e due, e per la stessa
-strada: toccare una casella con il dito fa esattamente ciò che fa attivarla con la
-voce, non una cosa simile. Se noti una differenza fra le due, è un difetto e voglio
-saperlo.
+Ci sono tre cose da provare, e conviene provarle in quest'ordine.
 
-**Il registro e l'annullamento sono quelli della build precedente**, descritti qui
-sotto perché la nota vecchia li descriveva ancora come erano due build fa.
+1. **Il piazzamento di un reparto dopo aver scelto una tessera, sulle celle della
+   fila più arretrata.** È la cosa che era rotta ed è stata corretta. Sulla griglia
+   di battaglia, scegli una tessera dal mazzo e poi tocca col dito una cella per
+   piazzarvi il reparto. Prima, scegliere la tessera faceva scorrere di poco la
+   griglia verso l'alto, e il dito che mirava a una cella della fila più arretrata
+   la mancava: toccava dove la cella era annunciata, ma la cella non era più lì.
+   Ora la griglia non si muove più alla scelta della tessera. Prova proprio le
+   celle in fondo: se un piazzamento manca ancora il bersaglio, dimmelo.
 
-**Una cosa da sapere sul dito, sulle mappe grandi e sullo scontro.** Quando la
-griglia è più grande dello schermo, il dito può toccare soltanto ciò che è
-davvero in vista: per raggiungere una casella più in basso bisogna prima far
-scorrere la griglia. La voce invece ci arriva da sé, perché quando il cursore si
-sposta su una casella fuori vista è il gioco a portarla in vista. Non è un
-difetto, ma è un'asimmetria fra i due modi: dimmi se giocando la senti come
-scomoda, perché in quel caso si può fare qualcosa.
+2. **Il tocco diretto su una casella della mappa grande che sta fuori dalla parte
+   visibile.** Quando la mappa è più grande dello schermo, il dito raggiunge
+   soltanto ciò che è davvero in vista: per una casella più in basso bisogna prima
+   far scorrere. Il dito non scorre da solo — la voce sì, perché quando il cursore
+   va su una casella fuori vista è il gioco a portarla in vista. Prova a toccare
+   una casella fuori dalla parte visibile, prima e dopo aver fatto scorrere, e
+   dimmi se l'asimmetria fra dito e voce ti pesa.
 
-**Il collaudo automatico ora gira tutto prima di ogni caricamento.** Prima ne
-girava una parte, e la parte che non girava era proprio quella che prova
-l'interfaccia. Non cambia nulla per te mentre giochi; cambia che i difetti come
-quelli che mi hai segnalato hanno adesso una rete.
+3. **Che cosa senti esplorando col dito sopra la zona dei comandi, in basso.**
+   Passando il dito nella fascia bassa dello schermo — quella del mazzo e dei
+   comandi — potresti sentir annunciare una cella della griglia là dove sullo
+   schermo non c'è disegnata alcuna cella. Se ti capita, dimmi dov'era il dito e
+   che cosa hai sentito: è un punto che sto ancora verificando, e la tua prova sul
+   dispositivo è quella che decide.
+
+Restano vere, e descritte qui sotto, le cose della mappa di campagna già presenti:
+il tocco diretto sulle caselle, il registro, l'annullamento entro la giornata. E il
+collaudo automatico continua a girare tutto prima di ogni caricamento.
 
 ## Dalla schermata iniziale
 
