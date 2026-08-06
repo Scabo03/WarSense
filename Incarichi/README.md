@@ -30,7 +30,21 @@ accaduto.
 
 | n. | data | materia | incarico | resoconto |
 |---|---|---|---|---|
+| 06 | 2026-08-06 | caricamento build 15, spostamento sessioni complete, tre questioni | [incarico](06-2026-08-06-caricamento-spostamento-tre-questioni-incarico.md) | [resoconto](06-2026-08-06-caricamento-spostamento-tre-questioni-resoconto.md) |
+| 05 | 2026-08-06 | chiarimento delle contraddizioni (richiesta e risposta) | [richiesta](05-2026-08-06-chiarimento-contraddizioni-richiesta.md) | [risposta](05-2026-08-06-chiarimento-contraddizioni-risposta.md) |
 | 04 | 2026-08-05 | sessioni per l'interfaccia, manifest dei testi, conteggio delle prove | [incarico](04-2026-08-05-sessioni-per-interfaccia-incarico.md) | [resoconto](04-2026-08-05-sessioni-per-interfaccia-resoconto.md) |
 | 03 | 2026-08-05 | freschezza delle note, build 13, tocco in battaglia | [incarico](03-2026-08-05-freschezza-e-tocco-battaglia-incarico.md) | [resoconto](03-2026-08-05-freschezza-e-tocco-battaglia-resoconto.md) |
-| 02 | 2026-08-05 | catena intera, tocco sintetizzato, sessioni complete | [incarico](02-2026-08-05-catena-e-sessioni-complete-incarico.md) | [resoconto](02-2026-08-05-catena-e-sessioni-complete-resoconto.md) |
+| 02 | 2026-08-05 | catena intera, tocco sintetizzato, sessioni complete | **MANCANTE** — [segnaposto](02-2026-08-05-INCARICO-MANCANTE-segnaposto.md) | [resoconto](02-2026-08-05-catena-e-sessioni-complete-resoconto.md) |
 | 01 | 2026-08-05 | tocco diretto, impianto di prova sul simulatore, tre cancelli | [incarico](01-2026-08-05-tocco-diretto-e-cancelli-incarico.md) | [resoconto](01-2026-08-05-tocco-diretto-e-cancelli-resoconto.md) |
+
+L'incarico della sessione **02** non è mai stato scritto su disco: una catena di
+comandi si interruppe prima del comando che lo depositava. Fino a quel commit
+l'indice lo indicava come collegamento a un file inesistente. Al suo posto sta un
+[segnaposto](02-2026-08-05-INCARICO-MANCANTE-segnaposto.md); il testo vero esiste
+altrove e verrà reinserito dal titolare al nome canonico
+`02-2026-08-05-catena-e-sessioni-complete-incarico.md`, momento in cui il
+segnaposto va rimosso. La verifica dei file dichiarati archiviati ma assenti è nel
+resoconto della sessione 06.
+
+La riga **05** non è un incarico ma un chiarimento: una richiesta del titolare e la
+risposta della sessione, depositate verbatim con la stessa disciplina.
