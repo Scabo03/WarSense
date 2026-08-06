@@ -149,6 +149,16 @@ final class SessioniPerInterfacciaTest: XCTestCase {
         try await giocaTutte(gruppiMassimi: Self.gruppiMassimi)
     }
 
+    /// Il tetto dei gruppi dipende da DOVE gira. Nel collaudo di ogni caricamento
+    /// resta il sottoinsieme di 24 sessioni (1–2 gruppi): le 144 complete costano
+    /// venti minuti e cinquanta secondi, tre volte la stima su cui la decisione era
+    /// stata presa, e il titolare le ha spostate in una corsa separata il 2026-08-06
+    /// (RDA-83, S11). La corsa separata — `scripts/esegui-sessioni-complete.sh` —
+    /// impone il tetto pieno con `WARSENSE_SESSIONI_COMPLETE`, e allora giocano tutte
+    /// e 144. Non è un canale di collaudo: le sessioni giocate sono reali in entrambi
+    /// i casi, cambia solo QUANTE. Il numero, sottoinsieme o intero, lo stampa la
+    /// riga `MISURA`, sicché quale corsa è stata fatta si legge dall'esito.
+
     private func giocaTutte(gruppiMassimi: Int) async throws {
         let (ambiente, banco, valoriCampagna) = try ambienteEBanco()
         let configurazioni = banco.configurazioni(
@@ -192,7 +202,12 @@ final class SessioniPerInterfacciaTest: XCTestCase {
                        "non tutte le configurazioni generate sono passate per l'interfaccia")
     }
 
-    /// Il tetto dei gruppi: lo stesso del programma di verifica fuori dal fumo, così
-    /// che le due liste coincidano. Numero di struttura della misura (05 §0.4).
-    private static let gruppiMassimi = 12
+    /// Il tetto dei gruppi. Con `WARSENSE_SESSIONI_COMPLETE` è 12, lo stesso del
+    /// programma di verifica fuori dal fumo, così che le due liste coincidano e
+    /// giochino tutte le 144 configurazioni; senza, è 2 e restano le 24 del
+    /// sottoinsieme che il collaudo di ogni caricamento tiene. Numero di struttura
+    /// della misura (05 §0.4).
+    private static var gruppiMassimi: Int {
+        ProcessInfo.processInfo.environment["WARSENSE_SESSIONI_COMPLETE"] != nil ? 12 : 2
+    }
 }

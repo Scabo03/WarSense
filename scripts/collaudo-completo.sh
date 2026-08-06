@@ -55,11 +55,23 @@ print(candidati[-1][2])
   DESTINAZIONE="id=$UDID"
 fi
 
+# Il fascio di risultati serve al conteggio delle prove dall'ESECUTORE (sessione
+# 06): i numeri riportati nei resoconti venivano da uno scanner Python, perché
+# `-quiet` sopprime le righe per bersaglio. Il fascio conserva il conteggio vero,
+# che `scripts/conta-prove.sh` legge con xcresulttool.
+RISULTATI="${WARSENSE_RISULTATI:-$RADICE/Applicazione/build/collaudo-risultati.xcresult}"
+rm -rf "$RISULTATI"
 xcodebuild test \
   -project "$RADICE/Applicazione/WarSense.xcodeproj" \
   -scheme WarSense \
   -destination "$DESTINAZIONE" \
   -derivedDataPath "${WARSENSE_DERIVATI:-$RADICE/Applicazione/build/collaudo}" \
+  -resultBundlePath "$RISULTATI" \
   -quiet
+
+echo "== Conteggio delle prove ospitate e d'interfaccia, dall'esecutore =="
+# Non si sopprime più il conteggio: viene dal fascio di risultati dell'esecutore,
+# non da uno scanner. Non fatale: un conteggio non estratto non ferma il collaudo.
+"$RADICE/scripts/conta-prove.sh" "$RISULTATI" || echo "  (conteggio non estratto)"
 
 echo "== Collaudo completo: tutto verde =="

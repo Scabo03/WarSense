@@ -12,3 +12,6 @@ xcuserdata/
 *.env
 *.mobileprovision
 private_keys/
+
+# Esito runtime della corsa separata delle sessioni complete (non versionato)
+esiti-sessioni-complete/

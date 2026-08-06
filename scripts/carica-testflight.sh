@@ -70,6 +70,19 @@ python3 "$RADICE/scripts/controlla-note.py"
 echo "== Controllo preventivo: registro delle build e App Store Connect =="
 python3 "$RADICE/scripts/controlla-build.py"
 
+# ============================================================================
+# CONTROLLO PREVENTIVO DELLA CORSA SEPARATA DELLE SESSIONI COMPLETE.
+# Le 144 sessioni di campagna per l'interfaccia sono state spostate fuori dal
+# collaudo di ogni caricamento (RDA-83, S11); qui restano le 24 del sottoinsieme.
+# Perché lo spostamento non sia una perdita di protezione, il caricamento esige
+# che la corsa separata (scripts/esegui-sessioni-complete.sh) abbia lasciato un
+# esito FRESCO: presente, di successo, e non più vecchio dell'ultimo commit che ha
+# toccato il codice. È il controllo di freschezza delle note applicato a un
+# artefatto diverso, e rifiuterebbe un esito vero ma vecchio.
+# ============================================================================
+echo "== Controllo preventivo: freschezza della corsa separata delle sessioni complete =="
+python3 "$RADICE/scripts/controlla-sessioni.py"
+
 echo "== Collaudo COMPLETO prima del caricamento (pacchetto, ospitate, interfaccia) =="
 # Un solo elenco di ciò che «tutto» significa, condiviso con l'integrazione
 # continua. Si ferma al primo fallimento: `set -e` lo propaga.
