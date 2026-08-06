@@ -126,8 +126,13 @@ public enum CaricatoreValori {
                   a.proiettile != .armaDaMischia else {
                 throw ErroreDati(chiave: "errore.dati.tiro_incoerente", file: "archetipi.json", voce: id)
             }
-            guard a.sogliaDisingaggio > .zero, a.sogliaDisingaggio <= .uno else {
-                throw ErroreDati(chiave: "errore.dati.soglia_fuori_intervallo", file: "archetipi.json", voce: id)
+            // Soglia di disingaggio: se presente, nell'intervallo (0, 1]; ASSENTE per il
+            // reparto elitario, che non si sfila mai (incarico 10). L'assenza è leggibile
+            // come tale (chiave mancante), non confondibile con una soglia molto alta.
+            if let soglia = a.sogliaDisingaggio {
+                guard soglia > .zero, soglia <= .uno else {
+                    throw ErroreDati(chiave: "errore.dati.soglia_fuori_intervallo", file: "archetipi.json", voce: id)
+                }
             }
         }
         for tipo in TipoProtezione.allCases where protezioni[tipo] == nil {
@@ -178,6 +183,12 @@ public enum CaricatoreValori {
         // condizione ridotta si confonderebbe con l'assenza di risposta.
         guard combattimento.resaControSecondoBersaglio > .zero,
               combattimento.resaControSecondoBersaglio < .uno else {
+            throw ErroreDati(chiave: "errore.dati.soglia_fuori_intervallo", file: "combattimento.json")
+        }
+        // Il coefficiente di logoramento è una frazione: fra zero (inattivo) e l'unità
+        // (a integrità nulla la soglia si azzera). Fuori intervallo è respinto (incarico 10).
+        guard combattimento.coefficienteLogoramentoSoglia >= .zero,
+              combattimento.coefficienteLogoramentoSoglia <= .uno else {
             throw ErroreDati(chiave: "errore.dati.soglia_fuori_intervallo", file: "combattimento.json")
         }
     }

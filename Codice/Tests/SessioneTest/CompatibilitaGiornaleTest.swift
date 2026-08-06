@@ -50,7 +50,7 @@ final class CompatibilitaGiornaleTest: XCTestCase {
     /// Specchio di `ComandoBattaglia`.
     enum SpecieDiComando: String, CaseIterable {
         case seleziona, deseleziona, piazza, muovi, tira
-        case ingaggia, dichiaraResa, ritiraUnita, fineTurno
+        case ingaggia, dichiaraResa, ritiraUnita, disingaggiaSuOrdine, fineTurno
     }
 
     /// Specchio di `ComandoCampagna`.
@@ -99,6 +99,7 @@ final class CompatibilitaGiornaleTest: XCTestCase {
         case .ingaggia: return .ingaggia
         case .dichiaraResa: return .dichiaraResa
         case .ritiraUnita: return .ritiraUnita
+        case .disingaggiaSuOrdine: return .disingaggiaSuOrdine
         case .fineTurno: return .fineTurno
         }
     }
@@ -113,6 +114,7 @@ final class CompatibilitaGiornaleTest: XCTestCase {
         case .ingaggia: return .ingaggia(sciame: IdSciame(1), bersaglio: IdSciame(2))
         case .dichiaraResa: return .dichiaraResa
         case .ritiraUnita: return .ritiraUnita(sciame: IdSciame(1))
+        case .disingaggiaSuOrdine: return .disingaggiaSuOrdine(sciame: IdSciame(1))
         case .fineTurno: return .fineTurno
         }
     }

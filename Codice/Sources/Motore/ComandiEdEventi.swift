@@ -16,6 +16,11 @@ public enum ComandoBattaglia: Hashable, Codable, Sendable {
     case dichiaraResa
     /// Durante la ritirata combattuta: evacua un'unità non impegnata (01 §10.4).
     case ritiraUnita(sciame: IdSciame)
+    /// Disingaggio su ordine del giocatore, riservato al reparto elitario (incarico 10,
+    /// terza decisione): l'unico reparto sul quale il controllo non si perde del tutto
+    /// quando ingaggia. Azione esplicita, non evento automatico; valida solo se il reparto
+    /// è elitario e a contatto (01 §9.5, eccezione dichiarata in RDA).
+    case disingaggiaSuOrdine(sciame: IdSciame)
     case fineTurno
 }
 

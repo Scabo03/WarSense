@@ -600,10 +600,11 @@ public struct ProgrammaDiVerifica: Sendable {
                 && (c.turnoDistruzioneBersaglio == 0 || c.turnoSogliaBersaglio < c.turnoDistruzioneBersaglio)
             let divario = (c.turnoDistruzioneBersaglio > 0 && c.turnoSogliaBersaglio > 0)
                 ? String(c.turnoDistruzioneBersaglio - c.turnoSogliaBersaglio) : ""
+            let sogliaBersaglio = (soglieReali[c.bersaglio] ?? nil).map { String($0.grezzo) } ?? "assente"
             righeCrux.append([
                 c.attaccante, c.bersaglio, c.protezione.rawValue,
                 String(c.ingressoBersaglio), String(c.inflittoPrimoScambio),
-                String(inflittoPermille), String((soglieReali[c.bersaglio] ?? .uno).grezzo),
+                String(inflittoPermille), sogliaBersaglio,
                 String(c.turnoSogliaBersaglio), String(c.turnoDistruzioneBersaglio),
                 String(scattaPrima), divario, vincitore(c),
                 String(c.turnoDistruzioneAttaccante),
@@ -647,18 +648,118 @@ public struct ProgrammaDiVerifica: Sendable {
             nome: "provenienza_perdite",
             intestazione: ["famiglia", "etichetta", "perdite_tiro_giocatore", "perdite_tiro_avversario",
                            "perdite_mischia_giocatore", "perdite_mischia_avversario",
-                           "distruzioni_in_mischia", "distruzioni_in_tiro", "conclusa", "modo"],
+                           "distruzioni_in_mischia", "distruzioni_in_tiro",
+                           "reingaggi", "disingaggi", "conclusa", "modo"],
             righe: provenienze.map {
                 [$0.famiglia, $0.etichetta,
                  String($0.tiroG), String($0.tiroA), String($0.mischiaG), String($0.mischiaA),
-                 String($0.distMischia), String($0.distTiro), String($0.concluso), $0.modo]
+                 String($0.distMischia), String($0.distTiro),
+                 String($0.reingaggi), String($0.disingaggi), String($0.concluso), $0.modo]
             })
+
+        // Fasce di disingaggio: per ciascun valore di soglia (cioè per ciascuna fascia,
+        // più l'assenza dell'elitario) dopo quanti scambi la soglia scatta negli
+        // accoppiamenti tipici, e la verifica che le fasce restino separate (incarico 10).
+        let sezioneFasce = sezioneFasceDiDisingaggio(accoppiamenti: accoppiamenti,
+                                                     soglieReali: soglieReali)
+
+        // Esame congiunto (incarico 10): la regola del secondo contatto contro il
+        // coefficiente di logoramento. Le battaglie complete sotto i due regimi.
+        let sezioneSecondo = try sezioneSecondoContatto(scenari: scenari)
 
         let riepilogo = riepilogoMischia(fotografia: fotografia, accoppiamenti: accoppiamenti,
                                          accerchiata: accerchiata, provenienze: provenienze,
                                          soglieReali: soglieReali)
 
-        return [sezioneCrux, sezioneFotografia, sezioneAccerchiata, sezioneProvenienza, riepilogo]
+        return [sezioneCrux, sezioneFotografia, sezioneFasce, sezioneAccerchiata,
+                sezioneProvenienza, sezioneSecondo, riepilogo]
+    }
+
+    /// L'esame congiunto della regola del secondo contatto (01 §9.8.3) e del coefficiente
+    /// di logoramento (incarico 10). Le trentadue sessioni complete di battaglia, sotto i
+    /// due regimi: `regola_presente` (soglia_al_secondo_contatto = falso, il comportamento
+    /// distribuito) e `regola_tolta` (= vero, la soglia opera anche al secondo contatto). In
+    /// entrambi il coefficiente di logoramento è quello dei dati (attivo). Non decide fra le
+    /// due vie: ne stampa i numeri, che è ciò che l'incarico chiede.
+    func sezioneSecondoContatto(scenari: [ScenarioDiVerifica]) throws -> Rapporto.Sezione {
+        func misura(regolaTolta: Bool) throws -> (n: Int, reingaggi: Int, disingaggi: Int,
+                                                  distrMischia: Int, concluse: Int) {
+            let sost = [ValoriVariati.Sostituzione(file: "combattimento.json",
+                                                   chiave: "soglia_al_secondo_contatto",
+                                                   valore: regolaTolta)]
+            return try ValoriVariati.con(base: cartellaValori, sostituendo: sost) { valoriV in
+                let motore = MotoreBattaglia(valori: valoriV)
+                let prov = ProvenienzaBattaglia(motore: motore)
+                var reingaggi = 0, disingaggi = 0, distr = 0, concluse = 0, n = 0
+                for composizione in composizioniDiMazzo(scenari: scenari) {
+                    for primo in [Parte.giocatore, .avversario] {
+                        for ufficiale in valoriV.ufficiali.keys.sorted() {
+                            for imboscata in [false, true] {
+                                let sb = ScenarioBattaglia(
+                                    formato: scenari[0].formato, caratteristica: scenari[0].caratteristica,
+                                    primoOccupante: primo, imboscata: imboscata,
+                                    deckGiocatore: composizione.giocatore,
+                                    deckAvversario: composizione.avversario, ufficialeAvversario: ufficiale)
+                                let stato = try FabbricaBattaglia.crea(scenario: sb, valori: valoriV).0
+                                let u = valoriV.ufficiali[ufficiale]!
+                                let tattici: [Parte: TatticoBattaglia] = [
+                                    .giocatore: TatticoBattaglia(motore: motore, ufficiale: u, parte: .giocatore),
+                                    .avversario: TatticoBattaglia(motore: motore, ufficiale: u, parte: .avversario),
+                                ]
+                                let e = prov.replica(stato: stato, tattici: tattici,
+                                                     giriMassimi: scenari[0].giriMassimi)
+                                reingaggi += e.reingaggi; disingaggi += e.disingaggi
+                                distr += e.distruzioniInMischia; concluse += e.concluso ? 1 : 0; n += 1
+                            }
+                        }
+                    }
+                }
+                return (n, reingaggi, disingaggi, distr, concluse)
+            }
+        }
+        var righe: [[String]] = []
+        for (nome, tolta) in [("regola_presente", false), ("regola_tolta", true)] {
+            let m = try misura(regolaTolta: tolta)
+            righe.append([nome, String(m.n), String(m.reingaggi), String(m.disingaggi),
+                          String(m.distrMischia), String(m.concluse)])
+        }
+        return Rapporto.Sezione(
+            nome: "secondo_contatto",
+            intestazione: ["regime", "battaglie", "reingaggi", "disingaggi",
+                           "distruzioni_in_mischia", "concluse"],
+            righe: righe)
+    }
+
+    /// Per ciascun valore di soglia presente nei dati — ciascuna FASCIA — dopo quanti
+    /// scambi la soglia scatta, misurato sugli accoppiamenti in cui il bersaglio di quella
+    /// fascia la raggiunge (turni_soglia > 0). L'assenza di soglia (reparto elitario) è una
+    /// riga a sé, con la soglia dichiarata «assente» e nessuno scambio, perché non scatta
+    /// mai. Le righe sono ordinate per soglia crescente: il divario fra le mediane è la
+    /// grandezza su cui il cancello `MisuraMischiaTest` verifica che le fasce siano separate.
+    func sezioneFasceDiDisingaggio(accoppiamenti: [BanchiDiMisura.CorsaMischia],
+                                   soglieReali: [IdentificatoreDati: Scalato?]) -> Rapporto.Sezione {
+        // Gruppi di archetipi per valore di soglia; nil (elitario) come gruppo a parte.
+        var archetipiPerSoglia: [Int: [String]] = [:]  // -1 = assente
+        for (id, soglia) in soglieReali {
+            let chiave = soglia.map { Int($0.grezzo) } ?? -1
+            archetipiPerSoglia[chiave, default: []].append(id)
+        }
+        var righe: [[String]] = []
+        for chiave in archetipiPerSoglia.keys.sorted() {
+            let archetipi = archetipiPerSoglia[chiave]!.sorted()
+            let scatti = accoppiamenti
+                .filter { archetipi.contains($0.bersaglio) && $0.turnoSogliaBersaglio > 0 }
+                .map(\.turnoSogliaBersaglio)
+            let d = Distribuzione(scatti)
+            righe.append([chiave < 0 ? "assente" : String(chiave),
+                          archetipi.joined(separator: ";"),
+                          String(d.quanti), String(d.minimo), String(d.mediana), String(d.massimo)])
+        }
+        return Rapporto.Sezione(
+            nome: "mischia_fasce",
+            intestazione: ["soglia_permille", "archetipi", "accoppiamenti_che_scattano",
+                           "scatta_minimo", "scatta_mediana", "scatta_massimo"],
+            righe: righe)
     }
 
     /// Una riga di provenienza per singola battaglia, con la famiglia da cui viene.
@@ -671,6 +772,8 @@ public struct ProgrammaDiVerifica: Sendable {
         let mischiaA: Int64
         let distMischia: Int
         let distTiro: Int
+        let reingaggi: Int
+        let disingaggi: Int
         let concluso: Bool
         let modo: String
     }
@@ -757,6 +860,7 @@ public struct ProgrammaDiVerifica: Sendable {
             tiroG: e.perditeTiro[.giocatore] ?? 0, tiroA: e.perditeTiro[.avversario] ?? 0,
             mischiaG: e.perditeMischia[.giocatore] ?? 0, mischiaA: e.perditeMischia[.avversario] ?? 0,
             distMischia: e.distruzioniInMischia, distTiro: e.distruzioniInTiro,
+            reingaggi: e.reingaggi, disingaggi: e.disingaggi,
             concluso: e.concluso, modo: e.modo)
     }
 
@@ -766,7 +870,7 @@ public struct ProgrammaDiVerifica: Sendable {
                           accoppiamenti: [BanchiDiMisura.CorsaMischia],
                           accerchiata: [BanchiDiMisura.MischiaAccerchiata],
                           provenienze: [RigaProvenienza],
-                          soglieReali: [IdentificatoreDati: Scalato]) -> Rapporto.Sezione {
+                          soglieReali: [IdentificatoreDati: Scalato?]) -> Rapporto.Sezione {
         var voci: [[String]] = []
         func voce(_ nome: String, _ valore: Int) { voci.append([nome, String(valore)]) }
 
@@ -831,6 +935,11 @@ public struct ProgrammaDiVerifica: Sendable {
              provenienze.filter { $0.distMischia == 0 }.count)
         voce("battaglie_con_distruzione_in_mischia",
              provenienze.filter { $0.distMischia > 0 }.count)
+        // Regola del secondo contatto (01 §9.8.3): quanto è esercitata e quanti disingaggi
+        // automatici avvengono in tutte le battaglie generate (incarico 10).
+        voce("reingaggi_totali", provenienze.reduce(0) { $0 + $1.reingaggi })
+        voce("disingaggi_automatici_totali", provenienze.reduce(0) { $0 + $1.disingaggi })
+        voce("battaglie_con_almeno_un_reingaggio", provenienze.filter { $0.reingaggi > 0 }.count)
 
         return Rapporto.Sezione(nome: "mischia_riepilogo",
                                 intestazione: ["voce", "valore"], righe: voci)

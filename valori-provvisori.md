@@ -114,3 +114,13 @@ La misura del costo di chiusura di una giornata usa un modello dichiarato in `Ba
 ### Sigle degli archetipi sulla tessera del deck — SEGNAPOSTO, non forma definitiva
 
 Le sigle di una o due lettere mostrate al centro della tessera del deck sono il **segnaposto testuale** dei simboli grafici, che non esistono ancora (RDA-85, incarico 08). Stanno nei testi come `deck.sigla.<archetipo>`: in italiano FL, FP, GE, TR, CR, CM, PT, MA, MT; in inglese (pacchetto `en.lproj`, non ancora caricabile) LI, HI, EG, SK, RC, MC, TP, SE, AR. Sono decorazione visiva, escluse dall'albero accessibile e mai annunciate. **Provvisorie per costruzione**: un lavoro successivo le sostituirà con simboli grafici, e finché ciò non avviene nessuna sessione deve scambiarle per la forma definitiva. Le lettere non sono un valore di gioco — sono un'abbreviazione del nome dell'archetipo — e vivono nei file dei testi, non nel codice.
+
+### Soglie di disingaggio a tre fasce, logoramento e secondo contatto — PROVVISORI (incarico 10)
+
+Introdotti dall'incarico 10 dopo la misura del corpo a corpo (incarico 09), giustificati da una misura di separazione ma non ancora tarati sul gioco reale con i tester; restano PROVVISORI finché il titolare non li conferma provando le battaglie.
+
+- `archetipi.json`, campo `soglia_disingaggio`, **tre fasce** (RDA-87): bassa **0,12** (`tiratori`, `piattaforma_trainata`, `macchina_tiro`); media **0,6** (`fanteria_leggera`, `cavalleria_ricognizione`, `cavalleria_manovrata`); alta **0,9** (`fanteria_pesante`, `macchina_assedio`). La chiave è ASSENTE per `guardia_elite` (reparto elitario, RDA-88): non è un valore, è l'assenza della soglia. Misura di separazione: `mischia_fasce` di `swift run StrumentoVerifica` dà mediana 1 / 4 / 8 scambi per bassa / media / alta.
+- `combattimento.json`, `coefficiente_logoramento_soglia` = **0,5** (RDA-90): coefficiente della formula unica `sogliaDisingaggioEffettiva`. Zero lo disattiva. PROVVISORIO.
+- `combattimento.json`, `soglia_al_secondo_contatto` = **falso** (RDA-91): interruttore dell'esame congiunto con la regola del secondo contatto. Falso conserva il comportamento distribuito. PROVVISORIO, in attesa della decisione del titolare fra conservare la regola, il solo coefficiente, o la sola regola; i numeri sono nella misura `secondo_contatto`.
+
+La versione dei valori è salita a **0.6.0** (RDA-91): incremento dovuto, non discrezionale, perché queste regole incidono su come una partita in corso si svolgerebbe.

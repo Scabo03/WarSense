@@ -23,7 +23,7 @@ final class MisuraMischiaTest: XCTestCase {
         return BanchiDiMisura(motore: MotoreBattaglia(valori: valori), banchi: parametri)
     }
 
-    private func soglieReali(_ valori: ValoriDiGioco) -> [IdentificatoreDati: Scalato] {
+    private func soglieReali(_ valori: ValoriDiGioco) -> [IdentificatoreDati: Scalato?] {
         valori.archetipi.mapValues { $0.sogliaDisingaggio }
     }
 
@@ -107,6 +107,14 @@ final class MisuraMischiaTest: XCTestCase {
         XCTAssertEqual(try valore("battaglie_senza_distruzione_in_mischia"), senzaDist)
         XCTAssertEqual(try valore("battaglie_con_distruzione_in_mischia"), conDist)
         XCTAssertEqual(senzaDist + conDist, provenienza.righe.count)
+        let cReingaggi = try colonnaProv("reingaggi")
+        let cDisingaggi = try colonnaProv("disingaggi")
+        XCTAssertEqual(try valore("reingaggi_totali"),
+                       provenienza.righe.reduce(0) { $0 + (Int($1[cReingaggi]) ?? 0) })
+        XCTAssertEqual(try valore("disingaggi_automatici_totali"),
+                       provenienza.righe.reduce(0) { $0 + (Int($1[cDisingaggi]) ?? 0) })
+        XCTAssertEqual(try valore("battaglie_con_almeno_un_reingaggio"),
+                       provenienza.righe.filter { (Int($0[cReingaggi]) ?? 0) > 0 }.count)
     }
 
     // MARK: - Terzo punto: la soglia disattivata è un artificio di misura che davvero disattiva
@@ -141,21 +149,23 @@ final class MisuraMischiaTest: XCTestCase {
     /// fabbrica sono minori di 1). Non tocca il Motore né i file di gioco.
     func test_incarico09_disingaggio_disattivato_porta_la_soglia_a_uno() throws {
         let fabbrica = try CaricatoreValori.carica(da: Contenuti.valoriDiFabbrica)
-        XCTAssertTrue(fabbrica.archetipi.values.allSatisfy { $0.sogliaDisingaggio < .uno },
-                      "di fabbrica ogni soglia è minore di uno: c'è qualcosa da disattivare")
+        XCTAssertTrue(fabbrica.archetipi.values.allSatisfy { ($0.sogliaDisingaggio.map { $0 < .uno }) ?? true },
+                      "di fabbrica ogni soglia presente è minore di uno: c'è qualcosa da disattivare")
 
         try ValoriVariati.con(base: Contenuti.valoriDiFabbrica,
                               inElenco: ValoriVariati.disingaggioDisattivato) { valoriV in
             XCTAssertEqual(valoriV.archetipi.count, fabbrica.archetipi.count,
                            "nessun archetipo perso o aggiunto dall'artificio")
+            // Anche l'elitario, che di fabbrica non ha soglia, riceve 1,0: a soglia
+            // disattivata ogni corsa prosegue fino alla distruzione.
             for (id, a) in valoriV.archetipi {
-                XCTAssertEqual(a.sogliaDisingaggio, .uno, "soglia non disattivata per \(id)")
+                XCTAssertEqual(try XCTUnwrap(a.sogliaDisingaggio), .uno, "soglia non disattivata per \(id)")
             }
         }
 
         // La fabbrica su disco non è stata toccata: riletta, ha ancora le soglie originali.
         let riletta = try CaricatoreValori.carica(da: Contenuti.valoriDiFabbrica)
-        XCTAssertTrue(riletta.archetipi.values.allSatisfy { $0.sogliaDisingaggio < .uno })
+        XCTAssertTrue(riletta.archetipi.values.allSatisfy { ($0.sogliaDisingaggio.map { $0 < .uno }) ?? true })
     }
 
     // MARK: - Nessun accoppiamento è un buco
@@ -251,5 +261,85 @@ final class MisuraMischiaTest: XCTestCase {
             XCTAssertGreaterThan(uno.scambiPerDistruggere, massimo.scambiPerDistruggere,
                                  "l'ammassamento non accorcia la distruzione: i modificatori non si sommano?")
         }
+    }
+
+    // MARK: - Incarico 10: le tre fasce restano separate
+
+    /// Il cancello della taratura sulle tre fasce (incarico 10, prima decisione): le fasce
+    /// devono essere distinguibili ascoltando, non solo diverse sulla carta. La mediana degli
+    /// scambi in cui la soglia scatta cresce di almeno due fra fasce adiacenti; se due fasce
+    /// si sfilano a scambi contigui la differenza non esiste per chi gioca, e la prova
+    /// rifiuta quello stato. Il reparto elitario non scatta mai.
+    func test_incarico10_le_fasce_di_disingaggio_restano_separate() throws {
+        let rapporto = try programma().esegui()
+        let fasce = try XCTUnwrap(rapporto.sezioni.first { $0.nome == "mischia_fasce" })
+        func col(_ n: String) throws -> Int { try XCTUnwrap(fasce.intestazione.firstIndex(of: n)) }
+        let cSoglia = try col("soglia_permille")
+        let cMediana = try col("scatta_mediana")
+        let cN = try col("accoppiamenti_che_scattano")
+        let conSoglia = fasce.righe.filter { $0[cSoglia] != "assente" }
+            .sorted { (Int($0[cSoglia]) ?? 0) < (Int($1[cSoglia]) ?? 0) }
+        XCTAssertGreaterThanOrEqual(conSoglia.count, 3, "almeno tre fasce distinte di soglia")
+        let mediane = try conSoglia.map { try XCTUnwrap(Int($0[cMediana])) }
+        for (prima, dopo) in zip(mediane, mediane.dropFirst()) {
+            XCTAssertGreaterThanOrEqual(dopo - prima, 2,
+                "fasce adiacenti separate di almeno due scambi: se no, non distinguibili ascoltando (incarico 10)")
+        }
+        let elite = try XCTUnwrap(fasce.righe.first { $0[cSoglia] == "assente" },
+                                  "manca la riga del reparto elitario a soglia assente")
+        XCTAssertEqual(Int(elite[cN]), 0,
+                       "il reparto elitario non raggiunge mai la propria soglia perché non ne ha")
+    }
+
+    // MARK: - Incarico 10: l'interruttore del secondo contatto cambia il comportamento
+
+    /// Il cancello dell'interruttore del secondo contatto (01 §9.8.3, incarico 10): con la
+    /// regola presente (falso) una coppia già staccata che riattacca non ha più soglia e si
+    /// combatte fino alla dispersione; con la regola tolta (vero) la soglia opera di nuovo e
+    /// il reparto può sfilarsi. Se l'interruttore non cambiasse nulla, non sarebbe un
+    /// interruttore: la prova lo vede rifiutare entrambi gli stati.
+    func test_incarico10_l_interruttore_del_secondo_contatto_cambia_il_disingaggio() throws {
+        func siSfilaAlSecondoContatto(regolaTolta: Bool) throws -> Bool {
+            let sost = [ValoriVariati.Sostituzione(file: "combattimento.json",
+                                                   chiave: "soglia_al_secondo_contatto", valore: regolaTolta)]
+            return try ValoriVariati.con(base: Contenuti.valoriDiFabbrica, sostituendo: sost) { valori in
+                let motore = MotoreBattaglia(valori: valori)
+                let scenario = ScenarioBattaglia(formato: "cento", caratteristica: "campo_aperto",
+                                                 primoOccupante: .giocatore, imboscata: false,
+                                                 deckGiocatore: [], deckAvversario: [])
+                var s = try FabbricaBattaglia.crea(scenario: scenario, valori: valori).0
+                let a = valori.archetipi["fanteria_leggera"]!
+                func poni(_ id: Int, _ p: Parte, _ cella: Cella) {
+                    s.sciami[IdSciame(id)] = Sciame(id: IdSciame(id), parte: p, archetipo: "fanteria_leggera",
+                                                    protezione: .antiSaturazione, lettera: id, atomiIniziali: 5,
+                                                    serbatoio: 5 * a.puntiVitaPerAtomo, munizioni: 0,
+                                                    posizione: cella, azioneSpesa: false, rinforzo: false)
+                    s.forzeImpegnate[p, default: 0] += 5 * a.puntiVitaPerAtomo
+                }
+                poni(1, .giocatore, Cella(riga: 6, colonna: 5))
+                poni(2, .avversario, Cella(riga: 5, colonna: 5))
+                s.prossimoIdSciame = 3
+                s.prossimaLettera = [.giocatore: 2, .avversario: 2]
+                // La coppia si è GIÀ staccata: questo è il secondo contatto (01 §9.8.3).
+                s.coppieStaccate.insert(Coppia(IdSciame(1), IdSciame(2)))
+                s = motore.applica(.ingaggia(sciame: IdSciame(1), bersaglio: IdSciame(2)),
+                                   parte: .giocatore, stato: s).0
+                var giri = 0
+                while s.sciami[IdSciame(1)] != nil && s.sciami[IdSciame(2)] != nil
+                        && s.esito == nil && giri < 40 {
+                    let (dopo, eventi) = motore.applica(.fineTurno, parte: s.parteDiTurno, stato: s)
+                    s = dopo
+                    if eventi.contains(where: { if case .disingaggio = $0 { return true }; return false }) {
+                        return true
+                    }
+                    giri += 1
+                }
+                return false
+            }
+        }
+        XCTAssertFalse(try siSfilaAlSecondoContatto(regolaTolta: false),
+                       "regola presente: al secondo contatto nessuna soglia, si combatte fino alla dispersione")
+        XCTAssertTrue(try siSfilaAlSecondoContatto(regolaTolta: true),
+                      "regola tolta: al secondo contatto la soglia opera di nuovo e il reparto si sfila")
     }
 }

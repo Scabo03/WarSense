@@ -136,6 +136,25 @@ final class PannelloAzioniTest: XCTestCase {
         try await attendi("congedo finale") { schermata.presentedViewController == nil }
     }
 
+    /// Il disingaggio su ordine (incarico 10, RDA-89) NON si offre per un reparto ordinario:
+    /// è riservato all'elitario a contatto e l'azione impossibile non si offre (02 §9.5). Il
+    /// deck di prova non contiene l'elitario, quindi il caso positivo è provato al Motore
+    /// (`DisingaggioElitarioTest`) e il pannello offre la voce solo se `motore.valida` è
+    /// valido; qui si accerta che per un reparto ordinario non compaia mai.
+    func test_incarico10_il_disingaggio_su_ordine_non_si_offre_a_reparto_ordinario() async throws {
+        let ambiente = try Ambiente()
+        let (schermata, _, cella) = try await schermataConTruppaPronta(ambiente)
+        XCTAssertTrue(schermata.attiva(cella))
+        try await attendi("apertura del pannello") {
+            schermata.presentedViewController is UIAlertController
+        }
+        let titoli = schermata.vociPannelloPerProva.map(\.titolo)
+        XCTAssertFalse(titoli.contains(ambiente.testi.frase("pannello.disingaggia").testo),
+                       "un reparto ordinario non ha il disingaggio su ordine (RDA-89)")
+        schermata.presentedViewController?.dismiss(animated: false)
+        try await attendi("congedo del pannello") { schermata.presentedViewController == nil }
+    }
+
     func test_02_9_2_1_anche_la_chiusura_del_pannello_non_congeda_la_schermata() async throws {
         let ambiente = try Ambiente()
         let (schermata, _, cella) = try await schermataConTruppaPronta(ambiente)

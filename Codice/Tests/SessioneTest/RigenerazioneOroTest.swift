@@ -34,6 +34,37 @@ final class RigenerazioneOroTest: XCTestCase {
                                                                        valori: valori)
         try await scrivi(sessione: secondo, cartellaSlot: cartellaSecondo,
                          fixture: RiproduzioneOroRiserveTest.cartellaFixture)
+
+        // Terzo: il salvataggio della build distribuita è un prefisso a battaglia in corso
+        // del primo oro (SalvataggioBuildDistribuitaTest). Si rigenera dallo stesso oro,
+        // scegliendo il prefisso più lungo entro la metà che lascia l'esito ancora nullo.
+        try await scriviPrefissoInCorso(golden: RiproduzioneOroTest.cartellaFixture,
+                                        fixture: SalvataggioBuildDistribuitaTest.cartellaFixture,
+                                        valori: valori)
+    }
+
+    private func scriviPrefissoInCorso(golden: URL, fixture: URL, valori: ValoriDiGioco) async throws {
+        let righe = try String(contentsOf: golden.appendingPathComponent("giornale.jsonl"), encoding: .utf8)
+            .split(separator: "\n").map(String.init)
+        var scelto: (n: Int, impronta: String)?
+        for n in stride(from: max(1, righe.count / 2), through: 1, by: -1) {
+            let slot = FileManager.default.temporaryDirectory
+                .appendingPathComponent("prefisso-\(UUID().uuidString)")
+            try FileManager.default.createDirectory(at: slot, withIntermediateDirectories: true)
+            defer { try? FileManager.default.removeItem(at: slot) }
+            try (righe.prefix(n).joined(separator: "\n") + "\n")
+                .write(to: slot.appendingPathComponent("giornale.jsonl"), atomically: true, encoding: .utf8)
+            guard let sessione = try? await SessioneBattaglia(riprendi: slot, valori: valori) else { continue }
+            if await sessione.stato.esito == nil {
+                scelto = (n, await sessione.impronta())
+                break
+            }
+        }
+        let (n, impronta) = try XCTUnwrap(scelto, "nessun prefisso lascia la battaglia in corso")
+        try (righe.prefix(n).joined(separator: "\n") + "\n")
+            .write(to: fixture.appendingPathComponent("giornale.jsonl"), atomically: true, encoding: .utf8)
+        try (impronta + "\n").write(to: fixture.appendingPathComponent("impronta.txt"),
+                                    atomically: true, encoding: .utf8)
     }
 
     private func scrivi(sessione: SessioneBattaglia, cartellaSlot: URL, fixture: URL) async throws {

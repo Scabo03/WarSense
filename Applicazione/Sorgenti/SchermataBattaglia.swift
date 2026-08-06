@@ -335,6 +335,16 @@ final class SchermataBattaglia: UIViewController {
                 self?.chiudiPannello(cella: sciame.posizione) { await self?.eseguiComando(ritiro) }
             })
         }
+        // Disingaggio su ordine, riservato al reparto elitario a contatto (incarico 10):
+        // la validità è decisa dal Motore, quindi l'azione compare solo quando è ammessa e
+        // per nessun altro reparto (00 §3.2: la schermata non calcola dati di gioco).
+        let disingaggio = ComandoBattaglia.disingaggiaSuOrdine(sciame: sciame.id)
+        if partita.motore.valida(disingaggio, parte: .giocatore, stato: stato).eValido {
+            voci.append(VocePannello(
+                titolo: testi.frase("pannello.disingaggia").testo, stile: .default) { [weak self] in
+                self?.chiudiPannello(cella: sciame.posizione) { await self?.eseguiComando(disingaggio) }
+            })
+        }
         voci.append(VocePannello(titolo: testi.frase("pannello.chiudi").testo,
                                  stile: .cancel) { [weak self] in
             self?.chiudiPannello(cella: sciame.posizione, poi: nil)

@@ -30,6 +30,7 @@ accaduto.
 
 | n. | data | materia | incarico | resoconto |
 |---|---|---|---|---|
+| 10 | 2026-08-06 | soglie di disingaggio su tre fasce, logoramento, reparto elitario che non si sfila | [incarico](10-2026-08-06-soglie-logoramento-disingaggio-incarico.md) | [resoconto](10-2026-08-06-soglie-logoramento-disingaggio-resoconto.md) |
 | 09 | 2026-08-06 | misura del corpo a corpo, senza alcuna correzione | [incarico](09-2026-08-06-misura-corpo-a-corpo-incarico.md) | [resoconto](09-2026-08-06-misura-corpo-a-corpo-resoconto.md) |
 | 08 | 2026-08-06 | deck a riquadri, griglia che sparisce in orizzontale, scorrimento anticipato | [incarico](08-2026-08-06-deck-riquadri-griglia-orizzontale-incarico.md) | [resoconto](08-2026-08-06-deck-riquadri-griglia-orizzontale-resoconto.md) |
 | 07 | 2026-08-06 | misura di S10, due chiarimenti sui numeri | [incarico](07-2026-08-06-misura-s10-e-chiarimenti-incarico.md) | [resoconto](07-2026-08-06-misura-s10-e-chiarimenti-resoconto.md) |

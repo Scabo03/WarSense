@@ -16,3 +16,4 @@
 {"numero":15,"voce":{"aperturaGiornata":{"giorno":2}}}
 {"numero":16,"voce":{"annullamentoCampagna":{"azzeramento":false,"giorno":2}}}
 {"numero":17,"voce":{"annullamentoCampagna":{"azzeramento":true,"giorno":3}}}
+{"numero":18,"voce":{"comando":{"comando":{"disingaggiaSuOrdine":{"sciame":{"numero":1}}},"parte":"giocatore"}}}

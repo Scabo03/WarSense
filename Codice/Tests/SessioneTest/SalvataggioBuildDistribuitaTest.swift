@@ -58,6 +58,36 @@ final class SalvataggioBuildDistribuitaTest: XCTestCase {
                        "il salvataggio si riapre ma su uno stato diverso: la partita che il tester ritrova non è quella che aveva lasciato")
     }
 
+    /// Un salvataggio di versione dei valori INCOMPATIBILE si DICHIARA, non fallisce in
+    /// silenzio (00 §15.2, incarico 10): cambiate le regole della mischia con la versione
+    /// 0.6.0, un salvataggio 0.5.0 verrebbe rigiocato con regole diverse e su uno stato
+    /// sbagliato; la ripresa lo rifiuta con `salvataggioIncompatibile` invece di aprirlo. La
+    /// fixture corrente (0.6.0) si riscrive con una versione fuori da `versioni_compatibili`.
+    func test_00_15_un_salvataggio_di_versione_incompatibile_si_dichiara() async throws {
+        let valori = try CaricatoreValori.carica(da: Contenuti.valoriDiFabbrica)
+        let slot = try slotConIlSalvataggio()
+        let url = slot.appendingPathComponent("giornale.jsonl")
+        let originale = try String(contentsOf: url, encoding: .utf8)
+        let versione = valori.versione
+        XCTAssertFalse(valori.versioniCompatibili.contains("0.5.0"),
+                       "0.5.0 deve essere fuori dalle versioni compatibili perché il caso esista")
+        // Riscrive la versione dei valori della fondazione con una incompatibile.
+        let alterato = originale.replacingOccurrences(of: "\"versione_valori\":\"\(versione)\"",
+                                                      with: "\"versione_valori\":\"0.5.0\"")
+        XCTAssertNotEqual(alterato, originale, "la fondazione deve portare la versione corrente \(versione)")
+        try alterato.write(to: url, atomically: true, encoding: .utf8)
+        do {
+            _ = try await SessioneBattaglia(riprendi: slot, valori: valori)
+            XCTFail("un salvataggio incompatibile non deve aprirsi in silenzio")
+        } catch let errore as SessioneBattaglia.ErroreSessione {
+            guard case .salvataggioIncompatibile(let attesa, let trovata) = errore else {
+                return XCTFail("errore diverso da salvataggioIncompatibile: \(errore)")
+            }
+            XCTAssertEqual(trovata, "0.5.0")
+            XCTAssertEqual(attesa, versione)
+        }
+    }
+
     /// La ripresa deve poter proseguire: riaperto il salvataggio, un comando
     /// ordinario si valida e si applica come prima dell'interruzione.
     func test_00_15_la_partita_riaperta_prosegue() async throws {

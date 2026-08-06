@@ -63,7 +63,7 @@ extension BanchiDiMisura {
     /// (l'insieme completo degli accoppiamenti: nessuno resta un buco). `soglieReali`
     /// sono le soglie del gioco distribuito, passate a parte perché a soglia disattivata
     /// i valori del Motore le portano a 1,0 e non le si potrebbe più leggere dallo stato.
-    public func corseMischia(soglieReali: [IdentificatoreDati: Scalato]) throws -> [CorsaMischia] {
+    public func corseMischia(soglieReali: [IdentificatoreDati: Scalato?]) throws -> [CorsaMischia] {
         var esito: [CorsaMischia] = []
         for protezione in TipoProtezione.allCases.sorted(by: { $0.rawValue < $1.rawValue }) {
             for attaccante in archetipiOrdinati {
@@ -79,7 +79,7 @@ extension BanchiDiMisura {
 
     private func corsaSingola(attaccante: IdentificatoreDati, bersaglio: IdentificatoreDati,
                               protezione: TipoProtezione,
-                              soglieReali: [IdentificatoreDati: Scalato]) throws -> CorsaMischia {
+                              soglieReali: [IdentificatoreDati: Scalato?]) throws -> CorsaMischia {
         let cellaAttaccante = intorno[0], cellaBersaglio = centro
         let costruito = try campo([
             Collocazione(parte: .giocatore, archetipo: attaccante,
@@ -92,8 +92,10 @@ extension BanchiDiMisura {
         let idA = ids[0], idB = ids[1]
         let ingA = stato.sciami[idA]!.serbatoio
         let ingB = stato.sciami[idB]!.serbatoio
-        let sogliaA = soglieReali[attaccante] ?? .uno
-        let sogliaB = soglieReali[bersaglio] ?? .uno
+        // Soglia reale del gioco distribuito; nil = reparto elitario, che non raggiunge
+        // mai la propria soglia perché non ne ha (incarico 10).
+        let sogliaA: Scalato? = soglieReali[attaccante] ?? nil
+        let sogliaB: Scalato? = soglieReali[bersaglio] ?? nil
 
         // Primo scambio: l'ingaggio si risolve all'istante (01 §9.7.1).
         stato = motore.applica(.ingaggia(sciame: idA, bersaglio: idB), parte: .giocatore, stato: stato).0
@@ -109,10 +111,12 @@ extension BanchiDiMisura {
         func osservaSoglie() {
             let serbB = stato.sciami[idB]?.serbatoio ?? 0
             let serbA = stato.sciami[idA]?.serbatoio ?? 0
-            if turnoSogliaB == 0, perditePermille(ingresso: ingB, serbatoio: serbB) >= sogliaB.grezzo {
+            if turnoSogliaB == 0, let sB = sogliaB,
+               perditePermille(ingresso: ingB, serbatoio: serbB) >= sB.grezzo {
                 turnoSogliaB = scambi
             }
-            if turnoSogliaA == 0, perditePermille(ingresso: ingA, serbatoio: serbA) >= sogliaA.grezzo {
+            if turnoSogliaA == 0, let sA = sogliaA,
+               perditePermille(ingresso: ingA, serbatoio: serbA) >= sA.grezzo {
                 turnoSogliaA = scambi
             }
         }
@@ -268,6 +272,11 @@ public struct ProvenienzaBattaglia: Sendable {
         public let perditeMischia: [Parte: Int64]
         public let distruzioniInMischia: Int
         public let distruzioniInTiro: Int
+        /// Reingaggi: contatti formati su una coppia già staccata (01 §9.8.3). Misura
+        /// quanto la regola del secondo contatto è esercitata (incarico 10).
+        public let reingaggi: Int
+        /// Disingaggi automatici avvenuti nella battaglia (eventi `.disingaggio`).
+        public let disingaggi: Int
         public let concluso: Bool
         public let modo: String
     }
@@ -276,12 +285,16 @@ public struct ProvenienzaBattaglia: Sendable {
                         tattici: [Parte: TatticoBattaglia], giriMassimi: Int) -> Esito {
         var stato = iniziale
         var tiro: [Parte: Int64] = [:], mischia: [Parte: Int64] = [:]
-        var distMischia = 0, distTiro = 0
+        var distMischia = 0, distTiro = 0, reingaggi = 0, disingaggi = 0
         var comandi = 0
         let tetto = giriMassimi * 200
         while stato.esito == nil && stato.giro <= giriMassimi && comandi < tetto {
             let parte = stato.parteDiTurno
             let comando = tattici[parte]!.prossimoComando(stato: stato)
+            // Reingaggio: la coppia che sta per ingaggiare si era già staccata (01 §9.8.3).
+            if case .ingaggia(let a, let b) = comando, stato.coppieStaccate.contains(Coppia(a, b)) {
+                reingaggi += 1
+            }
             let prima = stato.perditeSubite
             let (dopo, eventi) = motore.applica(comando, parte: parte, stato: stato)
             for p in Parte.allCases {
@@ -294,6 +307,7 @@ public struct ProvenienzaBattaglia: Sendable {
                 }
             }
             for e in eventi {
+                if case .disingaggio = e { disingaggi += 1 }
                 guard case .sciameDisfatto = e else { continue }
                 switch comando {
                 case .tira: distTiro += 1
@@ -306,6 +320,7 @@ public struct ProvenienzaBattaglia: Sendable {
         }
         return Esito(perditeTiro: tiro, perditeMischia: mischia,
                      distruzioniInMischia: distMischia, distruzioniInTiro: distTiro,
+                     reingaggi: reingaggi, disingaggi: disingaggi,
                      concluso: stato.esito != nil, modo: stato.esito?.modo.rawValue ?? "non_concluso")
     }
 }
