@@ -566,7 +566,10 @@ public struct ProgrammaDiVerifica: Sendable {
     /// copia i numeri e che una prova pareggia con le righe di dettaglio (RDA-71).
     func sezioniMischia(valori: ValoriDiGioco, parametriBanchi: ParametriBanchi,
                         scenari: [ScenarioDiVerifica]) throws -> [Rapporto.Sezione] {
-        let soglieReali = valori.archetipi.mapValues { $0.sogliaDisingaggio }
+        // Le soglie osservate dalla misura sono quelle della fase del banco (antica, la
+        // fase che la fabbrica assume): l'élite di quella fase non ha soglia (incarico 11).
+        let faseDelBanco: Fase = .antica
+        let soglieReali = valori.archetipi.mapValues { $0.eliteFase == faseDelBanco ? nil : $0.sogliaDisingaggio }
 
         // Fotografia: soglia attiva.
         let banchiAttivi = BanchiDiMisura(motore: MotoreBattaglia(valori: valori), banchi: parametriBanchi)
@@ -663,71 +666,12 @@ public struct ProgrammaDiVerifica: Sendable {
         let sezioneFasce = sezioneFasceDiDisingaggio(accoppiamenti: accoppiamenti,
                                                      soglieReali: soglieReali)
 
-        // Esame congiunto (incarico 10): la regola del secondo contatto contro il
-        // coefficiente di logoramento. Le battaglie complete sotto i due regimi.
-        let sezioneSecondo = try sezioneSecondoContatto(scenari: scenari)
-
         let riepilogo = riepilogoMischia(fotografia: fotografia, accoppiamenti: accoppiamenti,
                                          accerchiata: accerchiata, provenienze: provenienze,
                                          soglieReali: soglieReali)
 
         return [sezioneCrux, sezioneFotografia, sezioneFasce, sezioneAccerchiata,
-                sezioneProvenienza, sezioneSecondo, riepilogo]
-    }
-
-    /// L'esame congiunto della regola del secondo contatto (01 §9.8.3) e del coefficiente
-    /// di logoramento (incarico 10). Le trentadue sessioni complete di battaglia, sotto i
-    /// due regimi: `regola_presente` (soglia_al_secondo_contatto = falso, il comportamento
-    /// distribuito) e `regola_tolta` (= vero, la soglia opera anche al secondo contatto). In
-    /// entrambi il coefficiente di logoramento è quello dei dati (attivo). Non decide fra le
-    /// due vie: ne stampa i numeri, che è ciò che l'incarico chiede.
-    func sezioneSecondoContatto(scenari: [ScenarioDiVerifica]) throws -> Rapporto.Sezione {
-        func misura(regolaTolta: Bool) throws -> (n: Int, reingaggi: Int, disingaggi: Int,
-                                                  distrMischia: Int, concluse: Int) {
-            let sost = [ValoriVariati.Sostituzione(file: "combattimento.json",
-                                                   chiave: "soglia_al_secondo_contatto",
-                                                   valore: regolaTolta)]
-            return try ValoriVariati.con(base: cartellaValori, sostituendo: sost) { valoriV in
-                let motore = MotoreBattaglia(valori: valoriV)
-                let prov = ProvenienzaBattaglia(motore: motore)
-                var reingaggi = 0, disingaggi = 0, distr = 0, concluse = 0, n = 0
-                for composizione in composizioniDiMazzo(scenari: scenari) {
-                    for primo in [Parte.giocatore, .avversario] {
-                        for ufficiale in valoriV.ufficiali.keys.sorted() {
-                            for imboscata in [false, true] {
-                                let sb = ScenarioBattaglia(
-                                    formato: scenari[0].formato, caratteristica: scenari[0].caratteristica,
-                                    primoOccupante: primo, imboscata: imboscata,
-                                    deckGiocatore: composizione.giocatore,
-                                    deckAvversario: composizione.avversario, ufficialeAvversario: ufficiale)
-                                let stato = try FabbricaBattaglia.crea(scenario: sb, valori: valoriV).0
-                                let u = valoriV.ufficiali[ufficiale]!
-                                let tattici: [Parte: TatticoBattaglia] = [
-                                    .giocatore: TatticoBattaglia(motore: motore, ufficiale: u, parte: .giocatore),
-                                    .avversario: TatticoBattaglia(motore: motore, ufficiale: u, parte: .avversario),
-                                ]
-                                let e = prov.replica(stato: stato, tattici: tattici,
-                                                     giriMassimi: scenari[0].giriMassimi)
-                                reingaggi += e.reingaggi; disingaggi += e.disingaggi
-                                distr += e.distruzioniInMischia; concluse += e.concluso ? 1 : 0; n += 1
-                            }
-                        }
-                    }
-                }
-                return (n, reingaggi, disingaggi, distr, concluse)
-            }
-        }
-        var righe: [[String]] = []
-        for (nome, tolta) in [("regola_presente", false), ("regola_tolta", true)] {
-            let m = try misura(regolaTolta: tolta)
-            righe.append([nome, String(m.n), String(m.reingaggi), String(m.disingaggi),
-                          String(m.distrMischia), String(m.concluse)])
-        }
-        return Rapporto.Sezione(
-            nome: "secondo_contatto",
-            intestazione: ["regime", "battaglie", "reingaggi", "disingaggi",
-                           "distruzioni_in_mischia", "concluse"],
-            righe: righe)
+                sezioneProvenienza, riepilogo]
     }
 
     /// Per ciascun valore di soglia presente nei dati — ciascuna FASCIA — dopo quanti

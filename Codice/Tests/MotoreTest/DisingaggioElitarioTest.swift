@@ -18,10 +18,11 @@ final class DisingaggioElitarioTest: XCTestCase {
     }
 
     /// Costruisce uno stato con reparti collocati a mano, sul formato quindici.
-    private func stato(_ sciami: [(IdSciame, Parte, IdentificatoreDati, Cella, Int64)]) throws -> StatoBattaglia {
+    private func stato(_ sciami: [(IdSciame, Parte, IdentificatoreDati, Cella, Int64)],
+                       fase: Fase = .antica) throws -> StatoBattaglia {
         let scenario = ScenarioBattaglia(formato: "quindici", caratteristica: "campo_aperto",
                                          primoOccupante: .giocatore, imboscata: false,
-                                         deckGiocatore: [], deckAvversario: [])
+                                         deckGiocatore: [], deckAvversario: [], fase: fase)
         var s = try FabbricaBattaglia.crea(scenario: scenario, valori: valori).0
         for (id, parte, archetipo, cella, atomi) in sciami {
             let a = valori.archetipi[archetipo]!
@@ -44,16 +45,49 @@ final class DisingaggioElitarioTest: XCTestCase {
         return eventi
     }
 
-    // MARK: - Seconda decisione: il reparto elitario non si sfila mai (soglia assente)
+    // MARK: - Incarico 11: l'élite è la coppia archetipo-fase indicata dalla ricerca storica
 
-    /// Di fabbrica il solo `guardia_elite` ha soglia assente, e nessun altro: l'assenza è
-    /// leggibile come tale (nil), non confondibile con una soglia molto alta (incarico 10).
-    func test_incarico10_solo_l_elitario_ha_soglia_assente() {
-        XCTAssertNil(valori.archetipi["guardia_elite"]!.sogliaDisingaggio,
-                     "il reparto elitario non ha soglia: è l'assenza, non un valore estremo")
-        for (id, a) in valori.archetipi where id != "guardia_elite" {
-            XCTAssertNotNil(a.sogliaDisingaggio, "solo l'elitario ha soglia assente, non \(id)")
+    /// L'élite di ciascuna fase è l'archetipo storicamente superiore, e ce n'è al più uno per
+    /// fase (incarico 11): antica → `guardia_elite` (guardia d'élite, Immortali/Spartiati,
+    /// 01 §3.3); arcaica → `piattaforma_trainata` (il carro dei maryannu). Nessun altro
+    /// archetipo è élite. La condizione non è più l'assenza della soglia ma `eliteFase`.
+    func test_incarico11_l_elite_e_una_coppia_archetipo_fase_unica() {
+        XCTAssertEqual(valori.archetipi["guardia_elite"]!.eliteFase, .antica)
+        XCTAssertEqual(valori.archetipi["piattaforma_trainata"]!.eliteFase, .arcaica)
+        for (id, a) in valori.archetipi where id != "guardia_elite" && id != "piattaforma_trainata" {
+            XCTAssertNil(a.eliteFase, "\(id) non è élite di alcuna fase")
         }
+        for fase in Fase.allCases {
+            XCTAssertLessThanOrEqual(valori.archetipi.values.filter { $0.eliteFase == fase }.count, 1,
+                                     "al più un archetipo élite per fase \(fase.rawValue)")
+        }
+    }
+
+    /// Il cancello della dipendenza dalla fase (incarico 11): `piattaforma_trainata` NON si
+    /// sfila mai in ARCAICA (è l'élite: il carro dei maryannu), ma si sfila in ANTICA, dove è
+    /// materiale datato con la soglia della propria fascia. Se la fase non contasse, il
+    /// comportamento sarebbe identico nelle due: la prova rifiuta quello stato.
+    func test_incarico11_l_elite_dipende_dalla_fase() throws {
+        func siSfila(fase: Fase) throws -> Bool {
+            var s = try stato([
+                (IdSciame(1), .giocatore, "fanteria_pesante", Cella(riga: 2, colonna: 2), 4),
+                (IdSciame(2), .avversario, "piattaforma_trainata", Cella(riga: 3, colonna: 2), 3),
+            ], fase: fase)
+            esegui(.ingaggia(sciame: IdSciame(1), bersaglio: IdSciame(2)), .giocatore, &s)
+            var giri = 0
+            while s.sciami[IdSciame(2)] != nil && s.esito == nil && giri < 40 {
+                let eventi = esegui(.fineTurno, s.parteDiTurno, &s)
+                if eventi.contains(where: { if case .disingaggio(let chi, _, _) = $0 { return chi == IdSciame(2) }; return false }) {
+                    return true
+                }
+                giri += 1
+            }
+            return false
+        }
+        XCTAssertFalse(try siSfila(fase: .arcaica),
+                       "in arcaica la piattaforma è l'élite (il carro): non si sfila mai")
+        XCTAssertTrue(try siSfila(fase: .antica),
+                      "in antica la piattaforma è datata e si sfila alla propria soglia di fascia")
     }
 
     /// L'elitario non si disingaggia MAI da sé, per quante perdite subisca (01 §9.8, seconda

@@ -71,6 +71,7 @@ final class CaricamentoTest: XCTestCase {
                       "errore.dati.identificatore_duplicato", "errore.dati.elenco_vuoto",
                       "errore.dati.valore_non_positivo",
                       "errore.dati.tiro_incoerente", "errore.dati.soglia_fuori_intervallo",
+                      "errore.dati.elite_di_fase_duplicata",
                       "errore.dati.protezione_mancante", "errore.dati.formato_incoerente",
                       "errore.dati.minimi_sotto_uno", "errore.dati.efficacia_minima_nulla",
                       "errore.testi.manifest_mancante", "errore.testi.manifest_malformato",

@@ -51,6 +51,7 @@ extension StatoBattaglia {
         c.intero(Int64(ostacoli.count))
         for cella in ostacoli.sorted() { cella.codifica(in: &c) }
         c.testo(primoOccupante.rawValue)
+        c.testo(fase.rawValue) // fase storica (incarico 11): distingue stati altrimenti identici
         c.intero(Int64(sciami.count))
         for sciame in sciamiOrdinati { sciame.codifica(in: &c) }
         for parte in Parte.allCases {

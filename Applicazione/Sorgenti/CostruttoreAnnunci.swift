@@ -89,6 +89,13 @@ struct CostruttoreAnnunci {
                      ? testi.frase("cella.occupante_proprio", nome, lettera(sciame)).testo
                      : testi.frase("cella.occupante_avversario", nome, lettera(sciame)).testo)
         guard verbosita != .sintetico else { return parti }
+        // Reparto élite della fase corrente (incarico 11, terza decisione): la ragione è
+        // l'addestramento superiore, non la meccanica; l'annuncio rende riconoscibile la
+        // condizione — resta ai propri ordini anche in mischia — prima di ingaggiare, per
+        // il proprio reparto come per l'avversario.
+        if valori.archetipi[sciame.archetipo]!.eliteFase == stato.fase {
+            parti.append(testi.frase("battaglia.reparto_elite").testo)
+        }
         // Anomalie nell'ordine fisso: controllo, munizioni (02 §3.8.1, §8.7.1).
         if stato.impegnato(sciame.id) {
             parti.append(testi.termine("controllo.impegnato").testo)

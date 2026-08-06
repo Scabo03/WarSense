@@ -12,6 +12,13 @@ public enum Parte: String, Codable, Hashable, Sendable, CaseIterable {
     public var avversaria: Parte { self == .giocatore ? .avversario : .giocatore }
 }
 
+/// Le fasi storiche della prima versione (01 §2.3, §2.4). La transizione fra le due è
+/// materia di campagna; una battaglia si combatte in una fase, che ne determina quale
+/// reparto sia l'élite senza soglia di disingaggio (01 §3.2.3, incarico 11).
+public enum Fase: String, Codable, Hashable, Sendable, CaseIterable {
+    case arcaica, antica
+}
+
 /// I due tipi di offesa da tiro (01 §3.3.1) e le offese da mischia.
 public enum TipoOffesa: String, Codable, Hashable, Sendable, CaseIterable, CodingKeyRepresentable {
     case proiettileLeggero = "proiettile_leggero"
@@ -64,10 +71,17 @@ public struct DefinizioneArchetipo: Codable, Hashable, Sendable {
     /// Coefficiente di penalità di avanzamento (01 §8.6).
     public let penalitaAvanzamento: Scalato
     /// Soglia di disingaggio: proporzione delle perdite sulla consistenza d'ingresso (01 §9.8).
-    /// ASSENTE (nil) per il reparto elitario, che non si sfila mai in alcuna condizione
-    /// (incarico 10, seconda decisione): l'assenza della soglia, non una soglia molto alta.
-    /// La chiave `soglia_disingaggio` è quindi facoltativa nei dati; assente significa elitario.
+    /// È la soglia della fascia dell'archetipo (incarico 10). Il reparto élite della fase
+    /// corrente NON usa la soglia — non si sfila mai — ma la porta comunque come ripiego per
+    /// le fasi in cui non è élite (incarico 11): l'élite si determina da `eliteFase`, non
+    /// dall'assenza della soglia. Facoltativa per compatibilità con i dati anteriori.
     public let sogliaDisingaggio: Scalato?
+    /// La fase storica in cui questo archetipo è l'ÉLITE, cioè il reparto superiore per
+    /// addestramento e disciplina che non si sfila mai e resta controllabile su ordine
+    /// (01 §3.2.3, §3.3; incarico 11). Assente per gli archetipi che non sono élite in
+    /// alcuna fase. La condizione di soglia assente vale quando `eliteFase` coincide con la
+    /// fase della battaglia: è la coppia archetipo-fase, senza tabelle a doppia entrata.
+    public let eliteFase: Fase?
     /// Sensibilità alla stanchezza (01 §5.7).
     public let sensibilitaStanchezza: Scalato
     /// Scariche di munizioni disponibili (01 §3.4.3); zero per chi non tira.
@@ -88,6 +102,7 @@ public struct DefinizioneArchetipo: Codable, Hashable, Sendable {
         case volumePerAtomo = "volume_per_atomo"
         case penalitaAvanzamento = "penalita_avanzamento"
         case sogliaDisingaggio = "soglia_disingaggio"
+        case eliteFase = "elite_fase"
         case sensibilitaStanchezza = "sensibilita_stanchezza"
         case dotazioneMunizioni = "dotazione_munizioni"
         case offesaMischia = "offesa_mischia"
@@ -194,12 +209,6 @@ public struct ParametriCombattimento: Codable, Hashable, Sendable {
     /// uno fresco regge la soglia piena. Zero = coefficiente inattivo (soglia sempre piena).
     /// Formula unica nel Motore (`sogliaDisingaggioEffettiva`), coefficiente qui. PROVVISORIO.
     public let coefficienteLogoramentoSoglia: Scalato
-    /// Se vero, la soglia di disingaggio opera anche al secondo contatto di una coppia
-    /// già staccata; se falso vale la regola del secondo contatto (01 §9.8.3), per cui al
-    /// ritorno a contatto non opera più alcuna soglia. Falso conserva il comportamento
-    /// distribuito. È l'interruttore con cui l'esame congiunto dell'incarico 10 misura
-    /// le due possibilità. PROVVISORIO, in attesa della decisione del titolare.
-    public let sogliaAlSecondoContatto: Bool
     enum CodingKeys: String, CodingKey {
         case efficaciaMinima = "efficacia_minima"
         case sogliaPocoEfficace = "soglia_poco_efficace"
@@ -213,7 +222,6 @@ public struct ParametriCombattimento: Codable, Hashable, Sendable {
         case concorrentiMassimi = "concorrenti_massimi"
         case resaControSecondoBersaglio = "resa_contro_secondo_bersaglio"
         case coefficienteLogoramentoSoglia = "coefficiente_logoramento_soglia"
-        case sogliaAlSecondoContatto = "soglia_al_secondo_contatto"
     }
 }
 

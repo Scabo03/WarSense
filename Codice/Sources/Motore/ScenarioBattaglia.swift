@@ -27,16 +27,21 @@ public struct ScenarioBattaglia: Hashable, Codable, Sendable {
     /// L'ufficiale che comanda la parte avversaria (01 §14.3). Facoltativo per
     /// compatibilità con i salvataggi anteriori: assente, vale il primo dei dati.
     public let ufficialeAvversario: IdentificatoreDati?
+    /// La fase storica in cui la battaglia si combatte (01 §2.3, §2.4; incarico 11):
+    /// determina quale archetipo sia l'élite senza soglia. Facoltativa per compatibilità
+    /// con i salvataggi anteriori: assente, la fabbrica assume la fase antica.
+    public let fase: Fase?
 
     public init(formato: IdentificatoreDati, caratteristica: IdentificatoreDati,
                 ostacoli: [Cella] = [], primoOccupante: Parte, imboscata: Bool,
                 deckGiocatore: [ElementoScenario], deckAvversario: [ElementoScenario],
-                ufficialeAvversario: IdentificatoreDati? = nil) {
+                ufficialeAvversario: IdentificatoreDati? = nil, fase: Fase? = nil) {
         self.formato = formato; self.caratteristica = caratteristica
         self.ostacoli = ostacoli; self.primoOccupante = primoOccupante
         self.imboscata = imboscata
         self.deckGiocatore = deckGiocatore; self.deckAvversario = deckAvversario
         self.ufficialeAvversario = ufficialeAvversario
+        self.fase = fase
     }
 }
 
@@ -82,6 +87,7 @@ public enum FabbricaBattaglia {
             caratteristica: scenario.caratteristica,
             ostacoli: Set(scenario.ostacoli),
             primoOccupante: scenario.primoOccupante,
+            fase: scenario.fase ?? .antica, // fase assente: la fabbrica assume l'antica (incarico 11)
             sciami: [:],
             deck: [.giocatore: deckG, .avversario: deckA],
             prossimoIdSciame: 1,
