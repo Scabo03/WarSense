@@ -36,6 +36,7 @@ come tale. Dalla 14 in poi la riga è scritta dallo script al momento stesso.
 | 15 | 2026-08-06 08:58:48 | 1.1.0 | `2b8e87a` | scritta dallo script al caricamento |
 | 16 | 2026-08-06 13:46:47 | 1.1.0 | `020d10e` | scritta dallo script al caricamento |
 | 17 | 2026-08-06 19:27:36 | 1.1.0 | `bcf34e4` | scritta dallo script al caricamento |
+| 18 | 2026-08-06 21:15:54 | 1.1.0 | `cf610ae` | scritta dallo script al caricamento |
 
 ## La build 13, accertata
 

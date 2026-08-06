@@ -52,7 +52,7 @@ Valutazione esplicita (richiesta): la versione dei valori VA incrementata, da 0.
 
 Collaudo del pacchetto verde: **250 prove**, 1 saltata, 0 fallimenti (`swift test`). Prove d'interfaccia sul simulatore incluse (`scripts/collaudo-completo.sh`).
 
-<!-- SEZIONE CARICAMENTO DA COMPLETARE -->
+Build **18** caricata su TestFlight con `scripts/carica-testflight.sh` (exit 0; UPLOAD SUCCEEDED). Cancelli preventivi superati: versione di marketing 1.1.0 non toccata (pari alla più alta, si procede); note (2449/4000 caratteri, vocabolario 5 nomi esposti, cifre a posto, freschezza); registro build concorde; corsa separata delle sessioni complete rieseguita sul codice nuovo e fresca («successo», commit del ramo principale); collaudo completo verde. Verifica per interfaccia di programmazione (`scripts/asc_api.py`, sola lettura), presa dopo il caricamento: `GET /v1/builds` → build **18** stato **VALID**, treno **1.1.0** (il più alto); `scripts/controlla-build.py` → «registro e App Store Connect concordano: 18 build, la più alta è la 18»; gruppo di test **WarLab** con accesso automatico a tutte le build (`hasAccessToAllBuilds`, nessuna assegnazione manuale). Le due note rigenerate: `note-di-rilascio.txt` (allegata alla build 18) e `nota-per-il-titolare-mischia.md`, che dichiara quale reparto è l'élite di ciascuna fase (antica: guardia scelta; arcaica: piattaforma trainata) e che cosa provare. Versione di marketing, certificati e profili non toccati; nessun `-allowProvisioningUpdates`.
 
 ## Registrazioni
 
