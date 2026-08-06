@@ -24,6 +24,13 @@ final class SchermataBattaglia: UIViewController {
     private let rigaDeck = UIStackView()
     private var tessereDeck: [TesseraDeck] = []
     private let colonnaDeck = UIStackView()
+    /// Area scorrevole propria del deck: quando lo spazio verticale manca (orizzontale,
+    /// caratteri grandi) la colonna del deck scorre invece di comprimere la griglia, che
+    /// conserva un minimo richiesto. Il deck non determina più l'altezza della griglia.
+    private let scorrimentoColonna = UIScrollView()
+    /// Altezza minima RICHIESTA della griglia: sufficiente a una riga intera di celle
+    /// più i margini (00 §10.4, principio 1). È il numero che impedisce il collasso.
+    private static let altezzaMinimaGriglia: CGFloat = 120
     private let pulsanteAnnulla = UIButton(type: .system)
     private let pulsanteAzzera = UIButton(type: .system)
     private let pulsanteResa = UIButton(type: .system)
@@ -67,7 +74,10 @@ final class SchermataBattaglia: UIViewController {
         colonnaDeck.axis = .vertical
         colonnaDeck.spacing = 6
         colonnaDeck.translatesAutoresizingMaskIntoConstraints = false
-        view.addSubview(colonnaDeck)
+        scorrimentoColonna.translatesAutoresizingMaskIntoConstraints = false
+        scorrimentoColonna.showsVerticalScrollIndicator = false
+        view.addSubview(scorrimentoColonna)
+        scorrimentoColonna.addSubview(colonnaDeck)
         colonnaDeck.addArrangedSubview(intestazioneDeck)
 
         // Le tessere del deck in una riga scorrevole: riquadri di un insieme di
@@ -75,26 +85,19 @@ final class SchermataBattaglia: UIViewController {
         scorrimentoDeck.showsHorizontalScrollIndicator = false
         rigaDeck.axis = .horizontal
         rigaDeck.spacing = 8
-        // Poche tessere riempiono la riga e restano tutte in vista; molte tessere
-        // (i rinforzi futuri) faranno scorrere la riga, mai comprimere (00 §1.2).
-        rigaDeck.distribution = .fillEqually
+        rigaDeck.alignment = .center
+        // Le tessere hanno dimensione fissa e compatta (TesseraDeck): la riga non le
+        // stira più a riempire la larghezza (modifica di RDA-50 per decisione del
+        // titolare). Poche tessere stanno a sinistra; molte (i rinforzi futuri) fanno
+        // scorrere la riga lateralmente, mai comprimere (00 §1.2).
         rigaDeck.translatesAutoresizingMaskIntoConstraints = false
         scorrimentoDeck.addSubview(rigaDeck)
         colonnaDeck.addArrangedSubview(scorrimentoDeck)
-        // Il contenuto di uno scorrevole ha larghezza libera: senza il pareggio
-        // con la finestra le etichette non andrebbero mai a capo e le tessere
-        // uscirebbero sempre di vista. Il pareggio cede solo sotto il minimo.
-        let pareggioLarghezza = rigaDeck.widthAnchor.constraint(
-            equalTo: scorrimentoDeck.frameLayoutGuide.widthAnchor)
-        pareggioLarghezza.priority = UILayoutPriority(800)
         NSLayoutConstraint.activate([
             rigaDeck.topAnchor.constraint(equalTo: scorrimentoDeck.contentLayoutGuide.topAnchor),
             rigaDeck.bottomAnchor.constraint(equalTo: scorrimentoDeck.contentLayoutGuide.bottomAnchor),
             rigaDeck.leadingAnchor.constraint(equalTo: scorrimentoDeck.contentLayoutGuide.leadingAnchor),
             rigaDeck.trailingAnchor.constraint(equalTo: scorrimentoDeck.contentLayoutGuide.trailingAnchor),
-            rigaDeck.widthAnchor.constraint(
-                greaterThanOrEqualTo: scorrimentoDeck.frameLayoutGuide.widthAnchor),
-            pareggioLarghezza,
             scorrimentoDeck.frameLayoutGuide.heightAnchor
                 .constraint(equalTo: scorrimentoDeck.contentLayoutGuide.heightAnchor),
         ])
@@ -111,9 +114,10 @@ final class SchermataBattaglia: UIViewController {
             pulsante.heightAnchor.constraint(greaterThanOrEqualToConstant: 44).isActive = true
         }
 
-        // L'altezza della griglia è desiderata, non imposta: quando lo spazio manca
-        // la griglia — che resta scorrevole e ingrandibile (00 §10.4) — cede alla
-        // colonna, che non deve mai comprimersi né uscire dallo schermo (00 §1.2).
+        // L'altezza della griglia è desiderata al 55% a bassa priorità, ma NON scende
+        // mai sotto il minimo richiesto: quando lo spazio manca (orizzontale, caratteri
+        // grandi) è la COLONNA DEL DECK a scorrere, non la griglia a collassare. Prima
+        // il deck ne determinava l'altezza e la griglia spariva (S10, principio 1).
         let altezzaGriglia = scorrimento.heightAnchor.constraint(
             equalTo: view.heightAnchor, multiplier: 0.55)
         altezzaGriglia.priority = .defaultLow
@@ -122,11 +126,17 @@ final class SchermataBattaglia: UIViewController {
             scorrimento.leadingAnchor.constraint(equalTo: view.leadingAnchor),
             scorrimento.trailingAnchor.constraint(equalTo: view.trailingAnchor),
             altezzaGriglia,
-            colonnaDeck.topAnchor.constraint(equalTo: scorrimento.bottomAnchor, constant: 8),
-            colonnaDeck.leadingAnchor.constraint(equalTo: view.leadingAnchor, constant: 16),
-            colonnaDeck.trailingAnchor.constraint(equalTo: view.trailingAnchor, constant: -16),
-            colonnaDeck.bottomAnchor.constraint(lessThanOrEqualTo: view.safeAreaLayoutGuide.bottomAnchor,
-                                                constant: -24),
+            scorrimento.heightAnchor.constraint(greaterThanOrEqualToConstant: Self.altezzaMinimaGriglia),
+            scorrimentoColonna.topAnchor.constraint(equalTo: scorrimento.bottomAnchor, constant: 8),
+            scorrimentoColonna.leadingAnchor.constraint(equalTo: view.leadingAnchor, constant: 16),
+            scorrimentoColonna.trailingAnchor.constraint(equalTo: view.trailingAnchor, constant: -16),
+            scorrimentoColonna.bottomAnchor.constraint(
+                equalTo: view.safeAreaLayoutGuide.bottomAnchor, constant: -8),
+            colonnaDeck.topAnchor.constraint(equalTo: scorrimentoColonna.contentLayoutGuide.topAnchor),
+            colonnaDeck.bottomAnchor.constraint(equalTo: scorrimentoColonna.contentLayoutGuide.bottomAnchor),
+            colonnaDeck.leadingAnchor.constraint(equalTo: scorrimentoColonna.contentLayoutGuide.leadingAnchor),
+            colonnaDeck.trailingAnchor.constraint(equalTo: scorrimentoColonna.contentLayoutGuide.trailingAnchor),
+            colonnaDeck.widthAnchor.constraint(equalTo: scorrimentoColonna.frameLayoutGuide.widthAnchor),
         ])
     }
 
@@ -211,8 +221,9 @@ final class SchermataBattaglia: UIViewController {
             let esemplari = stato.deck[.giocatore]?[tessera.tag].esemplari ?? 0
             tessera.aggiorna(nome: costruttore.nomeElementoDeck(indice: tessera.tag),
                              valore: costruttore.valoreElementoDeck(indice: tessera.tag),
-                             valoreDiRiserva: costruttore.valoreElementoDeck(
-                                indice: tessera.tag, comeSelezionato: true),
+                             sigla: costruttore.siglaElementoDeck(indice: tessera.tag),
+                             atomi: costruttore.atomiElementoDeck(indice: tessera.tag),
+                             volume: costruttore.volumeElementoDeck(indice: tessera.tag),
                              selezionata: stato.selezione[.giocatore] == tessera.tag,
                              attiva: esemplari > 0 && stato.esito == nil)
         }

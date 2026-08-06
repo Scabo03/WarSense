@@ -1,97 +1,102 @@
 import UIKit
 
-/// Un elemento del deck come riquadro a sé stante (02 §8.1, §8.2): dichiara chi è,
-/// quanti esemplari restano e che cosa costa. Si distingue dai comandi globali
-/// tanto alla vista (riquadro di un insieme di forze, non pulsante di sistema)
-/// quanto all'ascolto (nome, poi valore in ordine fisso; l'indicazione d'uso sta
-/// nel suggerimento). L'attivazione seleziona, secondo lo schema
-/// seleziona-naviga-conferma (00 §8.2).
+/// Un elemento del deck come riquadro compatto (02 §8.1, §8.2; modifica di RDA-50
+/// per decisione del titolare, non correzione di una svista). Modello dichiarato:
+/// il deck di Clash of Clans, col numero di atomi al posto del livello.
+///
+/// Il riquadro è alto circa la metà della tessera precedente (misurata 130 punti)
+/// e largo poco meno di quanto sia alto, mai sotto la dimensione minima toccabile
+/// del sistema (44 punti). Mostra, PER CHI VEDE soltanto: un simbolo dell'archetipo
+/// al centro — oggi il SEGNAPOSTO TESTUALE della sigla, in attesa dei simboli
+/// grafici (valori-provvisori.md) —, il nome molto in piccolo, e due quadratini
+/// negli angoli inferiori con atomi e volume.
+///
+/// PER CHI ASCOLTA nulla cambia: la sigla, il nome disegnato e i due quadratini
+/// sono DECORAZIONE, esclusi dall'albero accessibile; l'elemento accessibile resta
+/// uno solo, con la propria etichetta (nome) e il proprio valore (l'annuncio in
+/// ordine fisso, invariato). Chi ascolta non sente sigle né numeri due volte.
+///
+/// L'altezza è FISSA e i caratteri decorativi non scalano con la tipografia
+/// dinamica: selezionare non fa crescere la tessera né spinge in giù ciò che le sta
+/// sotto (il difetto già corretto, S10), e la banda del deck resta compatta a ogni
+/// taglia di carattere — è ciò che restituisce altezza alla griglia.
 final class TesseraDeck: UIControl {
+    private let etichettaSigla = UILabel()
     private let etichettaNome = UILabel()
-    private let etichettaDettaglio = UILabel()
-    /// L'etichetta invisibile che RISERVA l'altezza dello stato più lungo.
-    ///
-    /// Il difetto che chiude: selezionando una tessera il suo valore guadagna il
-    /// termine «selezionato» (02 §8.2), la riga va a capo e la tessera cresceva di
-    /// diciotto punti. La colonna del deck cresceva con essa e la griglia, che le
-    /// cede spazio (RDA-50, scostamento S3), perdeva altrettanto dalla propria
-    /// porzione visibile — proprio fra il selezionare e il piazzare, e proprio sul
-    /// bordo inferiore, dove sta la zona di schieramento (01 §8.2.1). Le celle di
-    /// quella zona uscivano di vista mentre la cornice che l'accessibilità riporta
-    /// restava quella di prima, perché è la posizione nel CONTENUTO: chi toccava
-    /// dove la cella era annunciata non toccava la cella.
-    ///
-    /// La riserva non taglia nulla di ciò che si vede: il testo disegnato continua
-    /// a dire quanto la voce annuncia (00 §1.2), e l'altezza è quella che servirà,
-    /// non una costante — si adatta quindi alle taglie d'accessibilità.
-    private let etichettaDiRiserva = UILabel()
+    private let quadratinoAtomi = UILabel()
+    private let quadratinoVolume = UILabel()
+
+    /// Circa la metà dell'altezza precedente (130), sopra il minimo toccabile.
+    static let altezzaRiquadro: CGFloat = 65
+    /// Poco meno dell'altezza, sopra il minimo toccabile.
+    static let larghezzaRiquadro: CGFloat = 56
 
     override init(frame: CGRect) {
         super.init(frame: frame)
-        layer.cornerRadius = 10
+        layer.cornerRadius = 8
         layer.borderWidth = 2
         backgroundColor = .secondarySystemBackground
-        etichettaNome.font = .preferredFont(forTextStyle: .headline)
-        etichettaNome.adjustsFontForContentSizeCategory = true
-        etichettaNome.numberOfLines = 0
-        etichettaDettaglio.font = .preferredFont(forTextStyle: .footnote)
-        etichettaDettaglio.adjustsFontForContentSizeCategory = true
-        etichettaDettaglio.textColor = .secondaryLabel
-        etichettaDettaglio.numberOfLines = 0
-        etichettaDiRiserva.font = etichettaDettaglio.font
-        etichettaDiRiserva.adjustsFontForContentSizeCategory = true
-        etichettaDiRiserva.numberOfLines = 0
-        etichettaDiRiserva.alpha = 0
-        etichettaDiRiserva.isAccessibilityElement = false
-        // I due testi occupano lo stesso posto: il riquadro prende l'altezza del
-        // più alto, che è sempre quello di riserva.
-        let riquadroDettaglio = UIView()
-        riquadroDettaglio.isUserInteractionEnabled = false
-        for etichetta in [etichettaDiRiserva, etichettaDettaglio] {
-            etichetta.translatesAutoresizingMaskIntoConstraints = false
-            riquadroDettaglio.addSubview(etichetta)
-            NSLayoutConstraint.activate([
-                etichetta.topAnchor.constraint(equalTo: riquadroDettaglio.topAnchor),
-                etichetta.leadingAnchor.constraint(equalTo: riquadroDettaglio.leadingAnchor),
-                etichetta.trailingAnchor.constraint(equalTo: riquadroDettaglio.trailingAnchor),
-                etichetta.bottomAnchor.constraint(lessThanOrEqualTo: riquadroDettaglio.bottomAnchor),
-            ])
-        }
-        etichettaDiRiserva.bottomAnchor
-            .constraint(equalTo: riquadroDettaglio.bottomAnchor).isActive = true
 
-        let colonna = UIStackView(arrangedSubviews: [etichettaNome, riquadroDettaglio])
-        colonna.axis = .vertical
-        colonna.spacing = 2
-        colonna.isUserInteractionEnabled = false
-        colonna.translatesAutoresizingMaskIntoConstraints = false
-        addSubview(colonna)
+        etichettaSigla.font = .systemFont(ofSize: 24, weight: .bold)
+        etichettaSigla.textAlignment = .center
+        etichettaSigla.adjustsFontSizeToFitWidth = true
+        etichettaSigla.minimumScaleFactor = 0.5
+        etichettaNome.font = .systemFont(ofSize: 8, weight: .regular)
+        etichettaNome.textAlignment = .center
+        etichettaNome.textColor = .secondaryLabel
+        etichettaNome.numberOfLines = 1
+        etichettaNome.adjustsFontSizeToFitWidth = true
+        etichettaNome.minimumScaleFactor = 0.6
+        for quadratino in [quadratinoAtomi, quadratinoVolume] {
+            quadratino.font = .systemFont(ofSize: 9, weight: .semibold)
+            quadratino.textAlignment = .center
+            quadratino.backgroundColor = .tertiarySystemBackground
+            quadratino.layer.cornerRadius = 3
+            quadratino.layer.masksToBounds = true
+        }
+        // La decorazione è ESCLUSA dall'albero accessibile: chi ascolta non la sente.
+        for decorazione in [etichettaSigla, etichettaNome, quadratinoAtomi, quadratinoVolume] {
+            decorazione.isAccessibilityElement = false
+            decorazione.isUserInteractionEnabled = false
+            decorazione.translatesAutoresizingMaskIntoConstraints = false
+            addSubview(decorazione)
+        }
         NSLayoutConstraint.activate([
-            colonna.topAnchor.constraint(equalTo: topAnchor, constant: 8),
-            colonna.leadingAnchor.constraint(equalTo: leadingAnchor, constant: 10),
-            colonna.trailingAnchor.constraint(equalTo: trailingAnchor, constant: -10),
-            colonna.bottomAnchor.constraint(equalTo: bottomAnchor, constant: -8),
-            widthAnchor.constraint(greaterThanOrEqualToConstant: 104),
-            heightAnchor.constraint(greaterThanOrEqualToConstant: 44),
+            widthAnchor.constraint(equalToConstant: Self.larghezzaRiquadro),
+            heightAnchor.constraint(equalToConstant: Self.altezzaRiquadro),
+            etichettaNome.topAnchor.constraint(equalTo: topAnchor, constant: 2),
+            etichettaNome.leadingAnchor.constraint(equalTo: leadingAnchor, constant: 3),
+            etichettaNome.trailingAnchor.constraint(equalTo: trailingAnchor, constant: -3),
+            etichettaSigla.centerXAnchor.constraint(equalTo: centerXAnchor),
+            etichettaSigla.centerYAnchor.constraint(equalTo: centerYAnchor, constant: 3),
+            etichettaSigla.leadingAnchor.constraint(greaterThanOrEqualTo: leadingAnchor, constant: 3),
+            etichettaSigla.trailingAnchor.constraint(lessThanOrEqualTo: trailingAnchor, constant: -3),
+            quadratinoAtomi.leadingAnchor.constraint(equalTo: leadingAnchor, constant: 3),
+            quadratinoAtomi.bottomAnchor.constraint(equalTo: bottomAnchor, constant: -3),
+            quadratinoVolume.trailingAnchor.constraint(equalTo: trailingAnchor, constant: -3),
+            quadratinoVolume.bottomAnchor.constraint(equalTo: bottomAnchor, constant: -3),
         ])
         isAccessibilityElement = true
         aggiornaAspetto()
     }
     required init?(coder: NSCoder) { nil }
 
-    /// Il testo che la tessera DISEGNA, per il collaudo: deve dire quanto la voce
-    /// annuncia (00 §1.2), e nessuna correzione di disposizione può tagliarlo.
-    var dettaglioDisegnatoPerProva: String? { etichettaDettaglio.text }
+    /// Le decorazioni disegnate, per il collaudo: la parità sonoro/visivo (00 §1.2)
+    /// si prova sull'INFORMAZIONE — gli stessi atomi e lo stesso volume che la voce
+    /// annuncia —, non sull'uguaglianza letterale col vecchio testo composto.
+    var siglaDisegnataPerProva: String? { etichettaSigla.text }
+    var atomiDisegnatiPerProva: String? { quadratinoAtomi.text }
+    var volumeDisegnatoPerProva: String? { quadratinoVolume.text }
 
-    /// Aggiornamento sul posto (RDA-03): l'oggetto resta, cambiano le proprietà.
-    /// - Parameter valoreDiRiserva: il valore come sarebbe nello stato più lungo,
-    ///   cioè quello selezionato. Non si disegna e non si annuncia: serve soltanto
-    ///   a riservare l'altezza, così che selezionare non muova la disposizione.
-    func aggiorna(nome: String, valore: String, valoreDiRiserva: String,
+    /// Aggiornamento sul posto (RDA-03). Etichetta e valore (l'annuncio) NON cambiano
+    /// rispetto alla forma precedente; sigla, nome disegnato, atomi e volume sono le
+    /// decorazioni visive nuove e non si annunciano.
+    func aggiorna(nome: String, valore: String, sigla: String, atomi: String, volume: String,
                   selezionata: Bool, attiva: Bool) {
+        etichettaSigla.text = sigla
         etichettaNome.text = nome
-        etichettaDettaglio.text = valore
-        etichettaDiRiserva.text = valoreDiRiserva
+        quadratinoAtomi.text = atomi
+        quadratinoVolume.text = volume
         accessibilityLabel = nome
         accessibilityValue = valore
         isSelected = selezionata
@@ -105,6 +110,7 @@ final class TesseraDeck: UIControl {
 
     private func aggiornaAspetto() {
         layer.borderColor = (isSelected ? tintColor : UIColor.separator).cgColor
+        etichettaSigla.textColor = isSelected ? tintColor : .label
         alpha = isEnabled ? 1 : 0.45
     }
 
@@ -125,8 +131,7 @@ final class TesseraDeck: UIControl {
         return true
     }
 
-    /// La voce che arriva su una tessera fuori vista la porta in vista da sé,
-    /// come per le celle della griglia (00 §10.4); il fuoco non viene toccato.
+    /// La voce che arriva su una tessera fuori vista la porta in vista da sé (00 §10.4).
     override func accessibilityElementDidBecomeFocused() {
         var vista = superview
         while let corrente = vista, !(corrente is UIScrollView) { vista = corrente.superview }

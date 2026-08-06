@@ -185,6 +185,27 @@ struct CostruttoreAnnunci {
         return parti.joined(separator: ", ")
     }
 
+    /// La sigla dell'archetipo, SEGNAPOSTO TESTUALE dei simboli grafici finché non
+    /// esistono (valori-provvisori.md). Decorazione della tessera, mai annunciata.
+    func siglaElementoDeck(indice: Int) -> String {
+        guard let elemento = elementoDeck(indice) else { return "" }
+        return testi.frase("deck.sigla." + elemento.archetipo).testo
+    }
+
+    /// Gli atomi del reparto, per il quadratino della tessera. Il numero è già
+    /// annunciato dall'etichetta: qui è decorazione visiva, non un canale nuovo.
+    func atomiElementoDeck(indice: Int) -> String {
+        guard let elemento = elementoDeck(indice) else { return "" }
+        return String(elemento.atomi)
+    }
+
+    /// Il volume del reparto, per il quadratino della tessera. Come gli atomi: già
+    /// annunciato dall'etichetta, qui decorazione visiva.
+    func volumeElementoDeck(indice: Int) -> String {
+        guard let elemento = elementoDeck(indice) else { return "" }
+        return String(elemento.atomi * valori.archetipi[elemento.archetipo]!.volumePerAtomo)
+    }
+
     // MARK: - Informazione di stato (02 §6.4)
 
     func informazioneDiStato() -> String {

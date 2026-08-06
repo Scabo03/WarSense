@@ -28,6 +28,12 @@ final class SchermataMappaCampagna: UIViewController {
     private let scorrimento = UIScrollView()
     private let vistaMappa = VistaMappa()
     private let colonnaComandi = UIStackView()
+    /// Area scorrevole propria della banda dei comandi: quando lo spazio verticale
+    /// manca (orizzontale, caratteri grandi) i comandi scorrono invece di comprimere
+    /// la mappa, che conserva un minimo richiesto. Come in battaglia (00 §10.4).
+    private let scorrimentoComandi = UIScrollView()
+    /// Altezza minima RICHIESTA della mappa: sufficiente a una riga intera di caselle.
+    private static let altezzaMinimaMappa: CGFloat = 120
     private let pulsanteRegistro = UIButton(type: .system)
     private let pulsanteAnnulla = UIButton(type: .system)
     private let pulsanteAzzera = UIButton(type: .system)
@@ -66,7 +72,10 @@ final class SchermataMappaCampagna: UIViewController {
         colonnaComandi.axis = .vertical
         colonnaComandi.spacing = 6
         colonnaComandi.translatesAutoresizingMaskIntoConstraints = false
-        view.addSubview(colonnaComandi)
+        scorrimentoComandi.translatesAutoresizingMaskIntoConstraints = false
+        scorrimentoComandi.showsVerticalScrollIndicator = false
+        view.addSubview(scorrimentoComandi)
+        scorrimentoComandi.addSubview(colonnaComandi)
         for (pulsante, azione) in [(pulsanteRegistro, #selector(apriRegistro)),
                                    (pulsanteAnnulla, #selector(annulla)),
                                    (pulsanteAzzera, #selector(azzera)),
@@ -79,8 +88,9 @@ final class SchermataMappaCampagna: UIViewController {
             pulsante.heightAnchor.constraint(greaterThanOrEqualToConstant: 44).isActive = true
         }
 
-        // Come in battaglia: l'altezza della mappa è desiderata e non imposta,
-        // così che i comandi non vengano mai schiacciati (scostamento S3).
+        // L'altezza della mappa è desiderata al 60% a bassa priorità, ma NON scende
+        // mai sotto il minimo richiesto: quando lo spazio manca è la banda dei comandi
+        // a scorrere, non la mappa a collassare (principio 1, 00 §10.4).
         let altezzaMappa = scorrimento.heightAnchor.constraint(
             equalTo: view.heightAnchor, multiplier: 0.6)
         altezzaMappa.priority = .defaultLow
@@ -89,13 +99,17 @@ final class SchermataMappaCampagna: UIViewController {
             scorrimento.leadingAnchor.constraint(equalTo: view.leadingAnchor),
             scorrimento.trailingAnchor.constraint(equalTo: view.trailingAnchor),
             altezzaMappa,
-            colonnaComandi.topAnchor.constraint(equalTo: scorrimento.bottomAnchor, constant: 8),
-            colonnaComandi.leadingAnchor.constraint(equalTo: view.leadingAnchor, constant: 16),
-            colonnaComandi.trailingAnchor.constraint(equalTo: view.trailingAnchor, constant: -16),
-            // Distanziati dal bordo inferiore, dove la striscia estrema è del
-            // gesto di sistema (02 §8.5).
-            colonnaComandi.bottomAnchor.constraint(
-                lessThanOrEqualTo: view.safeAreaLayoutGuide.bottomAnchor, constant: -24),
+            scorrimento.heightAnchor.constraint(greaterThanOrEqualToConstant: Self.altezzaMinimaMappa),
+            scorrimentoComandi.topAnchor.constraint(equalTo: scorrimento.bottomAnchor, constant: 8),
+            scorrimentoComandi.leadingAnchor.constraint(equalTo: view.leadingAnchor, constant: 16),
+            scorrimentoComandi.trailingAnchor.constraint(equalTo: view.trailingAnchor, constant: -16),
+            scorrimentoComandi.bottomAnchor.constraint(
+                equalTo: view.safeAreaLayoutGuide.bottomAnchor, constant: -8),
+            colonnaComandi.topAnchor.constraint(equalTo: scorrimentoComandi.contentLayoutGuide.topAnchor),
+            colonnaComandi.bottomAnchor.constraint(equalTo: scorrimentoComandi.contentLayoutGuide.bottomAnchor),
+            colonnaComandi.leadingAnchor.constraint(equalTo: scorrimentoComandi.contentLayoutGuide.leadingAnchor),
+            colonnaComandi.trailingAnchor.constraint(equalTo: scorrimentoComandi.contentLayoutGuide.trailingAnchor),
+            colonnaComandi.widthAnchor.constraint(equalTo: scorrimentoComandi.frameLayoutGuide.widthAnchor),
         ])
     }
 

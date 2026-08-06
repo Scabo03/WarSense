@@ -84,18 +84,31 @@ final class StabilitaDellaDisposizioneTest: XCTestCase {
                        + "e la disposizione si sposta sotto il dito")
     }
 
-    /// E ciò che si vede continua a dire ciò che si sente: la correzione non deve
-    /// tagliare il testo disegnato per tenere ferma l'altezza (00 §1.2).
-    func test_00_1_2_il_testo_disegnato_dice_quanto_la_voce(
-    ) async throws {
-        let (schermata, partita, finestra) = try await battagliaAperta()
-        _ = try await partita.esegui(.seleziona(indiceDeck: 0))
-        try await Task.sleep(nanoseconds: 300_000_000)
-        finestra.layoutIfNeeded()
-        for tessera in schermata.tesserePerProva {
-            XCTAssertEqual(tessera.dettaglioDisegnatoPerProva, tessera.accessibilityValue,
-                           "la tessera «\(tessera.accessibilityLabel ?? "")» disegna un testo "
-                           + "diverso da quello che annuncia")
+    /// L'annuncio della tessera NON cambia col ridisegno a riquadro (02 §8.2, 00 §1.2):
+    /// la voce sente identità (etichetta) e valore in ordine fisso, esattamente come
+    /// prima. La sigla, il nome disegnato e i due quadratini sono DECORAZIONE ed
+    /// escono dall'albero accessibile; gli atomi e il volume DISEGNATI sono gli stessi
+    /// numeri che la voce annuncia — stessa informazione ai due piani, non un numero
+    /// ripetuto due volte all'ascolto.
+    func test_02_8_2_l_annuncio_della_tessera_non_cambia_col_ridisegno() async throws {
+        let (schermata, _, _) = try await battagliaAperta()
+        let tessere = schermata.tesserePerProva
+        XCTAssertFalse(tessere.isEmpty, "il deck espone le proprie tessere")
+        for tessera in tessere {
+            XCTAssertTrue(tessera.isAccessibilityElement,
+                          "la tessera resta un solo elemento accessibile")
+            let etichetta = try XCTUnwrap(tessera.accessibilityLabel)
+            XCTAssertFalse(etichetta.isEmpty, "la tessera annuncia la propria identità (02 §8.2)")
+            let valore = try XCTUnwrap(tessera.accessibilityValue)
+            let atomi = try XCTUnwrap(tessera.atomiDisegnatiPerProva)
+            let volume = try XCTUnwrap(tessera.volumeDisegnatoPerProva)
+            let sigla = try XCTUnwrap(tessera.siglaDisegnataPerProva)
+            XCTAssertTrue(valore.contains(atomi),
+                          "gli atomi disegnati (\(atomi)) non sono nell'annuncio «\(valore)» (00 §1.2)")
+            XCTAssertTrue(valore.contains(volume),
+                          "il volume disegnato (\(volume)) non è nell'annuncio «\(valore)» (00 §1.2)")
+            XCTAssertFalse(etichetta.contains(sigla) || valore.contains(sigla),
+                           "la sigla decorativa «\(sigla)» non deve essere annunciata")
         }
     }
 }

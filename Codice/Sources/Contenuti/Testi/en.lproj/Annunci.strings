@@ -1,0 +1,15 @@
+/* Pacchetto inglese: per ora contiene SOLTANTO le sigle dell'archetipo, che sono
+   language-dependent (una sigla italiana non vale in inglese). Il pacchetto inglese
+   completo non esiste ancora e "en" non è fra le lingue caricabili del manifest:
+   questo file è il posto in cui le sigle inglesi vivono in attesa che quel pacchetto
+   sia costruito. Sigle SEGNAPOSTO dei simboli grafici, decorazione mai annunciata
+   (valori-provvisori.md). Provvisorie. */
+"deck.sigla.fanteria_leggera" = "LI";
+"deck.sigla.fanteria_pesante" = "HI";
+"deck.sigla.guardia_elite" = "EG";
+"deck.sigla.tiratori" = "SK";
+"deck.sigla.cavalleria_ricognizione" = "RC";
+"deck.sigla.cavalleria_manovrata" = "MC";
+"deck.sigla.piattaforma_trainata" = "TP";
+"deck.sigla.macchina_assedio" = "SE";
+"deck.sigla.macchina_tiro" = "AR";
