@@ -53,6 +53,25 @@ public struct Testi: Sendable {
         guard manifest.lingue.contains(lingua) else {
             throw ErroreDati(chiave: "errore.testi.lingua_assente", file: "manifest.json", voce: lingua)
         }
+        // Impronte dei file di testo (05 §7.2), come nel caricatore dei valori
+        // (`CaricatoreValori`, RDA-54): fino a questa versione `Testi.carica` leggeva
+        // il campo `impronte` e non lo confrontava con nulla, ed era l'unico artefatto
+        // di contenuto senza controllo. Ogni file elencato DEVE coincidere con la
+        // propria impronta; una copia divergente dal proprio manifest è respinta, e
+        // chi carica ripiega sulla fabbrica, sempre coerente (Servizi, 05 §7.1). A
+        // differenza dei valori, che sulla discordanza derivano una versione locale
+        // (RDA-45), qui la discordanza è un RIFIUTO: i testi non ammettono modifica
+        // locale silenziosa. Il ripiego dichiarato rende il rifiuto non distruttivo.
+        if let impronte = manifest.impronte, !impronte.isEmpty {
+            for (nome, attesa) in impronte.sorted(by: { $0.key < $1.key }) {
+                guard let dati = try? Data(contentsOf: albero.appendingPathComponent(nome)) else {
+                    throw ErroreDati(chiave: "errore.testi.file_mancante", file: nome)
+                }
+                guard SHA256.improntaEsadecimale(dati) == attesa else {
+                    throw ErroreDati(chiave: "errore.testi.impronta_discorde", file: nome)
+                }
+            }
+        }
         let sorgente = albero.appendingPathComponent(lingua + ".lproj")
         // Copia di lavoro a percorso unico: aggira la cache dei Bundle.
         let copia = FileManager.default.temporaryDirectory

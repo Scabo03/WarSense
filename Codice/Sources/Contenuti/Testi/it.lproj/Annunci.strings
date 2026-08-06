@@ -26,6 +26,8 @@
 "errore.testi.manifest_malformato" = "Il manifest dei testi non è leggibile";
 "errore.testi.lingua_assente" = "La lingua %@ non è presente nei testi";
 "errore.testi.pacchetto_illeggibile" = "Il pacchetto di lingua %@ non è leggibile";
+"errore.testi.file_mancante" = "Manca il file di testo %@";
+"errore.testi.impronta_discorde" = "Il file di testo %@ non corrisponde alla propria impronta";
 "errore.dati.troppi_significati_tattili" = "I significati tattili superano il tetto stabilito";
 
 /* Annunci degli eventi di battaglia (05 §10.7): frasi intere con segnaposto. */

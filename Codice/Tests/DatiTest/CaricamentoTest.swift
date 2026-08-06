@@ -74,7 +74,8 @@ final class CaricamentoTest: XCTestCase {
                       "errore.dati.protezione_mancante", "errore.dati.formato_incoerente",
                       "errore.dati.minimi_sotto_uno", "errore.dati.efficacia_minima_nulla",
                       "errore.testi.manifest_mancante", "errore.testi.manifest_malformato",
-                      "errore.testi.lingua_assente", "errore.testi.pacchetto_illeggibile"]
+                      "errore.testi.lingua_assente", "errore.testi.pacchetto_illeggibile",
+                      "errore.testi.file_mancante", "errore.testi.impronta_discorde"]
         for chiave in chiavi {
             XCTAssertTrue(testi.esiste(chiave), "Chiave mancante nei testi di fabbrica: \(chiave)")
         }
@@ -88,6 +89,69 @@ final class CaricamentoTest: XCTestCase {
         XCTAssertEqual(testi.frase("battaglia.atomi_presenti", 1).testo, "1 atomo")
         XCTAssertEqual(testi.frase("battaglia.atomi_presenti", 5).testo, "5 atomi")
         XCTAssertEqual(testi.termine("cella.troppo_avanzata").testo, "troppo avanzata")
+    }
+
+    // MARK: - 05 §7.2 — il manifest dei testi è confrontato, come quello dei valori
+
+    /// La copia di fabbrica dei testi coincide con le proprie impronte: `Testi.carica`
+    /// non rifiuta la fabbrica. È la prova che fallisce se un file di testo è alterato
+    /// senza rigenerare il manifest — il caso che l'incarico chiede di provocare. Non
+    /// rigenera nulla: legge il manifest e i file committati, sicché il controllo non
+    /// è vacuo (se li rigenerasse, coinciderebbero sempre).
+    func test_05_7_2_testi_di_fabbrica_coincidono_con_le_impronte() throws {
+        XCTAssertNoThrow(try Testi.carica(albero: Contenuti.testiDiFabbrica, lingua: "it"),
+                         "la fabbrica dei testi non coincide con il proprio manifest: "
+                         + "un file è stato modificato senza rieseguire rigenera-impronte")
+    }
+
+    /// Un file di testo modificato senza rigenerare il manifest è respinto con la
+    /// chiave dichiarata. Modellata su `test_01_3_4_1_vincolo_tiro_in_blocco_respinto`
+    /// e `test_file_malformato_respinto_con_chiave` dei valori.
+    func test_05_7_2_testo_alterato_senza_rigenerare_respinto() throws {
+        let copia = try copiaTestiDiLavoro()
+        let url = copia.appendingPathComponent("it.lproj/Vocabolario.strings")
+        var testo = try String(contentsOf: url, encoding: .utf8)
+        testo += "\n/* byte in più senza rigenerare il manifest */\n"
+        try testo.write(to: url, atomically: true, encoding: .utf8)
+        XCTAssertThrowsError(try Testi.carica(albero: copia, lingua: "it")) { errore in
+            let e = errore as? ErroreDati
+            XCTAssertEqual(e?.chiave, "errore.testi.impronta_discorde")
+            XCTAssertEqual(e?.file, "it.lproj/Vocabolario.strings")
+        }
+    }
+
+    /// Un file elencato nel manifest ma assente è respinto con la propria chiave.
+    func test_05_7_2_testo_mancante_respinto() throws {
+        let copia = try copiaTestiDiLavoro()
+        try FileManager.default.removeItem(
+            at: copia.appendingPathComponent("it.lproj/Vocabolario.strings"))
+        XCTAssertThrowsError(try Testi.carica(albero: copia, lingua: "it")) { errore in
+            XCTAssertEqual((errore as? ErroreDati)?.chiave, "errore.testi.file_mancante")
+        }
+    }
+
+    /// Il rifiuto non lascia il caricamento senza testi: chi carica (Servizi, 05 §7.1)
+    /// ripiega sulla fabbrica, che è sempre coerente. Qui il ripiego è riprodotto: al
+    /// rifiuto della copia divergente segue il caricamento della fabbrica, che dà un
+    /// pacchetto funzionante — nessuna schermata resterebbe senza testi.
+    func test_05_7_1_al_rifiuto_segue_il_ripiego_sulla_fabbrica() throws {
+        let copia = try copiaTestiDiLavoro()
+        let url = copia.appendingPathComponent("it.lproj/Annunci.strings")
+        try (try String(contentsOf: url, encoding: .utf8) + "\n// divergenza\n")
+            .write(to: url, atomically: true, encoding: .utf8)
+        let testi: Testi
+        do { testi = try Testi.carica(albero: copia, lingua: "it") }
+        catch { testi = try Testi.carica(albero: Contenuti.testiDiFabbrica, lingua: "it") }
+        XCTAssertEqual(testi.frase("battaglia.turno", 3).testo, "Turno 3",
+                       "dopo il ripiego i testi funzionano")
+    }
+
+    private func copiaTestiDiLavoro() throws -> URL {
+        let copia = FileManager.default.temporaryDirectory
+            .appendingPathComponent("testi-prova-\(UUID().uuidString)")
+        try FileManager.default.copyItem(at: Contenuti.testiDiFabbrica, to: copia)
+        addTeardownBlock { try? FileManager.default.removeItem(at: copia) }
+        return copia
     }
 
     private func copiaDiLavoro() throws -> URL {
