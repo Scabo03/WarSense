@@ -104,6 +104,7 @@
 "pannello.ingaggia" = "Ingaggia %@ %@ avversario in riga %d cella %d, %@, %@";
 "pannello.ingaggia_accerchiato" = "Ingaggia %@ %@ avversario in riga %d cella %d, %@, %@, %@";
 "pannello.ritira_unita" = "Evacua questa unità: costa %d";
+"pannello.disingaggia" = "Disingaggia dalla mischia";
 "pannello.designa_movimento" = "Scegli la destinazione sulla griglia";
 "pannello.designazione_avviata" = "Scegli la cella di destinazione e attivala per confermare";
 "pannello.designazione_annullata" = "Designazione annullata";

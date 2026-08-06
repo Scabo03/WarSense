@@ -64,7 +64,10 @@ public struct DefinizioneArchetipo: Codable, Hashable, Sendable {
     /// Coefficiente di penalità di avanzamento (01 §8.6).
     public let penalitaAvanzamento: Scalato
     /// Soglia di disingaggio: proporzione delle perdite sulla consistenza d'ingresso (01 §9.8).
-    public let sogliaDisingaggio: Scalato
+    /// ASSENTE (nil) per il reparto elitario, che non si sfila mai in alcuna condizione
+    /// (incarico 10, seconda decisione): l'assenza della soglia, non una soglia molto alta.
+    /// La chiave `soglia_disingaggio` è quindi facoltativa nei dati; assente significa elitario.
+    public let sogliaDisingaggio: Scalato?
     /// Sensibilità alla stanchezza (01 §5.7).
     public let sensibilitaStanchezza: Scalato
     /// Scariche di munizioni disponibili (01 §3.4.3); zero per chi non tira.
@@ -186,6 +189,17 @@ public struct ParametriCombattimento: Codable, Hashable, Sendable {
     /// il secondo nemico. Contro il primo rende per intero, dal terzo non risponde
     /// affatto. Provvisorio.
     public let resaControSecondoBersaglio: Scalato
+    /// Coefficiente di logoramento sulla soglia di disingaggio (01 §9.8, incarico 10,
+    /// quarta decisione): un reparto già logorato all'ingresso nel contatto cede prima,
+    /// uno fresco regge la soglia piena. Zero = coefficiente inattivo (soglia sempre piena).
+    /// Formula unica nel Motore (`sogliaDisingaggioEffettiva`), coefficiente qui. PROVVISORIO.
+    public let coefficienteLogoramentoSoglia: Scalato
+    /// Se vero, la soglia di disingaggio opera anche al secondo contatto di una coppia
+    /// già staccata; se falso vale la regola del secondo contatto (01 §9.8.3), per cui al
+    /// ritorno a contatto non opera più alcuna soglia. Falso conserva il comportamento
+    /// distribuito. È l'interruttore con cui l'esame congiunto dell'incarico 10 misura
+    /// le due possibilità. PROVVISORIO, in attesa della decisione del titolare.
+    public let sogliaAlSecondoContatto: Bool
     enum CodingKeys: String, CodingKey {
         case efficaciaMinima = "efficacia_minima"
         case sogliaPocoEfficace = "soglia_poco_efficace"
@@ -198,6 +212,8 @@ public struct ParametriCombattimento: Codable, Hashable, Sendable {
         case passoAccerchiamento = "passo_accerchiamento"
         case concorrentiMassimi = "concorrenti_massimi"
         case resaControSecondoBersaglio = "resa_contro_secondo_bersaglio"
+        case coefficienteLogoramentoSoglia = "coefficiente_logoramento_soglia"
+        case sogliaAlSecondoContatto = "soglia_al_secondo_contatto"
     }
 }
 

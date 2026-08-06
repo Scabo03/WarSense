@@ -338,6 +338,22 @@ public struct MotoreBattaglia: Sendable {
             guard c <= bilancio.disponibile else { return .nonValido(.volumeInsufficiente) }
             return .valido(CostiDichiarati(volume: c, residuoDopo: bilancio.disponibile - c))
 
+        case .disingaggiaSuOrdine(let id):
+            // Riservato al reparto elitario (soglia assente) e solo quando è a contatto:
+            // è l'unico sul quale il controllo non si perde del tutto quando ingaggia
+            // (01 §9.5, incarico 10, terza decisione). L'azione impossibile non si offre.
+            guard let sciame = stato.sciami[id], sciame.parte == parte,
+                  archetipo(sciame.archetipo).sogliaDisingaggio == nil,
+                  stato.impegnato(id) else {
+                return .nonValido(.bersaglioNonValido)
+            }
+            guard !sciame.azioneSpesa else { return .nonValido(.azioneGiaSpesa) }
+            // Serve una cella arretrata libera dove ritrarsi (01 §9.8.2); senza spazio non si offre.
+            let candidate = stato.griglia.celleArretrate(di: sciame.posizione, per: sciame.parte)
+                .filter { !stato.ostacoli.contains($0) && stato.occupante(di: $0) == nil }
+            guard !candidate.isEmpty else { return .nonValido(.occupata) }
+            return .valido(.nessuno) // il disingaggio su ordine è gratuito, come l'ingaggio
+
         case .fineTurno:
             return .valido(.nessuno)
         }
@@ -463,6 +479,10 @@ public struct MotoreBattaglia: Sendable {
             stato.evacuati[parte, default: []].append(id)
             stato.sciami[id] = nil
             eventi.append(.unitaEvacuata(parte: parte, sciame: id, costo: costiDichiarati.volume))
+
+        case .disingaggiaSuOrdine(let id):
+            // La validazione ha già accertato che una cella arretrata libera esista.
+            eseguiRitrazione(id, stato: &stato, eventi: &eventi)
 
         case .fineTurno:
             eventi.append(contentsOf: concludiTurno(&stato))
@@ -616,31 +636,68 @@ public struct MotoreBattaglia: Sendable {
             guard stato.contatti.contains(contatto),
                   stato.sciami[contatto.primo] != nil, stato.sciami[contatto.secondo] != nil else { continue }
             let coppia = Coppia(contatto.primo, contatto.secondo)
-            guard !stato.coppieStaccate.contains(coppia) else { continue } // 01 §9.8.3
+            // Regola del secondo contatto (01 §9.8.3): una coppia già staccata non ha più
+            // soglia, a meno che l'interruttore `sogliaAlSecondoContatto` non la riabiliti —
+            // è l'interruttore con cui l'esame congiunto dell'incarico 10 misura le due vie.
+            guard valori.combattimento.sogliaAlSecondoContatto
+                    || !stato.coppieStaccate.contains(coppia) else { continue }
             for (id, ingresso) in [(contatto.primo, contatto.consistenzaIngressoPrimo),
                                    (contatto.secondo, contatto.consistenzaIngressoSecondo)] {
                 guard let sciame = stato.sciami[id], stato.contatti.contains(contatto) else { continue }
+                // Soglia assente = reparto elitario: non si sfila mai (incarico 10, seconda decisione).
+                guard let sogliaBase = archetipo(sciame.archetipo).sogliaDisingaggio else { continue }
                 let perdite = ingresso - sciame.serbatoio
-                let soglia = archetipo(sciame.archetipo).sogliaDisingaggio
+                let sogliaEff = sogliaDisingaggioEffettiva(base: sogliaBase, sciame: sciame,
+                                                           consistenzaIngresso: ingresso)
                 // Proporzione delle perdite sulla consistenza d'ingresso (01 §9.8).
-                guard ingresso > 0, Scalato(millesimi: perdite * 1000 / ingresso) >= soglia else { continue }
-                // Ritrazione di una cella verso le proprie retrovie, se una cella è libera (01 §9.8.2).
-                let candidate = stato.griglia.celleArretrate(di: sciame.posizione, per: sciame.parte)
-                    .filter { !stato.ostacoli.contains($0) && stato.occupante(di: $0) == nil }
-                guard let destinazione = candidate.first else { continue } // senza spazio la mischia continua
-                let da = sciame.posizione
-                stato.sciami[id]!.posizione = destinazione
-                stato.sciami[id]!.azioneSpesa = true // torna controllabile dal turno successivo (01 §9.8.2)
-                for terminato in stato.contatti.filter({ $0.coinvolge(id) }) {
-                    let coppiaTerminata = Coppia(terminato.primo, terminato.secondo)
-                    stato.coppieStaccate.insert(coppiaTerminata)
-                    stato.divietoIngaggio[coppiaTerminata] = stato.giro // nessun ingaggio per un turno
-                }
-                stato.contatti.removeAll { $0.coinvolge(id) }
-                eventi.append(.disingaggio(sciame: id, da: da, a: destinazione))
+                guard ingresso > 0, Scalato(millesimi: perdite * 1000 / ingresso) >= sogliaEff else { continue }
+                _ = eseguiRitrazione(id, stato: &stato, eventi: &eventi)
             }
         }
         return (esiti, eventi)
+    }
+
+    /// La soglia di disingaggio effettiva (01 §9.8, incarico 10, quarta decisione): la soglia
+    /// di base del reparto, abbassata dal coefficiente di logoramento in proporzione a quanto
+    /// il reparto è già logorato all'INGRESSO nel contatto. L'integrità è la consistenza
+    /// d'ingresso sulla consistenza piena (atomi iniziali × punti vita per atomo): fissa per
+    /// la durata del contatto, riflette il logoramento pregresso e non la perdita in corso,
+    /// già contata dalla proporzione. A integrità piena la soglia è quella di base; a
+    /// integrità ridotta cala, sicché un reparto che riattacca logorato cede prima. Formula
+    /// unica, coefficiente dai dati; nessuna tabella (00 §13.3).
+    public func sogliaDisingaggioEffettiva(base: Scalato, sciame: Sciame,
+                                           consistenzaIngresso: Int64) -> Scalato {
+        let pieno = sciame.atomiIniziali * archetipo(sciame.archetipo).puntiVitaPerAtomo
+        guard pieno > 0 else { return base }
+        let integrita = Scalato(millesimi: min(consistenzaIngresso, pieno) * 1000 / pieno)
+        let coeff = valori.combattimento.coefficienteLogoramentoSoglia
+        return base * (Scalato.uno - coeff * (Scalato.uno - integrita))
+    }
+
+    /// Esegue la ritrazione di uno sciame che si sfila dalla mischia (01 §9.8.2): lo arretra
+    /// di una cella verso le proprie retrovie se ne trova una libera, termina TUTTI i suoi
+    /// contatti, ne registra le coppie come staccate (01 §9.8.3) e ne vieta il reingaggio per
+    /// un turno. Restituisce vero se la ritrazione è avvenuta, falso se non c'era spazio (la
+    /// mischia continua, precisazione P1). Comune al disingaggio automatico d'inizio giro e al
+    /// disingaggio su ordine del reparto elitario (incarico 10, terza decisione).
+    @discardableResult
+    private func eseguiRitrazione(_ id: IdSciame, stato: inout StatoBattaglia,
+                                  eventi: inout [EventoBattaglia]) -> Bool {
+        guard let sciame = stato.sciami[id] else { return false }
+        let candidate = stato.griglia.celleArretrate(di: sciame.posizione, per: sciame.parte)
+            .filter { !stato.ostacoli.contains($0) && stato.occupante(di: $0) == nil }
+        guard let destinazione = candidate.first else { return false }
+        let da = sciame.posizione
+        stato.sciami[id]!.posizione = destinazione
+        stato.sciami[id]!.azioneSpesa = true // torna controllabile dal turno successivo (01 §9.8.2)
+        for terminato in stato.contatti.filter({ $0.coinvolge(id) }) {
+            let coppiaTerminata = Coppia(terminato.primo, terminato.secondo)
+            stato.coppieStaccate.insert(coppiaTerminata)
+            stato.divietoIngaggio[coppiaTerminata] = stato.giro // nessun ingaggio per un turno
+        }
+        stato.contatti.removeAll { $0.coinvolge(id) }
+        eventi.append(.disingaggio(sciame: id, da: da, a: destinazione))
+        return true
     }
 
     private func applicaDanno(_ danno: Int64, a id: IdSciame,
