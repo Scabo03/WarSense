@@ -142,22 +142,29 @@ final class SessioniPerInterfacciaTest: XCTestCase {
 
     // MARK: - 00 §3.1 — ogni sessione generata, giocata al dito
 
-    /// Tutte le configurazioni che il banco genera, giocate attraverso la schermata
-    /// e confrontate con la corsa del Motore sulla stessa configurazione. Una
-    /// divergenza significa che la Presentazione decide qualcosa (00 §3.2).
+    /// Il SOTTOINSIEME di 24 sessioni (1–2 gruppi), che il collaudo di ogni
+    /// caricamento tiene: già misurato a 34,4 s. Le configurazioni sono giocate
+    /// attraverso la schermata e confrontate con la corsa del Motore sulla stessa
+    /// configurazione; una divergenza significa che la Presentazione decide qualcosa
+    /// (00 §3.2). Le 144 complete stanno in `test_00_3_9`, escluse dal collaudo.
     func test_00_3_1_ogni_sessione_generata_giocata_al_dito_da_lo_stesso_stato() async throws {
-        try await giocaTutte(gruppiMassimi: Self.gruppiMassimi)
+        try await giocaTutte(gruppiMassimi: Self.gruppiSottoinsieme)
     }
 
-    /// Il tetto dei gruppi dipende da DOVE gira. Nel collaudo di ogni caricamento
-    /// resta il sottoinsieme di 24 sessioni (1–2 gruppi): le 144 complete costano
-    /// venti minuti e cinquanta secondi, tre volte la stima su cui la decisione era
-    /// stata presa, e il titolare le ha spostate in una corsa separata il 2026-08-06
-    /// (RDA-83, S11). La corsa separata — `scripts/esegui-sessioni-complete.sh` —
-    /// impone il tetto pieno con `WARSENSE_SESSIONI_COMPLETE`, e allora giocano tutte
-    /// e 144. Non è un canale di collaudo: le sessioni giocate sono reali in entrambi
-    /// i casi, cambia solo QUANTE. Il numero, sottoinsieme o intero, lo stampa la
-    /// riga `MISURA`, sicché quale corsa è stata fatta si legge dall'esito.
+    /// TUTTE le 144 configurazioni, giocate al dito. Costano 1258,6 s — venti minuti
+    /// e cinquanta — e per questo sono FUORI dal collaudo di ogni caricamento
+    /// (decisione del titolare 2026-08-06, RDA-83, S11): la sola corsa separata
+    /// `scripts/esegui-sessioni-complete.sh` le esegue, con
+    /// `-only-testing:.../test_00_3_9_...`, e il collaudo le esclude con il
+    /// `-skip-testing` corrispondente. La selezione è per NOME della prova e non per
+    /// variabile d'ambiente: xcodebuild NON propaga l'ambiente della shell al
+    /// processo di prova sul simulatore, e una prima stesura che leggeva
+    /// `WARSENSE_SESSIONI_COMPLETE` girava le 24 credendo di girarne 144 (corsa
+    /// bb3aq10j7, 1 minuto invece di venti). Non è un canale di collaudo: le sessioni
+    /// giocate sono reali; cambia solo QUANTE, e il numero lo stampa la riga `MISURA`.
+    func test_00_3_9_ogni_configurazione_completa_giocata_al_dito() async throws {
+        try await giocaTutte(gruppiMassimi: Self.gruppiCompleti)
+    }
 
     private func giocaTutte(gruppiMassimi: Int) async throws {
         let (ambiente, banco, valoriCampagna) = try ambienteEBanco()
@@ -202,12 +209,10 @@ final class SessioniPerInterfacciaTest: XCTestCase {
                        "non tutte le configurazioni generate sono passate per l'interfaccia")
     }
 
-    /// Il tetto dei gruppi. Con `WARSENSE_SESSIONI_COMPLETE` è 12, lo stesso del
-    /// programma di verifica fuori dal fumo, così che le due liste coincidano e
-    /// giochino tutte le 144 configurazioni; senza, è 2 e restano le 24 del
-    /// sottoinsieme che il collaudo di ogni caricamento tiene. Numero di struttura
-    /// della misura (05 §0.4).
-    private static var gruppiMassimi: Int {
-        ProcessInfo.processInfo.environment["WARSENSE_SESSIONI_COMPLETE"] != nil ? 12 : 2
-    }
+    /// I tetti dei gruppi, numeri di struttura della misura (05 §0.4). Il
+    /// sottoinsieme è 2 (24 sessioni, 1–2 gruppi); l'insieme completo è 12 (144), lo
+    /// stesso del programma di verifica fuori dal fumo, così che le due liste
+    /// coincidano.
+    private static let gruppiSottoinsieme = 2
+    private static let gruppiCompleti = 12
 }

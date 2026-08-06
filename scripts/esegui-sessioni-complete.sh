@@ -59,12 +59,21 @@ cand.sort(); sys.stderr.write(f"simulatore: {cand[-1][1]} ({cand[-1][0]})\n"); p
   DEST="id=$UDID"
 fi
 ( cd "$RADICE/Applicazione" && xcodegen generate )
-if WARSENSE_SESSIONI_COMPLETE=1 xcodebuild test \
+# Solo test_00_3_9 (le 144 complete). La selezione è per NOME: xcodebuild non
+# propaga l'ambiente della shell al processo di prova sul simulatore, sicché una
+# variabile d'ambiente non arriverebbe alla prova (accertato: corsa che girava 24
+# credendo 144). test_00_3_1, il sottoinsieme di 24, non gira qui.
+RISCAMPAGNA="$RADICE/Applicazione/build/sessioni-complete-risultati.xcresult"
+rm -rf "$RISCAMPAGNA"
+if xcodebuild test \
     -project "$RADICE/Applicazione/WarSense.xcodeproj" -scheme WarSense \
     -destination "$DEST" \
-    -only-testing:WarSenseTest/SessioniPerInterfacciaTest \
+    -only-testing:WarSenseTest/SessioniPerInterfacciaTest/test_00_3_9_ogni_configurazione_completa_giocata_al_dito \
+    -resultBundlePath "$RISCAMPAGNA" \
     -derivedDataPath "$RADICE/Applicazione/build/sessioni-complete" -quiet; then
-  echo "  campagna per l'interfaccia (144): VERDE"
+  DURATA=$(xcrun xcresulttool get test-results summary --path "$RISCAMPAGNA" 2>/dev/null \
+    | python3 -c 'import json,sys; d=json.load(sys.stdin); print(round(d.get("finishTime",0)-d.get("startTime",0),1))' 2>/dev/null)
+  echo "  campagna per l'interfaccia (144): VERDE (durata prova ${DURATA}s)"
 else
   echo "  campagna per l'interfaccia: ROSSA"; fallito=1
 fi

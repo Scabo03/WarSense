@@ -61,12 +61,17 @@ fi
 # che `scripts/conta-prove.sh` legge con xcresulttool.
 RISULTATI="${WARSENSE_RISULTATI:-$RADICE/Applicazione/build/collaudo-risultati.xcresult}"
 rm -rf "$RISULTATI"
+# Le 144 sessioni complete per l'interfaccia (test_00_3_9) sono ESCLUSE: costano
+# venti minuti e cinquanta e girano nella sola corsa separata (RDA-83, S11). Resta
+# test_00_3_1, il sottoinsieme di 24. L'esclusione è per NOME e non per variabile
+# d'ambiente, perché xcodebuild non propaga l'ambiente della shell al simulatore.
 xcodebuild test \
   -project "$RADICE/Applicazione/WarSense.xcodeproj" \
   -scheme WarSense \
   -destination "$DESTINAZIONE" \
   -derivedDataPath "${WARSENSE_DERIVATI:-$RADICE/Applicazione/build/collaudo}" \
   -resultBundlePath "$RISULTATI" \
+  -skip-testing:WarSenseTest/SessioniPerInterfacciaTest/test_00_3_9_ogni_configurazione_completa_giocata_al_dito \
   -quiet
 
 echo "== Conteggio delle prove ospitate e d'interfaccia, dall'esecutore =="
