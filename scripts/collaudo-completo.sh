@@ -22,6 +22,13 @@ echo "== 0/3 Cancello dei simboli d'archetipo (biiezione archetipi <-> simboli, 
 # è più economico del collaudo intero e coglie il disallineamento alla radice.
 "$RADICE/scripts/verifica-simboli.sh"
 
+echo "== 0b/3 Cancello delle impronte dei Contenuti (RDA-106) =="
+# Rifiuta PRIMA delle prove del pacchetto un file di Contenuti cambiato senza
+# rigenerare il manifest: senza questo cancello la discordanza faceva fallire in
+# massa prove che sembravano regressioni, e la causa restava opaca. Qui il
+# fallimento dichiara la causa e il comando in una riga sola, in due secondi.
+python3 "$RADICE/scripts/rigenera-impronte.py" --verifica
+
 echo "== 1/3 Collaudo del pacchetto (Motore, Dati, Sessione, Segnali, Verifica, Confini) =="
 # Nessuna pipe: con `set -o pipefail` il fallimento si propaga comunque, ma senza
 # pipe l'uscita del collaudo arriva intera a chi legge.

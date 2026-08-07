@@ -24,6 +24,30 @@ public struct ErroreDati: Error, Sendable {
     }
 }
 
+/// La descrizione che il collaudo mostra quando l'errore risale (XCTest la stampa
+/// con `String(describing:)`). Per la discordanza di un'impronta di contenuto la
+/// descrizione nomina il file e il COMANDO che la rigenera, invece del solo riflesso
+/// del tipo: fino a questa versione un file di Contenuti cambiato senza rigenerare
+/// faceva fallire in massa prove che sembravano regressioni, con la sola riga opaca
+/// `ErroreDati(chiave: "errore.testi.impronta_discorde", ...)`. Il controllo NON è
+/// toccato — resta un rifiuto, e i testi si respingono ancora (RDA-106); cambia
+/// soltanto ciò che il fallimento dice. La dichiarazione IN CHIARO, in italiano, vive
+/// nel cancello del collaudo (`scripts/rigenera-impronte.py --verifica`, che gira
+/// PRIMA delle prove del pacchetto): qui, dentro i Sorgenti, le stringhe non portano
+/// spazi, perché il collaudo dei confini sorveglia che nessuna frase per l'utente vi
+/// viva (00 §14.1), come per i codici degli invarianti. Nomina comunque il file e lo
+/// script, senza prosa, così che pure chi corra `swift test` da solo veda la via.
+extension ErroreDati: CustomStringConvertible {
+    public var description: String {
+        if chiave.contains("impronta_discorde") {
+            return "\(chiave):file=\(file):rigenera=scripts/rigenera-impronte.py"
+        }
+        var testo = "ErroreDati:chiave=\(chiave):file=\(file)"
+        if let voce { testo += ":voce=\(voce)" }
+        return testo
+    }
+}
+
 /// Carica e valida l'albero dei valori (05 §7). Il caricamento avviene una volta
 /// per sessione e i valori restano fissi fino alla chiusura dello slot (05 §7.9).
 public enum CaricatoreValori {

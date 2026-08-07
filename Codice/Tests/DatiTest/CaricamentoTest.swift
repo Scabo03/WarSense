@@ -131,6 +131,26 @@ final class CaricamentoTest: XCTestCase {
         }
     }
 
+    /// La discordanza di un'impronta DICHIARA la causa e il comando che la rigenera
+    /// (RDA-106): fino a questa versione il fallimento era la sola riga opaca del
+    /// riflesso del tipo, e una modifica di Contenuti senza rigenerare faceva fallire
+    /// in massa prove che sembravano regressioni. La descrizione — quella che il
+    /// collaudo stampa risalendo l'errore — nomina `rigenera-impronte`. Il controllo
+    /// resta un rifiuto: qui si prova soltanto ciò che il rifiuto dice.
+    func test_05_7_2_l_errore_di_impronta_dichiara_il_comando_che_la_rigenera() throws {
+        let copia = try copiaTestiDiLavoro()
+        let url = copia.appendingPathComponent("it.lproj/Vocabolario.strings")
+        try (try String(contentsOf: url, encoding: .utf8) + "\n/* divergenza */\n")
+            .write(to: url, atomically: true, encoding: .utf8)
+        XCTAssertThrowsError(try Testi.carica(albero: copia, lingua: "it")) { errore in
+            let descrizione = String(describing: errore)
+            XCTAssertTrue(descrizione.contains("rigenera-impronte"),
+                          "la descrizione non nomina il comando che rigenera: «\(descrizione)»")
+            XCTAssertTrue(descrizione.contains("Vocabolario.strings"),
+                          "la descrizione non nomina il file divergente: «\(descrizione)»")
+        }
+    }
+
     /// Il rifiuto non lascia il caricamento senza testi: chi carica (Servizi, 05 §7.1)
     /// ripiega sulla fabbrica, che è sempre coerente. Qui il ripiego è riprodotto: al
     /// rifiuto della copia divergente segue il caricamento della fabbrica, che dà un

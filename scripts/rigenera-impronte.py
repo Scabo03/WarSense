@@ -7,7 +7,9 @@ modifica, altrimenti le installazioni esistenti restano con dati stantii
 (memoria di infrastruttura, regola 6). Le VERSIONI non si toccano mai qui:
 si cambiano soltanto su istruzione del titolare.
 
-Uso: python3 scripts/rigenera-impronte.py
+Uso: python3 scripts/rigenera-impronte.py            rigenera i manifest
+     python3 scripts/rigenera-impronte.py --verifica  controlla senza scrivere,
+                                                      esce 1 se qualcosa diverge
 """
 import hashlib
 import json
@@ -49,7 +51,42 @@ def aggiorna(cartella, estensioni):
     return nomi
 
 
+def verifica(cartella, estensioni):
+    """Confronta le impronte committate con i file, SENZA scrivere. Restituisce
+    l'elenco dei file divergenti o assenti. È il controllo che il collaudo esegue
+    per primo, così che un file di Contenuti cambiato senza rigenerare dichiari la
+    causa PRIMA delle prove del pacchetto, invece di farle fallire in massa."""
+    manifest_percorso = cartella / "manifest.json"
+    manifest = json.loads(manifest_percorso.read_text(encoding="utf-8"))
+    committate = manifest.get("impronte", {})
+    presenti = set(elenca(cartella, estensioni))
+    divergenti = []
+    for nome in sorted(set(committate) | presenti):
+        percorso = cartella / nome
+        if nome not in committate:
+            divergenti.append(f"{nome} (presente ma non nel manifest)")
+        elif not percorso.is_file():
+            divergenti.append(f"{nome} (nel manifest ma assente)")
+        elif impronta(percorso) != committate[nome]:
+            divergenti.append(f"{nome} (impronta divergente)")
+    return divergenti
+
+
 def main():
+    if "--verifica" in sys.argv[1:]:
+        tutte = []
+        for cartella, estensioni in ((CONTENUTI / "Valori", {".json"}),
+                                     (CONTENUTI / "Testi", {".strings", ".stringsdict"})):
+            for nome in verifica(cartella, estensioni):
+                tutte.append(f"{cartella.relative_to(RADICE)}/{nome}")
+        if tutte:
+            sys.stderr.write(
+                "RIFIUTATO: un file di Contenuti è cambiato senza rigenerare le impronte.\n"
+                "Esegui `python3 scripts/rigenera-impronte.py` e ricommitta.\n"
+                "File divergenti:\n  " + "\n  ".join(tutte) + "\n")
+            return 1
+        print("Impronte dei Contenuti coerenti col manifest.")
+        return 0
     aggiorna(CONTENUTI / "Valori", {".json"})
     aggiorna(CONTENUTI / "Testi", {".strings", ".stringsdict"})
     return 0
