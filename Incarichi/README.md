@@ -30,7 +30,7 @@ accaduto.
 
 | n. | data | materia | incarico | resoconto |
 |---|---|---|---|---|
-| 14 | 2026-08-07 | la risoluzione di fine giornata e le marce di più giorni, con la revoca | [incarico](14-2026-08-07-risoluzione-fine-giornata-marce-lunghe-incarico.md) | resoconto |
+| 14 | 2026-08-07 | la risoluzione di fine giornata e le marce di più giorni, con la revoca | [incarico](14-2026-08-07-risoluzione-fine-giornata-marce-lunghe-incarico.md) | [resoconto](14-2026-08-07-risoluzione-fine-giornata-marce-lunghe-resoconto.md) |
 | 13 | 2026-08-07 | i simboli grafici delle tessere del deck, al posto delle sigle testuali | [incarico](13-2026-08-07-simboli-tessere-deck-incarico.md) | [resoconto](13-2026-08-07-simboli-tessere-deck-resoconto.md) |
 | 12 | 2026-08-07 | sistemazione del versionamento e pulizia del repository | [incarico](12-2026-08-07-sistemazione-versionamento-incarico.md) | [resoconto](12-2026-08-07-sistemazione-versionamento-resoconto.md) |
 | 11 | 2026-08-06 | l'élite storica di ciascuna fase, e le chiusure del corpo a corpo | [incarico](11-2026-08-06-elite-storica-e-chiusure-corpo-a-corpo-incarico.md) | [resoconto](11-2026-08-06-elite-storica-e-chiusure-corpo-a-corpo-resoconto.md) |
