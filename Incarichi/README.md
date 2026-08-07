@@ -30,7 +30,7 @@ accaduto.
 
 | n. | data | materia | incarico | resoconto |
 |---|---|---|---|---|
-| 15 | 2026-08-07 | composizione dei gruppi e volume, rifornimento e taglio, divisione e riunione, correzioni sulla marcia | [incarico](15-2026-08-07-composizione-rifornimento-divisione-incarico.md) | resoconto in corso |
+| 15 | 2026-08-07 | composizione dei gruppi e volume, e le quattro correzioni sulla marcia (blocchi 1-2; rifornimento e divisione rinviati) | [incarico](15-2026-08-07-composizione-rifornimento-divisione-incarico.md) | [resoconto](15-2026-08-07-composizione-rifornimento-divisione-resoconto.md) |
 | 14 | 2026-08-07 | la risoluzione di fine giornata e le marce di più giorni, con la revoca | [incarico](14-2026-08-07-risoluzione-fine-giornata-marce-lunghe-incarico.md) | [resoconto](14-2026-08-07-risoluzione-fine-giornata-marce-lunghe-resoconto.md) |
 | 13 | 2026-08-07 | i simboli grafici delle tessere del deck, al posto delle sigle testuali | [incarico](13-2026-08-07-simboli-tessere-deck-incarico.md) | [resoconto](13-2026-08-07-simboli-tessere-deck-resoconto.md) |
 | 12 | 2026-08-07 | sistemazione del versionamento e pulizia del repository | [incarico](12-2026-08-07-sistemazione-versionamento-incarico.md) | [resoconto](12-2026-08-07-sistemazione-versionamento-resoconto.md) |
