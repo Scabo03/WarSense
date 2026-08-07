@@ -7,12 +7,15 @@ import Dati
 /// formato di salvataggio, e se la codifica degli enumerativi con valori associati
 /// si sposta, le partite aperte dei tester non si riaprono più (00 §15).
 ///
-/// I campioni della CAMPAGNA sono stati riscritti quando il comando di marcia ha
-/// preso il costo in giorni (01 §5.6.3.1): non è una deriva silenziosa del formato
-/// ma un cambiamento deliberato, e la sua contropartita è l'incremento di
-/// `FondazioneCampagna.schemaCorrente` da 1 a 2, che fa dichiarare e non aprire i
-/// giornali di campagna precedenti (00 §15.2). I campioni della BATTAGLIA non sono
-/// stati toccati, e continuano a ricodificarsi byte per byte identici.
+/// I campioni della CAMPAGNA crescono di due casi con la marcia lunga: la revoca,
+/// caso nuovo di `ComandoCampagna` (RDA-76, `impatto-marcia-lunga.md` §7), e il
+/// marcatore `risoluzioneGiornata` di `VoceGiornale`, che tiene il confine
+/// dell'annullamento nel giornale (RDA-102). La contropartita è l'incremento di
+/// `FondazioneCampagna.schemaCorrente` da 2 a 3, che fa dichiarare e non aprire i
+/// giornali di campagna precedenti (00 §15.2). I campioni preesistenti — battaglia e
+/// campagna — non sono stati toccati e continuano a ricodificarsi byte per byte
+/// identici: la codifica sintetizzata usa il NOME del caso come chiave, e i casi si
+/// aggiungono in coda senza spostare quelli esistenti.
 ///
 /// ## Perché la copertura è imposta da una catena di errori di compilazione
 ///
@@ -44,7 +47,7 @@ final class CompatibilitaGiornaleTest: XCTestCase {
     /// del tipo vero, perché è il nome del caso a essere la chiave codificata.
     enum SpecieDiVoce: String, CaseIterable {
         case fondazione, comando, inizioTurno, fondazioneCampagna
-        case comandoCampagna, aperturaGiornata, annullamentoCampagna
+        case comandoCampagna, aperturaGiornata, annullamentoCampagna, risoluzioneGiornata
     }
 
     /// Specchio di `ComandoBattaglia`.
@@ -55,7 +58,7 @@ final class CompatibilitaGiornaleTest: XCTestCase {
 
     /// Specchio di `ComandoCampagna`.
     enum SpecieDiComandoCampagna: String, CaseIterable {
-        case marcia, presidio
+        case marcia, presidio, revocaMarcia
     }
 
     // MARK: - I due lati della catena: dal tipo vero allo specchio e ritorno
@@ -70,6 +73,7 @@ final class CompatibilitaGiornaleTest: XCTestCase {
         case .comandoCampagna: return .comandoCampagna
         case .aperturaGiornata: return .aperturaGiornata
         case .annullamentoCampagna: return .annullamentoCampagna
+        case .risoluzioneGiornata: return .risoluzioneGiornata
         }
     }
 
@@ -85,6 +89,7 @@ final class CompatibilitaGiornaleTest: XCTestCase {
             return .comandoCampagna(parte: .giocatore, comando: .presidio(gruppo: IdGruppo(1)))
         case .aperturaGiornata: return .aperturaGiornata(giorno: 1)
         case .annullamentoCampagna: return .annullamentoCampagna(giorno: 1, azzeramento: false)
+        case .risoluzioneGiornata: return .risoluzioneGiornata(giorno: 1)
         }
     }
 
@@ -124,6 +129,7 @@ final class CompatibilitaGiornaleTest: XCTestCase {
         switch comando {
         case .marcia: return .marcia
         case .presidio: return .presidio
+        case .revocaMarcia: return .revocaMarcia
         }
     }
 
@@ -132,6 +138,7 @@ final class CompatibilitaGiornaleTest: XCTestCase {
         case .marcia:
             return .marcia(gruppo: IdGruppo(1), a: Cella(riga: 1, colonna: 1), giorni: 1)
         case .presidio: return .presidio(gruppo: IdGruppo(1))
+        case .revocaMarcia: return .revocaMarcia(gruppo: IdGruppo(1))
         }
     }
 

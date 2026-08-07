@@ -142,6 +142,58 @@ final class MappaCampagnaAccessibileTest: XCTestCase {
                        "le due azioni di questa unità più la chiusura, in ordine fisso")
     }
 
+    /// Attivare una destinazione durante la designazione apre il PANNELLO DI
+    /// CONFERMA (02 §9.2.1), non esegue la marcia: dichiara il costo in giorni e
+    /// l'inchiodamento, e offre conferma o rinuncia (01 §5.6.3.5).
+    func test_02_9_2_1_l_attivazione_della_destinazione_apre_la_conferma_della_marcia() async throws {
+        let (schermata, _, ambiente) = try await mappaAperta(taglia: .media)
+        let stato = try XCTUnwrap(schermata.statoPerProva)
+        let gruppo = stato.gruppiOrdinati[0]
+        let vista = VistaCampagna(motore: schermata.motorePerProva, stato: stato, parte: .giocatore)
+        let meta = try XCTUnwrap(vista.destinazioniValide(per: gruppo.id).first)
+        let costo = schermata.motorePerProva.costoInGiorni(da: gruppo.posizione, a: meta, stato: stato)
+
+        schermata.avviaDesignazionePerProva(gruppo: gruppo.id)
+        XCTAssertTrue(schermata.attiva(meta), "la destinazione designata si attiva")
+        for _ in 0..<50 where !(schermata.presentedViewController is UIAlertController) {
+            try await Task.sleep(nanoseconds: 20_000_000)
+        }
+        let pannello = try XCTUnwrap(schermata.presentedViewController as? UIAlertController,
+                                     "l'attivazione della destinazione apre il pannello di conferma")
+        let testi = ambiente.testi
+        XCTAssertEqual(schermata.vociPannelloPerProva.map(\.titolo),
+                       [testi.frase("pannello.marcia_conferma_azione").testo,
+                        testi.frase("pannello.marcia_rinuncia_azione").testo],
+                       "il pannello offre conferma e rinuncia")
+        XCTAssertTrue(pannello.message?.contains("\(costo)") == true,
+                      "il pannello dichiara il costo in giorni prima della conferma: \(pannello.message ?? "")")
+        // La marcia NON è stata eseguita: il gruppo non è ancora in marcia.
+        XCTAssertFalse(try XCTUnwrap(schermata.statoPerProva).gruppi[gruppo.id]!.inMarcia,
+                       "la conferma non ha ancora ordinato la marcia")
+    }
+
+    /// Il pannello di un gruppo IN MARCIA offre la revoca e null'altro d'ordinabile:
+    /// non può marciare né presidiare, ma può revocare (01 §5.6.3.3).
+    func test_01_5_6_3_3_il_pannello_di_un_gruppo_in_marcia_offre_la_revoca() async throws {
+        let (schermata, _, ambiente) = try await mappaAperta(taglia: .media)
+        let stato = try XCTUnwrap(schermata.statoPerProva)
+        let gruppo = stato.gruppiOrdinati[0]
+        let vista = VistaCampagna(motore: schermata.motorePerProva, stato: stato, parte: .giocatore)
+        let meta = try XCTUnwrap(vista.destinazioniValide(per: gruppo.id).first)
+        let costo = schermata.motorePerProva.costoInGiorni(da: gruppo.posizione, a: meta, stato: stato)
+        // Ordinata la marcia con altri gruppi ancora in attesa, il gruppo resta in marcia.
+        await schermata.eseguiPerProva(.marcia(gruppo: gruppo.id, a: meta, giorni: costo))
+        let dopo = try XCTUnwrap(schermata.statoPerProva)
+        XCTAssertTrue(dopo.gruppi[gruppo.id]!.inMarcia, "il gruppo è in marcia lunga")
+
+        XCTAssertTrue(schermata.attiva(gruppo.posizione), "la casella del gruppo in marcia si attiva")
+        try await Task.sleep(nanoseconds: 100_000_000)
+        let testi = ambiente.testi
+        XCTAssertEqual(schermata.vociPannelloPerProva.map(\.titolo),
+                       [testi.frase("pannello.revoca").testo, testi.frase("pannello.chiudi").testo],
+                       "solo la revoca e la chiusura: un gruppo in marcia non marcia né presidia")
+    }
+
     func test_02_9_5_una_casella_vuota_non_apre_alcun_pannello() async throws {
         let (schermata, _, _) = try await mappaAperta(taglia: .media)
         let stato = try XCTUnwrap(schermata.statoPerProva)

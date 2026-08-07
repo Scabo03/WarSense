@@ -1,3 +1,8 @@
 {
- "costo_giorni_base": 1
+ "costo_giorni_base": 1,
+ "posizioni_visive": 9,
+ "peso_terreno_partenza": { "aperto": 0, "bosco": 1, "acqua": 1 },
+ "peso_terreno_arrivo": { "aperto": 0, "bosco": 1, "acqua": 2 },
+ "peso_strada_arrivo": { "nessuna": 0, "sterrata": 0, "battuta": -1, "lastricata": -1 },
+ "costo_strettoia": 1
 }

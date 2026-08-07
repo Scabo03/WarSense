@@ -270,6 +270,73 @@ final class InvariantiCampagnaTest: XCTestCase {
             "la sonda non vede il giorno avanzare senza che la giornata si sia chiusa")
     }
 
+    // MARK: - Mutanti della marcia lunga e della risoluzione di fine giornata
+
+    func test_mutante_un_gruppo_fra_due_caselle_viene_visto() throws {
+        var guasto = try stato(gruppi: [(10, 6)])
+        XCTAssertEqual(sonda.controlla(stato: guasto), [], "senza marce lo stato è sano")
+        let id = guasto.gruppiOrdinati[0].id
+        // Marcia con i giorni compiuti pari ai totali: arrivato ma non mosso.
+        guasto.gruppi[id]!.marcia = MarciaInCorso(destinazione: Cella(riga: 10, colonna: 7),
+                                                  giorniTotali: 2, giorniCompiuti: 2)
+        XCTAssertTrue(descrizioni(sonda.controlla(stato: guasto))
+            .contains { $0.hasPrefix("gruppo_fra_due_caselle") },
+            "la sonda non vede un gruppo fra due caselle")
+    }
+
+    func test_mutante_i_giorni_mancanti_fuori_intervallo_vengono_visti() throws {
+        var guasto = try stato(gruppi: [(10, 6)])
+        let id = guasto.gruppiOrdinati[0].id
+        // Giorni compiuti negativi: i mancanti superano i totali.
+        guasto.gruppi[id]!.marcia = MarciaInCorso(destinazione: Cella(riga: 10, colonna: 7),
+                                                  giorniTotali: 2, giorniCompiuti: -1)
+        XCTAssertTrue(descrizioni(sonda.controlla(stato: guasto))
+            .contains { $0.hasPrefix("giorni_mancanti_fuori_intervallo") })
+    }
+
+    func test_mutante_una_posizione_visiva_incoerente_viene_vista() throws {
+        var s = try stato(gruppi: [(10, 6)])
+        let id = s.gruppiOrdinati[0].id
+        s.gruppi[id]!.marcia = MarciaInCorso(destinazione: Cella(riga: 10, colonna: 7),
+                                             giorniTotali: 3, giorniCompiuti: 1)
+        let posizioni = valoriCampagna.marcia.posizioniVisive
+        let attesa = (1 * posizioni) / 3
+        // Con la posizione mostrata pari a quella derivata non c'è violazione.
+        XCTAssertEqual(sonda.controllaPosizioniVisive(stato: s, posizioni: posizioni,
+                                                      mostrate: [id: attesa]), [])
+        // Con una posizione mostrata divergente, la sonda se ne accorge.
+        XCTAssertTrue(descrizioni(sonda.controllaPosizioniVisive(stato: s, posizioni: posizioni,
+                                                                 mostrate: [id: attesa + 1]))
+            .contains { $0.hasPrefix("posizione_visiva_incoerente") })
+    }
+
+    func test_mutante_un_gruppo_in_marcia_che_riceve_un_ordine_viene_visto() throws {
+        var prima = try stato(gruppi: [(10, 6), (10, 5)])
+        let id = prima.gruppiOrdinati[0].id
+        prima.gruppi[id]!.marcia = MarciaInCorso(destinazione: Cella(riga: 9, colonna: 6),
+                                                 giorniTotali: 2, giorniCompiuti: 1)
+        var dopo = prima
+        dopo.gruppi[id]!.azioneSpesa = true
+        XCTAssertTrue(descrizioni(sonda.controlla(
+            prima: prima, comando: .marcia(gruppo: id, a: Cella(riga: 10, colonna: 7), giorni: 1),
+            dopo: dopo, eventi: [], adiacenti: prima.griglia.adiacenti))
+            .contains { $0.hasPrefix("gruppo_in_marcia_ordinato") })
+    }
+
+    func test_mutante_una_revoca_non_conforme_viene_vista() throws {
+        var prima = try stato(gruppi: [(10, 6), (10, 5)])
+        let id = prima.gruppiOrdinati[0].id
+        prima.gruppi[id]!.marcia = MarciaInCorso(destinazione: Cella(riga: 9, colonna: 6),
+                                                 giorniTotali: 2, giorniCompiuti: 1)
+        // La revoca dovrebbe azzerare la marcia; questo mutante la lascia in piedi.
+        var dopo = prima
+        dopo.gruppi[id]!.azioneSpesa = true
+        XCTAssertTrue(descrizioni(sonda.controlla(
+            prima: prima, comando: .revocaMarcia(gruppo: id),
+            dopo: dopo, eventi: [], adiacenti: prima.griglia.adiacenti))
+            .contains { $0.hasPrefix("revoca_non_conforme") })
+    }
+
     // MARK: - La guardia: nessun invariante senza mutante
 
     /// Ogni invariante sorvegliato deve avere almeno un mutante che lo fa scattare.
@@ -299,6 +366,7 @@ final class InvariantiCampagnaTest: XCTestCase {
         let griglia = base.griglia
         let motore = self.motore!
         let sonda = self.sonda
+        let posizioniVisive = valoriCampagna.marcia.posizioniVisive
 
         func statoCon(_ modifica: (inout StatoCampagna) -> Void) -> StatoCampagna {
             var s = base; modifica(&s); return s
@@ -394,6 +462,43 @@ final class InvariantiCampagnaTest: XCTestCase {
                 return sonda.controllaRaggiungibilita(
                     griglia: piccola, da: Cella(riga: 1, colonna: 1),
                     vicini: { c in piccola.vicini(di: c).filter { $0.riga <= c.riga } })
+            }),
+            ("gruppo_fra_due_caselle", {
+                sonda.controlla(stato: statoCon { s in
+                    s.gruppi[ids[0]]!.marcia = MarciaInCorso(destinazione: Cella(riga: 10, colonna: 7),
+                                                             giorniTotali: 2, giorniCompiuti: 2)
+                })
+            }),
+            ("giorni_mancanti_fuori_intervallo", {
+                sonda.controlla(stato: statoCon { s in
+                    s.gruppi[ids[0]]!.marcia = MarciaInCorso(destinazione: Cella(riga: 10, colonna: 7),
+                                                             giorniTotali: 2, giorniCompiuti: -1)
+                })
+            }),
+            ("posizione_visiva_incoerente", {
+                let s = statoCon { s in
+                    s.gruppi[ids[0]]!.marcia = MarciaInCorso(destinazione: Cella(riga: 10, colonna: 7),
+                                                             giorniTotali: 3, giorniCompiuti: 1)
+                }
+                return sonda.controllaPosizioniVisive(
+                    stato: s, posizioni: posizioniVisive, mostrate: [ids[0]: 99])
+            }),
+            ("gruppo_in_marcia_ordinato", {
+                var prima = base
+                prima.gruppi[ids[0]]!.marcia = MarciaInCorso(destinazione: Cella(riga: 9, colonna: 6),
+                                                             giorniTotali: 2, giorniCompiuti: 1)
+                var dopo = prima; dopo.gruppi[ids[0]]!.azioneSpesa = true
+                return sonda.controlla(prima: prima,
+                                       comando: .marcia(gruppo: ids[0], a: Cella(riga: 10, colonna: 7), giorni: 1),
+                                       dopo: dopo, eventi: [], adiacenti: griglia.adiacenti)
+            }),
+            ("revoca_non_conforme", {
+                var prima = base
+                prima.gruppi[ids[0]]!.marcia = MarciaInCorso(destinazione: Cella(riga: 9, colonna: 6),
+                                                             giorniTotali: 2, giorniCompiuti: 1)
+                var dopo = prima; dopo.gruppi[ids[0]]!.azioneSpesa = true  // marcia residua: non conforme
+                return sonda.controlla(prima: prima, comando: .revocaMarcia(gruppo: ids[0]),
+                                       dopo: dopo, eventi: [], adiacenti: griglia.adiacenti)
             }),
         ]
     }

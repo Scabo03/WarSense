@@ -178,9 +178,11 @@
 "significato.rinforzi_nel_deck" = "Rinforzi arrivati nelle riserve";
 
 /* Piano di campagna — annunci degli eventi (05 §10.7): frasi intere con
-   segnaposto, mai somme di parole (00 §14.2). */
-"campagna.marcia_eseguita" = "%@ marcia in riga %d, casella %d";
-"campagna.marcia_eseguita.sintetico" = "%@ in riga %d, casella %d";
+   segnaposto, mai somme di parole (00 §14.2). La marcia ordinata e quella revocata
+   dichiarano i giorni con il plurale di sistema e stanno nel .stringsdict; qui
+   restano gli annunci senza conteggio. */
+"campagna.marcia_compiuta" = "%@ è arrivato in riga %d, casella %d";
+"campagna.marcia_compiuta.sintetico" = "%@ in riga %d, casella %d";
 "campagna.presidio_ordinato" = "%@ presidia in riga %d, casella %d";
 "campagna.presidio_ordinato.sintetico" = "%@ presidia";
 "campagna.giornata_aperta" = "Giornata conclusa: comincia il giorno %d";
@@ -191,6 +193,8 @@
    una voce a sé: l'apertura di una giornata non produce alcuna riga. */
 "registro.marcia_ordinata" = "Giorno %1$d: %2$@ marcia in riga %3$d, casella %4$d";
 "registro.presidio_ordinato" = "Giorno %1$d: %2$@ presidia in riga %3$d, casella %4$d";
+"registro.marcia_compiuta" = "Giorno %1$d: %2$@ è arrivato in riga %3$d, casella %4$d";
+"registro.marcia_revocata" = "Giorno %1$d: %2$@ revoca la marcia in riga %3$d, casella %4$d";
 "registro.ordine_annullato" = "Giorno %d: ordine annullato";
 "registro.giornata_azzerata" = "Giorno %d: ordini della giornata azzerati";
 "registro.titolo" = "Registro della campagna";
@@ -205,10 +209,13 @@
 "casella.testa" = "riga %d, casella %d";
 "casella.libera" = "libera";
 "casella.occupante_proprio" = "tuo %@, %@";
-"casella.disponibile" = "raggiungibile";
+/* casella.disponibile porta il costo in giorni e sta nel .stringsdict, con il
+   plurale di sistema (01 §5.6.3.5: il costo si dichiara prima della conferma). */
 "campagna.annuncio_apertura" = "Mappa %@, %d righe per %d caselle. Il tuo quartier generale è in riga %d, casella %d";
 "campagna.stato" = "Giorno %d. Hanno agito %d gruppi su %d";
+"campagna.stato_con_marcia" = "Giorno %d. Hanno agito %d gruppi su %d, %d in marcia lunga";
 "campagna.stato_tutti_fermi" = "Giorno %d. Nessun gruppo ha ancora agito, sono %d";
+"campagna.stato_solo_marcia" = "Giorno %d. Nessun gruppo ha agito, %d in marcia lunga su %d";
 "campagna.annullato_conferma" = "Ultimo ordine annullato";
 "campagna.azzerato_conferma" = "Ordini della giornata azzerati";
 "campagna.niente_da_annullare" = "Niente da annullare in questa giornata";
@@ -221,6 +228,16 @@
 "pannello.designa_marcia" = "Marcia: scegli la casella sulla mappa";
 "pannello.marcia_designazione_avviata" = "Scegli la casella di destinazione e attivala per confermare";
 "pannello.presidio" = "Presidia: resta fermo in guardia";
+/* Pannello di conferma della marcia (02 §9.2.1, 01 §5.6.3.5): dichiara il costo in
+   giorni e la conseguenza dell'inchiodamento PRIMA della conferma. Il titolo con il
+   costo e la conseguenza sta nel .stringsdict, per il plurale sui giorni. */
+"pannello.marcia_titolo" = "Marcia verso riga %d, casella %d";
+"pannello.marcia_conferma_azione" = "Conferma la marcia";
+"pannello.marcia_rinuncia_azione" = "Rinuncia";
+/* Pannello di revoca della marcia (01 §5.6.3.3, §5.6.3.5): dichiara i giorni persi
+   e che il gruppo resta senza azione, prima della conferma. */
+"pannello.revoca" = "Revoca la marcia";
+"pannello.revoca_conferma_azione" = "Conferma la revoca";
 
 /* Rotori della mappa di campagna (02 §7.3). */
 "rotore.proprie_formazioni" = "Tue formazioni";
@@ -238,6 +255,7 @@
 "avvio.riprendi_campagna" = "Riprendi la campagna in corso";
 
 /* Errori dei dati di campagna (05 §7.8): chiavi risolte sulla copia di fabbrica. */
+"errore.dati.costo_marcia_incoerente" = "I valori della marcia sono incoerenti: costo o posizioni sotto il minimo, o pesi di terreno o strada mancanti";
 "errore.dati.formato_ignoto" = "Formato di mappa ignoto in %@: %@";
 "errore.dati.casella_fuori_mappa" = "Casella fuori dai confini in %@ alla voce %@";
 "errore.dati.casella_ripetuta" = "Casella dichiarata due volte in %@ alla voce %@";

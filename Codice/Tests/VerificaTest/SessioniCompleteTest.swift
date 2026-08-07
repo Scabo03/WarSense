@@ -39,16 +39,31 @@ final class SessioniCompleteTest: XCTestCase {
 
     // MARK: - I mutanti della campagna
 
-    /// Un giorno che salta è invisibile all'invariante di passo, che vede solo
-    /// «prima» e «dopo» di una transizione e li trova coerenti.
-    func test_mutante_un_calendario_che_salta_un_giorno_viene_visto() {
+    /// Un salto IN AVANTI del calendario è legittimo: con la marcia lunga, se tutti
+    /// i gruppi sono in marcia le giornate scorrono a cascata in una sola
+    /// applicazione (01 §5.6.11). L'invariante non lo segnala.
+    func test_01_5_6_11_un_calendario_che_salta_in_avanti_e_legittimo() {
         let s = storiaSana()
-        let mutante = SondaSessioneCampagna.Storia(
+        let cascata = SondaSessioneCampagna.Storia(
             giorniLetti: [1, 2, 5], gruppiIniziali: s.gruppiIniziali, gruppiFinali: s.gruppiFinali,
             vociDiRegistro: s.vociDiRegistro, ordiniImpartiti: s.ordiniImpartiti,
             improntaFinale: s.improntaFinale, improntaRigiocata: s.improntaRigiocata)
-        XCTAssertTrue(codici(SondaSessioneCampagna().controlla(mutante))
-            .contains("calendario_non_monotono"))
+        XCTAssertFalse(codici(SondaSessioneCampagna().controlla(cascata))
+            .contains("calendario_non_monotono"),
+            "il salto in avanti della cascata non è una violazione")
+    }
+
+    /// Un registro che accumula i compimenti di marcia oltre agli ordini è sano
+    /// finché le voci sono ordini più compimenti (01 §5.17.1).
+    func test_01_5_17_1_il_registro_con_i_compimenti_e_sano() {
+        let s = storiaSana()
+        let conCompimenti = SondaSessioneCampagna.Storia(
+            giorniLetti: s.giorniLetti, gruppiIniziali: s.gruppiIniziali, gruppiFinali: s.gruppiFinali,
+            vociDiRegistro: 6, ordiniImpartiti: 4, compimentiDiMarcia: 2,
+            improntaFinale: s.improntaFinale, improntaRigiocata: s.improntaRigiocata)
+        XCTAssertFalse(codici(SondaSessioneCampagna().controlla(conCompimenti))
+            .contains("registro_non_corrisponde"),
+            "le voci sono ordini più compimenti: nessuna divergenza")
     }
 
     func test_mutante_un_calendario_che_torna_indietro_viene_visto() {
@@ -146,7 +161,7 @@ final class SessioniCompleteTest: XCTestCase {
         // il codice che ne esce. Un invariante nuovo senza mutante non compare.
         let sana = storiaSana()
         let guasti: [SondaSessioneCampagna.Storia] = [
-            .init(giorniLetti: [1, 2, 5], gruppiIniziali: sana.gruppiIniziali,
+            .init(giorniLetti: [1, 2, 1], gruppiIniziali: sana.gruppiIniziali,
                   gruppiFinali: sana.gruppiFinali, vociDiRegistro: sana.vociDiRegistro,
                   ordiniImpartiti: sana.ordiniImpartiti, improntaFinale: "a", improntaRigiocata: "a"),
             .init(giorniLetti: sana.giorniLetti, gruppiIniziali: [1, 2], gruppiFinali: [1],

@@ -31,6 +31,21 @@ public struct SondaInvariantiCampagna: Sendable {
         case movimentoFraCaselleNonAdiacenti(da: String, a: String)
         case casellaPercorribileIrraggiungibile(riga: Int, colonna: Int)
         case registroFuoriOrdine(voce: Int)
+        // Invarianti della marcia lunga e della risoluzione di fine giornata.
+        /// Un gruppo in marcia ha i giorni compiuti pari o superiori ai totali: è
+        /// arrivato senza muoversi, cioè fra due caselle (01 §5.6.3.3).
+        case gruppoFraDueCaselle(gruppo: Int)
+        /// I giorni compiuti di una marcia escono da [0, totali]: i giorni mancanti
+        /// sono negativi o superiori ai totali.
+        case giorniMancantiFuoriIntervallo(gruppo: Int, mancanti: Int, totali: Int)
+        /// La posizione visiva mostrata non è quella derivata dalla proporzione dei
+        /// giorni (01 §5.6.3.4): il piano visivo diverge dalla grandezza di origine.
+        case posizioneVisivaIncoerente(gruppo: Int, mostrata: Int, attesa: Int)
+        /// Un gruppo in marcia ha ricevuto un ordine (01 §5.6.3.3).
+        case gruppoInMarciaHaRicevutoOrdine(gruppo: Int)
+        /// Una revoca non ha lasciato il gruppo nella casella di partenza con la
+        /// giornata spesa e senza marcia residua (01 §5.6.3.3, RDA-100).
+        case revocaNonConforme(gruppo: Int)
 
         /// Il codice della violazione, senza spazi: l'uscita del programma di
         /// verifica è dato per chi sviluppa e non testo di prodotto (05 §12.6),
@@ -53,6 +68,11 @@ public struct SondaInvariantiCampagna: Sendable {
             case .movimentoFraCaselleNonAdiacenti(let a, let b): return "movimento_non_adiacente:da=\(a):a=\(b)"
             case .casellaPercorribileIrraggiungibile(let r, let c): return "casella_irraggiungibile:riga=\(r):casella=\(c)"
             case .registroFuoriOrdine(let v): return "registro_fuori_ordine:voce=\(v)"
+            case .gruppoFraDueCaselle(let g): return "gruppo_fra_due_caselle:gruppo=\(g)"
+            case .giorniMancantiFuoriIntervallo(let g, let m, let t): return "giorni_mancanti_fuori_intervallo:gruppo=\(g):mancanti=\(m):totali=\(t)"
+            case .posizioneVisivaIncoerente(let g, let m, let a): return "posizione_visiva_incoerente:gruppo=\(g):mostrata=\(m):attesa=\(a)"
+            case .gruppoInMarciaHaRicevutoOrdine(let g): return "gruppo_in_marcia_ordinato:gruppo=\(g)"
+            case .revocaNonConforme(let g): return "revoca_non_conforme:gruppo=\(g)"
             }
         }
     }
@@ -79,6 +99,11 @@ public struct SondaInvariantiCampagna: Sendable {
         "movimento_non_adiacente",
         "casella_irraggiungibile",
         "registro_fuori_ordine",
+        "gruppo_fra_due_caselle",
+        "giorni_mancanti_fuori_intervallo",
+        "posizione_visiva_incoerente",
+        "gruppo_in_marcia_ordinato",
+        "revoca_non_conforme",
     ]
 
     /// Il codice nudo, senza i valori: la parte prima dei due punti.
@@ -110,6 +135,19 @@ public struct SondaInvariantiCampagna: Sendable {
                     ? .gruppoFuoriDallaMappa(gruppo: gruppo.id.numero)
                     : .gruppoInPiuCaselle(gruppo: gruppo.id.numero, caselle: quante))
             }
+            // Marcia lunga: nessuno stato intermedio fra due caselle, e giorni
+            // compiuti sempre in [0, totali) (01 §5.6.3.3). Un gruppo con i giorni
+            // compiuti pari o superiori ai totali è arrivato ma non mosso, cioè fra
+            // due caselle; giorni compiuti fuori da [0, totali] sono impossibili.
+            if let m = gruppo.marcia {
+                if m.giorniCompiuti >= m.giorniTotali {
+                    violazioni.append(.gruppoFraDueCaselle(gruppo: gruppo.id.numero))
+                }
+                if m.giorniCompiuti < 0 || m.giorniCompiuti > m.giorniTotali {
+                    violazioni.append(.giorniMancantiFuoriIntervallo(
+                        gruppo: gruppo.id.numero, mancanti: m.giorniMancanti, totali: m.giorniTotali))
+                }
+            }
         }
         for casella in occupanti.keys.sorted() where occupanti[casella]! > 1 {
             violazioni.append(.dueGruppiNellaStessaCasella(riga: casella.riga, colonna: casella.colonna))
@@ -133,6 +171,9 @@ public struct SondaInvariantiCampagna: Sendable {
                           adiacenti: (Cella, Cella) -> Bool) -> [Violazione] {
         var violazioni: [Violazione] = []
         let idAgente: IdGruppo
+        // Un gruppo in marcia non riceve mai un ordine di marcia o di presidio
+        // (01 §5.6.3.3): la validazione lo impedisce, l'invariante lo sorveglia. La
+        // revoca fa eccezione, perché si compie PROPRIO su una marcia in corso.
         switch comando {
         case .marcia(let id, let destinazione, _):
             idAgente = id
@@ -141,16 +182,38 @@ public struct SondaInvariantiCampagna: Sendable {
                     da: "\(partenza.riga)-\(partenza.colonna)",
                     a: "\(destinazione.riga)-\(destinazione.colonna)"))
             }
+            if prima.gruppi[id]?.inMarcia == true {
+                violazioni.append(.gruppoInMarciaHaRicevutoOrdine(gruppo: id.numero))
+            }
         case .presidio(let id):
             idAgente = id
+            if prima.gruppi[id]?.inMarcia == true {
+                violazioni.append(.gruppoInMarciaHaRicevutoOrdine(gruppo: id.numero))
+            }
+        case .revocaMarcia(let id):
+            idAgente = id
+            // La revoca lascia il gruppo nella casella di partenza, senza marcia
+            // residua e con la giornata spesa (01 §5.6.3.3, RDA-100).
+            if let g = dopo.gruppi[id] {
+                let conforme = g.posizione == prima.gruppi[id]?.posizione
+                    && g.marcia == nil && g.azioneSpesa
+                if !conforme { violazioni.append(.revocaNonConforme(gruppo: id.numero)) }
+            }
         }
-        if prima.gruppi[idAgente]?.azioneSpesa == true {
+        // «Azione spesa due volte» non si applica alla revoca: la revoca non è
+        // un'azione (01 §5.6.8.1) e si compie su un gruppo che ha già la giornata
+        // consumata dalla marcia, sicché l'azione risulta legittimamente già presa.
+        if case .revocaMarcia = comando {} else if prima.gruppi[idAgente]?.azioneSpesa == true {
             violazioni.append(.azioneSpesaDueVolte(gruppo: idAgente.numero))
         }
 
-        let chiusa = eventi.contains { if case .giornataChiusa = $0 { return true } else { return false } }
-        if chiusa {
-            if dopo.giorno != prima.giorno + 1 {
+        // Con la cascata (tutti i gruppi in marcia) una sola applicazione può
+        // chiudere più giornate: il giorno avanza di TANTE quante le chiusure.
+        let chiusure = eventi.reduce(0) {
+            if case .giornataChiusa = $1 { return $0 + 1 } else { return $0 }
+        }
+        if chiusure > 0 {
+            if dopo.giorno != prima.giorno + chiusure {
                 violazioni.append(.giornoNonAvanzato(prima: prima.giorno, dopo: dopo.giorno))
             }
             for gruppo in dopo.gruppiOrdinati where gruppo.azioneSpesa {
@@ -168,6 +231,31 @@ public struct SondaInvariantiCampagna: Sendable {
                 if gruppo.azioneSpesa && prima.gruppi[gruppo.id]?.azioneSpesa != true {
                     violazioni.append(.gruppoEstraneoHaAgito(gruppo: gruppo.id.numero))
                 }
+            }
+        }
+        return violazioni
+    }
+
+    // MARK: - Invariante della posizione visiva derivata
+
+    /// Che la posizione visiva MOSTRATA di un gruppo in marcia corrisponda a quella
+    /// DERIVATA dalla proporzione fra giorni compiuti e giorni totali, con
+    /// troncamento per difetto su `posizioni` posizioni (01 §5.6.3.4). La posizione
+    /// mostrata arriva dall'esterno — la calcola chi disegna, cioè la Presentazione
+    /// (nel banco, `MotoreCampagna.avanzamentoVisivo`) — così che una prova possa
+    /// darne una divergente e accertare che la sonda se ne accorga. In produzione la
+    /// posizione mostrata è funzione pura dei giorni e non può divergere; l'invariante
+    /// sorveglia che nessuna sede la conservi come grandezza autonoma.
+    public func controllaPosizioniVisive(stato: StatoCampagna, posizioni: Int,
+                                         mostrate: [IdGruppo: Int]) -> [Violazione] {
+        var violazioni: [Violazione] = []
+        for gruppo in stato.gruppiOrdinati {
+            guard let m = gruppo.marcia else { continue }
+            let attesa = m.giorniTotali > 0 ? (m.giorniCompiuti * posizioni) / m.giorniTotali : 0
+            guard let mostrata = mostrate[gruppo.id] else { continue }
+            if mostrata != attesa {
+                violazioni.append(.posizioneVisivaIncoerente(
+                    gruppo: gruppo.id.numero, mostrata: mostrata, attesa: attesa))
             }
         }
         return violazioni

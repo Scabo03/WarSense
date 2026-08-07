@@ -7,23 +7,32 @@ import Dati
 /// caso come chiave (prova in `CompatibilitaGiornaleTest`).
 ///
 /// L'elenco chiuso delle azioni di giornata è quello di 01 §5.6.8.1, sedici voci.
-/// Questa unità ne realizza due: la marcia di una casella e il presidio, cioè
-/// restare fermi. Le altre quattordici appartengono alle unità che le introducono
-/// e non si dichiarano a vuoto.
+/// Questa unità ne realizza due: la marcia di una o più giornate e il presidio,
+/// cioè restare fermi. A queste si aggiunge la REVOCA della marcia, che 01 §5.6.8.1
+/// dichiara espressamente NON un'azione (non consuma la giornata): è un comando
+/// proprio e non un annullamento (RDA-76). Le altre azioni appartengono alle unità
+/// che le introducono e non si dichiarano a vuoto.
 public enum ComandoCampagna: Hashable, Codable, Sendable {
     /// Marcia in una casella adiacente (01 §5.6.1), con il COSTO IN GIORNI dello
-    /// scatto (01 §5.6.3.1). Il costo viaggia dentro il comando e non si ricalcola
-    /// alla riapplicazione: il giornale è anche il formato di salvataggio, e una
-    /// campagna ripresa deve ripercorrere gli scatti che è costata, non quelli che
-    /// costerebbero oggi. Il valore viene dai dati (`marcia-campagna.json`) e in
-    /// questa unità vale sempre uno: la marcia lunga, i pesi della casella di
-    /// partenza e di arrivo, il volume della colonna, la strada e la strettoia
-    /// (01 §5.6.3.2, §5.6.3.3) appartengono all'unità successiva.
+    /// scatto (01 §5.6.3.1, §5.6.3.3). Il costo viaggia dentro il comando e non si
+    /// ricalcola alla riapplicazione: il giornale è anche il formato di salvataggio,
+    /// e una campagna ripresa deve ripercorrere gli scatti che è costata, non quelli
+    /// che costerebbero oggi (RDA-75). Il valore viene dai dati (`marcia-campagna.json`),
+    /// dove i pesi della casella di partenza e di arrivo, la strada e la strettoia
+    /// confluiscono nella medesima grandezza; con costo maggiore di uno la marcia è
+    /// lunga e il gruppo resta nella casella di partenza finché non l'ha compiuta.
     case marcia(gruppo: IdGruppo, a: Cella, giorni: Int)
     /// Presidio: restare fermi in guardia (01 §5.6.0.6, §5.6.8.1). Stare fermi è
     /// un'azione ordinabile e non un'omissione: un gruppo che non ha agito è
     /// sempre un gruppo che attende una decisione.
     case presidio(gruppo: IdGruppo)
+    /// Revoca dell'ordine di marcia (01 §5.6.3.3, §5.6.8.1, RDA-76). Si può compiere
+    /// in qualunque momento e costa TUTTI i giorni già spesi. Non è un'azione e non
+    /// consuma la giornata; ma il gruppo che revoca ha già speso la propria giornata
+    /// con l'ordine di marcia e non compie altro quel giorno (decisione del titolare,
+    /// RDA-100): perde i giorni spesi e resta senza azione per la giornata corrente.
+    /// Comando proprio che si AGGIUNGE alla sequenza, non un troncamento del giornale.
+    case revocaMarcia(gruppo: IdGruppo)
 }
 
 /// I motivi chiusi di non ammissibilità sulla mappa (05 §3.2). Ogni caso
@@ -53,6 +62,11 @@ public enum MotivoNonValidoCampagna: String, Codable, Hashable, Sendable, CaseIt
     /// corso (05 §6.5). Non è il rifiuto di un comando ma di un annullamento, e
     /// riusa questo insieme perché il vocabolario dei motivi è uno solo (00 §9.4).
     case oltreLaGiornataInCorso = "campagna.non_si_torna_oltre_la_giornata"
+    /// Nuovo della campagna: la revoca è stata chiesta per un gruppo che non è in
+    /// marcia (01 §5.6.3.3). Non nasce da un gesto del giocatore — la revoca si offre
+    /// soltanto per i gruppi in marcia — ma da un giornale estraneo o manomesso, e
+    /// va dichiarato come ogni altro rifiuto invece di essere applicato in silenzio.
+    case gruppoNonInMarcia = "comando.non_valido.gruppo_non_in_marcia"
 }
 
 /// Esito della validazione di un comando di campagna: la validazione e l'anteprima
@@ -69,11 +83,19 @@ public enum EsitoValidazioneCampagna: Hashable, Sendable {
 
 /// Gli eventi astratti della campagna (05 §3.7): fatti, mai annunci (00 §3.2).
 public enum EventoCampagna: Hashable, Codable, Sendable {
-    /// Un gruppo è entrato nella casella indicata (01 §5.6.1).
-    case marciaEseguita(gruppo: IdGruppo, nome: IdentificatoreDati, da: Cella, a: Cella)
+    /// Un gruppo ha ricevuto l'ordine di marciare verso una casella adiacente, che
+    /// gli costerà `giorni` (01 §5.6.1, §5.6.3.1). NON è ancora entrato: con la
+    /// marcia lunga l'ingresso avviene alla risoluzione di fine giornata.
+    case marciaOrdinata(gruppo: IdGruppo, nome: IdentificatoreDati, da: Cella, a: Cella, giorni: Int)
+    /// Una marcia si è COMPIUTA e il gruppo è entrato nella casella di arrivo, alla
+    /// chiusura della giornata (01 §5.6.3.3, §5.17.1). Fatto non deciso dal giocatore.
+    case marciaCompiuta(gruppo: IdGruppo, nome: IdentificatoreDati, da: Cella, a: Cella)
+    /// Una marcia è stata revocata: il gruppo resta in `casella` e perde `giorniPersi`
+    /// giorni (01 §5.6.3.3, RDA-76).
+    case marciaRevocata(gruppo: IdGruppo, nome: IdentificatoreDati, casella: Cella, giorniPersi: Int)
     /// Un gruppo è rimasto fermo in guardia (01 §5.6.8.1).
     case presidioOrdinato(gruppo: IdGruppo, nome: IdentificatoreDati, casella: Cella)
-    /// La giornata si è chiusa perché tutti i gruppi hanno agito (01 §5.6.0.6):
+    /// La giornata si è chiusa perché tutti i gruppi hanno concluso (01 §5.6.0.6):
     /// non esiste alcun comando di fine giornata.
     case giornataChiusa(giorno: Int)
     /// La giornata nuova si è aperta e il contatore dei giorni è avanzato.

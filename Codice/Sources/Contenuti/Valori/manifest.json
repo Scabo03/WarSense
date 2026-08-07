@@ -9,7 +9,7 @@
   "combattimento.json": "b2b1b8a8085864bb61c310986865bcf9bd2520c05bc8399509ddc4e9b94dbd94",
   "formati-mappa.json": "3adc8adb22315fba1f4610622e8f6e9ee03e891311f024774a99a19bfdbea4e7",
   "formato-battaglia.json": "d5877cc487278512568a7efec9e76f3195542b3ecb0d23be9f6dc49939a5f290",
-  "marcia-campagna.json": "a6523f631ed19239ebe132dcd7b1776c5a41c58b9a3cb65dd5e3891d11513ef8",
+  "marcia-campagna.json": "ba9f858e2f07541f5b920212fda8092ba203d2219ba3fe668642764fe8209f82",
   "minimi.json": "d67b738ee9136f09d98382d60c3bd661751943c5caacb5dc1b60e12811df353c",
   "nomi-gruppi.json": "9ca67b318cef18f01b622ee09740476e9f5e0b5849e9b4df66c4b2e1a73f8a46",
   "offese-e-protezioni.json": "bb48b76b1c6f93837850dda262114c4cc4ce9ead5a3c4b463dee75ef65bcc35f",
@@ -19,8 +19,8 @@
   "ufficiali.json": "39447ca2b767d7b0a443f69257b67c8c71a3954c3725a3aa2169157c42f595c3",
   "vantaggi-nascosti.json": "65c7d952ce06cd5c9a8b594be77b0cfb3171045d77b6007673299c6b36d253f8"
  },
- "versione": "0.7.0",
+ "versione": "0.8.0",
  "versioni_compatibili": [
-  "0.7.0"
+  "0.8.0"
  ]
 }

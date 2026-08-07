@@ -15,8 +15,13 @@ import Contenuti
 ///
 /// Oltre quel confine, cioè per gli ordini appartenenti a giornate precedenti,
 /// l'annullamento è rifiutato con il proprio motivo dichiarato: annullare dopo la
-/// chiusura, quando esisteranno le mosse avversarie e le risoluzioni di fine
-/// giornata, equivarrebbe alla prova a rovescio (decisione del titolare, RDA-73).
+/// chiusura equivarrebbe alla prova a rovescio (decisione del titolare, RDA-73).
+///
+/// Con la risoluzione di fine giornata il confine torna a mordere di più: se la
+/// chiusura ha COMPIUTO una marcia lunga, il giocatore ne ha ascoltato l'arrivo, e
+/// l'ordine che l'ha chiusa non si annulla più — annullarlo sarebbe rifare la mossa
+/// sapendo com'è andata (05 §6.5, RDA-102). La grazia di RDA-73 resta solo per le
+/// chiusure senza fatti, dove 00 §13.8 prevale.
 final class AnnullamentoGiornataTest: XCTestCase {
 
     var valori: ValoriDiGioco!
@@ -34,9 +39,10 @@ final class AnnullamentoGiornataTest: XCTestCase {
         return url
     }
 
-    private func nuova(_ cartella: URL, gruppi: [(Int, Int)]) throws -> SessioneCampagna {
+    private func nuova(_ cartella: URL, gruppi: [(Int, Int)],
+                       mappa: String = "pianura_lunga") throws -> SessioneCampagna {
         try SessioneCampagna(
-            nuova: ScenarioCampagna(mappa: "pianura_lunga",
+            nuova: ScenarioCampagna(mappa: mappa,
                                     gruppiGiocatore: gruppi.map { .init(riga: $0.0, colonna: $0.1) }),
             valori: valori, valoriCampagna: valoriCampagna, versioneTesti: "0.1.1",
             cartella: cartella, seme: 4242, identificatore: "prova-annullamento")
@@ -169,8 +175,9 @@ final class AnnullamentoGiornataTest: XCTestCase {
         let cartella = try slot()
         let sessione = try await nuova(cartella, gruppi: [(10, 6), (10, 5), (9, 6)])
         let ids = await sessione.stato.gruppiOrdinati.map(\.id)
-        _ = try await sessione.esegui(.marcia(gruppo: ids[0], a: Cella(riga: 10, colonna: 7), giorni: 1),
-                                      parte: .giocatore)
+        // Solo presidi: la chiusura non compie alcuna marcia, sicché la grazia di
+        // RDA-73 vale e l'ordine di chiusura resta annullabile.
+        _ = try await sessione.esegui(.presidio(gruppo: ids[0]), parte: .giocatore)
         _ = try await sessione.esegui(.presidio(gruppo: ids[1]), parte: .giocatore)
         let partitaPrima = await partita(sessione.stato)
         _ = try await sessione.esegui(.presidio(gruppo: ids[2]), parte: .giocatore)
@@ -208,6 +215,45 @@ final class AnnullamentoGiornataTest: XCTestCase {
         _ = try await sessione.esegui(.presidio(gruppo: id), parte: .giocatore)
         _ = try await sessione.annulla(parte: .giocatore) // riapre il giorno 2
 
+        let ripresa = try await SessioneCampagna(riprendi: cartella, valori: valori,
+                                                 valoriCampagna: valoriCampagna)
+        await XCTAssertRifiutaOltreLaGiornata { try await ripresa.annulla(parte: .giocatore) }
+    }
+
+    // MARK: - 05 §6.5, RDA-102 — il compimento di una marcia chiude il confine
+
+    /// Quando la chiusura della giornata compie una marcia lunga, l'ordine che l'ha
+    /// chiusa non si annulla più: il giocatore ha ascoltato l'arrivo, e annullare
+    /// sarebbe rifare la mossa sapendo com'è andata. Situazione raggiungibile: un
+    /// solo gruppo marcia verso l'acqua, la marcia si compie a cascata, e la revoca
+    /// dell'ordine è rifiutata al confine.
+    func test_05_6_5_annullare_dopo_un_compimento_di_marcia_e_rifiutato() async throws {
+        let cartella = try slot()
+        // Guado: un gruppo a (3,2) marcia su (2,2), acqua con strada, costo maggiore di uno.
+        let sessione = try await nuova(cartella, gruppi: [(3, 2)], mappa: "guado")
+        let id = await sessione.stato.gruppiOrdinati[0].id
+        let costo = await sessione.vista(per: .giocatore).costoInGiorni(
+            da: Cella(riga: 3, colonna: 2), a: Cella(riga: 2, colonna: 2))
+        XCTAssertGreaterThan(costo, 1)
+        _ = try await sessione.esegui(
+            .marcia(gruppo: id, a: Cella(riga: 2, colonna: 2), giorni: costo), parte: .giocatore)
+        // La marcia si è compiuta a cascata: il gruppo è arrivato.
+        let arrivato = await sessione.stato.gruppi[id]!.posizione
+        XCTAssertEqual(arrivato, Cella(riga: 2, colonna: 2))
+        // L'ordine che ha chiuso la giornata (la marcia stessa) non si annulla più.
+        await XCTAssertRifiutaOltreLaGiornata { try await sessione.annulla(parte: .giocatore) }
+    }
+
+    /// Il confine del compimento vive nel giornale e sopravvive al riavvio: ripresa
+    /// dal solo giornale, l'annullamento resta rifiutato.
+    func test_05_6_5_il_confine_del_compimento_sopravvive_alla_ripresa() async throws {
+        let cartella = try slot()
+        let sessione = try await nuova(cartella, gruppi: [(3, 2)], mappa: "guado")
+        let id = await sessione.stato.gruppiOrdinati[0].id
+        let costo = await sessione.vista(per: .giocatore).costoInGiorni(
+            da: Cella(riga: 3, colonna: 2), a: Cella(riga: 2, colonna: 2))
+        _ = try await sessione.esegui(
+            .marcia(gruppo: id, a: Cella(riga: 2, colonna: 2), giorni: costo), parte: .giocatore)
         let ripresa = try await SessioneCampagna(riprendi: cartella, valori: valori,
                                                  valoriCampagna: valoriCampagna)
         await XCTAssertRifiutaOltreLaGiornata { try await ripresa.annulla(parte: .giocatore) }

@@ -204,13 +204,17 @@ final class RegoleCampagnaTest: XCTestCase {
             mappa: "pianura_lunga",
             gruppiGiocatore: [.init(riga: qg.riga, colonna: qg.colonna),
                               .init(riga: vicina.riga, colonna: vicina.colonna - 1)]))
+        let primo = stato.gruppiOrdinati[0].id
         let secondo = stato.gruppiOrdinati[1].id
-        XCTAssertTrue(motore.valida(.marcia(gruppo: secondo, a: vicina, giorni: 1),
+        let costo = motore.costoInGiorni(da: stato.gruppi[secondo]!.posizione, a: vicina, stato: stato)
+        XCTAssertTrue(motore.valida(.marcia(gruppo: secondo, a: vicina, giorni: costo),
                                     parte: .giocatore, stato: stato).eValido,
                       "la casella accanto al gruppo si raggiunge come qualunque altra")
-        esegui(.marcia(gruppo: secondo, a: vicina, giorni: 1), &stato)
-        XCTAssertEqual(stato.gruppi[secondo]!.posizione, vicina)
-        // E la si raggiunge anche dal gruppo che le sta a sud, una volta libera.
+        // Ordinata la marcia e chiusa la giornata (l'altro gruppo presidia), la marcia
+        // si compie e il secondo entra nella casella.
+        esegui(.marcia(gruppo: secondo, a: vicina, giorni: costo), &stato)
+        esegui(.presidio(gruppo: primo), &stato)
+        XCTAssertEqual(stato.gruppi[secondo]!.posizione, vicina, "la marcia si è compiuta")
         XCTAssertEqual(stato.griglia.vicini(di: vicina).count, 4,
                        "geometricamente ha quattro vicine, come ogni casella interna")
     }
@@ -230,13 +234,19 @@ final class RegoleCampagnaTest: XCTestCase {
     }
 
     func test_01_5_6_0_5_la_marcia_consuma_l_intera_giornata_del_gruppo() throws {
+        // Con altri gruppi ancora in attesa la giornata non si chiude: la marcia è
+        // ORDINATA, spende l'azione, ma non muove il gruppo (01 §5.6.3.3). Il gruppo
+        // resta nella casella di partenza, in marcia, e non può agire di nuovo.
         var stato = try crea(scenario())
         let id = stato.gruppiOrdinati[0].id
         let partenza = stato.gruppi[id]!.posizione
         esegui(.marcia(gruppo: id, a: Cella(riga: 10, colonna: 7), giorni: 1), &stato)
-        XCTAssertEqual(stato.gruppi[id]!.posizione, Cella(riga: 10, colonna: 7))
-        XCTAssertNotEqual(stato.gruppi[id]!.posizione, partenza)
+        XCTAssertEqual(stato.gruppi[id]!.posizione, partenza,
+                       "il gruppo resta nella casella di partenza fino al compimento")
+        XCTAssertTrue(stato.gruppi[id]!.inMarcia)
         XCTAssertTrue(stato.gruppi[id]!.azioneSpesa)
+        XCTAssertEqual(motore.valida(.presidio(gruppo: id), parte: .giocatore, stato: stato).motivo,
+                       .azioneGiaSpesa, "la giornata del gruppo è consumata")
     }
 
     func test_01_5_6_3_1_non_esistono_percorsi_di_piu_caselle_in_un_turno() throws {
@@ -259,10 +269,27 @@ final class RegoleCampagnaTest: XCTestCase {
         let dove = stato.gruppi[secondo]!.posizione
         XCTAssertEqual(motore.valida(.marcia(gruppo: primo, a: dove, giorni: 1),
                                      parte: .giocatore, stato: stato).motivo, .occupata)
-        // Liberata la casella, la marcia diventa valida: il divieto è di posizione.
+        // Il secondo ordina una marcia verso nord: NON libera ancora la casella,
+        // perché resta nella casella di partenza fino al compimento (01 §5.6.3.3).
         esegui(.marcia(gruppo: secondo, a: Cella(riga: 9, colonna: 5), giorni: 1), &stato)
-        XCTAssertTrue(motore.valida(.marcia(gruppo: primo, a: dove, giorni: 1),
-                                    parte: .giocatore, stato: stato).eValido)
+        XCTAssertEqual(motore.valida(.marcia(gruppo: primo, a: dove, giorni: 1),
+                                     parte: .giocatore, stato: stato).motivo, .occupata,
+                       "il secondo è ancora nella casella: la marcia non l'ha mosso")
+    }
+
+    /// Due marce non possono puntare la STESSA casella: la destinazione di una marcia
+    /// in corso è prenotata, perché il gruppo vi arriverà e non ci starebbero in due
+    /// (01 §5.6.0.2). Senza questo, i due arriverebbero e si scontrerebbero alla
+    /// risoluzione.
+    func test_01_5_6_0_2_due_marce_non_puntano_la_stessa_casella() throws {
+        var stato = try crea(scenario(gruppi: [(10, 6), (10, 8)]))
+        let primo = stato.gruppiOrdinati[0].id
+        let secondo = stato.gruppiOrdinati[1].id
+        // Il primo marcia verso (10,7); il secondo prova a puntare la stessa casella.
+        esegui(.marcia(gruppo: primo, a: Cella(riga: 10, colonna: 7), giorni: 1), &stato)
+        XCTAssertEqual(motore.valida(.marcia(gruppo: secondo, a: Cella(riga: 10, colonna: 7),
+                                             giorni: 1), parte: .giocatore, stato: stato).motivo,
+                       .occupata, "la casella è già puntata da una marcia in corso")
     }
 
     func test_01_5_1_la_marcia_fuori_mappa_e_respinta_con_il_proprio_motivo() throws {
@@ -322,14 +349,22 @@ final class RegoleCampagnaTest: XCTestCase {
     // MARK: - 01 §5.16.1 — gli stati del gruppo, ridotti a ciò che esiste
 
     func test_01_5_16_1_il_gruppo_dichiara_il_proprio_stato_con_il_vocabolario_ridotto() throws {
-        var stato = try crea(scenario(gruppi: [(10, 6), (10, 5)]))
-        let id = stato.gruppiOrdinati[0].id
-        XCTAssertEqual(stato.gruppi[id]!.statoDichiarato, .inAttesa)
-        esegui(.presidio(gruppo: id), &stato)
-        XCTAssertEqual(stato.gruppi[id]!.statoDichiarato, .haAgito)
-        // Il vocabolario di questa unità è chiuso a due termini: gli altri stati di
+        // Tre gruppi, così che ordinandone due la giornata resti aperta e gli stati
+        // «ha agito» e «in marcia» si possano osservare senza che la chiusura li muti.
+        var stato = try crea(scenario(gruppi: [(10, 6), (10, 5), (9, 6)]))
+        let primo = stato.gruppiOrdinati[0].id
+        let secondo = stato.gruppiOrdinati[1].id
+        XCTAssertEqual(stato.gruppi[primo]!.statoDichiarato, .inAttesa)
+        esegui(.presidio(gruppo: primo), &stato)
+        XCTAssertEqual(stato.gruppi[primo]!.statoDichiarato, .haAgito)
+        // Un gruppo in marcia lunga dichiara i giorni mancanti nel proprio stato.
+        let costo = motore.costoInGiorni(da: stato.gruppi[secondo]!.posizione,
+                                         a: Cella(riga: 9, colonna: 5), stato: stato)
+        esegui(.marcia(gruppo: secondo, a: Cella(riga: 9, colonna: 5), giorni: costo), &stato)
+        XCTAssertEqual(stato.gruppi[secondo]!.statoDichiarato, .inMarcia(giorniMancanti: costo))
+        // Il vocabolario di questa unità è chiuso a tre termini: gli altri stati di
         // 02 §4.4.5 appartengono alle regole che li producono e non esistono qui.
-        XCTAssertEqual(StatoGruppo.allCases.count, 2)
+        XCTAssertEqual(StatoGruppo.casiDiRiferimento.count, 3)
     }
 
     func test_01_5_6_0_4_ogni_gruppo_riceve_un_nome_proprio_stabile_e_unico() throws {
@@ -348,7 +383,9 @@ final class RegoleCampagnaTest: XCTestCase {
     /// ordini impartiti ai gruppi (scostamento S8, RDA-72). Nasce vuoto: senza
     /// fatti non c'è nulla da annotare.
     func test_01_5_17_il_registro_annota_gli_ordini_impartiti_ai_gruppi() throws {
-        var stato = try crea(scenario(gruppi: [(10, 6), (10, 5)]))
+        // Tre gruppi: ordinandone due la giornata resta aperta, e il registro porta
+        // le sole due voci degli ordini, senza compimenti.
+        var stato = try crea(scenario(gruppi: [(10, 6), (10, 5), (9, 6)]))
         XCTAssertTrue(stato.registro.isEmpty, "il registro nasce vuoto: nulla è ancora avvenuto")
         let ids = stato.gruppiOrdinati.map(\.id)
         esegui(.presidio(gruppo: ids[0]), &stato)
@@ -364,7 +401,7 @@ final class RegoleCampagnaTest: XCTestCase {
         esegui(.marcia(gruppo: ids[1], a: Cella(riga: 9, colonna: 5), giorni: 1), &stato)
         XCTAssertEqual(stato.registro.count, 2)
         XCTAssertEqual(stato.registro[1].luogo, Cella(riga: 9, colonna: 5),
-                       "il luogo della marcia è la casella di arrivo")
+                       "il luogo della marcia ordinata è la casella di destinazione")
     }
 
     /// Il giorno è una PROPRIETÀ di ciascuna voce e non una voce a sé: l'apertura

@@ -27,7 +27,11 @@ public struct TraduttoreEventiCampagna: Sendable {
     /// arriva sempre subito dopo un segnale sarebbe carico senza informazione.
     public func significato(per evento: EventoCampagna) -> SignificatoSegnale? {
         switch evento {
-        case .marciaEseguita, .presidioOrdinato: return .conferma
+        case .marciaOrdinata, .presidioOrdinato, .marciaRevocata: return .conferma
+        // Il compimento di una marcia lunga è un fatto non deciso dal giocatore e ha
+        // il proprio significato tattile già assegnato: `marcia_completata`, famiglia
+        // della navigazione (02 §11.7.1). Non è una conferma di un ordine.
+        case .marciaCompiuta: return .marciaCompletata
         case .giornataChiusa, .giornataAperta: return nil
         }
     }
@@ -41,9 +45,17 @@ public struct TraduttoreEventiCampagna: Sendable {
     /// Restituisce nulla per gli eventi che non producono annuncio proattivo.
     public func annuncio(per evento: EventoCampagna, verbosita: Verbosita) -> TestoLocalizzato? {
         switch evento {
-        case .marciaEseguita(_, let chiave, _, let a):
-            return testi.frase("campagna.marcia_eseguita", verbosita: verbosita,
+        case .marciaOrdinata(_, let chiave, _, let a, let giorni):
+            // La marcia ordinata dichiara i giorni: la grandezza di origine che chi
+            // ascolta riceve (01 §5.6.3.3), con il plurale di sistema.
+            return testi.frase("campagna.marcia_ordinata", verbosita: verbosita,
+                               nome(chiave), a.riga, a.colonna, giorni)
+        case .marciaCompiuta(_, let chiave, _, let a):
+            return testi.frase("campagna.marcia_compiuta", verbosita: verbosita,
                                nome(chiave), a.riga, a.colonna)
+        case .marciaRevocata(_, let chiave, _, let giorniPersi):
+            return testi.frase("campagna.marcia_revocata", verbosita: verbosita,
+                               nome(chiave), giorniPersi)
         case .presidioOrdinato(_, let chiave, let casella):
             return testi.frase("campagna.presidio_ordinato", verbosita: verbosita,
                                nome(chiave), casella.riga, casella.colonna)
@@ -66,6 +78,10 @@ public struct TraduttoreEventiCampagna: Sendable {
         case .marciaOrdinata(let gruppo, _, let a):
             return testi.frase(chiave, voce.giorno, nome(gruppo), a.riga, a.colonna)
         case .presidioOrdinato(let gruppo, let casella):
+            return testi.frase(chiave, voce.giorno, nome(gruppo), casella.riga, casella.colonna)
+        case .marciaCompiuta(let gruppo, _, let a):
+            return testi.frase(chiave, voce.giorno, nome(gruppo), a.riga, a.colonna)
+        case .marciaRevocata(let gruppo, let casella):
             return testi.frase(chiave, voce.giorno, nome(gruppo), casella.riga, casella.colonna)
         case .ordineAnnullato, .giornataAzzerata:
             return testi.frase(chiave, voce.giorno)

@@ -17,6 +17,14 @@ extension Gruppo: CodificabileCanonico {
         c.testo(nome)
         posizione.codifica(in: &c)
         c.vero(azioneSpesa)
+        // La marcia lunga in corso entra nell'impronta: due gruppi con la stessa
+        // posizione e azione ma marce diverse — o uno in marcia e uno no — non sono
+        // lo stesso stato e devono produrre byte diversi.
+        c.opzionale(marcia) { cc, m in
+            m.destinazione.codifica(in: &cc)
+            cc.intero(Int64(m.giorniTotali))
+            cc.intero(Int64(m.giorniCompiuti))
+        }
     }
 }
 
@@ -30,6 +38,10 @@ extension FattoRegistrato: CodificabileCanonico {
         case .marciaOrdinata(let gruppo, let da, let a):
             c.testo(gruppo); da.codifica(in: &c); a.codifica(in: &c)
         case .presidioOrdinato(let gruppo, let casella):
+            c.testo(gruppo); casella.codifica(in: &c)
+        case .marciaCompiuta(let gruppo, let da, let a):
+            c.testo(gruppo); da.codifica(in: &c); a.codifica(in: &c)
+        case .marciaRevocata(let gruppo, let casella):
             c.testo(gruppo); casella.codifica(in: &c)
         case .ordineAnnullato, .giornataAzzerata:
             break

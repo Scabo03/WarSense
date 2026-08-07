@@ -136,6 +136,7 @@
 "casella.fuori_mappa" = "fuori dalla mappa";
 "comando.non_valido.gruppo_ignoto" = "gruppo non disponibile";
 "comando.non_valido.costo_non_coerente" = "costo della marcia non coerente";
+"comando.non_valido.gruppo_non_in_marcia" = "il gruppo non è in marcia";
 /* Confine dell'annullamento (05 §6.5): ogni motivo di rifiuto ha il proprio
    termine (00 §9, principio 9), e il rifiuto non è mai silenzioso. */
 "campagna.non_si_torna_oltre_la_giornata" = "non si torna oltre la giornata in corso";

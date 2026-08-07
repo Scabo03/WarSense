@@ -55,6 +55,24 @@ public enum CaricatoreCampagna {
             throw ErroreDati(chiave: "errore.dati.costo_marcia_incoerente",
                              file: "marcia-campagna.json")
         }
+        // Le nove posizioni dell'avanzamento visivo (01 §5.6.3.4): almeno una, o la
+        // proporzione non si discretizzerebbe e il troncamento dividerebbe per zero.
+        guard marcia.posizioniVisive >= 1 else {
+            throw ErroreDati(chiave: "errore.dati.costo_marcia_incoerente",
+                             file: "marcia-campagna.json")
+        }
+        // I pesi confluiscono in una sola grandezza (01 §5.6.3.2) e nessun terreno o
+        // strada può restare senza peso: un peso mancante sarebbe un fattore che si
+        // somma in modo opaco, cioè per omissione. Si respinge la copia incompleta
+        // invece di applicare un valore sottinteso (00 §13.1, §13.6).
+        let terreniAttesi = Set(TerrenoCasella.allCases.map(\.rawValue))
+        let stradeAttese = Set(TipoStrada.allCases.map(\.rawValue))
+        guard Set(marcia.pesoTerrenoPartenza.keys) == terreniAttesi,
+              Set(marcia.pesoTerrenoArrivo.keys) == terreniAttesi,
+              Set(marcia.pesoStradaArrivo.keys) == stradeAttese else {
+            throw ErroreDati(chiave: "errore.dati.costo_marcia_incoerente",
+                             file: "marcia-campagna.json")
+        }
 
         // Le mappe sono un albero di file: ciascuna è contenuto a sé (05 §7.6).
         let cartellaDelleMappe = cartella.appendingPathComponent(cartellaMappe)

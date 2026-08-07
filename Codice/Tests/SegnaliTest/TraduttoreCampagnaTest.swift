@@ -18,8 +18,12 @@ final class TraduttoreCampagnaTest: XCTestCase {
     }
 
     private let eventi: [EventoCampagna] = [
-        .marciaEseguita(gruppo: IdGruppo(1), nome: "corvo",
+        .marciaOrdinata(gruppo: IdGruppo(1), nome: "corvo",
+                        da: Cella(riga: 10, colonna: 6), a: Cella(riga: 9, colonna: 6), giorni: 2),
+        .marciaCompiuta(gruppo: IdGruppo(1), nome: "corvo",
                         da: Cella(riga: 10, colonna: 6), a: Cella(riga: 9, colonna: 6)),
+        .marciaRevocata(gruppo: IdGruppo(1), nome: "corvo",
+                        casella: Cella(riga: 10, colonna: 6), giorniPersi: 1),
         .presidioOrdinato(gruppo: IdGruppo(2), nome: "lupo", casella: Cella(riga: 10, colonna: 5)),
         .giornataChiusa(giorno: 1),
         .giornataAperta(giorno: 2),
@@ -43,11 +47,39 @@ final class TraduttoreCampagnaTest: XCTestCase {
     }
 
     func test_00_14_2_l_annuncio_e_una_frase_intera_con_i_segnaposto_riempiti() throws {
-        let annuncio = traduttore.annuncio(
-            per: .marciaEseguita(gruppo: IdGruppo(1), nome: "corvo",
+        let arrivo = traduttore.annuncio(
+            per: .marciaCompiuta(gruppo: IdGruppo(1), nome: "corvo",
                                  da: Cella(riga: 10, colonna: 6), a: Cella(riga: 9, colonna: 6)),
             verbosita: .normale)
-        XCTAssertEqual(annuncio?.testo, "Corvo marcia in riga 9, casella 6")
+        XCTAssertEqual(arrivo?.testo, "Corvo è arrivato in riga 9, casella 6")
+    }
+
+    /// L'annuncio della marcia ordinata dichiara i giorni con il PLURALE di sistema:
+    /// «1 giorno» al singolare, «più giorni» al plurale. È il modo in cui chi ascolta
+    /// riceve la grandezza di origine (01 §5.6.3.3, §5.6.3.4).
+    func test_01_5_6_3_3_l_annuncio_della_marcia_ordinata_declina_i_giorni() throws {
+        func detto(_ giorni: Int) -> String {
+            traduttore.annuncio(
+                per: .marciaOrdinata(gruppo: IdGruppo(1), nome: "corvo",
+                                     da: Cella(riga: 10, colonna: 6),
+                                     a: Cella(riga: 9, colonna: 6), giorni: giorni),
+                verbosita: .normale)?.testo ?? "‼️"
+        }
+        XCTAssertEqual(detto(1), "Corvo marcia verso riga 9, casella 6, 1 giorno al termine")
+        XCTAssertEqual(detto(3), "Corvo marcia verso riga 9, casella 6, 3 giorni al termine")
+    }
+
+    /// La revoca dichiara i giorni persi con il plurale: la conseguenza che
+    /// 01 §5.6.3.5 vuole detta.
+    func test_01_5_6_3_3_l_annuncio_della_revoca_declina_i_giorni_persi() throws {
+        func detto(_ giorni: Int) -> String {
+            traduttore.annuncio(
+                per: .marciaRevocata(gruppo: IdGruppo(1), nome: "corvo",
+                                     casella: Cella(riga: 10, colonna: 6), giorniPersi: giorni),
+                verbosita: .normale)?.testo ?? "‼️"
+        }
+        XCTAssertEqual(detto(1), "Corvo: marcia revocata, perso 1 giorno")
+        XCTAssertEqual(detto(2), "Corvo: marcia revocata, persi 2 giorni")
     }
 
     func test_02_11_5_la_chiusura_della_giornata_non_aggiunge_un_significato_tattile() throws {
@@ -62,9 +94,17 @@ final class TraduttoreCampagnaTest: XCTestCase {
     }
 
     func test_02_4_ogni_termine_del_vocabolario_di_campagna_esiste_nei_testi() throws {
-        for stato in StatoGruppo.allCases {
-            XCTAssertTrue(testi.esiste(stato.rawValue, tavola: "Vocabolario"),
-                          "manca il termine \(stato.rawValue)")
+        for stato in StatoGruppo.casiDiRiferimento {
+            switch stato {
+            case .inAttesa, .haAgito:
+                XCTAssertTrue(testi.esiste(stato.chiaveTesto, tavola: "Vocabolario"),
+                              "manca il termine \(stato.chiaveTesto)")
+            case .inMarcia:
+                // «in marcia» porta i giorni mancanti e declina al plurale: vive nel
+                // .stringsdict della tavola Annunci, non nel vocabolario semplice.
+                XCTAssertTrue(testi.esiste(stato.chiaveTesto, tavola: "Annunci"),
+                              "manca il plurale di \(stato.chiaveTesto)")
+            }
         }
         for motivo in MotivoNonValidoCampagna.allCases {
             XCTAssertTrue(testi.esiste(motivo.rawValue, tavola: "Vocabolario"),

@@ -991,3 +991,61 @@ Conseguenze sul codice. `TesseraDeck.etichettaSigla` (UILabel) → `vistaSimbolo
 Geometria invariata. Riquadro 65×56 fisso, altezza dello stato più lungo, banda del deck compatta (S10), altezza minima della griglia (RDA-86): nulla toccato. Se un simbolo non entra si rimpicciolisce il simbolo (`scaleAspectFit`), non si allarga la tessera.
 
 Versione dei valori. NON incrementata: cambia solo la rappresentazione visiva della tessera; nessuna regola incide su come una partita in corso si svolgerebbe (l'annuncio, il modello dello stato e i valori sono invariati), quindi non ricorre il criterio di RDA-92/RDA-91. Resta 0.7.0.
+
+## Parte diciassettesima — Decisioni della sessione della risoluzione di fine giornata e delle marce di più giorni (incarico 14)
+
+### RDA-98 — La risoluzione di fine giornata è un momento dichiarato e ordinato, non una funzione che fa una cosa sola (01 §5.6.11)
+
+Problema. Con le marce di più giorni il movimento non avviene più all'atto dell'ordine ma alla chiusura della giornata, dove 01 §5.6.11 colloca un ORDINE di risoluzioni: avanzamento delle marce lunghe, scatto delle imboscate, valutazione dei tagli di rifornimento, completamenti di costruzione, invecchiamento e decadimento della conoscenza. Di queste, questa unità realizza soltanto la prima; le altre appartengono a materie non ancora costruite. Il rischio è scrivere il meccanismo sulla misura del suo unico abitante, e costringere la sessione successiva a rifarlo per aggiungervi un passo.
+
+Opzioni. Una funzione `avanzaLeMarce` chiamata direttamente da `chiudiLaGiornataSeServe`; oppure un momento `risolviFineGiornata` che elenca i passi in ordine e ne contiene oggi uno solo.
+
+Scelta. La seconda. `MotoreCampagna.risolviFineGiornata(_:)` è il momento; contiene la sola chiamata a `avanzaLeMarce(_:)` più i posti dichiarati in commento per i passi futuri, ciascuno con la propria firma `(inout StatoCampagna) -> [EventoCampagna]`. Una sessione futura aggiunge il proprio passo come una riga in coda a `risolviFineGiornata`, senza toccare gli altri: ogni passo è indipendente e riceve e restituisce lo stato per riferimento. `chiudiLaGiornataSeServe` chiama `risolviFineGiornata` fra l'evento `giornataChiusa` e l'incremento del giorno.
+
+Motivazione. L'ordine di 01 §5.6.11 è un fatto di gioco (determina quale risoluzione vede lo stato prima di un'altra) e va reso esplicito nel codice, non lasciato all'ordine di scrittura di chiamate sparse. Il costo — una funzione in più che oggi delega a una sola — è precisamente ciò che rende il punto d'estensione visibile.
+
+Conseguenze. `chiudiLaGiornataSeServe` è un CICLO e non un solo passo: se dopo l'apertura della giornata nuova tutti i gruppi restano in marcia lunga, non c'è nulla da ordinare e le giornate scorrono a cascata finché una marcia si compie e libera un gruppo. Il ciclo termina perché ogni giro avanza tutte le marce di un giorno. La chiusura automatica di 01 §5.6.0.6 non è toccata: nessun comando di fine giornata, nessun gruppo che agisca da sé. Il criterio della chiusura passa da `allSatisfy(azioneSpesa)` a `allSatisfy(haConclusoLaGiornata)`, dove un gruppo in marcia ha concluso la giornata pur senza spendere l'azione.
+
+### RDA-99 — I fattori del costo in giorni confluiscono in una sola grandezza (01 §5.6.3.2)
+
+Problema. 01 §5.6.3.2 vuole che sul numero di giorni dello scatto agiscano insieme, in UNA SOLA grandezza e senza regole che si sommino in modo opaco, la natura della casella di partenza e di arrivo con pesi distinti, il volume della colonna, il tipo di strada e il costo fisso della strettoia. La firma `costoInGiorni(da:a:stato:)` era già definitiva (RDA-75) proprio perché il punto di calcolo non si spostasse quando questi fattori sarebbero arrivati.
+
+Scelta. `MotoreCampagna.costoInGiorni` somma il costo base, il peso del terreno di partenza, il peso del terreno di arrivo, il peso della strada di arrivo e il costo della strettoia se la casella di arrivo la è, e satura il risultato a uno. I pesi vivono nei dati (`marcia-campagna.json`: `peso_terreno_partenza`, `peso_terreno_arrivo`, `peso_strada_arrivo`, `costo_strettoia`), sono `[String: Int]` per rawValue di `TerrenoCasella`/`TipoStrada`, e il caricatore RIFIUTA una copia che ometta un terreno o una strada — un peso mancante sarebbe un fattore che si somma per omissione. Nessuna tabella a doppia entrata: una formula nel codice, coefficienti nei file.
+
+Il VOLUME non agisce ancora. Il gruppo non ha composizione in questa unità (`impatto-marcia-lunga.md` §1 la rinvia): la firma riceve già lo `stato` e vi leggerà il volume quando la composizione esisterà, senza spostare il punto di calcolo. È un fattore DICHIARATO ma non reso, non un'omissione silenziosa: renderlo senza un volume da leggere sarebbe un canale che esiste solo per il collaudo.
+
+Conseguenze. Con i pesi introdotti (tutti PROVVISORI, in `valori-provvisori.md`) la stessa casella costa da uno a tre giorni secondo il terreno; l'identità «una casella = una giornata» della prima unità cade, come `CostoDellaMarciaTest` fissava che sarebbe caduto. Il minimo di uno resta FISSATO da 00 §13.6 e imposto dal caricatore. Il costo viaggia dentro il comando (RDA-75) e la validazione rifiuta un comando che ne dichiari un altro.
+
+### RDA-100 — La revoca è un comando proprio, e la decisione del titolare sulla giornata (01 §5.6.3.3, §5.6.8.1, RDA-76)
+
+Problema. RDA-76 aveva distinto annullamento e revoca e stabilito che la revoca, quando si fosse realizzata, sarebbe stata un comando proprio che si aggiunge alla sequenza invece di toglierne. 01 §5.6.8.1 la elenca fra le operazioni che NON sono azioni e non consumano la giornata; ma i documenti lasciavano aperto se la revoca RESTITUISСА la giornata in cui viene compiuta, perché ogni azione consuma l'intera giornata mentre la revoca non è un'azione.
+
+La decisione del titolare. La revoca NON restituisce la giornata. È gratuita come atto — non è essa stessa un'azione — ma il gruppo che revoca ha già speso la propria giornata con l'ordine di marcia impartito e non compie altro quel giorno. Perde i giorni già spesi nella marcia e resta senza azione per la giornata corrente.
+
+Scelta. `ComandoCampagna.revocaMarcia(gruppo:)`, caso nuovo che passa per `valida`/`applica` come ogni comando e si iscrive nel giornale come `.comandoCampagna`, ricalcolabile alla ripresa; NON dal comando di annullamento né dal troncamento del giornale. `valida` la ammette solo su un gruppo in marcia (motivo nuovo `comando.non_valido.gruppo_non_in_marcia`), senza controllare `azioneSpesa`, perché si può revocare in qualunque momento, anche nel giorno stesso dell'ordine. `applica` azzera la marcia (i giorni compiuti si perdono, la posizione resta quella di partenza) e pone `azioneSpesa` a vero: la giornata è spesa. La conseguenza — i giorni persi — è dichiarata prima della conferma, nel pannello di revoca (01 §5.6.3.5).
+
+Conseguenze. Caso nuovo di `ComandoCampagna`: la catena di `CompatibilitaGiornaleTest` pretende il campione, committato nella stessa modifica. Registrata come scostamento la contraddizione dei documenti che la decisione chiude (S15). L'invariante `revoca_non_conforme` sorveglia che una revoca lasci sempre il gruppo nella casella di partenza, senza marcia residua e con la giornata spesa.
+
+### RDA-101 — Riesame della deroga sul registro: gli ordini restano accanto ai fatti nuovi (01 §5.17.1, RDA-72)
+
+Problema. RDA-72 aveva ammesso gli ordini del giocatore nel registro, in deroga a 01 §5.17.1 che li esclude, perché nel perimetro della prima unità non esisteva alcun fatto non deciso dal giocatore (scostamento S8). RDA-72 prevedeva che, comparso il primo fatto non deciso dal giocatore, 01 §5.17.1 andasse confermato togliendo allora gli ordini. Questa sessione porta quel fatto: il compimento di una marcia lunga (01 §5.17.1).
+
+Opzioni. Togliere gli ordini e lasciare nel registro i soli fatti non decisi dal giocatore (conferma di 01 §5.17.1); oppure lasciare gli ordini accanto ai fatti nuovi (deroga estesa).
+
+Scelta. Gli ordini RESTANO. La ragione che 01 §5.17 dichiara per il registro è il recupero degli annunci persi mentre il giocatore fa altro; nel perimetro attuale — solo, senza avversario, con i completamenti come unico fatto e per giunta raro — un registro dei soli completamenti sarebbe quasi vuoto e perderebbe gli annullamenti, che RDA-72 dichiara fatti che il giocatore può volere ricostruire. Togliere gli ordini cambierebbe ciò che il giocatore sente, in peggio; e l'incarico chiede espressamente di non decidere da soli una scelta che cambia ciò che il giocatore sente.
+
+Motivazione della divergenza dalla previsione di RDA-72. La previsione fu fatta quando la forma del primo fatto era ignota. Ora si vede che è raro e che il perimetro resta di sola giocata; la rimozione degli ordini avrà senso quando esisteranno i fatti avversari, frequenti e mancabili — cioè alla sessione di riallineamento, dove 01 §5.17.1 si conferma o si riscrive. Fino ad allora la deroga S8 resta dichiarata.
+
+Conseguenze. `FattoRegistrato` acquista `marciaCompiuta(gruppo:da:a:)` (primo fatto non deciso dal giocatore, luogo = casella di arrivo, primo fatto che esercita il salto al luogo di RDA-67) e `marciaRevocata(gruppo:casella:)`; gli ordini preesistenti restano. La sonda di sessione `registro_non_corrisponde` passa da «voci = ordini» a «voci = ordini + compimenti».
+
+### RDA-102 — Il confine dell'annullamento morde sul compimento di una marcia (05 §6.5, 00 §13.8, RDA-70, RDA-73)
+
+Problema. Fino a questa unità la chiusura della giornata non aveva nulla di giocato dopo di sé, e RDA-70/RDA-73 concedevano di annullare l'ordine che l'aveva chiusa finché la giornata nuova era intatta. Con la risoluzione di fine giornata la chiusura produce FATTI: il compimento di una marcia lunga, che il giocatore ascolta. Annullare dopo averlo ascoltato equivarrebbe a rifare la mossa sapendo com'è andata, cioè alla prova a rovescio che 05 §6.5 vieta.
+
+Opzioni. Rimuovere del tutto la grazia (l'ordine di chiusura non si annulla mai, come la build 11); oppure rimuoverla solo quando la chiusura ha prodotto un fatto ascoltato.
+
+Scelta. La seconda. La grazia di RDA-73 resta valida per le chiusure SENZA fatti, dove 00 §13.8 — annullare l'ultimo gesto, che è principio dell'accessibilità e prevale su 05 — chiede che l'ordine resti annullabile; e cade per le chiusure che compiono una marcia, dove 05 §6.5 prevale. La rimozione totale reintrodurrebbe proprio il difetto che RDA-70/RDA-73 avevano corretto (l'ordine dell'ultimo gruppo irreversibile senza segnale), a danno di chi ascolta, nel caso frequente in cui nessuna marcia si compie.
+
+Dove vive il confine, e perché lì. Nel GIORNALE, come marcatore nuovo `VoceGiornale.risoluzioneGiornata(giorno:)`, scritto dalla Sessione alla chiusura SE e solo se la risoluzione ha compiuto almeno una marcia (evento `.marciaCompiuta`), prima dell'apertura della giornata. `SessioneCampagna.ordineDentroIlConfine` concede l'annullamento dell'ordine di chiusura finché la giornata nuova è intatta E fra quell'ordine e l'apertura non sta un `risoluzioneGiornata`. Sta nel giornale e non nello stato perché il confine deve sopravvivere alla ripresa della campagna, dove i difetti di questa specie si manifestano. Il marcatore NON duplica i fatti che il registro annota — quelli si ricalcolano riapplicando il comando di chiusura — e serve al solo confine.
+
+Conseguenze. Caso nuovo di `VoceGiornale`: la catena di `CompatibilitaGiornaleTest` pretende il campione. Il rifiuto oltre il confine si dichiara col termine chiuso già esistente `campagna.non_si_torna_oltre_la_giornata`. Situazione raggiungibile e provata: un gruppo marcia verso l'acqua, la marcia si compie a cascata, l'annullamento è rifiutato e il rifiuto sopravvive al riavvio (`AnnullamentoGiornataTest`). Predisposto per l'avversario: quando le sue mosse produrranno fatti alla chiusura, il marcatore li coprirà con la stessa logica.

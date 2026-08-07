@@ -91,10 +91,23 @@ public actor SessioneCampagna {
         stato = nuovoStato
         // La chiusura della giornata è un confine significativo: vi si scatta
         // un'istantanea e vi si registra il marcatore che l'azzeramento userà
-        // (05 §6.2, §6.4, §6.5).
-        var giornataChiusa = false
-        for evento in eventi { if case .giornataAperta = evento { giornataChiusa = true } }
+        // (05 §6.2, §6.4, §6.5). Una sola apertura anche quando più giornate si
+        // chiudono a cascata (tutti i gruppi in marcia lunga): la riapplicazione del
+        // comando ripercorre la cascata e riproduce lo stato finale.
+        let giornataChiusa = eventi.contains {
+            if case .giornataAperta = $0 { return true } else { return false }
+        }
         if giornataChiusa {
+            // Se la risoluzione ha COMPIUTO una marcia, la chiusura ha prodotto un
+            // fatto che il giocatore ha ascoltato: il marcatore lo registra, e
+            // l'ordine che ha chiuso la giornata non sarà più annullabile (05 §6.5,
+            // RDA-102). Va scritto PRIMA dell'apertura, cui il confine lo lega.
+            let haCompiutoUnaMarcia = eventi.contains {
+                if case .marciaCompiuta = $0 { return true } else { return false }
+            }
+            if haCompiutoUnaMarcia {
+                try giornale.appendi(.risoluzioneGiornata(giorno: stato.giorno))
+            }
             try giornale.appendi(.aperturaGiornata(giorno: stato.giorno))
             try Self.scattaIstantanea(giornale: giornale, stato: stato,
                                       cartella: cartella, forzata: true)
@@ -199,12 +212,23 @@ public actor SessioneCampagna {
     }
 
     /// Vero se l'ordine indicato appartiene alla giornata in corso, oppure è quello
-    /// la cui conferma l'ha aperta e nella giornata nuova non è ancora accaduto
-    /// nulla. Falso per gli ordini di giornate passate.
+    /// la cui conferma l'ha aperta e la chiusura che ne è seguita NON ha compiuto una
+    /// marcia e nella giornata nuova non è ancora accaduto nulla. Falso altrimenti.
+    ///
+    /// Con la risoluzione di fine giornata il confine di 05 §6.5 torna a mordere: se
+    /// la chiusura ha compiuto una marcia lunga, il giocatore ne ha ascoltato
+    /// l'arrivo, e annullare l'ordine che l'ha chiusa sarebbe rifare la mossa sapendo
+    /// com'è andata. La deroga di RDA-73 — che concedeva l'annullamento dell'ordine
+    /// di chiusura finché la giornata nuova era intatta — resta valida SOLTANTO per
+    /// le chiusure senza fatti: quando la chiusura non compie nulla, 00 §13.8
+    /// (annullare l'ultimo gesto, principio supremo dell'accessibilità) prevale e
+    /// l'ordine resta annullabile; quando compie una marcia, 05 §6.5 prevale e il
+    /// rifiuto è dichiarato con `campagna.non_si_torna_oltre_la_giornata` (RDA-102).
     ///
     /// Si legge dal giornale e non dallo stato perché lo stato si ricostruisce
     /// riapplicando i comandi: dopo un annullamento sarebbe indistinguibile da una
-    /// giornata appena aperta, e il confine sparirebbe alla prima ripresa.
+    /// giornata appena aperta, e il confine sparirebbe alla prima ripresa. Il
+    /// marcatore `risoluzioneGiornata` vive nel giornale per la stessa ragione.
     private func ordineDentroIlConfine(_ ordine: Int) -> Bool {
         var aperturaCorrente = 0
         for riga in giornale.righe.reversed() {
@@ -212,10 +236,15 @@ public actor SessioneCampagna {
         }
         if ordine > aperturaCorrente { return true } // ordine della giornata in corso
         // L'ordine precede l'apertura: è quello che ha chiuso la giornata prima.
-        // Si concede finché nella giornata nuova non è accaduto nulla.
-        return !giornale.righe.dropFirst(aperturaCorrente).contains {
+        let giornataNuovaIntatta = !giornale.righe.dropFirst(aperturaCorrente).contains {
             if case .annullamentoCampagna = $0.voce { return true } else { return false }
         }
+        // Fra l'ordine di chiusura e l'apertura sta il marcatore di risoluzione se e
+        // solo se quella chiusura ha compiuto una marcia.
+        let chiusuraHaCompiutoUnaMarcia = giornale.righe[ordine..<aperturaCorrente].contains {
+            if case .risoluzioneGiornata = $0.voce { return true } else { return false }
+        }
+        return giornataNuovaIntatta && !chiusuraHaCompiutoUnaMarcia
     }
 
     private func ritira(a numeroRighe: Int, azzeramento: Bool) throws {

@@ -119,16 +119,53 @@ public struct NomiGruppi: Codable, Hashable, Sendable {
 /// dello spostamento.
 ///
 /// Su quella medesima grandezza — un solo numero, senza regole che si sommino in
-/// modo opaco — agiranno la natura della casella di partenza e quella della casella
-/// di arrivo con pesi distinti, il volume della colonna, il tipo di strada e il
-/// costo fisso della strettoia (01 §5.6.3.2). Nessuno di quei fattori esiste in
-/// questa unità: il costo vale oggi `costo_giorni_base` per ogni coppia di caselle,
-/// ed è una SEMPLIFICAZIONE PROVVISORIA dichiarata, non una regola (valori-provvisori).
+/// modo opaco — agiscono la natura della casella di partenza e quella della casella
+/// di arrivo con pesi distinti, il tipo di strada e il costo fisso della strettoia
+/// (01 §5.6.3.2). Tutti confluiscono nel valore che `MotoreCampagna.costoInGiorni`
+/// somma e satura a uno: nessuna regola separata, un solo numero. Il VOLUME della
+/// colonna, quinto fattore di 01 §5.6.3.2, non agisce ancora perché il gruppo non
+/// ha composizione in questa unità (`impatto-marcia-lunga.md` §1 lo rinvia): la
+/// firma di `costoInGiorni` riceve già lo stato e vi leggerà il volume quando la
+/// composizione esisterà, senza spostare il punto di calcolo (RDA-75). Tutti i pesi
+/// sono PROVVISORI e si tarano giocando; il minimo di uno resta FISSATO (00 §13.6).
 public struct ValoriMarcia: Codable, Hashable, Sendable {
-    /// Il costo in giorni dello scatto fra due caselle adiacenti. Provvisorio: uno.
+    /// Il costo base in giorni dello scatto fra due caselle adiacenti. Provvisorio: uno.
     public let costoGiorniBase: Int
-    public init(costoGiorniBase: Int) { self.costoGiorniBase = costoGiorniBase }
-    enum CodingKeys: String, CodingKey { case costoGiorniBase = "costo_giorni_base" }
+    /// Il numero delle posizioni in cui l'avanzamento visivo si discretizza dentro
+    /// la casella (01 §5.6.3.4): nove, disposte a quadrato. FISSATO dal documento.
+    public let posizioniVisive: Int
+    /// Il peso della natura della casella DI PARTENZA, per terreno (chiave = rawValue
+    /// di `TerrenoCasella`). Il costo grava sul tragitto reale, e i due pesi non sono
+    /// necessariamente uguali (01 §5.6.3.2).
+    public let pesoTerrenoPartenza: [String: Int]
+    /// Il peso della natura della casella DI ARRIVO, per terreno.
+    public let pesoTerrenoArrivo: [String: Int]
+    /// L'effetto del tipo di strada della casella di arrivo (chiave = rawValue di
+    /// `TipoStrada`): negativo per le strade che accorciano il tempo. Il costo non
+    /// scende comunque sotto uno (saturazione nel Motore).
+    public let pesoStradaArrivo: [String: Int]
+    /// Il costo fisso aggiuntivo dell'attraversare la strettoia (01 §5.1.3, §5.6.3.2).
+    public let costoStrettoia: Int
+
+    public init(costoGiorniBase: Int, posizioniVisive: Int,
+                pesoTerrenoPartenza: [String: Int], pesoTerrenoArrivo: [String: Int],
+                pesoStradaArrivo: [String: Int], costoStrettoia: Int) {
+        self.costoGiorniBase = costoGiorniBase
+        self.posizioniVisive = posizioniVisive
+        self.pesoTerrenoPartenza = pesoTerrenoPartenza
+        self.pesoTerrenoArrivo = pesoTerrenoArrivo
+        self.pesoStradaArrivo = pesoStradaArrivo
+        self.costoStrettoia = costoStrettoia
+    }
+
+    enum CodingKeys: String, CodingKey {
+        case costoGiorniBase = "costo_giorni_base"
+        case posizioniVisive = "posizioni_visive"
+        case pesoTerrenoPartenza = "peso_terreno_partenza"
+        case pesoTerrenoArrivo = "peso_terreno_arrivo"
+        case pesoStradaArrivo = "peso_strada_arrivo"
+        case costoStrettoia = "costo_strettoia"
+    }
 }
 
 /// I valori del piano di campagna caricati e validati.

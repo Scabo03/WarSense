@@ -41,6 +41,11 @@ final class VistaMappa: VistaACaselle {
     /// L'iniziale del gruppo presente e i segni della casella: ciò che si sente si vede.
     var testoCasella: ((Cella) -> String?)?
     var segnoCasella: ((Cella) -> String?)?
+    /// Per un gruppo in marcia lunga, la posizione dell'avanzamento fra le nove
+    /// disposte a quadrato (01 §5.6.3.4): indice in 0..8, derivato dai giorni. Se
+    /// nulla, l'iniziale si disegna al centro. È una rappresentazione DERIVATA: non
+    /// è una grandezza autonoma e non può divergere dai giorni (il Motore la calcola).
+    var avanzamentoCasella: ((Cella) -> Int?)?
 
     static func dimensione(per griglia: GrigliaCampagna) -> CGSize {
         CGSize(width: margine * 2 + CGFloat(griglia.colonne) * passo,
@@ -67,8 +72,20 @@ final class VistaMappa: VistaACaselle {
                         colore: .secondaryLabel, allineamento: .basso)
             }
             if let testo = testoCasella?(casella) {
-                disegna(testo, in: cornice, dimensione: 20, peso: .bold,
-                        colore: .white, allineamento: .centro)
+                if let indice = avanzamentoCasella?(casella), (0..<9).contains(indice) {
+                    // L'esercito si fa strada verso il bordo: l'iniziale si colloca in
+                    // una delle nove sotto-caselle, secondo l'indice derivato dai giorni.
+                    let colonna = indice % 3, riga = indice / 3
+                    let terzoL = cornice.width / 3, terzoH = cornice.height / 3
+                    let sotto = CGRect(x: cornice.minX + CGFloat(colonna) * terzoL,
+                                       y: cornice.minY + CGFloat(riga) * terzoH,
+                                       width: terzoL, height: terzoH)
+                    disegna(testo, in: sotto, dimensione: 13, peso: .bold,
+                            colore: .white, allineamento: .centro)
+                } else {
+                    disegna(testo, in: cornice, dimensione: 20, peso: .bold,
+                            colore: .white, allineamento: .centro)
+                }
             }
         }
     }

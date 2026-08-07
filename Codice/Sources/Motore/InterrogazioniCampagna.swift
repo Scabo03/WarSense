@@ -74,6 +74,26 @@ public struct VistaCampagna: Sendable {
                        giorni: costoInGiorni(da: gruppo.posizione, a: casella))
     }
 
+    /// Il comando di revoca della marcia, se il gruppo ne ha una in corso (01 §5.6.3.3).
+    public func comandoDiRevoca(per id: IdGruppo) -> ComandoCampagna? {
+        guard let gruppo = stato.gruppi[id], gruppo.inMarcia else { return nil }
+        return .revocaMarcia(gruppo: id)
+    }
+
+    /// I giorni che una revoca farebbe perdere: quelli già spesi (01 §5.6.3.3). La
+    /// Presentazione lo dichiara nel pannello di conferma, prima della conferma
+    /// (01 §5.6.3.5). Nullo se il gruppo non è in marcia.
+    public func giorniPersiRevocando(per id: IdGruppo) -> Int? {
+        stato.gruppi[id]?.marcia?.giorniCompiuti
+    }
+
+    /// L'avanzamento visivo di un gruppo in marcia (01 §5.6.3.4): la posizione fra le
+    /// nove, derivata dai giorni. La Presentazione non la calcola: la chiede qui.
+    public func avanzamentoVisivo(di id: IdGruppo) -> Int? {
+        guard let m = stato.gruppi[id]?.marcia else { return nil }
+        return motore.avanzamentoVisivo(giorniCompiuti: m.giorniCompiuti, giorniTotali: m.giorniTotali)
+    }
+
     /// Le destinazioni valide per un gruppo, in ordine di lettura. È l'anteprima
     /// annunciata (05 §3.2) e alimenta la designazione sulla mappa (02 §9.2.1).
     public func destinazioniValide(per id: IdGruppo) -> [Cella] {
@@ -106,13 +126,19 @@ public struct VistaCampagna: Sendable {
     public struct InformazioneDiStato: Hashable, Sendable {
         public let giorno: Int
         public let gruppiCheHannoAgito: Int
+        public let gruppiInMarcia: Int
         public let gruppiTotali: Int
     }
 
     public var informazioneDiStato: InformazioneDiStato {
         let miei = stato.gruppi(di: parte)
+        // «Ha agito» e «in marcia lunga» sono categorie distinte (01 §5.16): un gruppo
+        // in marcia si dichiara a parte e non si conta fra chi ha agito, così che il
+        // giocatore sappia che quella giornata è consumata da una marcia e non da
+        // un'azione conclusa. Chi attende è il resto: totale meno agiti meno in marcia.
         return InformazioneDiStato(giorno: stato.giorno,
-                                   gruppiCheHannoAgito: miei.filter(\.azioneSpesa).count,
+                                   gruppiCheHannoAgito: miei.filter { $0.azioneSpesa && !$0.inMarcia }.count,
+                                   gruppiInMarcia: miei.filter(\.inMarcia).count,
                                    gruppiTotali: miei.count)
     }
 

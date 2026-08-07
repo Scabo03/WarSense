@@ -124,7 +124,24 @@ final class SessioniPerInterfacciaTest: XCTestCase {
                 let bersaglio = VistaMappa.cornice(di: meta)
                 XCTAssertTrue(schermata.grigliaPerProva.attivaAlTocco(
                     in: CGPoint(x: bersaglio.midX, y: bersaglio.midY)),
-                              "il dito non conferma la destinazione \(meta)")
+                              "il dito non apre la conferma verso \(meta)")
+                // Il tocco della destinazione apre la conferma (02 §9.2.1): la marcia
+                // si esegue confermando, come il dito farebbe.
+                try await attendi("pannello di conferma marcia") {
+                    schermata.presentedViewController is UIAlertController
+                }
+                let conferma = try XCTUnwrap(schermata.vociPannelloPerProva.first {
+                    $0.titolo == ambiente.testi.frase("pannello.marcia_conferma_azione").testo
+                }, "il pannello di conferma offre la conferma della marcia")
+                schermata.presentedViewController?.dismiss(animated: false)
+                try await attendi("congedo della conferma") {
+                    schermata.presentedViewController == nil
+                }
+                conferma.esegui()
+            case .revocaMarcia:
+                // La condotta del banco non revoca mai: se accadesse, la traduzione
+                // in tocchi non sarebbe esercitata e la prova mentirebbe.
+                XCTFail("la condotta non prevede la revoca in questa sessione")
             }
             ordini += 1
             try await attendi("ordine applicato") {

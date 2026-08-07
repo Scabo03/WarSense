@@ -45,13 +45,17 @@ import Motore
 public struct SondaSessioneCampagna: Sendable {
 
     public enum Violazione: Hashable, Sendable, CustomStringConvertible {
-        /// Il calendario è salito di più di un giorno, o è sceso, fra due letture
-        /// consecutive dell'intera sessione.
+        /// Il calendario è SCESO fra due letture consecutive dell'intera sessione.
+        /// I salti in avanti sono legittimi: con la marcia lunga, se tutti i gruppi
+        /// sono in marcia le giornate scorrono a cascata in una sola applicazione
+        /// (01 §5.6.11), e il giorno avanza di più di uno. Ciò che non deve mai
+        /// accadere è che torni indietro.
         case calendarioNonMonotono(prima: Int, dopo: Int)
         /// Un gruppo è comparso o scomparso fra il primo e l'ultimo stato.
         case gruppiNonConservati(iniziali: Int, finali: Int)
-        /// Le voci del registro non corrispondono, in numero o in ordine, agli
-        /// ordini davvero impartiti.
+        /// Le voci del registro non corrispondono al numero degli ordini impartiti
+        /// più i compimenti di marcia (l'unico fatto non deciso dal giocatore in
+        /// questa unità, 01 §5.17.1).
         case registroNonCorrispondeAgliOrdini(voci: Int, ordini: Int)
         /// La sequenza dei comandi, riapplicata dalla fabbrica, non riproduce lo
         /// stato finale della sessione.
@@ -96,17 +100,21 @@ public struct SondaSessioneCampagna: Sendable {
         public let gruppiFinali: Set<Int>
         public let vociDiRegistro: Int
         public let ordiniImpartiti: Int
+        /// I compimenti di marcia osservati: fatti non decisi dal giocatore che
+        /// aggiungono una voce al registro accanto agli ordini (01 §5.17.1).
+        public let compimentiDiMarcia: Int
         public let improntaFinale: String
         public let improntaRigiocata: String
 
         public init(giorniLetti: [Int], gruppiIniziali: Set<Int>, gruppiFinali: Set<Int>,
-                    vociDiRegistro: Int, ordiniImpartiti: Int,
+                    vociDiRegistro: Int, ordiniImpartiti: Int, compimentiDiMarcia: Int = 0,
                     improntaFinale: String, improntaRigiocata: String) {
             self.giorniLetti = giorniLetti
             self.gruppiIniziali = gruppiIniziali
             self.gruppiFinali = gruppiFinali
             self.vociDiRegistro = vociDiRegistro
             self.ordiniImpartiti = ordiniImpartiti
+            self.compimentiDiMarcia = compimentiDiMarcia
             self.improntaFinale = improntaFinale
             self.improntaRigiocata = improntaRigiocata
         }
@@ -115,16 +123,16 @@ public struct SondaSessioneCampagna: Sendable {
     public func controlla(_ storia: Storia) -> [Violazione] {
         var trovate: [Violazione] = []
         for (prima, dopo) in zip(storia.giorniLetti, storia.giorniLetti.dropFirst())
-        where dopo < prima || dopo > prima + 1 {
+        where dopo < prima {
             trovate.append(.calendarioNonMonotono(prima: prima, dopo: dopo))
         }
         if storia.gruppiIniziali != storia.gruppiFinali {
             trovate.append(.gruppiNonConservati(iniziali: storia.gruppiIniziali.count,
                                                 finali: storia.gruppiFinali.count))
         }
-        // Ogni ordine impartito lascia una voce nel registro e nient'altro vi entra
-        // (S8, RDA-72): in questa unità non esistono fatti non decisi dal giocatore.
-        if storia.vociDiRegistro != storia.ordiniImpartiti {
+        // Ogni ordine lascia una voce; ogni compimento di marcia ne aggiunge un'altra
+        // (S8, RDA-72; 01 §5.17.1). Il registro accumulato è la somma dei due.
+        if storia.vociDiRegistro != storia.ordiniImpartiti + storia.compimentiDiMarcia {
             trovate.append(.registroNonCorrispondeAgliOrdini(voci: storia.vociDiRegistro,
                                                             ordini: storia.ordiniImpartiti))
         }
@@ -191,6 +199,7 @@ public struct BancoSessioniCampagna: Sendable {
 
         let giornoIniziale = stato.giorno
         var rete = 0
+        var compimenti = 0
         let tettoDeiPassi = giornate * (gruppi.count + 2) + 10
         while stato.giorno < giornoIniziale + giornate {
             rete += 1
@@ -200,6 +209,14 @@ public struct BancoSessioniCampagna: Sendable {
                 sondaDiPasso.controllaSalto(stato: stato,
                                             sequenza: sequenzaDelSalto(vista, stato))
                     .map(\.description))
+            // Le posizioni visive derivate: si sorveglia che non divergano dai giorni.
+            let mostrate = Dictionary(uniqueKeysWithValues: stato.gruppiInMarcia().map {
+                ($0.id, motore.avanzamentoVisivo(giorniCompiuti: $0.marcia!.giorniCompiuti,
+                                                 giorniTotali: $0.marcia!.giorniTotali))
+            })
+            violazioniDiPasso.formUnion(sondaDiPasso.controllaPosizioniVisive(
+                stato: stato, posizioni: valoriCampagna.marcia.posizioniVisive,
+                mostrate: mostrate).map(\.description))
             guard let comando = Self.prossimoOrdine(stato: stato, vista: vista,
                                                     condotta: condotta) else { break }
             let prima = stato
@@ -208,6 +225,9 @@ public struct BancoSessioniCampagna: Sendable {
                 sondaDiPasso.controlla(prima: prima, comando: comando, dopo: dopo, eventi: eventi,
                                        adiacenti: prima.griglia.adiacenti).map(\.description))
             violazioniDiPasso.formUnion(sondaDiPasso.controlla(stato: dopo).map(\.description))
+            compimenti += eventi.reduce(0) {
+                if case .marciaCompiuta = $1 { return $0 + 1 } else { return $0 }
+            }
             comandi.append(comando)
             stato = dopo
             giorniLetti.append(stato.giorno)
@@ -222,6 +242,7 @@ public struct BancoSessioniCampagna: Sendable {
             gruppiFinali: Set(stato.gruppi.keys.map(\.numero)),
             vociDiRegistro: stato.registro.count,
             ordiniImpartiti: comandi.count,
+            compimentiDiMarcia: compimenti,
             improntaFinale: stato.impronta(),
             improntaRigiocata: rigiocato)
 

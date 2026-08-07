@@ -33,13 +33,29 @@ struct CostruttoreAnnunciCampagna {
         var parti: [String] = []
         if case .marcia(let id) = designazione {
             switch vista.anteprimaMarcia(da: id, a: casella) {
-            case .valido: parti.append(testi.frase("casella.disponibile").testo)
+            case .valido:
+                // La disponibilità dichiara il COSTO IN GIORNI dello scatto, prima
+                // della conferma (01 §5.6.3.5), con il plurale di sistema.
+                let giorni = vista.comandoDiMarcia(per: id, a: casella).flatMap {
+                    if case .marcia(_, _, let g) = $0 { return g } else { return nil }
+                } ?? 1
+                parti.append(testi.frase("casella.disponibile", giorni).testo)
             case .nonValido(let motivo): parti.append(testi.termine(motivo.rawValue).testo)
             }
         }
         parti.append(testi.frase("casella.testa", casella.riga, casella.colonna).testo)
         parti.append(contentsOf: contenutoCasella(casella))
         return parti.joined(separator: ", ")
+    }
+
+    /// La frase dello stato dichiarato di un gruppo (01 §5.16.1). «In marcia» porta
+    /// i giorni mancanti e declina al plurale, quindi passa dagli Annunci; gli altri
+    /// due termini sono del vocabolario chiuso semplice.
+    func fraseStato(_ stato: StatoGruppo) -> String {
+        switch stato {
+        case .inAttesa, .haAgito: return testi.termine(stato.chiaveTesto).testo
+        case .inMarcia(let giorniMancanti): return testi.frase(stato.chiaveTesto, giorniMancanti).testo
+        }
     }
 
     /// Il contenuto nell'ordine registrato da 02 §3.8.1, ricavato dall'UNICO elenco
@@ -75,7 +91,7 @@ struct CostruttoreAnnunciCampagna {
         switch voce {
         case .occupante(let gruppo):
             return testi.frase("casella.occupante_proprio", nomeGruppo(gruppo),
-                               testi.termine(gruppo.statoDichiarato.rawValue).testo).testo
+                               fraseStato(gruppo.statoDichiarato)).testo
         case .quartierGenerale(let parte):
             return testi.termine(parte == .giocatore
                                  ? "casella.quartier_generale"
@@ -141,6 +157,16 @@ struct CostruttoreAnnunciCampagna {
     /// gruppi che hanno agito sul totale. Le condizioni assenti non si nominano.
     func informazioneDiStato() -> String {
         let info = vista.informazioneDiStato
+        // I gruppi in marcia lunga si dichiarano a parte (01 §5.16): quattro forme,
+        // secondo che vi siano gruppi in marcia e che qualcuno abbia già agito.
+        if info.gruppiInMarcia > 0 {
+            if info.gruppiCheHannoAgito == 0 {
+                return testi.frase("campagna.stato_solo_marcia", info.giorno,
+                                   info.gruppiInMarcia, info.gruppiTotali).testo
+            }
+            return testi.frase("campagna.stato_con_marcia", info.giorno,
+                               info.gruppiCheHannoAgito, info.gruppiTotali, info.gruppiInMarcia).testo
+        }
         if info.gruppiCheHannoAgito == 0 {
             return testi.frase("campagna.stato_tutti_fermi", info.giorno, info.gruppiTotali).testo
         }

@@ -45,10 +45,14 @@ public struct FondazioneCampagna: Codable, Sendable {
     public let seme: UInt64
     public let identificatore: String
     public let scenario: ScenarioCampagna
-    /// Versione 2 da quando il comando di marcia trasporta il costo in giorni dello
-    /// scatto (01 §5.6.3.1): un giornale di versione 1 porta comandi di marcia
-    /// senza quel campo e non si riapre, come 00 §15.2 impone.
-    public static let schemaCorrente = 2
+    /// Versione 3 dalla marcia lunga e dalla risoluzione di fine giornata: il gruppo
+    /// porta uno stato di marcia in corso, la marcia matura alla chiusura invece di
+    /// spostare all'istante, e il giornale porta il marcatore `risoluzioneGiornata`.
+    /// Un giornale di versione 2, rigiocato con queste regole, produrrebbe una
+    /// partita diversa — le marce si compirebbero in giorni diversi e i movimenti
+    /// slitterebbero alla risoluzione — e per questo non si riapre (00 §15.2). Era 2
+    /// da quando il comando di marcia trasporta il costo (RDA-75).
+    public static let schemaCorrente = 3
 
     public init(versioneSchema: Int, versioneValori: String, versioneTesti: String,
                 seme: UInt64, identificatore: String, scenario: ScenarioCampagna) {
@@ -100,6 +104,17 @@ public enum VoceGiornale: Codable, Sendable {
     /// quindi che l'ordine con cui la precedente si è chiusa non è più l'ultimo
     /// gesto del giocatore ma un ordine di una giornata passata.
     case annullamentoCampagna(giorno: Int, azzeramento: Bool)
+    /// Marcatore scritto alla chiusura di una giornata la cui risoluzione ha
+    /// prodotto un FATTO che il giocatore ha ascoltato — in questa unità il
+    /// compimento di una marcia lunga (01 §5.6.11, §5.17.1). Non porta stato: la
+    /// sua sola presenza dice che quella chiusura ha compiuto una marcia, sicché
+    /// l'ordine che l'ha chiusa non è più annullabile — annullarlo dopo aver
+    /// ascoltato l'arrivo equivarrebbe a rifare la mossa sapendo com'è andata
+    /// (05 §6.5). Sta nel giornale e non nello stato perché il confine deve
+    /// sopravvivere alla ripresa della campagna (RDA-102). I fatti che annota il
+    /// registro si ricalcolano riapplicando il comando che ha chiuso la giornata;
+    /// questa riga NON li duplica e serve al solo confine.
+    case risoluzioneGiornata(giorno: Int)
 }
 
 /// Una riga del giornale, numerata progressivamente.

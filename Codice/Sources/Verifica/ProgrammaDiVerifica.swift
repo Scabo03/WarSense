@@ -85,7 +85,9 @@ public struct ProgrammaDiVerifica: Sendable {
         for corsa in corse {
             righeInvarianti.append([corsa.identificatore, corsa.mappa, String(corsa.gruppi),
                                     String(corsa.giornate), String(corsa.ordini),
-                                    String(corsa.marce), String(corsa.presidi),
+                                    String(corsa.marce), String(corsa.marceLunghe),
+                                    String(corsa.marceCompiute), String(corsa.revoche),
+                                    String(corsa.presidi),
                                     String(corsa.senzaDestinazione),
                                     String(corsa.violazioni.count),
                                     corsa.violazioni.joined(separator: ";"),
@@ -94,7 +96,8 @@ public struct ProgrammaDiVerifica: Sendable {
         sezioni.append(Rapporto.Sezione(
             nome: "campagna_invarianti",
             intestazione: ["scenario", "mappa", "gruppi", "giornate", "ordini", "marce",
-                           "presidi", "senza_destinazione", "violazioni", "dettaglio",
+                           "marce_lunghe", "marce_compiute", "revoche", "presidi",
+                           "senza_destinazione", "violazioni", "dettaglio",
                            "impronta_finale"],
             righe: righeInvarianti))
 
@@ -202,16 +205,24 @@ public struct ProgrammaDiVerifica: Sendable {
         voce("scenari_di_campagna_generati", scenari.scenari.count)
         voce("giornate_generate_in_totale", perGruppi.values.reduce(0) { $0 + $1.giornate })
         voce("ordini_impartiti_in_totale", perGruppi.values.reduce(0) { $0 + $1.ordini })
-        let violazioni = righeInvarianti.reduce(0) { $0 + (Int($1[8]) ?? 0) }
+        // I totali delle marce lunghe, dei compimenti e delle revoche si sommano
+        // dalle stesse righe di dettaglio (RDA-71): la marcia lunga a colonna 6, il
+        // compimento a 7, la revoca a 8.
+        voce("marce_totali", righeInvarianti.reduce(0) { $0 + (Int($1[5]) ?? 0) })
+        voce("marce_lunghe_in_totale", righeInvarianti.reduce(0) { $0 + (Int($1[6]) ?? 0) })
+        voce("marce_compiute_in_totale", righeInvarianti.reduce(0) { $0 + (Int($1[7]) ?? 0) })
+        voce("revoche_in_totale", righeInvarianti.reduce(0) { $0 + (Int($1[8]) ?? 0) })
+        let violazioni = righeInvarianti.reduce(0) { $0 + (Int($1[11]) ?? 0) }
         voce("violazioni_trovate_in_totale", violazioni)
         voce("ordini_a_gruppi_senza_alcuna_destinazione",
-             righeInvarianti.reduce(0) { $0 + (Int($1[7]) ?? 0) })
+             righeInvarianti.reduce(0) { $0 + (Int($1[10]) ?? 0) })
         voce("gruppi_minimo_nelle_giornate_generate", perGruppi.keys.min() ?? 0)
         voce("gruppi_massimo_nelle_giornate_generate", perGruppi.keys.max() ?? 0)
         voce("invarianti_sorvegliati", SondaInvariantiCampagna.codiciNoti.count)
         voce("formati_di_mappa", banco.valoriCampagna.formatiMappa.count)
         voce("mappe_disponibili", banco.valoriCampagna.mappe.count)
-        voce("costo_in_giorni_dello_scatto", banco.valoriCampagna.marcia.costoGiorniBase)
+        voce("costo_in_giorni_dello_scatto_base", banco.valoriCampagna.marcia.costoGiorniBase)
+        voce("posizioni_visive_della_marcia", banco.valoriCampagna.marcia.posizioniVisive)
         voce("gruppi_minimo_nella_misura_dei_passi", scenari.gruppiPerLaMisuraDeiPassi.min() ?? 0)
         voce("gruppi_massimo_nella_misura_dei_passi", scenari.gruppiPerLaMisuraDeiPassi.max() ?? 0)
         voce("disposizioni_nella_misura_dei_passi", BancoCampagna.Disposizione.allCases.count)

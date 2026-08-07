@@ -64,6 +64,13 @@ public struct BancoCampagna: Sendable {
         public let giornate: Int
         public let ordini: Int
         public let marce: Int
+        /// Le marce ordinate che durano più di un giorno (01 §5.6.3.3): il caso che
+        /// questa unità introduce. Se zero, la corsa non ha esercitato la marcia lunga.
+        public let marceLunghe: Int
+        /// Le marce compiutesi alla risoluzione di fine giornata (01 §5.6.11).
+        public let marceCompiute: Int
+        /// Le revoche impartite (01 §5.6.3.3, RDA-76).
+        public let revoche: Int
         public let presidi: Int
         /// Ordini impartiti a un gruppo che NON aveva alcuna destinazione libera:
         /// è il caso di stipamento, quello in cui l'azione di marcia non si offre
@@ -88,14 +95,15 @@ public struct BancoCampagna: Sendable {
             scenario: ScenarioCampagna(mappa: voce.mappa, gruppiGiocatore: voce.gruppi),
             valori: valoriCampagna)
         var violazioni = Set<String>()
-        var ordini = 0, marce = 0, presidi = 0, senzaDestinazione = 0
+        var ordini = 0, marce = 0, marceLunghe = 0, marceCompiute = 0, revoche = 0
+        var presidi = 0, senzaDestinazione = 0
         violazioni.formUnion(sonda.controlla(stato: stato).map(\.description))
 
         let giornoIniziale = stato.giorno
         var passiDiSicurezza = 0
         while stato.giorno < giornoIniziale + giornate {
             passiDiSicurezza += 1
-            guard passiDiSicurezza <= giornate * (voce.gruppi.count + 2) + 10 else { break }
+            guard passiDiSicurezza <= giornate * (voce.gruppi.count + 4) + 10 else { break }
             let vista = VistaCampagna(motore: motore, stato: stato, parte: .giocatore)
 
             // L'invariante del salto si controlla percorrendolo davvero, con la
@@ -103,25 +111,45 @@ public struct BancoCampagna: Sendable {
             violazioni.formUnion(sonda.controllaSalto(stato: stato,
                                                       sequenza: sequenzaDelSalto(vista, stato))
                 .map(\.description))
+            // L'invariante della posizione visiva: le posizioni mostrate sono quelle
+            // che la Presentazione disegnerebbe, cioè la funzione pura del Motore.
+            let mostrate = Dictionary(uniqueKeysWithValues: stato.gruppiInMarcia().map {
+                ($0.id, motore.avanzamentoVisivo(giorniCompiuti: $0.marcia!.giorniCompiuti,
+                                                 giorniTotali: $0.marcia!.giorniTotali))
+            })
+            violazioni.formUnion(sonda.controllaPosizioniVisive(
+                stato: stato, posizioni: valoriCampagna.marcia.posizioniVisive,
+                mostrate: mostrate).map(\.description))
 
-            guard let gruppo = vista.prossimoGruppoInAttesa(dopo: nil) else { break }
-            let destinazioni = vista.destinazioniValide(per: gruppo.id)
-            // Regola fissa: si presidia quando la giornata è multipla di tre, o
-            // quando non esiste alcuna destinazione. Deterministica, senza caso.
+            // La condotta: ogni tanto si REVOCA una marcia in corso, secondo una
+            // regola fissa sul giorno, per esercitare la revoca e i suoi invarianti;
+            // altrimenti si ordina il prossimo gruppo in attesa, con la prima
+            // destinazione valida o il presidio. Deterministica, senza caso.
             let comando: ComandoCampagna
-            if destinazioni.isEmpty { senzaDestinazione += 1 }
-            if destinazioni.isEmpty || stato.giorno % 3 == 0 {
-                comando = .presidio(gruppo: gruppo.id)
-                presidi += 1
+            if stato.giorno % 5 == 2, let marciante = stato.gruppiInMarcia().first {
+                comando = .revocaMarcia(gruppo: marciante.id)
+                revoche += 1
             } else {
-                let destinazione = destinazioni[gruppo.id.numero % destinazioni.count]
-                // Il comando lo forma l'interrogazione, che vi mette il costo in
-                // giorni prescritto dai dati: nemmeno il banco lo inventa.
-                comando = vista.comandoDiMarcia(per: gruppo.id, a: destinazione)!
-                marce += 1
+                guard let gruppo = vista.prossimoGruppoInAttesa(dopo: nil) else { break }
+                let destinazioni = vista.destinazioniValide(per: gruppo.id)
+                if destinazioni.isEmpty { senzaDestinazione += 1 }
+                if destinazioni.isEmpty || stato.giorno % 3 == 0 {
+                    comando = .presidio(gruppo: gruppo.id)
+                    presidi += 1
+                } else {
+                    let destinazione = destinazioni[gruppo.id.numero % destinazioni.count]
+                    // Il comando lo forma l'interrogazione, che vi mette il costo in
+                    // giorni prescritto dai dati: nemmeno il banco lo inventa.
+                    comando = vista.comandoDiMarcia(per: gruppo.id, a: destinazione)!
+                    if case .marcia(_, _, let giorni) = comando, giorni > 1 { marceLunghe += 1 }
+                    marce += 1
+                }
             }
             let prima = stato
             let (dopo, eventi) = motore.applica(comando, parte: .giocatore, stato: stato)
+            marceCompiute += eventi.reduce(0) {
+                if case .marciaCompiuta = $1 { return $0 + 1 } else { return $0 }
+            }
             violazioni.formUnion(sonda.controlla(prima: prima, comando: comando, dopo: dopo,
                                                  eventi: eventi,
                                                  adiacenti: prima.griglia.adiacenti).map(\.description))
@@ -136,7 +164,8 @@ public struct BancoCampagna: Sendable {
 
         return Corsa(identificatore: voce.identificatore, mappa: voce.mappa,
                      gruppi: voce.gruppi.count, giornate: stato.giorno - giornoIniziale,
-                     ordini: ordini, marce: marce, presidi: presidi,
+                     ordini: ordini, marce: marce, marceLunghe: marceLunghe,
+                     marceCompiute: marceCompiute, revoche: revoche, presidi: presidi,
                      senzaDestinazione: senzaDestinazione,
                      violazioni: violazioni.sorted(), improntaFinale: stato.impronta())
     }

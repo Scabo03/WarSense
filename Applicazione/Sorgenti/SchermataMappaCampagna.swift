@@ -191,6 +191,14 @@ final class SchermataMappaCampagna: UIViewController {
         vistaMappa.segnoCasella = { [weak self] casella in
             self?.costruttore?.segniCasella(casella)
         }
+        // L'avanzamento visivo di un gruppo in marcia lunga: la posizione fra le nove
+        // (01 §5.6.3.4), derivata dai giorni dal Motore, mai calcolata qui (00 §3.2).
+        vistaMappa.avanzamentoCasella = { [weak self] casella in
+            guard let self, let costruttore = self.costruttore,
+                  let gruppo = costruttore.vista.occupante(di: casella), gruppo.inMarcia
+            else { return nil }
+            return costruttore.vista.avanzamentoVisivo(di: gruppo.id)
+        }
         vistaMappa.setNeedsDisplay()
     }
 
@@ -206,18 +214,80 @@ final class SchermataMappaCampagna: UIViewController {
     func attiva(_ casella: Cella) -> Bool {
         guard let stato = statoCorrente else { return false }
         if case .marcia(let id) = designazione {
-            // Il comando lo forma l'interrogazione, che vi mette il costo in giorni
-            // prescritto dai dati: la Presentazione non calcola dati di gioco
-            // (00 §3.2) e non conosce alcun numero (00 §13.1).
-            guard let comando = costruttore?.vista.comandoDiMarcia(per: id, a: casella)
-            else { return false }
+            // Attivare la destinazione NON esegue più la marcia: apre il pannello di
+            // conferma, che dichiara il costo in giorni e la conseguenza
+            // dell'inchiodamento PRIMA della conferma (02 §9.2.1, 01 §5.6.3.5).
+            let origine = stato.gruppi[id]?.posizione ?? casella
+            let esito = costruttore?.vista.anteprimaMarcia(da: id, a: casella) ?? .nonValido(.gruppoIgnoto)
             designazione = .nessuna
-            Task { await eseguiComando(comando) }
+            aggiorna(con: stato)
+            switch esito {
+            case .valido:
+                if let comando = costruttore?.vista.comandoDiMarcia(per: id, a: casella) {
+                    apriPannelloConfermaMarcia(comando: comando, casella: casella, origine: origine)
+                }
+            case .nonValido(let motivo):
+                partita.ambiente.segnali.annuncia(TestoLocalizzato(
+                    testo: testi.termine(motivo.rawValue).testo, lingua: testi.lingua))
+            }
             return true
         }
         guard let gruppo = stato.occupante(di: casella) else { return false }
         apriPannello(per: gruppo)
         return true
+    }
+
+    /// Il pannello di conferma della marcia (02 §9.2.1): dichiara il costo in giorni
+    /// e l'inchiodamento, e consente di confermare o rinunciare (01 §5.6.3.5).
+    private func apriPannelloConfermaMarcia(comando: ComandoCampagna, casella: Cella, origine: Cella) {
+        guard case .marcia(_, _, let giorni) = comando else { return }
+        let pannello = UIAlertController(
+            title: testi.frase("pannello.marcia_titolo", casella.riga, casella.colonna).testo,
+            message: testi.frase("pannello.marcia_conferma", casella.riga, casella.colonna, giorni).testo,
+            preferredStyle: .alert)
+        let voci = [
+            VocePannello(titolo: testi.frase("pannello.marcia_conferma_azione").testo,
+                         stile: .default) { [weak self] in
+                self?.chiudiPannello(casella: origine) { await self?.eseguiComando(comando) }
+            },
+            VocePannello(titolo: testi.frase("pannello.marcia_rinuncia_azione").testo,
+                         stile: .cancel) { [weak self] in
+                self?.chiudiPannello(casella: origine, poi: nil)
+            },
+        ]
+        for voce in voci {
+            pannello.addAction(UIAlertAction(title: voce.titolo, style: voce.stile) { _ in voce.esegui() })
+        }
+        vociPannello = voci
+        present(pannello, animated: false)
+    }
+
+    /// Il pannello di conferma della revoca (01 §5.6.3.5): dichiara i giorni che si
+    /// perdono e che il gruppo resta senza azione, prima della conferma.
+    private func apriPannelloConfermaRevoca(gruppo: Gruppo) {
+        guard let costruttore,
+              let giorniPersi = costruttore.vista.giorniPersiRevocando(per: gruppo.id) else { return }
+        let pannello = UIAlertController(
+            title: costruttore.titoloPannello(gruppo),
+            message: testi.frase("pannello.revoca_conferma", costruttore.nomeGruppo(gruppo), giorniPersi).testo,
+            preferredStyle: .alert)
+        let voci = [
+            VocePannello(titolo: testi.frase("pannello.revoca_conferma_azione").testo,
+                         stile: .destructive) { [weak self] in
+                self?.chiudiPannello(casella: gruppo.posizione) {
+                    await self?.eseguiComando(.revocaMarcia(gruppo: gruppo.id))
+                }
+            },
+            VocePannello(titolo: testi.frase("pannello.marcia_rinuncia_azione").testo,
+                         stile: .cancel) { [weak self] in
+                self?.chiudiPannello(casella: gruppo.posizione, poi: nil)
+            },
+        ]
+        for voce in voci {
+            pannello.addAction(UIAlertAction(title: voce.titolo, style: voce.stile) { _ in voce.esegui() })
+        }
+        vociPannello = voci
+        present(pannello, animated: false)
     }
 
     private func apriPannello(per gruppo: Gruppo) {
@@ -248,6 +318,20 @@ final class SchermataMappaCampagna: UIViewController {
                                      stile: .default) { [weak self] in
                 self?.chiudiPannello(casella: gruppo.posizione) {
                     await self?.eseguiComando(.presidio(gruppo: gruppo.id))
+                }
+            })
+        }
+        // La revoca si offre soltanto a un gruppo in marcia lunga: congeda il
+        // pannello del gruppo e apre quello di conferma, che dichiara i giorni persi.
+        if gruppo.inMarcia {
+            voci.append(VocePannello(titolo: testi.frase("pannello.revoca").testo,
+                                     stile: .destructive) { [weak self] in
+                guard let self else { return }
+                if let attuale = self.presentedViewController as? UIAlertController,
+                   !attuale.isBeingDismissed {
+                    attuale.dismiss(animated: false) { self.apriPannelloConfermaRevoca(gruppo: gruppo) }
+                } else {
+                    self.apriPannelloConfermaRevoca(gruppo: gruppo)
                 }
             })
         }

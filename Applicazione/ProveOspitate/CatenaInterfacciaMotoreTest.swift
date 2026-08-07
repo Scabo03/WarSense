@@ -185,10 +185,24 @@ final class CatenaInterfacciaMotoreTest: XCTestCase {
             if let meta = vista.destinazioniValide(per: gruppo.id).first {
                 schermata.avviaDesignazionePerProva(gruppo: gruppo.id)
                 let bersaglio = VistaMappa.cornice(di: meta)
-                // ANELLO 1: il tocco risolve l'elemento e lo attiva.
+                // ANELLO 1: il tocco risolve l'elemento e lo attiva. Attivare la
+                // destinazione NON esegue più la marcia: apre il pannello di conferma
+                // (02 §9.2.1), che dichiara il costo e l'inchiodamento prima della
+                // conferma. La marcia si esegue confermando, come il dito farebbe.
                 XCTAssertTrue(schermata.grigliaPerProva.attivaAlTocco(
                     in: CGPoint(x: bersaglio.midX, y: bersaglio.midY)),
-                              "\(dove): il dito non conferma la destinazione \(meta)")
+                              "\(dove): il dito non apre la conferma verso \(meta)")
+                try await attendi("\(dove): pannello di conferma marcia") {
+                    schermata.presentedViewController is UIAlertController
+                }
+                let conferma = try XCTUnwrap(schermata.vociPannelloPerProva.first {
+                    $0.titolo == ambiente.testi.frase("pannello.marcia_conferma_azione").testo
+                }, "\(dove): il pannello di conferma offre la conferma della marcia")
+                schermata.presentedViewController?.dismiss(animated: false)
+                try await attendi("\(dove): congedo della conferma") {
+                    schermata.presentedViewController == nil
+                }
+                conferma.esegui()
                 caselleToccate.append(meta)
             } else {
                 let cornice = VistaMappa.cornice(di: gruppo.posizione)

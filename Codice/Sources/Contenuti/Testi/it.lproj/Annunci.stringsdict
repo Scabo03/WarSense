@@ -45,4 +45,70 @@
       <key>other</key><string>%d esemplari</string>
     </dict>
   </dict>
+  <key>gruppo.in_marcia</key>
+  <dict>
+    <key>NSStringLocalizedFormatKey</key><string>in marcia, %#@giorni@</string>
+    <key>giorni</key>
+    <dict>
+      <key>NSStringFormatSpecTypeKey</key><string>NSStringPluralRuleType</string>
+      <key>NSStringFormatValueTypeKey</key><string>d</string>
+      <key>one</key><string>%d giorno al termine</string>
+      <key>other</key><string>%d giorni al termine</string>
+    </dict>
+  </dict>
+  <key>casella.disponibile</key>
+  <dict>
+    <key>NSStringLocalizedFormatKey</key><string>raggiungibile in %#@giorni@</string>
+    <key>giorni</key>
+    <dict>
+      <key>NSStringFormatSpecTypeKey</key><string>NSStringPluralRuleType</string>
+      <key>NSStringFormatValueTypeKey</key><string>d</string>
+      <key>one</key><string>%d giorno di marcia</string>
+      <key>other</key><string>%d giorni di marcia</string>
+    </dict>
+  </dict>
+  <key>campagna.marcia_ordinata</key>
+  <dict>
+    <key>NSStringLocalizedFormatKey</key><string>%4$#@giorni@</string>
+    <key>giorni</key>
+    <dict>
+      <key>NSStringFormatSpecTypeKey</key><string>NSStringPluralRuleType</string>
+      <key>NSStringFormatValueTypeKey</key><string>d</string>
+      <key>one</key><string>%1$@ marcia verso riga %2$d, casella %3$d, %4$d giorno al termine</string>
+      <key>other</key><string>%1$@ marcia verso riga %2$d, casella %3$d, %4$d giorni al termine</string>
+    </dict>
+  </dict>
+  <key>campagna.marcia_revocata</key>
+  <dict>
+    <key>NSStringLocalizedFormatKey</key><string>%2$#@giorni@</string>
+    <key>giorni</key>
+    <dict>
+      <key>NSStringFormatSpecTypeKey</key><string>NSStringPluralRuleType</string>
+      <key>NSStringFormatValueTypeKey</key><string>d</string>
+      <key>one</key><string>%1$@: marcia revocata, perso %2$d giorno</string>
+      <key>other</key><string>%1$@: marcia revocata, persi %2$d giorni</string>
+    </dict>
+  </dict>
+  <key>pannello.marcia_conferma</key>
+  <dict>
+    <key>NSStringLocalizedFormatKey</key><string>%3$#@giorni@</string>
+    <key>giorni</key>
+    <dict>
+      <key>NSStringFormatSpecTypeKey</key><string>NSStringPluralRuleType</string>
+      <key>NSStringFormatValueTypeKey</key><string>d</string>
+      <key>one</key><string>Marcia verso riga %1$d, casella %2$d. Costa %3$d giorno. Il gruppo resterà fermo fino all'arrivo e non potrà sfilarsi senza perdere i giorni spesi.</string>
+      <key>other</key><string>Marcia verso riga %1$d, casella %2$d. Costa %3$d giorni. Il gruppo resterà fermo fino all'arrivo e non potrà sfilarsi senza perdere i giorni spesi.</string>
+    </dict>
+  </dict>
+  <key>pannello.revoca_conferma</key>
+  <dict>
+    <key>NSStringLocalizedFormatKey</key><string>%2$#@giorni@</string>
+    <key>giorni</key>
+    <dict>
+      <key>NSStringFormatSpecTypeKey</key><string>NSStringPluralRuleType</string>
+      <key>NSStringFormatValueTypeKey</key><string>d</string>
+      <key>one</key><string>Revoca la marcia di %1$@. Perdi %2$d giorno e il gruppo resta senza azione oggi.</string>
+      <key>other</key><string>Revoca la marcia di %1$@. Perdi %2$d giorni e il gruppo resta senza azione oggi.</string>
+    </dict>
+  </dict>
 </dict></plist>
