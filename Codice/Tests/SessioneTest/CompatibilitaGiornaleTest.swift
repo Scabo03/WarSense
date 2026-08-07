@@ -63,7 +63,7 @@ final class CompatibilitaGiornaleTest: XCTestCase {
 
     /// Specchio di `ComandoCampagna`.
     enum SpecieDiComandoCampagna: String, CaseIterable {
-        case marcia, presidio, revocaMarcia
+        case marcia, presidio, revocaMarcia, divisione, riunione
     }
 
     // MARK: - I due lati della catena: dal tipo vero allo specchio e ritorno
@@ -135,6 +135,8 @@ final class CompatibilitaGiornaleTest: XCTestCase {
         case .marcia: return .marcia
         case .presidio: return .presidio
         case .revocaMarcia: return .revocaMarcia
+        case .divisione: return .divisione
+        case .riunione: return .riunione
         }
     }
 
@@ -144,6 +146,10 @@ final class CompatibilitaGiornaleTest: XCTestCase {
             return .marcia(gruppo: IdGruppo(1), a: Cella(riga: 1, colonna: 1), giorni: 1)
         case .presidio: return .presidio(gruppo: IdGruppo(1))
         case .revocaMarcia: return .revocaMarcia(gruppo: IdGruppo(1))
+        case .divisione:
+            return .divisione(gruppo: IdGruppo(1), repartiStaccati: [1], a: Cella(riga: 1, colonna: 2))
+        case .riunione:
+            return .riunione(gruppo: IdGruppo(1), con: IdGruppo(2))
         }
     }
 

@@ -41,6 +41,7 @@
 		D98FD5EC7B5146D5F3262613 /* Motore in Frameworks */ = {isa = PBXBuildFile; productRef = 4C9D7DB3476FDC5DEE8AC840 /* Motore */; };
 		E24D2DCC36AA253024D4016A /* VistaMappa.swift in Sources */ = {isa = PBXBuildFile; fileRef = 5159B9BE60E2EEEA1817D003 /* VistaMappa.swift */; };
 		E3377223A159BC8874F878FF /* CostruttoreAnnunci.swift in Sources */ = {isa = PBXBuildFile; fileRef = D09017EA703DD5FF54F15458 /* CostruttoreAnnunci.swift */; };
+		E92E862F8FAE7463EED1209F /* SchermataDivisione.swift in Sources */ = {isa = PBXBuildFile; fileRef = 6FCD9653D2440473853AF041 /* SchermataDivisione.swift */; };
 		F153F7238148016D1A99A85F /* RaggiungibilitaTest.swift in Sources */ = {isa = PBXBuildFile; fileRef = 03ACD38B8C2F68821502F3C4 /* RaggiungibilitaTest.swift */; };
 		F821EB8F313205F3828A2128 /* VistaACaselle.swift in Sources */ = {isa = PBXBuildFile; fileRef = 9D136B104384C6AF309293B3 /* VistaACaselle.swift */; };
 		F9D782BD8B4FD18B38DF5922 /* PannelloAzioniTest.swift in Sources */ = {isa = PBXBuildFile; fileRef = 325B59A8BC855637ABF9B2CB /* PannelloAzioniTest.swift */; };
@@ -82,6 +83,7 @@
 		47D2EC331332BE96EB5D410B /* Servizi.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Servizi.swift; sourceTree = "<group>"; };
 		5159B9BE60E2EEEA1817D003 /* VistaMappa.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = VistaMappa.swift; sourceTree = "<group>"; };
 		589A5B5EA3AF0D6D1EFB3900 /* DesignazioneBersaglioTest.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = DesignazioneBersaglioTest.swift; sourceTree = "<group>"; };
+		6FCD9653D2440473853AF041 /* SchermataDivisione.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SchermataDivisione.swift; sourceTree = "<group>"; };
 		7088EBAC70470929FF7BA18A /* SessioniPerInterfacciaTest.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SessioniPerInterfacciaTest.swift; sourceTree = "<group>"; };
 		75B409D97C3092A3CC3CDA17 /* ImpiantoInterfacciaTest.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ImpiantoInterfacciaTest.swift; sourceTree = "<group>"; };
 		780DA0404CFBE7DD9B420A68 /* AppDelegate.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AppDelegate.swift; sourceTree = "<group>"; };
@@ -147,6 +149,7 @@
 				D05C93D40ACCC919E14E0F90 /* PartitaCampagna.swift */,
 				9EF7773BD1ED816307203E97 /* PartitaCorrente.swift */,
 				849A458FA8292F265DF9BE68 /* SchermataBattaglia.swift */,
+				6FCD9653D2440473853AF041 /* SchermataDivisione.swift */,
 				33237A45EB1B4EBEA09B1769 /* SchermataMappaCampagna.swift */,
 				D159331FD8EEFB4F1B728089 /* SchermataRegistro.swift */,
 				44914552A51BDF0197E99DAF /* SchermateContorno.swift */,
@@ -369,6 +372,7 @@
 				35D13AF917D421DA151C322C /* PartitaCampagna.swift in Sources */,
 				9834F71661D44043584E4993 /* PartitaCorrente.swift in Sources */,
 				5F9166348949834153CEF7FA /* SchermataBattaglia.swift in Sources */,
+				E92E862F8FAE7463EED1209F /* SchermataDivisione.swift in Sources */,
 				939EB534A7DF2E8F28165724 /* SchermataMappaCampagna.swift in Sources */,
 				FC1C2BFD8B30FA33CFF6F12C /* SchermataRegistro.swift in Sources */,
 				190E7D5DC3B892BF2DFD277B /* SchermateContorno.swift in Sources */,

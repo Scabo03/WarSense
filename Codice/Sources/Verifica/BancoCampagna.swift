@@ -82,6 +82,10 @@ public struct BancoCampagna: Sendable {
         /// Le revoche impartite (01 §5.6.3.3, RDA-76).
         public let revoche: Int
         public let presidi: Int
+        /// Le divisioni e le riunioni generate (01 §5.6.0.2, §5.6.0.3): se zero, la
+        /// corsa non le ha esercitate, e gli invarianti relativi non hanno morso.
+        public let divisioni: Int
+        public let riunioni: Int
         /// Ordini impartiti a un gruppo che NON aveva alcuna destinazione libera:
         /// è il caso di stipamento, quello in cui l'azione di marcia non si offre
         /// affatto (02 §9.5). Se questo numero è zero, la corsa non ha esercitato
@@ -112,7 +116,7 @@ public struct BancoCampagna: Sendable {
             valori: valoriCampagna, archetipiNoti: archetipiNoti)
         var violazioni = Set<String>()
         var ordini = 0, marce = 0, marceLunghe = 0, marceCompiute = 0, revoche = 0
-        var presidi = 0, senzaDestinazione = 0
+        var presidi = 0, senzaDestinazione = 0, divisioni = 0, riunioni = 0
         // La tabella dei volumi per atomo, per l'invariante del volume come somma.
         let volumePerAtomo = motore.valori.archetipi.mapValues { $0.volumePerAtomo }
         // I volumi dei gruppi (costanti in questa unità: la composizione non muta).
@@ -148,7 +152,20 @@ public struct BancoCampagna: Sendable {
             // altrimenti si ordina il prossimo gruppo in attesa, con la prima
             // destinazione valida o il presidio. Deterministica, senza caso.
             let comando: ComandoCampagna
-            if stato.giorno % 5 == 2, let marciante = stato.gruppiInMarcia().first {
+            // La riunione (non è un'azione): ogni tanto due gruppi adiacenti si
+            // fondono, purché ne restino almeno due, così da esercitare la regola
+            // dell'azione già spesa senza far collassare lo scenario a un gruppo solo.
+            if stato.giorno % 4 == 1, stato.gruppi.count > 2,
+               let (a, b) = coppiaRiunibile(stato) {
+                comando = .riunione(gruppo: a, con: b)
+                riunioni += 1
+            // La divisione (costa l'azione): ogni tanto un gruppo divisibile stacca il
+            // primo reparto in una casella libera, se un nome è disponibile.
+            } else if stato.giorno % 7 == 3,
+                      let (g, staccati, dest) = divisionePossibile(vista, stato) {
+                comando = .divisione(gruppo: g, repartiStaccati: staccati, a: dest)
+                divisioni += 1
+            } else if stato.giorno % 5 == 2, let marciante = stato.gruppiInMarcia().first {
                 comando = .revocaMarcia(gruppo: marciante.id)
                 revoche += 1
             } else {
@@ -195,9 +212,39 @@ public struct BancoCampagna: Sendable {
                      gruppi: voce.gruppi.count, giornate: stato.giorno - giornoIniziale,
                      ordini: ordini, marce: marce, marceLunghe: marceLunghe,
                      marceCompiute: marceCompiute, revoche: revoche, presidi: presidi,
+                     divisioni: divisioni, riunioni: riunioni,
                      senzaDestinazione: senzaDestinazione,
                      volumeMinimo: volumeMinimo, volumeMassimo: volumeMassimo,
                      violazioni: violazioni.sorted(), improntaFinale: stato.impronta())
+    }
+
+    /// Due gruppi propri adiacenti e NON in marcia, per la riunione, il primo per id.
+    /// La riunione lavora su qualunque coppia adiacente, quale che sia lo stato
+    /// dell'azione: è così che si esercita la regola «già agito se uno lo era».
+    private func coppiaRiunibile(_ stato: StatoCampagna) -> (IdGruppo, IdGruppo)? {
+        let gruppi = stato.gruppiOrdinati.filter { !$0.inMarcia }
+        for i in gruppi.indices {
+            for j in gruppi.indices
+            where j > i && stato.griglia.adiacenti(gruppi[i].posizione, gruppi[j].posizione) {
+                return (gruppi[i].id, gruppi[j].id)
+            }
+        }
+        return nil
+    }
+
+    /// Un gruppo in attesa con almeno due reparti, una casella libera adiacente e un
+    /// nome disponibile: stacca il PRIMO reparto verso quella casella. La casella
+    /// libera si prende da `destinazioniValide`, cioè le adiacenti libere e non già
+    /// puntate — lo stesso vincolo del distaccamento (01 §5.6.0.2).
+    private func divisionePossibile(_ vista: VistaCampagna,
+                                    _ stato: StatoCampagna) -> (IdGruppo, [Int], Cella)? {
+        guard stato.prossimoIndiceNome < valoriCampagna.nomiGruppi.count else { return nil }
+        for gruppo in stato.gruppiInAttesa() where gruppo.composizione.count >= 2 {
+            if let dest = vista.destinazioniValide(per: gruppo.id).first {
+                return (gruppo.id, [0], dest)
+            }
+        }
+        return nil
     }
 
     /// La sequenza che il salto diretto propone percorrendolo fino a tornare al

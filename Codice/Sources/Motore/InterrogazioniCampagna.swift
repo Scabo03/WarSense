@@ -115,6 +115,42 @@ public struct VistaCampagna: Sendable {
         return motore.valida(comando, parte: parte, stato: stato)
     }
 
+    // MARK: - Divisione e riunione (01 §5.6.0.2, §5.6.0.3)
+
+    /// Vero se il gruppo può DIVIDERSI: non ha concluso la giornata, ha almeno due
+    /// reparti (la divisione lavora su reparti interi e nessuna parte resta vuota) e
+    /// ha una casella adiacente libera dove collocare il distaccamento. Quando è
+    /// falso, l'azione di divisione non si offre affatto (02 §9.5).
+    public func puoDividere(per id: IdGruppo) -> Bool {
+        guard let gruppo = stato.gruppi[id], !gruppo.haConclusoLaGiornata,
+              gruppo.composizione.count >= 2 else { return false }
+        return esisteDestinazione(per: id)
+    }
+
+    /// Il comando di divisione già formato, se valido; altrimenti nullo (00 §3.2): la
+    /// Presentazione non giudica da sé, chiede al Motore.
+    public func comandoDiDivisione(per id: IdGruppo, staccando reparti: [Int],
+                                   a casella: Cella) -> ComandoCampagna? {
+        let comando = ComandoCampagna.divisione(gruppo: id, repartiStaccati: reparti.sorted(), a: casella)
+        return motore.valida(comando, parte: parte, stato: stato).eValido ? comando : nil
+    }
+
+    /// I gruppi propri adiacenti con cui questo si può RIUNIRE: entrambi non in marcia
+    /// (01 §5.6.0.3), in ordine di id. Vuoto se il gruppo stesso è in marcia.
+    public func gruppiRiunibili(con id: IdGruppo) -> [Gruppo] {
+        guard let gruppo = stato.gruppi[id], !gruppo.inMarcia else { return [] }
+        return stato.griglia.vicini(di: gruppo.posizione).compactMap { vicina in
+            guard let altro = stato.occupante(di: vicina, parte: parte), !altro.inMarcia else { return nil }
+            return altro
+        }.sorted { $0.id < $1.id }
+    }
+
+    /// Il comando di riunione, se valido; altrimenti nullo (00 §3.2).
+    public func comandoDiRiunione(gruppo id: IdGruppo, con altro: IdGruppo) -> ComandoCampagna? {
+        let comando = ComandoCampagna.riunione(gruppo: id, con: altro)
+        return motore.valida(comando, parte: parte, stato: stato).eValido ? comando : nil
+    }
+
     // MARK: - Orientamento (01 §5.16)
 
     /// Il primo strato dell'orientamento: l'informazione di stato, richiamabile in

@@ -92,14 +92,16 @@ public struct ProgrammaDiVerifica: Sendable {
                                     String(corsa.violazioni.count),
                                     corsa.violazioni.joined(separator: ";"),
                                     corsa.improntaFinale,
-                                    String(corsa.volumeMinimo), String(corsa.volumeMassimo)])
+                                    String(corsa.volumeMinimo), String(corsa.volumeMassimo),
+                                    String(corsa.divisioni), String(corsa.riunioni)])
         }
         sezioni.append(Rapporto.Sezione(
             nome: "campagna_invarianti",
             intestazione: ["scenario", "mappa", "gruppi", "giornate", "ordini", "marce",
                            "marce_lunghe", "marce_compiute", "revoche", "presidi",
                            "senza_destinazione", "violazioni", "dettaglio",
-                           "impronta_finale", "volume_minimo", "volume_massimo"],
+                           "impronta_finale", "volume_minimo", "volume_massimo",
+                           "divisioni", "riunioni"],
             righe: righeInvarianti))
 
         // La curva, non il punto: il costo di chiusura di una giornata si misura su
@@ -213,6 +215,10 @@ public struct ProgrammaDiVerifica: Sendable {
         voce("marce_lunghe_in_totale", righeInvarianti.reduce(0) { $0 + (Int($1[6]) ?? 0) })
         voce("marce_compiute_in_totale", righeInvarianti.reduce(0) { $0 + (Int($1[7]) ?? 0) })
         voce("revoche_in_totale", righeInvarianti.reduce(0) { $0 + (Int($1[8]) ?? 0) })
+        // Divisioni e riunioni si sommano dalle colonne 16 e 17: se zero, il banco non
+        // le ha esercitate e i loro invarianti non hanno morso (01 §5.6.0.2, §5.6.0.3).
+        voce("divisioni_in_totale", righeInvarianti.reduce(0) { $0 + (Int($1[16]) ?? 0) })
+        voce("riunioni_in_totale", righeInvarianti.reduce(0) { $0 + (Int($1[17]) ?? 0) })
         let violazioni = righeInvarianti.reduce(0) { $0 + (Int($1[11]) ?? 0) }
         voce("violazioni_trovate_in_totale", violazioni)
         voce("ordini_a_gruppi_senza_alcuna_destinazione",

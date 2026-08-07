@@ -132,7 +132,7 @@ final class CaricamentoTest: XCTestCase {
     }
 
     /// La discordanza di un'impronta DICHIARA la causa e il comando che la rigenera
-    /// (RDA-106): fino a questa versione il fallimento era la sola riga opaca del
+    /// (RDA-105): fino a questa versione il fallimento era la sola riga opaca del
     /// riflesso del tipo, e una modifica di Contenuti senza rigenerare faceva fallire
     /// in massa prove che sembravano regressioni. La descrizione — quella che il
     /// collaudo stampa risalendo l'errore — nomina `rigenera-impronte`. Il controllo

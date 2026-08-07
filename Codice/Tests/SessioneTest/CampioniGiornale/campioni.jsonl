@@ -19,3 +19,5 @@
 {"numero":18,"voce":{"comando":{"comando":{"disingaggiaSuOrdine":{"sciame":{"numero":1}}},"parte":"giocatore"}}}
 {"numero":19,"voce":{"comandoCampagna":{"comando":{"revocaMarcia":{"gruppo":{"numero":1}}},"parte":"giocatore"}}}
 {"numero":20,"voce":{"risoluzioneGiornata":{"giorno":1}}}
+{"numero":21,"voce":{"comandoCampagna":{"comando":{"divisione":{"a":{"colonna":2,"riga":1},"gruppo":{"numero":1},"repartiStaccati":[1]}},"parte":"giocatore"}}}
+{"numero":22,"voce":{"comandoCampagna":{"comando":{"riunione":{"con":{"numero":2},"gruppo":{"numero":1}}},"parte":"giocatore"}}}

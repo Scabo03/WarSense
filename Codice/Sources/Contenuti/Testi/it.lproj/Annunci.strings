@@ -185,6 +185,12 @@
 "campagna.marcia_compiuta.sintetico" = "%@ in riga %d, casella %d";
 "campagna.presidio_ordinato" = "%@ presidia in riga %d, casella %d";
 "campagna.presidio_ordinato.sintetico" = "%@ presidia";
+/* Divisione e riunione (01 §5.6.0.2, §5.6.0.3). La divisione annuncia il DISTACCAMENTO
+   e dove è nato; la riunione il gruppo RISULTANTE e la sua casella. */
+"campagna.gruppo_diviso" = "Nuovo gruppo %1$@ in riga %2$d, casella %3$d";
+"campagna.gruppo_diviso.sintetico" = "Nuovo %1$@";
+"campagna.gruppi_riuniti" = "%1$@ riunito in riga %2$d, casella %3$d";
+"campagna.gruppi_riuniti.sintetico" = "%1$@ riunito";
 "campagna.giornata_aperta" = "Giornata conclusa: comincia il giorno %d";
 "campagna.giornata_aperta.sintetico" = "Giorno %d";
 
@@ -234,6 +240,10 @@
 "pannello.designa_marcia" = "Marcia: scegli la casella sulla mappa";
 "pannello.marcia_designazione_avviata" = "Scegli la casella di destinazione e attivala per dare l'ordine di marcia";
 "pannello.presidio" = "Presidia: resta fermo in guardia";
+/* Divisione e riunione (01 §5.6.0.2, §5.6.0.3). «Dividi» apre la schermata dei
+   reparti; «Riunisci con» si offre una volta per ciascun gruppo proprio adiacente. */
+"pannello.dividi" = "Dividi: scegli i reparti da staccare";
+"pannello.riunisci" = "Riunisci con %@";
 /* Il pannello di conferma della marcia NON esiste più: l'ordine parte direttamente
    dalla voce della casella di destinazione (correzione del titolare, RDA-104). Il
    costo e la conseguenza dell'inchiodamento stanno su quella voce (casella.disponibile
@@ -243,6 +253,19 @@
    e che il gruppo resta senza azione, prima della conferma. */
 "pannello.revoca" = "Revoca la marcia";
 "pannello.revoca_conferma_azione" = "Conferma la revoca";
+
+/* Schermata di divisione (01 §5.6.0.2, 02 §10.3): ogni riga una frase compatta.
+   `divisione.reparto` porta il plurale sugli atomi e sta nel .stringsdict. */
+"divisione.titolo" = "Dividi %@";
+"divisione.scegli_reparti" = "Scegli i reparti da staccare";
+"divisione.scegli_dove" = "Scegli dove collocare il distaccamento";
+"divisione.da_tenere" = "da tenere";
+"divisione.da_staccare" = "da staccare";
+"divisione.colloca" = "Colloca in riga %1$d, casella %2$d";
+"divisione.annulla" = "Annulla la divisione";
+"divisione.scelta_incompleta" = "Scegli almeno un reparto da staccare e almeno uno da tenere";
+"divisione.suggerimento_reparto" = "Attiva per staccare o tenere questo reparto";
+"divisione.suggerimento_colloca" = "Attiva per collocare qui il distaccamento e dividere";
 
 /* Rotori della mappa di campagna (02 §7.3). */
 "rotore.proprie_formazioni" = "Tue formazioni";

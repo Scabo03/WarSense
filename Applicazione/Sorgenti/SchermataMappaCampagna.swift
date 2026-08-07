@@ -297,6 +297,32 @@ final class SchermataMappaCampagna: UIViewController {
                 }
             })
         }
+        // La divisione si offre a un gruppo con almeno due reparti, una casella libera
+        // adiacente e la giornata non conclusa (01 §5.6.0.2): apre la schermata dei
+        // reparti. È l'operazione più complessa della mappa (02 §10.3).
+        if costruttore.vista.puoDividere(per: gruppo.id) {
+            voci.append(VocePannello(titolo: testi.frase("pannello.dividi").testo,
+                                     stile: .default) { [weak self] in
+                guard let self else { return }
+                if let attuale = self.presentedViewController as? UIAlertController,
+                   !attuale.isBeingDismissed {
+                    attuale.dismiss(animated: false) { self.apriSchermataDivisione(per: gruppo) }
+                } else {
+                    self.apriSchermataDivisione(per: gruppo)
+                }
+            })
+        }
+        // La riunione (non è un'azione, 01 §5.6.0.3): una voce per ciascun gruppo
+        // proprio adiacente e non in marcia. Attivarla riunisce e non apre schermate.
+        for altro in costruttore.vista.gruppiRiunibili(con: gruppo.id) {
+            voci.append(VocePannello(
+                titolo: testi.frase("pannello.riunisci", costruttore.nomeGruppo(altro)).testo,
+                stile: .default) { [weak self] in
+                self?.chiudiPannello(casella: gruppo.posizione) {
+                    await self?.eseguiComando(.riunione(gruppo: gruppo.id, con: altro.id))
+                }
+            })
+        }
         // La revoca si offre soltanto a un gruppo in marcia lunga: congeda il
         // pannello del gruppo e apre quello di conferma, che dichiara i giorni persi.
         if gruppo.inMarcia {
@@ -320,6 +346,25 @@ final class SchermataMappaCampagna: UIViewController {
         }
         vociPannello = voci
         present(pannello, animated: false)
+    }
+
+    /// Presenta la schermata di divisione del gruppo (01 §5.6.0.2, 02 §10.3). Alla
+    /// conferma forma il comando con i reparti scelti — il Motore lo valida, la
+    /// Presentazione non lo giudica — e lo esegue.
+    private func apriSchermataDivisione(per gruppo: Gruppo) {
+        guard let costruttore else { return }
+        let schermata = SchermataDivisione(
+            gruppo: gruppo,
+            destinazioni: costruttore.vista.destinazioniValide(per: gruppo.id),
+            testi: testi)
+        schermata.alConferma = { [weak self] staccati, cella in
+            guard let self,
+                  let comando = self.costruttore?.vista.comandoDiDivisione(
+                    per: gruppo.id, staccando: staccati, a: cella) else { return }
+            Task { await self.eseguiComando(comando) }
+        }
+        schermata.modalPresentationStyle = .fullScreen
+        present(schermata, animated: false)
     }
 
     /// Alla chiusura il fuoco torna alla casella d'origine (05 §10.3). L'avviso di

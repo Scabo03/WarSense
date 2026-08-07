@@ -28,6 +28,10 @@ public struct TraduttoreEventiCampagna: Sendable {
     public func significato(per evento: EventoCampagna) -> SignificatoSegnale? {
         switch evento {
         case .marciaOrdinata, .presidioOrdinato, .marciaRevocata: return .conferma
+        // La divisione e la riunione sono decise dal giocatore e portano il segnale di
+        // conferma del proprio ordine, come la marcia e il presidio: nessun sedicesimo
+        // significato (02 §11.5).
+        case .gruppoDiviso, .gruppiRiuniti: return .conferma
         // Il compimento di una marcia lunga è un fatto non deciso dal giocatore e ha
         // il proprio significato tattile già assegnato: `marcia_completata`, famiglia
         // della navigazione (02 §11.7.1). Non è una conferma di un ordine.
@@ -58,6 +62,14 @@ public struct TraduttoreEventiCampagna: Sendable {
                                nome(chiave), giorniPersi)
         case .presidioOrdinato(_, let chiave, let casella):
             return testi.frase("campagna.presidio_ordinato", verbosita: verbosita,
+                               nome(chiave), casella.riga, casella.colonna)
+        case .gruppoDiviso(_, _, _, let chiaveDistaccamento, let a):
+            // L'annuncio nomina il DISTACCAMENTO e dove è nato: è il fatto nuovo, e il
+            // gruppo di origine resta dove il giocatore lo vede (01 §5.6.0.2).
+            return testi.frase("campagna.gruppo_diviso", verbosita: verbosita,
+                               nome(chiaveDistaccamento), a.riga, a.colonna)
+        case .gruppiRiuniti(_, let chiave, _, let casella):
+            return testi.frase("campagna.gruppi_riuniti", verbosita: verbosita,
                                nome(chiave), casella.riga, casella.colonna)
         case .giornataChiusa:
             // Un fatto solo, una frase sola: l'apertura porta già la chiusura.

@@ -1,8 +1,8 @@
 {
  "impronte": {
-  "it.lproj/Annunci.strings": "91e8204f789205adf8881fa81a4fba57e58ebb41a688bb15928082a36522a3b2",
-  "it.lproj/Annunci.stringsdict": "e4d2ef9e95494d2947aaa3ffea4cd026fe2d8651498fc84611f7598b30e24b19",
-  "it.lproj/Vocabolario.strings": "875835dbedf4bbcbf157fed44f80b25e5f944c371efedbd4c0520c183a9241f1"
+  "it.lproj/Annunci.strings": "c2d52fbba6b10d9a8ad3568215d782b980a971eb046c5ad49f6adbe0a8399ca4",
+  "it.lproj/Annunci.stringsdict": "a8dda2c9a6057744287966568c88db189ee22c3dd9f673cdb04a33a39f7fb84b",
+  "it.lproj/Vocabolario.strings": "eeb3f4aa56d8b5bd9db30e97c9ff3471f9192b26404bbeee32a932e1246e0867"
  },
  "lingue": [
   "it"

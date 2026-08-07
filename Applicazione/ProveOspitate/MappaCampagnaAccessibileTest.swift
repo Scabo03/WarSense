@@ -127,19 +127,62 @@ final class MappaCampagnaAccessibileTest: XCTestCase {
                        "gli insiemi di 02 §7.3 che questa unità realizza, e nessuno a vuoto")
     }
 
-    func test_01_5_16_il_pannello_offre_marcia_e_presidio_e_nient_altro() async throws {
+    func test_01_5_16_il_pannello_offre_le_azioni_disponibili_in_ordine_fisso() async throws {
         let (schermata, _, ambiente) = try await mappaAperta(taglia: .media)
         let stato = try XCTUnwrap(schermata.statoPerProva)
+        // Il primo gruppo (istmo, riga 6 casella 3) è leggero — un reparto solo, niente
+        // divisione — non è in marcia — niente revoca — e ha un vicino proprio in riga 6
+        // casella 2, con cui la riunione si offre. Ordine fisso: marcia, presidio,
+        // riunioni, revoca, chiudi.
         let gruppo = stato.gruppiOrdinati[0]
+        let vicino = try XCTUnwrap(stato.occupante(di: Cella(riga: 6, colonna: 2)),
+                                   "il secondo gruppo è adiacente al primo")
         XCTAssertTrue(schermata.attiva(gruppo.posizione), "la casella di un proprio gruppo si attiva")
         try await Task.sleep(nanoseconds: 100_000_000)
-        let voci = schermata.vociPannelloPerProva
         let testi = ambiente.testi
-        XCTAssertEqual(voci.map(\.titolo),
+        let nomeVicino = testi.termine("gruppo.nome." + vicino.nome).testo
+        XCTAssertEqual(schermata.vociPannelloPerProva.map(\.titolo),
                        [testi.frase("pannello.designa_marcia").testo,
                         testi.frase("pannello.presidio").testo,
+                        testi.frase("pannello.riunisci", nomeVicino).testo,
                         testi.frase("pannello.chiudi").testo],
-                       "le due azioni di questa unità più la chiusura, in ordine fisso")
+                       "marcia, presidio, riunione col vicino, chiusura — in ordine fisso")
+    }
+
+    /// La divisione: la schermata dei reparti (02 §10.3), ogni riga un elemento
+    /// accessibile in una frase compatta. Si stacca un reparto, si colloca il
+    /// distaccamento in una casella adiacente, e il gruppo si divide (01 §5.6.0.2).
+    func test_01_5_6_0_2_la_schermata_di_divisione_stacca_un_reparto_e_divide() async throws {
+        let (schermata, _, ambiente) = try await mappaAperta(taglia: .media)
+        let stato = try XCTUnwrap(schermata.statoPerProva)
+        // Un gruppo divisibile: almeno due reparti (nel medio, il secondo e il terzo).
+        let gruppo = try XCTUnwrap(stato.gruppiOrdinati.first { $0.composizione.count >= 2 })
+        let gruppiPrima = stato.gruppi.count
+        XCTAssertTrue(schermata.attiva(gruppo.posizione))
+        try await Task.sleep(nanoseconds: 100_000_000)
+        let testi = ambiente.testi
+        let vociDividi = try XCTUnwrap(schermata.vociPannelloPerProva.first {
+            $0.titolo == testi.frase("pannello.dividi").testo }, "il pannello offre la divisione")
+        vociDividi.esegui()
+        // La schermata di divisione si presenta.
+        for _ in 0..<50 where !(schermata.presentedViewController is SchermataDivisione) {
+            try await Task.sleep(nanoseconds: 20_000_000)
+        }
+        let divisione = try XCTUnwrap(schermata.presentedViewController as? SchermataDivisione)
+        divisione.loadViewIfNeeded()
+        XCTAssertEqual(divisione.righeReparto.count, gruppo.composizione.count,
+                       "una riga accessibile per ciascun reparto (02 §10.3)")
+        XCTAssertFalse(divisione.righeDestinazione.isEmpty, "almeno una casella dove collocare")
+        // Stacca il primo reparto e colloca il distaccamento nella prima casella.
+        divisione.righeReparto[0].sendActions(for: .touchUpInside)
+        divisione.righeDestinazione[0].sendActions(for: .touchUpInside)
+        // La divisione si applica: un gruppo in più.
+        for _ in 0..<50 where (schermata.statoPerProva?.gruppi.count ?? 0) == gruppiPrima {
+            try await Task.sleep(nanoseconds: 20_000_000)
+        }
+        XCTAssertEqual(schermata.statoPerProva?.gruppi.count, gruppiPrima + 1,
+                       "la divisione ha creato il distaccamento")
+        XCTAssertNil(schermata.presentedViewController, "la schermata di divisione si è congedata")
     }
 
     /// Attivare una destinazione durante la designazione ORDINA la marcia

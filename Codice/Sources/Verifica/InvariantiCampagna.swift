@@ -55,6 +55,16 @@ public struct SondaInvariantiCampagna: Sendable {
         /// arriva dall'esterno, come la posizione visiva, così che una prova possa
         /// darne uno divergente e accertare che la sonda se ne accorga.
         case volumeIncoerente(gruppo: Int, riportato: Int, atteso: Int)
+        // Invarianti della divisione e della riunione (01 §5.6.0.2, §5.6.0.3).
+        /// La somma dei reparti del gruppo di origine e del distaccamento, dopo una
+        /// divisione, non eguaglia i reparti del gruppo di prima: la divisione ha
+        /// perso o inventato un reparto (01 §5.6.0.2).
+        case divisioneNonConserva(gruppo: Int)
+        /// Un gruppo diviso o riunito ha guadagnato un'azione: il gruppo di origine o
+        /// il distaccamento non risulta avere agito dopo la divisione, oppure il
+        /// risultante di una riunione non ha l'azione spesa se e solo se almeno uno
+        /// dei due la aveva (01 §5.6.0.2, §5.6.0.3). Regalerebbe una giornata.
+        case guadagnoDiAzione(gruppo: Int)
 
         /// Il codice della violazione, senza spazi: l'uscita del programma di
         /// verifica è dato per chi sviluppa e non testo di prodotto (05 §12.6),
@@ -84,6 +94,8 @@ public struct SondaInvariantiCampagna: Sendable {
             case .revocaNonConforme(let g): return "revoca_non_conforme:gruppo=\(g)"
             case .gruppoVuoto(let g): return "gruppo_vuoto:gruppo=\(g)"
             case .volumeIncoerente(let g, let r, let a): return "volume_incoerente:gruppo=\(g):riportato=\(r):atteso=\(a)"
+            case .divisioneNonConserva(let g): return "divisione_non_conserva:gruppo=\(g)"
+            case .guadagnoDiAzione(let g): return "guadagno_azione:gruppo=\(g)"
             }
         }
     }
@@ -117,6 +129,8 @@ public struct SondaInvariantiCampagna: Sendable {
         "revoca_non_conforme",
         "gruppo_vuoto",
         "volume_incoerente",
+        "divisione_non_conserva",
+        "guadagno_azione",
     ]
 
     /// Il codice nudo, senza i valori: la parte prima dei due punti.
@@ -189,10 +203,21 @@ public struct SondaInvariantiCampagna: Sendable {
                           dopo: StatoCampagna, eventi: [EventoCampagna],
                           adiacenti: (Cella, Cella) -> Bool) -> [Violazione] {
         var violazioni: [Violazione] = []
-        let idAgente: IdGruppo
-        // Un gruppo in marcia non riceve mai un ordine di marcia o di presidio
-        // (01 §5.6.3.3): la validazione lo impedisce, l'invariante lo sorveglia. La
-        // revoca fa eccezione, perché si compie PROPRIO su una marcia in corso.
+        // Il gruppo che AGISCE, per le verifiche generiche. La revoca e la riunione
+        // NON sono azioni (01 §5.6.8.1) e non hanno un agente: le loro regole proprie
+        // si controllano a parte, e le verifiche generiche dell'azione si saltano.
+        var idAgente: IdGruppo? = nil
+        // I gruppi che nascono in questa transizione (il distaccamento di una
+        // divisione): sono ESENTI dalla regola «nessuno agisce da sé», perché nascono
+        // legittimamente avendo già agito (01 §5.6.0.2).
+        var natiOra = Set<IdGruppo>()
+        // Se la transizione ha CHIUSO la giornata, l'azione spesa si azzera per la
+        // giornata nuova (01 §5.6.0.6): le regole sull'azione della divisione e della
+        // riunione si verificano sullo stato PRIMA di quell'azzeramento, cioè non si
+        // controllano quando una chiusura è avvenuta. La conservazione dei reparti,
+        // invece, non dipende dalla chiusura e si controlla sempre.
+        let giornoChiuso = eventi.contains { if case .giornataChiusa = $0 { return true } else { return false } }
+
         switch comando {
         case .marcia(let id, let destinazione, _):
             idAgente = id
@@ -210,19 +235,30 @@ public struct SondaInvariantiCampagna: Sendable {
                 violazioni.append(.gruppoInMarciaHaRicevutoOrdine(gruppo: id.numero))
             }
         case .revocaMarcia(let id):
-            idAgente = id
             // La revoca lascia il gruppo nella casella di partenza, senza marcia
-            // residua e con la giornata spesa (01 §5.6.3.3, RDA-100).
+            // residua e con la giornata spesa (01 §5.6.3.3, RDA-100). Non è un'azione.
             if let g = dopo.gruppi[id] {
                 let conforme = g.posizione == prima.gruppi[id]?.posizione
                     && g.marcia == nil && g.azioneSpesa
                 if !conforme { violazioni.append(.revocaNonConforme(gruppo: id.numero)) }
             }
+        case .divisione(let id, let repartiStaccati, _):
+            idAgente = id
+            // Il distaccamento nasce ora ed è esente dalla regola «nessuno agisce da sé».
+            if case .gruppoDiviso(_, _, let distaccamento, _, _) = eventi.first(where: {
+                if case .gruppoDiviso = $0 { return true } else { return false } }) {
+                natiOra.insert(distaccamento)
+            }
+            violazioni.append(contentsOf: controllaDivisione(
+                id: id, prima: prima, dopo: dopo, eventi: eventi, giornoChiuso: giornoChiuso))
+        case .riunione(let id, let idAltro):
+            violazioni.append(contentsOf: controllaRiunione(
+                id: id, idAltro: idAltro, prima: prima, dopo: dopo, giornoChiuso: giornoChiuso))
         }
-        // «Azione spesa due volte» non si applica alla revoca: la revoca non è
-        // un'azione (01 §5.6.8.1) e si compie su un gruppo che ha già la giornata
-        // consumata dalla marcia, sicché l'azione risulta legittimamente già presa.
-        if case .revocaMarcia = comando {} else if prima.gruppi[idAgente]?.azioneSpesa == true {
+
+        // «Azione spesa due volte»: solo per i comandi-AZIONE (marcia, presidio,
+        // divisione), che hanno un agente. La revoca e la riunione non sono azioni.
+        if let idAgente, prima.gruppi[idAgente]?.azioneSpesa == true {
             violazioni.append(.azioneSpesaDueVolte(gruppo: idAgente.numero))
         }
 
@@ -242,17 +278,65 @@ public struct SondaInvariantiCampagna: Sendable {
             if dopo.giorno != prima.giorno {
                 violazioni.append(.giornoAvanzatoSenzaChiusura(prima: prima.giorno, dopo: dopo.giorno))
             }
-            if dopo.gruppi[idAgente]?.azioneSpesa != true {
+            if let idAgente, dopo.gruppi[idAgente]?.azioneSpesa != true {
                 violazioni.append(.azioneNonRegistrata(gruppo: idAgente.numero))
             }
-            // Nessun altro gruppo può aver speso l'azione: nessuno agisce da sé.
-            for gruppo in dopo.gruppiOrdinati where gruppo.id != idAgente {
-                if gruppo.azioneSpesa && prima.gruppi[gruppo.id]?.azioneSpesa != true {
-                    violazioni.append(.gruppoEstraneoHaAgito(gruppo: gruppo.id.numero))
+            // Nessun gruppo PREESISTENTE (che non fosse l'agente) può aver speso
+            // l'azione da sé. I gruppi nati ora sono esenti; la riunione non ha agente
+            // e la sua regola sull'azione è controllata a parte.
+            if let idAgente {
+                for gruppo in dopo.gruppiOrdinati
+                where gruppo.id != idAgente && !natiOra.contains(gruppo.id) {
+                    if gruppo.azioneSpesa && prima.gruppi[gruppo.id]?.azioneSpesa != true {
+                        violazioni.append(.gruppoEstraneoHaAgito(gruppo: gruppo.id.numero))
+                    }
                 }
             }
         }
         return violazioni
+    }
+
+    /// La divisione conserva i reparti e non regala azioni (01 §5.6.0.2): i reparti
+    /// del gruppo di origine dopo, PIÙ quelli del distaccamento, eguagliano come
+    /// multiinsieme i reparti del gruppo di prima; e sia l'origine sia il distaccamento
+    /// hanno l'azione spesa (nessuno dei due può agire ancora).
+    private func controllaDivisione(id: IdGruppo, prima: StatoCampagna, dopo: StatoCampagna,
+                                    eventi: [EventoCampagna], giornoChiuso: Bool) -> [Violazione] {
+        var violazioni: [Violazione] = []
+        guard case .gruppoDiviso(_, _, let idDistacco, _, _) = eventi.first(where: {
+            if case .gruppoDiviso = $0 { return true } else { return false } }),
+              let origineDopo = dopo.gruppi[id], let distacco = dopo.gruppi[idDistacco],
+              let originePrima = prima.gruppi[id] else { return violazioni }
+        func multiinsieme(_ reparti: [Reparto]) -> [Reparto: Int] {
+            var conti: [Reparto: Int] = [:]
+            for r in reparti { conti[r, default: 0] += 1 }
+            return conti
+        }
+        if multiinsieme(origineDopo.composizione + distacco.composizione)
+            != multiinsieme(originePrima.composizione) {
+            violazioni.append(.divisioneNonConserva(gruppo: id.numero))
+        }
+        // Sia l'origine sia il distaccamento hanno l'azione spesa (nessuno può agire
+        // ancora oggi), salvo che la giornata si sia chiusa e l'azione azzerata.
+        if !giornoChiuso {
+            if !origineDopo.azioneSpesa { violazioni.append(.guadagnoDiAzione(gruppo: id.numero)) }
+            if !distacco.azioneSpesa { violazioni.append(.guadagnoDiAzione(gruppo: idDistacco.numero)) }
+        }
+        return violazioni
+    }
+
+    /// La riunione non regala un'azione (01 §5.6.0.3): il risultante ha l'azione spesa
+    /// SE E SOLO SE almeno uno dei due confluiti la aveva. Il risultante è quello dei
+    /// due che sopravvive in `dopo`.
+    private func controllaRiunione(id: IdGruppo, idAltro: IdGruppo,
+                                   prima: StatoCampagna, dopo: StatoCampagna,
+                                   giornoChiuso: Bool) -> [Violazione] {
+        // Chiusa la giornata, l'azione si azzera e la regola non si applica.
+        guard !giornoChiuso, let a = prima.gruppi[id], let b = prima.gruppi[idAltro] else { return [] }
+        let idRisultante = dopo.gruppi[id] != nil ? id : idAltro
+        guard let risultante = dopo.gruppi[idRisultante] else { return [] }
+        let attesa = a.azioneSpesa || b.azioneSpesa
+        return risultante.azioneSpesa == attesa ? [] : [.guadagnoDiAzione(gruppo: idRisultante.numero)]
     }
 
     // MARK: - Invariante della posizione visiva derivata

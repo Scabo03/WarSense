@@ -73,6 +73,55 @@ public struct MotoreCampagna: Sendable {
             // in qualunque momento, anche nel giorno stesso dell'ordine.
             guard gruppo.inMarcia else { return .nonValido(.gruppoNonInMarcia) }
             return .valido
+
+        case .divisione(let idGruppo, let repartiStaccati, let destinazione):
+            guard let gruppo = stato.gruppi[idGruppo], gruppo.parte == parte else {
+                return .nonValido(.gruppoIgnoto)
+            }
+            // L'inchiodamento si controlla PRIMA dell'azione spesa, così che il
+            // giocatore senta «inchiodato» e non «azione già spesa» (01 §5.6.3.5).
+            guard !gruppo.inMarcia else { return .nonValido(.gruppoInchiodato) }
+            guard !gruppo.azioneSpesa else { return .nonValido(.azioneGiaSpesa) }
+            guard stato.griglia.contiene(destinazione) else { return .nonValido(.fuoriMappa) }
+            // Il distaccamento nasce in una casella ADIACENTE, mai in quella di origine
+            // (01 §5.6.0.2): l'origine non è adiacente a sé, sicché il controllo di
+            // adiacenza la esclude già.
+            guard stato.griglia.adiacenti(gruppo.posizione, destinazione) else {
+                return .nonValido(.nonAdiacente)
+            }
+            guard stato.occupante(di: destinazione, parte: parte) == nil,
+                  !stato.gruppi.values.contains(where: {
+                      $0.parte == parte && $0.marcia?.destinazione == destinazione }) else {
+                return .nonValido(.occupata)
+            }
+            // Reparti interi, nessuna parte vuota (01 §5.6.0.2): indici distinti, tutti
+            // esistenti, almeno uno staccato e almeno uno tenuto.
+            let indici = Set(repartiStaccati)
+            guard indici.count == repartiStaccati.count,
+                  !indici.isEmpty, indici.count < gruppo.composizione.count,
+                  indici.allSatisfy({ $0 >= 0 && $0 < gruppo.composizione.count }) else {
+                return .nonValido(.divisioneImpropria)
+            }
+            // Il distaccamento ha bisogno di un nome dalla lista chiusa (01 §5.6.0.4).
+            // Esaurita la lista, la divisione è rifiutata (S16).
+            guard stato.prossimoIndiceNome < valoriCampagna.nomiGruppi.count else {
+                return .nonValido(.nomiEsauriti)
+            }
+            return .valido
+
+        case .riunione(let idGruppo, let idAltro):
+            guard let gruppo = stato.gruppi[idGruppo], gruppo.parte == parte,
+                  let altro = stato.gruppi[idAltro], altro.parte == parte else {
+                return .nonValido(.gruppoIgnoto)
+            }
+            guard idGruppo != idAltro else { return .nonValido(.riunioneImpropria) }
+            // La riunione non costa l'azione, ma un gruppo in marcia è inchiodato e non
+            // può confluire (01 §5.6.3.5): l'inchiodamento vince sull'adiacenza.
+            guard !gruppo.inMarcia, !altro.inMarcia else { return .nonValido(.gruppoInchiodato) }
+            guard stato.griglia.adiacenti(gruppo.posizione, altro.posizione) else {
+                return .nonValido(.nonAdiacente)
+            }
+            return .valido
         }
     }
 
@@ -189,6 +238,57 @@ public struct MotoreCampagna: Sendable {
             eventi.append(.marciaRevocata(gruppo: idGruppo, nome: gruppo.nome,
                                           casella: casella, giorniPersi: giorniPersi))
             annota(.marciaRevocata(gruppo: gruppo.nome, casella: casella), in: &nuovo)
+
+        case .divisione(let idGruppo, let repartiStaccati, let destinazione):
+            let origine = nuovo.gruppi[idGruppo]!
+            let staccati = Set(repartiStaccati)
+            // Reparti tenuti e staccati per indice: la divisione lavora su reparti
+            // INTERI, e la somma delle due parti eguaglia il gruppo di prima (invariante
+            // `divisione_non_conserva`). L'ordine dei reparti tenuti si conserva.
+            var tenuti: [Reparto] = []
+            var distacco: [Reparto] = []
+            for (indice, reparto) in origine.composizione.enumerated() {
+                if staccati.contains(indice) { distacco.append(reparto) } else { tenuti.append(reparto) }
+            }
+            // Il gruppo di origine conserva id, nome e casella; spende l'azione (la
+            // divisione COSTA la giornata, 01 §5.6.0.2) e perde i reparti staccati.
+            nuovo.gruppi[idGruppo]!.composizione = tenuti
+            nuovo.gruppi[idGruppo]!.azioneSpesa = true
+            // Il distaccamento: id e nome nuovi dalla lista chiusa (i nomi non si
+            // riusano). Nasce nella casella adiacente AVENDO GIÀ AGITO, perché il
+            // collocamento è uno spostamento (01 §5.6.0.2); mai in marcia.
+            let idNuovo = IdGruppo(nuovo.prossimoIdGruppo)
+            let nomeNuovo = valoriCampagna.nomiGruppi[nuovo.prossimoIndiceNome]
+            nuovo.gruppi[idNuovo] = Gruppo(id: idNuovo, parte: parte, nome: nomeNuovo,
+                                           posizione: destinazione, composizione: distacco,
+                                           azioneSpesa: true, marcia: nil)
+            nuovo.prossimoIdGruppo += 1
+            nuovo.prossimoIndiceNome += 1
+            // Fatto DECISO dal giocatore: l'evento annuncia, il registro non annota.
+            eventi.append(.gruppoDiviso(gruppo: idGruppo, nome: origine.nome,
+                                        distaccamento: idNuovo, nomeDistaccamento: nomeNuovo,
+                                        a: destinazione))
+
+        case .riunione(let idGruppo, let idAltro):
+            let a = nuovo.gruppi[idGruppo]!, b = nuovo.gruppi[idAltro]!
+            // Il MAGGIORE dei due conserva nome, id e casella; a parità di volume vince
+            // l'id minore, cioè il più antico (01 §5.6.0.4). L'altro è assorbito e
+            // sparisce, e il suo nome non si riusa.
+            let aMaggiore: Bool = {
+                let va = volume(di: a), vb = volume(di: b)
+                return va != vb ? va > vb : a.id < b.id
+            }()
+            let maggiore = aMaggiore ? a : b
+            let assorbito = aMaggiore ? b : a
+            // Il risultante si considera avere già agito se ALMENO UNO dei due lo era
+            // (01 §5.6.0.3): la riunione non è un'azione, ma non deve regalare una
+            // giornata a chi l'aveva spesa. La composizione è l'unione, il maggiore
+            // per primo. Nessuno dei due è in marcia (la validazione lo esclude).
+            nuovo.gruppi.removeValue(forKey: assorbito.id)
+            nuovo.gruppi[maggiore.id]!.composizione = maggiore.composizione + assorbito.composizione
+            nuovo.gruppi[maggiore.id]!.azioneSpesa = a.azioneSpesa || b.azioneSpesa
+            eventi.append(.gruppiRiuniti(risultante: maggiore.id, nome: maggiore.nome,
+                                         assorbito: assorbito.id, casella: maggiore.posizione))
         }
 
         eventi.append(contentsOf: chiudiLaGiornataSeServe(&nuovo))

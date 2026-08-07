@@ -22,7 +22,7 @@ echo "== 0/3 Cancello dei simboli d'archetipo (biiezione archetipi <-> simboli, 
 # è più economico del collaudo intero e coglie il disallineamento alla radice.
 "$RADICE/scripts/verifica-simboli.sh"
 
-echo "== 0b/3 Cancello delle impronte dei Contenuti (RDA-106) =="
+echo "== 0b/3 Cancello delle impronte dei Contenuti (RDA-105) =="
 # Rifiuta PRIMA delle prove del pacchetto un file di Contenuti cambiato senza
 # rigenerare il manifest: senza questo cancello la discordanza faceva fallire in
 # massa prove che sembravano regressioni, e la causa restava opaca. Qui il

@@ -51,8 +51,11 @@ final class InvariantiCampagnaTest: XCTestCase {
             let corsa = try banco.corri(voce, giornate: scenari.giornateGenerate)
             XCTAssertEqual(corsa.violazioni, [],
                            "violazioni nello scenario \(corsa.identificatore)")
-            XCTAssertEqual(corsa.giornate, scenari.giornateGenerate,
-                           "le giornate generate sono quelle chieste")
+            // Almeno le giornate chieste: l'ultima applicazione può chiudere PIÙ
+            // giornate a cascata (01 §5.6.11), sicché il conto le può oltrepassare —
+            // che con le marce di più gruppi generate da questa unità accade davvero.
+            XCTAssertGreaterThanOrEqual(corsa.giornate, scenari.giornateGenerate,
+                                        "le giornate generate sono almeno quelle chieste")
             giornateTotali += corsa.giornate
             ordiniTotali += corsa.ordini
         }
@@ -547,6 +550,41 @@ final class InvariantiCampagnaTest: XCTestCase {
                 let vero = motore.volume(di: base.gruppiOrdinati[0])
                 return sonda.controllaVolumi(stato: base, volumePerAtomo: volumePerAtomo,
                                              volumiRiportati: [ids[0]: vero + 100])
+            }),
+            ("divisione_non_conserva", {
+                // Divisione che INVENTA un reparto: l'origine non rimuove lo staccato e
+                // il distaccamento ne porta comunque una copia.
+                let r0 = Reparto(archetipo: "fanteria_leggera", atomi: 6)
+                let r1 = Reparto(archetipo: "fanteria_pesante", atomi: 8)
+                let idDist = IdGruppo(99), dest = Cella(riga: 10, colonna: 7)
+                var prima = base; prima.gruppi[ids[0]]!.composizione = [r0, r1]
+                var dopo = prima
+                dopo.gruppi[ids[0]]!.azioneSpesa = true
+                dopo.gruppi[idDist] = Gruppo(id: idDist, parte: .giocatore, nome: "lupo",
+                                             posizione: dest, composizione: [r1], azioneSpesa: true)
+                let ev: [EventoCampagna] = [.gruppoDiviso(gruppo: ids[0], nome: prima.gruppi[ids[0]]!.nome,
+                                            distaccamento: idDist, nomeDistaccamento: "lupo", a: dest)]
+                return sonda.controlla(prima: prima,
+                                       comando: .divisione(gruppo: ids[0], repartiStaccati: [1], a: dest),
+                                       dopo: dopo, eventi: ev, adiacenti: griglia.adiacenti)
+            }),
+            ("guadagno_azione", {
+                // Divisione in cui il distaccamento NON ha l'azione spesa: guadagna una
+                // giornata (01 §5.6.0.2). La conservazione è corretta.
+                let r0 = Reparto(archetipo: "fanteria_leggera", atomi: 6)
+                let r1 = Reparto(archetipo: "fanteria_pesante", atomi: 8)
+                let idDist = IdGruppo(99), dest = Cella(riga: 10, colonna: 7)
+                var prima = base; prima.gruppi[ids[0]]!.composizione = [r0, r1]
+                var dopo = prima
+                dopo.gruppi[ids[0]]!.composizione = [r0]
+                dopo.gruppi[ids[0]]!.azioneSpesa = true
+                dopo.gruppi[idDist] = Gruppo(id: idDist, parte: .giocatore, nome: "lupo",
+                                             posizione: dest, composizione: [r1], azioneSpesa: false)
+                let ev: [EventoCampagna] = [.gruppoDiviso(gruppo: ids[0], nome: prima.gruppi[ids[0]]!.nome,
+                                            distaccamento: idDist, nomeDistaccamento: "lupo", a: dest)]
+                return sonda.controlla(prima: prima,
+                                       comando: .divisione(gruppo: ids[0], repartiStaccati: [1], a: dest),
+                                       dopo: dopo, eventi: ev, adiacenti: griglia.adiacenti)
             }),
         ]
     }

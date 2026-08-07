@@ -129,10 +129,11 @@ final class SessioniPerInterfacciaTest: XCTestCase {
                 XCTAssertTrue(schermata.grigliaPerProva.attivaAlTocco(
                     in: CGPoint(x: bersaglio.midX, y: bersaglio.midY)),
                               "il dito non ordina la marcia verso \(meta)")
-            case .revocaMarcia:
-                // La condotta del banco non revoca mai: se accadesse, la traduzione
-                // in tocchi non sarebbe esercitata e la prova mentirebbe.
-                XCTFail("la condotta non prevede la revoca in questa sessione")
+            case .revocaMarcia, .divisione, .riunione:
+                // La condotta delle sessioni complete non revoca, non divide e non
+                // riunisce: se accadesse, la traduzione in tocchi non sarebbe
+                // esercitata e la prova mentirebbe.
+                XCTFail("la condotta non prevede revoca, divisione o riunione in questa sessione")
             }
             ordini += 1
             try await attendi("ordine applicato") {

@@ -30,7 +30,7 @@ public struct ErroreDati: Error, Sendable {
 /// del tipo: fino a questa versione un file di Contenuti cambiato senza rigenerare
 /// faceva fallire in massa prove che sembravano regressioni, con la sola riga opaca
 /// `ErroreDati(chiave: "errore.testi.impronta_discorde", ...)`. Il controllo NON è
-/// toccato — resta un rifiuto, e i testi si respingono ancora (RDA-106); cambia
+/// toccato — resta un rifiuto, e i testi si respingono ancora (RDA-105); cambia
 /// soltanto ciò che il fallimento dice. La dichiarazione IN CHIARO, in italiano, vive
 /// nel cancello del collaudo (`scripts/rigenera-impronte.py --verifica`, che gira
 /// PRIMA delle prove del pacchetto): qui, dentro i Sorgenti, le stringhe non portano

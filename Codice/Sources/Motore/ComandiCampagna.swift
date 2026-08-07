@@ -33,6 +33,22 @@ public enum ComandoCampagna: Hashable, Codable, Sendable {
     /// RDA-100): perde i giorni spesi e resta senza azione per la giornata corrente.
     /// Comando proprio che si AGGIUNGE alla sequenza, non un troncamento del giornale.
     case revocaMarcia(gruppo: IdGruppo)
+    /// Divisione del gruppo (01 §5.6.0.2, §5.6.8.1): COSTA l'azione della giornata.
+    /// Il giocatore sceglie quali reparti staccare — per indice nella composizione,
+    /// perché la divisione lavora su reparti INTERI e non sui singoli atomi — e la
+    /// casella adiacente `a` in cui collocare il distaccamento, che non nasce mai
+    /// nella casella di origine. Il distaccamento nasce avendo GIÀ AGITO, perché il
+    /// collocamento è uno spostamento; e il gruppo di origine spende l'azione con la
+    /// divisione. Nessuna delle due parti può restare vuota. Il distaccamento riceve
+    /// un nome nuovo dalla lista chiusa (RDA-106).
+    case divisione(gruppo: IdGruppo, repartiStaccati: [Int], a: Cella)
+    /// Riunione di due gruppi adiacenti (01 §5.6.0.3, §5.6.8.1): NON costa l'azione,
+    /// perché non è un'azione. Il gruppo risultante conserva il nome del MAGGIORE dei
+    /// due (per volume, a parità l'id minore) e la sua casella; l'altro sparisce e il
+    /// suo nome non si riusa. Il risultante si considera avere già agito se almeno uno
+    /// dei due vi confluiti aveva già agito, o un gruppo che ha marciato potrebbe
+    /// fondersi con uno fermo e rimettersi in marcia lo stesso giorno (RDA-106).
+    case riunione(gruppo: IdGruppo, con: IdGruppo)
 }
 
 /// I motivi chiusi di non ammissibilità sulla mappa (05 §3.2). Ogni caso
@@ -67,6 +83,25 @@ public enum MotivoNonValidoCampagna: String, Codable, Hashable, Sendable, CaseIt
     /// soltanto per i gruppi in marcia — ma da un giornale estraneo o manomesso, e
     /// va dichiarato come ogni altro rifiuto invece di essere applicato in silenzio.
     case gruppoNonInMarcia = "comando.non_valido.gruppo_non_in_marcia"
+    /// Nuovo della campagna: il gruppo è in marcia lunga, cioè inchiodato, e non può
+    /// dividersi né riunirsi finché non l'ha compiuta (01 §5.6.3.5: «è di fatto
+    /// immobile … e non può sfilarsi se non perdendo i giorni già spesi»). È ciò che
+    /// il giocatore sente se prova a dividere o riunire un gruppo in marcia (RDA-106).
+    case gruppoInchiodato = "comando.non_valido.gruppo_inchiodato"
+    /// Nuovo della campagna: la divisione lascerebbe una parte vuota, oppure nomina
+    /// reparti inesistenti o ripetuti (01 §5.6.0.2: nessuna delle due parti può
+    /// restare vuota, e si lavora su reparti interi). La Presentazione offre solo
+    /// selezioni valide; questo rifiuto morde su un giornale estraneo o manomesso.
+    case divisioneImpropria = "comando.non_valido.divisione_impropria"
+    /// Nuovo della campagna: i due gruppi non si possono riunire — è lo stesso gruppo,
+    /// o non sono adiacenti, o non sono entrambi del giocatore (01 §5.6.0.3).
+    case riunioneImpropria = "comando.non_valido.riunione_impropria"
+    /// Nuovo della campagna: la lista chiusa dei nomi è esaurita e il distaccamento
+    /// non riceverebbe un nome (01 §5.6.0.4). I nomi non si riusano, sicché la lista
+    /// impone un tetto pratico al numero di gruppi CREATI in una campagna, in tensione
+    /// dichiarata con 01 §5.6.0.1 («non esiste alcun tetto»): scostamento S16, mitigato
+    /// da una lista ampia; il tetto morde solo su campagne con moltissime divisioni.
+    case nomiEsauriti = "comando.non_valido.nomi_esauriti"
 }
 
 /// Esito della validazione di un comando di campagna: la validazione e l'anteprima
@@ -100,4 +135,13 @@ public enum EventoCampagna: Hashable, Codable, Sendable {
     case giornataChiusa(giorno: Int)
     /// La giornata nuova si è aperta e il contatore dei giorni è avanzato.
     case giornataAperta(giorno: Int)
+    /// Un gruppo si è diviso: il distaccamento `distaccamento`, di nome `nomeDistaccamento`,
+    /// è nato nella casella adiacente `a` (01 §5.6.0.2). Fatto DECISO dal giocatore:
+    /// fa l'annuncio immediato ma non entra nel registro (01 §5.17.1, RDA-104).
+    case gruppoDiviso(gruppo: IdGruppo, nome: IdentificatoreDati,
+                      distaccamento: IdGruppo, nomeDistaccamento: IdentificatoreDati, a: Cella)
+    /// Due gruppi si sono riuniti nel gruppo `risultante`, di nome `nome`, nella
+    /// casella `casella`; il gruppo `assorbito` è sparito (01 §5.6.0.3).
+    case gruppiRiuniti(risultante: IdGruppo, nome: IdentificatoreDati,
+                       assorbito: IdGruppo, casella: Cella)
 }
