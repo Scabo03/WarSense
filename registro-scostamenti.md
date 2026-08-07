@@ -126,7 +126,9 @@ Aperto dall'accertamento sugli esiti degli scontri (build 6), chiuso dal titolar
 
 Nessun punto dell'architettura è risultato irrealizzabile o errato nella fase A: i confini dei bersagli, il giornale con istantanee, l'impronta canonica, la virgola fissa e la catena dei testi esterni funzionano come dichiarato. I documenti 00–05 non richiedono modifiche.
 
-## S8 — Il registro annota gli ordini del giocatore, in deroga dichiarata a 01 §5.17.1
+## S8 — Il registro annota gli ordini del giocatore, in deroga dichiarata a 01 §5.17.1 — SUPERATO (incarico 15, RDA-104)
+
+**Stato: superato.** La deroga è chiusa. Con l'incarico 15 il compimento della marcia lunga — il primo fatto non deciso dal giocatore — esiste, e per decisione del titolare (RDA-104, quarta correzione sulla marcia) gli ordini di marcia e di presidio ESCONO dal registro: 01 §5.17.1 è ripristinato. La revoca vi resta, per volontà del titolare, come eccezione voluta perché spiega perché un gruppo si trovi fermo. La previsione di RDA-101, che rinviava la rimozione alla comparsa dei fatti avversari, è a sua volta superata dalla decisione del titolare. Ciò che segue è la storia della deroga, conservata verbatim.
 
 **Che cosa dicevano i documenti.** 01 §5.17.1 e 02 §6.6.2 stabiliscono che nel registro entrino soltanto i fatti che il giocatore non ha deciso, e che «non vi entrano i propri ordini, che il giocatore ha appena impartito e già sentito confermare».
 

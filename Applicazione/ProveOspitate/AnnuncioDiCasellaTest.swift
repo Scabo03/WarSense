@@ -149,8 +149,14 @@ final class AnnuncioDiCasellaTest: XCTestCase {
                        "\(dove): la designazione non conserva l'annuncio di esplorazione in coda.\n"
                        + "esplorazione: «\(esplorazione)»\ndesignazione: «\(designazione)»",
                        file: file, line: line)
-        XCTAssertEqual(trovate.count, attese.count + 1,
-                       "\(dove): la designazione aggiunge una sola voce, la disponibilità",
-                       file: file, line: line)
+        // La designazione AGGIUNGE in testa, senza togliere nulla: per una
+        // destinazione valida la disponibilità E la conseguenza dell'inchiodamento
+        // (due voci, correzione del titolare RDA-104); per una non valida il solo
+        // motivo (una voce). Nessuna delle due toglie l'esplorazione dalla coda.
+        let aggiunte = trovate.count - attese.count
+        XCTAssertTrue(aggiunte == 1 || aggiunte == 2,
+                      "\(dove): la designazione aggiunge il motivo (1) o disponibilità e "
+                      + "inchiodamento (2), non \(aggiunte).\ndesignazione: «\(designazione)»",
+                      file: file, line: line)
     }
 }

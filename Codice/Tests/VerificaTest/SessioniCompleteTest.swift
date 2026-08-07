@@ -22,9 +22,12 @@ final class SessioniCompleteTest: XCTestCase {
     // MARK: - La storia sana, da cui i mutanti si ricavano guastandola
 
     private func storiaSana() -> SondaSessioneCampagna.Storia {
+        // Il registro annota i soli fatti non decisi dal giocatore (01 §5.17.1,
+        // correzione del titolare RDA-104): quattro ordini impartiti, due marce
+        // compiute, e quindi due sole voci di registro — le due dei compimenti.
         SondaSessioneCampagna.Storia(
             giorniLetti: [1, 1, 2, 2, 3], gruppiIniziali: [1, 2], gruppiFinali: [1, 2],
-            vociDiRegistro: 4, ordiniImpartiti: 4,
+            vociDiRegistro: 2, ordiniImpartiti: 4, compimentiDiMarcia: 2,
             improntaFinale: "abc", improntaRigiocata: "abc")
     }
 
@@ -53,17 +56,18 @@ final class SessioniCompleteTest: XCTestCase {
             "il salto in avanti della cascata non è una violazione")
     }
 
-    /// Un registro che accumula i compimenti di marcia oltre agli ordini è sano
-    /// finché le voci sono ordini più compimenti (01 §5.17.1).
-    func test_01_5_17_1_il_registro_con_i_compimenti_e_sano() {
+    /// Il registro annota i soli fatti non decisi dal giocatore (01 §5.17.1,
+    /// correzione del titolare RDA-104): è sano quando le voci eguagliano i
+    /// compimenti di marcia, e gli ordini impartiti NON vi entrano.
+    func test_01_5_17_1_il_registro_dei_soli_compimenti_e_sano() {
         let s = storiaSana()
         let conCompimenti = SondaSessioneCampagna.Storia(
             giorniLetti: s.giorniLetti, gruppiIniziali: s.gruppiIniziali, gruppiFinali: s.gruppiFinali,
-            vociDiRegistro: 6, ordiniImpartiti: 4, compimentiDiMarcia: 2,
+            vociDiRegistro: 3, ordiniImpartiti: 5, compimentiDiMarcia: 3,
             improntaFinale: s.improntaFinale, improntaRigiocata: s.improntaRigiocata)
         XCTAssertFalse(codici(SondaSessioneCampagna().controlla(conCompimenti))
             .contains("registro_non_corrisponde"),
-            "le voci sono ordini più compimenti: nessuna divergenza")
+            "le voci eguagliano i compimenti: nessuna divergenza, gli ordini non contano")
     }
 
     func test_mutante_un_calendario_che_torna_indietro_viene_visto() {
@@ -88,9 +92,11 @@ final class SessioniCompleteTest: XCTestCase {
 
     func test_mutante_un_registro_che_perde_una_voce_viene_visto() {
         let s = storiaSana()
+        // Due compimenti ma una sola voce: il registro ha perso il fatto di un arrivo.
         let mutante = SondaSessioneCampagna.Storia(
             giorniLetti: s.giorniLetti, gruppiIniziali: s.gruppiIniziali,
-            gruppiFinali: s.gruppiFinali, vociDiRegistro: 3, ordiniImpartiti: 4,
+            gruppiFinali: s.gruppiFinali, vociDiRegistro: 1, ordiniImpartiti: 4,
+            compimentiDiMarcia: 2,
             improntaFinale: s.improntaFinale, improntaRigiocata: s.improntaRigiocata)
         XCTAssertTrue(codici(SondaSessioneCampagna().controlla(mutante))
             .contains("registro_non_corrisponde"))

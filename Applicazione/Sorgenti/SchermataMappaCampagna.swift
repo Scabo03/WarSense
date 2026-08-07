@@ -214,17 +214,18 @@ final class SchermataMappaCampagna: UIViewController {
     func attiva(_ casella: Cella) -> Bool {
         guard let stato = statoCorrente else { return false }
         if case .marcia(let id) = designazione {
-            // Attivare la destinazione NON esegue più la marcia: apre il pannello di
-            // conferma, che dichiara il costo in giorni e la conseguenza
-            // dell'inchiodamento PRIMA della conferma (02 §9.2.1, 01 §5.6.3.5).
-            let origine = stato.gruppi[id]?.posizione ?? casella
+            // L'ordine parte DIRETTAMENTE dalla voce del comando, senza pannello di
+            // conferma intermedio (correzione del titolare, RDA-104). La conseguenza
+            // dell'inchiodamento è già stata dichiarata sulla voce della casella di
+            // destinazione, che chi ascolta ha sentito prima di attivarla: l'etichetta
+            // vocale la porta (02 §9.2.1, `CostruttoreAnnunciCampagna.etichettaCasella`).
             let esito = costruttore?.vista.anteprimaMarcia(da: id, a: casella) ?? .nonValido(.gruppoIgnoto)
             designazione = .nessuna
             aggiorna(con: stato)
             switch esito {
             case .valido:
                 if let comando = costruttore?.vista.comandoDiMarcia(per: id, a: casella) {
-                    apriPannelloConfermaMarcia(comando: comando, casella: casella, origine: origine)
+                    Task { await eseguiComando(comando) }
                 }
             case .nonValido(let motivo):
                 partita.ambiente.segnali.annuncia(TestoLocalizzato(
@@ -235,31 +236,6 @@ final class SchermataMappaCampagna: UIViewController {
         guard let gruppo = stato.occupante(di: casella) else { return false }
         apriPannello(per: gruppo)
         return true
-    }
-
-    /// Il pannello di conferma della marcia (02 §9.2.1): dichiara il costo in giorni
-    /// e l'inchiodamento, e consente di confermare o rinunciare (01 §5.6.3.5).
-    private func apriPannelloConfermaMarcia(comando: ComandoCampagna, casella: Cella, origine: Cella) {
-        guard case .marcia(_, _, let giorni) = comando else { return }
-        let pannello = UIAlertController(
-            title: testi.frase("pannello.marcia_titolo", casella.riga, casella.colonna).testo,
-            message: testi.frase("pannello.marcia_conferma", casella.riga, casella.colonna, giorni).testo,
-            preferredStyle: .alert)
-        let voci = [
-            VocePannello(titolo: testi.frase("pannello.marcia_conferma_azione").testo,
-                         stile: .default) { [weak self] in
-                self?.chiudiPannello(casella: origine) { await self?.eseguiComando(comando) }
-            },
-            VocePannello(titolo: testi.frase("pannello.marcia_rinuncia_azione").testo,
-                         stile: .cancel) { [weak self] in
-                self?.chiudiPannello(casella: origine, poi: nil)
-            },
-        ]
-        for voce in voci {
-            pannello.addAction(UIAlertAction(title: voce.titolo, style: voce.stile) { _ in voce.esegui() })
-        }
-        vociPannello = voci
-        present(pannello, animated: false)
     }
 
     /// Il pannello di conferma della revoca (01 §5.6.3.5): dichiara i giorni che si

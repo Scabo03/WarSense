@@ -154,7 +154,12 @@ final class AnnullamentoGiornataTest: XCTestCase {
     func test_00_13_8_l_azzeramento_si_ferma_alla_giornata_corrente() async throws {
         let sessione = try await nuova(try slot(), gruppi: [(10, 6), (10, 5)])
         let ids = await sessione.stato.gruppiOrdinati.map(\.id)
-        for id in ids { _ = try await sessione.esegui(.presidio(gruppo: id), parte: .giocatore) }
+        // Giorno 1: una marcia di un giorno e un presidio. La giornata si chiude e la
+        // marcia si compie, ANNOTANDO un fatto (l'arrivo) nel giorno 1 — gli ordini
+        // non entrano più nel registro (correzione del titolare, RDA-104).
+        _ = try await sessione.esegui(.marcia(gruppo: ids[0], a: Cella(riga: 9, colonna: 6), giorni: 1),
+                                      parte: .giocatore)
+        _ = try await sessione.esegui(.presidio(gruppo: ids[1]), parte: .giocatore)
         // Giorno 2: un ordine solo, la giornata resta aperta.
         _ = try await sessione.esegui(.presidio(gruppo: ids[0]), parte: .giocatore)
         let esito = try await sessione.azzera(parte: .giocatore)
@@ -162,7 +167,8 @@ final class AnnullamentoGiornataTest: XCTestCase {
         let dopo = await sessione.stato
         XCTAssertEqual(dopo.giorno, 2)
         XCTAssertEqual(dopo.gruppiInAttesa().count, 2, "il giorno 2 è tornato vuoto")
-        // Gli ordini del giorno 1 sono ancora nel registro, e non si annullano più.
+        // Il compimento della marcia del giorno 1 è ancora nel registro: è un fatto
+        // non deciso dal giocatore, e non si annulla più (05 §6.5).
         XCTAssertTrue(dopo.registro.contains { $0.giorno == 1 })
         await XCTAssertRifiutaOltreLaGiornata { try await sessione.annulla(parte: .giocatore) }
     }

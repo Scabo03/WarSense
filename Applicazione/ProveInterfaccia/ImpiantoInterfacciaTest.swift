@@ -215,12 +215,15 @@ final class ImpiantoInterfacciaTest: XCTestCase {
                       "dopo l'ordine dato al dito il gruppo dichiara di avere agito "
                       + "(01 §5.16.1). Etichetta prima: «\(etichettaPrima)»")
 
-        // Il registro annota il fatto con il giorno e il luogo (S8, RDA-72).
+        // L'ordine di presidio NON entra nel registro: con la correzione del titolare
+        // (RDA-104) il registro annota i soli fatti che il giocatore non ha deciso
+        // (01 §5.17.1). L'ordine è arrivato al gioco — il gruppo ha agito — ma non vi
+        // lascia una voce; il compimento della marcia, quello sì (provato altrove).
         app.buttons["Registro della campagna"].tap()
-        let voce = app.descendants(matching: .any)
+        let vocePresidio = app.descendants(matching: .any)
             .matching(NSPredicate(format: "label CONTAINS %@", "presidia")).firstMatch
-        XCTAssertTrue(voce.waitForExistence(timeout: 10),
-                      "il registro annota l'ordine impartito, con il giorno e la casella")
+        XCTAssertFalse(vocePresidio.waitForExistence(timeout: 3),
+                       "l'ordine di presidio non deve comparire nel registro (01 §5.17.1, RDA-104)")
         app.buttons["Chiudi il registro"].tap()
     }
 

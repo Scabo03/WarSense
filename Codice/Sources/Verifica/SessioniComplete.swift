@@ -130,11 +130,14 @@ public struct SondaSessioneCampagna: Sendable {
             trovate.append(.gruppiNonConservati(iniziali: storia.gruppiIniziali.count,
                                                 finali: storia.gruppiFinali.count))
         }
-        // Ogni ordine lascia una voce; ogni compimento di marcia ne aggiunge un'altra
-        // (S8, RDA-72; 01 §5.17.1). Il registro accumulato è la somma dei due.
-        if storia.vociDiRegistro != storia.ordiniImpartiti + storia.compimentiDiMarcia {
+        // Il registro annota i fatti che il giocatore NON ha deciso (01 §5.17.1,
+        // ripristinato dalla correzione del titolare RDA-104): gli ordini NON vi
+        // entrano più. La condotta delle sessioni complete non revoca né annulla,
+        // sicché il registro accumulato è esattamente il numero dei compimenti di
+        // marcia — l'unico fatto non deciso che questa condotta produce.
+        if storia.vociDiRegistro != storia.compimentiDiMarcia {
             trovate.append(.registroNonCorrispondeAgliOrdini(voci: storia.vociDiRegistro,
-                                                            ordini: storia.ordiniImpartiti))
+                                                            ordini: storia.compimentiDiMarcia))
         }
         if storia.improntaFinale != storia.improntaRigiocata {
             trovate.append(.rigiocaturaDivergente(attesa: storia.improntaFinale,

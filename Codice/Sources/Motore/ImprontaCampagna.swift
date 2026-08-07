@@ -46,10 +46,6 @@ extension FattoRegistrato: CodificabileCanonico {
     public func codifica(in c: inout CodificatoreCanonico) {
         c.testo(chiaveTesto)
         switch self {
-        case .marciaOrdinata(let gruppo, let da, let a):
-            c.testo(gruppo); da.codifica(in: &c); a.codifica(in: &c)
-        case .presidioOrdinato(let gruppo, let casella):
-            c.testo(gruppo); casella.codifica(in: &c)
         case .marciaCompiuta(let gruppo, let da, let a):
             c.testo(gruppo); da.codifica(in: &c); a.codifica(in: &c)
         case .marciaRevocata(let gruppo, let casella):

@@ -191,8 +191,10 @@
 /* Registro degli eventi (01 §5.17, 02 §6.6): ogni voce è una frase compiuta che
    dichiara il giorno cui si riferisce. Il giorno è una PROPRIETÀ della voce e non
    una voce a sé: l'apertura di una giornata non produce alcuna riga. */
-"registro.marcia_ordinata" = "Giorno %1$d: %2$@ marcia in riga %3$d, casella %4$d";
-"registro.presidio_ordinato" = "Giorno %1$d: %2$@ presidia in riga %3$d, casella %4$d";
+/* Gli ordini di marcia e di presidio ESCONO dal registro (correzione del titolare,
+   RDA-104): il registro annota i fatti che il giocatore non ha deciso (01 §5.17.1).
+   Restano il compimento della marcia (l'arrivo) e la revoca — quest'ultima per
+   volontà del titolare, perché spiega perché un gruppo si trovi fermo. */
 "registro.marcia_compiuta" = "Giorno %1$d: %2$@ è arrivato in riga %3$d, casella %4$d";
 "registro.marcia_revocata" = "Giorno %1$d: %2$@ revoca la marcia in riga %3$d, casella %4$d";
 "registro.ordine_annullato" = "Giorno %d: ordine annullato";
@@ -210,7 +212,11 @@
 "casella.libera" = "libera";
 "casella.occupante_proprio" = "tuo %@, %@";
 /* casella.disponibile porta il costo in giorni e sta nel .stringsdict, con il
-   plurale di sistema (01 §5.6.3.5: il costo si dichiara prima della conferma). */
+   plurale di sistema (01 §5.6.3.5: il costo si dichiara sulla voce del comando).
+   casella.inchioda è la CONSEGUENZA che l'etichetta vocale aggiunge, perché l'ordine
+   parte direttamente dalla voce senza pannello (correzione del titolare, RDA-104):
+   chi vede riceve la stessa informazione dai nove pallini dell'avanzamento. */
+"casella.inchioda" = "il gruppo resterà fermo fino all'arrivo e non potrà sfilarsi senza perdere i giorni spesi";
 "campagna.annuncio_apertura" = "Mappa %@, %d righe per %d caselle. Il tuo quartier generale è in riga %d, casella %d";
 "campagna.stato" = "Giorno %d. Hanno agito %d gruppi su %d";
 "campagna.stato_con_marcia" = "Giorno %d. Hanno agito %d gruppi su %d, %d in marcia lunga";
@@ -226,13 +232,12 @@
    forma non compare affatto (02 §9.5). */
 "pannello.casella_titolo" = "Azioni per %@ in riga %d, casella %d";
 "pannello.designa_marcia" = "Marcia: scegli la casella sulla mappa";
-"pannello.marcia_designazione_avviata" = "Scegli la casella di destinazione e attivala per confermare";
+"pannello.marcia_designazione_avviata" = "Scegli la casella di destinazione e attivala per dare l'ordine di marcia";
 "pannello.presidio" = "Presidia: resta fermo in guardia";
-/* Pannello di conferma della marcia (02 §9.2.1, 01 §5.6.3.5): dichiara il costo in
-   giorni e la conseguenza dell'inchiodamento PRIMA della conferma. Il titolo con il
-   costo e la conseguenza sta nel .stringsdict, per il plurale sui giorni. */
-"pannello.marcia_titolo" = "Marcia verso riga %d, casella %d";
-"pannello.marcia_conferma_azione" = "Conferma la marcia";
+/* Il pannello di conferma della marcia NON esiste più: l'ordine parte direttamente
+   dalla voce della casella di destinazione (correzione del titolare, RDA-104). Il
+   costo e la conseguenza dell'inchiodamento stanno su quella voce (casella.disponibile
+   e casella.inchioda). Resta la sola voce di rinuncia, condivisa con la revoca. */
 "pannello.marcia_rinuncia_azione" = "Rinuncia";
 /* Pannello di revoca della marcia (01 §5.6.3.3, §5.6.3.5): dichiara i giorni persi
    e che il gruppo resta senza azione, prima della conferma. */

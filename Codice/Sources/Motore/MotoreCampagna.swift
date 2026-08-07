@@ -160,16 +160,21 @@ public struct MotoreCampagna: Sendable {
             nuovo.gruppi[idGruppo]!.marcia = MarciaInCorso(destinazione: destinazione,
                                                            giorniTotali: giorni, giorniCompiuti: 0)
             nuovo.gruppi[idGruppo]!.azioneSpesa = true
+            // L'evento fa l'annuncio immediato della conferma dell'ordine, che il
+            // giocatore ascolta; NON entra nel registro. L'ordine di marcia è deciso
+            // dal giocatore, e il registro annota i fatti che il giocatore NON ha
+            // deciso (01 §5.17.1, ripristinato dalla correzione del titolare, RDA-104):
+            // la deroga di RDA-72/RDA-101 (S8) è superata, perché il fatto non deciso
+            // — l'arrivo — ora esiste.
             eventi.append(.marciaOrdinata(gruppo: idGruppo, nome: nome,
                                           da: partenza, a: destinazione, giorni: giorni))
-            annota(.marciaOrdinata(gruppo: nome, da: partenza, a: destinazione), in: &nuovo)
 
         case .presidio(let idGruppo):
             let gruppo = nuovo.gruppi[idGruppo]!
             nuovo.gruppi[idGruppo]!.azioneSpesa = true
+            // Come la marcia: l'evento annuncia, il registro non annota un ordine.
             eventi.append(.presidioOrdinato(gruppo: idGruppo, nome: gruppo.nome,
                                             casella: gruppo.posizione))
-            annota(.presidioOrdinato(gruppo: gruppo.nome, casella: gruppo.posizione), in: &nuovo)
 
         case .revocaMarcia(let idGruppo):
             let gruppo = nuovo.gruppi[idGruppo]!

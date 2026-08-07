@@ -75,10 +75,6 @@ public struct TraduttoreEventiCampagna: Sendable {
     public func voceDiRegistro(_ voce: VoceRegistro) -> TestoLocalizzato {
         let chiave = voce.fatto.chiaveTesto
         switch voce.fatto {
-        case .marciaOrdinata(let gruppo, _, let a):
-            return testi.frase(chiave, voce.giorno, nome(gruppo), a.riga, a.colonna)
-        case .presidioOrdinato(let gruppo, let casella):
-            return testi.frase(chiave, voce.giorno, nome(gruppo), casella.riga, casella.colonna)
         case .marciaCompiuta(let gruppo, _, let a):
             return testi.frase(chiave, voce.giorno, nome(gruppo), a.riga, a.colonna)
         case .marciaRevocata(let gruppo, let casella):

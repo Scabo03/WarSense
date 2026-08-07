@@ -178,33 +178,28 @@ public struct VoceRegistro: Hashable, Codable, Sendable {
 /// I fatti che il registro sa annotare. Insieme chiuso, come ogni vocabolario del
 /// gioco.
 ///
-/// Con questa unità compaiono i PRIMI fatti non decisi dal giocatore: il
-/// completamento di una marcia lunga (01 §5.17.1). Ciò riapre la deroga di RDA-72,
-/// per cui il registro annotava soltanto gli ordini del giocatore in assenza
-/// d'altro (scostamento S8, in deroga a 01 §5.17.1 che gli ordini li esclude). Il
-/// RIESAME: gli ordini RESTANO nel registro accanto ai fatti nuovi. La ragione è
-/// che 01 §5.17 giustifica il registro con il recupero degli annunci persi mentre
-/// il giocatore fa altro, e nel perimetro attuale — solo, senza avversario né fatti
-/// frequenti — un registro dei soli completamenti sarebbe quasi vuoto e perderebbe
-/// gli annullamenti, che RDA-72 dichiara fatti ricostruibili; togliere gli ordini
-/// cambierebbe ciò che il giocatore sente in peggio. La deroga S8 resta dichiarata
-/// e si risolverà quando i fatti avversari frequenti e mancabili esisteranno, cioè
-/// nella sessione di riallineamento (RDA-101).
+/// Il registro annota i fatti che il giocatore NON ha deciso (01 §5.17.1). Con la
+/// marcia lunga esiste il primo di essi — il compimento di una marcia — e con la
+/// correzione del titolare (RDA-104) la regola di 01 §5.17.1 è RIPRISTINATA: gli
+/// ordini di marcia e di presidio ESCONO dal registro, dove erano entrati in deroga
+/// (S8, RDA-72/RDA-101) solo perché non esisteva alcun fatto non deciso. La deroga è
+/// superata. Vi restano il compimento e la revoca; la revoca vi rimane per VOLONTÀ
+/// del titolare benché decisa dal giocatore, perché è il fatto che spiega perché un
+/// gruppo si trovi fermo — eccezione voluta, non dimenticanza. Restano anche gli
+/// annullamenti, che sono fatti ricostruibili solo dal registro (RDA-72).
 ///
 /// Ogni caso porta con sé ciò che la frase deve dichiarare: il registro non
 /// ricalcola nulla e non rilegge lo stato, perché la voce racconta il momento in
 /// cui il fatto è avvenuto e non quello in cui la si legge.
 public enum FattoRegistrato: Hashable, Codable, Sendable {
-    /// Un gruppo ha ricevuto l'ordine di marciare in una casella adiacente.
-    case marciaOrdinata(gruppo: IdentificatoreDati, da: Cella, a: Cella)
-    /// Un gruppo ha ricevuto l'ordine di restare fermo in guardia (01 §5.6.0.6).
-    case presidioOrdinato(gruppo: IdentificatoreDati, casella: Cella)
     /// Una marcia lunga si è compiuta alla chiusura della giornata (01 §5.17.1): il
     /// PRIMO fatto non deciso dal giocatore, e il primo che esercita il salto al
     /// luogo del fatto, essendo `a` una casella reale (RDA-67).
     case marciaCompiuta(gruppo: IdentificatoreDati, da: Cella, a: Cella)
     /// Un ordine di marcia è stato revocato (01 §5.6.3.3): il gruppo perde i giorni
-    /// spesi e resta nella casella di partenza. Mossa di gioco, non annullamento (RDA-76).
+    /// spesi e resta nella casella di partenza. Mossa di gioco, non annullamento
+    /// (RDA-76); resta nel registro per volontà del titolare (RDA-104), eccezione
+    /// voluta, perché spiega perché un gruppo si trovi fermo.
     case marciaRevocata(gruppo: IdentificatoreDati, casella: Cella)
     /// L'ultimo ordine è stato ritirato (00 §13.8).
     case ordineAnnullato
@@ -217,9 +212,6 @@ public enum FattoRegistrato: Hashable, Codable, Sendable {
     /// aggiunto senza frase passerebbe inosservato — la stessa ragione per cui
     /// esiste l'elenco dei codici degli invarianti.
     public static let casiDiRiferimento: [FattoRegistrato] = [
-        .marciaOrdinata(gruppo: "corvo",
-                        da: Cella(riga: 1, colonna: 1), a: Cella(riga: 1, colonna: 2)),
-        .presidioOrdinato(gruppo: "corvo", casella: Cella(riga: 1, colonna: 1)),
         .marciaCompiuta(gruppo: "corvo",
                         da: Cella(riga: 1, colonna: 1), a: Cella(riga: 1, colonna: 2)),
         .marciaRevocata(gruppo: "corvo", casella: Cella(riga: 1, colonna: 1)),
@@ -231,8 +223,6 @@ public enum FattoRegistrato: Hashable, Codable, Sendable {
     /// non conosce la frase, la nomina soltanto.
     public var chiaveTesto: String {
         switch self {
-        case .marciaOrdinata: return "registro.marcia_ordinata"
-        case .presidioOrdinato: return "registro.presidio_ordinato"
         case .marciaCompiuta: return "registro.marcia_compiuta"
         case .marciaRevocata: return "registro.marcia_revocata"
         case .ordineAnnullato: return "registro.ordine_annullato"
@@ -245,8 +235,6 @@ public enum FattoRegistrato: Hashable, Codable, Sendable {
     /// accadono in una casella.
     public var luogo: Cella? {
         switch self {
-        case .marciaOrdinata(_, _, let a): return a
-        case .presidioOrdinato(_, let casella): return casella
         case .marciaCompiuta(_, _, let a): return a
         case .marciaRevocata(_, let casella): return casella
         case .ordineAnnullato, .giornataAzzerata: return nil

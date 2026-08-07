@@ -142,34 +142,38 @@ final class MappaCampagnaAccessibileTest: XCTestCase {
                        "le due azioni di questa unità più la chiusura, in ordine fisso")
     }
 
-    /// Attivare una destinazione durante la designazione apre il PANNELLO DI
-    /// CONFERMA (02 §9.2.1), non esegue la marcia: dichiara il costo in giorni e
-    /// l'inchiodamento, e offre conferma o rinuncia (01 §5.6.3.5).
-    func test_02_9_2_1_l_attivazione_della_destinazione_apre_la_conferma_della_marcia() async throws {
+    /// Attivare una destinazione durante la designazione ORDINA la marcia
+    /// DIRETTAMENTE, senza pannello di conferma (correzione del titolare, RDA-104).
+    /// Il costo in giorni e la conseguenza dell'inchiodamento stanno sulla VOCE della
+    /// casella di destinazione, che chi ascolta sente prima di attivarla, al posto
+    /// dei nove pallini che chi vede riceve (02 §9.2.1, 01 §5.6.3.5).
+    func test_02_9_2_1_l_attivazione_della_destinazione_ordina_la_marcia_senza_pannello() async throws {
         let (schermata, _, ambiente) = try await mappaAperta(taglia: .media)
         let stato = try XCTUnwrap(schermata.statoPerProva)
         let gruppo = stato.gruppiOrdinati[0]
         let vista = VistaCampagna(motore: schermata.motorePerProva, stato: stato, parte: .giocatore)
         let meta = try XCTUnwrap(vista.destinazioniValide(per: gruppo.id).first)
         let costo = schermata.motorePerProva.costoInGiorni(da: gruppo.posizione, a: meta, stato: stato)
+        let testi = ambiente.testi
 
         schermata.avviaDesignazionePerProva(gruppo: gruppo.id)
+        // La voce della casella di destinazione dichiara il costo E la conseguenza
+        // dell'inchiodamento, PRIMA dell'attivazione: è ciò che chi ascolta riceve.
+        let etichetta = try XCTUnwrap(schermata.elementiPerProva[meta]?.accessibilityLabel)
+        XCTAssertTrue(etichetta.contains("\(costo)"),
+                      "la voce della destinazione dichiara il costo in giorni: «\(etichetta)»")
+        XCTAssertTrue(etichetta.contains(testi.frase("casella.inchioda").testo),
+                      "la voce dichiara la conseguenza dell'inchiodamento: «\(etichetta)»")
+
         XCTAssertTrue(schermata.attiva(meta), "la destinazione designata si attiva")
-        for _ in 0..<50 where !(schermata.presentedViewController is UIAlertController) {
+        for _ in 0..<50 where !((try? XCTUnwrap(schermata.statoPerProva))?.gruppi[gruppo.id]?.inMarcia ?? false) {
             try await Task.sleep(nanoseconds: 20_000_000)
         }
-        let pannello = try XCTUnwrap(schermata.presentedViewController as? UIAlertController,
-                                     "l'attivazione della destinazione apre il pannello di conferma")
-        let testi = ambiente.testi
-        XCTAssertEqual(schermata.vociPannelloPerProva.map(\.titolo),
-                       [testi.frase("pannello.marcia_conferma_azione").testo,
-                        testi.frase("pannello.marcia_rinuncia_azione").testo],
-                       "il pannello offre conferma e rinuncia")
-        XCTAssertTrue(pannello.message?.contains("\(costo)") == true,
-                      "il pannello dichiara il costo in giorni prima della conferma: \(pannello.message ?? "")")
-        // La marcia NON è stata eseguita: il gruppo non è ancora in marcia.
-        XCTAssertFalse(try XCTUnwrap(schermata.statoPerProva).gruppi[gruppo.id]!.inMarcia,
-                       "la conferma non ha ancora ordinato la marcia")
+        // Nessun pannello di conferma: l'ordine è partito direttamente dalla voce.
+        XCTAssertNil(schermata.presentedViewController,
+                     "l'ordine di marcia non apre alcun pannello di conferma")
+        XCTAssertTrue(try XCTUnwrap(schermata.statoPerProva).gruppi[gruppo.id]!.inMarcia,
+                      "attivare la destinazione ha ordinato la marcia direttamente")
     }
 
     /// Il pannello di un gruppo IN MARCIA offre la revoca e null'altro d'ordinabile:
@@ -268,11 +272,11 @@ final class MappaCampagnaAccessibileTest: XCTestCase {
         }
     }
 
-    /// Il registro contiene gli ordini impartiti ai gruppi, ciascuno con il proprio
-    /// giorno e il proprio luogo (01 §5.17, scostamento S8). Nella prima unità
-    /// conteneva soltanto voci di calendario, e il salto al luogo del fatto non era
-    /// mai esercitabile.
-    func test_01_5_17_il_registro_contiene_gli_ordini_con_il_loro_luogo() async throws {
+    /// Il registro contiene i FATTI NON DECISI dal giocatore, ciascuno con il proprio
+    /// giorno e il proprio luogo (01 §5.17.1): gli ordini ne escono (correzione del
+    /// titolare, RDA-104), vi entra il compimento della marcia — l'arrivo. Il salto al
+    /// luogo del fatto resta esercitabile, essendo la casella di arrivo reale.
+    func test_01_5_17_1_il_registro_contiene_i_compimenti_con_il_loro_luogo() async throws {
         let (schermata, _, ambiente) = try await mappaAperta(taglia: .media)
         let stato = try XCTUnwrap(schermata.statoPerProva)
         let gruppo = stato.gruppiOrdinati[0]
@@ -282,10 +286,11 @@ final class MappaCampagnaAccessibileTest: XCTestCase {
             .marcia(gruppo: gruppo.id, a: destinazione,
                     giorni: partitaMotore(schermata).costoInGiorni(da: gruppo.posizione,
                                                                    a: destinazione, stato: stato)))
+        try await presidiaFinoAlCompimento(schermata)
         let dopo = try XCTUnwrap(schermata.statoPerProva)
-        XCTAssertEqual(dopo.registro.count, 1)
+        XCTAssertEqual(dopo.registro.count, 1, "un solo fatto non deciso: il compimento della marcia")
         let voce = try XCTUnwrap(dopo.registro.first)
-        XCTAssertEqual(voce.luogo, destinazione, "la voce porta al luogo del fatto")
+        XCTAssertEqual(voce.luogo, destinazione, "la voce del compimento porta al luogo del fatto")
 
         let costruttore = CostruttoreAnnunciCampagna(testi: ambiente.testi,
                                                      motore: partitaMotore(schermata),
@@ -295,6 +300,24 @@ final class MappaCampagnaAccessibileTest: XCTestCase {
         XCTAssertTrue(frase.contains("\(voce.giorno)"), "la voce dichiara il giorno")
         XCTAssertTrue(frase.contains(costruttore.nomeGruppo(dopo.gruppi[gruppo.id]!)),
                       "la voce dichiara quale gruppo: \(frase)")
+    }
+
+    /// Chiude le giornate presidiando i gruppi in attesa finché una marcia in corso
+    /// si compie e annota il proprio fatto nel registro. Serve perché con la
+    /// correzione del titolare (RDA-104) è il COMPIMENTO, non l'ordine, a lasciare la
+    /// voce, e il compimento matura alla risoluzione di fine giornata (01 §5.6.11).
+    private func presidiaFinoAlCompimento(_ schermata: SchermataMappaCampagna,
+                                          file: StaticString = #filePath, line: UInt = #line) async throws {
+        var tentativi = 0
+        while (schermata.statoPerProva?.registro.isEmpty ?? true), tentativi < 30 {
+            tentativi += 1
+            let s = try XCTUnwrap(schermata.statoPerProva, file: file, line: line)
+            let attesa = s.gruppiInAttesa()
+            if attesa.isEmpty { break }
+            for g in attesa { await schermata.eseguiPerProva(.presidio(gruppo: g.id)) }
+        }
+        XCTAssertFalse(try XCTUnwrap(schermata.statoPerProva).registro.isEmpty,
+                       "la marcia non si è compiuta: nessun fatto nel registro", file: file, line: line)
     }
 
     /// Il salto dalla voce al luogo del fatto (02 §6.6), esercitabile per la prima
@@ -309,6 +332,7 @@ final class MappaCampagnaAccessibileTest: XCTestCase {
             .marcia(gruppo: gruppo.id, a: destinazione,
                     giorni: partitaMotore(schermata).costoInGiorni(da: gruppo.posizione,
                                                                    a: destinazione, stato: stato)))
+        try await presidiaFinoAlCompimento(schermata)
         schermata.apriRegistroPerProva()
         for _ in 0..<50 where schermata.presentedViewController == nil {
             try await Task.sleep(nanoseconds: 20_000_000)

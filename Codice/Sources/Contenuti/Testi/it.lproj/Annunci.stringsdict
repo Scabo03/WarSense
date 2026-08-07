@@ -89,17 +89,6 @@
       <key>other</key><string>%1$@: marcia revocata, persi %2$d giorni</string>
     </dict>
   </dict>
-  <key>pannello.marcia_conferma</key>
-  <dict>
-    <key>NSStringLocalizedFormatKey</key><string>%3$#@giorni@</string>
-    <key>giorni</key>
-    <dict>
-      <key>NSStringFormatSpecTypeKey</key><string>NSStringPluralRuleType</string>
-      <key>NSStringFormatValueTypeKey</key><string>d</string>
-      <key>one</key><string>Marcia verso riga %1$d, casella %2$d. Costa %3$d giorno. Il gruppo resterà fermo fino all'arrivo e non potrà sfilarsi senza perdere i giorni spesi.</string>
-      <key>other</key><string>Marcia verso riga %1$d, casella %2$d. Costa %3$d giorni. Il gruppo resterà fermo fino all'arrivo e non potrà sfilarsi senza perdere i giorni spesi.</string>
-    </dict>
-  </dict>
   <key>pannello.revoca_conferma</key>
   <dict>
     <key>NSStringLocalizedFormatKey</key><string>%2$#@giorni@</string>

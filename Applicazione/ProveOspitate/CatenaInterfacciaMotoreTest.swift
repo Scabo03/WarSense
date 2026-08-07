@@ -194,23 +194,15 @@ final class CatenaInterfacciaMotoreTest: XCTestCase {
                 schermata.avviaDesignazionePerProva(gruppo: gruppo.id)
                 let bersaglio = VistaMappa.cornice(di: meta)
                 // ANELLO 1: il tocco risolve l'elemento e lo attiva. Attivare la
-                // destinazione NON esegue più la marcia: apre il pannello di conferma
-                // (02 §9.2.1), che dichiara il costo e l'inchiodamento prima della
-                // conferma. La marcia si esegue confermando, come il dito farebbe.
+                // destinazione ORDINA la marcia DIRETTAMENTE, senza pannello di
+                // conferma (correzione del titolare, RDA-104): il costo e la
+                // conseguenza dell'inchiodamento sono già sulla voce della casella
+                // (casella.disponibile e casella.inchioda), che chi ascolta ha sentito
+                // prima di attivarla. L'ordine è asincrono e la sua applicazione si
+                // attende sotto, con il cambiamento d'impronta.
                 XCTAssertTrue(schermata.grigliaPerProva.attivaAlTocco(
                     in: CGPoint(x: bersaglio.midX, y: bersaglio.midY)),
-                              "\(dove): il dito non apre la conferma verso \(meta)")
-                try await attendi("\(dove): pannello di conferma marcia") {
-                    schermata.presentedViewController is UIAlertController
-                }
-                let conferma = try XCTUnwrap(schermata.vociPannelloPerProva.first {
-                    $0.titolo == ambiente.testi.frase("pannello.marcia_conferma_azione").testo
-                }, "\(dove): il pannello di conferma offre la conferma della marcia")
-                schermata.presentedViewController?.dismiss(animated: false)
-                try await attendi("\(dove): congedo della conferma") {
-                    schermata.presentedViewController == nil
-                }
-                conferma.esegui()
+                              "\(dove): il dito non ordina la marcia verso \(meta)")
                 caselleToccate.append(meta)
             } else {
                 let cornice = VistaMappa.cornice(di: gruppo.posizione)

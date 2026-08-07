@@ -34,12 +34,19 @@ struct CostruttoreAnnunciCampagna {
         if case .marcia(let id) = designazione {
             switch vista.anteprimaMarcia(da: id, a: casella) {
             case .valido:
-                // La disponibilità dichiara il COSTO IN GIORNI dello scatto, prima
-                // della conferma (01 §5.6.3.5), con il plurale di sistema.
+                // La disponibilità dichiara il COSTO IN GIORNI dello scatto e la
+                // CONSEGUENZA dell'inchiodamento, prima dell'ordine (01 §5.6.3.5,
+                // correzione del titolare, RDA-104): l'ordine parte direttamente da
+                // questa voce, senza pannello, e chi ascolta deve sentire prima di
+                // attivarla che il gruppo resterà fermo fino all'arrivo e non potrà
+                // sfilarsi senza perdere i giorni spesi. Chi vede riceve la stessa
+                // informazione dai nove pallini dell'avanzamento (01 §5.6.3.4): è la
+                // parità ottenuta per due vie diverse. Il plurale di sistema sui giorni.
                 let giorni = vista.comandoDiMarcia(per: id, a: casella).flatMap {
                     if case .marcia(_, _, let g) = $0 { return g } else { return nil }
                 } ?? 1
                 parti.append(testi.frase("casella.disponibile", giorni).testo)
+                parti.append(testi.frase("casella.inchioda").testo)
             case .nonValido(let motivo): parti.append(testi.termine(motivo.rawValue).testo)
             }
         }
