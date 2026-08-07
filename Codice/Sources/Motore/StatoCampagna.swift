@@ -39,10 +39,38 @@ public struct MarciaInCorso: Hashable, Codable, Sendable {
     public var giorniMancanti: Int { giorniTotali - giorniCompiuti }
 }
 
+/// Un reparto che compone un gruppo di campagna (01 §5.6.0): un archetipo e il
+/// numero di atomi che vi sono schierati. È l'unità INTERA su cui lavora la
+/// divisione (01 §5.6.0.2): «la divisione lavora su reparti interi e non sui
+/// singoli atomi».
+///
+/// Il volume che ne discende (`MotoreCampagna.volume`) è la STESSA grandezza del
+/// volume di battaglia, non una grandezza omonima: 01 §3.4.4 dichiara «il volume è
+/// il parametro unico da cui dipendono tanto il costo di schieramento quanto la
+/// velocità di marcia della colonna» ed è «unico e stabile per archetipo». Il
+/// numero letto è lo stesso campo dell'archetipo, `volume_per_atomo`, che in
+/// battaglia misura l'ingombro manovrabile (01 §9.5.0.2) e in campagna la
+/// lunghezza della colonna (01 §5.6.3). Il budget di manovra della battaglia
+/// (`BilancioVolume`) è invece un'altra cosa e conserva il proprio nome: qui non
+/// entra. L'accertamento è dichiarato in RDA.
+public struct Reparto: Hashable, Codable, Sendable {
+    /// La chiave dell'archetipo nei dati di battaglia (01 §3.4): da esso si legge
+    /// `volume_per_atomo`. Un archetipo ignoto è respinto dalla fabbrica.
+    public let archetipo: IdentificatoreDati
+    /// Il numero di atomi del reparto. Sempre positivo: un reparto senza atomi non
+    /// esiste, e la fabbrica lo respinge (invariante «nessun gruppo vuoto»).
+    public let atomi: Int
+
+    public init(archetipo: IdentificatoreDati, atomi: Int) {
+        self.archetipo = archetipo; self.atomi = atomi
+    }
+}
+
 /// Un gruppo sulla mappa di campagna (01 §5.6.0): l'oggetto che dispone di
-/// un'azione al giorno. In questa unità porta l'identità, il nome, la posizione,
-/// l'azione spesa e l'eventuale marcia lunga in corso; composizione, provviste e
-/// imboscata appartengono alle unità successive.
+/// un'azione al giorno. Porta l'identità, il nome, la posizione, l'azione spesa,
+/// l'eventuale marcia lunga in corso e la COMPOSIZIONE in reparti da cui discende
+/// il volume (01 §5.6.0, §5.6.3); provviste e imboscata appartengono alle unità
+/// successive.
 public struct Gruppo: Hashable, Codable, Sendable {
     public let id: IdGruppo
     public let parte: Parte
@@ -53,6 +81,14 @@ public struct Gruppo: Hashable, Codable, Sendable {
     /// proprio nome anche se l'elenco dei dati cambia.
     public let nome: IdentificatoreDati
     public var posizione: Cella
+    /// La composizione del gruppo (01 §5.6.0): i reparti di cui è fatto. Mai vuota
+    /// — un gruppo senza reparti non esiste (01 §5.6.0.2, invariante `gruppoVuoto`).
+    /// È `var` perché la divisione stacca reparti interi e la riunione li fonde
+    /// (01 §5.6.0.2, §5.6.0.3, unità successiva). Il volume NON è un campo qui: è
+    /// derivato dai reparti e dagli archetipi (`MotoreCampagna.volume`), sicché non
+    /// può divergere dalla composizione — la sola via che rende impossibile lo stato
+    /// sbagliato dell'invariante «il volume è la somma di ciò che lo compone».
+    public var composizione: [Reparto]
     /// Vero se l'azione della giornata è stata spesa DAL GIOCATORE (01 §5.6). Un
     /// gruppo in marcia lunga ha l'azione consumata ma non spesa dal giocatore nei
     /// giorni successivi all'ordine (02 §6.5.1.2): per quei giorni `azioneSpesa` è
@@ -62,10 +98,17 @@ public struct Gruppo: Hashable, Codable, Sendable {
     public var marcia: MarciaInCorso?
 
     public init(id: IdGruppo, parte: Parte, nome: IdentificatoreDati,
-                posizione: Cella, azioneSpesa: Bool, marcia: MarciaInCorso? = nil) {
+                posizione: Cella, composizione: [Reparto],
+                azioneSpesa: Bool, marcia: MarciaInCorso? = nil) {
         self.id = id; self.parte = parte; self.nome = nome
-        self.posizione = posizione; self.azioneSpesa = azioneSpesa; self.marcia = marcia
+        self.posizione = posizione; self.composizione = composizione
+        self.azioneSpesa = azioneSpesa; self.marcia = marcia
     }
+
+    /// Il numero totale di atomi del gruppo: la somma sui reparti. Serve alla
+    /// riunione per stabilire «il maggiore dei due» (01 §5.6.0.4) senza gli
+    /// archetipi, e al confronto della divisione.
+    public var atomiTotali: Int { composizione.reduce(0) { $0 + $1.atomi } }
 
     /// Vero se il gruppo è impegnato in una marcia lunga.
     public var inMarcia: Bool { marcia != nil }

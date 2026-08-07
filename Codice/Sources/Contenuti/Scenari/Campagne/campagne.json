@@ -21,11 +21,27 @@
    "gruppi": [
     {
      "riga": 4,
-     "colonna": 2
+     "colonna": 2,
+     "composizione": [
+      {
+       "archetipo": "fanteria_leggera",
+       "atomi": 6
+      }
+     ]
     },
     {
      "riga": 4,
-     "colonna": 3
+     "colonna": 3,
+     "composizione": [
+      {
+       "archetipo": "fanteria_leggera",
+       "atomi": 18
+      },
+      {
+       "archetipo": "fanteria_pesante",
+       "atomi": 8
+      }
+     ]
     }
    ]
   },
@@ -35,15 +51,41 @@
    "gruppi": [
     {
      "riga": 6,
-     "colonna": 3
+     "colonna": 3,
+     "composizione": [
+      {
+       "archetipo": "fanteria_leggera",
+       "atomi": 6
+      }
+     ]
     },
     {
      "riga": 6,
-     "colonna": 2
+     "colonna": 2,
+     "composizione": [
+      {
+       "archetipo": "fanteria_leggera",
+       "atomi": 18
+      },
+      {
+       "archetipo": "fanteria_pesante",
+       "atomi": 8
+      }
+     ]
     },
     {
      "riga": 5,
-     "colonna": 4
+     "colonna": 4,
+     "composizione": [
+      {
+       "archetipo": "fanteria_pesante",
+       "atomi": 24
+      },
+      {
+       "archetipo": "cavalleria_manovrata",
+       "atomi": 12
+      }
+     ]
     }
    ]
   },
@@ -53,23 +95,65 @@
    "gruppi": [
     {
      "riga": 10,
-     "colonna": 6
+     "colonna": 6,
+     "composizione": [
+      {
+       "archetipo": "fanteria_leggera",
+       "atomi": 6
+      }
+     ]
     },
     {
      "riga": 10,
-     "colonna": 5
+     "colonna": 5,
+     "composizione": [
+      {
+       "archetipo": "fanteria_leggera",
+       "atomi": 18
+      },
+      {
+       "archetipo": "fanteria_pesante",
+       "atomi": 8
+      }
+     ]
     },
     {
      "riga": 9,
-     "colonna": 6
+     "colonna": 6,
+     "composizione": [
+      {
+       "archetipo": "fanteria_pesante",
+       "atomi": 24
+      },
+      {
+       "archetipo": "cavalleria_manovrata",
+       "atomi": 12
+      }
+     ]
     },
     {
      "riga": 9,
-     "colonna": 5
+     "colonna": 5,
+     "composizione": [
+      {
+       "archetipo": "fanteria_leggera",
+       "atomi": 6
+      }
+     ]
     },
     {
      "riga": 10,
-     "colonna": 7
+     "colonna": 7,
+     "composizione": [
+      {
+       "archetipo": "fanteria_leggera",
+       "atomi": 18
+      },
+      {
+       "archetipo": "fanteria_pesante",
+       "atomi": 8
+      }
+     ]
     }
    ]
   },
@@ -79,7 +163,13 @@
    "gruppi": [
     {
      "riga": 10,
-     "colonna": 6
+     "colonna": 6,
+     "composizione": [
+      {
+       "archetipo": "fanteria_leggera",
+       "atomi": 6
+      }
+     ]
     }
    ]
   },
@@ -89,19 +179,51 @@
    "gruppi": [
     {
      "riga": 10,
-     "colonna": 1
+     "colonna": 1,
+     "composizione": [
+      {
+       "archetipo": "fanteria_leggera",
+       "atomi": 6
+      }
+     ]
     },
     {
      "riga": 10,
-     "colonna": 4
+     "colonna": 4,
+     "composizione": [
+      {
+       "archetipo": "fanteria_leggera",
+       "atomi": 18
+      },
+      {
+       "archetipo": "fanteria_pesante",
+       "atomi": 8
+      }
+     ]
     },
     {
      "riga": 9,
-     "colonna": 8
+     "colonna": 8,
+     "composizione": [
+      {
+       "archetipo": "fanteria_pesante",
+       "atomi": 24
+      },
+      {
+       "archetipo": "cavalleria_manovrata",
+       "atomi": 12
+      }
+     ]
     },
     {
      "riga": 8,
-     "colonna": 2
+     "colonna": 2,
+     "composizione": [
+      {
+       "archetipo": "fanteria_leggera",
+       "atomi": 6
+      }
+     ]
     }
    ]
   },
@@ -111,35 +233,103 @@
    "gruppi": [
     {
      "riga": 1,
-     "colonna": 1
+     "colonna": 1,
+     "composizione": [
+      {
+       "archetipo": "fanteria_leggera",
+       "atomi": 6
+      }
+     ]
     },
     {
      "riga": 1,
-     "colonna": 10
+     "colonna": 10,
+     "composizione": [
+      {
+       "archetipo": "fanteria_leggera",
+       "atomi": 18
+      },
+      {
+       "archetipo": "fanteria_pesante",
+       "atomi": 8
+      }
+     ]
     },
     {
      "riga": 3,
-     "colonna": 5
+     "colonna": 5,
+     "composizione": [
+      {
+       "archetipo": "fanteria_pesante",
+       "atomi": 24
+      },
+      {
+       "archetipo": "cavalleria_manovrata",
+       "atomi": 12
+      }
+     ]
     },
     {
      "riga": 5,
-     "colonna": 2
+     "colonna": 2,
+     "composizione": [
+      {
+       "archetipo": "fanteria_leggera",
+       "atomi": 6
+      }
+     ]
     },
     {
      "riga": 6,
-     "colonna": 9
+     "colonna": 9,
+     "composizione": [
+      {
+       "archetipo": "fanteria_leggera",
+       "atomi": 18
+      },
+      {
+       "archetipo": "fanteria_pesante",
+       "atomi": 8
+      }
+     ]
     },
     {
      "riga": 8,
-     "colonna": 4
+     "colonna": 4,
+     "composizione": [
+      {
+       "archetipo": "fanteria_pesante",
+       "atomi": 24
+      },
+      {
+       "archetipo": "cavalleria_manovrata",
+       "atomi": 12
+      }
+     ]
     },
     {
      "riga": 10,
-     "colonna": 1
+     "colonna": 1,
+     "composizione": [
+      {
+       "archetipo": "fanteria_leggera",
+       "atomi": 6
+      }
+     ]
     },
     {
      "riga": 10,
-     "colonna": 10
+     "colonna": 10,
+     "composizione": [
+      {
+       "archetipo": "fanteria_leggera",
+       "atomi": 18
+      },
+      {
+       "archetipo": "fanteria_pesante",
+       "atomi": 8
+      }
+     ]
     }
    ]
   },
@@ -149,51 +339,155 @@
    "gruppi": [
     {
      "riga": 1,
-     "colonna": 2
+     "colonna": 2,
+     "composizione": [
+      {
+       "archetipo": "fanteria_leggera",
+       "atomi": 6
+      }
+     ]
     },
     {
      "riga": 1,
-     "colonna": 7
+     "colonna": 7,
+     "composizione": [
+      {
+       "archetipo": "fanteria_leggera",
+       "atomi": 18
+      },
+      {
+       "archetipo": "fanteria_pesante",
+       "atomi": 8
+      }
+     ]
     },
     {
      "riga": 2,
-     "colonna": 4
+     "colonna": 4,
+     "composizione": [
+      {
+       "archetipo": "fanteria_pesante",
+       "atomi": 24
+      },
+      {
+       "archetipo": "cavalleria_manovrata",
+       "atomi": 12
+      }
+     ]
     },
     {
      "riga": 3,
-     "colonna": 9
+     "colonna": 9,
+     "composizione": [
+      {
+       "archetipo": "fanteria_leggera",
+       "atomi": 6
+      }
+     ]
     },
     {
      "riga": 4,
-     "colonna": 1
+     "colonna": 1,
+     "composizione": [
+      {
+       "archetipo": "fanteria_leggera",
+       "atomi": 18
+      },
+      {
+       "archetipo": "fanteria_pesante",
+       "atomi": 8
+      }
+     ]
     },
     {
      "riga": 5,
-     "colonna": 6
+     "colonna": 6,
+     "composizione": [
+      {
+       "archetipo": "fanteria_pesante",
+       "atomi": 24
+      },
+      {
+       "archetipo": "cavalleria_manovrata",
+       "atomi": 12
+      }
+     ]
     },
     {
      "riga": 6,
-     "colonna": 3
+     "colonna": 3,
+     "composizione": [
+      {
+       "archetipo": "fanteria_leggera",
+       "atomi": 6
+      }
+     ]
     },
     {
      "riga": 7,
-     "colonna": 8
+     "colonna": 8,
+     "composizione": [
+      {
+       "archetipo": "fanteria_leggera",
+       "atomi": 18
+      },
+      {
+       "archetipo": "fanteria_pesante",
+       "atomi": 8
+      }
+     ]
     },
     {
      "riga": 8,
-     "colonna": 5
+     "colonna": 5,
+     "composizione": [
+      {
+       "archetipo": "fanteria_pesante",
+       "atomi": 24
+      },
+      {
+       "archetipo": "cavalleria_manovrata",
+       "atomi": 12
+      }
+     ]
     },
     {
      "riga": 9,
-     "colonna": 10
+     "colonna": 10,
+     "composizione": [
+      {
+       "archetipo": "fanteria_leggera",
+       "atomi": 6
+      }
+     ]
     },
     {
      "riga": 10,
-     "colonna": 2
+     "colonna": 2,
+     "composizione": [
+      {
+       "archetipo": "fanteria_leggera",
+       "atomi": 18
+      },
+      {
+       "archetipo": "fanteria_pesante",
+       "atomi": 8
+      }
+     ]
     },
     {
      "riga": 10,
-     "colonna": 8
+     "colonna": 8,
+     "composizione": [
+      {
+       "archetipo": "fanteria_pesante",
+       "atomi": 24
+      },
+      {
+       "archetipo": "cavalleria_manovrata",
+       "atomi": 12
+      }
+     ]
     }
    ]
   },
@@ -203,35 +497,103 @@
    "gruppi": [
     {
      "riga": 5,
-     "colonna": 1
+     "colonna": 1,
+     "composizione": [
+      {
+       "archetipo": "fanteria_leggera",
+       "atomi": 6
+      }
+     ]
     },
     {
      "riga": 5,
-     "colonna": 2
+     "colonna": 2,
+     "composizione": [
+      {
+       "archetipo": "fanteria_leggera",
+       "atomi": 18
+      },
+      {
+       "archetipo": "fanteria_pesante",
+       "atomi": 8
+      }
+     ]
     },
     {
      "riga": 5,
-     "colonna": 3
+     "colonna": 3,
+     "composizione": [
+      {
+       "archetipo": "fanteria_pesante",
+       "atomi": 24
+      },
+      {
+       "archetipo": "cavalleria_manovrata",
+       "atomi": 12
+      }
+     ]
     },
     {
      "riga": 5,
-     "colonna": 4
+     "colonna": 4,
+     "composizione": [
+      {
+       "archetipo": "fanteria_leggera",
+       "atomi": 6
+      }
+     ]
     },
     {
      "riga": 6,
-     "colonna": 1
+     "colonna": 1,
+     "composizione": [
+      {
+       "archetipo": "fanteria_leggera",
+       "atomi": 18
+      },
+      {
+       "archetipo": "fanteria_pesante",
+       "atomi": 8
+      }
+     ]
     },
     {
      "riga": 6,
-     "colonna": 2
+     "colonna": 2,
+     "composizione": [
+      {
+       "archetipo": "fanteria_pesante",
+       "atomi": 24
+      },
+      {
+       "archetipo": "cavalleria_manovrata",
+       "atomi": 12
+      }
+     ]
     },
     {
      "riga": 6,
-     "colonna": 3
+     "colonna": 3,
+     "composizione": [
+      {
+       "archetipo": "fanteria_leggera",
+       "atomi": 6
+      }
+     ]
     },
     {
      "riga": 6,
-     "colonna": 4
+     "colonna": 4,
+     "composizione": [
+      {
+       "archetipo": "fanteria_leggera",
+       "atomi": 18
+      },
+      {
+       "archetipo": "fanteria_pesante",
+       "atomi": 8
+      }
+     ]
     }
    ]
   },
@@ -241,27 +603,79 @@
    "gruppi": [
     {
      "riga": 3,
-     "colonna": 1
+     "colonna": 1,
+     "composizione": [
+      {
+       "archetipo": "fanteria_leggera",
+       "atomi": 6
+      }
+     ]
     },
     {
      "riga": 3,
-     "colonna": 2
+     "colonna": 2,
+     "composizione": [
+      {
+       "archetipo": "fanteria_leggera",
+       "atomi": 18
+      },
+      {
+       "archetipo": "fanteria_pesante",
+       "atomi": 8
+      }
+     ]
     },
     {
      "riga": 3,
-     "colonna": 3
+     "colonna": 3,
+     "composizione": [
+      {
+       "archetipo": "fanteria_pesante",
+       "atomi": 24
+      },
+      {
+       "archetipo": "cavalleria_manovrata",
+       "atomi": 12
+      }
+     ]
     },
     {
      "riga": 4,
-     "colonna": 1
+     "colonna": 1,
+     "composizione": [
+      {
+       "archetipo": "fanteria_leggera",
+       "atomi": 6
+      }
+     ]
     },
     {
      "riga": 4,
-     "colonna": 2
+     "colonna": 2,
+     "composizione": [
+      {
+       "archetipo": "fanteria_leggera",
+       "atomi": 18
+      },
+      {
+       "archetipo": "fanteria_pesante",
+       "atomi": 8
+      }
+     ]
     },
     {
      "riga": 4,
-     "colonna": 3
+     "colonna": 3,
+     "composizione": [
+      {
+       "archetipo": "fanteria_pesante",
+       "atomi": 24
+      },
+      {
+       "archetipo": "cavalleria_manovrata",
+       "atomi": 12
+      }
+     ]
     }
    ]
   },
@@ -271,51 +685,155 @@
    "gruppi": [
     {
      "riga": 1,
-     "colonna": 1
+     "colonna": 1,
+     "composizione": [
+      {
+       "archetipo": "fanteria_leggera",
+       "atomi": 6
+      }
+     ]
     },
     {
      "riga": 1,
-     "colonna": 2
+     "colonna": 2,
+     "composizione": [
+      {
+       "archetipo": "fanteria_leggera",
+       "atomi": 18
+      },
+      {
+       "archetipo": "fanteria_pesante",
+       "atomi": 8
+      }
+     ]
     },
     {
      "riga": 1,
-     "colonna": 3
+     "colonna": 3,
+     "composizione": [
+      {
+       "archetipo": "fanteria_pesante",
+       "atomi": 24
+      },
+      {
+       "archetipo": "cavalleria_manovrata",
+       "atomi": 12
+      }
+     ]
     },
     {
      "riga": 1,
-     "colonna": 4
+     "colonna": 4,
+     "composizione": [
+      {
+       "archetipo": "fanteria_leggera",
+       "atomi": 6
+      }
+     ]
     },
     {
      "riga": 2,
-     "colonna": 1
+     "colonna": 1,
+     "composizione": [
+      {
+       "archetipo": "fanteria_leggera",
+       "atomi": 18
+      },
+      {
+       "archetipo": "fanteria_pesante",
+       "atomi": 8
+      }
+     ]
     },
     {
      "riga": 2,
-     "colonna": 2
+     "colonna": 2,
+     "composizione": [
+      {
+       "archetipo": "fanteria_pesante",
+       "atomi": 24
+      },
+      {
+       "archetipo": "cavalleria_manovrata",
+       "atomi": 12
+      }
+     ]
     },
     {
      "riga": 2,
-     "colonna": 3
+     "colonna": 3,
+     "composizione": [
+      {
+       "archetipo": "fanteria_leggera",
+       "atomi": 6
+      }
+     ]
     },
     {
      "riga": 2,
-     "colonna": 4
+     "colonna": 4,
+     "composizione": [
+      {
+       "archetipo": "fanteria_leggera",
+       "atomi": 18
+      },
+      {
+       "archetipo": "fanteria_pesante",
+       "atomi": 8
+      }
+     ]
     },
     {
      "riga": 3,
-     "colonna": 1
+     "colonna": 1,
+     "composizione": [
+      {
+       "archetipo": "fanteria_pesante",
+       "atomi": 24
+      },
+      {
+       "archetipo": "cavalleria_manovrata",
+       "atomi": 12
+      }
+     ]
     },
     {
      "riga": 3,
-     "colonna": 2
+     "colonna": 2,
+     "composizione": [
+      {
+       "archetipo": "fanteria_leggera",
+       "atomi": 6
+      }
+     ]
     },
     {
      "riga": 3,
-     "colonna": 3
+     "colonna": 3,
+     "composizione": [
+      {
+       "archetipo": "fanteria_leggera",
+       "atomi": 18
+      },
+      {
+       "archetipo": "fanteria_pesante",
+       "atomi": 8
+      }
+     ]
     },
     {
      "riga": 3,
-     "colonna": 4
+     "colonna": 4,
+     "composizione": [
+      {
+       "archetipo": "fanteria_pesante",
+       "atomi": 24
+      },
+      {
+       "archetipo": "cavalleria_manovrata",
+       "atomi": 12
+      }
+     ]
     }
    ]
   }

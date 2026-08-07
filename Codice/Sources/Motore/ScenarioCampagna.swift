@@ -4,10 +4,26 @@ import Dati
 /// La definizione dichiarativa di una campagna: da qui nasce lo stato iniziale.
 /// È anche la forma degli scenari di campagna del programma di verifica (05 §12.2).
 public struct ScenarioCampagna: Hashable, Codable, Sendable {
+    /// Un reparto iniziale di un gruppo, come compare nei dati: archetipo e atomi
+    /// (01 §5.6.0). La fabbrica lo traduce in `Reparto` dopo averne verificato
+    /// l'archetipo e il numero di atomi.
+    public struct RepartoIniziale: Hashable, Codable, Sendable {
+        public let archetipo: IdentificatoreDati
+        public let atomi: Int
+        public init(archetipo: IdentificatoreDati, atomi: Int) {
+            self.archetipo = archetipo; self.atomi = atomi
+        }
+    }
+
     public struct GruppoIniziale: Hashable, Codable, Sendable {
         public let riga: Int
         public let colonna: Int
-        public init(riga: Int, colonna: Int) { self.riga = riga; self.colonna = colonna }
+        /// La composizione del gruppo (01 §5.6.0): mai vuota. La fabbrica respinge
+        /// lo scenario che ne dichiari una vuota o con reparti a zero atomi.
+        public let composizione: [RepartoIniziale]
+        public init(riga: Int, colonna: Int, composizione: [RepartoIniziale]) {
+            self.riga = riga; self.colonna = colonna; self.composizione = composizione
+        }
         public var casella: Cella { Cella(riga: riga, colonna: colonna) }
     }
 
@@ -36,10 +52,24 @@ public enum FabbricaCampagna {
         case gruppiSovrapposti(Cella)
         case nomiInsufficienti(richiesti: Int, disponibili: Int)
         case nessunGruppo
+        /// Un gruppo con composizione vuota: nessun gruppo può esistere senza reparti
+        /// (01 §5.6.0.2, invariante `gruppoVuoto`). Reso impossibile qui, non solo
+        /// sorvegliato.
+        case gruppoSenzaComposizione(Cella)
+        /// Un reparto con atomi non positivi: un reparto senza atomi non esiste, e la
+        /// somma dei volumi non tornerebbe (01 §5.6.0).
+        case repartoVuoto(Cella)
+        /// Un archetipo ignoto nella composizione: come il terreno ignoto respinto in
+        /// caricamento (05 §7.7), il volume non si potrebbe leggere.
+        case archetipoIgnoto(IdentificatoreDati)
     }
 
+    /// - Parameter archetipiNoti: le chiavi degli archetipi caricati e validi
+    ///   (`ValoriDiGioco.archetipi`). La composizione di ogni gruppo vi si verifica,
+    ///   come lo scenario di battaglia verifica i propri sciami (`ScenarioBattaglia`).
     public static func crea(scenario: ScenarioCampagna,
-                            valori: ValoriCampagna) throws -> StatoCampagna {
+                            valori: ValoriCampagna,
+                            archetipiNoti: Set<IdentificatoreDati>) throws -> StatoCampagna {
         guard let definizione = valori.mappe[scenario.mappa] else {
             throw ErroreScenario.mappaIgnota(scenario.mappa)
         }
@@ -68,9 +98,23 @@ public enum FabbricaCampagna {
             guard occupate.insert(casella).inserted else {
                 throw ErroreScenario.gruppiSovrapposti(casella)
             }
+            // La composizione: mai vuota, reparti a atomi positivi, archetipi noti.
+            // I tre rifiuti rendono impossibile — non solo sorvegliabile — il gruppo
+            // vuoto e il volume che non torna (01 §5.6.0.2).
+            guard !iniziale.composizione.isEmpty else {
+                throw ErroreScenario.gruppoSenzaComposizione(casella)
+            }
+            var composizione: [Reparto] = []
+            for reparto in iniziale.composizione {
+                guard reparto.atomi > 0 else { throw ErroreScenario.repartoVuoto(casella) }
+                guard archetipiNoti.contains(reparto.archetipo) else {
+                    throw ErroreScenario.archetipoIgnoto(reparto.archetipo)
+                }
+                composizione.append(Reparto(archetipo: reparto.archetipo, atomi: reparto.atomi))
+            }
             let id = IdGruppo(prossimoId)
             gruppi[id] = Gruppo(id: id, parte: .giocatore, nome: valori.nomiGruppi[prossimoNome],
-                                posizione: casella, azioneSpesa: false)
+                                posizione: casella, composizione: composizione, azioneSpesa: false)
             prossimoId += 1
             prossimoNome += 1
         }

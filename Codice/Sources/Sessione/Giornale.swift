@@ -45,14 +45,14 @@ public struct FondazioneCampagna: Codable, Sendable {
     public let seme: UInt64
     public let identificatore: String
     public let scenario: ScenarioCampagna
-    /// Versione 3 dalla marcia lunga e dalla risoluzione di fine giornata: il gruppo
-    /// porta uno stato di marcia in corso, la marcia matura alla chiusura invece di
-    /// spostare all'istante, e il giornale porta il marcatore `risoluzioneGiornata`.
-    /// Un giornale di versione 2, rigiocato con queste regole, produrrebbe una
-    /// partita diversa — le marce si compirebbero in giorni diversi e i movimenti
-    /// slitterebbero alla risoluzione — e per questo non si riapre (00 §15.2). Era 2
-    /// da quando il comando di marcia trasporta il costo (RDA-75).
-    public static let schemaCorrente = 3
+    /// Versione 4 dalla composizione dei gruppi e dal volume: ogni gruppo porta i
+    /// propri reparti, e il volume che ne discende agisce sul costo della marcia
+    /// (01 §5.6.0, §5.6.3). Un giornale di versione 3, i cui gruppi non hanno
+    /// composizione, non ha da dove leggere il volume e, rigiocato con queste regole,
+    /// produrrebbe marce di costo diverso: per questo non si riapre (00 §15.2). Era 3
+    /// dalla marcia lunga e dalla risoluzione di fine giornata, 2 da quando il comando
+    /// di marcia trasporta il costo (RDA-75).
+    public static let schemaCorrente = 4
 
     public init(versioneSchema: Int, versioneValori: String, versioneTesti: String,
                 seme: UInt64, identificatore: String, scenario: ScenarioCampagna) {

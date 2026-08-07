@@ -18,11 +18,15 @@ final class MarciaLungaTest: XCTestCase {
         motore = MotoreCampagna(valori: valori, valoriCampagna: valoriCampagna)
     }
 
+    static let composizioneLeggera: [ScenarioCampagna.RepartoIniziale] =
+        [.init(archetipo: "fanteria_leggera", atomi: 6)]
+
     private func crea(mappa: String = "guado", gruppi: [(Int, Int)]) throws -> StatoCampagna {
         try FabbricaCampagna.crea(
             scenario: ScenarioCampagna(mappa: mappa,
-                                       gruppiGiocatore: gruppi.map { .init(riga: $0.0, colonna: $0.1) }),
-            valori: valoriCampagna)
+                                       gruppiGiocatore: gruppi.map {
+                                        .init(riga: $0.0, colonna: $0.1, composizione: Self.composizioneLeggera) }),
+            valori: valoriCampagna, archetipiNoti: Set(valori.archetipi.keys))
     }
 
     @discardableResult

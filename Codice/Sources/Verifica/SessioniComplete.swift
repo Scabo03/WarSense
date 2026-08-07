@@ -189,7 +189,8 @@ public struct BancoSessioniCampagna: Sendable {
                       disposizione: Disposizione, condotta: Condotta,
                       giornate: Int) throws -> Sessione {
         let scenario = ScenarioCampagna(mappa: mappa, gruppiGiocatore: gruppi)
-        let iniziale = try FabbricaCampagna.crea(scenario: scenario, valori: valoriCampagna)
+        let iniziale = try FabbricaCampagna.crea(scenario: scenario, valori: valoriCampagna,
+                                                 archetipiNoti: Set(motore.valori.archetipi.keys))
         var stato = iniziale
         var violazioniDiPasso = Set<String>()
         var comandi: [ComandoCampagna] = []
@@ -280,7 +281,8 @@ public struct BancoSessioniCampagna: Sendable {
     /// restituisce l'impronta finale. È la rigiocatura di 05 §13.2 al livello del
     /// Motore: il giornale su disco e le istantanee sono materia della Sessione.
     public func rigioca(_ comandi: [ComandoCampagna], scenario: ScenarioCampagna) -> String {
-        guard var stato = try? FabbricaCampagna.crea(scenario: scenario, valori: valoriCampagna)
+        guard var stato = try? FabbricaCampagna.crea(scenario: scenario, valori: valoriCampagna,
+                                                     archetipiNoti: Set(motore.valori.archetipi.keys))
         else { return "" }
         for comando in comandi {
             guard motore.valida(comando, parte: .giocatore, stato: stato).eValido else { return "" }
@@ -363,13 +365,29 @@ public struct BancoSessioniCampagna: Sendable {
         case .raccolti:
             // Dalla riga più arretrata in avanti: è la prima giornata di una campagna.
             let ordinate = caselle.sorted { ($0.0, $0.1) > ($1.0, $1.1) }
-            return ordinate.prefix(quanti).map { .init(riga: $0.0, colonna: $0.1) }
+            return ordinate.prefix(quanti).enumerated().map {
+                .init(riga: $0.element.0, colonna: $0.element.1,
+                      composizione: Self.composizionePerIndice($0.offset)) }
         case .sparpagliati:
             let passo = max(1, caselle.count / max(1, quanti))
             return (0..<quanti).map { indice in
                 let posto = caselle[(indice * passo) % caselle.count]
-                return .init(riga: posto.0, colonna: posto.1)
+                return .init(riga: posto.0, colonna: posto.1,
+                             composizione: Self.composizionePerIndice(indice))
             }
+        }
+    }
+
+    /// La composizione di un gruppo generato, variata per indice così che le sessioni
+    /// complete esercitino marce di volumi diversi (01 §5.6.3): le tre fasce danno
+    /// zero, uno e due giorni aggiuntivi alla soglia dei dati.
+    static func composizionePerIndice(_ i: Int) -> [ScenarioCampagna.RepartoIniziale] {
+        switch i % 3 {
+        case 0:  return [.init(archetipo: "fanteria_leggera", atomi: 6)]
+        case 1:  return [.init(archetipo: "fanteria_leggera", atomi: 18),
+                         .init(archetipo: "fanteria_pesante", atomi: 8)]
+        default: return [.init(archetipo: "fanteria_pesante", atomi: 24),
+                         .init(archetipo: "cavalleria_manovrata", atomi: 12)]
         }
     }
 }

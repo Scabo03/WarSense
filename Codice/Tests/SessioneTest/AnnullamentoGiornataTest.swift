@@ -43,7 +43,9 @@ final class AnnullamentoGiornataTest: XCTestCase {
                        mappa: String = "pianura_lunga") throws -> SessioneCampagna {
         try SessioneCampagna(
             nuova: ScenarioCampagna(mappa: mappa,
-                                    gruppiGiocatore: gruppi.map { .init(riga: $0.0, colonna: $0.1) }),
+                                    gruppiGiocatore: gruppi.map {
+                                        .init(riga: $0.0, colonna: $0.1,
+                                              composizione: [.init(archetipo: "fanteria_leggera", atomi: 6)]) }),
             valori: valori, valoriCampagna: valoriCampagna, versioneTesti: "0.1.1",
             cartella: cartella, seme: 4242, identificatore: "prova-annullamento")
     }

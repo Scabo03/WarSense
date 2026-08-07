@@ -93,8 +93,9 @@ Questa unità introduce POCHISSIMI numeri, ed è voluto: le grandezze della camp
 - `peso_strada_arrivo` (nessuna 0, sterrata 0, battuta -1, lastricata -1): PROVVISORIO. L'effetto del tipo di strada della casella di arrivo (01 §5.5.3, §5.14.4). Le strade ACCORCIANO il tempo: la battuta e la lastricata tolgono un giorno, la sterrata non ancora (da distinguere in taratura), nessuna strada nulla. Il costo non scende comunque sotto uno (saturazione nel Motore, 00 §13.6): una strada su terreno aperto resta un giorno, una strada che attraversa l'acqua — il guado — dimezza la fatica dell'acqua. Da tarare giocando.
 - `costo_strettoia` (1): PROVVISORIO. Il costo fisso aggiuntivo dell'attraversare la strettoia (01 §5.1.3, §5.6.3.2), applicato quando la casella di arrivo è la strettoia. Un giorno in più. Da tarare.
 - `posizioni_visive` (9): FISSATO da 01 §5.6.3.4, che stabilisce «nove posizioni disposte a quadrato dentro la casella». Non si tara: è geometria del progetto. Vive nei dati e non nel codice perché nessun numero di gioco vive fuori dai file (00 §13.1).
+- `soglia_volume_per_giorno_aggiuntivo` (250): PROVVISORIO. Il volume oltre il quale la colonna spende un giorno in più (01 §5.6.3.2, quinto fattore); i giorni aggiuntivi sono il volume del gruppo diviso questa soglia, per troncamento. Formula nel codice (`MotoreCampagna.costoInGiorni`), coefficiente qui (00 §13.1). Scelta così che le tre composizioni di misura — 60, 292, 696 di volume — diano rispettivamente zero, uno e due giorni aggiuntivi, cioè una gamma osservabile. Il minimo di uno è FISSATO (è un divisore) e imposto dal caricatore. Da tarare giocando (01 §16.3). Introdotto con l'incarico 15 (composizione e volume); decisione architetturale RDA-103.
 
-Il VOLUME della colonna, quinto fattore di 01 §5.6.3.2, NON è ancora un peso: il gruppo non ha composizione in questa unità (impatto-marcia-lunga §1). `MotoreCampagna.costoInGiorni` riceve già lo stato e vi leggerà il volume quando la composizione esisterà, senza spostare il punto di calcolo (RDA-75, RDA-99).
+Il VOLUME della colonna, quinto fattore di 01 §5.6.3.2, con l'incarico 15 AGISCE: `MotoreCampagna.costoInGiorni` legge il volume del gruppo che occupa la casella di partenza — somma sui reparti di atomi per `volume_per_atomo`, la STESSA grandezza del volume di battaglia (01 §3.4.4) — e vi somma il volume diviso la soglia qui sopra, senza spostare il punto di calcolo (RDA-75, RDA-99, RDA-103). Il rinvio di `impatto-marcia-lunga.md` §1 è così superato.
 
 ### formati-mappa.json — FISSATI
 
@@ -113,6 +114,8 @@ Le dodici chiavi dei nomi dei gruppi. Non sono valori: sono l'elenco chiuso e pr
 ### Scenari/Campagne/campagne.json — PARAMETRI DI MISURA, non valori di gioco
 
 `giornate_generate` (40) e `gruppi_per_la_misura_dei_passi` (da 1 a 8) governano quanto a lungo il programma di verifica generi giornate e su quali conteggi di gruppi misuri il costo di chiusura. Come i parametri dei banchi di scontro, non entrano in alcuna formula del Motore: cambiarli cambia la misura, non il gioco.
+
+La `composizione` dei gruppi negli scenari (incarico 15) è CONTENUTO, non valore da tarare, come le posizioni: gli atomi per archetipo dichiarano di che cosa un gruppo è fatto. Le tre fasce usate negli scenari di misura e nelle campagne giocabili (`scenari-campagna.json`) — fanteria leggera 6; leggera 18 più pesante 8; pesante 24 più cavalleria manovrata 12 — danno volumi 60, 292, 696, scelti per esercitare i tre gradini del giorno aggiuntivo alla soglia provvisoria di 250. Il `volume_per_atomo` di ciascun archetipo resta PROVVISORIO in `archetipi.json`.
 
 ### Il modello dei passi — DICHIARATO, non tarato
 

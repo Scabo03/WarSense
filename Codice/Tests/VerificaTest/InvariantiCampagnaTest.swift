@@ -26,11 +26,15 @@ final class InvariantiCampagnaTest: XCTestCase {
         motore = MotoreCampagna(valori: valori, valoriCampagna: valoriCampagna)
     }
 
+    static let composizioneLeggera: [ScenarioCampagna.RepartoIniziale] =
+        [.init(archetipo: "fanteria_leggera", atomi: 6)]
+
     private func stato(gruppi: [(Int, Int)] = [(10, 6), (10, 5), (9, 6)]) throws -> StatoCampagna {
         try FabbricaCampagna.crea(
             scenario: ScenarioCampagna(mappa: "pianura_lunga",
-                                       gruppiGiocatore: gruppi.map { .init(riga: $0.0, colonna: $0.1) }),
-            valori: valoriCampagna)
+                                       gruppiGiocatore: gruppi.map {
+                                        .init(riga: $0.0, colonna: $0.1, composizione: Self.composizioneLeggera) }),
+            valori: valoriCampagna, archetipiNoti: Set(valori.archetipi.keys))
     }
 
     private func descrizioni(_ violazioni: [SondaInvariantiCampagna.Violazione]) -> [String] {
@@ -76,7 +80,8 @@ final class InvariantiCampagnaTest: XCTestCase {
         // Si duplica un gruppo su una seconda casella, con lo STESSO identificatore.
         let primo = guasto.gruppiOrdinati[0]
         guasto.gruppi[IdGruppo(99)] = Gruppo(id: primo.id, parte: .giocatore, nome: primo.nome,
-                                             posizione: Cella(riga: 8, colonna: 6), azioneSpesa: false)
+                                             posizione: Cella(riga: 8, colonna: 6),
+                                             composizione: primo.composizione, azioneSpesa: false)
         XCTAssertTrue(descrizioni(sonda.controlla(stato: guasto))
             .contains { $0.contains("gruppo_in_piu_caselle:gruppo=1:caselle=2") },
             "la sonda non vede un gruppo in due caselle")
@@ -343,6 +348,39 @@ final class InvariantiCampagnaTest: XCTestCase {
     /// Nella prima unità due invarianti su quindici ne erano privi e nessuno se ne
     /// era accorto, perché il conto lo tenevo io a mente. Qui lo tiene una prova:
     /// la tavola dei mutanti va estesa insieme all'enumerativo, o il collaudo cade.
+    /// Un gruppo senza reparti (01 §5.6.0.2): la corsa sana non lo produce, il
+    /// mutante che svuota la composizione lo fa vedere.
+    func test_mutante_un_gruppo_vuoto_viene_visto() throws {
+        let sano = try stato()
+        XCTAssertEqual(descrizioni(sonda.controlla(stato: sano)), [], "lo stato sano non ha gruppi vuoti")
+        var guasto = sano
+        let id = guasto.gruppiOrdinati[0].id
+        guasto.gruppi[id]!.composizione = []
+        XCTAssertTrue(descrizioni(sonda.controlla(stato: guasto))
+            .contains { $0.contains("gruppo_vuoto:gruppo=\(id.numero)") },
+            "un gruppo con composizione vuota non è stato visto")
+    }
+
+    /// Il volume come somma della composizione (01 §5.6.3): il volume riportato dal
+    /// Motore coincide con la somma; un valore riportato divergente fa scattare
+    /// l'invariante.
+    func test_mutante_un_volume_incoerente_viene_visto() throws {
+        let s = try stato()
+        let volumePerAtomo = valori.archetipi.mapValues { $0.volumePerAtomo }
+        // Coincidenza sul valore vero del Motore: nessuna violazione.
+        let veri = Dictionary(uniqueKeysWithValues: s.gruppiOrdinati.map { ($0.id, motore.volume(di: $0)) })
+        XCTAssertEqual(descrizioni(sonda.controllaVolumi(stato: s, volumePerAtomo: volumePerAtomo,
+                                                         volumiRiportati: veri)), [],
+                       "il volume del Motore è la somma della composizione")
+        // Un riportato divergente: violazione vista.
+        let id = s.gruppiOrdinati[0].id
+        XCTAssertTrue(descrizioni(sonda.controllaVolumi(
+            stato: s, volumePerAtomo: volumePerAtomo,
+            volumiRiportati: [id: motore.volume(di: s.gruppiOrdinati[0]) + 100]))
+            .contains { $0.contains("volume_incoerente:gruppo=\(id.numero)") },
+            "un volume riportato divergente non è stato visto")
+    }
+
     func test_incarico_6_ogni_invariante_ha_almeno_un_mutante_che_lo_fa_scattare() throws {
         var visti = Set<String>()
         for (nome, produci) in try tavolaDeiMutanti() {
@@ -377,7 +415,8 @@ final class InvariantiCampagnaTest: XCTestCase {
                 sonda.controlla(stato: statoCon { s in
                     let primo = s.gruppiOrdinati[0]
                     s.gruppi[IdGruppo(99)] = Gruppo(id: primo.id, parte: .giocatore, nome: primo.nome,
-                                                    posizione: Cella(riga: 8, colonna: 6), azioneSpesa: false)
+                                                    posizione: Cella(riga: 8, colonna: 6),
+                                                    composizione: primo.composizione, azioneSpesa: false)
                 })
             }),
             ("due_gruppi_stessa_casella", {
@@ -499,6 +538,15 @@ final class InvariantiCampagnaTest: XCTestCase {
                 var dopo = prima; dopo.gruppi[ids[0]]!.azioneSpesa = true  // marcia residua: non conforme
                 return sonda.controlla(prima: prima, comando: .revocaMarcia(gruppo: ids[0]),
                                        dopo: dopo, eventi: [], adiacenti: griglia.adiacenti)
+            }),
+            ("gruppo_vuoto", {
+                sonda.controlla(stato: statoCon { s in s.gruppi[ids[0]]!.composizione = [] })
+            }),
+            ("volume_incoerente", {
+                let volumePerAtomo = motore.valori.archetipi.mapValues { $0.volumePerAtomo }
+                let vero = motore.volume(di: base.gruppiOrdinati[0])
+                return sonda.controllaVolumi(stato: base, volumePerAtomo: volumePerAtomo,
+                                             volumiRiportati: [ids[0]: vero + 100])
             }),
         ]
     }

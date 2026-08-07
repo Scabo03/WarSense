@@ -175,7 +175,15 @@ final class CatenaInterfacciaMotoreTest: XCTestCase {
 
         while (await partita.stato).giorno <= ultimoGiorno {
             let stato = await partita.stato
-            guard let gruppo = stato.gruppiOrdinati.first(where: { !$0.azioneSpesa }) else { break }
+            // Il prossimo gruppo che ATTENDE una decisione: non basta `!azioneSpesa`,
+            // perché un gruppo in marcia lunga ha l'azione consumata dalla marcia e
+            // non dal giocatore (azioneSpesa falsa, marcia non nulla) e non è
+            // ordinabile — offrirebbe la revoca, non il presidio. È lo stesso criterio
+            // del salto e del rotore (`haConclusoLaGiornata`, 01 §5.16.1). Con i volumi
+            // diversi dell'incarico 15 le marce durano più giorni e questo caso, prima
+            // latente, si esercita davvero.
+            guard let gruppo = stato.gruppiOrdinati.first(where: { !$0.haConclusoLaGiornata })
+            else { break }
             let vista = await partita.vista
             let improntaPrima = stato.impronta()
             statiPrecedenti.append(stato)

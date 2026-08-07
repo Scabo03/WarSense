@@ -26,7 +26,9 @@ final class SessioneCampagnaTest: XCTestCase {
 
     private func scenario(gruppi: [(Int, Int)] = [(10, 6), (10, 5), (9, 6)]) -> ScenarioCampagna {
         ScenarioCampagna(mappa: "pianura_lunga",
-                         gruppiGiocatore: gruppi.map { .init(riga: $0.0, colonna: $0.1) })
+                         gruppiGiocatore: gruppi.map {
+                            .init(riga: $0.0, colonna: $0.1,
+                                  composizione: [.init(archetipo: "fanteria_leggera", atomi: 6)]) })
     }
 
     private func nuova(_ cartella: URL, _ s: ScenarioCampagna) throws -> SessioneCampagna {

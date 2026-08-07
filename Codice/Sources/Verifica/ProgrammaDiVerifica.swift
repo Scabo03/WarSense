@@ -91,14 +91,15 @@ public struct ProgrammaDiVerifica: Sendable {
                                     String(corsa.senzaDestinazione),
                                     String(corsa.violazioni.count),
                                     corsa.violazioni.joined(separator: ";"),
-                                    corsa.improntaFinale])
+                                    corsa.improntaFinale,
+                                    String(corsa.volumeMinimo), String(corsa.volumeMassimo)])
         }
         sezioni.append(Rapporto.Sezione(
             nome: "campagna_invarianti",
             intestazione: ["scenario", "mappa", "gruppi", "giornate", "ordini", "marce",
                            "marce_lunghe", "marce_compiute", "revoche", "presidi",
                            "senza_destinazione", "violazioni", "dettaglio",
-                           "impronta_finale"],
+                           "impronta_finale", "volume_minimo", "volume_massimo"],
             righe: righeInvarianti))
 
         // La curva, non il punto: il costo di chiusura di una giornata si misura su
@@ -223,6 +224,13 @@ public struct ProgrammaDiVerifica: Sendable {
         voce("mappe_disponibili", banco.valoriCampagna.mappe.count)
         voce("costo_in_giorni_dello_scatto_base", banco.valoriCampagna.marcia.costoGiorniBase)
         voce("posizioni_visive_della_marcia", banco.valoriCampagna.marcia.posizioniVisive)
+        // Il volume e il suo coefficiente (01 §5.6.3): il minimo e il massimo si
+        // leggono dalle colonne 14 e 15 del dettaglio; se differiscono, il banco ha
+        // esercitato marce di volumi diversi. La soglia è provvisoria.
+        voce("volume_minimo_fra_gli_scenari", righeInvarianti.compactMap { Int($0[14]) }.min() ?? 0)
+        voce("volume_massimo_fra_gli_scenari", righeInvarianti.compactMap { Int($0[15]) }.max() ?? 0)
+        voce("soglia_volume_per_giorno_aggiuntivo",
+             banco.valoriCampagna.marcia.sogliaVolumePerGiornoAggiuntivo)
         voce("gruppi_minimo_nella_misura_dei_passi", scenari.gruppiPerLaMisuraDeiPassi.min() ?? 0)
         voce("gruppi_massimo_nella_misura_dei_passi", scenari.gruppiPerLaMisuraDeiPassi.max() ?? 0)
         voce("disposizioni_nella_misura_dei_passi", BancoCampagna.Disposizione.allCases.count)

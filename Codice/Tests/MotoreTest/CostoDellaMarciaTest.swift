@@ -24,12 +24,23 @@ final class CostoDellaMarciaTest: XCTestCase {
         motore = MotoreCampagna(valori: valori, valoriCampagna: valoriCampagna)
     }
 
-    private func stato(mappa: String = "guado",
-                       gruppi: [(Int, Int)] = [(4, 2)]) throws -> StatoCampagna {
+    /// Una composizione leggera (volume 60, sotto la soglia dei dati): il volume non
+    /// aggiunge giorni, così le prove sui pesi misurano il solo terreno-strada-strettoia.
+    static let leggera: [ScenarioCampagna.RepartoIniziale] =
+        [.init(archetipo: "fanteria_leggera", atomi: 6)]
+    /// Una composizione pesante (volume 696, oltre due volte la soglia): aggiunge
+    /// giorni al costo. È la colonna «più voluminosa» di 01 §5.6.3.
+    static let pesante: [ScenarioCampagna.RepartoIniziale] =
+        [.init(archetipo: "fanteria_pesante", atomi: 24),
+         .init(archetipo: "cavalleria_manovrata", atomi: 12)]
+
+    private func stato(mappa: String = "guado", gruppi: [(Int, Int)] = [(4, 2)],
+                       composizione: [ScenarioCampagna.RepartoIniziale] = leggera) throws -> StatoCampagna {
         try FabbricaCampagna.crea(
             scenario: ScenarioCampagna(mappa: mappa,
-                                       gruppiGiocatore: gruppi.map { .init(riga: $0.0, colonna: $0.1) }),
-            valori: valoriCampagna)
+                                       gruppiGiocatore: gruppi.map {
+                                        .init(riga: $0.0, colonna: $0.1, composizione: composizione) }),
+            valori: valoriCampagna, archetipiNoti: Set(valori.archetipi.keys))
     }
 
     // MARK: - 00 §13.1 — il costo vive nei dati, non nel codice
@@ -47,6 +58,13 @@ final class CostoDellaMarciaTest: XCTestCase {
                 atteso += m.pesoTerrenoArrivo[s.mappa.terreno(di: a).rawValue]!
                 atteso += m.pesoStradaArrivo[s.mappa.strada(di: a).rawValue]!
                 if s.mappa.strettoia == a { atteso += m.costoStrettoia }
+                // Il quinto fattore: il volume della colonna che occupa la partenza,
+                // diviso la soglia (01 §5.6.3.2). Sulla partenza reale c'è il gruppo
+                // leggero, sotto soglia, sicché il contributo è zero; la prova lo
+                // include comunque per rifare l'aritmetica intera.
+                if let occ = s.occupante(di: da) {
+                    atteso += Int(motore.volume(di: occ) / Int64(m.sogliaVolumePerGiornoAggiuntivo))
+                }
                 atteso = max(1, atteso)
                 XCTAssertEqual(motore.costoInGiorni(da: da, a: a, stato: s), atteso,
                                "il costo non coincide con la somma dei pesi dei dati (00 §13.1)")
@@ -85,7 +103,8 @@ final class CostoDellaMarciaTest: XCTestCase {
                                     pesoTerrenoPartenza: m.pesoTerrenoPartenza,
                                     pesoTerrenoArrivo: m.pesoTerrenoArrivo,
                                     pesoStradaArrivo: m.pesoStradaArrivo,
-                                    costoStrettoia: m.costoStrettoia)
+                                    costoStrettoia: m.costoStrettoia,
+                                    sogliaVolumePerGiornoAggiuntivo: m.sogliaVolumePerGiornoAggiuntivo)
         let alterati = ValoriCampagna(formatiMappa: valoriCampagna.formatiMappa,
                                       mappe: valoriCampagna.mappe,
                                       nomiGruppi: valoriCampagna.nomiGruppi,
@@ -109,7 +128,7 @@ final class CostoDellaMarciaTest: XCTestCase {
          "peso_terreno_partenza": {"aperto": 0, "bosco": 1, "acqua": 1},
          "peso_terreno_arrivo": {"aperto": 0, "bosco": 1, "acqua": 2},
          "peso_strada_arrivo": {"nessuna": 0, "sterrata": 0, "battuta": -1, "lastricata": -1},
-         "costo_strettoia": 1}
+         "costo_strettoia": 1, "soglia_volume_per_giorno_aggiuntivo": 250}
         """
         try Data(costoZero.utf8).write(to: cartella.appendingPathComponent("marcia-campagna.json"))
         XCTAssertThrowsError(try CaricatoreCampagna.carica(da: cartella),
@@ -128,7 +147,7 @@ final class CostoDellaMarciaTest: XCTestCase {
          "peso_terreno_partenza": {"aperto": 0, "bosco": 1},
          "peso_terreno_arrivo": {"aperto": 0, "bosco": 1, "acqua": 2},
          "peso_strada_arrivo": {"nessuna": 0, "sterrata": 0, "battuta": -1, "lastricata": -1},
-         "costo_strettoia": 1}
+         "costo_strettoia": 1, "soglia_volume_per_giorno_aggiuntivo": 250}
         """
         try Data(manca.utf8).write(to: cartella.appendingPathComponent("marcia-campagna.json"))
         XCTAssertThrowsError(try CaricatoreCampagna.carica(da: cartella),
@@ -210,5 +229,77 @@ final class CostoDellaMarciaTest: XCTestCase {
         XCTAssertNil(s.gruppi[id]!.marcia)
         XCTAssertEqual(s.giorno, giornoIniziale + giorni, "sono passate tante giornate quante il costo")
         XCTAssertTrue(eventi.contains { if case .marciaCompiuta = $0 { return true } else { return false } })
+    }
+
+    // MARK: - 01 §5.6.0, §5.6.3, §3.4.4 — il volume e il costo che ne discende
+
+    /// Il volume di un gruppo è la SOMMA, sui reparti, di atomi per volume-per-atomo,
+    /// ed è la STESSA grandezza del volume di battaglia: si legge lo stesso campo
+    /// dell'archetipo (01 §3.4.4). La prova rifà la somma con i dati degli archetipi.
+    func test_01_5_6_0_il_volume_e_la_somma_di_cio_che_lo_compone() throws {
+        let s = try stato(composizione: Self.pesante)
+        let g = s.gruppiOrdinati[0]
+        let atteso = Int64(24) * valori.archetipi["fanteria_pesante"]!.volumePerAtomo
+                   + Int64(12) * valori.archetipi["cavalleria_manovrata"]!.volumePerAtomo
+        XCTAssertEqual(motore.volume(di: g), atteso,
+                       "il volume non è la somma di ciò che compone il gruppo (01 §5.6.3)")
+        XCTAssertEqual(g.atomiTotali, 36)
+    }
+
+    /// Una colonna più voluminosa è più lunga e percorre meno strada in una giornata
+    /// (01 §5.6.3): sullo stesso tragitto, la colonna pesante costa più della leggera,
+    /// e l'incremento è ESATTAMENTE il volume diviso la soglia (01 §5.6.3.2).
+    func test_01_5_6_3_una_colonna_piu_voluminosa_costa_piu_giorni() throws {
+        let da = Cella(riga: 4, colonna: 2), a = Cella(riga: 4, colonna: 3)
+        let leggero = try stato(composizione: Self.leggera)
+        let pesante = try stato(composizione: Self.pesante)
+        let costoLeggero = motore.costoInGiorni(da: da, a: a, stato: leggero)
+        let costoPesante = motore.costoInGiorni(da: da, a: a, stato: pesante)
+        XCTAssertGreaterThan(costoPesante, costoLeggero,
+                             "la colonna più voluminosa costa più giorni (01 §5.6.3)")
+        // L'incremento è il volume del pesante diviso la soglia (il leggero è sotto
+        // soglia, contributo zero), su terreno aperto senza strada né strettoia.
+        let soglia = Int64(valoriCampagna.marcia.sogliaVolumePerGiornoAggiuntivo)
+        let g = pesante.gruppiOrdinati[0]
+        XCTAssertEqual(costoPesante - costoLeggero, Int(motore.volume(di: g) / soglia),
+                       "l'incremento non è il volume diviso la soglia (01 §5.6.3.2)")
+    }
+
+    /// La soglia del volume è un divisore: un valore minore di uno è respinto in
+    /// caricamento, come il costo base minore di uno (01 §5.6.3.2). Il cancello si
+    /// vede rifiutare: senza, non sarebbe un cancello.
+    func test_01_5_6_3_2_una_soglia_di_volume_minore_di_uno_e_respinta() throws {
+        let cartella = FileManager.default.temporaryDirectory
+            .appendingPathComponent("valori-soglia-\(UUID().uuidString)")
+        try FileManager.default.copyItem(at: Contenuti.valoriDiFabbrica, to: cartella)
+        defer { try? FileManager.default.removeItem(at: cartella) }
+        let soglia0 = """
+        {"costo_giorni_base": 1, "posizioni_visive": 9,
+         "peso_terreno_partenza": {"aperto": 0, "bosco": 1, "acqua": 1},
+         "peso_terreno_arrivo": {"aperto": 0, "bosco": 1, "acqua": 2},
+         "peso_strada_arrivo": {"nessuna": 0, "sterrata": 0, "battuta": -1, "lastricata": -1},
+         "costo_strettoia": 1, "soglia_volume_per_giorno_aggiuntivo": 0}
+        """
+        try Data(soglia0.utf8).write(to: cartella.appendingPathComponent("marcia-campagna.json"))
+        XCTAssertThrowsError(try CaricatoreCampagna.carica(da: cartella),
+                             "una soglia a zero dividerebbe per zero: va respinta")
+    }
+
+    /// Nessun gruppo vuoto (01 §5.6.0.2): la fabbrica respinge la composizione vuota,
+    /// il reparto a atomi non positivi e l'archetipo ignoto. Tre cancelli, tutti
+    /// visti rifiutare.
+    func test_01_5_6_0_2_la_fabbrica_respinge_le_composizioni_non_valide() {
+        let noti = Set(valori.archetipi.keys)
+        func crea(_ comp: [ScenarioCampagna.RepartoIniziale]) throws {
+            _ = try FabbricaCampagna.crea(
+                scenario: ScenarioCampagna(mappa: "guado",
+                    gruppiGiocatore: [.init(riga: 4, colonna: 2, composizione: comp)]),
+                valori: valoriCampagna, archetipiNoti: noti)
+        }
+        XCTAssertThrowsError(try crea([]), "composizione vuota accettata")
+        XCTAssertThrowsError(try crea([.init(archetipo: "fanteria_leggera", atomi: 0)]),
+                             "reparto a zero atomi accettato")
+        XCTAssertThrowsError(try crea([.init(archetipo: "arciere_lunare", atomi: 5)]),
+                             "archetipo ignoto accettato")
     }
 }

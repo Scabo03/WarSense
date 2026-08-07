@@ -16,6 +16,17 @@ extension Gruppo: CodificabileCanonico {
         c.testo(parte.rawValue)
         c.testo(nome)
         posizione.codifica(in: &c)
+        // La composizione entra nell'impronta nell'ordine dichiarato dei reparti,
+        // che è un fatto di gioco (l'ordine dei reparti è quello con cui il gruppo
+        // si legge e si divide): due gruppi con reparti diversi — o gli stessi in
+        // ordine diverso — non sono lo stesso stato. Il volume NON vi entra a sé:
+        // è funzione pura della composizione e degli archetipi, e non aggiunge
+        // informazione all'impronta.
+        c.intero(Int64(composizione.count))
+        for reparto in composizione {
+            c.testo(reparto.archetipo)
+            c.intero(Int64(reparto.atomi))
+        }
         c.vero(azioneSpesa)
         // La marcia lunga in corso entra nell'impronta: due gruppi con la stessa
         // posizione e azione ma marce diverse — o uno in marcia e uno no — non sono

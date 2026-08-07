@@ -54,6 +54,16 @@ public struct BancoCampagna: Sendable {
         self.scenari = scenari
     }
 
+    /// Le chiavi degli archetipi noti, per la fabbrica (rifiuto dell'archetipo ignoto).
+    private var archetipiNoti: Set<IdentificatoreDati> { Set(motore.valori.archetipi.keys) }
+
+    /// La composizione dei gruppi generati dalle misure interne (passi, distanze,
+    /// uscite): una fanteria leggera, volume sotto la soglia, così che la misura del
+    /// costo di chiusura non dipenda dal volume. La diversità di volume che l'unità
+    /// esercita viene dagli scenari di `campagne.json`, non da queste misure.
+    static let composizioneDiMisura: [ScenarioCampagna.RepartoIniziale] =
+        [.init(archetipo: "fanteria_leggera", atomi: 6)]
+
     // MARK: - Generazione deterministica delle giornate
 
     /// L'esito di una corsa: quante giornate, quanti ordini, quali violazioni.
@@ -77,6 +87,12 @@ public struct BancoCampagna: Sendable {
         /// affatto (02 §9.5). Se questo numero è zero, la corsa non ha esercitato
         /// lo stipamento, per quanti gruppi vi fossero.
         public let senzaDestinazione: Int
+        /// Il volume più piccolo e più grande fra i gruppi dello scenario (01 §5.6.3):
+        /// se differiscono, la corsa ha esercitato marce di volumi diversi, cioè il
+        /// caso che questa unità introduce. Uguali, i gruppi erano tutti dello stesso
+        /// ingombro e la diversità di volume non è stata esercitata.
+        public let volumeMinimo: Int
+        public let volumeMassimo: Int
         public let violazioni: [String]
         public let improntaFinale: String
     }
@@ -93,10 +109,16 @@ public struct BancoCampagna: Sendable {
     public func corri(_ voce: ScenariCampagna.Voce, giornate: Int) throws -> Corsa {
         var stato = try FabbricaCampagna.crea(
             scenario: ScenarioCampagna(mappa: voce.mappa, gruppiGiocatore: voce.gruppi),
-            valori: valoriCampagna)
+            valori: valoriCampagna, archetipiNoti: archetipiNoti)
         var violazioni = Set<String>()
         var ordini = 0, marce = 0, marceLunghe = 0, marceCompiute = 0, revoche = 0
         var presidi = 0, senzaDestinazione = 0
+        // La tabella dei volumi per atomo, per l'invariante del volume come somma.
+        let volumePerAtomo = motore.valori.archetipi.mapValues { $0.volumePerAtomo }
+        // I volumi dei gruppi (costanti in questa unità: la composizione non muta).
+        let volumi = stato.gruppiOrdinati.map { motore.volume(di: $0) }
+        let volumeMinimo = Int(volumi.min() ?? 0)
+        let volumeMassimo = Int(volumi.max() ?? 0)
         violazioni.formUnion(sonda.controlla(stato: stato).map(\.description))
 
         let giornoIniziale = stato.giorno
@@ -154,6 +176,13 @@ public struct BancoCampagna: Sendable {
                                                  eventi: eventi,
                                                  adiacenti: prima.griglia.adiacenti).map(\.description))
             violazioni.formUnion(sonda.controlla(stato: dopo).map(\.description))
+            // L'invariante del volume come somma: il volume riportato è quello che il
+            // Motore calcola, la sonda ne verifica la coincidenza con la composizione.
+            let volumiRiportati = Dictionary(uniqueKeysWithValues:
+                dopo.gruppiOrdinati.map { ($0.id, motore.volume(di: $0)) })
+            violazioni.formUnion(sonda.controllaVolumi(
+                stato: dopo, volumePerAtomo: volumePerAtomo,
+                volumiRiportati: volumiRiportati).map(\.description))
             stato = dopo
             ordini += 1
         }
@@ -167,6 +196,7 @@ public struct BancoCampagna: Sendable {
                      ordini: ordini, marce: marce, marceLunghe: marceLunghe,
                      marceCompiute: marceCompiute, revoche: revoche, presidi: presidi,
                      senzaDestinazione: senzaDestinazione,
+                     volumeMinimo: volumeMinimo, volumeMassimo: volumeMassimo,
                      violazioni: violazioni.sorted(), improntaFinale: stato.impronta())
     }
 
@@ -258,8 +288,10 @@ public struct BancoCampagna: Sendable {
         let stato = try FabbricaCampagna.crea(
             scenario: ScenarioCampagna(
                 mappa: identificatore,
-                gruppiGiocatore: caselle.map { .init(riga: $0.riga, colonna: $0.colonna) }),
-            valori: valoriCampagna)
+                gruppiGiocatore: caselle.map {
+                    .init(riga: $0.riga, colonna: $0.colonna,
+                          composizione: Self.composizioneDiMisura) }),
+            valori: valoriCampagna, archetipiNoti: archetipiNoti)
 
         let ordine = griglia.tutteLeCaselle
         func indice(_ casella: Cella) -> Int { ordine.firstIndex(of: casella) ?? 0 }
@@ -315,8 +347,9 @@ public struct BancoCampagna: Sendable {
         var stato = try FabbricaCampagna.crea(
             scenario: ScenarioCampagna(mappa: identificatore,
                                        gruppiGiocatore: [.init(riga: partenza.riga,
-                                                               colonna: partenza.colonna)]),
-            valori: valoriCampagna)
+                                                               colonna: partenza.colonna,
+                                                               composizione: Self.composizioneDiMisura)]),
+            valori: valoriCampagna, archetipiNoti: archetipiNoti)
         let id = stato.gruppiOrdinati[0].id
         let giornoIniziale = stato.giorno
         var passi = 0
@@ -379,8 +412,9 @@ public struct BancoCampagna: Sendable {
             scenario: ScenarioCampagna(
                 mappa: identificatore,
                 gruppiGiocatore: [.init(riga: definizione.quartierGenerali.giocatore.riga,
-                                        colonna: definizione.quartierGenerali.giocatore.colonna)]),
-            valori: valoriCampagna)
+                                        colonna: definizione.quartierGenerali.giocatore.colonna,
+                                        composizione: Self.composizioneDiMisura)]),
+            valori: valoriCampagna, archetipiNoti: archetipiNoti)
         let vista = VistaCampagna(motore: motore, stato: stato, parte: .giocatore)
         let griglia = stato.griglia
         func diBordo(_ c: Cella) -> Bool {

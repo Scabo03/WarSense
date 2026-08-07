@@ -43,7 +43,8 @@ public actor SessioneCampagna {
                                             scenario: scenario)
         self.giornale = try Giornale.nuovo(a: cartella.appendingPathComponent("giornale.jsonl"),
                                            fondazione: fondazione)
-        let statoIniziale = try FabbricaCampagna.crea(scenario: scenario, valori: valoriCampagna)
+        let statoIniziale = try FabbricaCampagna.crea(scenario: scenario, valori: valoriCampagna,
+                                                      archetipiNoti: Set(valori.archetipi.keys))
         self.stato = statoIniziale
         // Il marcatore di apertura giornata è il punto cui l'azzeramento risale (05 §6.4).
         try giornale.appendi(.aperturaGiornata(giorno: statoIniziale.giorno))
@@ -280,7 +281,8 @@ public actor SessioneCampagna {
                                      valoriCampagna: ValoriCampagna) throws -> StatoCampagna {
         var (statoCorrente, daRiga) = try istantaneaMigliore(
             in: cartella, nonOltre: limite,
-            scenario: giornale.fondazioneCampagna.scenario, valoriCampagna: valoriCampagna)
+            scenario: giornale.fondazioneCampagna.scenario, valoriCampagna: valoriCampagna,
+            archetipiNoti: Set(motore.valori.archetipi.keys))
         for riga in giornale.righe.prefix(limite).dropFirst(daRiga) {
             switch riga.voce {
             case .comandoCampagna(let parte, let comando):
@@ -333,7 +335,8 @@ public actor SessioneCampagna {
     /// Un'istantanea corrotta fa scalare alla precedente (05 §6.8).
     private static func istantaneaMigliore(in cartella: URL, nonOltre limite: Int,
                                            scenario: ScenarioCampagna,
-                                           valoriCampagna: ValoriCampagna) throws
+                                           valoriCampagna: ValoriCampagna,
+                                           archetipiNoti: Set<IdentificatoreDati>) throws
         -> (StatoCampagna, Int) {
         let candidate = istantaneeDisponibili(in: cartella)
             .filter { $0.0 <= limite }
@@ -344,6 +347,7 @@ public actor SessioneCampagna {
                 return (istantanea.stato, indice)
             }
         }
-        return (try FabbricaCampagna.crea(scenario: scenario, valori: valoriCampagna), 0)
+        return (try FabbricaCampagna.crea(scenario: scenario, valori: valoriCampagna,
+                                          archetipiNoti: archetipiNoti), 0)
     }
 }

@@ -68,13 +68,19 @@ final class SalvataggioBuildDistribuitaTest: XCTestCase {
         let slot = try slotConIlSalvataggio()
         let url = slot.appendingPathComponent("giornale.jsonl")
         let originale = try String(contentsOf: url, encoding: .utf8)
-        let versione = valori.versione
+        // La fixture è il salvataggio della build distribuita, alla versione dei
+        // valori di quella build; è COMPATIBILE (figura in `versioni_compatibili`) e
+        // quindi si riaprirebbe. Per provare il rifiuto la si riscrive con una
+        // versione FUORI da `versioni_compatibili`. La versione della fixture è
+        // quella compatibile che la build distribuita porta, non quella corrente dei
+        // valori, che con questa unità è avanzata (0.9.0).
+        let versioneFixture = try XCTUnwrap(valori.versioniCompatibili.first,
+                                            "manca una versione compatibile a cui la fixture appartiene")
         XCTAssertFalse(valori.versioniCompatibili.contains("0.5.0"),
                        "0.5.0 deve essere fuori dalle versioni compatibili perché il caso esista")
-        // Riscrive la versione dei valori della fondazione con una incompatibile.
-        let alterato = originale.replacingOccurrences(of: "\"versione_valori\":\"\(versione)\"",
+        let alterato = originale.replacingOccurrences(of: "\"versione_valori\":\"\(versioneFixture)\"",
                                                       with: "\"versione_valori\":\"0.5.0\"")
-        XCTAssertNotEqual(alterato, originale, "la fondazione deve portare la versione corrente \(versione)")
+        XCTAssertNotEqual(alterato, originale, "la fondazione deve portare la versione \(versioneFixture)")
         try alterato.write(to: url, atomically: true, encoding: .utf8)
         do {
             _ = try await SessioneBattaglia(riprendi: slot, valori: valori)
@@ -84,7 +90,8 @@ final class SalvataggioBuildDistribuitaTest: XCTestCase {
                 return XCTFail("errore diverso da salvataggioIncompatibile: \(errore)")
             }
             XCTAssertEqual(trovata, "0.5.0")
-            XCTAssertEqual(attesa, versione)
+            XCTAssertEqual(attesa, valori.versioneEffettiva,
+                           "la ripresa dichiara la versione che la build attende")
         }
     }
 

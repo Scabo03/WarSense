@@ -7,15 +7,20 @@ import Dati
 /// formato di salvataggio, e se la codifica degli enumerativi con valori associati
 /// si sposta, le partite aperte dei tester non si riaprono più (00 §15).
 ///
-/// I campioni della CAMPAGNA crescono di due casi con la marcia lunga: la revoca,
-/// caso nuovo di `ComandoCampagna` (RDA-76, `impatto-marcia-lunga.md` §7), e il
-/// marcatore `risoluzioneGiornata` di `VoceGiornale`, che tiene il confine
-/// dell'annullamento nel giornale (RDA-102). La contropartita è l'incremento di
-/// `FondazioneCampagna.schemaCorrente` da 2 a 3, che fa dichiarare e non aprire i
-/// giornali di campagna precedenti (00 §15.2). I campioni preesistenti — battaglia e
-/// campagna — non sono stati toccati e continuano a ricodificarsi byte per byte
-/// identici: la codifica sintetizzata usa il NOME del caso come chiave, e i casi si
-/// aggiungono in coda senza spostare quelli esistenti.
+/// La composizione dei gruppi (01 §5.6.0) non aggiunge alcun caso agli enumerativi
+/// del giornale, ma cambia la FORMA di `ScenarioCampagna` — ogni gruppo iniziale
+/// porta ora la propria composizione — e quindi la codifica di `FondazioneCampagna`,
+/// che lo iscrive. Il campione di `fondazioneCampagna` è stato perciò rigenerato con
+/// la composizione, ed è il solo toccato; il suo `versione_schema` sale a 4, valore
+/// che `FondazioneCampagna.schemaCorrente` porta perché un giornale di versione 3 —
+/// gruppi senza composizione — non ha da dove leggere il volume e non si riapre
+/// (00 §15.2). Gli altri campioni continuano a ricodificarsi byte per byte identici:
+/// la codifica sintetizzata usa il NOME del caso come chiave, e i casi non sono
+/// cambiati.
+///
+/// Storia dello schema di campagna: 2 da quando il comando di marcia trasporta il
+/// costo (RDA-75); 3 dalla marcia lunga e dalla risoluzione di fine giornata; 4 dalla
+/// composizione e dal volume.
 ///
 /// ## Perché la copertura è imposta da una catena di errori di compilazione
 ///
@@ -155,7 +160,8 @@ final class CompatibilitaGiornaleTest: XCTestCase {
         versioneSchema: FondazioneCampagna.schemaCorrente, versioneValori: "0.0.0",
         versioneTesti: "0.0.0", seme: 1, identificatore: "specie",
         scenario: ScenarioCampagna(mappa: "guado",
-                                   gruppiGiocatore: [.init(riga: 4, colonna: 2)]))
+                                   gruppiGiocatore: [.init(riga: 4, colonna: 2,
+                                       composizione: [.init(archetipo: "fanteria_leggera", atomi: 6)])]))
 
     // MARK: - La prova
 

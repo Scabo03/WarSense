@@ -22,14 +22,22 @@ final class RegoleCampagnaTest: XCTestCase {
 
     // MARK: - Attrezzi
 
+    /// Una composizione leggera (volume 60, sotto la soglia dei dati): il volume non
+    /// aggiunge giorni, sicché le prove sul costo della marcia misurano il solo
+    /// contributo di terreno, strada e strettoia. Il volume ha prove dedicate.
+    static let composizioneLeggera: [ScenarioCampagna.RepartoIniziale] =
+        [.init(archetipo: "fanteria_leggera", atomi: 6)]
+
     func scenario(mappa: String = "pianura_lunga",
                   gruppi: [(Int, Int)] = [(10, 6), (10, 5), (9, 6)]) -> ScenarioCampagna {
         ScenarioCampagna(mappa: mappa,
-                         gruppiGiocatore: gruppi.map { .init(riga: $0.0, colonna: $0.1) })
+                         gruppiGiocatore: gruppi.map {
+                            .init(riga: $0.0, colonna: $0.1, composizione: Self.composizioneLeggera) })
     }
 
     func crea(_ s: ScenarioCampagna) throws -> StatoCampagna {
-        try FabbricaCampagna.crea(scenario: s, valori: valoriCampagna)
+        try FabbricaCampagna.crea(scenario: s, valori: valoriCampagna,
+                                  archetipiNoti: Set(valori.archetipi.keys))
     }
 
     @discardableResult
@@ -94,7 +102,8 @@ final class RegoleCampagnaTest: XCTestCase {
         // Non esistono caselle interdette: da ogni casella si raggiunge ogni altra.
         for identificatore in valoriCampagna.mappe.keys.sorted() {
             let stato = try crea(ScenarioCampagna(
-                mappa: identificatore, gruppiGiocatore: [.init(riga: 1, colonna: 1)]))
+                mappa: identificatore,
+                gruppiGiocatore: [.init(riga: 1, colonna: 1, composizione: Self.composizioneLeggera)]))
             let griglia = stato.griglia
             var visitate: Set<Cella> = [Cella(riga: 1, colonna: 1)]
             var fronte = [Cella(riga: 1, colonna: 1)]
@@ -163,7 +172,8 @@ final class RegoleCampagnaTest: XCTestCase {
                            colonna: definizione.quartierGenerali.giocatore.colonna)
             let stato = try crea(ScenarioCampagna(
                 mappa: identificatore,
-                gruppiGiocatore: [.init(riga: qg.riga, colonna: qg.colonna)]))
+                gruppiGiocatore: [.init(riga: qg.riga, colonna: qg.colonna,
+                                        composizione: Self.composizioneLeggera)]))
             let vista = VistaCampagna(motore: motore, stato: stato, parte: .giocatore)
             let griglia = stato.griglia
 
@@ -202,8 +212,10 @@ final class RegoleCampagnaTest: XCTestCase {
         // Un secondo gruppo, collocato di fianco, può marciarvi dentro.
         var stato = try crea(ScenarioCampagna(
             mappa: "pianura_lunga",
-            gruppiGiocatore: [.init(riga: qg.riga, colonna: qg.colonna),
-                              .init(riga: vicina.riga, colonna: vicina.colonna - 1)]))
+            gruppiGiocatore: [.init(riga: qg.riga, colonna: qg.colonna,
+                                    composizione: Self.composizioneLeggera),
+                              .init(riga: vicina.riga, colonna: vicina.colonna - 1,
+                                    composizione: Self.composizioneLeggera)]))
         let primo = stato.gruppiOrdinati[0].id
         let secondo = stato.gruppiOrdinati[1].id
         let costo = motore.costoInGiorni(da: stato.gruppi[secondo]!.posizione, a: vicina, stato: stato)

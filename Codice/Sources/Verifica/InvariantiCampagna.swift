@@ -46,6 +46,15 @@ public struct SondaInvariantiCampagna: Sendable {
         /// Una revoca non ha lasciato il gruppo nella casella di partenza con la
         /// giornata spesa e senza marcia residua (01 §5.6.3.3, RDA-100).
         case revocaNonConforme(gruppo: Int)
+        // Invarianti della composizione e del volume (01 §5.6.0, §5.6.3).
+        /// Un gruppo senza reparti, o con un reparto a atomi non positivi: nessun
+        /// gruppo può essere vuoto (01 §5.6.0.2).
+        case gruppoVuoto(gruppo: Int)
+        /// Il volume riportato di un gruppo non è la somma di ciò che lo compone
+        /// (01 §5.6.3): il volume diverge dalla composizione. Il valore riportato
+        /// arriva dall'esterno, come la posizione visiva, così che una prova possa
+        /// darne uno divergente e accertare che la sonda se ne accorga.
+        case volumeIncoerente(gruppo: Int, riportato: Int, atteso: Int)
 
         /// Il codice della violazione, senza spazi: l'uscita del programma di
         /// verifica è dato per chi sviluppa e non testo di prodotto (05 §12.6),
@@ -73,6 +82,8 @@ public struct SondaInvariantiCampagna: Sendable {
             case .posizioneVisivaIncoerente(let g, let m, let a): return "posizione_visiva_incoerente:gruppo=\(g):mostrata=\(m):attesa=\(a)"
             case .gruppoInMarciaHaRicevutoOrdine(let g): return "gruppo_in_marcia_ordinato:gruppo=\(g)"
             case .revocaNonConforme(let g): return "revoca_non_conforme:gruppo=\(g)"
+            case .gruppoVuoto(let g): return "gruppo_vuoto:gruppo=\(g)"
+            case .volumeIncoerente(let g, let r, let a): return "volume_incoerente:gruppo=\(g):riportato=\(r):atteso=\(a)"
             }
         }
     }
@@ -104,6 +115,8 @@ public struct SondaInvariantiCampagna: Sendable {
         "posizione_visiva_incoerente",
         "gruppo_in_marcia_ordinato",
         "revoca_non_conforme",
+        "gruppo_vuoto",
+        "volume_incoerente",
     ]
 
     /// Il codice nudo, senza i valori: la parte prima dei due punti.
@@ -147,6 +160,12 @@ public struct SondaInvariantiCampagna: Sendable {
                     violazioni.append(.giorniMancantiFuoriIntervallo(
                         gruppo: gruppo.id.numero, mancanti: m.giorniMancanti, totali: m.giorniTotali))
                 }
+            }
+            // Nessun gruppo vuoto (01 §5.6.0.2): composizione non vuota e ogni reparto
+            // con atomi positivi. La fabbrica lo rende impossibile; la sonda lo
+            // sorveglia perché la divisione dell'unità successiva vi lavorerà sopra.
+            if gruppo.composizione.isEmpty || gruppo.composizione.contains(where: { $0.atomi <= 0 }) {
+                violazioni.append(.gruppoVuoto(gruppo: gruppo.id.numero))
             }
         }
         for casella in occupanti.keys.sorted() where occupanti[casella]! > 1 {
@@ -256,6 +275,34 @@ public struct SondaInvariantiCampagna: Sendable {
             if mostrata != attesa {
                 violazioni.append(.posizioneVisivaIncoerente(
                     gruppo: gruppo.id.numero, mostrata: mostrata, attesa: attesa))
+            }
+        }
+        return violazioni
+    }
+
+    // MARK: - Invariante del volume come somma della composizione
+
+    /// Che il volume RIPORTATO di ciascun gruppo coincida con la somma, sui reparti,
+    /// di atomi per `volume_per_atomo` (01 §5.6.3, §3.4.4). Come per la posizione
+    /// visiva, il valore riportato arriva dall'esterno — lo calcola chi lo usa, cioè
+    /// il Motore (`MotoreCampagna.volume`) — così che una prova possa darne uno
+    /// divergente e accertare che la sonda se ne accorga. La tabella `volumePerAtomo`
+    /// arriva anch'essa dall'esterno, perché la sonda è separata dai dati come dal
+    /// Motore. In produzione il volume è funzione pura della composizione e non può
+    /// divergere; l'invariante sorveglia che nessuna sede lo conservi come grandezza
+    /// autonoma.
+    public func controllaVolumi(stato: StatoCampagna,
+                                volumePerAtomo: [IdentificatoreDati: Int64],
+                                volumiRiportati: [IdGruppo: Int64]) -> [Violazione] {
+        var violazioni: [Violazione] = []
+        for gruppo in stato.gruppiOrdinati {
+            guard let riportato = volumiRiportati[gruppo.id] else { continue }
+            let atteso = gruppo.composizione.reduce(Int64(0)) { somma, reparto in
+                somma + Int64(reparto.atomi) * (volumePerAtomo[reparto.archetipo] ?? 0)
+            }
+            if riportato != atteso {
+                violazioni.append(.volumeIncoerente(gruppo: gruppo.id.numero,
+                                                    riportato: Int(riportato), atteso: Int(atteso)))
             }
         }
         return violazioni

@@ -61,6 +61,12 @@ public enum CaricatoreCampagna {
             throw ErroreDati(chiave: "errore.dati.costo_marcia_incoerente",
                              file: "marcia-campagna.json")
         }
+        // La soglia del volume è un divisore: almeno uno, o il costo dividerebbe per
+        // zero (01 §5.6.3.2). È provvisoria come i pesi, ma il minimo di uno è fisso.
+        guard marcia.sogliaVolumePerGiornoAggiuntivo >= 1 else {
+            throw ErroreDati(chiave: "errore.dati.costo_marcia_incoerente",
+                             file: "marcia-campagna.json")
+        }
         // I pesi confluiscono in una sola grandezza (01 §5.6.3.2) e nessun terreno o
         // strada può restare senza peso: un peso mancante sarebbe un fattore che si
         // somma in modo opaco, cioè per omissione. Si respinge la copia incompleta

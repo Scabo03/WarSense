@@ -160,8 +160,9 @@ final class TraduttoreCampagnaTest: XCTestCase {
         let motore = MotoreCampagna(valori: valori, valoriCampagna: valoriCampagna)
         var stato = try FabbricaCampagna.crea(
             scenario: ScenarioCampagna(mappa: "guado",
-                                       gruppiGiocatore: [.init(riga: 4, colonna: 2)]),
-            valori: valoriCampagna)
+                                       gruppiGiocatore: [.init(riga: 4, colonna: 2,
+                                           composizione: [.init(archetipo: "fanteria_leggera", atomi: 6)])]),
+            valori: valoriCampagna, archetipiNoti: Set(valori.archetipi.keys))
         let id = stato.gruppiOrdinati[0].id
         let (dopo, eventi) = motore.applica(.presidio(gruppo: id), parte: .giocatore, stato: stato)
         stato = dopo

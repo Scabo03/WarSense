@@ -2,26 +2,140 @@
  "campagna_piccola": {
   "mappa": "guado",
   "gruppi_giocatore": [
-   { "riga": 4, "colonna": 2 },
-   { "riga": 4, "colonna": 3 }
+   {
+    "riga": 4,
+    "colonna": 2,
+    "composizione": [
+     {
+      "archetipo": "fanteria_leggera",
+      "atomi": 6
+     }
+    ]
+   },
+   {
+    "riga": 4,
+    "colonna": 3,
+    "composizione": [
+     {
+      "archetipo": "fanteria_leggera",
+      "atomi": 18
+     },
+     {
+      "archetipo": "fanteria_pesante",
+      "atomi": 8
+     }
+    ]
+   }
   ]
  },
  "campagna_media": {
   "mappa": "istmo",
   "gruppi_giocatore": [
-   { "riga": 6, "colonna": 3 },
-   { "riga": 6, "colonna": 2 },
-   { "riga": 5, "colonna": 4 }
+   {
+    "riga": 6,
+    "colonna": 3,
+    "composizione": [
+     {
+      "archetipo": "fanteria_leggera",
+      "atomi": 6
+     }
+    ]
+   },
+   {
+    "riga": 6,
+    "colonna": 2,
+    "composizione": [
+     {
+      "archetipo": "fanteria_leggera",
+      "atomi": 18
+     },
+     {
+      "archetipo": "fanteria_pesante",
+      "atomi": 8
+     }
+    ]
+   },
+   {
+    "riga": 5,
+    "colonna": 4,
+    "composizione": [
+     {
+      "archetipo": "fanteria_pesante",
+      "atomi": 24
+     },
+     {
+      "archetipo": "cavalleria_manovrata",
+      "atomi": 12
+     }
+    ]
+   }
   ]
  },
  "campagna_grande": {
   "mappa": "pianura_lunga",
   "gruppi_giocatore": [
-   { "riga": 10, "colonna": 6 },
-   { "riga": 10, "colonna": 5 },
-   { "riga": 9, "colonna": 6 },
-   { "riga": 9, "colonna": 5 },
-   { "riga": 10, "colonna": 7 }
+   {
+    "riga": 10,
+    "colonna": 6,
+    "composizione": [
+     {
+      "archetipo": "fanteria_leggera",
+      "atomi": 6
+     }
+    ]
+   },
+   {
+    "riga": 10,
+    "colonna": 5,
+    "composizione": [
+     {
+      "archetipo": "fanteria_leggera",
+      "atomi": 18
+     },
+     {
+      "archetipo": "fanteria_pesante",
+      "atomi": 8
+     }
+    ]
+   },
+   {
+    "riga": 9,
+    "colonna": 6,
+    "composizione": [
+     {
+      "archetipo": "fanteria_pesante",
+      "atomi": 24
+     },
+     {
+      "archetipo": "cavalleria_manovrata",
+      "atomi": 12
+     }
+    ]
+   },
+   {
+    "riga": 9,
+    "colonna": 5,
+    "composizione": [
+     {
+      "archetipo": "fanteria_leggera",
+      "atomi": 6
+     }
+    ]
+   },
+   {
+    "riga": 10,
+    "colonna": 7,
+    "composizione": [
+     {
+      "archetipo": "fanteria_leggera",
+      "atomi": 18
+     },
+     {
+      "archetipo": "fanteria_pesante",
+      "atomi": 8
+     }
+    ]
+   }
   ]
  }
 }

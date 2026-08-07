@@ -146,16 +146,24 @@ public struct ValoriMarcia: Codable, Hashable, Sendable {
     public let pesoStradaArrivo: [String: Int]
     /// Il costo fisso aggiuntivo dell'attraversare la strettoia (01 §5.1.3, §5.6.3.2).
     public let costoStrettoia: Int
+    /// Il volume oltre il quale la colonna spende un giorno in più (01 §5.6.3.2,
+    /// quinto fattore): i giorni aggiuntivi sono il volume del gruppo diviso questa
+    /// soglia, per troncamento. È il coefficiente che lega volume e costo (01 §5.6.3:
+    /// «una colonna più voluminosa è più lunga e percorre meno strada»). PROVVISORIO
+    /// e da tarare giocando; almeno uno, o la divisione sarebbe per zero.
+    public let sogliaVolumePerGiornoAggiuntivo: Int
 
     public init(costoGiorniBase: Int, posizioniVisive: Int,
                 pesoTerrenoPartenza: [String: Int], pesoTerrenoArrivo: [String: Int],
-                pesoStradaArrivo: [String: Int], costoStrettoia: Int) {
+                pesoStradaArrivo: [String: Int], costoStrettoia: Int,
+                sogliaVolumePerGiornoAggiuntivo: Int) {
         self.costoGiorniBase = costoGiorniBase
         self.posizioniVisive = posizioniVisive
         self.pesoTerrenoPartenza = pesoTerrenoPartenza
         self.pesoTerrenoArrivo = pesoTerrenoArrivo
         self.pesoStradaArrivo = pesoStradaArrivo
         self.costoStrettoia = costoStrettoia
+        self.sogliaVolumePerGiornoAggiuntivo = sogliaVolumePerGiornoAggiuntivo
     }
 
     enum CodingKeys: String, CodingKey {
@@ -165,6 +173,7 @@ public struct ValoriMarcia: Codable, Hashable, Sendable {
         case pesoTerrenoArrivo = "peso_terreno_arrivo"
         case pesoStradaArrivo = "peso_strada_arrivo"
         case costoStrettoia = "costo_strettoia"
+        case sogliaVolumePerGiornoAggiuntivo = "soglia_volume_per_giorno_aggiuntivo"
     }
 }
 

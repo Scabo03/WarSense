@@ -76,18 +76,38 @@ public struct MotoreCampagna: Sendable {
         }
     }
 
+    // MARK: - Volume della colonna (01 §5.6.0, §5.6.3, §3.4.4)
+
+    /// Il volume complessivo di un gruppo: la somma, sui reparti, di atomi per
+    /// `volume_per_atomo` dell'archetipo. È la STESSA grandezza del volume di
+    /// battaglia (`MotoreBattaglia.volume(di sciame:)`, `atomi × volume_per_atomo`):
+    /// 01 §3.4.4 la dichiara «unica e stabile per archetipo», e qui si legge lo
+    /// stesso campo dell'archetipo. Non è mai un campo dello stato: derivarla dalla
+    /// composizione rende impossibile che diverga da ciò che compone il gruppo
+    /// (invariante «il volume è la somma di ciò che lo compone»). Gli archetipi sono
+    /// noti per costruzione, perché la fabbrica respinge lo scenario che ne nomini
+    /// uno ignoto; l'accesso forzato rispecchia `MotoreBattaglia`.
+    public func volume(di gruppo: Gruppo) -> Int64 {
+        gruppo.composizione.reduce(0) { somma, reparto in
+            somma + Int64(reparto.atomi) * valori.archetipi[reparto.archetipo]!.volumePerAtomo
+        }
+    }
+
     // MARK: - Costo in giorni dello scatto (01 §5.6.3.1, §5.6.3.2)
 
     /// I giorni necessari a entrare nella casella di arrivo venendo da quella di
     /// partenza. È UNA SOLA grandezza, come 01 §5.6.3.2 impone: vi confluiscono, per
     /// somma e senza regole separate che si sommino in modo opaco, il costo base, la
     /// natura della casella di partenza e quella di arrivo con pesi distinti, il tipo
-    /// di strada della casella di arrivo e il costo fisso della strettoia. Il VOLUME
-    /// della colonna, quinto fattore di 01 §5.6.3.2, non agisce ancora: il gruppo non
-    /// ha composizione in questa unità (`impatto-marcia-lunga.md` §1). La firma
-    /// riceve già lo stato e vi leggerà il volume quando la composizione esisterà,
-    /// senza spostare questo punto (RDA-75). Il costo non scende mai sotto uno, che
-    /// 00 §13.6 fissa per impedire lo scatto gratuito.
+    /// di strada della casella di arrivo, il costo fisso della strettoia e il VOLUME
+    /// della colonna (quinto fattore di 01 §5.6.3.2). Il volume è quello del gruppo
+    /// che occupa la casella di partenza — la colonna che marcia — letto dallo stato,
+    /// senza spostare il punto di calcolo (RDA-75, `impatto-marcia-lunga.md` §1 ora
+    /// superato): una colonna più voluminosa è più lunga e percorre meno strada in
+    /// una giornata (01 §5.6.3), sicché il suo contributo è POSITIVO e cresce col
+    /// volume. Se la casella di partenza non ha occupante il contributo è nullo: il
+    /// costo esiste anche per una casella libera (anteprime, banco). Il costo non
+    /// scende mai sotto uno, che 00 §13.6 fissa per impedire lo scatto gratuito.
     public func costoInGiorni(da partenza: Cella, a arrivo: Cella,
                               stato: StatoCampagna) -> Int {
         let m = valoriCampagna.marcia
@@ -96,6 +116,13 @@ public struct MotoreCampagna: Sendable {
         costo += m.pesoTerrenoArrivo[stato.mappa.terreno(di: arrivo).rawValue] ?? 0
         costo += m.pesoStradaArrivo[stato.mappa.strada(di: arrivo).rawValue] ?? 0
         if stato.mappa.strettoia == arrivo { costo += m.costoStrettoia }
+        // Il volume entra sulla MEDESIMA grandezza, per somma: giorni aggiuntivi pari
+        // al volume diviso la soglia (troncamento). Formula nel codice, coefficiente
+        // nei dati (00 §13.1): la soglia è provvisoria. Il contributo è monotòno nel
+        // volume e nullo per una colonna leggera sotto la soglia.
+        if let colonna = stato.occupante(di: partenza, parte: .giocatore) {
+            costo += Int(volume(di: colonna) / Int64(m.sogliaVolumePerGiornoAggiuntivo))
+        }
         return max(1, costo)
     }
 
