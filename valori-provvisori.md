@@ -109,7 +109,7 @@ Terreni, strade, strettoie e posizioni dei quartier generali delle tre mappe di 
 
 ### nomi-gruppi.json — CONTENUTO
 
-Le dodici chiavi dei nomi dei gruppi. Non sono valori: sono l'elenco chiuso e prevedibile che 01 §5.6.0.4 richiede. Il numero dodici è la sola scelta, ed è capienza, non taratura: nulla impedisce di allungarlo, e la validazione respinge un elenco più corto del numero di gruppi che uno scenario chiede.
+Le ventiquattro chiavi dei nomi dei gruppi (dodici con l'incarico 15, che introduce la divisione: ogni divisione consuma un nome, e i nomi non si riusano). Non sono valori: sono l'elenco chiuso e prevedibile che 01 §5.6.0.4 richiede. Il numero è capienza, non taratura: nulla impedisce di allungarlo, e la validazione respinge un elenco più corto del numero di gruppi che uno scenario chiede. Il tetto pratico che la lista impone al numero di gruppi CREATI è lo scostamento S16, in tensione con 01 §5.6.0.1.
 
 ### Scenari/Campagne/campagne.json — PARAMETRI DI MISURA, non valori di gioco
 
