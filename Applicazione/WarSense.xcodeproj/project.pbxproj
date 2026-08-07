@@ -23,6 +23,7 @@
 		78DBF35F0D2BCE57B8D29F25 /* CostruttoreAnnunciCampagna.swift in Sources */ = {isa = PBXBuildFile; fileRef = C50CAE1A5AEB350F4FEDAB36 /* CostruttoreAnnunciCampagna.swift */; };
 		7A5079BF5C38019EE9CE070D /* Segnali in Frameworks */ = {isa = PBXBuildFile; productRef = 1F88D1E30799930786B4DDD2 /* Segnali */; };
 		7E69C9F2DB0BBABC72260BBB /* AnnunciEFuocoTest.swift in Sources */ = {isa = PBXBuildFile; fileRef = 1C877A8D5733D587BE7B618F /* AnnunciEFuocoTest.swift */; };
+		873A5D26551D3035FC2D2BFE /* SimboliDegliArchetipiTest.swift in Sources */ = {isa = PBXBuildFile; fileRef = B3FD0402E55F3494E1F28DCF /* SimboliDegliArchetipiTest.swift */; };
 		873D9C045E99E55A19A8AC00 /* Servizi.swift in Sources */ = {isa = PBXBuildFile; fileRef = 47D2EC331332BE96EB5D410B /* Servizi.swift */; };
 		8C28A2B62F03F542DD08122D /* Contenuti in Frameworks */ = {isa = PBXBuildFile; productRef = 4EA3C58AA15BA2930E7F7E45 /* Contenuti */; };
 		939EB534A7DF2E8F28165724 /* SchermataMappaCampagna.swift in Sources */ = {isa = PBXBuildFile; fileRef = 33237A45EB1B4EBEA09B1769 /* SchermataMappaCampagna.swift */; };
@@ -91,6 +92,7 @@
 		95889945EEE20611E0341AC7 /* WarSenseUITest.xctest */ = {isa = PBXFileReference; includeInIndex = 0; lastKnownFileType = wrapper.cfbundle; path = WarSenseUITest.xctest; sourceTree = BUILT_PRODUCTS_DIR; };
 		9D136B104384C6AF309293B3 /* VistaACaselle.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = VistaACaselle.swift; sourceTree = "<group>"; };
 		9EF7773BD1ED816307203E97 /* PartitaCorrente.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = PartitaCorrente.swift; sourceTree = "<group>"; };
+		B3FD0402E55F3494E1F28DCF /* SimboliDegliArchetipiTest.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SimboliDegliArchetipiTest.swift; sourceTree = "<group>"; };
 		B61635E47EDED9D5E8A15EA1 /* Codice */ = {isa = PBXFileReference; lastKnownFileType = folder; name = Codice; path = ../Codice; sourceTree = SOURCE_ROOT; };
 		B7792DA00B9CCC289C68A7E6 /* Info.plist */ = {isa = PBXFileReference; lastKnownFileType = text.plist; path = Info.plist; sourceTree = "<group>"; };
 		C217410DA2BE88F4B1000D93 /* PorzioneVisibileTest.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = PorzioneVisibileTest.swift; sourceTree = "<group>"; };
@@ -200,6 +202,7 @@
 				03ACD38B8C2F68821502F3C4 /* RaggiungibilitaTest.swift */,
 				1BE339E6703B78CDC77E5B87 /* RegistroVisibileTest.swift */,
 				7088EBAC70470929FF7BA18A /* SessioniPerInterfacciaTest.swift */,
+				B3FD0402E55F3494E1F28DCF /* SimboliDegliArchetipiTest.swift */,
 				026CC99253672C0BE5244297 /* StabilitaDellaDisposizioneTest.swift */,
 				10A40D60A1907135F70F1FB4 /* ToccoDirettoTest.swift */,
 			);
@@ -349,6 +352,7 @@
 				F153F7238148016D1A99A85F /* RaggiungibilitaTest.swift in Sources */,
 				45C1B6E90486F2F6078B2B8B /* RegistroVisibileTest.swift in Sources */,
 				4F7ECFCC6A61E15D90A39997 /* SessioniPerInterfacciaTest.swift in Sources */,
+				873A5D26551D3035FC2D2BFE /* SimboliDegliArchetipiTest.swift in Sources */,
 				94A9A556DB6F6992ED60E383 /* StabilitaDellaDisposizioneTest.swift in Sources */,
 				09CFF70CB8EC19E916A3C7BA /* ToccoDirettoTest.swift in Sources */,
 			);

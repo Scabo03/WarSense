@@ -192,11 +192,16 @@ struct CostruttoreAnnunci {
         return parti.joined(separator: ", ")
     }
 
-    /// La sigla dell'archetipo, SEGNAPOSTO TESTUALE dei simboli grafici finché non
-    /// esistono (valori-provvisori.md). Decorazione della tessera, mai annunciata.
-    func siglaElementoDeck(indice: Int) -> String {
+    /// Il nome del simbolo grafico dell'archetipo, cioè l'identificatore dell'archetipo
+    /// stesso: ogni `<archetipo>.symbolset` in `Immagini.xcassets` porta il nome del
+    /// proprio archetipo (RDA-97). Decorazione visiva della tessera, mai annunciata;
+    /// non porta informazione da solo e non si distingue per il colore (00 §1.4). Per
+    /// un assetto misto varrà, quando il modello lo prevederà, il simbolo dell'archetipo
+    /// PREVALENTE con il segno di mistione (RDA-97): il nome qui restituito è già quello
+    /// dell'archetipo dell'elemento, che nel modello attuale è puro (un solo archetipo).
+    func nomeSimboloElementoDeck(indice: Int) -> String {
         guard let elemento = elementoDeck(indice) else { return "" }
-        return testi.frase("deck.sigla." + elemento.archetipo).testo
+        return elemento.archetipo
     }
 
     /// Gli atomi del reparto, per il quadratino della tessera. Il numero è già

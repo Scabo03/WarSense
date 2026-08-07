@@ -221,7 +221,7 @@ final class SchermataBattaglia: UIViewController {
             let esemplari = stato.deck[.giocatore]?[tessera.tag].esemplari ?? 0
             tessera.aggiorna(nome: costruttore.nomeElementoDeck(indice: tessera.tag),
                              valore: costruttore.valoreElementoDeck(indice: tessera.tag),
-                             sigla: costruttore.siglaElementoDeck(indice: tessera.tag),
+                             simbolo: UIImage(named: costruttore.nomeSimboloElementoDeck(indice: tessera.tag)),
                              atomi: costruttore.atomiElementoDeck(indice: tessera.tag),
                              volume: costruttore.volumeElementoDeck(indice: tessera.tag),
                              selezionata: stato.selezione[.giocatore] == tessera.tag,
@@ -548,6 +548,7 @@ final class SchermataBattaglia: UIViewController {
     /// con lo stesso corpo sui due piani (02 §2.11, RDA-78).
     var grigliaPerProva: VistaACaselle { vistaGriglia }
     var tesserePerProva: [TesseraDeck] { rigaDeck.arrangedSubviews.compactMap { $0 as? TesseraDeck } }
+    var costruttorePerProva: CostruttoreAnnunci? { costruttore }
 }
 
 extension SchermataBattaglia: UIScrollViewDelegate {

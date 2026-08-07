@@ -84,14 +84,19 @@ final class StabilitaDellaDisposizioneTest: XCTestCase {
                        + "e la disposizione si sposta sotto il dito")
     }
 
-    /// L'annuncio della tessera NON cambia col ridisegno a riquadro (02 §8.2, 00 §1.2):
-    /// la voce sente identità (etichetta) e valore in ordine fisso, esattamente come
-    /// prima. La sigla, il nome disegnato e i due quadratini sono DECORAZIONE ed
-    /// escono dall'albero accessibile; gli atomi e il volume DISEGNATI sono gli stessi
-    /// numeri che la voce annuncia — stessa informazione ai due piani, non un numero
-    /// ripetuto due volte all'ascolto.
+    /// L'annuncio della tessera NON cambia sostituendo la sigla testuale col simbolo
+    /// grafico (02 §8.2, 00 §1.2, RDA-97): la voce sente identità (etichetta) e valore
+    /// in ordine fisso, ESATTAMENTE ciò che il costruttore d'annunci produce — le
+    /// funzioni `nomeElementoDeck`/`valoreElementoDeck` non sono toccate dalla modifica.
+    /// Il simbolo, il nome disegnato e i due quadratini sono DECORAZIONE ed escono
+    /// dall'albero accessibile; gli atomi e il volume DISEGNATI sono gli stessi numeri
+    /// che la voce annuncia — stessa informazione ai due piani, non un numero ripetuto
+    /// due volte all'ascolto. Il simbolo non è testo: non può comparire nell'annuncio.
+    /// Confronto prima/dopo: l'etichetta e il valore della tessera coincidono con
+    /// l'uscita del costruttore, che è il canale d'annuncio invariato.
     func test_02_8_2_l_annuncio_della_tessera_non_cambia_col_ridisegno() async throws {
         let (schermata, _, _) = try await battagliaAperta()
+        let costruttore = try XCTUnwrap(schermata.costruttorePerProva)
         let tessere = schermata.tesserePerProva
         XCTAssertFalse(tessere.isEmpty, "il deck espone le proprie tessere")
         for tessera in tessere {
@@ -100,15 +105,20 @@ final class StabilitaDellaDisposizioneTest: XCTestCase {
             let etichetta = try XCTUnwrap(tessera.accessibilityLabel)
             XCTAssertFalse(etichetta.isEmpty, "la tessera annuncia la propria identità (02 §8.2)")
             let valore = try XCTUnwrap(tessera.accessibilityValue)
+            // L'annuncio è ESATTAMENTE quello del costruttore invariato (prima = dopo).
+            XCTAssertEqual(etichetta, costruttore.nomeElementoDeck(indice: tessera.tag),
+                           "l'etichetta annunciata è cambiata rispetto al costruttore (02 §8.2)")
+            XCTAssertEqual(valore, costruttore.valoreElementoDeck(indice: tessera.tag),
+                           "il valore annunciato è cambiato rispetto al costruttore (02 §8.2)")
             let atomi = try XCTUnwrap(tessera.atomiDisegnatiPerProva)
             let volume = try XCTUnwrap(tessera.volumeDisegnatoPerProva)
-            let sigla = try XCTUnwrap(tessera.siglaDisegnataPerProva)
             XCTAssertTrue(valore.contains(atomi),
                           "gli atomi disegnati (\(atomi)) non sono nell'annuncio «\(valore)» (00 §1.2)")
             XCTAssertTrue(valore.contains(volume),
                           "il volume disegnato (\(volume)) non è nell'annuncio «\(valore)» (00 §1.2)")
-            XCTAssertFalse(etichetta.contains(sigla) || valore.contains(sigla),
-                           "la sigla decorativa «\(sigla)» non deve essere annunciata")
+            // Il simbolo è decorazione: presente per chi vede, mai nell'annuncio.
+            XCTAssertNotNil(tessera.simboloDisegnatoPerProva,
+                            "la tessera disegna il simbolo dell'archetipo (RDA-97)")
         }
     }
 }

@@ -68,17 +68,10 @@
 "deck.selezionato" = "selezionato";
 "deck.rinforzo" = "rinforzo";
 "deck.elemento_indicazione" = "Riserva da schierare: attivala per selezionarla, poi conferma sulla cella di destinazione";
-/* Sigle dell'archetipo: SEGNAPOSTO TESTUALE dei simboli grafici della tessera del
-   deck, decorazione visiva mai annunciata (valori-provvisori.md). Provvisorie. */
-"deck.sigla.fanteria_leggera" = "FL";
-"deck.sigla.fanteria_pesante" = "FP";
-"deck.sigla.guardia_elite" = "GE";
-"deck.sigla.tiratori" = "TR";
-"deck.sigla.cavalleria_ricognizione" = "CR";
-"deck.sigla.cavalleria_manovrata" = "CM";
-"deck.sigla.piattaforma_trainata" = "PT";
-"deck.sigla.macchina_assedio" = "MA";
-"deck.sigla.macchina_tiro" = "MT";
+/* Le sigle dell'archetipo (deck.sigla.*) sono state RIMOSSE (RDA-97): il simbolo
+   grafico della tessera ha sostituito il segnaposto testuale. Il simbolo è
+   un'immagine (Immagini.xcassets/<archetipo>.symbolset), non un testo, e non ha
+   quindi chiave nei testi. */
 "pulsante.annulla" = "Annulla l'ultima operazione";
 "pulsante.azzera" = "Azzera lo schieramento del turno";
 "pulsante.fine_turno" = "Fine del turno";

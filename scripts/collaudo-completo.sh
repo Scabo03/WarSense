@@ -17,6 +17,11 @@ set -euo pipefail
 
 RADICE="$(cd "$(dirname "$0")/.." && pwd)"
 
+echo "== 0/3 Cancello dei simboli d'archetipo (biiezione archetipi <-> simboli, RDA-97) =="
+# Rifiuta prima di ogni altra cosa un archetipo senza simbolo o un simbolo orfano:
+# è più economico del collaudo intero e coglie il disallineamento alla radice.
+"$RADICE/scripts/verifica-simboli.sh"
+
 echo "== 1/3 Collaudo del pacchetto (Motore, Dati, Sessione, Segnali, Verifica, Confini) =="
 # Nessuna pipe: con `set -o pipefail` il fallimento si propaga comunque, ma senza
 # pipe l'uscita del collaudo arriva intera a chi legge.
