@@ -46,3 +46,17 @@ Le cinque voci che seguono nascono da errori commessi, non da principi astratti.
 ### Avvertenza su queste stesse voci
 
 Una regola scritta in un file di memoria è una PRESCRIZIONE, ed è la forma di protezione che in questo progetto viene disattesa con regolarità, mentre i controlli che rifiutano non lo sono mai — è il risultato che `esame-critico.md` ha misurato e il criterio da cui nascono i cancelli. Queste cinque voci valgono quindi come promemoria e non come garanzia. **Nessuna di esse va considerata un problema risolto**, e chi le legge non deve trattarle come tali: finché non esiste un controllo che rifiuti lo stato sbagliato, il problema è aperto e queste righe sono soltanto un appunto.
+
+---
+
+## Il versionamento: si spinge sempre (aggiunto il 2026-08-07, incarico 12)
+
+Nasce da un difetto durato dodici sessioni: si è committato e fuso sul ramo principale senza mai spingere sul server remoto, così che il codice dietro le build distribuite su TestFlight è esistito soltanto sulla macchina locale. La regola qui sotto vale da ora in ogni sessione, senza eccezioni.
+
+1. **Si lavora sul ramo dedicato**, si committa, si fonde sul ramo `principale` SOLTANTO ciò che è completo e verde.
+2. **Si spinge sempre**, tanto il ramo `principale` quanto il ramo dedicato (`git push origin principale` e `git push origin <ramo-dedicato>`). La spinta NON è facoltativa e NON si rinvia alla sessione successiva.
+3. **Se un caricamento su TestFlight è avvenuto, la spinta di `principale` è obbligatoria prima di chiudere la sessione**: la build distribuita deve essere sempre risalibile al codice che l'ha prodotta, e il remoto è l'unica copia che sopravvive al guasto della macchina.
+4. **I rami già fusi si cancellano quando non servono più** (`git branch -d`, che rifiuta i non fusi). Un ramo che contenga anche un solo commit non presente su `principale` non si cancella.
+5. Lo stato finale di ogni sessione dichiara, con i comandi che lo producono, che `principale` locale e remoto coincidono (`git rev-parse principale` uguale a `git rev-parse origin/principale`).
+
+Questa è una prescrizione, e vale l'avvertenza qui sopra: finché non esiste un controllo che rifiuti lo stato sbagliato non è una garanzia. Il controllo esiste ed è realizzato dall'incarico 12: `scripts/carica-testflight.sh` rifiuta il caricamento, come primo controllo preventivo, quando `principale` locale è avanti rispetto a `origin/principale` — una build non si carica se il suo codice non è già sul remoto. Il rifiuto è stato visto fallire di proposito (uscita nel resoconto dell'incarico 12).

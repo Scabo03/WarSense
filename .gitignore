@@ -4,6 +4,7 @@ DerivedData/
 Applicazione/build/
 *.xcarchive
 *.ipa
+*.xcresult
 xcuserdata/
 *.xcuserstate
 .DS_Store
@@ -11,6 +12,10 @@ xcuserdata/
 *.p8
 *.env
 *.mobileprovision
+*.p12
+*.pem
+*.cer
+*.key
 private_keys/
 
 # Esito runtime della corsa separata delle sessioni complete (non versionato)

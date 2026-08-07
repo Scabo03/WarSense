@@ -5,6 +5,26 @@
 set -euo pipefail
 
 RADICE="$(cd "$(dirname "$0")/.." && pwd)"
+
+# ============================================================================
+# CONTROLLO PREVENTIVO DEL VERSIONAMENTO — PRIMA DI QUALUNQUE ALTRA OPERAZIONE.
+# Una build non si carica se il suo codice non è già sul server remoto: la
+# build distribuita deve sempre essere risalibile al codice che l'ha prodotta,
+# e il remoto è l'unica copia che sopravvive al guasto della macchina locale
+# (incarico 12, forma-dei-resoconti.md «Il versionamento: si spinge sempre»).
+# Rende il rifiuto un fatto e non una prescrizione. È puramente locale: non
+# chiede credenziali, e nessuna variabile d'ambiente lo salta.
+# ============================================================================
+echo "== Controllo preventivo: il ramo principale è spinto sul remoto =="
+git -C "$RADICE" fetch origin --quiet || echo "  avviso: fetch del remoto fallito; confronto con l'ultimo stato noto"
+NONSPINTI=$(git -C "$RADICE" rev-list --count origin/principale..HEAD 2>/dev/null || echo 999)
+if [ "$NONSPINTI" != "0" ]; then
+  echo "RIFIUTATO: $NONSPINTI commit locali non sono su origin/principale."
+  echo "  La build sarebbe prodotta da codice non spinto. Esegui 'git push origin principale' prima di caricare."
+  exit 1
+fi
+echo "  principale locale e origin/principale coincidono: si procede"
+
 CONFIG="${WARSENSE_CONFIG:-$HOME/Developer/private_keys/scabo_deploy.env}"
 source "$CONFIG"
 export APP_STORE_CONNECT_API_KEY_ID APP_STORE_CONNECT_API_KEY_ISSUER_ID APP_STORE_CONNECT_API_KEY_PATH
