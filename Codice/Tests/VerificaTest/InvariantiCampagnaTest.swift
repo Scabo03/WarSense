@@ -655,6 +655,23 @@ final class InvariantiCampagnaTest: XCTestCase {
                                                             .giornataAperta(giorno: base.giorno + 1)],
                                        adiacenti: griglia.adiacenti)
             }),
+            ("conoscenza_falsa", {
+                // Un'età dell'informazione negativa: conoscenza dal futuro (§12).
+                sonda.controlla(stato: statoCon { s in
+                    s.conoscenza[.giocatore] = [Cella(riga: 1, colonna: 1): -1]
+                })
+            }),
+            ("conoscenza_regredita_senza_tempo", {
+                // La memoria di conoscenza cambia senza che una giornata si chiuda: un
+                // ricordo starebbe retrocedendo senza il passare del tempo (§5.3, §5.6.11).
+                var prima = base
+                prima.conoscenza[.giocatore] = [Cella(riga: 2, colonna: 2): 0]
+                var dopo = prima
+                dopo.conoscenza[.giocatore] = [Cella(riga: 2, colonna: 2): 5]
+                dopo.gruppi[ids[0]]!.azioneSpesa = true
+                return sonda.controlla(prima: prima, comando: .presidio(gruppo: ids[0]),
+                                       dopo: dopo, eventi: [], adiacenti: griglia.adiacenti)
+            }),
         ]
     }
 

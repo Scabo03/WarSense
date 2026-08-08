@@ -304,6 +304,7 @@
 
 /* Errori dei dati di campagna (05 §7.8): chiavi risolte sulla copia di fabbrica. */
 "errore.dati.costo_marcia_incoerente" = "I valori della marcia sono incoerenti: costo o posizioni sotto il minimo, o pesi di terreno o strada mancanti";
+"errore.dati.conoscenza_incoerente" = "I valori della conoscenza sono incoerenti: raggio di osservazione negativo o soglia di decadimento sotto uno";
 "errore.dati.formato_ignoto" = "Formato di mappa ignoto in %@: %@";
 "errore.dati.casella_fuori_mappa" = "Casella fuori dai confini in %@ alla voce %@";
 "errore.dati.casella_ripetuta" = "Casella dichiarata due volte in %@ alla voce %@";

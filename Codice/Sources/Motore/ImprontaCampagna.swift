@@ -107,6 +107,17 @@ extension StatoCampagna {
         for casella in forzeNemiche.sorted() { casella.codifica(in: &c) }
         c.intero(Int64(struttureDiRifornimento.count))
         for casella in struttureDiRifornimento.sorted() { casella.codifica(in: &c) }
+        // La memoria di conoscenza, ordinata per parte e per casella: due partite con
+        // ricordi diversi non sono lo stesso stato (l'età dell'informazione conta).
+        for parte in Parte.allCases {
+            let memoria = conoscenza[parte] ?? [:]
+            c.testo(parte.rawValue)
+            c.intero(Int64(memoria.count))
+            for casella in memoria.keys.sorted() {
+                casella.codifica(in: &c)
+                c.intero(Int64(memoria[casella]!))
+            }
+        }
         return SHA256.improntaEsadecimale(c.byte)
     }
 }

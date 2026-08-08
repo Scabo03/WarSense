@@ -38,6 +38,9 @@ public struct VistaCampagna: Sendable {
     /// RDA-63), terreno, strada, note di zona. Le voci che non si applicano si
     /// saltano senza lasciare traccia; i tagli di verbosità partono dalla coda.
     public enum VoceDiCasella: Hashable, Sendable {
+        /// Lo stato di conoscenza, PRIMA voce dopo la testa fissa se diverso da
+        /// confermato (02 §3.8.1): dice quanto è corrente ciò che segue.
+        case conoscenza(StatoConoscenza)
         case occupante(Gruppo)
         case rifornimento(StatoRifornimento)
         case quartierGenerale(Parte)
@@ -49,6 +52,10 @@ public struct VistaCampagna: Sendable {
 
     public func vociDiCasella(_ casella: Cella) -> [VoceDiCasella] {
         var voci: [VoceDiCasella] = []
+        // Lo stato di conoscenza viene PER PRIMO dopo la testa fissa, se diverso da
+        // confermato (02 §3.8.1): dichiara quanto è corrente ciò che la casella dice.
+        let statoConoscenza = motore.conoscenza(di: casella, per: parte, stato: stato)
+        if statoConoscenza.siAnnuncia { voci.append(.conoscenza(statoConoscenza)) }
         if let gruppo = occupante(di: casella) {
             voci.append(.occupante(gruppo))
             // Il rifornimento è la PRIMA anomalia dell'occupante (02 §3.8.1): un gruppo

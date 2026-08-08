@@ -219,6 +219,62 @@ public struct MotoreCampagna: Sendable {
         return nil
     }
 
+    // MARK: - Conoscenza incompleta (01 §5.3)
+
+    /// Vero se la casella è OSSERVATA ORA da una parte: entro il raggio di osservazione
+    /// (distanza ortogonale, 03 §4.8.2) da una delle sue formazioni. È la conoscenza
+    /// corrente, derivata dalle posizioni; il ricordo che invecchia sta nello stato.
+    public func osservata(_ cella: Cella, da parte: Parte, stato: StatoCampagna) -> Bool {
+        let raggio = valoriCampagna.conoscenza.raggioOsservazione
+        return stato.gruppi.values.contains {
+            $0.parte == parte && stato.griglia.distanza($0.posizione, cella) <= raggio
+        }
+    }
+
+    /// Le caselle che una parte osserva ora: l'insieme, per chi deve percorrerlo tutto
+    /// (l'invecchiamento di fine giornata e i rotori). Deriva dalle posizioni.
+    public func caselleOsservate(da parte: Parte, stato: StatoCampagna) -> Set<Cella> {
+        let raggio = valoriCampagna.conoscenza.raggioOsservazione
+        var viste = Set<Cella>()
+        for gruppo in stato.gruppi.values where gruppo.parte == parte {
+            let p = gruppo.posizione
+            for dr in -raggio...raggio {
+                for dc in -raggio...raggio where abs(dr) + abs(dc) <= raggio {
+                    let cella = Cella(riga: p.riga + dr, colonna: p.colonna + dc)
+                    if stato.griglia.contiene(cella) { viste.insert(cella) }
+                }
+            }
+        }
+        return viste
+    }
+
+    /// Lo stato di conoscenza di una casella per una parte (01 §5.3): confermato se
+    /// osservato ora, altrimenti derivato dal ricordo che invecchia. Il gioco non
+    /// dichiara mai il falso — la mancanza di conoscenza è inesplorato, non menzogna
+    /// (01 §12). Il presunto nasce solo dalla deduzione dell'itinerario (01 §5.10.1,
+    /// blocco successivo) e non da qui.
+    public func conoscenza(di cella: Cella, per parte: Parte, stato: StatoCampagna) -> StatoConoscenza {
+        if osservata(cella, da: parte, stato: stato) { return .confermato }
+        return StatoConoscenza.da(eta: stato.conoscenza[parte]?[cella],
+                                  sogliaConfermato: valoriCampagna.conoscenza.sogliaConfermatoInAvvistato)
+    }
+
+    /// L'invecchiamento e il decadimento della conoscenza (01 §5.6.11, §5.3): passo di
+    /// fine giornata. Per ciascuna parte, ogni ricordo invecchia di un turno; poi le
+    /// caselle osservate a fine giornata si riportano a zero, appena viste. Non produce
+    /// eventi: ciò che il giocatore apprende passa dagli stati di conoscenza e dal
+    /// registro, mai da un annuncio dell'invecchiamento (01 §5.6.11). Un ricordo non
+    /// retrocede mai da confermato senza il passare del tempo (invariante).
+    func invecchiaLaConoscenza(_ stato: inout StatoCampagna) -> [EventoCampagna] {
+        for parte in [Parte.giocatore, .avversario] {
+            var memoria = stato.conoscenza[parte] ?? [:]
+            for cella in memoria.keys { memoria[cella]! += 1 }
+            for cella in caselleOsservate(da: parte, stato: stato) { memoria[cella] = 0 }
+            stato.conoscenza[parte] = memoria
+        }
+        return []
+    }
+
     // MARK: - Costo in giorni dello scatto (01 §5.6.3.1, §5.6.3.2)
 
     /// I giorni necessari a entrare nella casella di arrivo venendo da quella di
@@ -435,7 +491,7 @@ public struct MotoreCampagna: Sendable {
         // Passo successivo (unità futura): scattaLeImboscate(&stato)
         eventi.append(contentsOf: valutaITagliDiRifornimento(&stato))
         // Passo successivo (unità futura): completaLeCostruzioni(&stato)
-        // Passo successivo (unità futura): invecchiaLaConoscenza(&stato)
+        eventi.append(contentsOf: invecchiaLaConoscenza(&stato))
         return eventi
     }
 

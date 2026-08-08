@@ -80,6 +80,19 @@ public enum CaricatoreCampagna {
                              file: "marcia-campagna.json")
         }
 
+        // La conoscenza incompleta (01 §5.3): il raggio di osservazione è almeno zero
+        // (zero = solo la propria casella) e la soglia di decadimento almeno uno, o il
+        // confermato decadrebbe nello stesso turno in cui si osserva (03 §4.8.1).
+        let conoscenza = try leggi(ValoriConoscenza.self, "conoscenza-campagna.json")
+        guard conoscenza.raggioOsservazione >= 0 else {
+            throw ErroreDati(chiave: "errore.dati.conoscenza_incoerente",
+                             file: "conoscenza-campagna.json")
+        }
+        guard conoscenza.sogliaConfermatoInAvvistato >= 1 else {
+            throw ErroreDati(chiave: "errore.dati.conoscenza_incoerente",
+                             file: "conoscenza-campagna.json")
+        }
+
         // Le mappe sono un albero di file: ciascuna è contenuto a sé (05 §7.6).
         let cartellaDelleMappe = cartella.appendingPathComponent(cartellaMappe)
         let contenuti = (try? FileManager.default.contentsOfDirectory(
@@ -100,7 +113,7 @@ public enum CaricatoreCampagna {
         }
 
         return ValoriCampagna(formatiMappa: formati, mappe: mappe,
-                              nomiGruppi: nomi.chiavi, marcia: marcia)
+                              nomiGruppi: nomi.chiavi, marcia: marcia, conoscenza: conoscenza)
     }
 
     /// Coerenza di una mappa (05 §7.8): formato noto, caselle dentro i confini e

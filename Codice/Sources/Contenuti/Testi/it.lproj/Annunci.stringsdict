@@ -56,6 +56,17 @@
       <key>other</key><string>%d giorni al termine</string>
     </dict>
   </dict>
+  <key>conoscenza.avvistato</key>
+  <dict>
+    <key>NSStringLocalizedFormatKey</key><string>avvistato, %#@turni@</string>
+    <key>turni</key>
+    <dict>
+      <key>NSStringFormatSpecTypeKey</key><string>NSStringPluralRuleType</string>
+      <key>NSStringFormatValueTypeKey</key><string>d</string>
+      <key>one</key><string>%d turno fa</string>
+      <key>other</key><string>%d turni fa</string>
+    </dict>
+  </dict>
   <key>casella.disponibile</key>
   <dict>
     <key>NSStringLocalizedFormatKey</key><string>raggiungibile in %#@giorni@</string>

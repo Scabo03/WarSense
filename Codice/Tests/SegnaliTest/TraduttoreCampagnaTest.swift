@@ -136,6 +136,13 @@ final class TraduttoreCampagnaTest: XCTestCase {
             XCTAssertTrue(testi.esiste(stato.chiaveTesto, tavola: "Vocabolario"),
                           "manca il termine dello stato di rifornimento \(stato.chiaveTesto)")
         }
+        // Gli stati di conoscenza (01 §5.3, 02 §4.2): «avvistato» porta i turni e vive
+        // nel .stringsdict degli Annunci; gli altri sono termini semplici.
+        for stato in StatoConoscenza.casiDiRiferimento {
+            let tavola = { if case .avvistato = stato { return "Annunci" } else { return "Vocabolario" } }()
+            XCTAssertTrue(testi.esiste(stato.chiaveTesto, tavola: tavola),
+                          "manca il termine dello stato di conoscenza \(stato.chiaveTesto)")
+        }
         for terreno in TerrenoCasella.allCases where terreno != .aperto {
             XCTAssertTrue(testi.esiste("terreno." + terreno.rawValue, tavola: "Vocabolario"),
                           "manca il termine del terreno \(terreno.rawValue)")

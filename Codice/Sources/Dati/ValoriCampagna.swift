@@ -177,19 +177,46 @@ public struct ValoriMarcia: Codable, Hashable, Sendable {
     }
 }
 
+/// I valori della conoscenza incompleta (01 §5.3, 03 §4.8): PROVVISORI. Il raggio di
+/// osservazione — quante caselle attorno a una formazione risultano confermate — e la
+/// soglia oltre la quale il confermato decade in avvistato (03 §4.8.1). I documenti
+/// dichiarano queste grandezze e ne rimandano il numero alla realizzazione; entrambe
+/// sono qui col contrassegno di provvisorietà, da tarare giocando.
+public struct ValoriConoscenza: Codable, Hashable, Sendable {
+    /// Il raggio di osservazione in caselle (distanza ortogonale): zero = solo la
+    /// casella della formazione; uno = anche le adiacenti. PROVVISORIO (03 §4.8.2).
+    public let raggioOsservazione: Int
+    /// I turni dopo i quali il confermato decade in avvistato: il decadimento deve
+    /// mordere, perché la certezza resti rara (03 §4.8.1). PROVVISORIO; almeno uno.
+    public let sogliaConfermatoInAvvistato: Int
+
+    public init(raggioOsservazione: Int, sogliaConfermatoInAvvistato: Int) {
+        self.raggioOsservazione = raggioOsservazione
+        self.sogliaConfermatoInAvvistato = sogliaConfermatoInAvvistato
+    }
+
+    enum CodingKeys: String, CodingKey {
+        case raggioOsservazione = "raggio_osservazione"
+        case sogliaConfermatoInAvvistato = "soglia_confermato_in_avvistato"
+    }
+}
+
 /// I valori del piano di campagna caricati e validati.
 public struct ValoriCampagna: Sendable {
     public let formatiMappa: [IdentificatoreDati: FormatoMappa]
     public let mappe: [IdentificatoreDati: DefinizioneMappa]
     public let nomiGruppi: [IdentificatoreDati]
     public let marcia: ValoriMarcia
+    public let conoscenza: ValoriConoscenza
 
     public init(formatiMappa: [IdentificatoreDati: FormatoMappa],
                 mappe: [IdentificatoreDati: DefinizioneMappa],
-                nomiGruppi: [IdentificatoreDati], marcia: ValoriMarcia) {
+                nomiGruppi: [IdentificatoreDati], marcia: ValoriMarcia,
+                conoscenza: ValoriConoscenza) {
         self.formatiMappa = formatiMappa
         self.mappe = mappe
         self.nomiGruppi = nomiGruppi
         self.marcia = marcia
+        self.conoscenza = conoscenza
     }
 }

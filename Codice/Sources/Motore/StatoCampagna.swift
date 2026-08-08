@@ -195,6 +195,58 @@ public enum StatoRifornimento: Hashable, Sendable {
     ]
 }
 
+/// Lo stato di conoscenza di una casella per una parte (01 §5.3, 02 §4.2): il
+/// vocabolario chiuso — inesplorato, presunto, avvistato con i turni trascorsi,
+/// confermato — esiste già come termine (`conoscenza.*`) e questa unità lo rende
+/// esistente nel gioco senza ampliarlo. Il gioco non dichiara MAI il falso (01 §12):
+/// questi stati descrivono che cosa una parte SA, e la mancanza di conoscenza non è
+/// una menzogna — un gruppo appostato non è individuato perché la sua casella non è
+/// confermata, non perché si sia mentito sul suo stato (01 §5.11.1).
+///
+/// Non è un campo grezzo dello stato: si DERIVA dall'età dell'informazione — i turni
+/// trascorsi dall'ultima osservazione — con `da(eta:sogliaConfermato:)`. Il `presunto`
+/// nasce solo dalla deduzione dell'itinerario (01 §5.10.1) ed è materia del blocco
+/// della ricognizione: qui non si produce, ma il termine esiste per l'annuncio.
+public enum StatoConoscenza: Hashable, Sendable {
+    case inesplorato
+    case presunto
+    /// «avvistato» seguito dai turni trascorsi dall'ultima osservazione (02 §4.2).
+    case avvistato(turni: Int)
+    case confermato
+
+    /// La chiave del termine chiuso già riservato (02 §4.2). «avvistato» porta i turni
+    /// e passa dagli Annunci col plurale di sistema; gli altri sono termini semplici.
+    public var chiaveTesto: String {
+        switch self {
+        case .inesplorato: return "conoscenza.inesplorato"
+        case .presunto: return "conoscenza.presunto"
+        case .avvistato: return "conoscenza.avvistato"
+        case .confermato: return "conoscenza.confermato"
+        }
+    }
+
+    /// Il CONFERMATO è la condizione ordinaria di ciò su cui si ha certezza e NON si
+    /// annuncia (02 §3.8.1: lo stato di conoscenza si dichiara «se diverso da
+    /// confermato»); gli altri tre si annunciano, in testa alla casella.
+    public var siAnnuncia: Bool {
+        if case .confermato = self { return false }
+        return true
+    }
+
+    /// Deriva lo stato dall'ETÀ dell'informazione (turni dall'ultima osservazione) e
+    /// dalla soglia oltre la quale il confermato decade in avvistato (03 §4.8.1).
+    /// L'assenza di età significa mai osservata: inesplorato. Il presunto, che non
+    /// dipende dall'età, non nasce da qui (01 §5.10.1, blocco successivo).
+    public static func da(eta: Int?, sogliaConfermato: Int) -> StatoConoscenza {
+        guard let eta else { return .inesplorato }
+        return eta < sogliaConfermato ? .confermato : .avvistato(turni: eta)
+    }
+
+    public static let casiDiRiferimento: [StatoConoscenza] = [
+        .inesplorato, .presunto, .avvistato(turni: 0), .confermato,
+    ]
+}
+
 /// I termini chiusi degli stati di un gruppo realizzati in questa unità
 /// (02 §4.4.5: «in attesa», «ha agito», «in marcia» con i giorni mancanti). Gli
 /// altri termini dell'insieme — in agguato, scatto disponibile, e gli stati di
@@ -355,16 +407,27 @@ public struct StatoCampagna: Hashable, Codable, Sendable {
     /// questo è il minimo per rendere provabile la zona di rifornimento, dato dello
     /// scenario, non l'opera. In gioco reale è vuoto.
     public var struttureDiRifornimento: Set<Cella>
+    /// La MEMORIA di conoscenza di ciascuna parte: per ogni casella già osservata,
+    /// i turni trascorsi dall'ultima osservazione (01 §5.3). L'assenza di una casella
+    /// significa mai osservata (inesplorato). L'osservazione CORRENTE — ciò che una
+    /// formazione vede ora attorno a sé — non sta qui ma si deriva dalle posizioni
+    /// (`MotoreCampagna.conoscenza`), e questa mappa conserva solo il ricordo che
+    /// invecchia a ogni fine giornata (`invecchiaLaConoscenza`). Non è nel giornale:
+    /// si ricostruisce rigiocando, sicché non tocca lo schema; entra però nell'impronta,
+    /// perché due partite con memorie diverse non sono lo stesso stato.
+    public var conoscenza: [Parte: [Cella: Int]]
 
     public init(mappa: MappaCampagna, giorno: Int, gruppi: [IdGruppo: Gruppo],
                 prossimoIdGruppo: Int, prossimoIndiceNome: Int,
                 registro: [VoceRegistro], prossimoNumeroVoce: Int,
-                forzeNemiche: Set<Cella> = [], struttureDiRifornimento: Set<Cella> = []) {
+                forzeNemiche: Set<Cella> = [], struttureDiRifornimento: Set<Cella> = [],
+                conoscenza: [Parte: [Cella: Int]] = [:]) {
         self.mappa = mappa; self.giorno = giorno; self.gruppi = gruppi
         self.prossimoIdGruppo = prossimoIdGruppo
         self.prossimoIndiceNome = prossimoIndiceNome
         self.registro = registro; self.prossimoNumeroVoce = prossimoNumeroVoce
         self.forzeNemiche = forzeNemiche; self.struttureDiRifornimento = struttureDiRifornimento
+        self.conoscenza = conoscenza
     }
 
     public var griglia: GrigliaCampagna { mappa.griglia }

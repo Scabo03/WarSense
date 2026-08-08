@@ -83,6 +83,15 @@ public struct SondaInvariantiCampagna: Sendable {
         /// in una delle sue caselle alle spalle: il taglio dipende SOLO da quelle
         /// (01 §5.2.2.2). La sonda ricava le caselle per conto proprio.
         case taglioDaCasellaNonPrescritta(gruppo: Int)
+        // Invarianti della conoscenza incompleta (01 §5.3, §12).
+        /// La memoria di conoscenza è cambiata senza che una giornata si chiudesse: un
+        /// ricordo non retrocede mai da confermato se non col passare del tempo, e il
+        /// tempo passa solo alla chiusura della giornata (01 §5.3, §5.6.11).
+        case conoscenzaRegreditaSenzaTempo(parte: String)
+        /// Un'età dell'informazione negativa: sarebbe conoscenza dal futuro, cioè il
+        /// gioco che dichiara il falso su uno stato di conoscenza (01 §12), il che non
+        /// è mai ammesso.
+        case conoscenzaFalsa(parte: String, riga: Int, colonna: Int)
 
         /// Il codice della violazione, senza spazi: l'uscita del programma di
         /// verifica è dato per chi sviluppa e non testo di prodotto (05 §12.6),
@@ -119,6 +128,8 @@ public struct SondaInvariantiCampagna: Sendable {
             case .sostaElusaMarciando(let g): return "sosta_elusa_marciando:gruppo=\(g)"
             case .zonaTagliata(let g): return "zona_tagliata:gruppo=\(g)"
             case .taglioDaCasellaNonPrescritta(let g): return "taglio_da_casella_non_prescritta:gruppo=\(g)"
+            case .conoscenzaRegreditaSenzaTempo(let p): return "conoscenza_regredita_senza_tempo:parte=\(p)"
+            case .conoscenzaFalsa(let p, let r, let c): return "conoscenza_falsa:parte=\(p):riga=\(r):casella=\(c)"
             }
         }
     }
@@ -159,6 +170,8 @@ public struct SondaInvariantiCampagna: Sendable {
         "sosta_elusa_marciando",
         "zona_tagliata",
         "taglio_da_casella_non_prescritta",
+        "conoscenza_regredita_senza_tempo",
+        "conoscenza_falsa",
     ]
 
     /// Il codice nudo, senza i valori: la parte prima dei due punti.
@@ -231,6 +244,14 @@ public struct SondaInvariantiCampagna: Sendable {
         for voce in stato.registro {
             if voce.giorno < precedente { violazioni.append(.registroFuoriOrdine(voce: voce.numero)) }
             precedente = voce.giorno
+        }
+        // La memoria di conoscenza non porta mai un'età negativa: un'età è i turni
+        // trascorsi dall'ultima osservazione, che non può essere il futuro (01 §12).
+        for parte in Parte.allCases {
+            for (cella, eta) in stato.conoscenza[parte] ?? [:] where eta < 0 {
+                violazioni.append(.conoscenzaFalsa(parte: parte.rawValue,
+                                                   riga: cella.riga, colonna: cella.colonna))
+            }
         }
         return violazioni
     }
@@ -367,6 +388,12 @@ public struct SondaInvariantiCampagna: Sendable {
                         violazioni.append(.gruppoEstraneoHaAgito(gruppo: gruppo.id.numero))
                     }
                 }
+            }
+            // La memoria di conoscenza invecchia SOLO alla chiusura della giornata
+            // (01 §5.6.11): senza chiusura non deve cambiare, o un ricordo starebbe
+            // retrocedendo da confermato senza il passare del tempo (01 §5.3).
+            for parte in Parte.allCases where (dopo.conoscenza[parte] ?? [:]) != (prima.conoscenza[parte] ?? [:]) {
+                violazioni.append(.conoscenzaRegreditaSenzaTempo(parte: parte.rawValue))
             }
         }
         return violazioni

@@ -85,7 +85,7 @@ struct CostruttoreAnnunciCampagna {
         for voce in voci {
             let eTesta: Bool
             switch voce {
-            case .occupante, .rifornimento: eTesta = true
+            case .conoscenza, .occupante, .rifornimento: eTesta = true
             default: eTesta = false
             }
             if !eTesta, verbosita == .sintetico { break }
@@ -102,6 +102,13 @@ struct CostruttoreAnnunciCampagna {
     /// La frase di una voce di casella. Esaustiva per costruzione.
     private func frase(di voce: VistaCampagna.VoceDiCasella) -> String {
         switch voce {
+        case .conoscenza(let stato):
+            // «avvistato» porta i turni trascorsi col plurale di sistema (02 §4.2);
+            // gli altri stati sono termini chiusi semplici del vocabolario.
+            if case .avvistato(let turni) = stato {
+                return testi.frase(stato.chiaveTesto, turni).testo
+            }
+            return testi.termine(stato.chiaveTesto).testo
         case .occupante(let gruppo):
             return testi.frase("casella.occupante_proprio", nomeGruppo(gruppo),
                                fraseStato(gruppo.statoDichiarato)).testo
@@ -130,6 +137,13 @@ struct CostruttoreAnnunciCampagna {
     /// frase, presa dalla medesima enumerazione e quindi mai in ritardo su di essa.
     private func segno(di voce: VistaCampagna.VoceDiCasella) -> String? {
         switch voce {
+        case .conoscenza(let stato):
+            switch stato {
+            case .inesplorato: return "?"
+            case .presunto: return "~"
+            case .avvistato: return "'"
+            case .confermato: return nil
+            }
         case .occupante(let gruppo): return inizialeGruppo(gruppo)
         case .rifornimento(let rifornimento):
             switch rifornimento {
