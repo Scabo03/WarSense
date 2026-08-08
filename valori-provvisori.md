@@ -108,6 +108,15 @@ L'incarico 16 realizza la catena, il taglio, le zone, l'autonomia e la sosta (01
 
 La versione dei valori NON sale (resta 0.9.0): nessun file di `Contenuti/Valori` cambia, e una campagna in corso, riaperta con questa build, si comporta ESATTAMENTE come prima, perché in gioco reale `forzeNemiche` e `struttureDiRifornimento` sono vuote (l'avversario e le opere non sono costruiti) e nessun gruppo risulta mai tagliato. Lo schema del giornale resta 4 e i salvataggi restano compatibili (RDA-107). La regola del titolare è rispettata: le versioni non si toccano di propria iniziativa, sale solo il numero di build.
 
+### conoscenza-campagna.json — PROVVISORI (incarico 17, blocco 1)
+
+Gli stati di conoscenza (01 §5.3, RDA-110). Due numeri, entrambi dichiarati e rimandati dal documento 03 alla realizzazione, ora introdotti col contrassegno di provvisorietà:
+
+- `raggio_osservazione` (1): il raggio in caselle (distanza ortogonale) entro cui una formazione conferma la conoscenza — uno significa la propria casella e le adiacenti. PROVVISORIO (03 §4.8.2, che rimandava il raggio di osservazione dei gruppi alla realizzazione). Da tarare con la portata degli esploratori, quando esisteranno.
+- `soglia_confermato_in_avvistato` (2): i turni dopo i quali il confermato decade in avvistato (03 §4.8.1). PROVVISORIO; il vincolo di direzione del documento 03 è che il decadimento «morda, perché la certezza resti rara»: due turni è una scelta che morde presto, da rivedere giocando. Almeno uno, o il confermato decadrebbe nel turno stesso in cui si osserva (imposto dal caricatore).
+
+La versione dei valori NON è ancora salita in questo blocco (resta 0.9.0), perché il blocco 1 non è caricabile da solo: non c'è nulla da scoprire finché l'avversario non esiste. La sessione che chiude un blocco giocabile (l'avversario che si muove) incrementerà la versione dei valori per tutti i numeri di campagna introdotti da allora, questi due compresi.
+
 ### formati-mappa.json — FISSATI
 
 Le dimensioni dei tre formati: quattro per quattro, sei per sei, dieci per dieci. FISSATI da 01 §5.1, che li dichiara «tre formati fissi». Non sono taratura e non si toccano qui. Stanno nei dati e non nel codice perché il codice non deve conoscere alcuna dimensione, non perché siano da tarare.
