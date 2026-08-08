@@ -63,6 +63,29 @@ final class InvariantiCampagnaTest: XCTestCase {
         XCTAssertGreaterThan(ordiniTotali, 300)
     }
 
+    /// Il banco DEVE generare ogni fenomeno del rifornimento (01 §5.2.2): tagli,
+    /// soste imposte di due turni, soste volontarie di uno, riprese, passaggi in zona e
+    /// strutture isolate. Se un totale restasse a zero, il fenomeno non sarebbe
+    /// esercitato e il suo invariante non avrebbe mai avuto occasione di mordere.
+    func test_incarico_16_il_banco_genera_ogni_fenomeno_del_rifornimento() throws {
+        let scenari = try ScenariCampagna.carica(da: Verifica.Ambiente.scenariCampagnaDiFabbrica)
+        let banco = BancoCampagna(motore: motore, valoriCampagna: valoriCampagna, scenari: scenari)
+        var tagli = 0, sosteImposte = 0, sosteVolontarie = 0, riprese = 0, inZona = 0, isolate = 0
+        for voce in scenari.scenari {
+            let corsa = try banco.corri(voce, giornate: scenari.giornateGenerate)
+            XCTAssertEqual(corsa.violazioni, [], "violazioni nello scenario \(corsa.identificatore)")
+            tagli += corsa.tagli; sosteImposte += corsa.sosteImposte
+            sosteVolontarie += corsa.sosteVolontarie; riprese += corsa.riprese
+            inZona += corsa.passaggiInZona; isolate += corsa.struttureIsolate
+        }
+        XCTAssertGreaterThan(tagli, 0, "il banco genera tagli del rifornimento")
+        XCTAssertGreaterThan(sosteImposte, 0, "il banco genera soste imposte di due turni")
+        XCTAssertGreaterThan(sosteVolontarie, 0, "il banco genera soste volontarie di un turno")
+        XCTAssertGreaterThan(riprese, 0, "il banco genera riprese del rifornimento")
+        XCTAssertGreaterThan(inZona, 0, "il banco genera passaggi in zona di rifornimento")
+        XCTAssertGreaterThan(isolate, 0, "il banco genera almeno una struttura isolata")
+    }
+
     func test_05_12_3_1_due_corse_sugli_stessi_dati_danno_lo_stesso_identico_esito() throws {
         let scenari = try ScenariCampagna.carica(da: Verifica.Ambiente.scenariCampagnaDiFabbrica)
         let banco = BancoCampagna(motore: motore, valoriCampagna: valoriCampagna, scenari: scenari)
@@ -585,6 +608,52 @@ final class InvariantiCampagnaTest: XCTestCase {
                 return sonda.controlla(prima: prima,
                                        comando: .divisione(gruppo: ids[0], repartiStaccati: [1], a: dest),
                                        dopo: dopo, eventi: ev, adiacenti: griglia.adiacenti)
+            }),
+            ("rifornimento_fuori_intervallo", {
+                // Un gruppo senza provviste per TRE turni: oltre il tetto di due (§5.2.2.4).
+                sonda.controlla(stato: statoCon { s in s.gruppi[ids[0]]!.turniSenzaProvviste = 3 })
+            }),
+            ("marcia_forzata_inattesa", {
+                // Il contatore della marcia forzata alimentato: questa unità lo tiene a
+                // zero, distinto da quello delle provviste (§5.2.2.5).
+                sonda.controlla(stato: statoCon { s in s.gruppi[ids[0]]!.turniMarciaForzata = 1 })
+            }),
+            ("sosta_elusa_marciando", {
+                // Un gruppo che deve rifornirsi riceve un ordine di marcia (§5.2.2.4).
+                let dest = Cella(riga: 10, colonna: 7)
+                var prima = base; prima.gruppi[ids[0]]!.sostaDovuta = 1
+                var dopo = prima
+                dopo.gruppi[ids[0]]!.posizione = dest
+                dopo.gruppi[ids[0]]!.azioneSpesa = true
+                return sonda.controlla(prima: prima,
+                                       comando: .marcia(gruppo: ids[0], a: dest, giorni: 1),
+                                       dopo: dopo, eventi: [], adiacenti: griglia.adiacenti)
+            }),
+            ("zona_tagliata", {
+                // Un gruppo in zona resta senza provviste dopo la chiusura (§5.2.2.6): in
+                // zona il taglio non ha effetto. Struttura sulla casella del gruppo.
+                let pos = base.gruppiOrdinati[0].posizione
+                var prima = base
+                prima.struttureDiRifornimento = [pos]
+                prima.gruppi[ids[0]]!.turniSenzaProvviste = 1
+                var dopo = prima; dopo.giorno += 1
+                for g in dopo.gruppiOrdinati { dopo.gruppi[g.id]!.azioneSpesa = false }
+                return sonda.controlla(prima: prima, comando: .presidio(gruppo: ids[0]),
+                                       dopo: dopo, eventi: [.giornataChiusa(giorno: base.giorno),
+                                                            .giornataAperta(giorno: base.giorno + 1)],
+                                       adiacenti: griglia.adiacenti)
+            }),
+            ("taglio_da_casella_non_prescritta", {
+                // Le provviste peggiorano SENZA una forza nemica alle spalle: il taglio
+                // sarebbe nato da una casella non prescritta (§5.2.2.2). Nessun nemico.
+                var prima = base  // turni a zero
+                var dopo = prima; dopo.giorno += 1
+                dopo.gruppi[ids[0]]!.turniSenzaProvviste = 1  // peggiorato senza motivo
+                for g in dopo.gruppiOrdinati { dopo.gruppi[g.id]!.azioneSpesa = false }
+                return sonda.controlla(prima: prima, comando: .presidio(gruppo: ids[0]),
+                                       dopo: dopo, eventi: [.giornataChiusa(giorno: base.giorno),
+                                                            .giornataAperta(giorno: base.giorno + 1)],
+                                       adiacenti: griglia.adiacenti)
             }),
         ]
     }

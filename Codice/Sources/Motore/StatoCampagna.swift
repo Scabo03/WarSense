@@ -96,13 +96,29 @@ public struct Gruppo: Hashable, Codable, Sendable {
     public var azioneSpesa: Bool
     /// La marcia di più giorni in corso, se il gruppo ne ha una (01 §5.6.3.3).
     public var marcia: MarciaInCorso?
+    /// I turni CONSECUTIVI in cui il gruppo ha operato con il rifornimento tagliato,
+    /// da zero a due (01 §5.2.2.4): oltre il secondo non può proseguire e deve
+    /// fermarsi. È il conteggio della mancanza di provviste, distinto per invariante
+    /// da quello della marcia forzata.
+    public var turniSenzaProvviste: Int
+    /// I turni di SOSTA di rifornimento ancora dovuti, da zero a due (01 §5.2.2.4):
+    /// finché è maggiore di zero il gruppo non può marciare, e ogni sosta lo riduce.
+    public var sostaDovuta: Int
+    /// I turni consecutivi di marcia forzata: SEPARATO da `turniSenzaProvviste`
+    /// perché i due malus si cumulano e i loro conteggi restano distinti (01 §5.2.2.5).
+    /// Predisposto e non ancora alimentato: la marcia forzata è materia successiva, e
+    /// oggi questo campo resta a zero (dichiarato nel resoconto).
+    public var turniMarciaForzata: Int
 
     public init(id: IdGruppo, parte: Parte, nome: IdentificatoreDati,
                 posizione: Cella, composizione: [Reparto],
-                azioneSpesa: Bool, marcia: MarciaInCorso? = nil) {
+                azioneSpesa: Bool, marcia: MarciaInCorso? = nil,
+                turniSenzaProvviste: Int = 0, sostaDovuta: Int = 0, turniMarciaForzata: Int = 0) {
         self.id = id; self.parte = parte; self.nome = nome
         self.posizione = posizione; self.composizione = composizione
         self.azioneSpesa = azioneSpesa; self.marcia = marcia
+        self.turniSenzaProvviste = turniSenzaProvviste; self.sostaDovuta = sostaDovuta
+        self.turniMarciaForzata = turniMarciaForzata
     }
 
     /// Il numero totale di atomi del gruppo: la somma sui reparti. Serve alla
@@ -127,6 +143,56 @@ public struct Gruppo: Hashable, Codable, Sendable {
         if let marcia { return .inMarcia(giorniMancanti: marcia.giorniMancanti) }
         return azioneSpesa ? .haAgito : .inAttesa
     }
+
+    /// Vero se il gruppo DEVE fermarsi a rifornirsi e non può marciare (01 §5.2.2.4):
+    /// ha una sosta ancora dovuta. La validazione della marcia lo respinge.
+    public var deveRifornirsi: Bool { sostaDovuta > 0 }
+}
+
+/// Gli stati di rifornimento del vocabolario chiuso (02 §4.4.5): esistono già come
+/// termini e questa unità li rende esistenti nel gioco, senza aggiungerne di nuovi.
+/// Il gruppo RIFORNITO è la condizione ordinaria e non ha termine, perché non si
+/// annuncia (02 §8.7). L'ordine di precedenza — sosta, poi zona, poi senza provviste
+/// — lo fissa `MotoreCampagna.statoDiRifornimento`.
+public enum StatoRifornimento: Hashable, Sendable {
+    /// «senza provviste, primo giorno» / «secondo giorno» (giorno = 1 o 2).
+    case senzaProvviste(giorno: Int)
+    /// «in sosta di rifornimento, con i giorni di sosta dovuti».
+    case inSosta(giorniDovuti: Int)
+    /// «in zona di rifornimento».
+    case inZona
+
+    /// La chiave del termine chiuso (00 §14.1): il testo lo risolve il pacchetto. Le
+    /// chiavi ESISTONO GIÀ nel vocabolario (`rifornimento.*`, 02 §4.4.5): questa unità
+    /// le usa, non ne conia. Il termine della sosta è «in sosta di rifornimento» come
+    /// il consolidato lo fissa, senza il seguito «con i giorni di sosta dovuti» che
+    /// l'incarico suggeriva: fra i due prevale il consolidato (scostamento S17).
+    public var chiaveTesto: String {
+        switch self {
+        case .senzaProvviste(let giorno):
+            return giorno >= 2 ? "rifornimento.senza_provviste_secondo" : "rifornimento.senza_provviste_primo"
+        case .inSosta: return "rifornimento.in_sosta"
+        case .inZona: return "rifornimento.in_zona"
+        }
+    }
+
+    /// La privazione è ciò che si annuncia SULL'OCCUPANTE come sua prima anomalia
+    /// (02 §3.8.1): senza provviste, oppure in sosta. La zona è invece una proprietà
+    /// del LUOGO — la si annuncia in coda alla casella, con la strettoia — e un gruppo
+    /// che vi sosta è semplicemente rifornito, che non si annuncia (02 §8.7).
+    public var eDiPrivazione: Bool {
+        switch self {
+        case .senzaProvviste, .inSosta: return true
+        case .inZona: return false
+        }
+    }
+
+    /// Un esemplare per ciascun caso, in ordine fisso, per le prove che pretendono
+    /// che ogni stato abbia il proprio termine (come `StatoGruppo.casiDiRiferimento`).
+    public static let casiDiRiferimento: [StatoRifornimento] = [
+        .senzaProvviste(giorno: 1), .senzaProvviste(giorno: 2),
+        .inSosta(giorniDovuti: 1), .inZona,
+    ]
 }
 
 /// I termini chiusi degli stati di un gruppo realizzati in questa unità
@@ -205,6 +271,15 @@ public enum FattoRegistrato: Hashable, Codable, Sendable {
     case ordineAnnullato
     /// Gli ordini della giornata sono stati azzerati (00 §13.8).
     case giornataAzzerata
+    /// Il rifornimento di un gruppo si è interrotto: forze nemiche alle sue spalle
+    /// (01 §5.2.2.2). Fatto NON deciso dal giocatore (01 §5.17.1) — entra nel registro.
+    case rifornimentoInterrotto(gruppo: IdentificatoreDati, casella: Cella)
+    /// Un gruppo è stato costretto alla sosta di rifornimento (01 §5.2.2.4): compiuti
+    /// i turni senza provviste, deve fermarsi. Fatto non deciso dal giocatore.
+    case sostaDiRifornimento(gruppo: IdentificatoreDati, casella: Cella)
+    /// Il rifornimento di un gruppo è ripreso (01 §5.2.2): non ha più nemici alle
+    /// spalle, o è entrato in una zona di rifornimento. Fatto non deciso dal giocatore.
+    case rifornimentoRipreso(gruppo: IdentificatoreDati, casella: Cella)
 
     /// Un esemplare per ciascun caso, in ordine fisso. Serve al collaudo per
     /// pretendere che OGNI fatto abbia la propria frase compiuta: con i valori
@@ -217,6 +292,9 @@ public enum FattoRegistrato: Hashable, Codable, Sendable {
         .marciaRevocata(gruppo: "corvo", casella: Cella(riga: 1, colonna: 1)),
         .ordineAnnullato,
         .giornataAzzerata,
+        .rifornimentoInterrotto(gruppo: "corvo", casella: Cella(riga: 1, colonna: 1)),
+        .sostaDiRifornimento(gruppo: "corvo", casella: Cella(riga: 1, colonna: 1)),
+        .rifornimentoRipreso(gruppo: "corvo", casella: Cella(riga: 1, colonna: 1)),
     ]
 
     /// La chiave del testo che compone la frase della voce (00 §14.1): il fatto
@@ -227,6 +305,9 @@ public enum FattoRegistrato: Hashable, Codable, Sendable {
         case .marciaRevocata: return "registro.marcia_revocata"
         case .ordineAnnullato: return "registro.ordine_annullato"
         case .giornataAzzerata: return "registro.giornata_azzerata"
+        case .rifornimentoInterrotto: return "registro.rifornimento_interrotto"
+        case .sostaDiRifornimento: return "registro.sosta_di_rifornimento"
+        case .rifornimentoRipreso: return "registro.rifornimento_ripreso"
         }
     }
 
@@ -237,6 +318,9 @@ public enum FattoRegistrato: Hashable, Codable, Sendable {
         switch self {
         case .marciaCompiuta(_, _, let a): return a
         case .marciaRevocata(_, let casella): return casella
+        case .rifornimentoInterrotto(_, let casella): return casella
+        case .sostaDiRifornimento(_, let casella): return casella
+        case .rifornimentoRipreso(_, let casella): return casella
         case .ordineAnnullato, .giornataAzzerata: return nil
         }
     }
@@ -259,14 +343,28 @@ public struct StatoCampagna: Hashable, Codable, Sendable {
     /// qui si conserva in ordine di accadimento e si legge al contrario (02 §6.6).
     public var registro: [VoceRegistro]
     public var prossimoNumeroVoce: Int
+    /// Le caselle occupate da forze nemiche (01 §5.2.2.2): ciò che sta alle spalle di
+    /// una colonna e ne taglia il rifornimento. L'AVVERSARIO sulla mappa NON esiste
+    /// ancora (materia della sessione successiva): questo è il MINIMO indispensabile a
+    /// rendere provabile la regola del taglio, un dato dello scenario, e non
+    /// l'avversario — dichiarato come anticipazione parziale. In gioco reale è vuoto,
+    /// sicché oggi nessun gruppo risulta mai tagliato.
+    public var forzeNemiche: Set<Cella>
+    /// Le caselle con una struttura di rifornimento — fortezza o magazzino avanzato
+    /// (01 §5.2.2.6). Le OPERE non esistono ancora (materia della sessione successiva):
+    /// questo è il minimo per rendere provabile la zona di rifornimento, dato dello
+    /// scenario, non l'opera. In gioco reale è vuoto.
+    public var struttureDiRifornimento: Set<Cella>
 
     public init(mappa: MappaCampagna, giorno: Int, gruppi: [IdGruppo: Gruppo],
                 prossimoIdGruppo: Int, prossimoIndiceNome: Int,
-                registro: [VoceRegistro], prossimoNumeroVoce: Int) {
+                registro: [VoceRegistro], prossimoNumeroVoce: Int,
+                forzeNemiche: Set<Cella> = [], struttureDiRifornimento: Set<Cella> = []) {
         self.mappa = mappa; self.giorno = giorno; self.gruppi = gruppi
         self.prossimoIdGruppo = prossimoIdGruppo
         self.prossimoIndiceNome = prossimoIndiceNome
         self.registro = registro; self.prossimoNumeroVoce = prossimoNumeroVoce
+        self.forzeNemiche = forzeNemiche; self.struttureDiRifornimento = struttureDiRifornimento
     }
 
     public var griglia: GrigliaCampagna { mappa.griglia }

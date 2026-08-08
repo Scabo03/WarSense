@@ -97,6 +97,17 @@ Questa unità introduce POCHISSIMI numeri, ed è voluto: le grandezze della camp
 
 Il VOLUME della colonna, quinto fattore di 01 §5.6.3.2, con l'incarico 15 AGISCE: `MotoreCampagna.costoInGiorni` legge il volume del gruppo che occupa la casella di partenza — somma sui reparti di atomi per `volume_per_atomo`, la STESSA grandezza del volume di battaglia (01 §3.4.4) — e vi somma il volume diviso la soglia qui sopra, senza spostare il punto di calcolo (RDA-75, RDA-99, RDA-103). Il rinvio di `impatto-marcia-lunga.md` §1 è così superato.
 
+### Rifornimento (incarico 16) — NESSUN valore nuovo, e il perché
+
+L'incarico 16 realizza la catena, il taglio, le zone, l'autonomia e la sosta (01 §5.2.2), e NON introduce alcun numero di gioco. È voluto e coerente col rinvio di sopra: la MAGNITUDINE del malus della mancanza di provviste (di quanto scendano punti vita e capacità offensiva del reparto) e l'AUTONOMIA (i giorni di viveri portati) restano da determinare come il documento 03 le registra, e introdurle senza il codice di battaglia che le mette alla prova significherebbe inventare numeri. Ciò che questa unità realizza è la MECCANICA, non i suoi pesi:
+
+- Il numero massimo di turni senza provviste (2) e di sosta dovuta (2) NON sono valori da tarare: sono la regola di 01 §5.2.2.4 («oltre il secondo turno non si prosegue», «la sosta imposta è di due turni»), fissati, imposti dagli invarianti `rifornimento_fuori_intervallo` e sorvegliati.
+- Il raggio della zona (distanza di Čebyšëv al più uno, cioè le nove caselle) è geometria della regola (01 §5.2.2.6), non un valore.
+- Il malus del digiuno agisce sui PARAMETRI del reparto (punti vita, capacità offensiva) e MAI sul volume: il campo `turniSenzaProvviste` è predisposto e conta i turni, ma la sua traduzione in una riduzione dei parametri è materia dell'unità che congiungerà campagna e battaglia. Predisposto, non alimentato, come `turniMarciaForzata`.
+- Le `forze_nemiche` e le `strutture_di_rifornimento` negli scenari di `campagne.json` sono CONTENUTO (dati minimi per provare taglio e zona), non valori da tarare, come le posizioni dei gruppi.
+
+La versione dei valori NON sale (resta 0.9.0): nessun file di `Contenuti/Valori` cambia, e una campagna in corso, riaperta con questa build, si comporta ESATTAMENTE come prima, perché in gioco reale `forzeNemiche` e `struttureDiRifornimento` sono vuote (l'avversario e le opere non sono costruiti) e nessun gruppo risulta mai tagliato. Lo schema del giornale resta 4 e i salvataggi restano compatibili (RDA-107). La regola del titolare è rispettata: le versioni non si toccano di propria iniziativa, sale solo il numero di build.
+
 ### formati-mappa.json — FISSATI
 
 Le dimensioni dei tre formati: quattro per quattro, sei per sei, dieci per dieci. FISSATI da 01 §5.1, che li dichiara «tre formati fissi». Non sono taratura e non si toccano qui. Stanno nei dati e non nel codice perché il codice non deve conoscere alcuna dimensione, non perché siano da tarare.

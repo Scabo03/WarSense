@@ -49,6 +49,13 @@ public enum ComandoCampagna: Hashable, Codable, Sendable {
     /// dei due vi confluiti aveva già agito, o un gruppo che ha marciato potrebbe
     /// fondersi con uno fermo e rimettersi in marcia lo stesso giorno (RDA-106).
     case riunione(gruppo: IdGruppo, con: IdGruppo)
+    /// Sosta con raccolta automatica (01 §5.6.5, §5.6.8.1): il gruppo si ferma,
+    /// s'accampa e raccoglie quanto serve nelle zone circostanti, in automatico. È
+    /// un'AZIONE dell'elenco chiuso, non una voce nuova, e consuma la giornata. È la
+    /// via ordinaria quando la catena si interrompe (01 §5.6.5.1): riduce di uno la
+    /// sosta dovuta dal taglio, e quando la sosta è saldata il gruppo torna rifornito
+    /// (RDA-107). Vale sia per l'autonomia sia per la sosta imposta dal taglio.
+    case sostaConRaccolta(gruppo: IdGruppo)
 }
 
 /// I motivi chiusi di non ammissibilità sulla mappa (05 §3.2). Ogni caso
@@ -102,6 +109,10 @@ public enum MotivoNonValidoCampagna: String, Codable, Hashable, Sendable, CaseIt
     /// dichiarata con 01 §5.6.0.1 («non esiste alcun tetto»): scostamento S16, mitigato
     /// da una lista ampia; il tetto morde solo su campagne con moltissime divisioni.
     case nomiEsauriti = "comando.non_valido.nomi_esauriti"
+    /// Nuovo della campagna: il gruppo deve fermarsi a rifornirsi (01 §5.2.2.4) e non
+    /// può marciare finché la sosta dovuta non è saldata. È ciò che il giocatore sente
+    /// se prova a marciare un gruppo tenuto fermo dal taglio (RDA-107).
+    case deveRifornirsi = "comando.non_valido.deve_rifornirsi"
 }
 
 /// Esito della validazione di un comando di campagna: la validazione e l'anteprima
@@ -144,4 +155,12 @@ public enum EventoCampagna: Hashable, Codable, Sendable {
     /// casella `casella`; il gruppo `assorbito` è sparito (01 §5.6.0.3).
     case gruppiRiuniti(risultante: IdGruppo, nome: IdentificatoreDati,
                        assorbito: IdGruppo, casella: Cella)
+    /// Il rifornimento di un gruppo si è interrotto: forze nemiche alle spalle
+    /// (01 §5.2.2.2). Fatto non deciso dal giocatore, alla risoluzione di fine giornata.
+    case rifornimentoInterrotto(gruppo: IdGruppo, nome: IdentificatoreDati, casella: Cella)
+    /// Un gruppo è stato costretto alla sosta di rifornimento (01 §5.2.2.4).
+    case sostaDiRifornimento(gruppo: IdGruppo, nome: IdentificatoreDati, casella: Cella)
+    /// Il rifornimento di un gruppo è ripreso — nemici tolti dalle spalle o zona di
+    /// rifornimento raggiunta (01 §5.2.2, §5.2.2.6).
+    case rifornimentoRipreso(gruppo: IdGruppo, nome: IdentificatoreDati, casella: Cella)
 }

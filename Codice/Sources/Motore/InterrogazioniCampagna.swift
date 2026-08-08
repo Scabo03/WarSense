@@ -39,21 +39,38 @@ public struct VistaCampagna: Sendable {
     /// saltano senza lasciare traccia; i tagli di verbosità partono dalla coda.
     public enum VoceDiCasella: Hashable, Sendable {
         case occupante(Gruppo)
+        case rifornimento(StatoRifornimento)
         case quartierGenerale(Parte)
         case terreno(TerrenoCasella)
         case strada(TipoStrada)
         case strettoia
+        case zonaDiRifornimento
     }
 
     public func vociDiCasella(_ casella: Cella) -> [VoceDiCasella] {
         var voci: [VoceDiCasella] = []
-        if let gruppo = occupante(di: casella) { voci.append(.occupante(gruppo)) }
+        if let gruppo = occupante(di: casella) {
+            voci.append(.occupante(gruppo))
+            // Il rifornimento è la PRIMA anomalia dell'occupante (02 §3.8.1): un gruppo
+            // senza provviste o in sosta lo dichiara subito dopo il proprio nome. La
+            // zona, che è una proprietà del LUOGO e non del gruppo, va invece in coda
+            // (con la strettoia): un gruppo che vi sosta è solo rifornito, e il
+            // rifornito non si annuncia (02 §8.7).
+            if let rifornimento = motore.statoDiRifornimento(di: gruppo, stato: stato),
+               rifornimento.eDiPrivazione {
+                voci.append(.rifornimento(rifornimento))
+            }
+        }
         if let parte = quartierGeneraleSu(casella) { voci.append(.quartierGenerale(parte)) }
         let terreno = terreno(di: casella)
         if terreno != .aperto { voci.append(.terreno(terreno)) }
         let strada = strada(di: casella)
         if strada != .nessuna { voci.append(.strada(strada)) }
         if eStrettoia(casella) { voci.append(.strettoia) }
+        // Nota di zona in coda: la casella è in una zona di rifornimento, che vi sia o
+        // no un occupante (una zona vuota resta una zona). È l'ultima voce, e i tagli
+        // di verbosità partono da qui (02 §3.8.1).
+        if motore.inZonaDiRifornimento(casella, stato: stato) { voci.append(.zonaDiRifornimento) }
         return voci
     }
 
@@ -156,13 +173,16 @@ public struct VistaCampagna: Sendable {
     /// Il primo strato dell'orientamento: l'informazione di stato, richiamabile in
     /// qualunque momento senza abbandonare la mappa (01 §5.16, 02 §6.5.1.3).
     /// L'ordine dei campi è quello fisso di 02 §6.5.1.3, ridotto a ciò che esiste
-    /// in questa unità: giorno, gruppi che hanno agito sul totale. Stagione, marce,
-    /// scatti, provviste, battaglie in sospeso e vincolo fra campagne appartengono
-    /// alle unità che li introducono e non si annunciano a vuoto (02 §8.7.1).
+    /// in questa unità: giorno, gruppi che hanno agito sul totale, gruppi in marcia e
+    /// — da questa unità — gruppi senza rifornimento. Stagione, scatti, battaglie in
+    /// sospeso e vincolo fra campagne appartengono alle unità che li introducono e non
+    /// si annunciano a vuoto (02 §8.7.1). Le «provviste» dell'elenco entrano ora, col
+    /// conto dei gruppi che il rifornimento non raggiunge.
     public struct InformazioneDiStato: Hashable, Sendable {
         public let giorno: Int
         public let gruppiCheHannoAgito: Int
         public let gruppiInMarcia: Int
+        public let gruppiSenzaRifornimento: Int
         public let gruppiTotali: Int
     }
 
@@ -172,9 +192,14 @@ public struct VistaCampagna: Sendable {
         // in marcia si dichiara a parte e non si conta fra chi ha agito, così che il
         // giocatore sappia che quella giornata è consumata da una marcia e non da
         // un'azione conclusa. Chi attende è il resto: totale meno agiti meno in marcia.
+        // «Senza rifornimento» è un'altra categoria ancora: raccoglie chi patisce il
+        // taglio — senza provviste o in sosta imposta — indipendentemente dall'azione.
         return InformazioneDiStato(giorno: stato.giorno,
                                    gruppiCheHannoAgito: miei.filter { $0.azioneSpesa && !$0.inMarcia }.count,
                                    gruppiInMarcia: miei.filter(\.inMarcia).count,
+                                   gruppiSenzaRifornimento: miei.filter {
+                                       motore.statoDiRifornimento(di: $0, stato: stato)?.eDiPrivazione == true
+                                   }.count,
                                    gruppiTotali: miei.count)
     }
 
@@ -204,6 +229,16 @@ public struct VistaCampagna: Sendable {
     /// dell'elenco dipendono da regole che questa unità non realizza.
     public var casellePropriFormazioni: [Cella] { stato.gruppi(di: parte).map(\.posizione).sorted() }
     public var caselleGruppiInAttesa: [Cella] { stato.gruppiInAttesa(di: parte).map(\.posizione).sorted() }
+
+    /// Il rotore dei propri gruppi SENZA RIFORNIMENTO (02 §7.3): quelli che patiscono
+    /// il taglio — senza provviste o in sosta imposta — in ordine di lettura. È il
+    /// salto diretto ai gruppi che chiedono attenzione, contropartita del fatto che il
+    /// taglio non paralizza ma va gestito.
+    public var caselleGruppiSenzaRifornimento: [Cella] {
+        stato.gruppi(di: parte)
+            .filter { motore.statoDiRifornimento(di: $0, stato: stato)?.eDiPrivazione == true }
+            .map(\.posizione).sorted()
+    }
 
     // MARK: - Registro (01 §5.17, 02 §6.6)
 

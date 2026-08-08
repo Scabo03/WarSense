@@ -65,6 +65,24 @@ public struct SondaInvariantiCampagna: Sendable {
         /// risultante di una riunione non ha l'azione spesa se e solo se almeno uno
         /// dei due la aveva (01 §5.6.0.2, §5.6.0.3). Regalerebbe una giornata.
         case guadagnoDiAzione(gruppo: Int)
+        // Invarianti del rifornimento (01 §5.2.2).
+        /// I contatori del rifornimento escono da [0, 2]: nessun gruppo può restare
+        /// senza provviste, o dover sosta, per più di due turni (01 §5.2.2.4).
+        case rifornimentoFuoriIntervallo(gruppo: Int, senza: Int, sosta: Int)
+        /// Il contatore della marcia forzata è stato alimentato: questa unità lo tiene
+        /// DISTINTO da quello delle provviste e non lo tocca (01 §5.2.2.5). L'invariante
+        /// cade quando la marcia forzata sarà costruita e alimenterà il proprio conto.
+        case marciaForzataInattesa(gruppo: Int, turni: Int)
+        /// Un gruppo che DEVE rifornirsi ha ricevuto un ordine di marcia: la sosta
+        /// dovuta non si elude marciando (01 §5.2.2.4).
+        case sostaElusaMarciando(gruppo: Int)
+        /// Un gruppo in una zona di rifornimento risulta senza provviste dopo la
+        /// chiusura della giornata: in zona il taglio non ha effetto (01 §5.2.2.6).
+        case zonaTagliata(gruppo: Int)
+        /// Il rifornimento di un gruppo si è interrotto senza che una forza nemica fosse
+        /// in una delle sue caselle alle spalle: il taglio dipende SOLO da quelle
+        /// (01 §5.2.2.2). La sonda ricava le caselle per conto proprio.
+        case taglioDaCasellaNonPrescritta(gruppo: Int)
 
         /// Il codice della violazione, senza spazi: l'uscita del programma di
         /// verifica è dato per chi sviluppa e non testo di prodotto (05 §12.6),
@@ -96,6 +114,11 @@ public struct SondaInvariantiCampagna: Sendable {
             case .volumeIncoerente(let g, let r, let a): return "volume_incoerente:gruppo=\(g):riportato=\(r):atteso=\(a)"
             case .divisioneNonConserva(let g): return "divisione_non_conserva:gruppo=\(g)"
             case .guadagnoDiAzione(let g): return "guadagno_azione:gruppo=\(g)"
+            case .rifornimentoFuoriIntervallo(let g, let s, let d): return "rifornimento_fuori_intervallo:gruppo=\(g):senza=\(s):sosta=\(d)"
+            case .marciaForzataInattesa(let g, let t): return "marcia_forzata_inattesa:gruppo=\(g):turni=\(t)"
+            case .sostaElusaMarciando(let g): return "sosta_elusa_marciando:gruppo=\(g)"
+            case .zonaTagliata(let g): return "zona_tagliata:gruppo=\(g)"
+            case .taglioDaCasellaNonPrescritta(let g): return "taglio_da_casella_non_prescritta:gruppo=\(g)"
             }
         }
     }
@@ -131,6 +154,11 @@ public struct SondaInvariantiCampagna: Sendable {
         "volume_incoerente",
         "divisione_non_conserva",
         "guadagno_azione",
+        "rifornimento_fuori_intervallo",
+        "marcia_forzata_inattesa",
+        "sosta_elusa_marciando",
+        "zona_tagliata",
+        "taglio_da_casella_non_prescritta",
     ]
 
     /// Il codice nudo, senza i valori: la parte prima dei due punti.
@@ -181,6 +209,20 @@ public struct SondaInvariantiCampagna: Sendable {
             if gruppo.composizione.isEmpty || gruppo.composizione.contains(where: { $0.atomi <= 0 }) {
                 violazioni.append(.gruppoVuoto(gruppo: gruppo.id.numero))
             }
+            // Rifornimento (01 §5.2.2.4): i due contatori restano in [0, 2] — oltre il
+            // secondo turno non si prosegue. La marcia forzata è un contatore DISTINTO
+            // (§5.2.2.5) che questa unità non alimenta: resta a zero, e se non lo è,
+            // qualcosa lo ha confuso con quello delle provviste.
+            if gruppo.turniSenzaProvviste < 0 || gruppo.turniSenzaProvviste > 2
+                || gruppo.sostaDovuta < 0 || gruppo.sostaDovuta > 2 {
+                violazioni.append(.rifornimentoFuoriIntervallo(
+                    gruppo: gruppo.id.numero,
+                    senza: gruppo.turniSenzaProvviste, sosta: gruppo.sostaDovuta))
+            }
+            if gruppo.turniMarciaForzata != 0 {
+                violazioni.append(.marciaForzataInattesa(gruppo: gruppo.id.numero,
+                                                         turni: gruppo.turniMarciaForzata))
+            }
         }
         for casella in occupanti.keys.sorted() where occupanti[casella]! > 1 {
             violazioni.append(.dueGruppiNellaStessaCasella(riga: casella.riga, colonna: casella.colonna))
@@ -229,6 +271,11 @@ public struct SondaInvariantiCampagna: Sendable {
             if prima.gruppi[id]?.inMarcia == true {
                 violazioni.append(.gruppoInMarciaHaRicevutoOrdine(gruppo: id.numero))
             }
+            // La sosta dovuta non si elude marciando (01 §5.2.2.4): un gruppo che deve
+            // rifornirsi non può ricevere un ordine di marcia.
+            if prima.gruppi[id]?.deveRifornirsi == true {
+                violazioni.append(.sostaElusaMarciando(gruppo: id.numero))
+            }
         case .presidio(let id):
             idAgente = id
             if prima.gruppi[id]?.inMarcia == true {
@@ -254,6 +301,13 @@ public struct SondaInvariantiCampagna: Sendable {
         case .riunione(let id, let idAltro):
             violazioni.append(contentsOf: controllaRiunione(
                 id: id, idAltro: idAltro, prima: prima, dopo: dopo, giornoChiuso: giornoChiuso))
+        case .sostaConRaccolta(let id):
+            // La sosta con raccolta è un'azione (01 §5.6.8.1) e ha un agente: spende la
+            // giornata come marcia e presidio. Un gruppo in marcia non la può ordinare.
+            idAgente = id
+            if prima.gruppi[id]?.inMarcia == true {
+                violazioni.append(.gruppoInMarciaHaRicevutoOrdine(gruppo: id.numero))
+            }
         }
 
         // «Azione spesa due volte»: solo per i comandi-AZIONE (marcia, presidio,
@@ -273,6 +327,28 @@ public struct SondaInvariantiCampagna: Sendable {
             }
             for gruppo in dopo.gruppiOrdinati where gruppo.azioneSpesa {
                 violazioni.append(.azioniNonAzzerateAllaChiusura(gruppo: gruppo.id.numero))
+            }
+            // Rifornimento a fine giornata (01 §5.2.2). La sonda ricava PER CONTO PROPRIO
+            // le caselle alle spalle e le zone, così che un errore di geometria del
+            // Motore non le sfugga (la sonda non chiama il Motore).
+            for gruppo in dopo.gruppiOrdinati {
+                // In zona il taglio non ha effetto: un gruppo in zona non resta senza
+                // provviste dopo la chiusura (01 §5.2.2.6).
+                if inZonaDiRifornimento(gruppo.posizione, dopo), gruppo.turniSenzaProvviste > 0 {
+                    violazioni.append(.zonaTagliata(gruppo: gruppo.id.numero))
+                }
+                // Il taglio dipende SOLO dalle caselle prescritte (01 §5.2.2.2): se le
+                // provviste sono peggiorate, una forza nemica deve stare alle spalle e il
+                // gruppo non deve essere in zona.
+                let prima2 = prima.gruppi[gruppo.id]?.turniSenzaProvviste ?? 0
+                if gruppo.turniSenzaProvviste > prima2 {
+                    let alleSpalle = caselleAlleSpalle(di: gruppo, in: dopo)
+                    let taglioLegittimo = !inZonaDiRifornimento(gruppo.posizione, dopo)
+                        && alleSpalle.contains(where: dopo.forzeNemiche.contains)
+                    if !taglioLegittimo {
+                        violazioni.append(.taglioDaCasellaNonPrescritta(gruppo: gruppo.id.numero))
+                    }
+                }
             }
         } else {
             if dopo.giorno != prima.giorno {
@@ -337,6 +413,35 @@ public struct SondaInvariantiCampagna: Sendable {
         guard let risultante = dopo.gruppi[idRisultante] else { return [] }
         let attesa = a.azioneSpesa || b.azioneSpesa
         return risultante.azioneSpesa == attesa ? [] : [.guadagnoDiAzione(gruppo: idRisultante.numero)]
+    }
+
+    // MARK: - Geometria del rifornimento, ricavata dalla sonda per conto proprio
+
+    /// Le caselle alle spalle di un gruppo (01 §5.2.2.2), RICAVATE QUI e non chieste al
+    /// Motore: la sonda non deve condividere i punti ciechi di ciò che giudica. La
+    /// direzione viene dal quartier generale reale della parte del gruppo, comprese le
+    /// due condizioni di bordo (riga retrostante inesistente, colonna di bordo).
+    private func caselleAlleSpalle(di gruppo: Gruppo, in stato: StatoCampagna) -> Set<Cella> {
+        let pos = gruppo.posizione
+        let qg = stato.mappa.quartierGenerale(di: gruppo.parte)
+        let passo = qg.riga == pos.riga ? 0 : (qg.riga > pos.riga ? 1 : -1)
+        let righe = passo == 0 ? [pos.riga] : [pos.riga, pos.riga + passo]
+        var celle = Set<Cella>()
+        for r in righe {
+            for c in [pos.colonna - 1, pos.colonna, pos.colonna + 1] {
+                let cella = Cella(riga: r, colonna: c)
+                if stato.griglia.contiene(cella) { celle.insert(cella) }
+            }
+        }
+        return celle
+    }
+
+    /// Vero se la casella è in una zona di rifornimento (01 §5.2.2.6): distanza di
+    /// Čebyšëv al più uno da una struttura. Anche questa la sonda la ricava da sé.
+    private func inZonaDiRifornimento(_ cella: Cella, _ stato: StatoCampagna) -> Bool {
+        stato.struttureDiRifornimento.contains {
+            max(abs($0.riga - cella.riga), abs($0.colonna - cella.colonna)) <= 1
+        }
     }
 
     // MARK: - Invariante della posizione visiva derivata

@@ -114,10 +114,12 @@
 "perdite.subite.gravi" = "perdite subite gravi";
 
 /* Stati di un gruppo sulla mappa di campagna (01 §5.16.1, 02 §4.4.1.1, §4.4.5).
-   Questa unità realizza i due termini che le regole di questa unità producono;
-   gli altri — in marcia, in agguato, scatto disponibile, e gli stati di
-   rifornimento — entrano con le regole che li generano. I due termini sono brevi
-   e non condividono alcuna parola, come 02 §4.4.1.1 richiede. */
+   Questa unità realizza i due termini di stato che le regole di questa unità
+   producono; degli altri — in marcia, in agguato, scatto disponibile — restano
+   deferiti quelli le cui regole non esistono ancora. Gli stati di rifornimento
+   (rifornimento.*, sopra) sono ora realizzati dal blocco del rifornimento e usati
+   da `StatoRifornimento.chiaveTesto`. I due termini sono brevi e non condividono
+   alcuna parola, come 02 §4.4.1.1 richiede. */
 "gruppo.in_attesa" = "in attesa";
 "gruppo.ha_agito" = "ha agito";
 /* Qualificazione della casella (01 §5.1.2). Il terreno aperto e l'assenza di
@@ -137,6 +139,11 @@
 "comando.non_valido.gruppo_ignoto" = "gruppo non disponibile";
 "comando.non_valido.costo_non_coerente" = "costo della marcia non coerente";
 "comando.non_valido.gruppo_non_in_marcia" = "il gruppo non è in marcia";
+"comando.non_valido.gruppo_inchiodato" = "gruppo inchiodato dalla marcia";
+"comando.non_valido.divisione_impropria" = "divisione non ammessa";
+"comando.non_valido.riunione_impropria" = "riunione non ammessa";
+"comando.non_valido.nomi_esauriti" = "nomi dei gruppi esauriti";
+"comando.non_valido.deve_rifornirsi" = "il gruppo deve rifornirsi";
 /* Confine dell'annullamento (05 §6.5): ogni motivo di rifiuto ha il proprio
    termine (00 §9, principio 9), e il rifiuto non è mai silenzioso. */
 "campagna.non_si_torna_oltre_la_giornata" = "non si torna oltre la giornata in corso";

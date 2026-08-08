@@ -193,6 +193,16 @@
 "campagna.gruppi_riuniti.sintetico" = "%1$@ riunito";
 "campagna.giornata_aperta" = "Giornata conclusa: comincia il giorno %d";
 "campagna.giornata_aperta.sintetico" = "Giorno %d";
+/* Rifornimento (01 §5.2.2): il taglio interrompe, la sosta imposta ferma, la catena
+   ricomposta fa riprendere. Sono fatti della catena e dichiarano il luogo. La ripresa
+   è un annuncio a sé, distinto dallo stato «rifornito» che non si annuncia (02 §8.7):
+   dice il passaggio, non la quiete. */
+"campagna.rifornimento_interrotto" = "Rifornimento di %@ interrotto in riga %d, casella %d";
+"campagna.rifornimento_interrotto.sintetico" = "%@ senza rifornimento";
+"campagna.sosta_di_rifornimento" = "%@ in sosta di rifornimento in riga %d, casella %d";
+"campagna.sosta_di_rifornimento.sintetico" = "%@ in sosta di rifornimento";
+"campagna.rifornimento_ripreso" = "Rifornimento di %@ ripreso in riga %d, casella %d";
+"campagna.rifornimento_ripreso.sintetico" = "%@ di nuovo rifornito";
 
 /* Registro degli eventi (01 §5.17, 02 §6.6): ogni voce è una frase compiuta che
    dichiara il giorno cui si riferisce. Il giorno è una PROPRIETÀ della voce e non
@@ -203,6 +213,12 @@
    volontà del titolare, perché spiega perché un gruppo si trovi fermo. */
 "registro.marcia_compiuta" = "Giorno %1$d: %2$@ è arrivato in riga %3$d, casella %4$d";
 "registro.marcia_revocata" = "Giorno %1$d: %2$@ revoca la marcia in riga %3$d, casella %4$d";
+/* Fatti del rifornimento (01 §5.2.2, §5.17.1): il taglio, la sosta imposta e la
+   ripresa sono fatti che il giocatore NON ha deciso, e perciò si annotano, con il
+   giorno e il luogo. La sosta VOLONTARIA, che è un ordine, non entra nel registro. */
+"registro.rifornimento_interrotto" = "Giorno %1$d: rifornimento di %2$@ interrotto in riga %3$d, casella %4$d";
+"registro.sosta_di_rifornimento" = "Giorno %1$d: %2$@ costretto alla sosta di rifornimento in riga %3$d, casella %4$d";
+"registro.rifornimento_ripreso" = "Giorno %1$d: rifornimento di %2$@ ripreso in riga %3$d, casella %4$d";
 "registro.ordine_annullato" = "Giorno %d: ordine annullato";
 "registro.giornata_azzerata" = "Giorno %d: ordini della giornata azzerati";
 "registro.titolo" = "Registro della campagna";
@@ -228,6 +244,9 @@
 "campagna.stato_con_marcia" = "Giorno %d. Hanno agito %d gruppi su %d, %d in marcia lunga";
 "campagna.stato_tutti_fermi" = "Giorno %d. Nessun gruppo ha ancora agito, sono %d";
 "campagna.stato_solo_marcia" = "Giorno %d. Nessun gruppo ha agito, %d in marcia lunga su %d";
+/* Coda dell'informazione di stato (02 §6.5.1.3): i gruppi senza rifornimento, quando
+   ce ne sono. Si aggiunge alle quattro forme di sopra e non le sostituisce. */
+"campagna.stato_senza_rifornimento" = ", %d senza rifornimento";
 "campagna.annullato_conferma" = "Ultimo ordine annullato";
 "campagna.azzerato_conferma" = "Ordini della giornata azzerati";
 "campagna.niente_da_annullare" = "Niente da annullare in questa giornata";
@@ -270,6 +289,7 @@
 /* Rotori della mappa di campagna (02 §7.3). */
 "rotore.proprie_formazioni" = "Tue formazioni";
 "rotore.gruppi_in_attesa" = "Gruppi da muovere";
+"rotore.gruppi_senza_rifornimento" = "Gruppi senza rifornimento";
 
 /* Nomi parlati delle mappe di prova. */
 "mappa.guado" = "Guado";

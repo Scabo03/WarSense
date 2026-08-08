@@ -93,7 +93,10 @@ public struct ProgrammaDiVerifica: Sendable {
                                     corsa.violazioni.joined(separator: ";"),
                                     corsa.improntaFinale,
                                     String(corsa.volumeMinimo), String(corsa.volumeMassimo),
-                                    String(corsa.divisioni), String(corsa.riunioni)])
+                                    String(corsa.divisioni), String(corsa.riunioni),
+                                    String(corsa.tagli), String(corsa.sosteImposte),
+                                    String(corsa.sosteVolontarie), String(corsa.riprese),
+                                    String(corsa.passaggiInZona), String(corsa.struttureIsolate)])
         }
         sezioni.append(Rapporto.Sezione(
             nome: "campagna_invarianti",
@@ -101,7 +104,9 @@ public struct ProgrammaDiVerifica: Sendable {
                            "marce_lunghe", "marce_compiute", "revoche", "presidi",
                            "senza_destinazione", "violazioni", "dettaglio",
                            "impronta_finale", "volume_minimo", "volume_massimo",
-                           "divisioni", "riunioni"],
+                           "divisioni", "riunioni",
+                           "tagli", "soste_imposte", "soste_volontarie", "riprese",
+                           "passaggi_in_zona", "strutture_isolate"],
             righe: righeInvarianti))
 
         // La curva, non il punto: il costo di chiusura di una giornata si misura su
@@ -219,6 +224,16 @@ public struct ProgrammaDiVerifica: Sendable {
         // le ha esercitate e i loro invarianti non hanno morso (01 §5.6.0.2, §5.6.0.3).
         voce("divisioni_in_totale", righeInvarianti.reduce(0) { $0 + (Int($1[16]) ?? 0) })
         voce("riunioni_in_totale", righeInvarianti.reduce(0) { $0 + (Int($1[17]) ?? 0) })
+        // I fenomeni del rifornimento si sommano dalle colonne 18–23: il taglio, la
+        // sosta imposta di due turni, la sosta volontaria di uno, la ripresa, i
+        // turni-gruppo in zona e le strutture isolate (01 §5.2.2). Se un totale è zero,
+        // il banco non ha esercitato quel fenomeno e l'invariante relativo non ha morso.
+        voce("tagli_in_totale", righeInvarianti.reduce(0) { $0 + (Int($1[18]) ?? 0) })
+        voce("soste_imposte_in_totale", righeInvarianti.reduce(0) { $0 + (Int($1[19]) ?? 0) })
+        voce("soste_volontarie_in_totale", righeInvarianti.reduce(0) { $0 + (Int($1[20]) ?? 0) })
+        voce("riprese_in_totale", righeInvarianti.reduce(0) { $0 + (Int($1[21]) ?? 0) })
+        voce("passaggi_in_zona_in_totale", righeInvarianti.reduce(0) { $0 + (Int($1[22]) ?? 0) })
+        voce("strutture_isolate_in_totale", righeInvarianti.reduce(0) { $0 + (Int($1[23]) ?? 0) })
         let violazioni = righeInvarianti.reduce(0) { $0 + (Int($1[11]) ?? 0) }
         voce("violazioni_trovate_in_totale", violazioni)
         voce("ordini_a_gruppi_senza_alcuna_destinazione",

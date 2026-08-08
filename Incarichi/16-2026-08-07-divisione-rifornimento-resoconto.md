@@ -1,4 +1,6 @@
-Resoconto — Divisione e riunione dei gruppi, e le impronte che si dichiarano (incarico 16)
+Resoconto — Divisione, riunione, rifornimento e le impronte che si dichiarano (incarico 16)
+
+> Nota di continuazione (2026-08-08). Questo resoconto è stato COMPLETATO col blocco quattro (rifornimento) in una sessione successiva, ripresa dal ramo `incarico-16-rifornimento`. Le sezioni dei blocchi 0 e 3 restano come scritte; sono aggiunte la sezione del blocco 4, i numeri del rifornimento, e sono aggiornate le sezioni «Ambito», «I numeri», «Ciò che… non è stato fatto», «Da dove si riprende», «Non verificato» e «Tempi».
 
 ## Le frasi vere che il giocatore sente
 
@@ -10,11 +12,19 @@ Riunendo un gruppo. Sul pannello, una voce per ciascun gruppo proprio adiacente:
 
 Provando su un gruppo in marcia lunga. La divisione e la riunione non si offrono; e se un giornale manomesso le chiedesse, il gruppo è dichiarato inchiodato.
 
-Quando il rifornimento si interrompe e riprende. NON REALIZZATO in questa sessione. Il rifornimento con la regola del taglio, le zone, l'autonomia e la sosta (il blocco quattro) non è stato costruito: non esistono frasi da riportare, e nessun termine è stato aggiunto al vocabolario chiuso. Vedi «Da dove si riprende».
+Quando il rifornimento si interrompe. A fine giornata, se una forza nemica è alle spalle della colonna, il giocatore sente «Rifornimento di Corvo interrotto in riga 5, casella 5», con un richiamo tattile (`rifornimento_interrotto`). Attivando la casella, dopo il nome del gruppo sente subito «senza provviste, primo giorno» — il rifornimento è la PRIMA anomalia dell'occupante. Il gruppo può ancora agire: il taglio non paralizza.
+
+Al secondo giorno di taglio. «Corvo in sosta di rifornimento in riga 5, casella 5», con lo stesso richiamo tattile. Ora Corvo DEVE fermarsi: se il giocatore prova a marciarlo, sente il rifiuto «il gruppo deve rifornirsi». Il primo turno di sosta è dedicato al rifornimento; il secondo è usabile per un'azione che non sia marcia.
+
+Quando riprende. Esaurita la sosta, «Rifornimento di Corvo ripreso in riga 5, casella 5» — annuncio a voce, senza richiamo tattile proprio (il tetto dei significati è chiuso), perché è buona notizia e non chiede attenzione. Il gruppo semplicemente rifornito non si annuncia più.
+
+In zona di rifornimento. Una casella nelle nove attorno a una struttura dichiara, in coda, «in zona di rifornimento». Un gruppo lì è rifornito comunque, anche col nemico alle spalle.
+
+Nell'informazione di stato e nel rotore. L'informazione di stato aggiunge in coda, quando ce ne sono, «…, 2 senza rifornimento»; e il rotore «Gruppi senza rifornimento» salta ai gruppi che patiscono il taglio. Nessun termine NUOVO è stato aggiunto al vocabolario chiuso: gli stati usano le chiavi `rifornimento.*` già riservate (scostamento S17).
 
 ## Ambito effettivo della sessione, e perché
 
-L'incarico chiedeva due materie: la divisione e la riunione, e il rifornimento con il taglio. Prima è stata tolta la perdita di tempo delle impronte (blocco zero). Poi è stata costruita la divisione e la riunione con la loro schermata (blocco tre), fino alla prova sul simulatore superata. La sessione si è fermata al confine del blocco tre, come l'incarico consente («Se ti fermi a un confine di blocco senza chiudere la sessione, non caricare e dichiaralo»). Il rifornimento (blocco quattro) NON è stato iniziato: nessuna riga di codice parziale lo riguarda. La build NON è stata caricata, perché il lavoro non è chiuso.
+L'incarico chiedeva due materie: la divisione e la riunione, e il rifornimento con il taglio. La prima sessione ha tolto la perdita di tempo delle impronte (blocco zero), costruito la divisione e la riunione con la loro schermata (blocco tre) fino alla prova sul simulatore, e si è fermata al confine del blocco tre senza caricare, come l'incarico consente. La sessione di continuazione (2026-08-08) ha costruito il rifornimento — catena, taglio, zone, autonomia e sosta (blocco quattro) — e ha chiuso l'incarico caricando la build. Ciò che segue è il resoconto delle due sessioni insieme, per materia.
 
 ## Blocco 0 — Le impronte dei Contenuti si dichiarano (RDA-105)
 
@@ -42,44 +52,62 @@ Invarianti nuovi con mutante (`SondaInvariantiCampagna`): `divisione_non_conserv
 
 Difetti latenti scoperti e corretti. La prova `test_incarico_6_molte_giornate_generate` pretendeva `giornate == giornateGenerate`: con le marce di più gruppi generate ora, l'ultima applicazione chiude più giornate a cascata (01 §5.6.11) e il conto le oltrepassa; corretto a `>=`. La prova `test_01_5_16` pretendeva che il pannello offrisse solo marcia, presidio e chiusura: ora il primo gruppo ha un vicino proprio e la voce «Riunisci con» compare; aggiornata.
 
+## Blocco 4 — Rifornimento, taglio, zone, autonomia e sosta (RDA-107, RDA-108, RDA-109)
+
+La geometria del taglio (RDA-107). `MotoreCampagna.caselleAlleSpalle` ricava le sei caselle alle spalle — tre colonne per due righe, la occupata e la retrostante — e la direzione del retro viene dal quartier generale REALE della parte del gruppo (`mappa.quartierGenerale(di:)`), mai dall'assunzione che i due quartier generali siano allineati. È l'errore che un'unità precedente aveva commesso, corretto qui: la prova `test_5_2_2_2_la_direzione_viene_dal_quartier_generale_reale` mostra i due versi opposti per giocatore e avversario sulla stessa casella. Le due condizioni di bordo (ultima riga verso il proprio quartier generale, colonna di bordo) cadono da sé filtrando le caselle inesistenti, ciascuna con la sua prova. `rifornimentoTagliato` è vero se una forza nemica cade in quelle caselle; `inZonaDiRifornimento` copre le nove caselle attorno a una struttura (RDA-108), e in zona il taglio non ha effetto — la zona vince.
+
+Il dato minimo, non l'avversario né le opere. `StatoCampagna` porta `forzeNemiche` e `struttureDiRifornimento` come insiemi di caselle ferme; `ScenarioCampagna` li porta come campi OPZIONALI la cui codifica li OMETTE quando vuoti, sicché il campione del giornale `fondazioneCampagna` resta byte per byte identico (verificato: `CompatibilitaGiornaleTest` verde senza toccare il campione) e nessuno schema salta. Le campagne giocabili non ne dichiarano; solo gli scenari di verifica. L'avversario, la sua condotta, le sue mosse e le opere NON sono costruiti.
+
+La macchina a stati (RDA-109). Tre campi sul gruppo, tutti in [0,2]: `turniSenzaProvviste`, `sostaDovuta`, `turniMarciaForzata` (quest'ultimo SEPARATO e non alimentato). `valutaITagliDiRifornimento`, passo di `risolviFineGiornata` DOPO l'avanzamento delle marce (così una marcia compiuta si valuta all'arrivo), applica la precedenza sosta → zona → taglio: in sosta scala un giorno e, esaurita, torna rifornito azzerando i turni; tagliato accumula un turno, al primo interrompe, al secondo impone la sosta di due. Finché `sostaDovuta > 0` la marcia è vietata (`deveRifornirsi`); il primo turno di sosta vieta anche il presidio (dedicato al rifornimento). `sostaConRaccolta` è l'azione esistente (01 §5.6.8.1), non una voce nuova: ordinata di propria iniziativa da un gruppo digiuno, fissa i giorni di sosta pari ai turni digiunati (autonomia). Il malus del digiuno agisce sui parametri del reparto e MAI sul volume: `turniSenzaProvviste` conta i turni, la sua traduzione in riduzione dei parametri è materia dell'unità che congiungerà campagna e battaglia — predisposto, non alimentato, come la marcia forzata. Nessun valore di gioco introdotto (valori-provvisori.md, §Rifornimento).
+
+Registro, segnali, vocabolario. Tre `FattoRegistrato` (interrotto, sosta imposta, ripresa) — fatti non decisi, annotati col giorno e il salto al luogo; la sosta VOLONTARIA è un ordine e non si annota. Tre `EventoCampagna` con annuncio; il taglio e la sosta imposta portano lo stesso significato `rifornimento_interrotto` (tetto chiuso, 02 §11.5), la ripresa nessuno. Vocabolario: gli stati usano le chiavi `rifornimento.*` già riservate; il termine della sosta resta «in sosta di rifornimento» (scostamento S17). Interrogazioni: `statoDiRifornimento`, `vociDiCasella` col rifornimento come prima anomalia dell'occupante e la zona in coda, `informazioneDiStato` col conto dei gruppi senza rifornimento, il rotore `caselleGruppiSenzaRifornimento`.
+
+Invarianti e banco. Cinque invarianti nuovi con mutante: `rifornimento_fuori_intervallo`, `marcia_forzata_inattesa`, `sosta_elusa_marciando`, `zona_tagliata`, `taglio_da_casella_non_prescritta`. La sonda ricava la geometria delle spalle e delle zone PER CONTO PROPRIO, senza chiamare il Motore, così che un suo errore non le sfugga. Il banco `BancoCampagna` inietta forze e strutture negli scenari di `campagne.json` (due nuovi: `rifornimento_taglio`, `rifornimento_zona`) e la condotta genera i fenomeni: un gruppo tagliato presidia perché il taglio maturi, un gruppo digiuno ogni tanto sosta di propria iniziativa. Quattordici prove nuove del Motore (`RifornimentoTest`).
+
 ## I numeri, dal programma di verifica
 
 Da `swift run StrumentoVerifica`, sezione `campagna_riepilogo` (blocco unico, RDA-71; nessun numero a mente):
 
-- **violazioni_trovate_in_totale: 0** (nessun invariante violato in 400+ giornate generate su 10 scenari).
-- **invarianti_sorvegliati: 24** (erano 22; +`divisione_non_conserva`, +`guadagno_azione`).
-- **divisioni_in_totale: 53**; **riunioni_in_totale: 61** (il banco le GENERA, non le rende soltanto possibili).
+- **violazioni_trovate_in_totale: 0** (nessun invariante violato in 480+ giornate generate su 12 scenari).
+- **invarianti_sorvegliati: 29** (erano 24; +`rifornimento_fuori_intervallo`, +`marcia_forzata_inattesa`, +`sosta_elusa_marciando`, +`zona_tagliata`, +`taglio_da_casella_non_prescritta`).
+- **divisioni_in_totale: 53**; **riunioni_in_totale: 61** (invariati: i due scenari nuovi hanno gruppi a un solo reparto e non si dividono).
+- Fenomeni del rifornimento, GENERATI dal banco (non solo resi possibili): **tagli_in_totale: 26**, **soste_imposte_in_totale: 14** (di due turni), **soste_volontarie_in_totale: 12** (di un turno), **riprese_in_totale: 26**, **passaggi_in_zona_in_totale: 5**, **strutture_isolate_in_totale: 1**.
 
-Collaudo. `swift test`: 287 prove, 1 saltata, 0 fallite. `scripts/collaudo-completo.sh`: tutto verde; l'esecutore (xcresulttool) conta 73 prove ospitate e d'interfaccia, 73 passate, 0 fallite. Include la prova nuova `test_01_5_6_0_2_la_schermata_di_divisione_stacca_un_reparto_e_divide`, che percorre la schermata sul simulatore.
+Collaudo. `swift test`: 303 prove, 1 saltata, 0 fallite. `scripts/collaudo-completo.sh`: tutto verde, dal cancello dei simboli e delle impronte alle prove ospitate e d'interfaccia sul simulatore — l'esecutore (xcresulttool) conta 73 prove ospitate e d'interfaccia, 73 passate, 0 fallite. Includono le prove nuove del rifornimento (`RifornimentoTest`, 14 del Motore) e gli invarianti coi loro mutanti; la catena del giornale ha il campione nuovo numero 23 (`sostaConRaccolta`), ricodifica byte per byte verificata; il rotore nuovo «Gruppi senza rifornimento» è verificato dalla prova d'interfaccia dei rotori.
 
 ## Ambiguità segnalate (prima di cominciare)
 
 1. «Un gruppo in marcia lunga è inchiodato e non può dividersi né riunirsi.» I consolidati NON contengono una regola esplicita: 01 §5.6.3.5 stabilisce che un gruppo in marcia lunga «è di fatto immobile … e non può sfilarsi se non perdendo i giorni già spesi», ma non nomina divisione e riunione come vietate. Realizzato il divieto sulla base di quell'immobilità, con il motivo dedicato `gruppoInchiodato`; segnalato che la regola è implicita.
 2. Il tetto pratico ai gruppi dalla lista chiusa dei nomi è in tensione con 01 §5.6.0.1 («non esiste alcun tetto»): scostamento S16, realizzato allargando la lista e respingendo con `nomiEsauriti`.
+3. (Blocco quattro) Il termine della sosta. L'incarico dice «in sosta di rifornimento, con i giorni di sosta dovuti»; il vocabolario chiuso già consolidato fissa «in sosta di rifornimento» (chiave riservata `rifornimento.in_sosta`). Prevale il consolidato, come l'incarico stesso prescrive: usate le chiavi `rifornimento.*` esistenti, nessun termine nuovo. Scostamento S17.
+4. (Blocco quattro) La direzione del «dietro». L'incarico avverte di ricavarla dalla posizione REALE del quartier generale e non da un'assunzione. Fatto: `caselleAlleSpalle` legge `mappa.quartierGenerale(di: gruppo.parte)`, benché `CaricatoreCampagna.valida` fissi oggi il quartier generale del giocatore all'ultima riga; se quella geometria cambiasse, il taglio resterebbe corretto (RDA-107, prova coi due versi opposti).
+5. (Blocco quattro) La provabilità senza avversario. L'incarico chiede di rendere provabile il taglio «collocando forze nemiche negli scenari di verifica come dati minimi, dichiarati come minimo per provare la regola, non l'avversario». Fatto così: `forzeNemiche`/`struttureDiRifornimento`, insiemi di caselle ferme, opzionali negli scenari, assenti nelle campagne giocabili.
 
 ## Ciò che è stato fatto e l'incarico non chiedeva
 
-- Ampliata la lista dei nomi da 12 a 24 (necessaria perché la divisione consuma nomi che non si riusano).
+- Ampliata la lista dei nomi da 12 a 24 (necessaria perché la divisione consuma nomi che non si riusano). [Blocco 3]
+- (Blocco 4) Corretto un vuoto PREESISTENTE del vocabolario: cinque termini `comando.non_valido.*` mancavano da `Vocabolario.strings` — `gruppo_inchiodato`, `divisione_impropria`, `riunione_impropria`, `nomi_esauriti` (del blocco tre) e `deve_rifornirsi` (del blocco quattro). La prova `test_02_4` che li pretende falliva su quei cinque; aggiunti tutti, con la copertura estesa anche agli stati di rifornimento. Segnalato perché quattro dei cinque non erano di questa materia.
 
 ## Ciò che l'incarico chiedeva e non è stato fatto
 
-- Rifornimento e taglio (blocco quattro), per intero: la regola del taglio con le sei caselle alle spalle e le due condizioni di bordo, la direzione ricavata dal quartier generale proprio, gli effetti (malus, due turni, sosta uno-due), le zone di rifornimento (nove caselle), l'autonomia e la sosta con raccolta, i due conteggi distinti (provviste e marcia forzata), gli stati di rifornimento del vocabolario chiuso, l'informazione di stato, il rotore dei gruppi senza rifornimento, l'annuncio della casella con il rifornimento come prima anomalia, il banco che genera tagli, soste e riprese, i relativi invarianti.
-- Caricamento della build, incremento della versione dei valori, note per il titolare: non effettuati, perché il lavoro non è chiuso.
+- Il MALUS numerico del digiuno sui parametri del reparto (di quanto scendano punti vita e capacità offensiva) NON è realizzato: è predisposto il conteggio (`turniSenzaProvviste`) ma non la sua traduzione in una riduzione, che appartiene all'unità di congiunzione campagna-battaglia. Dichiarato in valori-provvisori.md e in RDA-109; l'incarico stesso chiedeva di predisporre la separazione e alimentare solo il contatore, non di costruire il malus. Coerente.
+- Il contatore della marcia forzata (`turniMarciaForzata`) è predisposto e non alimentato, come chiesto.
 
 ## Da dove si riprende
 
-Ramo `incarico-15-divisione-rifornimento`, fuso su `principale` fino al commit del resoconto. Si riprende dal blocco quattro (rifornimento e taglio). La divisione e la riunione, e la composizione col volume su cui il taglio poggia (il taglio legge la posizione dei gruppi e del quartier generale), esistono e sono verdi. Traccia per il blocco quattro: `MotoreCampagna.risolviFineGiornata` ha già i commenti-segnaposto dei passi futuri, fra cui `valutaITagliDiRifornimento`; il caricatore `CaricatoreCampagna.valida` FISSA `qg.avversario.riga == 1` e `qg.giocatore.riga == formato.righe`, ma la direzione del «dietro» va comunque ricavata da `mappa.quartierGeneraleGiocatore` e non da questa geometria (l'incarico lo avverte).
+Ramo `incarico-16-rifornimento`, fuso su `principale` a valle del collaudo verde. L'incarico 16 è CHIUSO: blocchi 0, 3, 4 realizzati, build caricata. La prossima unità naturale è la congiunzione campagna-battaglia, che darà corpo al malus del digiuno (oggi solo contato) e alla marcia forzata (oggi solo predisposta); i loro valori entreranno allora in `Contenuti/Valori`, e la versione dei valori salirà per quel motivo.
 
 ## Non verificato, dichiarato
 
-- L'effetto reale su chi ascolta della schermata di divisione con VoiceOver su dispositivo non è stato provato: è verificato il contenuto delle righe e il percorso nelle prove ospitate sul simulatore, non l'ascolto su ferro. Spetta ai tester.
-- La versione dei valori NON è stata incrementata (resta 0.9.0): non c'è caricamento, e 0.9.0 non è distribuita (la build viva è la 20, a 0.8.0), sicché non c'è collisione. Un caricamento futuro dovrà incrementarla.
+- L'effetto reale su chi ascolta — l'annuncio del rifornimento interrotto, della sosta, della ripresa, e la zona in coda alla casella — con VoiceOver su dispositivo non è provato: è verificato il contenuto e il percorso nel Motore e nel traduttore, non l'ascolto su ferro. Spetta ai tester (il titolare provi in particolare l'interruzione del rifornimento, oltre a divisione e riunione).
+- La versione dei valori NON è stata incrementata (resta 0.9.0), ed è la scelta giusta: nessun file di `Contenuti/Valori` è cambiato e una campagna in corso si comporta identica (forze nemiche e strutture vuote in gioco reale). Lo schema del giornale resta 4, i salvataggi restano compatibili. Sale solo il numero di build (regola del titolare).
+- La versione dei TESTI resta 0.1.1 benché siano state aggiunte chiavi nuove (annunci del rifornimento, voci di registro, rotore, stato, e i cinque termini `comando.non_valido.*` che mancavano). Verificato che NON scatta la trappola dei testi (memoria-infrastruttura, «REGOLE DELLE VERSIONI»): i testi sono compilati NEL fascio dell'app (`Bundle.module`), non consegnati fuori banda e versionati, sicché ogni nuova build porta con sé le chiavi nuove — le installazioni dei tester le ricevono con la build. Le chiavi sono additive: nessun salvataggio le referenzia, e i testi si risolvono a schermo dal fascio corrente. Il manifest dei testi traccia i FILE per impronta (rigenerate), non le singole chiavi; l'impronta di `Annunci.strings` e `Vocabolario.strings` è aggiornata. Nessun bump di propria iniziativa (regola del titolare).
 
 ## Tempi (presi in flusso, non in isolamento — dichiarati tali)
 
 Le misure di tempo dell'incarico si prendono in isolamento; queste sono wall-clock del flusso ordinario e vanno lette come ordini di grandezza.
 
-- Compilazioni e prove del pacchetto (`swift build`/`swift test`): la corsa piena delle prove del pacchetto dura ~45,6 s (287 prove); eseguita una decina di volte durante lo sviluppo, per un totale nell'ordine di 7-8 minuti, la maggior parte in compilazione incrementale e nelle prove.
-- Corsa del simulatore (prove ospitate e d'interfaccia): 154,4 s la sola fase di test del simulatore (`IDETestOperationsObserver`), dentro una corsa piena di `collaudo-completo.sh` eseguita UNA volta per il blocco tre (più `xcodegen` e la costruzione dell'app, per un totale nell'ordine di 5-6 minuti).
-- Caricamento: nessuno (0), perché il lavoro non è chiuso.
-- La parte più lunga del lavoro è stata il blocco tre (divisione, riunione, schermata, catena del giornale, invarianti, banco); il blocco zero è stato breve.
+- Prove del pacchetto (`swift test`): la corsa piena dura ~46 s (303 prove); eseguita molte volte durante lo sviluppo dei due blocchi.
+- Corsa del simulatore (prove ospitate e d'interfaccia): dentro `collaudo-completo.sh`, eseguito più volte a fine blocco quattro (più `xcodegen` e la costruzione dell'app; una corsa piena è nell'ordine di 5-6 minuti).
+- Blocco quattro (rifornimento): la parte più lunga della sessione di continuazione è stata la geometria del taglio con le prove dedicate, la macchina a stati della sosta e il banco con la condotta che genera i fenomeni; gli invarianti e i loro mutanti sono seguiti. Il vuoto dei cinque termini di vocabolario si è manifestato come cinque prove rosse (`test_02_4`) e si è chiuso subito.
+- Caricamento: una corsa di `carica-testflight.sh` a valle del collaudo verde; numero di build ricavato da TestFlight, versioni non toccate.

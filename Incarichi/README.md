@@ -30,7 +30,7 @@ accaduto.
 
 | n. | data | materia | incarico | resoconto |
 |---|---|---|---|---|
-| 16 | 2026-08-07 | ripresa: divisione e riunione dei gruppi con la schermata, e le impronte che si dichiarano (blocco 0 e 3; rifornimento rinviato) | [incarico](16-2026-08-07-divisione-rifornimento-incarico.md) | [resoconto](16-2026-08-07-divisione-rifornimento-resoconto.md) |
+| 16 | 2026-08-07 | divisione e riunione dei gruppi con la schermata, le impronte che si dichiarano, e il rifornimento — catena, taglio, zone, autonomia e sosta (blocchi 0, 3, 4; completato il 2026-08-08) | [incarico](16-2026-08-07-divisione-rifornimento-incarico.md) | [resoconto](16-2026-08-07-divisione-rifornimento-resoconto.md) |
 | 15 | 2026-08-07 | composizione dei gruppi e volume, e le quattro correzioni sulla marcia (blocchi 1-2; rifornimento e divisione rinviati) | [incarico](15-2026-08-07-composizione-rifornimento-divisione-incarico.md) | [resoconto](15-2026-08-07-composizione-rifornimento-divisione-resoconto.md) |
 | 14 | 2026-08-07 | la risoluzione di fine giornata e le marce di più giorni, con la revoca | [incarico](14-2026-08-07-risoluzione-fine-giornata-marce-lunghe-incarico.md) | [resoconto](14-2026-08-07-risoluzione-fine-giornata-marce-lunghe-resoconto.md) |
 | 13 | 2026-08-07 | i simboli grafici delle tessere del deck, al posto delle sigle testuali | [incarico](13-2026-08-07-simboli-tessere-deck-incarico.md) | [resoconto](13-2026-08-07-simboli-tessere-deck-resoconto.md) |

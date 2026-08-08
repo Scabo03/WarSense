@@ -836,6 +836,84 @@
      ]
     }
    ]
+  },
+  {
+   "identificatore": "rifornimento_taglio",
+   "mappa": "pianura_lunga",
+   "gruppi": [
+    {
+     "riga": 5,
+     "colonna": 5,
+     "composizione": [
+      {
+       "archetipo": "fanteria_leggera",
+       "atomi": 6
+      }
+     ]
+    },
+    {
+     "riga": 7,
+     "colonna": 3,
+     "composizione": [
+      {
+       "archetipo": "fanteria_leggera",
+       "atomi": 6
+      }
+     ]
+    }
+   ],
+   "forze_nemiche": [
+    {
+     "riga": 6,
+     "colonna": 5
+    },
+    {
+     "riga": 8,
+     "colonna": 3
+    }
+   ]
+  },
+  {
+   "identificatore": "rifornimento_zona",
+   "mappa": "pianura_lunga",
+   "gruppi": [
+    {
+     "riga": 5,
+     "colonna": 5,
+     "composizione": [
+      {
+       "archetipo": "fanteria_leggera",
+       "atomi": 6
+      }
+     ]
+    },
+    {
+     "riga": 1,
+     "colonna": 1,
+     "composizione": [
+      {
+       "archetipo": "fanteria_leggera",
+       "atomi": 6
+      }
+     ]
+    }
+   ],
+   "forze_nemiche": [
+    {
+     "riga": 6,
+     "colonna": 5
+    }
+   ],
+   "strutture_di_rifornimento": [
+    {
+     "riga": 5,
+     "colonna": 5
+    },
+    {
+     "riga": 9,
+     "colonna": 9
+    }
+   ]
   }
  ]
 }

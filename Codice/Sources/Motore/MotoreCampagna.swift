@@ -31,6 +31,9 @@ public struct MotoreCampagna: Sendable {
             // `haConclusoLaGiornata`. È l'invariante «un gruppo in marcia non riceve
             // mai un ordine» reso impossibile qui, non soltanto sorvegliato.
             guard !gruppo.haConclusoLaGiornata else { return .nonValido(.azioneGiaSpesa) }
+            // Il taglio non paralizza ma toglie la marcia finché la sosta è dovuta
+            // (01 §5.2.2.4): la sosta non si elude marciando (invariante).
+            guard !gruppo.deveRifornirsi else { return .nonValido(.deveRifornirsi) }
             guard stato.griglia.contiene(destinazione) else { return .nonValido(.fuoriMappa) }
             guard stato.griglia.adiacenti(gruppo.posizione, destinazione) else {
                 return .nonValido(.nonAdiacente)
@@ -62,6 +65,10 @@ public struct MotoreCampagna: Sendable {
                 return .nonValido(.gruppoIgnoto)
             }
             guard !gruppo.haConclusoLaGiornata else { return .nonValido(.azioneGiaSpesa) }
+            // Il PRIMO turno di sosta è dedicato al rifornimento (01 §5.2.2.4): con
+            // due soste dovute solo la sosta con raccolta è ammessa; dal secondo turno
+            // (una sosta dovuta) un'altra azione non di marcia, come il presidio, va bene.
+            guard gruppo.sostaDovuta < 2 else { return .nonValido(.deveRifornirsi) }
             return .valido
 
         case .revocaMarcia(let idGruppo):
@@ -82,6 +89,9 @@ public struct MotoreCampagna: Sendable {
             // giocatore senta «inchiodato» e non «azione già spesa» (01 §5.6.3.5).
             guard !gruppo.inMarcia else { return .nonValido(.gruppoInchiodato) }
             guard !gruppo.azioneSpesa else { return .nonValido(.azioneGiaSpesa) }
+            // La divisione colloca il distaccamento con uno spostamento: come la marcia,
+            // non si compie finché la sosta di rifornimento è dovuta (01 §5.2.2.4).
+            guard !gruppo.deveRifornirsi else { return .nonValido(.deveRifornirsi) }
             guard stato.griglia.contiene(destinazione) else { return .nonValido(.fuoriMappa) }
             // Il distaccamento nasce in una casella ADIACENTE, mai in quella di origine
             // (01 §5.6.0.2): l'origine non è adiacente a sé, sicché il controllo di
@@ -122,6 +132,16 @@ public struct MotoreCampagna: Sendable {
                 return .nonValido(.nonAdiacente)
             }
             return .valido
+
+        case .sostaConRaccolta(let idGruppo):
+            guard let gruppo = stato.gruppi[idGruppo], gruppo.parte == parte else {
+                return .nonValido(.gruppoIgnoto)
+            }
+            // La sosta con raccolta è un'azione (01 §5.6.8.1): la può ordinare un gruppo
+            // che non ha concluso la giornata — un gruppo in marcia è inchiodato. Vale
+            // sia per l'autonomia sia per la sosta imposta dal taglio (01 §5.6.5).
+            guard !gruppo.haConclusoLaGiornata else { return .nonValido(.azioneGiaSpesa) }
+            return .valido
         }
     }
 
@@ -140,6 +160,63 @@ public struct MotoreCampagna: Sendable {
         gruppo.composizione.reduce(0) { somma, reparto in
             somma + Int64(reparto.atomi) * valori.archetipi[reparto.archetipo]!.volumePerAtomo
         }
+    }
+
+    // MARK: - Rifornimento: catena, taglio, zone (01 §5.2.2)
+
+    /// Le caselle DIETRO la colonna (01 §5.2.2.2): le tre colonne centrate su quella
+    /// occupata, prese sulla riga della colonna stessa e su quella immediatamente
+    /// retrostante — retrostante DALLA PARTE DEL PROPRIO QUARTIER GENERALE. La
+    /// direzione è ricavata dalla posizione REALE del quartier generale del gruppo, mai
+    /// da un'assunzione sulla geometria della mappa né dall'allineamento dei due
+    /// quartier generali (RDA-107). Le due condizioni di bordo cadono da sé filtrando
+    /// le caselle inesistenti: sull'ultima riga verso il proprio quartier generale la
+    /// riga retrostante non esiste e restano le sole caselle esistenti; su una colonna
+    /// di bordo la fascia si restringe a due caselle anziché tre.
+    public func caselleAlleSpalle(di gruppo: Gruppo, mappa: MappaCampagna) -> [Cella] {
+        let pos = gruppo.posizione
+        let qg = mappa.quartierGenerale(di: gruppo.parte)
+        let passo = qg.riga == pos.riga ? 0 : (qg.riga > pos.riga ? 1 : -1)
+        let righe = passo == 0 ? [pos.riga] : [pos.riga, pos.riga + passo]
+        var caselle: [Cella] = []
+        for r in righe {
+            for c in [pos.colonna - 1, pos.colonna, pos.colonna + 1] {
+                let cella = Cella(riga: r, colonna: c)
+                if mappa.griglia.contiene(cella) { caselle.append(cella) }
+            }
+        }
+        return caselle
+    }
+
+    /// Vero se la casella è in una ZONA di rifornimento (01 §5.2.2.6): la casella di
+    /// una struttura o una delle otto che la circondano — le nove caselle del blocco
+    /// tre per tre (distanza di Čebyšëv al più uno), diagonali comprese. La fortezza
+    /// isolata rifornisce comunque, perché conta la prossimità e non il collegamento
+    /// con la patria (01 §5.2.2.7): la regola non guarda chi possiede l'intorno.
+    public func inZonaDiRifornimento(_ cella: Cella, stato: StatoCampagna) -> Bool {
+        stato.struttureDiRifornimento.contains {
+            max(abs($0.riga - cella.riga), abs($0.colonna - cella.colonna)) <= 1
+        }
+    }
+
+    /// Vero se il rifornimento del gruppo è tagliato (01 §5.2.2.2): forze nemiche in
+    /// una delle caselle alle spalle. In una zona di rifornimento il taglio non produce
+    /// effetto (01 §5.2.2.6): la zona vince sul taglio, e un gruppo in zona non risulta
+    /// mai tagliato (invariante).
+    public func rifornimentoTagliato(di gruppo: Gruppo, stato: StatoCampagna) -> Bool {
+        guard !inZonaDiRifornimento(gruppo.posizione, stato: stato) else { return false }
+        return caselleAlleSpalle(di: gruppo, mappa: stato.mappa)
+            .contains(where: stato.forzeNemiche.contains)
+    }
+
+    /// Lo stato di rifornimento del gruppo per il vocabolario chiuso (02 §4.4.5), con
+    /// la precedenza fissa: sosta, poi zona, poi senza provviste. Il gruppo RIFORNITO
+    /// è la condizione ordinaria e restituisce nil, perché non si annuncia (02 §8.7).
+    public func statoDiRifornimento(di gruppo: Gruppo, stato: StatoCampagna) -> StatoRifornimento? {
+        if gruppo.sostaDovuta > 0 { return .inSosta(giorniDovuti: gruppo.sostaDovuta) }
+        if inZonaDiRifornimento(gruppo.posizione, stato: stato) { return .inZona }
+        if gruppo.turniSenzaProvviste > 0 { return .senzaProvviste(giorno: gruppo.turniSenzaProvviste) }
+        return nil
     }
 
     // MARK: - Costo in giorni dello scatto (01 §5.6.3.1, §5.6.3.2)
@@ -289,6 +366,24 @@ public struct MotoreCampagna: Sendable {
             nuovo.gruppi[maggiore.id]!.azioneSpesa = a.azioneSpesa || b.azioneSpesa
             eventi.append(.gruppiRiuniti(risultante: maggiore.id, nome: maggiore.nome,
                                          assorbito: assorbito.id, casella: maggiore.posizione))
+
+        case .sostaConRaccolta(let idGruppo):
+            let gruppo = nuovo.gruppi[idGruppo]!
+            // La sosta con raccolta è l'azione con cui un gruppo si ferma a rifornirsi
+            // (01 §5.6.8.1): spende la giornata come le altre azioni. Ordinata di propria
+            // iniziativa da un gruppo che ha già patito il taglio (turni senza provviste)
+            // ma non è ancora costretto (nessuna sosta già dovuta), fissa i giorni di
+            // sosta pari ai turni digiunati — il gruppo si ferma «con i giorni di sosta
+            // dovuti» (02 §4.4.5) — e ne dà annuncio (fatto deciso: non si annota). La
+            // sosta già imposta dal taglio non si tocca qui: la fine giornata la scala.
+            // Ordinata da un gruppo rifornito è una semplice raccolta: spende la giornata
+            // e nient'altro.
+            nuovo.gruppi[idGruppo]!.azioneSpesa = true
+            if gruppo.turniSenzaProvviste > 0 && gruppo.sostaDovuta == 0 {
+                nuovo.gruppi[idGruppo]!.sostaDovuta = gruppo.turniSenzaProvviste
+                eventi.append(.sostaDiRifornimento(gruppo: idGruppo, nome: gruppo.nome,
+                                                   casella: gruppo.posizione))
+            }
         }
 
         eventi.append(contentsOf: chiudiLaGiornataSeServe(&nuovo))
@@ -338,7 +433,7 @@ public struct MotoreCampagna: Sendable {
         var eventi: [EventoCampagna] = []
         eventi.append(contentsOf: avanzaLeMarce(&stato))
         // Passo successivo (unità futura): scattaLeImboscate(&stato)
-        // Passo successivo (unità futura): valutaITagliDiRifornimento(&stato)
+        eventi.append(contentsOf: valutaITagliDiRifornimento(&stato))
         // Passo successivo (unità futura): completaLeCostruzioni(&stato)
         // Passo successivo (unità futura): invecchiaLaConoscenza(&stato)
         return eventi
@@ -364,6 +459,82 @@ public struct MotoreCampagna: Sendable {
                 annota(.marciaCompiuta(gruppo: nome, da: partenza, a: marcia.destinazione), in: &stato)
             } else {
                 stato.gruppi[id]!.marcia = marcia
+            }
+        }
+        return eventi
+    }
+
+    /// La valutazione dei tagli di rifornimento (01 §5.6.11, §5.2.2): il passo di fine
+    /// giornata che, sulla posizione RAGGIUNTA da ciascun gruppo, aggiorna lo stato di
+    /// rifornimento. Gira DOPO l'avanzamento delle marce, così una marcia compiuta si
+    /// valuta già nella casella d'arrivo. Non decide nulla per il giocatore: registra
+    /// fatti non decisi — il taglio, la sosta imposta, la ripresa — con il giorno e il
+    /// salto al luogo (02 §6.6). L'ordine è deterministico (per id).
+    ///
+    /// La precedenza è fissa. Un gruppo IN SOSTA scala un giorno dovuto e, esaurita la
+    /// sosta, torna rifornito. Un gruppo IN ZONA è rifornito comunque, perché in zona
+    /// il taglio non ha effetto (01 §5.2.2.6). Un gruppo TAGLIATO accumula i turni
+    /// senza provviste, mai oltre due: al primo il rifornimento si interrompe, al
+    /// secondo scatta la sosta imposta di due turni (01 §5.2.2.4). Un gruppo di nuovo
+    /// rifornito lungo la catena, che aveva patito il taglio senza arrivare alla sosta,
+    /// riprende. Il malus dei turni senza provviste agisce altrove, sui parametri del
+    /// reparto, e mai sul volume (01 §5.2.2.3): qui si tiene solo il conto.
+    func valutaITagliDiRifornimento(_ stato: inout StatoCampagna) -> [EventoCampagna] {
+        var eventi: [EventoCampagna] = []
+        for id in stato.gruppi.keys.sorted() {
+            let gruppo = stato.gruppi[id]!
+            let casella = gruppo.posizione
+
+            // In sosta: si scala un giorno dovuto. All'ultimo, il gruppo è di nuovo
+            // rifornito e i turni senza provviste si azzerano; la ripresa si annota.
+            if gruppo.sostaDovuta > 0 {
+                stato.gruppi[id]!.sostaDovuta -= 1
+                if stato.gruppi[id]!.sostaDovuta == 0 {
+                    stato.gruppi[id]!.turniSenzaProvviste = 0
+                    eventi.append(.rifornimentoRipreso(gruppo: id, nome: gruppo.nome, casella: casella))
+                    annota(.rifornimentoRipreso(gruppo: gruppo.nome, casella: casella), in: &stato)
+                }
+                continue
+            }
+
+            // In zona: rifornito comunque. Se veniva da un digiuno, la zona lo chiude e
+            // il rifornimento riprende.
+            if inZonaDiRifornimento(casella, stato: stato) {
+                if gruppo.turniSenzaProvviste > 0 {
+                    stato.gruppi[id]!.turniSenzaProvviste = 0
+                    eventi.append(.rifornimentoRipreso(gruppo: id, nome: gruppo.nome, casella: casella))
+                    annota(.rifornimentoRipreso(gruppo: gruppo.nome, casella: casella), in: &stato)
+                }
+                continue
+            }
+
+            // Tagliato: si accumula un turno senza provviste, mai oltre due. Al primo il
+            // rifornimento si interrompe; al secondo scatta la sosta imposta di due turni.
+            if rifornimentoTagliato(di: gruppo, stato: stato) {
+                switch gruppo.turniSenzaProvviste {
+                case 0:
+                    stato.gruppi[id]!.turniSenzaProvviste = 1
+                    eventi.append(.rifornimentoInterrotto(gruppo: id, nome: gruppo.nome, casella: casella))
+                    annota(.rifornimentoInterrotto(gruppo: gruppo.nome, casella: casella), in: &stato)
+                case 1:
+                    stato.gruppi[id]!.turniSenzaProvviste = 2
+                    stato.gruppi[id]!.sostaDovuta = 2
+                    eventi.append(.sostaDiRifornimento(gruppo: id, nome: gruppo.nome, casella: casella))
+                    annota(.sostaDiRifornimento(gruppo: gruppo.nome, casella: casella), in: &stato)
+                default:
+                    // A due turni senza provviste senza sosta già dovuta non si arriva:
+                    // il secondo taglio impone sempre la sosta, gestita dal ramo di sopra.
+                    break
+                }
+                continue
+            }
+
+            // Rifornito lungo la catena: se veniva da un digiuno mai sfociato in sosta —
+            // l'ha spezzato muovendosi al riparo — il rifornimento riprende.
+            if gruppo.turniSenzaProvviste > 0 {
+                stato.gruppi[id]!.turniSenzaProvviste = 0
+                eventi.append(.rifornimentoRipreso(gruppo: id, nome: gruppo.nome, casella: casella))
+                annota(.rifornimentoRipreso(gruppo: gruppo.nome, casella: casella), in: &stato)
             }
         }
         return eventi

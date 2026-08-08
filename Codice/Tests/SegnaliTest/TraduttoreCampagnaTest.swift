@@ -25,6 +25,9 @@ final class TraduttoreCampagnaTest: XCTestCase {
         .marciaRevocata(gruppo: IdGruppo(1), nome: "corvo",
                         casella: Cella(riga: 10, colonna: 6), giorniPersi: 1),
         .presidioOrdinato(gruppo: IdGruppo(2), nome: "lupo", casella: Cella(riga: 10, colonna: 5)),
+        .rifornimentoInterrotto(gruppo: IdGruppo(1), nome: "corvo", casella: Cella(riga: 5, colonna: 5)),
+        .sostaDiRifornimento(gruppo: IdGruppo(1), nome: "corvo", casella: Cella(riga: 5, colonna: 5)),
+        .rifornimentoRipreso(gruppo: IdGruppo(1), nome: "corvo", casella: Cella(riga: 5, colonna: 5)),
         .giornataChiusa(giorno: 1),
         .giornataAperta(giorno: 2),
     ]
@@ -93,6 +96,23 @@ final class TraduttoreCampagnaTest: XCTestCase {
                        "l'ordine confermato usa il significato 3, che 02 §11.7.1 nomina proprio così")
     }
 
+    /// I segnali del rifornimento (02 §11.5, §11.7.1): il taglio e la sosta imposta
+    /// portano lo stesso segnale dedicato «rifornimento interrotto» — un solo richiamo
+    /// tattile, e le parole dicono quale dei due; la ripresa è buona notizia e non ha
+    /// segnale proprio (il tetto è chiuso), ma la si annuncia a voce.
+    func test_02_11_7_i_segnali_del_rifornimento() throws {
+        let luogo = Cella(riga: 5, colonna: 5)
+        XCTAssertEqual(traduttore.significato(
+            per: .rifornimentoInterrotto(gruppo: IdGruppo(1), nome: "corvo", casella: luogo)),
+                       .rifornimentoInterrotto)
+        XCTAssertEqual(traduttore.significato(
+            per: .sostaDiRifornimento(gruppo: IdGruppo(1), nome: "corvo", casella: luogo)),
+                       .rifornimentoInterrotto)
+        XCTAssertNil(traduttore.significato(
+            per: .rifornimentoRipreso(gruppo: IdGruppo(1), nome: "corvo", casella: luogo)),
+                     "la ripresa non aggiunge un segnale al tetto chiuso")
+    }
+
     func test_02_4_ogni_termine_del_vocabolario_di_campagna_esiste_nei_testi() throws {
         for stato in StatoGruppo.casiDiRiferimento {
             switch stato {
@@ -109,6 +129,12 @@ final class TraduttoreCampagnaTest: XCTestCase {
         for motivo in MotivoNonValidoCampagna.allCases {
             XCTAssertTrue(testi.esiste(motivo.rawValue, tavola: "Vocabolario"),
                           "manca il termine \(motivo.rawValue)")
+        }
+        // Gli stati di rifornimento (01 §5.2.2, 02 §4.4.5): ciascuno ha il proprio
+        // termine chiuso, che questa unità realizza usando le chiavi già riservate.
+        for stato in StatoRifornimento.casiDiRiferimento {
+            XCTAssertTrue(testi.esiste(stato.chiaveTesto, tavola: "Vocabolario"),
+                          "manca il termine dello stato di rifornimento \(stato.chiaveTesto)")
         }
         for terreno in TerrenoCasella.allCases where terreno != .aperto {
             XCTAssertTrue(testi.esiste("terreno." + terreno.rawValue, tavola: "Vocabolario"),

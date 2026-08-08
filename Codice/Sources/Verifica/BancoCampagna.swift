@@ -12,6 +12,26 @@ public struct ScenariCampagna: Codable, Sendable {
         public let identificatore: IdentificatoreDati
         public let mappa: IdentificatoreDati
         public let gruppi: [ScenarioCampagna.GruppoIniziale]
+        /// Le forze nemiche e le strutture dello scenario: dati MINIMI per provare taglio
+        /// e zona, non l'avversario e non le opere (incarico 16). Assenti negli scenari
+        /// che non li esercitano, e allora vuoti.
+        public let forzeNemiche: [Cella]
+        public let struttureDiRifornimento: [Cella]
+
+        enum CodingKeys: String, CodingKey {
+            case identificatore, mappa, gruppi
+            case forzeNemiche = "forze_nemiche"
+            case struttureDiRifornimento = "strutture_di_rifornimento"
+        }
+
+        public init(from decoder: Decoder) throws {
+            let c = try decoder.container(keyedBy: CodingKeys.self)
+            identificatore = try c.decode(IdentificatoreDati.self, forKey: .identificatore)
+            mappa = try c.decode(IdentificatoreDati.self, forKey: .mappa)
+            gruppi = try c.decode([ScenarioCampagna.GruppoIniziale].self, forKey: .gruppi)
+            forzeNemiche = try c.decodeIfPresent([Cella].self, forKey: .forzeNemiche) ?? []
+            struttureDiRifornimento = try c.decodeIfPresent([Cella].self, forKey: .struttureDiRifornimento) ?? []
+        }
     }
     /// Quante giornate generare per ciascuno scenario.
     public let giornateGenerate: Int
@@ -97,6 +117,17 @@ public struct BancoCampagna: Sendable {
         /// ingombro e la diversità di volume non è stata esercitata.
         public let volumeMinimo: Int
         public let volumeMassimo: Int
+        /// I fenomeni del rifornimento generati dalla corsa (01 §5.2.2): se restano a
+        /// zero, la corsa non li ha esercitati e gli invarianti relativi non hanno morso.
+        /// Il taglio (interruzioni), la sosta IMPOSTA di due turni (fatti non decisi nel
+        /// registro), la sosta VOLONTARIA di un turno (ordinata dalla condotta), le
+        /// riprese, i turni-gruppo passati in zona e le strutture isolate allo scenario.
+        public let tagli: Int
+        public let sosteImposte: Int
+        public let sosteVolontarie: Int
+        public let riprese: Int
+        public let passaggiInZona: Int
+        public let struttureIsolate: Int
         public let violazioni: [String]
         public let improntaFinale: String
     }
@@ -112,11 +143,18 @@ public struct BancoCampagna: Sendable {
     /// verso nord e la misura vedrebbe una sola situazione.
     public func corri(_ voce: ScenariCampagna.Voce, giornate: Int) throws -> Corsa {
         var stato = try FabbricaCampagna.crea(
-            scenario: ScenarioCampagna(mappa: voce.mappa, gruppiGiocatore: voce.gruppi),
+            scenario: ScenarioCampagna(mappa: voce.mappa, gruppiGiocatore: voce.gruppi,
+                                       forzeNemiche: voce.forzeNemiche,
+                                       struttureDiRifornimento: voce.struttureDiRifornimento),
             valori: valoriCampagna, archetipiNoti: archetipiNoti)
         var violazioni = Set<String>()
         var ordini = 0, marce = 0, marceLunghe = 0, marceCompiute = 0, revoche = 0
         var presidi = 0, senzaDestinazione = 0, divisioni = 0, riunioni = 0
+        // I fenomeni del rifornimento. Le soste VOLONTARIE le conta la condotta (è lei a
+        // ordinarle); il taglio, la sosta imposta e le riprese si leggono dal registro
+        // alla fine, perché sono i fatti non decisi che vi si annotano. I turni-gruppo in
+        // zona si contano a ogni giornata. Le strutture isolate si contano allo scenario.
+        var sosteVolontarie = 0, passaggiInZona = 0
         // La tabella dei volumi per atomo, per l'invariante del volume come somma.
         let volumePerAtomo = motore.valori.archetipi.mapValues { $0.volumePerAtomo }
         // I volumi dei gruppi (costanti in questa unità: la composizione non muta).
@@ -131,6 +169,11 @@ public struct BancoCampagna: Sendable {
             passiDiSicurezza += 1
             guard passiDiSicurezza <= giornate * (voce.gruppi.count + 4) + 10 else { break }
             let vista = VistaCampagna(motore: motore, stato: stato, parte: .giocatore)
+
+            // I turni-gruppo passati in una zona di rifornimento: si contano a ogni
+            // giro, così che il fenomeno risulti esercitato quando esiste una struttura.
+            passaggiInZona += stato.gruppi(di: .giocatore).lazy.filter {
+                motore.inZonaDiRifornimento($0.posizione, stato: stato) }.count
 
             // L'invariante del salto si controlla percorrendolo davvero, con la
             // sequenza che la Presentazione userebbe.
@@ -170,18 +213,35 @@ public struct BancoCampagna: Sendable {
                 revoche += 1
             } else {
                 guard let gruppo = vista.prossimoGruppoInAttesa(dopo: nil) else { break }
-                let destinazioni = vista.destinazioniValide(per: gruppo.id)
-                if destinazioni.isEmpty { senzaDestinazione += 1 }
-                if destinazioni.isEmpty || stato.giorno % 3 == 0 {
+                // Rifornimento (01 §5.2.2). Un gruppo che DEVE rifornirsi si ferma a
+                // rifornirsi: è l'unica azione possibile, e la sosta non si elude. Un
+                // gruppo senza provviste, ogni tanto, si ferma di propria iniziativa: è
+                // la sosta VOLONTARIA di un turno (autonomia). Un gruppo col rifornimento
+                // TAGLIATO presidia, così il taglio matura invece di essere aggirato
+                // marciando via — è ciò che fa emergere il taglio, la sosta imposta e la
+                // ripresa in modo deterministico, qualunque cosa faccia il resto.
+                if gruppo.deveRifornirsi {
+                    comando = .sostaConRaccolta(gruppo: gruppo.id)
+                } else if gruppo.turniSenzaProvviste == 1, stato.giorno % 3 == 0 {
+                    comando = .sostaConRaccolta(gruppo: gruppo.id)
+                    sosteVolontarie += 1
+                } else if motore.rifornimentoTagliato(di: gruppo, stato: stato) {
                     comando = .presidio(gruppo: gruppo.id)
                     presidi += 1
                 } else {
-                    let destinazione = destinazioni[gruppo.id.numero % destinazioni.count]
-                    // Il comando lo forma l'interrogazione, che vi mette il costo in
-                    // giorni prescritto dai dati: nemmeno il banco lo inventa.
-                    comando = vista.comandoDiMarcia(per: gruppo.id, a: destinazione)!
-                    if case .marcia(_, _, let giorni) = comando, giorni > 1 { marceLunghe += 1 }
-                    marce += 1
+                    let destinazioni = vista.destinazioniValide(per: gruppo.id)
+                    if destinazioni.isEmpty { senzaDestinazione += 1 }
+                    if destinazioni.isEmpty || stato.giorno % 3 == 0 {
+                        comando = .presidio(gruppo: gruppo.id)
+                        presidi += 1
+                    } else {
+                        let destinazione = destinazioni[gruppo.id.numero % destinazioni.count]
+                        // Il comando lo forma l'interrogazione, che vi mette il costo in
+                        // giorni prescritto dai dati: nemmeno il banco lo inventa.
+                        comando = vista.comandoDiMarcia(per: gruppo.id, a: destinazione)!
+                        if case .marcia(_, _, let giorni) = comando, giorni > 1 { marceLunghe += 1 }
+                        marce += 1
+                    }
                 }
             }
             let prima = stato
@@ -208,6 +268,27 @@ public struct BancoCampagna: Sendable {
             griglia: stato.griglia, da: Cella(riga: 1, colonna: 1),
             vicini: stato.griglia.vicini).map(\.description))
 
+        // Il taglio, la sosta imposta e la ripresa sono i fatti NON decisi che il
+        // registro annota (01 §5.17.1): li si conta di là, non dagli eventi, così che
+        // la sosta VOLONTARIA — che è un ordine e non si annota — non vi si confonda.
+        var tagli = 0, sosteImposte = 0, riprese = 0
+        for voce in stato.registro {
+            switch voce.fatto {
+            case .rifornimentoInterrotto: tagli += 1
+            case .sostaDiRifornimento: sosteImposte += 1
+            case .rifornimentoRipreso: riprese += 1
+            default: break
+            }
+        }
+        // Le strutture ISOLATE allo scenario: nessun proprio gruppo, all'inizio, nelle
+        // nove caselle della zona (01 §5.2.2.7). Riforniscono comunque, e la prova che
+        // la corsa le esercita è che esistono e che i turni-gruppo in zona sono positivi.
+        let posizioniIniziali = Set(voce.gruppi.map { Cella(riga: $0.riga, colonna: $0.colonna) })
+        let struttureIsolate = voce.struttureDiRifornimento.filter { struttura in
+            !posizioniIniziali.contains { max(abs($0.riga - struttura.riga),
+                                              abs($0.colonna - struttura.colonna)) <= 1 }
+        }.count
+
         return Corsa(identificatore: voce.identificatore, mappa: voce.mappa,
                      gruppi: voce.gruppi.count, giornate: stato.giorno - giornoIniziale,
                      ordini: ordini, marce: marce, marceLunghe: marceLunghe,
@@ -215,6 +296,9 @@ public struct BancoCampagna: Sendable {
                      divisioni: divisioni, riunioni: riunioni,
                      senzaDestinazione: senzaDestinazione,
                      volumeMinimo: volumeMinimo, volumeMassimo: volumeMassimo,
+                     tagli: tagli, sosteImposte: sosteImposte, sosteVolontarie: sosteVolontarie,
+                     riprese: riprese, passaggiInZona: passaggiInZona,
+                     struttureIsolate: struttureIsolate,
                      violazioni: violazioni.sorted(), improntaFinale: stato.impronta())
     }
 

@@ -36,6 +36,16 @@ public struct TraduttoreEventiCampagna: Sendable {
         // il proprio significato tattile già assegnato: `marcia_completata`, famiglia
         // della navigazione (02 §11.7.1). Non è una conferma di un ordine.
         case .marciaCompiuta: return .marciaCompletata
+        // Il rifornimento che si interrompe e la sosta imposta che ne consegue portano
+        // lo stesso segnale dedicato `rifornimento_interrotto` (02 §11.7.1): un solo
+        // richiamo tattile «bada al rifornimento», e le parole dicono se è il primo
+        // giorno di digiuno o la sosta imposta. Il tetto dei significati resta chiuso
+        // (02 §11.5): non se ne aggiunge uno per la sosta.
+        case .rifornimentoInterrotto, .sostaDiRifornimento: return .rifornimentoInterrotto
+        // La ripresa è una buona notizia e non chiede attenzione: nessun segnale
+        // tattile proprio — non esiste nel tetto chiuso e non se ne aggiunge — ma
+        // l'annuncio parlato la dice (02 §8.7), come per la chiusura della giornata.
+        case .rifornimentoRipreso: return nil
         case .giornataChiusa, .giornataAperta: return nil
         }
     }
@@ -76,6 +86,19 @@ public struct TraduttoreEventiCampagna: Sendable {
             return nil
         case .giornataAperta(let giorno):
             return testi.frase("campagna.giornata_aperta", verbosita: verbosita, giorno)
+        // I fatti del rifornimento si annunciano dal punto della catena in cui accadono,
+        // col salto alla casella (02 §6.6). La ripresa è un annuncio a sé, distinto dallo
+        // stato «rifornito» che non si annuncia mai (02 §8.7): dice il passaggio, non la
+        // quiete.
+        case .rifornimentoInterrotto(_, let chiave, let casella):
+            return testi.frase("campagna.rifornimento_interrotto", verbosita: verbosita,
+                               nome(chiave), casella.riga, casella.colonna)
+        case .sostaDiRifornimento(_, let chiave, let casella):
+            return testi.frase("campagna.sosta_di_rifornimento", verbosita: verbosita,
+                               nome(chiave), casella.riga, casella.colonna)
+        case .rifornimentoRipreso(_, let chiave, let casella):
+            return testi.frase("campagna.rifornimento_ripreso", verbosita: verbosita,
+                               nome(chiave), casella.riga, casella.colonna)
         }
     }
 
@@ -90,6 +113,10 @@ public struct TraduttoreEventiCampagna: Sendable {
         case .marciaCompiuta(let gruppo, _, let a):
             return testi.frase(chiave, voce.giorno, nome(gruppo), a.riga, a.colonna)
         case .marciaRevocata(let gruppo, let casella):
+            return testi.frase(chiave, voce.giorno, nome(gruppo), casella.riga, casella.colonna)
+        case .rifornimentoInterrotto(let gruppo, let casella),
+             .sostaDiRifornimento(let gruppo, let casella),
+             .rifornimentoRipreso(let gruppo, let casella):
             return testi.frase(chiave, voce.giorno, nome(gruppo), casella.riga, casella.colonna)
         case .ordineAnnullato, .giornataAzzerata:
             return testi.frase(chiave, voce.giorno)

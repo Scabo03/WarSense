@@ -30,15 +30,51 @@ public struct ScenarioCampagna: Hashable, Codable, Sendable {
     public let mappa: IdentificatoreDati
     /// I gruppi propri, in numero libero (01 §5.6.0.1): non esiste alcun tetto.
     public let gruppiGiocatore: [GruppoIniziale]
+    /// Le forze nemiche FERME che lo scenario dichiara (01 §5.2.2): dati MINIMI per
+    /// provare il taglio, non l'avversario — non hanno condotta né mosse (incarico 16).
+    /// Le campagne giocabili non ne dichiarano, perché l'avversario non è costruito:
+    /// vi compaiono solo gli scenari di verifica. Quando l'elenco è vuoto la codifica
+    /// lo OMETTE, così che gli scenari e i salvataggi che non le usano restino identici
+    /// al byte — la compatibilità dei giornali non si muove (00 §15, RDA-107).
+    public let forzeNemiche: [Cella]
+    /// Le strutture di rifornimento FERME (01 §5.2.2.6): stessa natura dei dati minimi,
+    /// per provare la zona, mai le opere. Anch'esse omesse dalla codifica se vuote.
+    public let struttureDiRifornimento: [Cella]
 
-    public init(mappa: IdentificatoreDati, gruppiGiocatore: [GruppoIniziale]) {
+    public init(mappa: IdentificatoreDati, gruppiGiocatore: [GruppoIniziale],
+                forzeNemiche: [Cella] = [], struttureDiRifornimento: [Cella] = []) {
         self.mappa = mappa
         self.gruppiGiocatore = gruppiGiocatore
+        self.forzeNemiche = forzeNemiche
+        self.struttureDiRifornimento = struttureDiRifornimento
     }
 
     enum CodingKeys: String, CodingKey {
         case mappa
         case gruppiGiocatore = "gruppi_giocatore"
+        case forzeNemiche = "forze_nemiche"
+        case struttureDiRifornimento = "strutture_di_rifornimento"
+    }
+
+    public init(from decoder: Decoder) throws {
+        let c = try decoder.container(keyedBy: CodingKeys.self)
+        mappa = try c.decode(IdentificatoreDati.self, forKey: .mappa)
+        gruppiGiocatore = try c.decode([GruppoIniziale].self, forKey: .gruppiGiocatore)
+        // Assenti nei dati precedenti a questa unità: si leggono vuote e nulla cambia.
+        forzeNemiche = try c.decodeIfPresent([Cella].self, forKey: .forzeNemiche) ?? []
+        struttureDiRifornimento = try c.decodeIfPresent([Cella].self, forKey: .struttureDiRifornimento) ?? []
+    }
+
+    public func encode(to encoder: Encoder) throws {
+        var c = encoder.container(keyedBy: CodingKeys.self)
+        try c.encode(mappa, forKey: .mappa)
+        try c.encode(gruppiGiocatore, forKey: .gruppiGiocatore)
+        // Omesse quando vuote: la compatibilità dei giornali esige che ciò che non le
+        // usa non cambi di un byte (il campione del giornale resta identico).
+        if !forzeNemiche.isEmpty { try c.encode(forzeNemiche, forKey: .forzeNemiche) }
+        if !struttureDiRifornimento.isEmpty {
+            try c.encode(struttureDiRifornimento, forKey: .struttureDiRifornimento)
+        }
     }
 }
 
@@ -62,6 +98,9 @@ public enum FabbricaCampagna {
         /// Un archetipo ignoto nella composizione: come il terreno ignoto respinto in
         /// caricamento (05 §7.7), il volume non si potrebbe leggere.
         case archetipoIgnoto(IdentificatoreDati)
+        /// Una forza nemica o una struttura FUORI dalla mappa: come i gruppi, i dati
+        /// minimi del rifornimento devono stare dentro la griglia (01 §5.2.2).
+        case rifornimentoFuoriMappa(Cella)
     }
 
     /// - Parameter archetipiNoti: le chiavi degli archetipi caricati e validi
@@ -119,6 +158,15 @@ public enum FabbricaCampagna {
             prossimoNome += 1
         }
 
+        // Le forze nemiche e le strutture: dati minimi per provare taglio e zona, che
+        // devono comunque stare dentro la griglia. Nessun'altra regola le governa —
+        // non hanno condotta, non si muovono, non sono opere (incarico 16).
+        for cella in scenario.forzeNemiche + scenario.struttureDiRifornimento {
+            guard mappa.griglia.contiene(cella) else {
+                throw ErroreScenario.rifornimentoFuoriMappa(cella)
+            }
+        }
+
         // Il registro nasce vuoto e la schermata lo dichiara: l'apertura di una
         // giornata non è un fatto da annotare, perché il giorno è una proprietà di
         // ciascuna voce (02 §6.6) e un elemento che dichiarasse soltanto l'inizio
@@ -126,6 +174,8 @@ public enum FabbricaCampagna {
         return StatoCampagna(mappa: mappa, giorno: 1, gruppi: gruppi,
                              prossimoIdGruppo: prossimoId,
                              prossimoIndiceNome: prossimoNome,
-                             registro: [], prossimoNumeroVoce: 0)
+                             registro: [], prossimoNumeroVoce: 0,
+                             forzeNemiche: Set(scenario.forzeNemiche),
+                             struttureDiRifornimento: Set(scenario.struttureDiRifornimento))
     }
 }

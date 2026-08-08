@@ -67,8 +67,8 @@ struct CostruttoreAnnunciCampagna {
 
     /// Il contenuto nell'ordine registrato da 02 §3.8.1, ricavato dall'UNICO elenco
     /// di ciò che la casella dichiara (`VistaCampagna.vociDiCasella`). Lo stato di
-    /// conoscenza, le anomalie dell'occupante e la zona di rifornimento
-    /// appartengono a unità successive e si saltano senza lasciare traccia.
+    /// conoscenza appartiene a un'unità successiva e si salta senza lasciare traccia;
+    /// il rifornimento dell'occupante e la zona di rifornimento entrano ora.
     ///
     /// Il ciclo su quell'elenco non ha un ramo di ripiego: un caso aggiunto
     /// all'enumerativo senza la propria frase non compila. È così che la
@@ -76,13 +76,19 @@ struct CostruttoreAnnunciCampagna {
     /// costruzione anziché per disciplina (RDA-74).
     ///
     /// I tagli di verbosità partono dalla coda: il livello sintetico tiene la sola
-    /// identità di ciò che occupa la casella, come fa quello di battaglia. Fra
-    /// normale e dettagliato non c'è differenza finché la coda ha tre sole voci.
+    /// identità di ciò che occupa la casella E la sua prima anomalia, il rifornimento
+    /// (02 §3.8.1) — che un gruppo sia senza provviste è troppo per lasciarlo cadere
+    /// col resto. Il resto della coda cade nel sintetico, come in battaglia.
     private func contenutoCasella(_ casella: Cella) -> [String] {
         let voci = vista.vociDiCasella(casella)
         var parti: [String] = []
         for voce in voci {
-            if case .occupante = voce {} else if verbosita == .sintetico { break }
+            let eTesta: Bool
+            switch voce {
+            case .occupante, .rifornimento: eTesta = true
+            default: eTesta = false
+            }
+            if !eTesta, verbosita == .sintetico { break }
             parti.append(frase(di: voce))
         }
         // «Libera» si dice soltanto quando la casella non dichiara nulla: una
@@ -99,6 +105,14 @@ struct CostruttoreAnnunciCampagna {
         case .occupante(let gruppo):
             return testi.frase("casella.occupante_proprio", nomeGruppo(gruppo),
                                fraseStato(gruppo.statoDichiarato)).testo
+        case .rifornimento(let rifornimento):
+            // Lo stato di rifornimento dell'occupante è un termine chiuso: la chiave
+            // porta già il giorno (primo/secondo) o la sosta, e non prende numeri.
+            return testi.termine(rifornimento.chiaveTesto).testo
+        case .zonaDiRifornimento:
+            // La zona riusa il termine chiuso «in zona di rifornimento» (02 §4.4.5):
+            // è la stessa cosa, e non se ne conia uno nuovo per la casella.
+            return testi.termine("rifornimento.in_zona").testo
         case .quartierGenerale(let parte):
             return testi.termine(parte == .giocatore
                                  ? "casella.quartier_generale"
@@ -117,6 +131,13 @@ struct CostruttoreAnnunciCampagna {
     private func segno(di voce: VistaCampagna.VoceDiCasella) -> String? {
         switch voce {
         case .occupante(let gruppo): return inizialeGruppo(gruppo)
+        case .rifornimento(let rifornimento):
+            switch rifornimento {
+            case .senzaProvviste: return "!"
+            case .inSosta: return "S"
+            case .inZona: return nil
+            }
+        case .zonaDiRifornimento: return "R"
         case .quartierGenerale(let parte): return parte == .giocatore ? "Q" : "q"
         case .terreno(let terreno):
             switch terreno {
@@ -161,24 +182,34 @@ struct CostruttoreAnnunciCampagna {
     // MARK: - Informazione di stato (02 §6.4, §6.5.1.3)
 
     /// L'ordine è quello fisso di 02 §6.5.1.3, ridotto a ciò che esiste: giorno,
-    /// gruppi che hanno agito sul totale. Le condizioni assenti non si nominano.
+    /// gruppi che hanno agito sul totale, gruppi in marcia e — in coda — gruppi senza
+    /// rifornimento. Le condizioni assenti non si nominano.
     func informazioneDiStato() -> String {
         let info = vista.informazioneDiStato
         // I gruppi in marcia lunga si dichiarano a parte (01 §5.16): quattro forme,
         // secondo che vi siano gruppi in marcia e che qualcuno abbia già agito.
+        var frase: String
         if info.gruppiInMarcia > 0 {
             if info.gruppiCheHannoAgito == 0 {
-                return testi.frase("campagna.stato_solo_marcia", info.giorno,
-                                   info.gruppiInMarcia, info.gruppiTotali).testo
+                frase = testi.frase("campagna.stato_solo_marcia", info.giorno,
+                                    info.gruppiInMarcia, info.gruppiTotali).testo
+            } else {
+                frase = testi.frase("campagna.stato_con_marcia", info.giorno,
+                                    info.gruppiCheHannoAgito, info.gruppiTotali, info.gruppiInMarcia).testo
             }
-            return testi.frase("campagna.stato_con_marcia", info.giorno,
-                               info.gruppiCheHannoAgito, info.gruppiTotali, info.gruppiInMarcia).testo
+        } else if info.gruppiCheHannoAgito == 0 {
+            frase = testi.frase("campagna.stato_tutti_fermi", info.giorno, info.gruppiTotali).testo
+        } else {
+            frase = testi.frase("campagna.stato", info.giorno,
+                                info.gruppiCheHannoAgito, info.gruppiTotali).testo
         }
-        if info.gruppiCheHannoAgito == 0 {
-            return testi.frase("campagna.stato_tutti_fermi", info.giorno, info.gruppiTotali).testo
+        // I gruppi senza rifornimento sono una categoria a sé (01 §5.16): si dichiarano
+        // in coda quando ce ne sono, e la condizione assente non si nomina (02 §8.7.1).
+        if info.gruppiSenzaRifornimento > 0 {
+            frase += testi.frase("campagna.stato_senza_rifornimento",
+                                 info.gruppiSenzaRifornimento).testo
         }
-        return testi.frase("campagna.stato", info.giorno,
-                           info.gruppiCheHannoAgito, info.gruppiTotali).testo
+        return frase
     }
 
     /// L'annuncio di apertura: la mappa, le sue dimensioni e dove sta il proprio

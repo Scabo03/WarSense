@@ -36,6 +36,11 @@ extension Gruppo: CodificabileCanonico {
             cc.intero(Int64(m.giorniTotali))
             cc.intero(Int64(m.giorniCompiuti))
         }
+        // Lo stato di rifornimento entra nell'impronta: due gruppi altrimenti uguali
+        // ma uno senza provviste e uno rifornito non sono lo stesso stato.
+        c.intero(Int64(turniSenzaProvviste))
+        c.intero(Int64(sostaDovuta))
+        c.intero(Int64(turniMarciaForzata))
     }
 }
 
@@ -49,6 +54,10 @@ extension FattoRegistrato: CodificabileCanonico {
         case .marciaCompiuta(let gruppo, let da, let a):
             c.testo(gruppo); da.codifica(in: &c); a.codifica(in: &c)
         case .marciaRevocata(let gruppo, let casella):
+            c.testo(gruppo); casella.codifica(in: &c)
+        case .rifornimentoInterrotto(let gruppo, let casella),
+             .sostaDiRifornimento(let gruppo, let casella),
+             .rifornimentoRipreso(let gruppo, let casella):
             c.testo(gruppo); casella.codifica(in: &c)
         case .ordineAnnullato, .giornataAzzerata:
             break
@@ -91,6 +100,13 @@ extension StatoCampagna {
         c.intero(Int64(registro.count))
         for voce in registro { voce.codifica(in: &c) }
         c.intero(prossimoNumeroVoce)
+        // Le forze nemiche e le strutture di rifornimento, ordinate per casella: due
+        // stati con nemici o strutture in posti diversi si comportano in modo diverso
+        // (il taglio e le zone ne dipendono).
+        c.intero(Int64(forzeNemiche.count))
+        for casella in forzeNemiche.sorted() { casella.codifica(in: &c) }
+        c.intero(Int64(struttureDiRifornimento.count))
+        for casella in struttureDiRifornimento.sorted() { casella.codifica(in: &c) }
         return SHA256.improntaEsadecimale(c.byte)
     }
 }

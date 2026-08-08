@@ -536,6 +536,8 @@ final class SchermataMappaCampagna: UIViewController {
                 self?.costruttore?.vista.casellePropriFormazioni ?? [] },
             rotore("rotore.gruppi_in_attesa") { [weak self] in
                 self?.costruttore?.vista.caselleGruppiInAttesa ?? [] },
+            rotore("rotore.gruppi_senza_rifornimento") { [weak self] in
+                self?.costruttore?.vista.caselleGruppiSenzaRifornimento ?? [] },
         ]
     }
 
