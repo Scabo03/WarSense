@@ -2,7 +2,7 @@ Questa build porta nella campagna la DIVISIONE e la RIUNIONE dei gruppi, e sotto
 
 DIVIDERE UN GRUPPO. Attiva un tuo gruppo fatto di più reparti: nel suo pannello trovi «Dividi». Si apre una schermata a righe. In testa il nome del gruppo; poi una riga per ogni reparto, che dice quanti atomi è e se lo tieni o lo stacchi — attivala per commutare; infine le caselle adiacenti libere dove collocare il distaccamento. Attiva una destinazione: se hai scelto almeno un reparto da staccare e almeno uno da tenere, il gruppo si divide e senti nascere il nuovo gruppo, col suo nome, nella casella scelta. La divisione costa la giornata a entrambi. Se non stacchi nulla, o stacchi tutto, te lo dice e non divide. Prova a dividere un gruppo e ascolta dove nasce il distaccamento.
 
-RIUNIRE DUE GRUPPI. Attiva un gruppo che ha un tuo gruppo nella casella accanto: nel pannello trovi «Riunisci con ⟨nome⟩». Attivandola, i due diventano uno solo; il maggiore dei due conserva il nome e la casella. La riunione non costa la giornata, ma se uno dei due aveva già agito, il gruppo unito si considera avere già agito. Prova a riunire due gruppi vicini e ascolta quale nome sopravvive.
+RIUNIRE DUE GRUPPI. Attiva un gruppo che ha un tuo gruppo nella casella accanto: nel pannello trovi la voce per riunirlo con quel vicino, chiamato per nome. Attivandola, i due diventano uno solo; il maggiore dei due conserva il nome e la casella. La riunione non costa la giornata, ma se uno dei due aveva già agito, il gruppo unito si considera avere già agito. Prova a riunire due gruppi vicini e ascolta quale nome sopravvive.
 
 UN GRUPPO IN MARCIA NON SI DIVIDE NÉ SI RIUNISCE. Se provi a dividere o riunire un gruppo impegnato in una marcia lunga, il gioco te lo dichiara inchiodato: prima deve arrivare.
 
