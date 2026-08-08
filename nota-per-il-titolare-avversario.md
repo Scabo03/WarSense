@@ -10,7 +10,7 @@ Quando l'avversario si muove dentro il tuo sguardo, lo **senti annunciare**: «F
 
 ## Può tagliarti il rifornimento mettendosi alle tue spalle
 
-Se un gruppo avversario si porta **alle spalle** di una tua colonna — nelle caselle fra lei e il tuo quartier generale — ti interrompe il rifornimento, esattamente come facevano le forze ferme di prima, ma ora è qualcuno che ci si mette apposta. Quando accade lo senti: «Rifornimento di ⟨gruppo⟩ interrotto», col richiamo tattile del rifornimento; se resti tagliato, dopo un turno il gruppo è **costretto alla sosta** e perde tempo a rifornirsi. La contromossa è la stessa di prima: togliergli i nemici dalle spalle, o entrare in una zona di rifornimento.
+Se un gruppo avversario si porta **alle spalle** di una tua colonna — nelle caselle fra lei e il tuo quartier generale — ti interrompe il rifornimento, esattamente come facevano le forze ferme di prima, ma ora è qualcuno che ci si mette apposta. Quando accade lo senti: «Rifornimento di un tuo gruppo interrotto in riga tale, casella tale», col richiamo tattile del rifornimento; se resti tagliato, dopo un turno il gruppo è **costretto alla sosta** e perde tempo a rifornirsi. La contromossa è la stessa di prima: togliergli i nemici dalle spalle, o entrare in una zona di rifornimento.
 
 ## Può oltrepassarti e puntare altrove
 
