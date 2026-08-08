@@ -163,4 +163,13 @@ public enum EventoCampagna: Hashable, Codable, Sendable {
     /// Il rifornimento di un gruppo è ripreso — nemici tolti dalle spalle o zona di
     /// rifornimento raggiunta (01 §5.2.2, §5.2.2.6).
     case rifornimentoRipreso(gruppo: IdGruppo, nome: IdentificatoreDati, casella: Cella)
+    /// Una formazione avversaria è stata AVVISTATA dal giocatore in una casella che
+    /// osserva (01 §5.6.11, 02 §8.2.1): la sola mossa avversaria che il giocatore
+    /// apprende passa dagli stati di conoscenza, e questo evento la annuncia dove la
+    /// conoscenza è confermato. NON porta il nome della formazione né il suo volume
+    /// (02 §6.4.1): dichiara il fatto — una formazione avversaria, e dove — e nulla di
+    /// più. È l'analogo di campagna di `battaglia.spostamento_avversario`. La parte
+    /// avversaria non riceve mai questo evento sui gruppi del giocatore, perché
+    /// l'evento è già proiettato per l'osservatore (`proiettaPerIlGiocatore`).
+    case formazioneAvversariaAvvistata(casella: Cella)
 }

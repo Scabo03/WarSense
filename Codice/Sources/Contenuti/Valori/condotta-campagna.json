@@ -1,0 +1,6 @@
+{
+ "aggressivita": 100,
+ "minaccia_rifornimento": 300,
+ "difesa_quartier_generale": 600,
+ "soglia_difesa_quartier_generale": 3
+}

@@ -203,6 +203,11 @@
 "campagna.sosta_di_rifornimento.sintetico" = "%@ in sosta di rifornimento";
 "campagna.rifornimento_ripreso" = "Rifornimento di %@ ripreso in riga %d, casella %d";
 "campagna.rifornimento_ripreso.sintetico" = "%@ di nuovo rifornito";
+/* Avvistamento di una formazione avversaria (02 §8.2.1, incarico 18): il fatto e il
+   luogo, senza nome né volume (02 §6.4.1). È la mossa avversaria che il giocatore
+   apprende, e passa dalla conoscenza confermato. */
+"campagna.formazione_avvistata" = "Formazione avversaria avvistata in riga %d, casella %d";
+"campagna.formazione_avvistata.sintetico" = "Avversario in riga %d, casella %d";
 
 /* Registro degli eventi (01 §5.17, 02 §6.6): ogni voce è una frase compiuta che
    dichiara il giorno cui si riferisce. Il giorno è una PROPRIETÀ della voce e non
@@ -219,6 +224,7 @@
 "registro.rifornimento_interrotto" = "Giorno %1$d: rifornimento di %2$@ interrotto in riga %3$d, casella %4$d";
 "registro.sosta_di_rifornimento" = "Giorno %1$d: %2$@ costretto alla sosta di rifornimento in riga %3$d, casella %4$d";
 "registro.rifornimento_ripreso" = "Giorno %1$d: rifornimento di %2$@ ripreso in riga %3$d, casella %4$d";
+"registro.formazione_avvistata" = "Giorno %1$d: formazione avversaria avvistata in riga %2$d, casella %3$d";
 "registro.ordine_annullato" = "Giorno %d: ordine annullato";
 "registro.giornata_azzerata" = "Giorno %d: ordini della giornata azzerati";
 "registro.titolo" = "Registro della campagna";
@@ -233,6 +239,9 @@
 "casella.testa" = "riga %d, casella %d";
 "casella.libera" = "libera";
 "casella.occupante_proprio" = "tuo %@, %@";
+/* Occupante avversario di una casella osservata (incarico 18): senza nome, senza
+   volume (02 §6.4.1), senza stato d'azione. Il giocatore lo vede, non lo conosce. */
+"casella.occupante_avversario" = "formazione avversaria";
 /* casella.disponibile porta il costo in giorni e sta nel .stringsdict, con il
    plurale di sistema (01 §5.6.3.5: il costo si dichiara sulla voce del comando).
    casella.inchioda è la CONSEGUENZA che l'etichetta vocale aggiunge, perché l'ordine
@@ -290,6 +299,7 @@
 "rotore.proprie_formazioni" = "Tue formazioni";
 "rotore.gruppi_in_attesa" = "Gruppi da muovere";
 "rotore.gruppi_senza_rifornimento" = "Gruppi senza rifornimento";
+"rotore.formazioni_avversarie_note" = "Formazioni avversarie note";
 
 /* Nomi parlati delle mappe di prova. */
 "mappa.guado" = "Guado";
@@ -305,6 +315,7 @@
 /* Errori dei dati di campagna (05 §7.8): chiavi risolte sulla copia di fabbrica. */
 "errore.dati.costo_marcia_incoerente" = "I valori della marcia sono incoerenti: costo o posizioni sotto il minimo, o pesi di terreno o strada mancanti";
 "errore.dati.conoscenza_incoerente" = "I valori della conoscenza sono incoerenti: raggio di osservazione negativo o soglia di decadimento sotto uno";
+"errore.dati.condotta_incoerente" = "I valori della condotta dell'avversario sono incoerenti: soglia di difesa del quartier generale sotto uno";
 "errore.dati.formato_ignoto" = "Formato di mappa ignoto in %@: %@";
 "errore.dati.casella_fuori_mappa" = "Casella fuori dai confini in %@ alla voce %@";
 "errore.dati.casella_ripetuta" = "Casella dichiarata due volte in %@ alla voce %@";

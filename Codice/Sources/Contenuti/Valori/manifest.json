@@ -7,6 +7,7 @@
   "archetipi.json": "7e5accc502b50e25b24a4d0f4810129fddd57a68ebaf5c154a0c07e6a79b22e7",
   "caratteristiche-campo.json": "cda6b75ef6bd34f3445ce5ce803ca32d7bbea2b21169e0fef243bf1ab467793f",
   "combattimento.json": "b2b1b8a8085864bb61c310986865bcf9bd2520c05bc8399509ddc4e9b94dbd94",
+  "condotta-campagna.json": "5d02b5c776943d7ed42a26a78900c4a05c3e604c1a9de335bd97fc000b32aa23",
   "conoscenza-campagna.json": "39dae09f1d6694e6bf821f66479a5695021a0f9f135ad71f8f484e55754ecc87",
   "formati-mappa.json": "3adc8adb22315fba1f4610622e8f6e9ee03e891311f024774a99a19bfdbea4e7",
   "formato-battaglia.json": "d5877cc487278512568a7efec9e76f3195542b3ecb0d23be9f6dc49939a5f290",
@@ -20,8 +21,9 @@
   "ufficiali.json": "39447ca2b767d7b0a443f69257b67c8c71a3954c3725a3aa2169157c42f595c3",
   "vantaggi-nascosti.json": "65c7d952ce06cd5c9a8b594be77b0cfb3171045d77b6007673299c6b36d253f8"
  },
- "versione": "0.9.0",
+ "versione": "0.10.0",
  "versioni_compatibili": [
-  "0.8.0"
+  "0.8.0",
+  "0.9.0"
  ]
 }

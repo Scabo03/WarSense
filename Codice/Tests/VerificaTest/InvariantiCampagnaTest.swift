@@ -672,6 +672,24 @@ final class InvariantiCampagnaTest: XCTestCase {
                 return sonda.controlla(prima: prima, comando: .presidio(gruppo: ids[0]),
                                        dopo: dopo, eventi: [], adiacenti: griglia.adiacenti)
             }),
+            ("registro_rivela_ignoto", {
+                // Il registro acquisisce un avvistamento avversario su una casella che il
+                // giocatore NON osserva: informazione che la conoscenza non gli ha dato
+                // (§5.6.11). La sonda lo coglie perché l'osservazione arriva da fuori.
+                var dopo = base
+                dopo.registro.append(VoceRegistro(numero: 0, giorno: 1,
+                    fatto: .formazioneAvversariaAvvistata(casella: Cella(riga: 1, colonna: 1))))
+                return sonda.controllaRegistro(prima: base, dopo: dopo,
+                                               osservataDalGiocatore: { _ in false })
+            }),
+            ("vista_avversaria_rivela_ignoto", {
+                // La vista dell'avversario contiene una casella del giocatore che
+                // l'avversario NON osserva: deciderebbe su informazione non posseduta
+                // (§5.11.1). La sonda lo coglie perché la vista e l'osservazione arrivano
+                // da fuori.
+                sonda.controllaVistaAvversario(stato: base, note: [Cella(riga: 5, colonna: 5)],
+                                               osservataDallAvversario: { _ in false })
+            }),
         ]
     }
 

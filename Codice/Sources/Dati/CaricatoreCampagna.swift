@@ -93,6 +93,17 @@ public enum CaricatoreCampagna {
                              file: "conoscenza-campagna.json")
         }
 
+        // Il carattere dell'avversario (01 §12.1, §14.3): pesi provvisori, mai una
+        // costante nel codice (00 §13.1). I quattro pesi possono essere nulli o negativi
+        // — un avversario indifferente a una spinta è una taratura legittima — ma la
+        // soglia di difesa è un raggio e dev'essere almeno uno, o la difesa non si
+        // accenderebbe mai (nemmeno con un gruppo sul proprio quartier generale).
+        let condotta = try leggi(ValoriCondotta.self, "condotta-campagna.json")
+        guard condotta.sogliaDifesaQuartierGenerale >= 1 else {
+            throw ErroreDati(chiave: "errore.dati.condotta_incoerente",
+                             file: "condotta-campagna.json")
+        }
+
         // Le mappe sono un albero di file: ciascuna è contenuto a sé (05 §7.6).
         let cartellaDelleMappe = cartella.appendingPathComponent(cartellaMappe)
         let contenuti = (try? FileManager.default.contentsOfDirectory(
@@ -113,7 +124,8 @@ public enum CaricatoreCampagna {
         }
 
         return ValoriCampagna(formatiMappa: formati, mappe: mappe,
-                              nomiGruppi: nomi.chiavi, marcia: marcia, conoscenza: conoscenza)
+                              nomiGruppi: nomi.chiavi, marcia: marcia, conoscenza: conoscenza,
+                              condotta: condotta)
     }
 
     /// Coerenza di una mappa (05 §7.8): formato noto, caselle dentro i confini e

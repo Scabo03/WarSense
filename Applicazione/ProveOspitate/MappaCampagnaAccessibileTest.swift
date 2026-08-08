@@ -124,8 +124,9 @@ final class MappaCampagnaAccessibileTest: XCTestCase {
         XCTAssertEqual(rotori.map(\.name),
                        [testi.frase("rotore.proprie_formazioni").testo,
                         testi.frase("rotore.gruppi_in_attesa").testo,
-                        testi.frase("rotore.gruppi_senza_rifornimento").testo],
-                       "gli insiemi di 02 §7.3 realizzati: formazioni, gruppi in attesa, gruppi senza rifornimento")
+                        testi.frase("rotore.gruppi_senza_rifornimento").testo,
+                        testi.frase("rotore.formazioni_avversarie_note").testo],
+                       "gli insiemi di 02 §7.3 realizzati: formazioni, gruppi in attesa, gruppi senza rifornimento, formazioni avversarie note")
     }
 
     func test_01_5_16_il_pannello_offre_le_azioni_disponibili_in_ordine_fisso() async throws {

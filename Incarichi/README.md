@@ -30,6 +30,7 @@ accaduto.
 
 | n. | data | materia | incarico | resoconto |
 |---|---|---|---|---|
+| 18 | 2026-08-08 | l'avversario che si muove sulla mappa di campagna (blocco 2: condotta deterministica, informazione incompleta, aggiramento, annuncio, giornale) | [incarico](18-2026-08-08-avversario-mappa-campagna-incarico.md) | in corso |
 | 17 | 2026-08-08 | l'avversario, la ricognizione e l'informazione incompleta (blocco 1: stati di conoscenza; blocchi 2–5 rinviati) | [incarico](17-2026-08-08-avversario-ricognizione-incarico.md) | [resoconto](17-2026-08-08-avversario-ricognizione-resoconto.md) |
 | 16 | 2026-08-07 | divisione e riunione dei gruppi con la schermata, le impronte che si dichiarano, e il rifornimento — catena, taglio, zone, autonomia e sosta (blocchi 0, 3, 4; completato il 2026-08-08) | [incarico](16-2026-08-07-divisione-rifornimento-incarico.md) | [resoconto](16-2026-08-07-divisione-rifornimento-resoconto.md) |
 | 15 | 2026-08-07 | composizione dei gruppi e volume, e le quattro correzioni sulla marcia (blocchi 1-2; rifornimento e divisione rinviati) | [incarico](15-2026-08-07-composizione-rifornimento-divisione-incarico.md) | [resoconto](15-2026-08-07-composizione-rifornimento-divisione-resoconto.md) |

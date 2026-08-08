@@ -85,7 +85,7 @@ struct CostruttoreAnnunciCampagna {
         for voce in voci {
             let eTesta: Bool
             switch voce {
-            case .conoscenza, .occupante, .rifornimento: eTesta = true
+            case .conoscenza, .occupante, .occupanteAvversario, .rifornimento: eTesta = true
             default: eTesta = false
             }
             if !eTesta, verbosita == .sintetico { break }
@@ -112,6 +112,10 @@ struct CostruttoreAnnunciCampagna {
         case .occupante(let gruppo):
             return testi.frase("casella.occupante_proprio", nomeGruppo(gruppo),
                                fraseStato(gruppo.statoDichiarato)).testo
+        case .occupanteAvversario:
+            // Senza nome, senza volume, senza stato d'azione (02 §6.4.1, incarico 18):
+            // il giocatore la vede, non la conosce.
+            return testi.frase("casella.occupante_avversario").testo
         case .rifornimento(let rifornimento):
             // Lo stato di rifornimento dell'occupante è un termine chiuso: la chiave
             // porta già il giorno (primo/secondo) o la sosta, e non prende numeri.
@@ -145,6 +149,7 @@ struct CostruttoreAnnunciCampagna {
             case .confermato: return nil
             }
         case .occupante(let gruppo): return inizialeGruppo(gruppo)
+        case .occupanteAvversario: return "a"
         case .rifornimento(let rifornimento):
             switch rifornimento {
             case .senzaProvviste: return "!"

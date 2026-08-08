@@ -92,6 +92,18 @@ public struct SondaInvariantiCampagna: Sendable {
         /// gioco che dichiara il falso su uno stato di conoscenza (01 §12), il che non
         /// è mai ammesso.
         case conoscenzaFalsa(parte: String, riga: Int, colonna: Int)
+        // Invarianti dell'avversario (01 §5.6.11, §5.11.1, incarico 18).
+        /// Il registro del giocatore ha acquisito un fatto che la sua conoscenza non gli
+        /// ha dato: un avvistamento avversario su una casella che NON osserva, o un fatto
+        /// di rifornimento di un gruppo AVVERSARIO. Nessuna informazione deve raggiungere
+        /// il giocatore se non dai suoi stati di conoscenza e dal registro dei fatti che
+        /// gli competono (01 §5.6.11). La sonda ricava l'osservazione da fuori.
+        case registroRivelaIgnoto(voce: Int)
+        /// La vista dell'avversario contiene una casella del giocatore che l'avversario
+        /// NON osserva: deciderebbe su informazione che non possiede (01 §5.11.1). È il
+        /// controllo che rende impossibile — non solo sconsigliato — leggere lo stato
+        /// reale: se la proiezione perde tenuta, questa sonda se ne accorge.
+        case vistaAvversariaRivelaIgnoto(riga: Int, colonna: Int)
 
         /// Il codice della violazione, senza spazi: l'uscita del programma di
         /// verifica è dato per chi sviluppa e non testo di prodotto (05 §12.6),
@@ -130,6 +142,8 @@ public struct SondaInvariantiCampagna: Sendable {
             case .taglioDaCasellaNonPrescritta(let g): return "taglio_da_casella_non_prescritta:gruppo=\(g)"
             case .conoscenzaRegreditaSenzaTempo(let p): return "conoscenza_regredita_senza_tempo:parte=\(p)"
             case .conoscenzaFalsa(let p, let r, let c): return "conoscenza_falsa:parte=\(p):riga=\(r):casella=\(c)"
+            case .registroRivelaIgnoto(let v): return "registro_rivela_ignoto:voce=\(v)"
+            case .vistaAvversariaRivelaIgnoto(let r, let c): return "vista_avversaria_rivela_ignoto:riga=\(r):casella=\(c)"
             }
         }
     }
@@ -172,6 +186,8 @@ public struct SondaInvariantiCampagna: Sendable {
         "taglio_da_casella_non_prescritta",
         "conoscenza_regredita_senza_tempo",
         "conoscenza_falsa",
+        "registro_rivela_ignoto",
+        "vista_avversaria_rivela_ignoto",
     ]
 
     /// Il codice nudo, senza i valori: la parte prima dei due punti.
@@ -189,11 +205,15 @@ public struct SondaInvariantiCampagna: Sendable {
     public func controlla(stato: StatoCampagna) -> [Violazione] {
         var violazioni: [Violazione] = []
         var caselleDelGruppo: [IdGruppo: Int] = [:]
-        var occupanti: [Cella: Int] = [:]
+        // Gli occupanti si contano PER PARTE: una casella ospita al più una formazione
+        // della stessa parte (01 §5.6.0.2), ma la compresenza di un gruppo del giocatore
+        // e di uno avversario è ammessa (01 §6.1), sicché due gruppi di parti DIVERSE
+        // nella stessa casella non sono una violazione (incarico 18).
+        var occupanti: [Cella: [Parte: Int]] = [:]
         for casella in stato.griglia.tutteLeCaselle {
             for gruppo in stato.gruppi.values where gruppo.posizione == casella {
                 caselleDelGruppo[gruppo.id, default: 0] += 1
-                occupanti[casella, default: 0] += 1
+                occupanti[casella, default: [:]][gruppo.parte, default: 0] += 1
             }
         }
         for gruppo in stato.gruppiOrdinati {
@@ -237,7 +257,8 @@ public struct SondaInvariantiCampagna: Sendable {
                                                          turni: gruppo.turniMarciaForzata))
             }
         }
-        for casella in occupanti.keys.sorted() where occupanti[casella]! > 1 {
+        for casella in occupanti.keys.sorted()
+        where occupanti[casella]!.values.contains(where: { $0 > 1 }) {
             violazioni.append(.dueGruppiNellaStessaCasella(riga: casella.riga, colonna: casella.colonna))
         }
         var precedente = Int.min
@@ -364,8 +385,13 @@ public struct SondaInvariantiCampagna: Sendable {
                 let prima2 = prima.gruppi[gruppo.id]?.turniSenzaProvviste ?? 0
                 if gruppo.turniSenzaProvviste > prima2 {
                     let alleSpalle = caselleAlleSpalle(di: gruppo, in: dopo)
+                    // Forze OSTILI alla parte DEL GRUPPO (incarico 18): per il giocatore i
+                    // gruppi avversari e le forze ferme, per l'avversario i gruppi del
+                    // giocatore. La sonda le ricava per conto proprio, senza chiamare il
+                    // Motore, così che un errore di simmetria del Motore non le sfugga.
+                    let ostili = caselleOstili(a: gruppo.parte, in: dopo)
                     let taglioLegittimo = !inZonaDiRifornimento(gruppo.posizione, dopo)
-                        && alleSpalle.contains(where: dopo.forzeNemiche.contains)
+                        && alleSpalle.contains(where: ostili.contains)
                     if !taglioLegittimo {
                         violazioni.append(.taglioDaCasellaNonPrescritta(gruppo: gruppo.id.numero))
                     }
@@ -469,6 +495,72 @@ public struct SondaInvariantiCampagna: Sendable {
         stato.struttureDiRifornimento.contains {
             max(abs($0.riga - cella.riga), abs($0.colonna - cella.colonna)) <= 1
         }
+    }
+
+    /// Le caselle occupate da forze ostili a una parte (01 §5.2.2.2), ricavate QUI e non
+    /// chieste al Motore: i gruppi della parte opposta, più — per il solo giocatore — le
+    /// forze ferme dello scenario (incarico 18). Serve alla legittimità del taglio, che
+    /// è simmetrica: la sonda la ricalcola per conto proprio.
+    private func caselleOstili(a parte: Parte, in stato: StatoCampagna) -> Set<Cella> {
+        var celle = Set(stato.gruppi.values.lazy.filter { $0.parte != parte }.map(\.posizione))
+        if parte == .giocatore { celle.formUnion(stato.forzeNemiche) }
+        return celle
+    }
+
+    // MARK: - Invarianti dell'avversario (01 §5.6.11, §5.11.1, incarico 18)
+
+    /// Che il registro del giocatore non acquisisca ciò che la sua conoscenza non gli ha
+    /// dato (01 §5.6.11). Ogni fatto NUOVO — in `dopo` e non in `prima` — è ammesso solo
+    /// se è un avvistamento avversario su una casella che il giocatore OSSERVA, oppure un
+    /// fatto che riguarda un suo gruppo. Un avvistamento su casella non osservata, o un
+    /// fatto di rifornimento di un gruppo AVVERSARIO, è una fuga d'informazione.
+    /// L'osservazione arriva dall'esterno, così che la sonda non rifaccia il calcolo del
+    /// Motore con lo stesso codice.
+    public func controllaRegistro(prima: StatoCampagna, dopo: StatoCampagna,
+                                  osservataDalGiocatore: (Cella) -> Bool) -> [Violazione] {
+        var violazioni: [Violazione] = []
+        // I nomi dei gruppi del giocatore, prima e dopo: un nome non si riusa fra le parti
+        // (01 §5.6.0.4), sicché individua una sola parte e serve a dire se un fatto la tocca.
+        var nomiGiocatore = Set(dopo.gruppi.values.filter { $0.parte == .giocatore }.map(\.nome))
+        nomiGiocatore.formUnion(prima.gruppi.values.filter { $0.parte == .giocatore }.map(\.nome))
+        guard dopo.registro.count > prima.registro.count else { return violazioni }
+        for voce in dopo.registro.suffix(dopo.registro.count - prima.registro.count) {
+            switch voce.fatto {
+            case .formazioneAvversariaAvvistata(let casella):
+                if !osservataDalGiocatore(casella) {
+                    violazioni.append(.registroRivelaIgnoto(voce: voce.numero))
+                }
+            case .marciaCompiuta(let g, _, _), .marciaRevocata(let g, _),
+                 .rifornimentoInterrotto(let g, _), .sostaDiRifornimento(let g, _),
+                 .rifornimentoRipreso(let g, _):
+                if !nomiGiocatore.contains(g) {
+                    violazioni.append(.registroRivelaIgnoto(voce: voce.numero))
+                }
+            case .ordineAnnullato, .giornataAzzerata:
+                break
+            }
+        }
+        return violazioni
+    }
+
+    /// Che la vista dell'avversario non riveli una posizione del giocatore che
+    /// l'avversario non osserva (01 §5.11.1): ogni casella in `note` deve essere davvero
+    /// osservata dall'avversario E ospitare un gruppo del giocatore. La vista e
+    /// l'osservazione arrivano dall'esterno, così che la sonda giudichi la proiezione
+    /// senza rifarla col medesimo codice. È il controllo che rende la cecità un
+    /// invariante e non una disciplina.
+    public func controllaVistaAvversario(stato: StatoCampagna, note: Set<Cella>,
+                                         osservataDallAvversario: (Cella) -> Bool) -> [Violazione] {
+        var violazioni: [Violazione] = []
+        for cella in note.sorted() {
+            let ospitaGiocatore = stato.gruppi.values.contains {
+                $0.parte == .giocatore && $0.posizione == cella
+            }
+            if !osservataDallAvversario(cella) || !ospitaGiocatore {
+                violazioni.append(.vistaAvversariaRivelaIgnoto(riga: cella.riga, colonna: cella.colonna))
+            }
+        }
+        return violazioni
     }
 
     // MARK: - Invariante della posizione visiva derivata

@@ -25,6 +25,11 @@ public actor SessioneCampagna {
     private let giornale: Giornale
     private let cartella: URL
     public private(set) var stato: StatoCampagna
+    /// La condotta deterministica dell'avversario (RDA-114): senza stato, la Sessione la
+    /// «pompa» dopo il turno del giocatore (RDA-41). Non è una seconda via per i comandi
+    /// avversari: quelli passano dallo stesso `giornale.appendi` + `motore.applica` del
+    /// giocatore (RDA-42); la condotta decide soltanto QUALE comando, sulla vista ristretta.
+    private let condotta = CondottaAvversaria()
     /// Ogni quante righe si scatta un'istantanea: numero di struttura, non di gioco (05 §6.2).
     private static let passoIstantanee = 200
 
@@ -76,6 +81,14 @@ public actor SessioneCampagna {
         self.stato = try Self.ricostruisci(giornale: giornale, cartella: cartella,
                                            nonOltre: giornale.righe.count,
                                            motore: motore, valoriCampagna: valoriCampagna)
+        // Se il giornale si è interrotto a metà del turno dell'avversario — alcuni suoi
+        // comandi scritti, la giornata non ancora chiusa — la ripresa lo completa dallo
+        // stesso punto: la condotta è deterministica e decide i gruppi rimasti come li
+        // avrebbe decisi dal vivo, appendendoli al giornale. A un confine pulito (turno
+        // del giocatore) è un'operazione a vuoto. Gli eventi non raggiungono nessuno in
+        // ripresa (05 §6.3).
+        try Self.svolgiTurnoAvversario(giornale: giornale, motore: motore,
+                                       condotta: condotta, cartella: cartella, stato: &self.stato)
     }
 
     // MARK: - Esecuzione (05 §1.7)
@@ -88,35 +101,82 @@ public actor SessioneCampagna {
         guard esito.eValido else { return (esito, []) }
         do { try giornale.appendi(.comandoCampagna(parte: parte, comando: comando)) }
         catch { throw ErroreSessione.scritturaFallita }
-        let (nuovoStato, eventi) = motore.applica(comando, parte: parte, stato: stato)
+        let (nuovoStato, eventiComando) = motore.applica(comando, parte: parte, stato: stato)
         stato = nuovoStato
-        // La chiusura della giornata è un confine significativo: vi si scatta
-        // un'istantanea e vi si registra il marcatore che l'azzeramento userà
-        // (05 §6.2, §6.4, §6.5). Una sola apertura anche quando più giornate si
-        // chiudono a cascata (tutti i gruppi in marcia lunga): la riapplicazione del
-        // comando ripercorre la cascata e riproduce lo stato finale.
+        var eventi = eventiComando
+        // Il comando del giocatore può chiudere la giornata da solo — quando non c'è
+        // avversario da muovere, cioè i suoi gruppi sono già tutti conclusi o in marcia
+        // lunga — e allora i marcatori si scrivono qui. Altrimenti la chiusura è rinviata
+        // al turno dell'avversario, che scatta appena il giocatore ha concluso.
+        try Self.registraChiusura(eventiComando, avversarioHaAgito: false,
+                                  giornale: giornale, cartella: cartella, stato: stato)
+        if parte == .giocatore {
+            eventi += try Self.svolgiTurnoAvversario(giornale: giornale, motore: motore,
+                                                     condotta: condotta, cartella: cartella,
+                                                     stato: &stato)
+        }
+        // La proiezione è l'ultima difesa: alla Presentazione arrivano soltanto gli
+        // eventi che il giocatore è titolato a conoscere (01 §5.6.11, RDA-115).
+        return (esito, motore.proiettaPerIlGiocatore(eventi, stato: stato))
+    }
+
+    /// Muove l'avversario dopo che tutti i gruppi del giocatore hanno agito (01 §5.6.11):
+    /// finché nessun gruppo del giocatore attende e un gruppo avversario sì, la condotta
+    /// decide un comando per il gruppo di id minore che attende, che si appende al
+    /// giornale e si applica come qualunque comando (RDA-42). L'ultimo comando avversario
+    /// chiude la giornata, che si risolve e ne apre una nuova; se la nuova si apre con i
+    /// soli gruppi del giocatore in marcia lunga, l'avversario torna a muovere. Termina
+    /// perché ogni chiusura avanza il giorno e le marce si compiono in un numero finito
+    /// di giorni. È il PUNTO in cui l'avversario passa dalla stessa via del giocatore.
+    ///
+    /// STATICO perché lo usa anche l'inizializzatore di ripresa, che è nonisolated e non
+    /// può chiamare un metodo isolato dell'attore: opera sui parametri, non su `self`.
+    @discardableResult
+    private static func svolgiTurnoAvversario(giornale: Giornale, motore: MotoreCampagna,
+                                              condotta: CondottaAvversaria, cartella: URL,
+                                              stato: inout StatoCampagna) throws -> [EventoCampagna] {
+        var eventi: [EventoCampagna] = []
+        while stato.gruppiInAttesa(di: .giocatore).isEmpty,
+              !stato.gruppiInAttesa(di: .avversario).isEmpty {
+            let vista = motore.vistaAvversario(stato: stato)
+            guard let comando = condotta.prossimoComando(vista: vista) else { break }
+            do { try giornale.appendi(.comandoCampagna(parte: .avversario, comando: comando)) }
+            catch { throw ErroreSessione.scritturaFallita }
+            let (nuovoStato, ev) = motore.applica(comando, parte: .avversario, stato: stato)
+            stato = nuovoStato
+            eventi += ev
+            try registraChiusura(ev, avversarioHaAgito: true,
+                                 giornale: giornale, cartella: cartella, stato: stato)
+        }
+        return eventi
+    }
+
+    /// Scrive i marcatori e scatta l'istantanea quando una serie di eventi ha CHIUSO la
+    /// giornata (05 §6.2, §6.4, §6.5). Una sola coppia di marcatori anche quando più
+    /// giornate si chiudono a cascata dentro una stessa applicazione: la riapplicazione
+    /// del comando ripercorre la cascata e riproduce lo stato finale. Il marcatore di
+    /// risoluzione, che SIGILLA l'ordine di chiusura contro l'annullamento (05 §6.5,
+    /// RDA-102), si scrive quando la chiusura ha compiuto una marcia OPPURE quando
+    /// l'avversario ha agito nella giornata: le sue mosse, ancorché non viste, sono una
+    /// risoluzione che rifare equivarrebbe alla prova a rovescio (incarico 18, RDA-115).
+    private static func registraChiusura(_ eventi: [EventoCampagna], avversarioHaAgito: Bool,
+                                         giornale: Giornale, cartella: URL,
+                                         stato: StatoCampagna) throws {
         let giornataChiusa = eventi.contains {
             if case .giornataAperta = $0 { return true } else { return false }
         }
-        if giornataChiusa {
-            // Se la risoluzione ha COMPIUTO una marcia, la chiusura ha prodotto un
-            // fatto che il giocatore ha ascoltato: il marcatore lo registra, e
-            // l'ordine che ha chiuso la giornata non sarà più annullabile (05 §6.5,
-            // RDA-102). Va scritto PRIMA dell'apertura, cui il confine lo lega.
-            let haCompiutoUnaMarcia = eventi.contains {
-                if case .marciaCompiuta = $0 { return true } else { return false }
-            }
-            if haCompiutoUnaMarcia {
-                try giornale.appendi(.risoluzioneGiornata(giorno: stato.giorno))
-            }
-            try giornale.appendi(.aperturaGiornata(giorno: stato.giorno))
-            try Self.scattaIstantanea(giornale: giornale, stato: stato,
-                                      cartella: cartella, forzata: true)
-        } else {
-            try Self.scattaIstantanea(giornale: giornale, stato: stato,
-                                      cartella: cartella, forzata: false)
+        guard giornataChiusa else {
+            try scattaIstantanea(giornale: giornale, stato: stato, cartella: cartella, forzata: false)
+            return
         }
-        return (esito, eventi)
+        let haCompiutoUnaMarcia = eventi.contains {
+            if case .marciaCompiuta = $0 { return true } else { return false }
+        }
+        if haCompiutoUnaMarcia || avversarioHaAgito {
+            try giornale.appendi(.risoluzioneGiornata(giorno: stato.giorno))
+        }
+        try giornale.appendi(.aperturaGiornata(giorno: stato.giorno))
+        try scattaIstantanea(giornale: giornale, stato: stato, cartella: cartella, forzata: true)
     }
 
     /// L'anteprima è la validazione (05 §3.2).
@@ -203,11 +263,15 @@ public actor SessioneCampagna {
         return EsitoAnnullamento(giornataRiaperta: stato.giorno != giornoPrima, giorno: stato.giorno)
     }
 
-    /// L'indice di riga dell'ultimo ordine impartito dalla parte, se esiste.
+    /// L'indice di riga dell'ultimo ordine impartito dalla parte, se esiste. Salta i
+    /// comandi dell'ALTRA parte: dopo il turno dell'avversario l'ultimo comando del
+    /// giornale è suo, ma l'ordine che il giocatore può considerare di annullare è il
+    /// proprio ultimo, che il confine sigilla se la giornata si è chiusa (incarico 18).
+    /// Prima dell'avversario — dentro il proprio turno — l'ultimo comando è comunque del
+    /// giocatore, sicché l'annullamento nella giornata in corso resta quello di prima.
     private func ultimoOrdine(di parte: Parte) -> Int? {
         for riga in giornale.righe.reversed() {
-            guard case .comandoCampagna(let p, _) = riga.voce else { continue }
-            return p == parte ? riga.numero : nil
+            if case .comandoCampagna(let p, _) = riga.voce, p == parte { return riga.numero }
         }
         return nil
     }

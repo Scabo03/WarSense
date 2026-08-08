@@ -201,6 +201,54 @@ public struct ValoriConoscenza: Codable, Hashable, Sendable {
     }
 }
 
+/// Il CARATTERE dell'avversario di campagna (01 §12.1, §14.3): le grandezze da cui
+/// discendono le sue scelte, PROVVISORIE e nei dati, mai nel codice (00 §13.1,
+/// incarico 18). Nessuna è un tiro di dado: sono pesi di una valutazione deterministica
+/// (RDA-114). La condotta assegna a ciascuna mossa candidata un punteggio intero, somma
+/// pesata di quattro spinte, e sceglie il punteggio massimo rompendo le parità per
+/// ordine di lettura della casella (RDA-07). L'aggressività e le altre spinte sono le
+/// manopole da tarare con le simulazioni: alte, l'avversario preme; basse, temporeggia.
+///
+/// L'ORDINE delle valutazioni, che il titolare deve poter leggere nel comportamento, è
+/// quello dei pesi in DIMINUZIONE nei valori di fabbrica: prima difende il proprio
+/// quartier generale quando è minacciato (peso massimo), poi minaccia il rifornimento
+/// del giocatore mettendosi alle spalle di una sua formazione nota, poi avanza verso il
+/// quartier generale del giocatore; in assenza di guadagno, presidia. L'AGGIRAMENTO
+/// (01 §5.13) non è un peso ma un tratto costante dell'avanzata: la distanza-obiettivo
+/// si misura AGGIRANDO le formazioni note (un cammino che le tratta come ostacoli),
+/// sicché una formazione che sbarra la via diretta spinge l'avversario a girarle intorno
+/// anziché ammassarvisi, che è la mossa voluta e non un difetto.
+public struct ValoriCondotta: Codable, Hashable, Sendable {
+    /// Peso dell'AVANZATA verso il quartier generale del giocatore, misurata aggirando
+    /// le formazioni note: è l'aggressività, la propensione a puntare l'obiettivo e a
+    /// cercare lo scontro (01 §14.3, §6.1.3). PROVVISORIO.
+    public let aggressivita: Int
+    /// Peso del METTERSI ALLE SPALLE di una formazione nota del giocatore, per tagliarle
+    /// il rifornimento (01 §5.2.2, §5.2.3). PROVVISORIO.
+    public let minacciaRifornimento: Int
+    /// Peso della DIFESA del proprio quartier generale quando una formazione nota del
+    /// giocatore gli è vicina (01 §5.2.1). PROVVISORIO.
+    public let difesaQuartierGenerale: Int
+    /// La distanza in caselle entro cui una formazione nota del giocatore rende il
+    /// proprio quartier generale «minacciato» e accende la difesa. PROVVISORIO; almeno uno.
+    public let sogliaDifesaQuartierGenerale: Int
+
+    public init(aggressivita: Int, minacciaRifornimento: Int, difesaQuartierGenerale: Int,
+                sogliaDifesaQuartierGenerale: Int) {
+        self.aggressivita = aggressivita
+        self.minacciaRifornimento = minacciaRifornimento
+        self.difesaQuartierGenerale = difesaQuartierGenerale
+        self.sogliaDifesaQuartierGenerale = sogliaDifesaQuartierGenerale
+    }
+
+    enum CodingKeys: String, CodingKey {
+        case aggressivita
+        case minacciaRifornimento = "minaccia_rifornimento"
+        case difesaQuartierGenerale = "difesa_quartier_generale"
+        case sogliaDifesaQuartierGenerale = "soglia_difesa_quartier_generale"
+    }
+}
+
 /// I valori del piano di campagna caricati e validati.
 public struct ValoriCampagna: Sendable {
     public let formatiMappa: [IdentificatoreDati: FormatoMappa]
@@ -208,15 +256,17 @@ public struct ValoriCampagna: Sendable {
     public let nomiGruppi: [IdentificatoreDati]
     public let marcia: ValoriMarcia
     public let conoscenza: ValoriConoscenza
+    public let condotta: ValoriCondotta
 
     public init(formatiMappa: [IdentificatoreDati: FormatoMappa],
                 mappe: [IdentificatoreDati: DefinizioneMappa],
                 nomiGruppi: [IdentificatoreDati], marcia: ValoriMarcia,
-                conoscenza: ValoriConoscenza) {
+                conoscenza: ValoriConoscenza, condotta: ValoriCondotta) {
         self.formatiMappa = formatiMappa
         self.mappe = mappe
         self.nomiGruppi = nomiGruppi
         self.marcia = marcia
         self.conoscenza = conoscenza
+        self.condotta = condotta
     }
 }

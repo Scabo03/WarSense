@@ -538,6 +538,10 @@ final class SchermataMappaCampagna: UIViewController {
                 self?.costruttore?.vista.caselleGruppiInAttesa ?? [] },
             rotore("rotore.gruppi_senza_rifornimento") { [weak self] in
                 self?.costruttore?.vista.caselleGruppiSenzaRifornimento ?? [] },
+            // Il rotore delle formazioni avversarie NOTE (02 §7.3, incarico 18): il salto
+            // diretto a ciò che il giocatore osserva del nemico. Vuoto finché non ne osserva.
+            rotore("rotore.formazioni_avversarie_note") { [weak self] in
+                self?.costruttore?.vista.caselleFormazioniAvversarieNote ?? [] },
         ]
     }
 

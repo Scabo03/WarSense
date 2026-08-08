@@ -96,7 +96,12 @@ public struct ProgrammaDiVerifica: Sendable {
                                     String(corsa.divisioni), String(corsa.riunioni),
                                     String(corsa.tagli), String(corsa.sosteImposte),
                                     String(corsa.sosteVolontarie), String(corsa.riprese),
-                                    String(corsa.passaggiInZona), String(corsa.struttureIsolate)])
+                                    String(corsa.passaggiInZona), String(corsa.struttureIsolate),
+                                    // Le colonne dell'avversario si aggiungono in CODA, così
+                                    // che gli indici di colonna che il riepilogo somma non si
+                                    // spostino (incarico 18).
+                                    String(corsa.gruppiAvversario), String(corsa.tagliDaAvversario),
+                                    String(corsa.aggiramenti), String(corsa.minDistanzaAvversarioQg)])
         }
         sezioni.append(Rapporto.Sezione(
             nome: "campagna_invarianti",
@@ -106,7 +111,9 @@ public struct ProgrammaDiVerifica: Sendable {
                            "impronta_finale", "volume_minimo", "volume_massimo",
                            "divisioni", "riunioni",
                            "tagli", "soste_imposte", "soste_volontarie", "riprese",
-                           "passaggi_in_zona", "strutture_isolate"],
+                           "passaggi_in_zona", "strutture_isolate",
+                           "gruppi_avversario", "tagli_da_avversario", "aggiramenti",
+                           "min_distanza_avversario_qg"],
             righe: righeInvarianti))
 
         // La curva, non il punto: il costo di chiusura di una giornata si misura su
@@ -234,6 +241,19 @@ public struct ProgrammaDiVerifica: Sendable {
         voce("riprese_in_totale", righeInvarianti.reduce(0) { $0 + (Int($1[21]) ?? 0) })
         voce("passaggi_in_zona_in_totale", righeInvarianti.reduce(0) { $0 + (Int($1[22]) ?? 0) })
         voce("strutture_isolate_in_totale", righeInvarianti.reduce(0) { $0 + (Int($1[23]) ?? 0) })
+        // I fenomeni dell'AVVERSARIO (incarico 18), dalle colonne 24–27: gli scenari con
+        // avversario, i tagli del giocatore da lui causati, gli aggiramenti, e quanto si
+        // è avvicinato al quartier generale del giocatore. È il primo dato che dice se si
+        // gioca davvero contro qualcuno: se i tagli-da-avversario e gli aggiramenti sono
+        // zero, il banco non ha ancora esercitato l'avversario in modo significativo.
+        voce("scenari_con_avversario", righeInvarianti.filter { (Int($0[24]) ?? 0) > 0 }.count)
+        voce("gruppi_avversari_in_totale", righeInvarianti.reduce(0) { $0 + (Int($1[24]) ?? 0) })
+        voce("tagli_da_avversario_in_totale", righeInvarianti.reduce(0) { $0 + (Int($1[25]) ?? 0) })
+        voce("aggiramenti_in_totale", righeInvarianti.reduce(0) { $0 + (Int($1[26]) ?? 0) })
+        // La distanza minima raggiunta da un avversario dal quartier generale del
+        // giocatore, fra i soli scenari con avversario (dove la colonna è significativa).
+        voce("distanza_minima_avversario_dal_qg_giocatore",
+             righeInvarianti.filter { (Int($0[24]) ?? 0) > 0 }.compactMap { Int($0[27]) }.min() ?? -1)
         let violazioni = righeInvarianti.reduce(0) { $0 + (Int($1[11]) ?? 0) }
         voce("violazioni_trovate_in_totale", violazioni)
         voce("ordini_a_gruppi_senza_alcuna_destinazione",

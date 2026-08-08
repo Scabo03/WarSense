@@ -117,6 +117,21 @@ Gli stati di conoscenza (01 §5.3, RDA-110). Due numeri, entrambi dichiarati e r
 
 La versione dei valori NON è ancora salita in questo blocco (resta 0.9.0), perché il blocco 1 non è caricabile da solo: non c'è nulla da scoprire finché l'avversario non esiste. La sessione che chiude un blocco giocabile (l'avversario che si muove) incrementerà la versione dei valori per tutti i numeri di campagna introdotti da allora, questi due compresi.
 
+### condotta-campagna.json — PROVVISORI (incarico 18, l'avversario)
+
+Il CARATTERE dell'avversario di campagna (01 §12.1, §14.3, RDA-111): i pesi da cui discendono le sue scelte, tutti nei dati e nessuno nel codice (00 §13.1). Nessuno è un tiro di dado: sono i coefficienti di una valutazione deterministica. L'ORDINE del comportamento è quello dei pesi in diminuzione, ed è ciò che il titolare deve poter leggere guardando l'avversario giocare.
+
+- `difesa_quartier_generale` (600): peso della difesa del proprio quartier generale quando una formazione nota del giocatore vi è entro la soglia. Il più alto: minacciato il proprio quartier generale, ripiega a difenderlo. PROVVISORIO.
+- `minaccia_rifornimento` (300): peso del mettersi ALLE SPALLE di una formazione nota, da dove se ne taglia il rifornimento (01 §5.2.2). PROVVISORIO.
+- `aggressivita` (100): peso dell'avanzata verso il quartier generale del giocatore, aggirando le formazioni note; è la propensione a cercare lo scontro (01 §6.1.3). PROVVISORIO — è la manopola che 01 §6.1.3 dichiara decidere «molto più di prima» la frequenza degli scontri, da tarare con le simulazioni.
+- `soglia_difesa_quartier_generale` (3): la distanza in caselle entro cui una formazione nota accende la difesa. PROVVISORIO; almeno uno, o la difesa non si accenderebbe mai (imposto dal caricatore, `errore.dati.condotta_incoerente`).
+
+L'aggiramento (01 §5.13) NON è un peso ma un tratto costante dell'avanzata: la distanza-obiettivo si misura aggirando le formazioni note. Il carattere è UNO solo per ora, non sdoppiato per ufficiale né fra campagna e battaglia (03 §6.5.2, rinviato): quando gli ufficiali di campagna esisteranno, questi pesi diverranno i loro parametri. Misura dal banco (`swift run StrumentoVerifica`, incarico 18): due scenari con avversario, `tagli_da_avversario_in_totale` 19, `aggiramenti_in_totale` 5, `distanza_minima_avversario_dal_qg_giocatore` 0, con `violazioni_trovate_in_totale` 0.
+
+### La versione dei valori sale a 0.10.0 (incarico 18)
+
+Con l'avversario che si muove il primo blocco giocabile della campagna esiste, e la versione dei valori sale da 0.9.0 a **0.10.0**, come la sessione del blocco 1 aveva annunciato: raccoglie tutti i numeri di campagna introdotti da allora — il raggio di osservazione e la soglia di decadimento (`conoscenza-campagna.json`, incarico 17) e ora il carattere dell'avversario (`condotta-campagna.json`) — più il nuovo file di dati. L'incremento è dovuto e non discrezionale (regola del titolare: le versioni salgono su istruzione, e questo incarico la dà esplicitamente). I salvataggi 0.9.0 e 0.8.0 restano dichiarati COMPATIBILI (`versioni_compatibili`): una campagna salvata prima di questa build non ha gruppi avversari nel proprio scenario, sicché ripresa con questa build si comporta esattamente come prima (l'avversario non muove ciò che non esiste) e i suoi comandi si riapplicano identici; lo schema del giornale resta 4. Un salvataggio con versione o schema davvero incompatibili si dichiara e si rifiuta invece di fallire in silenzio (`SessioneCampagna.ErroreSessione.salvataggioIncompatibile`/`schemaIncompatibile`, prove in `SessioneCampagnaTest`). I valori di BATTAGLIA non cambiano.
+
 ### formati-mappa.json — FISSATI
 
 Le dimensioni dei tre formati: quattro per quattro, sei per sei, dieci per dieci. FISSATI da 01 §5.1, che li dichiara «tre formati fissi». Non sono taratura e non si toccano qui. Stanno nei dati e non nel codice perché il codice non deve conoscere alcuna dimensione, non perché siano da tarare.

@@ -12,6 +12,11 @@ public struct ScenariCampagna: Codable, Sendable {
         public let identificatore: IdentificatoreDati
         public let mappa: IdentificatoreDati
         public let gruppi: [ScenarioCampagna.GruppoIniziale]
+        /// I gruppi dell'AVVERSARIO (incarico 18): quando presenti, la corsa è una partita
+        /// intera contro la condotta deterministica, ed è il primo dato che dice se si
+        /// gioca davvero contro qualcuno. Assenti, la corsa è quella di prima e nessuno
+        /// muove dopo il giocatore.
+        public let gruppiAvversario: [ScenarioCampagna.GruppoIniziale]
         /// Le forze nemiche e le strutture dello scenario: dati MINIMI per provare taglio
         /// e zona, non l'avversario e non le opere (incarico 16). Assenti negli scenari
         /// che non li esercitano, e allora vuoti.
@@ -20,6 +25,7 @@ public struct ScenariCampagna: Codable, Sendable {
 
         enum CodingKeys: String, CodingKey {
             case identificatore, mappa, gruppi
+            case gruppiAvversario = "gruppi_avversario"
             case forzeNemiche = "forze_nemiche"
             case struttureDiRifornimento = "strutture_di_rifornimento"
         }
@@ -29,6 +35,8 @@ public struct ScenariCampagna: Codable, Sendable {
             identificatore = try c.decode(IdentificatoreDati.self, forKey: .identificatore)
             mappa = try c.decode(IdentificatoreDati.self, forKey: .mappa)
             gruppi = try c.decode([ScenarioCampagna.GruppoIniziale].self, forKey: .gruppi)
+            gruppiAvversario = try c.decodeIfPresent([ScenarioCampagna.GruppoIniziale].self,
+                                                     forKey: .gruppiAvversario) ?? []
             forzeNemiche = try c.decodeIfPresent([Cella].self, forKey: .forzeNemiche) ?? []
             struttureDiRifornimento = try c.decodeIfPresent([Cella].self, forKey: .struttureDiRifornimento) ?? []
         }
@@ -128,9 +136,29 @@ public struct BancoCampagna: Sendable {
         public let riprese: Int
         public let passaggiInZona: Int
         public let struttureIsolate: Int
+        // I fenomeni dell'AVVERSARIO (incarico 18): il primo dato che dice se si gioca
+        // davvero contro qualcuno. Zero negli scenari senza avversario.
+        /// I gruppi avversari dello scenario.
+        public let gruppiAvversario: Int
+        /// I tagli di rifornimento dei gruppi del GIOCATORE causati dall'avversario: negli
+        /// scenari con avversario e senza forze ferme, ogni taglio del giocatore è opera
+        /// sua (nessun'altra forza può stargli alle spalle).
+        public let tagliDaAvversario: Int
+        /// Gli AGGIRAMENTI (01 §5.13): i gruppi avversari DISTINTI che almeno una volta
+        /// si sono portati oltre la linea del giocatore, cioè più vicini al suo quartier
+        /// generale di ogni suo gruppo. Se zero, la corsa non ha esercitato l'aggiramento.
+        public let aggiramenti: Int
+        /// La distanza MINIMA raggiunta da un gruppo avversario dal quartier generale del
+        /// giocatore, durante la corsa: quanto l'avversario si è avvicinato all'obiettivo.
+        /// Vale la larghezza della mappa più uno quando non c'è avversario (mai avvicinato).
+        public let minDistanzaAvversarioQg: Int
         public let violazioni: [String]
         public let improntaFinale: String
     }
+
+    /// La condotta deterministica dell'avversario, la stessa della Sessione (RDA-114):
+    /// il banco la «pompa» dopo il turno del giocatore, per generare partite intere.
+    private let condotta = CondottaAvversaria()
 
     /// La condotta: per ciascun gruppo in attesa, la prima destinazione valida
     /// nell'ordine di lettura se ne esiste una, altrimenti il presidio; il gruppo
@@ -144,12 +172,17 @@ public struct BancoCampagna: Sendable {
     public func corri(_ voce: ScenariCampagna.Voce, giornate: Int) throws -> Corsa {
         var stato = try FabbricaCampagna.crea(
             scenario: ScenarioCampagna(mappa: voce.mappa, gruppiGiocatore: voce.gruppi,
+                                       gruppiAvversario: voce.gruppiAvversario,
                                        forzeNemiche: voce.forzeNemiche,
                                        struttureDiRifornimento: voce.struttureDiRifornimento),
             valori: valoriCampagna, archetipiNoti: archetipiNoti)
         var violazioni = Set<String>()
         var ordini = 0, marce = 0, marceLunghe = 0, marceCompiute = 0, revoche = 0
         var presidi = 0, senzaDestinazione = 0, divisioni = 0, riunioni = 0
+        // I fenomeni dell'avversario, misurati lungo la corsa.
+        let qgGiocatore = stato.mappa.quartierGenerale(di: .giocatore)
+        var gruppiAggiranti = Set<IdGruppo>()
+        var minDistanzaAvversarioQg = stato.griglia.colonne + stato.griglia.righe + 1
         // I fenomeni del rifornimento. Le soste VOLONTARIE le conta la condotta (è lei a
         // ordinarle); il taglio, la sosta imposta e le riprese si leggono dal registro
         // alla fine, perché sono i fatti non decisi che vi si annotano. I turni-gruppo in
@@ -262,6 +295,50 @@ public struct BancoCampagna: Sendable {
                 volumiRiportati: volumiRiportati).map(\.description))
             stato = dopo
             ordini += 1
+
+            // Il turno dell'AVVERSARIO (01 §5.6.11): appena il giocatore ha concluso, la
+            // condotta muove i gruppi avversari passando dalla stessa applicazione. È un
+            // ciclo a vuoto negli scenari senza avversario. Ogni suo comando è sorvegliato
+            // dagli stessi invarianti di transizione e di stato del giocatore (nessuna
+            // regola per una parte sola), più i due nuovi: che la sua vista non veda ciò
+            // che non osserva, e che il registro non riveli al giocatore l'ignoto.
+            while stato.gruppiInAttesa(di: .giocatore).isEmpty,
+                  !stato.gruppiInAttesa(di: .avversario).isEmpty {
+                let vistaAvv = motore.vistaAvversario(stato: stato)
+                let statoVista = stato
+                violazioni.formUnion(sonda.controllaVistaAvversario(
+                    stato: statoVista, note: vistaAvv.formazioniGiocatoreNote,
+                    osservataDallAvversario: { motore.osservata($0, da: .avversario, stato: statoVista) }
+                ).map(\.description))
+                guard let comandoAvv = condotta.prossimoComando(vista: vistaAvv) else { break }
+                let primaAvv = stato
+                let (dopoAvv, eventiAvv) = motore.applica(comandoAvv, parte: .avversario, stato: stato)
+                // Una marcia del GIOCATORE può compiersi alla chiusura innescata
+                // dall'ultimo comando avversario: la si conta di qui.
+                marceCompiute += eventiAvv.reduce(0) {
+                    if case .marciaCompiuta = $1 { return $0 + 1 } else { return $0 }
+                }
+                violazioni.formUnion(sonda.controlla(prima: primaAvv, comando: comandoAvv, dopo: dopoAvv,
+                                                     eventi: eventiAvv,
+                                                     adiacenti: primaAvv.griglia.adiacenti).map(\.description))
+                violazioni.formUnion(sonda.controlla(stato: dopoAvv).map(\.description))
+                violazioni.formUnion(sonda.controllaRegistro(
+                    prima: primaAvv, dopo: dopoAvv,
+                    osservataDalGiocatore: { motore.osservata($0, da: .giocatore, stato: dopoAvv) }
+                ).map(\.description))
+                stato = dopoAvv
+            }
+            // Le misure dell'avversario, sullo stato dopo il suo turno: quanto si è
+            // avvicinato al quartier generale del giocatore, e quali suoi gruppi hanno
+            // AGGIRATO la linea (si sono portati più vicini al quartier generale del
+            // giocatore di ogni gruppo del giocatore — 01 §5.13).
+            let distMinGiocatore = stato.gruppi(di: .giocatore)
+                .map { stato.griglia.distanza($0.posizione, qgGiocatore) }.min() ?? Int.max
+            for avv in stato.gruppi(di: .avversario) {
+                let d = stato.griglia.distanza(avv.posizione, qgGiocatore)
+                minDistanzaAvversarioQg = min(minDistanzaAvversarioQg, d)
+                if d < distMinGiocatore { gruppiAggiranti.insert(avv.id) }
+            }
         }
 
         violazioni.formUnion(sonda.controllaRaggiungibilita(
@@ -289,6 +366,11 @@ public struct BancoCampagna: Sendable {
                                               abs($0.colonna - struttura.colonna)) <= 1 }
         }.count
 
+        // I tagli del giocatore CAUSATI dall'avversario: negli scenari con avversario e
+        // senza forze ferme, nessun'altra forza può stargli alle spalle, sicché ogni suo
+        // taglio è opera dell'avversario. Zero altrove.
+        let tagliDaAvversario = (!voce.gruppiAvversario.isEmpty && voce.forzeNemiche.isEmpty) ? tagli : 0
+
         return Corsa(identificatore: voce.identificatore, mappa: voce.mappa,
                      gruppi: voce.gruppi.count, giornate: stato.giorno - giornoIniziale,
                      ordini: ordini, marce: marce, marceLunghe: marceLunghe,
@@ -299,6 +381,10 @@ public struct BancoCampagna: Sendable {
                      tagli: tagli, sosteImposte: sosteImposte, sosteVolontarie: sosteVolontarie,
                      riprese: riprese, passaggiInZona: passaggiInZona,
                      struttureIsolate: struttureIsolate,
+                     gruppiAvversario: voce.gruppiAvversario.count,
+                     tagliDaAvversario: tagliDaAvversario,
+                     aggiramenti: gruppiAggiranti.count,
+                     minDistanzaAvversarioQg: minDistanzaAvversarioQg,
                      violazioni: violazioni.sorted(), improntaFinale: stato.impronta())
     }
 
@@ -306,7 +392,9 @@ public struct BancoCampagna: Sendable {
     /// La riunione lavora su qualunque coppia adiacente, quale che sia lo stato
     /// dell'azione: è così che si esercita la regola «già agito se uno lo era».
     private func coppiaRiunibile(_ stato: StatoCampagna) -> (IdGruppo, IdGruppo)? {
-        let gruppi = stato.gruppiOrdinati.filter { !$0.inMarcia }
+        // Solo i gruppi del GIOCATORE: la condotta del banco muove il giocatore, e una
+        // riunione impartita per suo conto su gruppi avversari sarebbe invalida.
+        let gruppi = stato.gruppi(di: .giocatore).filter { !$0.inMarcia }
         for i in gruppi.indices {
             for j in gruppi.indices
             where j > i && stato.griglia.adiacenti(gruppi[i].posizione, gruppi[j].posizione) {

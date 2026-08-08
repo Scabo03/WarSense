@@ -55,7 +55,8 @@ public struct MotoreCampagna: Sendable {
             // Il costo dichiarato dal comando dev'essere quello che i dati
             // prescrivono per quello scatto: un comando che ne porti un altro non
             // è un comando del gioco (01 §5.6.3.1, RDA-75).
-            guard giorni == costoInGiorni(da: gruppo.posizione, a: destinazione, stato: stato) else {
+            guard giorni == costoInGiorni(da: gruppo.posizione, a: destinazione,
+                                          parte: parte, stato: stato) else {
                 return .nonValido(.costoNonCoerente)
             }
             return .valido
@@ -174,15 +175,26 @@ public struct MotoreCampagna: Sendable {
     /// riga retrostante non esiste e restano le sole caselle esistenti; su una colonna
     /// di bordo la fascia si restringe a due caselle anziché tre.
     public func caselleAlleSpalle(di gruppo: Gruppo, mappa: MappaCampagna) -> [Cella] {
-        let pos = gruppo.posizione
-        let qg = mappa.quartierGenerale(di: gruppo.parte)
+        Self.caselleAlleSpalle(di: gruppo.posizione,
+                               qg: mappa.quartierGenerale(di: gruppo.parte),
+                               griglia: mappa.griglia)
+    }
+
+    /// La geometria PURA delle caselle alle spalle di una posizione, dato il proprio
+    /// quartier generale (01 §5.2.2.2): dipende solo dalla griglia e da due caselle,
+    /// mai dalle posizioni delle parti. Estratta perché la condotta dell'avversario
+    /// possa ragionare sulle spalle di una formazione del giocatore che OSSERVA — la
+    /// casella nota e il quartier generale del giocatore, entrambi geografia nota —
+    /// senza accedere allo stato reale (incarico 18, RDA-114).
+    public static func caselleAlleSpalle(di pos: Cella, qg: Cella,
+                                         griglia: GrigliaCampagna) -> [Cella] {
         let passo = qg.riga == pos.riga ? 0 : (qg.riga > pos.riga ? 1 : -1)
         let righe = passo == 0 ? [pos.riga] : [pos.riga, pos.riga + passo]
         var caselle: [Cella] = []
         for r in righe {
             for c in [pos.colonna - 1, pos.colonna, pos.colonna + 1] {
                 let cella = Cella(riga: r, colonna: c)
-                if mappa.griglia.contiene(cella) { caselle.append(cella) }
+                if griglia.contiene(cella) { caselle.append(cella) }
             }
         }
         return caselle
@@ -199,14 +211,27 @@ public struct MotoreCampagna: Sendable {
         }
     }
 
-    /// Vero se il rifornimento del gruppo è tagliato (01 §5.2.2.2): forze nemiche in
-    /// una delle caselle alle spalle. In una zona di rifornimento il taglio non produce
-    /// effetto (01 §5.2.2.6): la zona vince sul taglio, e un gruppo in zona non risulta
-    /// mai tagliato (invariante).
+    /// Le caselle occupate da forze OSTILI a una parte (01 §5.2.2.2): i gruppi della
+    /// parte OPPOSTA, più — per il solo giocatore — le forze nemiche FERME dichiarate
+    /// dallo scenario (dati minimi di verifica, incarico 16). È relativa alla parte e
+    /// mai fissa su una sola (incarico 18, RDA-112): ciò che taglia il giocatore sono i
+    /// gruppi avversari e le forze ferme, ciò che taglia l'avversario sono i gruppi del
+    /// giocatore. La simmetria è voluta (01 §5.2.3, §5.9.1.8) e sostituisce l'uso
+    /// diretto di `stato.forzeNemiche`, che presupponeva il giocatore come unica vittima.
+    public func caselleOstili(a parte: Parte, stato: StatoCampagna) -> Set<Cella> {
+        var celle = Set(stato.gruppi.values.lazy.filter { $0.parte != parte }.map(\.posizione))
+        if parte == .giocatore { celle.formUnion(stato.forzeNemiche) }
+        return celle
+    }
+
+    /// Vero se il rifornimento del gruppo è tagliato (01 §5.2.2.2): forze OSTILI alla
+    /// sua parte in una delle caselle alle spalle. In una zona di rifornimento il taglio
+    /// non produce effetto (01 §5.2.2.6): la zona vince sul taglio, e un gruppo in zona
+    /// non risulta mai tagliato (invariante).
     public func rifornimentoTagliato(di gruppo: Gruppo, stato: StatoCampagna) -> Bool {
         guard !inZonaDiRifornimento(gruppo.posizione, stato: stato) else { return false }
-        return caselleAlleSpalle(di: gruppo, mappa: stato.mappa)
-            .contains(where: stato.forzeNemiche.contains)
+        let ostili = caselleOstili(a: gruppo.parte, stato: stato)
+        return caselleAlleSpalle(di: gruppo, mappa: stato.mappa).contains(where: ostili.contains)
     }
 
     /// Lo stato di rifornimento del gruppo per il vocabolario chiuso (02 §4.4.5), con
@@ -275,6 +300,55 @@ public struct MotoreCampagna: Sendable {
         return []
     }
 
+    // MARK: - La vista ristretta dell'avversario (01 §5.6.11, §5.11.1, RDA-114)
+
+    /// Costruisce la vista su cui decide l'avversario, proiettando lo stato reale
+    /// attraverso la SUA conoscenza. È l'UNICO punto del programma in cui la condotta
+    /// dell'avversario dipende dallo stato: qui si leggono le posizioni del giocatore, ma
+    /// SOLTANTO per stabilire quali sono osservate ORA dall'avversario (entro il raggio
+    /// di una sua formazione, cioè confermate per lui — 01 §5.3), e nella vista entra solo
+    /// quell'insieme di caselle. Le posizioni che l'avversario non osserva non escono di
+    /// qui: la condotta riceve la `VistaAvversario` e mai lo `StatoCampagna`, sicché non
+    /// può decidere su ciò che non possiede (incarico 18, RDA-114). L'avversario decide
+    /// sulla propria memoria e non sullo stato reale della mappa (01 §5.11.1).
+    public func vistaAvversario(stato: StatoCampagna) -> VistaAvversario {
+        let propri = stato.gruppi(di: .avversario)
+        var volumi: [IdGruppo: Int64] = [:]
+        for g in propri { volumi[g.id] = volume(di: g) }
+        var note = Set<Cella>()
+        for g in stato.gruppi.values where g.parte == .giocatore {
+            if osservata(g.posizione, da: .avversario, stato: stato) { note.insert(g.posizione) }
+        }
+        return VistaAvversario(mappa: stato.mappa, marcia: valoriCampagna.marcia,
+                               condotta: valoriCampagna.condotta,
+                               gruppiPropri: propri, volumi: volumi,
+                               formazioniGiocatoreNote: note)
+    }
+
+    /// Proietta una sequenza di eventi PER IL GIOCATORE (01 §5.6.11): passano gli eventi
+    /// dei suoi gruppi, i confini di giornata e gli avvistamenti (già filtrati a monte
+    /// dall'osservazione); gli eventi dei gruppi AVVERSARI — ordini, conferme, il loro
+    /// rifornimento — non passano, o il giocatore apprenderebbe le mosse avversarie per
+    /// una via diversa dalla conoscenza e dal registro. È l'ultima difesa, oltre alla
+    /// soppressione già operata nelle risoluzioni: la Sessione vi passa tutti gli eventi
+    /// del turno prima di consegnarli alla Presentazione.
+    public func proiettaPerIlGiocatore(_ eventi: [EventoCampagna],
+                                       stato: StatoCampagna) -> [EventoCampagna] {
+        func diGiocatore(_ id: IdGruppo) -> Bool { stato.gruppi[id]?.parte == .giocatore }
+        return eventi.filter { evento in
+            switch evento {
+            case .giornataChiusa, .giornataAperta, .formazioneAvversariaAvvistata:
+                return true
+            case .marciaOrdinata(let g, _, _, _, _), .presidioOrdinato(let g, _, _),
+                 .marciaRevocata(let g, _, _, _), .marciaCompiuta(let g, _, _, _),
+                 .gruppoDiviso(let g, _, _, _, _), .gruppiRiuniti(let g, _, _, _),
+                 .rifornimentoInterrotto(let g, _, _), .sostaDiRifornimento(let g, _, _),
+                 .rifornimentoRipreso(let g, _, _):
+                return diGiocatore(g)
+            }
+        }
+    }
+
     // MARK: - Costo in giorni dello scatto (01 §5.6.3.1, §5.6.3.2)
 
     /// I giorni necessari a entrare nella casella di arrivo venendo da quella di
@@ -290,21 +364,39 @@ public struct MotoreCampagna: Sendable {
     /// volume. Se la casella di partenza non ha occupante il contributo è nullo: il
     /// costo esiste anche per una casella libera (anteprime, banco). Il costo non
     /// scende mai sotto uno, che 00 §13.6 fissa per impedire lo scatto gratuito.
+    ///
+    /// Il volume è quello del gruppo che marcia, cioè l'occupante di `partenza` DELLA
+    /// PARTE indicata: con la compresenza (01 §6.1) una casella può ospitare un gruppo
+    /// per parte, e la colonna che marcia è la propria. `parte` ha per difetto il
+    /// giocatore, il caso ordinario e l'unico esercitato dalle prove; la validazione,
+    /// l'applicazione e la vista passano la parte reale, sicché l'avversario paga il
+    /// proprio volume e non quello del giocatore (incarico 18, RDA-112: rimosso il
+    /// fisso `.giocatore` che era l'unica asimmetria del costo).
     public func costoInGiorni(da partenza: Cella, a arrivo: Cella,
-                              stato: StatoCampagna) -> Int {
-        let m = valoriCampagna.marcia
+                              parte: Parte = .giocatore, stato: StatoCampagna) -> Int {
+        let volumeColonna = stato.occupante(di: partenza, parte: parte).map(volume(di:)) ?? 0
+        return Self.costoInGiorni(da: partenza, a: arrivo, volumeColonna: volumeColonna,
+                                  mappa: stato.mappa, marcia: valoriCampagna.marcia)
+    }
+
+    /// Il nucleo PURO del costo in giorni (01 §5.6.3.2): funzione soltanto della
+    /// geometria della mappa (terreno, strada, strettoia, tutti PUBBLICI) e del VOLUME
+    /// della colonna che marcia. Non tocca le posizioni di alcuna parte, sicché la vista
+    /// dell'avversario può calcolare i propri costi senza accedere allo stato reale
+    /// (incarico 18, RDA-114): è il punto in cui il costo cessa di dipendere dallo stato.
+    public static func costoInGiorni(da partenza: Cella, a arrivo: Cella,
+                                     volumeColonna: Int64, mappa: MappaCampagna,
+                                     marcia m: ValoriMarcia) -> Int {
         var costo = m.costoGiorniBase
-        costo += m.pesoTerrenoPartenza[stato.mappa.terreno(di: partenza).rawValue] ?? 0
-        costo += m.pesoTerrenoArrivo[stato.mappa.terreno(di: arrivo).rawValue] ?? 0
-        costo += m.pesoStradaArrivo[stato.mappa.strada(di: arrivo).rawValue] ?? 0
-        if stato.mappa.strettoia == arrivo { costo += m.costoStrettoia }
+        costo += m.pesoTerrenoPartenza[mappa.terreno(di: partenza).rawValue] ?? 0
+        costo += m.pesoTerrenoArrivo[mappa.terreno(di: arrivo).rawValue] ?? 0
+        costo += m.pesoStradaArrivo[mappa.strada(di: arrivo).rawValue] ?? 0
+        if mappa.strettoia == arrivo { costo += m.costoStrettoia }
         // Il volume entra sulla MEDESIMA grandezza, per somma: giorni aggiuntivi pari
         // al volume diviso la soglia (troncamento). Formula nel codice, coefficiente
         // nei dati (00 §13.1): la soglia è provvisoria. Il contributo è monotòno nel
         // volume e nullo per una colonna leggera sotto la soglia.
-        if let colonna = stato.occupante(di: partenza, parte: .giocatore) {
-            costo += Int(volume(di: colonna) / Int64(m.sogliaVolumePerGiornoAggiuntivo))
-        }
+        costo += Int(volumeColonna / Int64(m.sogliaVolumePerGiornoAggiuntivo))
         return max(1, costo)
     }
 
@@ -370,7 +462,13 @@ public struct MotoreCampagna: Sendable {
             nuovo.gruppi[idGruppo]!.azioneSpesa = true
             eventi.append(.marciaRevocata(gruppo: idGruppo, nome: gruppo.nome,
                                           casella: casella, giorniPersi: giorniPersi))
-            annota(.marciaRevocata(gruppo: gruppo.nome, casella: casella), in: &nuovo)
+            // La revoca del GIOCATORE resta nel registro per volontà del titolare
+            // (RDA-104); quella dell'avversario — che la condotta non compie, ma la
+            // validazione ammette per simmetria — non vi entra, o il registro darebbe al
+            // giocatore un ordine avversario che la sua conoscenza non gli ha dato.
+            if parte == .giocatore {
+                annota(.marciaRevocata(gruppo: gruppo.nome, casella: casella), in: &nuovo)
+            }
 
         case .divisione(let idGruppo, let repartiStaccati, let destinazione):
             let origine = nuovo.gruppi[idGruppo]!
@@ -502,20 +600,43 @@ public struct MotoreCampagna: Sendable {
     /// che due marce puntino la stessa casella o che una punti una casella occupata.
     func avanzaLeMarce(_ stato: inout StatoCampagna) -> [EventoCampagna] {
         var eventi: [EventoCampagna] = []
+        // Le caselle in cui una formazione AVVERSARIA si è compiuta questa giornata: gli
+        // avvistamenti si valutano DOPO, sulle posizioni settlate (vedi sotto).
+        var arriviAvversari: [Cella] = []
         for id in stato.gruppi.keys.sorted() {
             guard var marcia = stato.gruppi[id]!.marcia else { continue }
             marcia.giorniCompiuti += 1
             if marcia.giorniCompiuti >= marcia.giorniTotali {
-                let partenza = stato.gruppi[id]!.posizione
-                let nome = stato.gruppi[id]!.nome
-                stato.gruppi[id]!.posizione = marcia.destinazione
+                let gruppo = stato.gruppi[id]!
+                let partenza = gruppo.posizione
+                let nome = gruppo.nome
+                let arrivo = marcia.destinazione
+                stato.gruppi[id]!.posizione = arrivo
                 stato.gruppi[id]!.marcia = nil
-                eventi.append(.marciaCompiuta(gruppo: id, nome: nome,
-                                              da: partenza, a: marcia.destinazione))
-                annota(.marciaCompiuta(gruppo: nome, da: partenza, a: marcia.destinazione), in: &stato)
+                if gruppo.parte == .giocatore {
+                    // Fatto proprio del giocatore: annuncio e voce di registro, col salto
+                    // al luogo (01 §5.17.1, 02 §6.6).
+                    eventi.append(.marciaCompiuta(gruppo: id, nome: nome, da: partenza, a: arrivo))
+                    annota(.marciaCompiuta(gruppo: nome, da: partenza, a: arrivo), in: &stato)
+                } else {
+                    arriviAvversari.append(arrivo)
+                }
             } else {
                 stato.gruppi[id]!.marcia = marcia
             }
+        }
+        // Gli avvistamenti si valutano quando TUTTE le marce si sono compiute, sulle
+        // posizioni settlate: l'osservazione a metà del giro dipenderebbe dall'ordine
+        // degli identificatori (un gruppo del giocatore nato da una divisione ha id
+        // maggiore dell'avversario e si muoverebbe dopo di lui), e darebbe avvistamenti
+        // incoerenti con lo stato finale. Una formazione avversaria compiutasi è
+        // avvistata se il giocatore la OSSERVA ora (conoscenza confermato, 01 §5.6.11):
+        // il fatto e il luogo, senza nome né volume (02 §6.4.1), annunciato e nel registro
+        // (02 §8.2.1). Su una casella non osservata non esce nulla, e nessuna informazione
+        // raggiunge il giocatore se non dalla sua conoscenza e dal registro.
+        for arrivo in arriviAvversari where osservata(arrivo, da: .giocatore, stato: stato) {
+            eventi.append(.formazioneAvversariaAvvistata(casella: arrivo))
+            annota(.formazioneAvversariaAvvistata(casella: arrivo), in: &stato)
         }
         return eventi
     }
@@ -540,6 +661,17 @@ public struct MotoreCampagna: Sendable {
         for id in stato.gruppi.keys.sorted() {
             let gruppo = stato.gruppi[id]!
             let casella = gruppo.posizione
+            // Il rifornimento dell'AVVERSARIO segue le stesse regole (nessuna asimmetria,
+            // 01 §5.2.2), ma i suoi fatti NON raggiungono il giocatore: non entrano nel
+            // suo registro né nei suoi annunci, o gli darebbero informazione che la sua
+            // conoscenza non gli ha dato (01 §5.6.11). Lo stato si aggiorna per entrambe
+            // le parti; annuncio e registro sono del solo giocatore. `riporta` è il punto
+            // unico che lo rende impossibile per costruzione, non per disciplina.
+            func riporta(_ evento: EventoCampagna, _ fatto: FattoRegistrato) {
+                guard gruppo.parte == .giocatore else { return }
+                eventi.append(evento)
+                annota(fatto, in: &stato)
+            }
 
             // In sosta: si scala un giorno dovuto. All'ultimo, il gruppo è di nuovo
             // rifornito e i turni senza provviste si azzerano; la ripresa si annota.
@@ -547,8 +679,8 @@ public struct MotoreCampagna: Sendable {
                 stato.gruppi[id]!.sostaDovuta -= 1
                 if stato.gruppi[id]!.sostaDovuta == 0 {
                     stato.gruppi[id]!.turniSenzaProvviste = 0
-                    eventi.append(.rifornimentoRipreso(gruppo: id, nome: gruppo.nome, casella: casella))
-                    annota(.rifornimentoRipreso(gruppo: gruppo.nome, casella: casella), in: &stato)
+                    riporta(.rifornimentoRipreso(gruppo: id, nome: gruppo.nome, casella: casella),
+                            .rifornimentoRipreso(gruppo: gruppo.nome, casella: casella))
                 }
                 continue
             }
@@ -558,8 +690,8 @@ public struct MotoreCampagna: Sendable {
             if inZonaDiRifornimento(casella, stato: stato) {
                 if gruppo.turniSenzaProvviste > 0 {
                     stato.gruppi[id]!.turniSenzaProvviste = 0
-                    eventi.append(.rifornimentoRipreso(gruppo: id, nome: gruppo.nome, casella: casella))
-                    annota(.rifornimentoRipreso(gruppo: gruppo.nome, casella: casella), in: &stato)
+                    riporta(.rifornimentoRipreso(gruppo: id, nome: gruppo.nome, casella: casella),
+                            .rifornimentoRipreso(gruppo: gruppo.nome, casella: casella))
                 }
                 continue
             }
@@ -570,13 +702,13 @@ public struct MotoreCampagna: Sendable {
                 switch gruppo.turniSenzaProvviste {
                 case 0:
                     stato.gruppi[id]!.turniSenzaProvviste = 1
-                    eventi.append(.rifornimentoInterrotto(gruppo: id, nome: gruppo.nome, casella: casella))
-                    annota(.rifornimentoInterrotto(gruppo: gruppo.nome, casella: casella), in: &stato)
+                    riporta(.rifornimentoInterrotto(gruppo: id, nome: gruppo.nome, casella: casella),
+                            .rifornimentoInterrotto(gruppo: gruppo.nome, casella: casella))
                 case 1:
                     stato.gruppi[id]!.turniSenzaProvviste = 2
                     stato.gruppi[id]!.sostaDovuta = 2
-                    eventi.append(.sostaDiRifornimento(gruppo: id, nome: gruppo.nome, casella: casella))
-                    annota(.sostaDiRifornimento(gruppo: gruppo.nome, casella: casella), in: &stato)
+                    riporta(.sostaDiRifornimento(gruppo: id, nome: gruppo.nome, casella: casella),
+                            .sostaDiRifornimento(gruppo: gruppo.nome, casella: casella))
                 default:
                     // A due turni senza provviste senza sosta già dovuta non si arriva:
                     // il secondo taglio impone sempre la sosta, gestita dal ramo di sopra.
@@ -589,8 +721,8 @@ public struct MotoreCampagna: Sendable {
             // l'ha spezzato muovendosi al riparo — il rifornimento riprende.
             if gruppo.turniSenzaProvviste > 0 {
                 stato.gruppi[id]!.turniSenzaProvviste = 0
-                eventi.append(.rifornimentoRipreso(gruppo: id, nome: gruppo.nome, casella: casella))
-                annota(.rifornimentoRipreso(gruppo: gruppo.nome, casella: casella), in: &stato)
+                riporta(.rifornimentoRipreso(gruppo: id, nome: gruppo.nome, casella: casella),
+                        .rifornimentoRipreso(gruppo: gruppo.nome, casella: casella))
             }
         }
         return eventi

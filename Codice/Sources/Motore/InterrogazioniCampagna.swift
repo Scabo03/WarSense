@@ -42,6 +42,12 @@ public struct VistaCampagna: Sendable {
         /// confermato (02 §3.8.1): dice quanto è corrente ciò che segue.
         case conoscenza(StatoConoscenza)
         case occupante(Gruppo)
+        /// Una FORMAZIONE AVVERSARIA, mostrata solo dove la conoscenza del giocatore è
+        /// confermato (01 §5.6.11, incarico 18): l'occultamento. Non porta il gruppo —
+        /// né il suo nome né il suo volume (02 §6.4.1), né il suo stato d'azione, che
+        /// tradirebbe l'ordine interno di risoluzione — perché il giocatore la vede, non
+        /// la conosce. Su una casella non confermata questa voce non compare affatto.
+        case occupanteAvversario
         case rifornimento(StatoRifornimento)
         case quartierGenerale(Parte)
         case terreno(TerrenoCasella)
@@ -68,6 +74,16 @@ public struct VistaCampagna: Sendable {
                 voci.append(.rifornimento(rifornimento))
             }
         }
+        // La formazione avversaria si mostra SOLO dove la conoscenza del giocatore è
+        // confermato, cioè dove una sua formazione la osserva (01 §5.6.11, §5.11.1): è
+        // l'occultamento. La compresenza (01 §6.1) è possibile, sicché può accompagnare
+        // un proprio occupante. Su una casella non confermata non compare, e il giocatore
+        // vi legge solo lo stato di conoscenza, che tace ciò che non osserva.
+        let parteAvversa: Parte = parte == .giocatore ? .avversario : .giocatore
+        if statoConoscenza == .confermato,
+           stato.occupante(di: casella, parte: parteAvversa) != nil {
+            voci.append(.occupanteAvversario)
+        }
         if let parte = quartierGeneraleSu(casella) { voci.append(.quartierGenerale(parte)) }
         let terreno = terreno(di: casella)
         if terreno != .aperto { voci.append(.terreno(terreno)) }
@@ -86,7 +102,7 @@ public struct VistaCampagna: Sendable {
     /// Il costo in giorni dello scatto verso una casella adiacente (01 §5.6.3.1).
     /// La Presentazione non lo calcola mai: lo chiede qui (00 §3.2).
     public func costoInGiorni(da partenza: Cella, a arrivo: Cella) -> Int {
-        motore.costoInGiorni(da: partenza, a: arrivo, stato: stato)
+        motore.costoInGiorni(da: partenza, a: arrivo, parte: parte, stato: stato)
     }
 
     /// Il comando di marcia già formato, con il costo che i dati prescrivono: è
@@ -236,6 +252,20 @@ public struct VistaCampagna: Sendable {
     /// dell'elenco dipendono da regole che questa unità non realizza.
     public var casellePropriFormazioni: [Cella] { stato.gruppi(di: parte).map(\.posizione).sorted() }
     public var caselleGruppiInAttesa: [Cella] { stato.gruppiInAttesa(di: parte).map(\.posizione).sorted() }
+
+    /// Il rotore delle FORMAZIONI AVVERSARIE NOTE (02 §7.3): le caselle in cui una
+    /// formazione avversaria è osservata ORA, cioè dove la conoscenza è confermato
+    /// (01 §5.6.11, incarico 18). È il salto diretto a ciò che il giocatore vede del
+    /// nemico; ciò che non osserva non vi compare, come nella casella. Ordine di lettura
+    /// (02 §7.4): i nomi delle formazioni avversarie non si rivelano (02 §6.4.1), sicché
+    /// l'ordine è per posizione e non per nome.
+    public var caselleFormazioniAvversarieNote: [Cella] {
+        let parteAvversa: Parte = parte == .giocatore ? .avversario : .giocatore
+        return stato.gruppi(di: parteAvversa)
+            .map(\.posizione)
+            .filter { motore.osservata($0, da: parte, stato: stato) }
+            .sorted()
+    }
 
     /// Il rotore dei propri gruppi SENZA RIFORNIMENTO (02 §7.3): quelli che patiscono
     /// il taglio — senza provviste o in sosta imposta — in ordine di lettura. È il

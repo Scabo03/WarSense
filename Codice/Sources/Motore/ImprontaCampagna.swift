@@ -59,6 +59,8 @@ extension FattoRegistrato: CodificabileCanonico {
              .sostaDiRifornimento(let gruppo, let casella),
              .rifornimentoRipreso(let gruppo, let casella):
             c.testo(gruppo); casella.codifica(in: &c)
+        case .formazioneAvversariaAvvistata(let casella):
+            casella.codifica(in: &c)
         case .ordineAnnullato, .giornataAzzerata:
             break
         }

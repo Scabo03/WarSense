@@ -47,6 +47,11 @@ public struct TraduttoreEventiCampagna: Sendable {
         // l'annuncio parlato la dice (02 §8.7), come per la chiusura della giornata.
         case .rifornimentoRipreso: return nil
         case .giornataChiusa, .giornataAperta: return nil
+        // L'avvistamento di una formazione avversaria si annuncia a parole (02 §8.2.1),
+        // ma NON ha un significato tattile proprio: il tetto dei quindici è chiuso
+        // (02 §11.5) e l'elenco dei suoni dedicati (02 §11.7.1) non lo prevede; non se ne
+        // conia uno, come per la ripresa del rifornimento. Il fuoco non è rubato.
+        case .formazioneAvversariaAvvistata: return nil
         }
     }
 
@@ -99,6 +104,11 @@ public struct TraduttoreEventiCampagna: Sendable {
         case .rifornimentoRipreso(_, let chiave, let casella):
             return testi.frase("campagna.rifornimento_ripreso", verbosita: verbosita,
                                nome(chiave), casella.riga, casella.colonna)
+        case .formazioneAvversariaAvvistata(let casella):
+            // Il fatto e il luogo, senza nome né volume (02 §6.4.1): «una formazione
+            // avversaria, e dove». È la mossa avversaria che il giocatore apprende.
+            return testi.frase("campagna.formazione_avvistata", verbosita: verbosita,
+                               casella.riga, casella.colonna)
         }
     }
 
@@ -118,6 +128,10 @@ public struct TraduttoreEventiCampagna: Sendable {
              .sostaDiRifornimento(let gruppo, let casella),
              .rifornimentoRipreso(let gruppo, let casella):
             return testi.frase(chiave, voce.giorno, nome(gruppo), casella.riga, casella.colonna)
+        case .formazioneAvversariaAvvistata(let casella):
+            // Senza nome del gruppo (02 §6.4.1): il giorno e il luogo, attivabile per
+            // portarvi il fuoco (02 §6.6).
+            return testi.frase(chiave, voce.giorno, casella.riga, casella.colonna)
         case .ordineAnnullato, .giornataAzzerata:
             return testi.frase(chiave, voce.giorno)
         }

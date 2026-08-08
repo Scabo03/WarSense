@@ -332,6 +332,15 @@ public enum FattoRegistrato: Hashable, Codable, Sendable {
     /// Il rifornimento di un gruppo è ripreso (01 §5.2.2): non ha più nemici alle
     /// spalle, o è entrato in una zona di rifornimento. Fatto non deciso dal giocatore.
     case rifornimentoRipreso(gruppo: IdentificatoreDati, casella: Cella)
+    /// Una formazione avversaria è stata avvistata dal giocatore in una casella che
+    /// osserva (01 §5.6.11, §5.17.1, 02 §8.2.1): la mossa avversaria di cui il giocatore
+    /// «abbia notizia» entra nel registro, ed è attivabile per portare il fuoco sul
+    /// luogo (02 §6.6). NON porta il nome della formazione né il volume (02 §6.4.1): il
+    /// registro annota il fatto — una formazione avversaria, e dove — e nulla di più.
+    /// È annotata SOLO dove il giocatore osserva (conoscenza confermato): un avvistamento
+    /// su una casella non osservata non entra mai nel registro, o il registro darebbe al
+    /// giocatore informazione che la sua conoscenza non gli ha dato.
+    case formazioneAvversariaAvvistata(casella: Cella)
 
     /// Un esemplare per ciascun caso, in ordine fisso. Serve al collaudo per
     /// pretendere che OGNI fatto abbia la propria frase compiuta: con i valori
@@ -347,6 +356,7 @@ public enum FattoRegistrato: Hashable, Codable, Sendable {
         .rifornimentoInterrotto(gruppo: "corvo", casella: Cella(riga: 1, colonna: 1)),
         .sostaDiRifornimento(gruppo: "corvo", casella: Cella(riga: 1, colonna: 1)),
         .rifornimentoRipreso(gruppo: "corvo", casella: Cella(riga: 1, colonna: 1)),
+        .formazioneAvversariaAvvistata(casella: Cella(riga: 1, colonna: 1)),
     ]
 
     /// La chiave del testo che compone la frase della voce (00 §14.1): il fatto
@@ -360,6 +370,7 @@ public enum FattoRegistrato: Hashable, Codable, Sendable {
         case .rifornimentoInterrotto: return "registro.rifornimento_interrotto"
         case .sostaDiRifornimento: return "registro.sosta_di_rifornimento"
         case .rifornimentoRipreso: return "registro.rifornimento_ripreso"
+        case .formazioneAvversariaAvvistata: return "registro.formazione_avvistata"
         }
     }
 
@@ -373,6 +384,7 @@ public enum FattoRegistrato: Hashable, Codable, Sendable {
         case .rifornimentoInterrotto(_, let casella): return casella
         case .sostaDiRifornimento(_, let casella): return casella
         case .rifornimentoRipreso(_, let casella): return casella
+        case .formazioneAvversariaAvvistata(let casella): return casella
         case .ordineAnnullato, .giornataAzzerata: return nil
         }
     }
