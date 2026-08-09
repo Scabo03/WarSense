@@ -41,8 +41,8 @@ Quando un tuo gruppo armato o un tuo esploratore raggiunge la casella di una for
 Come avevi chiesto: le formazioni avversarie che hai avvistato hanno ora un proprio segno visivo sulla mappa, come i tuoi gruppi. Il segno **non si distingue per il colore** (che sarebbe inutile a chi distingue male i colori) ma per la **forma**:
 
 - Le **tue** formazioni portano al centro della casella l'**iniziale del nome**, una lettera.
-- Le formazioni **avversarie** portano un segno diverso, un «×», mai una lettera.
-- La **categoria** si riconosce da un marcatore uguale per le due parti: il gruppo armato è l'ordinario e non ne porta; l'esploratore porta un piccolo «»»; la formazione non armata un «≈».
+- Le formazioni **avversarie** portano un segno diverso, non una lettera: così le distingui dalle tue senza guardare il colore.
+- La **categoria** si riconosce da un marcatore di forma uguale per le due parti: il gruppo armato è l'ordinario e non ne porta; l'esploratore e la formazione non armata ne portano ciascuno uno proprio.
 
 Ciò che vedi e ciò che senti dicono esattamente la stessa cosa: il segno mostra quel che l'annuncio dichiara, né più né meno. Ci sono anche due nuovi rotori per saltare rapidamente alle caselle da cui puoi esplorare e alle informazioni di ricognizione ormai scadute.
 
