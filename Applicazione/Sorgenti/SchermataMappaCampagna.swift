@@ -323,6 +323,60 @@ final class SchermataMappaCampagna: UIViewController {
                 }
             })
         }
+        // Le azioni dell'incarico 19, ciascuna offerta SOLO se il Motore la valida: la
+        // Presentazione non giudica la categoria né il bersaglio, chiede al Motore (00 §3.2).
+        // L'ESPLORAZIONE (riservata agli esploratori, 01 §5.4): risolve subito, sulla casella.
+        if partita.motore.valida(.esplorazione(gruppo: gruppo.id),
+                                 parte: .giocatore, stato: costruttore.stato).eValido {
+            voci.append(VocePannello(titolo: testi.frase("pannello.esplora").testo,
+                                     stile: .default) { [weak self] in
+                self?.chiudiPannello(casella: gruppo.posizione) {
+                    await self?.eseguiComando(.esplorazione(gruppo: gruppo.id))
+                }
+            })
+        }
+        // Il SABOTAGGIO (gruppi armati o esploratori co-locati con una non armata avversaria,
+        // 01 §5.10.2): disperde il bersaglio, o — per esploratori sotto soglia — li fa notare.
+        if partita.motore.valida(.sabotaggio(gruppo: gruppo.id),
+                                 parte: .giocatore, stato: costruttore.stato).eValido {
+            voci.append(VocePannello(titolo: testi.frase("pannello.sabota").testo,
+                                     stile: .destructive) { [weak self] in
+                self?.chiudiPannello(casella: gruppo.posizione) {
+                    await self?.eseguiComando(.sabotaggio(gruppo: gruppo.id))
+                }
+            })
+        }
+        // Lo STUDIO APPROFONDITO (esploratori co-locati con una non armata avversaria,
+        // 01 §5.10.2): ne porta a confermato composizione, carico e direzione.
+        if partita.motore.valida(.studioApprofondito(gruppo: gruppo.id),
+                                 parte: .giocatore, stato: costruttore.stato).eValido {
+            voci.append(VocePannello(titolo: testi.frase("pannello.studia").testo,
+                                     stile: .default) { [weak self] in
+                self?.chiudiPannello(casella: gruppo.posizione) {
+                    await self?.eseguiComando(.studioApprofondito(gruppo: gruppo.id))
+                }
+            })
+        }
+        // L'IMBOSCATA (gruppi armati, 01 §5.11): colloca il gruppo in agguato nella casella.
+        if partita.motore.valida(.imboscata(gruppo: gruppo.id),
+                                 parte: .giocatore, stato: costruttore.stato).eValido {
+            voci.append(VocePannello(titolo: testi.frase("pannello.imboscata").testo,
+                                     stile: .default) { [weak self] in
+                self?.chiudiPannello(casella: gruppo.posizione) {
+                    await self?.eseguiComando(.imboscata(gruppo: gruppo.id))
+                }
+            })
+        }
+        // La REVOCA dell'imboscata si offre a un gruppo appostato (01 §5.11, RDA-76): come la
+        // revoca della marcia, lo libera dalla giornata successiva. Non è un'azione.
+        if gruppo.ordineImboscata {
+            voci.append(VocePannello(titolo: testi.frase("pannello.revoca_imboscata").testo,
+                                     stile: .destructive) { [weak self] in
+                self?.chiudiPannello(casella: gruppo.posizione) {
+                    await self?.eseguiComando(.revocaImboscata(gruppo: gruppo.id))
+                }
+            })
+        }
         // La revoca si offre soltanto a un gruppo in marcia lunga: congeda il
         // pannello del gruppo e apre quello di conferma, che dichiara i giorni persi.
         if gruppo.inMarcia {
@@ -542,6 +596,14 @@ final class SchermataMappaCampagna: UIViewController {
             // diretto a ciò che il giocatore osserva del nemico. Vuoto finché non ne osserva.
             rotore("rotore.formazioni_avversarie_note") { [weak self] in
                 self?.costruttore?.vista.caselleFormazioniAvversarieNote ?? [] },
+            // I due rotori di 02 §7.3 realizzati da questa unità (incarico 19): le caselle da
+            // cui è possibile ESPLORARE — i propri esploratori pronti — e le informazioni di
+            // ricognizione SCADUTE, cioè le caselle avvistate o presunte, che converrebbe
+            // riesplorare. Vuoti finché non esistono esploratori o conoscenza non corrente.
+            rotore("rotore.caselle_esplorabili") { [weak self] in
+                self?.costruttore?.vista.caselleEsplorabili ?? [] },
+            rotore("rotore.ricognizione_scadute") { [weak self] in
+                self?.costruttore?.vista.caselleRicognizioneScadute ?? [] },
         ]
     }
 

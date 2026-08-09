@@ -749,7 +749,7 @@ public struct MotoreCampagna: Sendable {
     /// La competenza si legge dalla categoria; se il gruppo non è un esploratore la funzione non
     /// dovrebbe essere chiamata (la validazione lo esclude) e l'insidiosità vince, ma non si
     /// forza: si tratta come competenza nulla.
-    func esitoEsplorazione(di gruppo: Gruppo, stato: StatoCampagna) -> EsitoEsplorazione {
+    public func esitoEsplorazione(di gruppo: Gruppo, stato: StatoCampagna) -> EsitoEsplorazione {
         let r = valoriCampagna.ricognizione
         let competenza = gruppo.categoria.competenza ?? 0
         let qgProprio = stato.mappa.quartierGenerale(di: gruppo.parte)

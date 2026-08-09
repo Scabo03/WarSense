@@ -125,8 +125,10 @@ final class MappaCampagnaAccessibileTest: XCTestCase {
                        [testi.frase("rotore.proprie_formazioni").testo,
                         testi.frase("rotore.gruppi_in_attesa").testo,
                         testi.frase("rotore.gruppi_senza_rifornimento").testo,
-                        testi.frase("rotore.formazioni_avversarie_note").testo],
-                       "gli insiemi di 02 §7.3 realizzati: formazioni, gruppi in attesa, gruppi senza rifornimento, formazioni avversarie note")
+                        testi.frase("rotore.formazioni_avversarie_note").testo,
+                        testi.frase("rotore.caselle_esplorabili").testo,
+                        testi.frase("rotore.ricognizione_scadute").testo],
+                       "gli insiemi di 02 §7.3 realizzati: formazioni, gruppi in attesa, gruppi senza rifornimento, formazioni avversarie note, caselle esplorabili, ricognizione scaduta")
     }
 
     func test_01_5_16_il_pannello_offre_le_azioni_disponibili_in_ordine_fisso() async throws {

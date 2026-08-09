@@ -315,6 +315,11 @@
 /* Pannello di revoca della marcia (01 §5.6.3.3, §5.6.3.5): dichiara i giorni persi
    e che il gruppo resta senza azione, prima della conferma. */
 "pannello.revoca" = "Revoca la marcia";
+"pannello.esplora" = "Esplora la zona";
+"pannello.sabota" = "Sabota la formazione avversaria";
+"pannello.studia" = "Studia a fondo la formazione avversaria";
+"pannello.imboscata" = "Mettiti in agguato";
+"pannello.revoca_imboscata" = "Lascia l'agguato";
 "pannello.revoca_conferma_azione" = "Conferma la revoca";
 
 /* Schermata di divisione (01 §5.6.0.2, 02 §10.3): ogni riga una frase compatta.
@@ -335,6 +340,8 @@
 "rotore.gruppi_in_attesa" = "Gruppi da muovere";
 "rotore.gruppi_senza_rifornimento" = "Gruppi senza rifornimento";
 "rotore.formazioni_avversarie_note" = "Formazioni avversarie note";
+"rotore.caselle_esplorabili" = "Caselle da cui esplorare";
+"rotore.ricognizione_scadute" = "Informazioni di ricognizione scadute";
 
 /* Nomi parlati delle mappe di prova. */
 "mappa.guado" = "Guado";
