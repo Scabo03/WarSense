@@ -30,7 +30,7 @@ accaduto.
 
 | n. | data | materia | incarico | resoconto |
 |---|---|---|---|---|
-| 19 | 2026-08-09 | ricognizione, formazioni non armate e imboscate (esploratori, sabotaggio e studio approfondito, aggiramento simmetrico, segni per categoria sulla mappa, arrivi fuori dal registro) | [incarico](19-2026-08-09-ricognizione-non-armate-imboscate-incarico.md) | resoconto (in corso) |
+| 19 | 2026-08-09 | ricognizione, formazioni non armate e imboscate (esploratori, sabotaggio e studio approfondito, aggiramento simmetrico, segni per categoria sulla mappa, arrivi fuori dal registro) | [incarico](19-2026-08-09-ricognizione-non-armate-imboscate-incarico.md) | [resoconto](19-2026-08-09-ricognizione-non-armate-imboscate-resoconto.md) |
 | 18 | 2026-08-08 | l'avversario che si muove sulla mappa di campagna (blocco 2: condotta deterministica, informazione incompleta, aggiramento, annuncio, giornale) | [incarico](18-2026-08-08-avversario-mappa-campagna-incarico.md) | [resoconto](18-2026-08-08-avversario-mappa-campagna-resoconto.md) |
 | 17 | 2026-08-08 | l'avversario, la ricognizione e l'informazione incompleta (blocco 1: stati di conoscenza; blocchi 2–5 rinviati) | [incarico](17-2026-08-08-avversario-ricognizione-incarico.md) | [resoconto](17-2026-08-08-avversario-ricognizione-resoconto.md) |
 | 16 | 2026-08-07 | divisione e riunione dei gruppi con la schermata, le impronte che si dichiarano, e il rifornimento — catena, taglio, zone, autonomia e sosta (blocchi 0, 3, 4; completato il 2026-08-08) | [incarico](16-2026-08-07-divisione-rifornimento-incarico.md) | [resoconto](16-2026-08-07-divisione-rifornimento-resoconto.md) |

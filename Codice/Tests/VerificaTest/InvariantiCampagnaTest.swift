@@ -764,4 +764,39 @@ final class InvariantiCampagnaTest: XCTestCase {
         BancoCampagna(motore: motore, valoriCampagna: valoriCampagna,
                       scenari: try ScenariCampagna.carica(da: Verifica.Ambiente.scenariCampagnaDiFabbrica))
     }
+
+    /// Il banco GENERA i fenomeni della ricognizione, non li rende soltanto possibili
+    /// (incarico 19): esplorazioni riuscite, a mani vuote, notati, perduti; sabotaggi armati
+    /// e da esploratori (riusciti e falliti); studi. Ciascuno positivo sullo scenario dedicato,
+    /// e nessuna violazione. Stampa le frequenze per il resoconto.
+    func test_incarico_19_il_banco_genera_i_fenomeni_della_ricognizione() throws {
+        let banco = try banchino()
+        let voce = banco.scenari.scenari.first { $0.identificatore == "ricognizione_imboscate_pianura" }!
+        let corsa = try banco.corri(voce, giornate: banco.scenari.giornateGenerate)
+        print("FENOMENI ricognizione_imboscate_pianura:"
+              + " esplorazioni_riuscite=\(corsa.esplorazioniRiuscite)"
+              + " a_mani_vuote=\(corsa.esplorazioniAManiVuote)"
+              + " notati=\(corsa.esploratoriNotati)"
+              + " perduti=\(corsa.esploratoriPerduti)"
+              + " sabotaggi_armati=\(corsa.sabotaggiArmati)"
+              + " sabotaggi_esploratori=\(corsa.sabotaggiEsploratori)"
+              + " sabotaggi_falliti=\(corsa.sabotaggiFalliti)"
+              + " studi=\(corsa.studi)"
+              + " imboscate_piazzate=\(corsa.imboscatePiazzate)"
+              + " imboscate_scattate=\(corsa.imboscateScattate)"
+              + " aggiramenti=\(corsa.aggiramenti)"
+              + " violazioni=\(corsa.violazioni.count) \(corsa.violazioni.joined(separator: ";"))")
+        XCTAssertTrue(corsa.violazioni.isEmpty, "nessuna violazione: \(corsa.violazioni)")
+        // I fenomeni della ricognizione sono esercitati: la loro somma è positiva.
+        XCTAssertGreaterThan(corsa.esplorazioniRiuscite + corsa.esplorazioniAManiVuote
+                             + corsa.esploratoriNotati + corsa.esploratoriPerduti, 0, "nessuna esplorazione")
+        XCTAssertGreaterThan(corsa.studi, 0, "nessuno studio approfondito")
+        XCTAssertGreaterThan(corsa.sabotaggiEsploratori + corsa.sabotaggiFalliti, 0, "nessun sabotaggio da esploratori")
+        XCTAssertGreaterThan(corsa.sabotaggiArmati, 0, "nessun sabotaggio armato")
+        // Tutti e quattro gli esiti dell'esplorazione sono esercitati (i tre richiesti —
+        // riuscite, a mani vuote, notati — più i perduti).
+        XCTAssertGreaterThan(corsa.esplorazioniRiuscite, 0)
+        XCTAssertGreaterThan(corsa.esplorazioniAManiVuote, 0)
+        XCTAssertGreaterThan(corsa.esploratoriNotati, 0)
+    }
 }

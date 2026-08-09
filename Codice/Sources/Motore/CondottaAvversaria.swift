@@ -127,6 +127,11 @@ public struct CondottaAvversaria: Sendable {
         // rinviata come il carattere (01 §6.1.3).
         if gruppo.categoria.eRicognizione { return .esplorazione(gruppo: gruppo.id) }
 
+        // Le formazioni NON ARMATE non avanzano né combattono: presidiano dove sono (catene di
+        // approvvigionamento, 01 §5.2). Nel banco questo le tiene raggiungibili — bersaglio di
+        // sabotaggio e studio — invece di ritirarle; la loro condotta è comunque provvisoria.
+        if gruppo.categoria.eNonArmata { return .presidio(gruppo: gruppo.id) }
+
         let c = vista.condotta
         let noti = vista.formazioniGiocatoreNote
         let griglia = vista.griglia
