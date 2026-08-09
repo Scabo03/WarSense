@@ -144,6 +144,12 @@
 "comando.non_valido.riunione_impropria" = "riunione non ammessa";
 "comando.non_valido.nomi_esauriti" = "nomi dei gruppi esauriti";
 "comando.non_valido.deve_rifornirsi" = "il gruppo deve rifornirsi";
+"comando.non_valido.categoria_non_ammessa" = "azione non ammessa a questa formazione";
+"comando.non_valido.nessun_bersaglio" = "nessuna formazione da colpire in questa casella";
+"comando.non_valido.gruppo_non_in_agguato" = "il gruppo non è in agguato";
+"categoria.gruppo_armato" = "gruppo armato";
+"categoria.ricognizione" = "formazione di ricognizione";
+"categoria.non_armata" = "formazione non armata";
 /* Confine dell'annullamento (05 §6.5): ogni motivo di rifiuto ha il proprio
    termine (00 §9, principio 9), e il rifiuto non è mai silenzioso. */
 "campagna.non_si_torna_oltre_la_giornata" = "non si torna oltre la giornata in corso";

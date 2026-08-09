@@ -155,8 +155,9 @@ final class AnnullamentoGiornataTest: XCTestCase {
         let sessione = try await nuova(try slot(), gruppi: [(10, 6), (10, 5)])
         let ids = await sessione.stato.gruppiOrdinati.map(\.id)
         // Giorno 1: una marcia di un giorno e un presidio. La giornata si chiude e la
-        // marcia si compie, ANNOTANDO un fatto (l'arrivo) nel giorno 1 — gli ordini
-        // non entrano più nel registro (correzione del titolare, RDA-104).
+        // marcia si compie; l'ARRIVO non entra più nel registro (correzione del titolare,
+        // incarico 19), ma la marcia compiuta scrive comunque il marcatore di risoluzione,
+        // sicché il confine di 05 §6.5 regge.
         _ = try await sessione.esegui(.marcia(gruppo: ids[0], a: Cella(riga: 9, colonna: 6), giorni: 1),
                                       parte: .giocatore)
         _ = try await sessione.esegui(.presidio(gruppo: ids[1]), parte: .giocatore)
@@ -167,9 +168,12 @@ final class AnnullamentoGiornataTest: XCTestCase {
         let dopo = await sessione.stato
         XCTAssertEqual(dopo.giorno, 2)
         XCTAssertEqual(dopo.gruppiInAttesa().count, 2, "il giorno 2 è tornato vuoto")
-        // Il compimento della marcia del giorno 1 è ancora nel registro: è un fatto
-        // non deciso dal giocatore, e non si annulla più (05 §6.5).
-        XCTAssertTrue(dopo.registro.contains { $0.giorno == 1 })
+        // L'arrivo del giorno 1 NON entra più nel registro (incarico 19): nessuna voce vi
+        // appartiene al giorno 1 (l'unica voce presente è l'azzeramento del giorno 2). Ma il
+        // confine regge lo stesso — la marcia compiuta ha scritto il marcatore di risoluzione —
+        // e annullare oltre la giornata è rifiutato (05 §6.5).
+        XCTAssertFalse(dopo.registro.contains { $0.giorno == 1 },
+                       "l'arrivo del giorno 1 non entra nel registro (incarico 19)")
         await XCTAssertRifiutaOltreLaGiornata { try await sessione.annulla(parte: .giocatore) }
     }
 

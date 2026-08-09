@@ -130,14 +130,14 @@ public struct SondaSessioneCampagna: Sendable {
             trovate.append(.gruppiNonConservati(iniziali: storia.gruppiIniziali.count,
                                                 finali: storia.gruppiFinali.count))
         }
-        // Il registro annota i fatti che il giocatore NON ha deciso (01 §5.17.1,
-        // ripristinato dalla correzione del titolare RDA-104): gli ordini NON vi
-        // entrano più. La condotta delle sessioni complete non revoca né annulla,
-        // sicché il registro accumulato è esattamente il numero dei compimenti di
-        // marcia — l'unico fatto non deciso che questa condotta produce.
-        if storia.vociDiRegistro != storia.compimentiDiMarcia {
+        // Il registro annota i fatti che il giocatore NON ha deciso (01 §5.17.1), ma dall'
+        // incarico 19 l'ARRIVO di un proprio gruppo ne è USCITO (correzione del titolare): il
+        // compimento di una marcia non vi entra più. Questa condotta non revoca, non annulla,
+        // non esplora, non tende imboscate e non muove l'avversario, sicché NESSUN fatto non
+        // deciso vi entra: il registro resta vuoto, quali che siano i compimenti di marcia.
+        if storia.vociDiRegistro != 0 {
             trovate.append(.registroNonCorrispondeAgliOrdini(voci: storia.vociDiRegistro,
-                                                            ordini: storia.compimentiDiMarcia))
+                                                            ordini: 0))
         }
         if storia.improntaFinale != storia.improntaRigiocata {
             trovate.append(.rigiocaturaDivergente(attesa: storia.improntaFinale,

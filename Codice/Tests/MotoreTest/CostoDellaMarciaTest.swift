@@ -110,7 +110,8 @@ final class CostoDellaMarciaTest: XCTestCase {
                                       nomiGruppi: valoriCampagna.nomiGruppi,
                                       marcia: alterata,
                                       conoscenza: valoriCampagna.conoscenza,
-                                      condotta: valoriCampagna.condotta)
+                                      condotta: valoriCampagna.condotta,
+                                      ricognizione: valoriCampagna.ricognizione)
         let altroMotore = MotoreCampagna(valori: valori, valoriCampagna: alterati)
         let s = try stato()
         XCTAssertEqual(altroMotore.costoInGiorni(da: Cella(riga: 4, colonna: 2),

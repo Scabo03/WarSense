@@ -24,6 +24,7 @@
  },
  "versione": "0.11.0",
  "versioni_compatibili": [
+  "0.8.0",
   "0.9.0",
   "0.10.0"
  ]

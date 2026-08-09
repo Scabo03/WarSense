@@ -116,7 +116,7 @@ final class TraduttoreCampagnaTest: XCTestCase {
     func test_02_4_ogni_termine_del_vocabolario_di_campagna_esiste_nei_testi() throws {
         for stato in StatoGruppo.casiDiRiferimento {
             switch stato {
-            case .inAttesa, .haAgito:
+            case .inAttesa, .haAgito, .inAgguato:
                 XCTAssertTrue(testi.esiste(stato.chiaveTesto, tavola: "Vocabolario"),
                               "manca il termine \(stato.chiaveTesto)")
             case .inMarcia:

@@ -181,19 +181,19 @@ final class MarciaLungaTest: XCTestCase {
                        .gruppoNonInMarcia, "non c'è marcia da revocare")
     }
 
-    /// Il registro annota il compimento di una marcia — primo fatto non deciso dal
-    /// giocatore (01 §5.17.1) — con il luogo della casella di arrivo (RDA-67).
-    func test_01_5_17_1_il_compimento_della_marcia_entra_nel_registro_col_luogo() throws {
+    /// L'ARRIVO di un proprio gruppo a destinazione NON entra più nel registro (incarico 19,
+    /// correzione del titolare): è un fatto che il giocatore ha deciso e già conosce. L'ANNUNCIO
+    /// dell'arrivo resta — l'evento è prodotto, col richiamo tattile del completamento di marcia
+    /// (02 §11.7.1) — e solo la voce di registro se ne va.
+    func test_01_5_17_1_l_arrivo_non_entra_nel_registro_ma_si_annuncia() throws {
         var stato = try crea(gruppi: [(3, 3)])
         let id = stato.gruppiOrdinati[0].id
         let costo = motore.costoInGiorni(da: Cella(riga: 3, colonna: 3),
                                          a: Cella(riga: 2, colonna: 3), stato: stato)
-        esegui(.marcia(gruppo: id, a: Cella(riga: 2, colonna: 3), giorni: costo), &stato)
-        let compimenti = stato.registro.filter {
-            if case .marciaCompiuta = $0.fatto { return true } else { return false }
-        }
-        XCTAssertEqual(compimenti.count, 1)
-        XCTAssertEqual(compimenti[0].luogo, Cella(riga: 2, colonna: 3),
-                       "la voce porta al luogo del fatto, cioè la casella di arrivo")
+        let eventi = esegui(.marcia(gruppo: id, a: Cella(riga: 2, colonna: 3), giorni: costo), &stato)
+        XCTAssertTrue(stato.registro.isEmpty,
+                      "l'arrivo di un proprio gruppo non entra nel registro (incarico 19)")
+        XCTAssertTrue(eventi.contains { if case .marciaCompiuta = $0 { return true } else { return false } },
+                      "ma l'annuncio dell'arrivo resta: l'evento è prodotto")
     }
 }

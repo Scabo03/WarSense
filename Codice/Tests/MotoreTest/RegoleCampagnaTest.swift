@@ -374,9 +374,10 @@ final class RegoleCampagnaTest: XCTestCase {
                                          a: Cella(riga: 9, colonna: 5), stato: stato)
         esegui(.marcia(gruppo: secondo, a: Cella(riga: 9, colonna: 5), giorni: costo), &stato)
         XCTAssertEqual(stato.gruppi[secondo]!.statoDichiarato, .inMarcia(giorniMancanti: costo))
-        // Il vocabolario di questa unità è chiuso a tre termini: gli altri stati di
-        // 02 §4.4.5 appartengono alle regole che li producono e non esistono qui.
-        XCTAssertEqual(StatoGruppo.casiDiRiferimento.count, 3)
+        // Il vocabolario degli stati di gruppo conta quattro termini realizzati: in attesa,
+        // ha agito, in marcia e — da questa unità — in agguato (02 §4.4.5). «scatto disponibile»
+        // appartiene alla marcia forzata, non ancora costruita.
+        XCTAssertEqual(StatoGruppo.casiDiRiferimento.count, 4)
     }
 
     func test_01_5_6_0_4_ogni_gruppo_riceve_un_nome_proprio_stabile_e_unico() throws {
@@ -394,10 +395,10 @@ final class RegoleCampagnaTest: XCTestCase {
     /// Il registro annota ciò che avviene nel perimetro di questa unità, cioè gli
     /// ordini impartiti ai gruppi (scostamento S8, RDA-72). Nasce vuoto: senza
     /// fatti non c'è nulla da annotare.
-    func test_01_5_17_1_il_registro_non_annota_gli_ordini_ma_i_fatti_non_decisi() throws {
-        // Gli ordini di marcia e di presidio NON entrano nel registro (correzione del
-        // titolare, RDA-104): il registro annota i fatti che il giocatore non ha
-        // deciso (01 §5.17.1). Vi entra il COMPIMENTO della marcia — l'arrivo.
+    func test_01_5_17_1_il_registro_non_annota_gli_ordini_ne_gli_arrivi() throws {
+        // Gli ordini di marcia e di presidio NON entrano nel registro (01 §5.17.1). E dall'
+        // incarico 19 nemmeno l'ARRIVO di un proprio gruppo a destinazione, che il titolare ha
+        // giudicato inutile e ingombrante: è un fatto che il giocatore ha deciso e già conosce.
         var stato = try crea(scenario(gruppi: [(10, 6), (10, 5), (9, 6)]))
         XCTAssertTrue(stato.registro.isEmpty, "il registro nasce vuoto: nulla è ancora avvenuto")
         let ids = stato.gruppiOrdinati.map(\.id)
@@ -406,53 +407,47 @@ final class RegoleCampagnaTest: XCTestCase {
                       "il presidio è un ordine deciso dal giocatore: non entra nel registro")
         esegui(.marcia(gruppo: ids[1], a: Cella(riga: 9, colonna: 5), giorni: 1), &stato)
         XCTAssertTrue(stato.registro.isEmpty,
-                      "l'ordine di marcia non entra nel registro finché la marcia non si compie")
-        // Ordinato anche il terzo, la giornata si chiude e la marcia di un giorno di
-        // ids[1] si compie: il registro porta il SOLO compimento, fatto non deciso.
+                      "l'ordine di marcia non entra nel registro")
+        // Ordinato anche il terzo, la giornata si chiude e la marcia di un giorno di ids[1] si
+        // compie: ma l'ARRIVO non entra più nel registro (incarico 19). Il registro resta vuoto.
         esegui(.presidio(gruppo: ids[2]), &stato)
-        XCTAssertEqual(stato.registro.count, 1, "il solo compimento della marcia è un fatto avvenuto")
-        guard case .marciaCompiuta(let nome, _, let a) = stato.registro[0].fatto else {
-            return XCTFail("il fatto annotato non è il compimento della marcia")
-        }
-        XCTAssertEqual(nome, stato.gruppi[ids[1]]!.nome)
-        XCTAssertEqual(a, Cella(riga: 9, colonna: 5))
-        XCTAssertEqual(stato.registro[0].luogo, a, "la voce porta al luogo del fatto")
+        XCTAssertTrue(stato.registro.isEmpty,
+                      "l'arrivo di un proprio gruppo NON entra più nel registro (correzione del titolare)")
     }
 
-    /// Il giorno è una PROPRIETÀ di ciascuna voce e non una voce a sé: l'apertura
-    /// di una giornata non produce alcuna riga di registro (02 §6.6).
+    /// L'ARRIVO non entra nel registro (incarico 19), e nemmeno l'apertura di una giornata,
+    /// che è una proprietà di ciascuna voce e non una voce a sé (02 §6.6): il registro resta
+    /// vuoto quando l'unico fatto della giornata è un arrivo deciso dal giocatore.
     func test_02_6_6_l_apertura_della_giornata_non_e_una_voce_di_registro() throws {
         var stato = try crea(scenario(gruppi: [(10, 6)]))
         let id = stato.gruppiOrdinati[0].id
-        // Un solo gruppo: la marcia di un giorno chiude la giornata, si compie e la
-        // nuova giornata si apre. Il registro porta il SOLO compimento; l'apertura
-        // della giornata non aggiunge alcuna voce (02 §6.6).
+        // Un solo gruppo: la marcia di un giorno chiude la giornata, si compie e la nuova
+        // giornata si apre. Né l'arrivo né l'apertura aggiungono una voce.
         esegui(.marcia(gruppo: id, a: Cella(riga: 9, colonna: 6), giorni: 1), &stato)
         XCTAssertEqual(stato.giorno, 2, "la giornata si è chiusa e la nuova si è aperta")
-        XCTAssertEqual(stato.registro.count, 1,
-                       "una voce sola: il compimento. L'apertura della giornata non ne aggiunge")
-        XCTAssertTrue(stato.registro.allSatisfy {
-            if case .marciaCompiuta = $0.fatto { return true }
-            return false
-        }, "nessuna voce di calendario nel registro")
+        XCTAssertTrue(stato.registro.isEmpty,
+                      "né l'arrivo (incarico 19) né l'apertura della giornata (02 §6.6) aggiungono una voce")
     }
 
     func test_02_6_6_il_registro_si_legge_dal_piu_recente_al_meno_recente() throws {
-        // Tre marce di un giorno in fila su un solo gruppo: ciascuna si compie e
-        // annota un fatto (l'arrivo). Il registro si legge dal più recente.
-        var stato = try crea(scenario(gruppi: [(10, 6)]))
-        for riga in [9, 8, 7] {
-            let id = stato.gruppiOrdinati[0].id
-            esegui(.marcia(gruppo: id, a: Cella(riga: riga, colonna: 6), giorni: 1), &stato)
+        // La REVOCA di una marcia è un fatto che RESTA nel registro (RDA-104): tre revoche in
+        // fila danno tre voci, e il registro si legge dal più recente (02 §6.6). Un quarto gruppo
+        // fermo tiene la giornata aperta, così che la revoca dell'ultima marcia non chiuda il turno.
+        var stato = try crea(scenario(gruppi: [(10, 6), (10, 5), (9, 6), (8, 6)]))
+        let bersagli: [(IdGruppo, Cella)] = [
+            (stato.gruppiOrdinati[0].id, Cella(riga: 10, colonna: 7)),
+            (stato.gruppiOrdinati[1].id, Cella(riga: 10, colonna: 4)),
+            (stato.gruppiOrdinati[2].id, Cella(riga: 9, colonna: 5)),
+        ]
+        for (id, dest) in bersagli {
+            let costo = motore.costoInGiorni(da: stato.gruppi[id]!.posizione, a: dest, stato: stato)
+            esegui(.marcia(gruppo: id, a: dest, giorni: costo), &stato)
+            esegui(.revocaMarcia(gruppo: id), &stato)
         }
         let vista = VistaCampagna(motore: motore, stato: stato, parte: .giocatore)
-        XCTAssertEqual(vista.registroDalPiuRecente.count, 3, "tre arrivi, tre voci")
+        XCTAssertEqual(vista.registroDalPiuRecente.count, 3, "tre revoche, tre voci")
         let numeri = vista.registroDalPiuRecente.map(\.numero)
         XCTAssertEqual(numeri, numeri.sorted(by: >), "dal più recente al meno recente")
-        let giorni = vista.registroDalPiuRecente.map(\.giorno)
-        XCTAssertEqual(giorni, giorni.sorted(by: >), "i giorni scendono con le voci")
-        XCTAssertEqual(giorni.first, stato.giorno - 1,
-                       "l'ultimo arrivo appartiene alla giornata che ha chiuso")
     }
 
     // MARK: - 00 §3.1 — determinismo
