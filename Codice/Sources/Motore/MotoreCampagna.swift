@@ -143,7 +143,76 @@ public struct MotoreCampagna: Sendable {
             // sia per l'autonomia sia per la sosta imposta dal taglio (01 §5.6.5).
             guard !gruppo.haConclusoLaGiornata else { return .nonValido(.azioneGiaSpesa) }
             return .valido
+
+        case .esplorazione(let idGruppo):
+            guard let gruppo = stato.gruppi[idGruppo], gruppo.parte == parte else {
+                return .nonValido(.gruppoIgnoto)
+            }
+            // Riservata alle formazioni di ricognizione (01 §5.6.8.1). Gli esploratori NON
+            // sono soggetti al taglio (01 §5.15): nessun controllo di sosta li riguarda.
+            guard gruppo.categoria.eRicognizione else { return .nonValido(.categoriaNonAmmessa) }
+            guard !gruppo.haConclusoLaGiornata else { return .nonValido(.azioneGiaSpesa) }
+            return .valido
+
+        case .imboscata(let idGruppo):
+            guard let gruppo = stato.gruppi[idGruppo], gruppo.parte == parte else {
+                return .nonValido(.gruppoIgnoto)
+            }
+            // Riservata ai gruppi armati (01 §5.11, §5.6.8.1).
+            guard gruppo.categoria.eArmata else { return .nonValido(.categoriaNonAmmessa) }
+            guard !gruppo.haConclusoLaGiornata else { return .nonValido(.azioneGiaSpesa) }
+            // Come il presidio: un gruppo tenuto fermo dal taglio (due soste) non si appòsta,
+            // solo si rifornisce; dal secondo turno (una sosta) l'agguato va bene.
+            guard gruppo.sostaDovuta < 2 else { return .nonValido(.deveRifornirsi) }
+            return .valido
+
+        case .revocaImboscata(let idGruppo):
+            guard let gruppo = stato.gruppi[idGruppo], gruppo.parte == parte else {
+                return .nonValido(.gruppoIgnoto)
+            }
+            // La revoca dell'imboscata si compie solo su un gruppo appostato (01 §5.11). Non
+            // controlla `azioneSpesa`: come la revoca della marcia, non è un'azione.
+            guard gruppo.ordineImboscata else { return .nonValido(.gruppoNonInAgguato) }
+            return .valido
+
+        case .sabotaggio(let idGruppo):
+            guard let gruppo = stato.gruppi[idGruppo], gruppo.parte == parte else {
+                return .nonValido(.gruppoIgnoto)
+            }
+            // Gruppi armati o esploratori, mai una formazione non armata (01 §5.10.2).
+            guard !gruppo.categoria.eNonArmata else { return .nonValido(.categoriaNonAmmessa) }
+            guard !gruppo.haConclusoLaGiornata else { return .nonValido(.azioneGiaSpesa) }
+            guard gruppo.sostaDovuta < 2 else { return .nonValido(.deveRifornirsi) }
+            // Serve una formazione non armata avversaria co-locata (01 §5.10, §6.1).
+            guard bersaglioNonArmato(su: gruppo.posizione, parte: parte, stato: stato) != nil else {
+                return .nonValido(.nessunBersaglio)
+            }
+            return .valido
+
+        case .studioApprofondito(let idGruppo):
+            guard let gruppo = stato.gruppi[idGruppo], gruppo.parte == parte else {
+                return .nonValido(.gruppoIgnoto)
+            }
+            // Riservato alle formazioni di ricognizione (01 §5.10.2), esenti dal taglio.
+            guard gruppo.categoria.eRicognizione else { return .nonValido(.categoriaNonAmmessa) }
+            guard !gruppo.haConclusoLaGiornata else { return .nonValido(.azioneGiaSpesa) }
+            guard bersaglioNonArmato(su: gruppo.posizione, parte: parte, stato: stato) != nil else {
+                return .nonValido(.nessunBersaglio)
+            }
+            return .valido
         }
+    }
+
+    /// La formazione non armata AVVERSARIA co-locata con una casella, se c'è (01 §5.10, §6.1):
+    /// il bersaglio del sabotaggio e dello studio approfondito, che agiscono sulla formazione
+    /// non armata della parte OPPOSTA presente nella stessa casella per compresenza. Nil se la
+    /// casella non ospita una formazione non armata avversaria.
+    public func bersaglioNonArmato(su casella: Cella, parte: Parte,
+                                   stato: StatoCampagna) -> Gruppo? {
+        let avversa: Parte = parte == .giocatore ? .avversario : .giocatore
+        guard let bersaglio = stato.occupante(di: casella, parte: avversa),
+              bersaglio.categoria.eNonArmata else { return nil }
+        return bersaglio
     }
 
     // MARK: - Volume della colonna (01 §5.6.0, §5.6.3, §3.4.4)
@@ -280,8 +349,16 @@ public struct MotoreCampagna: Sendable {
     /// blocco successivo) e non da qui.
     public func conoscenza(di cella: Cella, per parte: Parte, stato: StatoCampagna) -> StatoConoscenza {
         if osservata(cella, da: parte, stato: stato) { return .confermato }
-        return StatoConoscenza.da(eta: stato.conoscenza[parte]?[cella],
-                                  sogliaConfermato: valoriCampagna.conoscenza.sogliaConfermatoInAvvistato)
+        // Un ricordo reale — anche invecchiato in avvistato — prevale sulla deduzione: chi ha
+        // visto sa più di chi presume. Il presunto interviene solo dove non c'è alcun ricordo.
+        if let eta = stato.conoscenza[parte]?[cella] {
+            return StatoConoscenza.da(eta: eta,
+                                      sogliaConfermato: valoriCampagna.conoscenza.sogliaConfermatoInAvvistato)
+        }
+        // Il PRESUNTO nasce SOLO dalla deduzione dell'itinerario (01 §5.10.1, RDA-110): una
+        // casella a valle di una colonna che gli esploratori hanno visto seguire una strada.
+        if stato.presunti[parte]?.contains(cella) == true { return .presunto }
+        return .inesplorato
     }
 
     /// L'invecchiamento e il decadimento della conoscenza (01 §5.6.11, §5.3): passo di
@@ -337,14 +414,24 @@ public struct MotoreCampagna: Sendable {
         func diGiocatore(_ id: IdGruppo) -> Bool { stato.gruppi[id]?.parte == .giocatore }
         return eventi.filter { evento in
             switch evento {
-            case .giornataChiusa, .giornataAperta, .formazioneAvversariaAvvistata:
+            case .giornataChiusa, .giornataAperta, .formazioneAvversariaAvvistata,
+                 .imboscataScattata, .direzioneDedotta:
+                // Confini di giornata, avvistamenti, scatti d'imboscata (sempre fra parti
+                // opposte, il giocatore è parte) e deduzioni (prodotte solo per lui).
                 return true
             case .marciaOrdinata(let g, _, _, _, _), .presidioOrdinato(let g, _, _),
                  .marciaRevocata(let g, _, _, _), .marciaCompiuta(let g, _, _, _),
                  .gruppoDiviso(let g, _, _, _, _), .gruppiRiuniti(let g, _, _, _),
                  .rifornimentoInterrotto(let g, _, _), .sostaDiRifornimento(let g, _, _),
-                 .rifornimentoRipreso(let g, _, _):
+                 .rifornimentoRipreso(let g, _, _),
+                 .imboscataOrdinata(let g, _, _),
+                 .imboscataRevocata(let g, _, _), .sabotaggioCompiuto(let g, _, _, _),
+                 .studioCompiuto(let g, _, _):
                 return diGiocatore(g)
+            case .esplorazioneCompiuta(let p, _, _, _, _):
+                // Il gruppo può essere stato rimosso (esito perduti): si guarda la parte,
+                // non l'identificatore, per stabilire a chi consegnare l'annuncio.
+                return p == .giocatore
             }
         }
     }
@@ -538,10 +625,158 @@ public struct MotoreCampagna: Sendable {
                 eventi.append(.sostaDiRifornimento(gruppo: idGruppo, nome: gruppo.nome,
                                                    casella: gruppo.posizione))
             }
+
+        case .esplorazione(let idGruppo):
+            let gruppo = nuovo.gruppi[idGruppo]!
+            let casella = gruppo.posizione
+            // L'esito è DETERMINISTICO (01 §5.4, §12): si calcola sullo stato PRIMA di spendere
+            // l'azione, dal confronto fra competenza e insidiosità della zona. Nessuna estrazione.
+            let esito = esitoEsplorazione(di: gruppo, stato: stato)
+            nuovo.gruppi[idGruppo]!.azioneSpesa = true
+            switch esito {
+            case .riuscita:
+                // L'area attorno all'esploratore diventa conoscenza fresca (01 §5.3): memoria a
+                // zero sulle caselle entro il raggio di esplorazione, più ampio dell'ordinario.
+                rivelaArea(attorno: casella, per: parte,
+                           raggio: valoriCampagna.ricognizione.raggioEsplorazione, in: &nuovo)
+            case .aManiVuote:
+                break
+            case .notati:
+                // La casella dell'esploratore diventa avvistata PER L'AVVERSARIO (01 §5.4): la
+                // sua memoria di quella casella si azzera, come se vi avesse una formazione.
+                let avversa: Parte = parte == .giocatore ? .avversario : .giocatore
+                nuovo.conoscenza[avversa, default: [:]][casella] = 0
+                if parte == .giocatore {
+                    annota(.esploratoriNotati(gruppo: gruppo.nome, casella: casella), in: &nuovo)
+                }
+            case .perduti:
+                // La formazione va perduta: sparisce dalla mappa (01 §5.4.2). L'evento porta la
+                // parte perché il gruppo non è più rintracciabile per la proiezione.
+                nuovo.gruppi.removeValue(forKey: idGruppo)
+                if parte == .giocatore {
+                    annota(.esploratoriPerduti(gruppo: gruppo.nome, casella: casella), in: &nuovo)
+                }
+            }
+            eventi.append(.esplorazioneCompiuta(parte: parte, gruppo: idGruppo, nome: gruppo.nome,
+                                                casella: casella, esito: esito))
+
+        case .imboscata(let idGruppo):
+            let gruppo = nuovo.gruppi[idGruppo]!
+            // Colloca il gruppo in agguato (01 §5.11): resta lì attraverso le giornate, e la
+            // sua giornata è consumata (azione spesa oggi, `ordineImboscata` da domani). Non
+            // dichiara il falso: l'avversario non lo individua perché la casella non è per lui
+            // confermata, non perché il gioco menta (01 §5.11.1). Fatto deciso: annuncio, non registro.
+            nuovo.gruppi[idGruppo]!.ordineImboscata = true
+            nuovo.gruppi[idGruppo]!.azioneSpesa = true
+            eventi.append(.imboscataOrdinata(gruppo: idGruppo, nome: gruppo.nome, casella: gruppo.posizione))
+
+        case .revocaImboscata(let idGruppo):
+            let gruppo = nuovo.gruppi[idGruppo]!
+            // La revoca leva l'agguato e spende la giornata corrente (come la revoca della
+            // marcia, RDA-100): il gruppo torna libero dalla giornata successiva. Non annota.
+            nuovo.gruppi[idGruppo]!.ordineImboscata = false
+            nuovo.gruppi[idGruppo]!.azioneSpesa = true
+            eventi.append(.imboscataRevocata(gruppo: idGruppo, nome: gruppo.nome, casella: gruppo.posizione))
+
+        case .sabotaggio(let idGruppo):
+            let gruppo = nuovo.gruppi[idGruppo]!
+            let casella = gruppo.posizione
+            let bersaglio = bersaglioNonArmato(su: casella, parte: parte, stato: stato)!
+            nuovo.gruppi[idGruppo]!.azioneSpesa = true
+            // Compiuto da un gruppo armato riesce SEMPRE; da esploratori solo se la competenza
+            // raggiunge la soglia di protezione del bersaglio, altrimenti fallisce e gli
+            // esploratori si fanno notare (01 §5.10.2). Deterministico, mai un'estrazione.
+            let riuscito: Bool
+            if gruppo.categoria.eArmata {
+                riuscito = true
+            } else if let competenza = gruppo.categoria.competenza,
+                      let soglia = bersaglio.categoria.sogliaProtezione {
+                riuscito = competenza >= soglia
+            } else {
+                riuscito = false
+            }
+            if riuscito {
+                // Disperde la formazione bersaglio, il suo carico perduto (01 §5.10.2): sparisce
+                // dalla mappa. Il sabotaggio è sempre fra parti opposte e tocca sempre il
+                // giocatore — attore o vittima — sicché il fatto entra nel registro.
+                nuovo.gruppi.removeValue(forKey: bersaglio.id)
+                nuovo.studiati[parte]?.remove(bersaglio.id)
+                nuovo.studiati[bersaglio.parte]?.remove(bersaglio.id)
+                annota(.formazioneSabotata(casella: casella), in: &nuovo)
+            } else {
+                // Esploratori sotto soglia: si fanno notare, la loro casella avvistata per
+                // l'avversario (01 §5.10.2). Il bersaglio resta.
+                let avversa: Parte = parte == .giocatore ? .avversario : .giocatore
+                nuovo.conoscenza[avversa, default: [:]][casella] = 0
+                if parte == .giocatore {
+                    annota(.esploratoriNotati(gruppo: gruppo.nome, casella: casella), in: &nuovo)
+                }
+            }
+            eventi.append(.sabotaggioCompiuto(gruppo: idGruppo, nome: gruppo.nome,
+                                              casella: casella, riuscito: riuscito))
+
+        case .studioApprofondito(let idGruppo):
+            let gruppo = nuovo.gruppi[idGruppo]!
+            let casella = gruppo.posizione
+            let bersaglio = bersaglioNonArmato(su: casella, parte: parte, stato: stato)!
+            nuovo.gruppi[idGruppo]!.azioneSpesa = true
+            // Porta a confermato la conoscenza della formazione studiata (01 §5.10.2): la sua
+            // casella diventa conoscenza fresca (età zero), e la formazione entra fra le
+            // `studiati`, sicché composizione, carico e direzione restano note anche quando
+            // esce dall'osservazione — si è appreso ciò che quella colonna trasporta.
+            nuovo.conoscenza[parte, default: [:]][casella] = 0
+            nuovo.studiati[parte, default: []].insert(bersaglio.id)
+            if parte == .giocatore {
+                annota(.formazioneStudiata(casella: casella), in: &nuovo)
+            }
+            eventi.append(.studioCompiuto(gruppo: idGruppo, nome: gruppo.nome, casella: casella))
         }
 
         eventi.append(contentsOf: chiudiLaGiornataSeServe(&nuovo))
         return (nuovo, eventi)
+    }
+
+    // MARK: - Il rischio deterministico della ricognizione (01 §5.4, §12)
+
+    /// L'esito DETERMINISTICO di un'esplorazione (01 §5.4): la riuscita discende dalla
+    /// COMPETENZA degli esploratori e dalle CONDIZIONI, mai da un'estrazione (01 §12). Le
+    /// condizioni compongono l'INSIDIOSITÀ della zona: una base, la PROFONDITÀ dell'esploratore
+    /// nel campo avversario (distanza ortogonale dal proprio quartier generale) e il numero di
+    /// gruppi armati avversari VICINI. Il margine `competenza − insidiosità`, confrontato con lo
+    /// zero e con due soglie, dà l'esito in ordine di gravità decrescente. I pesi e le soglie
+    /// vengono dai dati (`ricognizione-campagna.json`), provvisori.
+    ///
+    /// La competenza si legge dalla categoria; se il gruppo non è un esploratore la funzione non
+    /// dovrebbe essere chiamata (la validazione lo esclude) e l'insidiosità vince, ma non si
+    /// forza: si tratta come competenza nulla.
+    func esitoEsplorazione(di gruppo: Gruppo, stato: StatoCampagna) -> EsitoEsplorazione {
+        let r = valoriCampagna.ricognizione
+        let competenza = gruppo.categoria.competenza ?? 0
+        let qgProprio = stato.mappa.quartierGenerale(di: gruppo.parte)
+        let profondita = stato.griglia.distanza(gruppo.posizione, qgProprio)
+        let avversa: Parte = gruppo.parte == .giocatore ? .avversario : .giocatore
+        let nemiciVicini = stato.gruppi.values.filter {
+            $0.parte == avversa && $0.categoria.eArmata
+                && stato.griglia.distanza($0.posizione, gruppo.posizione) <= r.raggioNemiciVicini
+        }.count
+        let insidiosita = r.insidiositaBase + r.pesoProfondita * profondita + r.pesoNemiciVicini * nemiciVicini
+        let margine = competenza - insidiosita
+        if margine >= 0 { return .riuscita }
+        if margine >= -r.sogliaManiVuote { return .aManiVuote }
+        if margine >= -r.sogliaNotati { return .notati }
+        return .perduti
+    }
+
+    /// Rivela un'area come conoscenza FRESCA di una parte (01 §5.3, §5.4): la memoria di ogni
+    /// casella entro il raggio (ortogonale) si azzera, come se la parte vi osservasse ora. È
+    /// l'effetto dell'esplorazione riuscita, che vede più lontano del raggio ordinario.
+    func rivelaArea(attorno centro: Cella, per parte: Parte, raggio: Int, in stato: inout StatoCampagna) {
+        for dr in -raggio...raggio {
+            for dc in -raggio...raggio where abs(dr) + abs(dc) <= raggio {
+                let cella = Cella(riga: centro.riga + dr, colonna: centro.colonna + dc)
+                if stato.griglia.contiene(cella) { stato.conoscenza[parte, default: [:]][cella] = 0 }
+            }
+        }
     }
 
     /// La chiusura del turno (01 §5.6.0.6): il turno si chiude automaticamente quando
@@ -576,21 +811,135 @@ public struct MotoreCampagna: Sendable {
 
     /// Le risoluzioni di fine giornata (01 §5.6.11): un MOMENTO DICHIARATO E ORDINATO,
     /// non una funzione che fa una cosa sola. L'ordine è quello di 01 §5.6.11:
-    /// avanzamento delle marce lunghe, scatto delle imboscate, valutazione dei tagli
+    /// avanzamento delle marce lunghe, SCATTO DELLE IMBOSCATE, valutazione dei tagli
     /// di rifornimento, completamenti di costruzione, invecchiamento e decadimento
-    /// della conoscenza. Di questi, questa unità realizza SOLTANTO il primo; gli
-    /// altri appartengono a materie non ancora costruite e trovano qui il proprio
-    /// posto già preparato. Una sessione futura aggiunge il proprio passo come una
-    /// riga in coda a questa funzione, senza toccare gli altri: ciascun passo è
-    /// indipendente e riceve e restituisce lo stato per riferimento.
+    /// della conoscenza — di cui la DEDUZIONE DELL'ITINERARIO (01 §5.10.1) fa parte,
+    /// perché produce il `presunto` dalle osservazioni fresche. Questa unità aggiunge lo
+    /// scatto delle imboscate e la deduzione senza toccare gli altri passi (RDA-98, il
+    /// passo già preparato). Restano da costruire i completamenti di costruzione.
     func risolviFineGiornata(_ stato: inout StatoCampagna) -> [EventoCampagna] {
         var eventi: [EventoCampagna] = []
+        // Le posizioni PRIMA dell'avanzamento: distinguono chi ENTRA in una casella, perché
+        // l'imboscata scatta solo all'ingresso di un gruppo armato (01 §5.11), non su chi vi
+        // stava già. Si legge sullo stato prima che le marce settino le nuove posizioni.
+        let posizioniPrima = stato.gruppi.mapValues { $0.posizione }
         eventi.append(contentsOf: avanzaLeMarce(&stato))
-        // Passo successivo (unità futura): scattaLeImboscate(&stato)
+        let arrivati = Set(stato.gruppi.compactMap { (id, g) -> IdGruppo? in
+            posizioniPrima[id] != nil && posizioniPrima[id] != g.posizione ? id : nil
+        })
+        eventi.append(contentsOf: scattaLeImboscate(&stato, arrivati: arrivati))
         eventi.append(contentsOf: valutaITagliDiRifornimento(&stato))
         // Passo successivo (unità futura): completaLeCostruzioni(&stato)
+        eventi.append(contentsOf: deduciGliItinerari(&stato))
         eventi.append(contentsOf: invecchiaLaConoscenza(&stato))
         return eventi
+    }
+
+    /// Lo SCATTO DELLE IMBOSCATE (01 §5.11, §5.6.11): passo di fine giornata. Un gruppo armato
+    /// appostato la cui casella riceve, in questa risoluzione, l'INGRESSO di un gruppo armato
+    /// avversario vede scattare la propria imboscata. «All'ingresso» è la chiave: `arrivati`
+    /// sono i gruppi che si sono mossi in questa risoluzione, e l'imboscata scatta solo se
+    /// l'intruso armato è fra loro — non su chi occupava già la casella per compresenza. Vale
+    /// SIMMETRICAMENTE per entrambe le parti (l'avversario può tendere imboscate, e il giocatore
+    /// vi può cadere). Il vantaggio dell'imboscante è materia della battaglia (01 §9.3.2, non
+    /// costruita): qui si registra lo scatto in `imboscateInSospeso` e si annota il fatto, sempre
+    /// consegnato al giocatore (lo scatto è fra parti opposte, il giocatore ne è parte). L'ordine
+    /// è deterministico (per id). L'agguato scattato si spegne — è sorto e ha còlto il suo bersaglio.
+    func scattaLeImboscate(_ stato: inout StatoCampagna, arrivati: Set<IdGruppo>) -> [EventoCampagna] {
+        var eventi: [EventoCampagna] = []
+        for id in stato.gruppi.keys.sorted() {
+            guard let appostato = stato.gruppi[id], appostato.ordineImboscata else { continue }
+            let casella = appostato.posizione
+            let avversa: Parte = appostato.parte == .giocatore ? .avversario : .giocatore
+            guard let intruso = stato.occupante(di: casella, parte: avversa),
+                  intruso.categoria.eArmata, arrivati.contains(intruso.id) else { continue }
+            stato.gruppi[id]!.ordineImboscata = false
+            stato.imboscateInSospeso.append(ImboscataInSospeso(
+                casella: casella, imboscante: appostato.parte, intruso: intruso.id, giorno: stato.giorno))
+            annota(.imboscataScattata(casella: casella), in: &stato)
+            eventi.append(.imboscataScattata(casella: casella))
+        }
+        return eventi
+    }
+
+    /// La DEDUZIONE DELL'ITINERARIO (01 §5.10.1): passo di fine giornata dentro la conoscenza.
+    /// Il compito è degli ESPLORATORI (01 §5.10.1): per ciascuna parte, si guardano le colonne
+    /// avversarie che una sua formazione di RICOGNIZIONE osserva ora. Se una colonna si è mossa
+    /// lungo una strada per due caselle consecutive — la sua ultima posizione nota, adiacente e
+    /// su strada, e quella attuale, anch'essa su strada, allineate — se ne deduce che segua
+    /// quella strada «fino alla destinazione o a una ramificazione»: le caselle a valle diventano
+    /// `presunto` per quella parte, e si annota la deduzione (del solo giocatore). Le presunzioni
+    /// si RICALCOLANO ogni giornata dalle osservazioni fresche: una presunzione non più sostenuta
+    /// svanisce. Deterministico: nessuna estrazione, ordine dei gruppi e delle caselle fisso.
+    /// Simmetrico fra le parti; solo i fatti del giocatore raggiungono il suo registro.
+    func deduciGliItinerari(_ stato: inout StatoCampagna) -> [EventoCampagna] {
+        var eventi: [EventoCampagna] = []
+        for parte in [Parte.giocatore, .avversario] {
+            let avversa: Parte = parte == .giocatore ? .avversario : .giocatore
+            var nuoviPresunti = Set<Cella>()
+            var memoria = stato.ultimaPosizioneNota[parte] ?? [:]
+            for colonna in stato.gruppi(di: avversa) {
+                let pos = colonna.posizione
+                // Solo ciò che un ESPLORATORE della parte osserva ora abilita la deduzione.
+                guard osservataDaEsploratore(pos, di: parte, stato: stato) else { continue }
+                let precedente = memoria[colonna.id]
+                memoria[colonna.id] = pos
+                guard let prev = precedente, prev != pos,
+                      stato.griglia.adiacenti(prev, pos),
+                      stato.mappa.strada(di: prev) != .nessuna,
+                      stato.mappa.strada(di: pos) != .nessuna else { continue }
+                let proiettate = proiettaItinerario(da: pos, verso: (pos.riga - prev.riga, pos.colonna - prev.colonna),
+                                                    stato: stato)
+                guard !proiettate.isEmpty else { continue }
+                nuoviPresunti.formUnion(proiettate)
+                if parte == .giocatore {
+                    annota(.direzioneDedotta(casella: pos), in: &stato)
+                    eventi.append(.direzioneDedotta(casella: pos))
+                }
+            }
+            stato.presunti[parte] = nuoviPresunti
+            stato.ultimaPosizioneNota[parte] = memoria
+        }
+        return eventi
+    }
+
+    /// Vero se una formazione di RICOGNIZIONE della parte osserva ora la casella (01 §5.10.1):
+    /// entro il raggio di osservazione ordinario da un proprio esploratore. È ciò che distingue
+    /// la deduzione dell'itinerario, compito degli esploratori, dalla semplice osservazione.
+    func osservataDaEsploratore(_ cella: Cella, di parte: Parte, stato: StatoCampagna) -> Bool {
+        let raggio = valoriCampagna.conoscenza.raggioOsservazione
+        return stato.gruppi.values.contains {
+            $0.parte == parte && $0.categoria.eRicognizione
+                && stato.griglia.distanza($0.posizione, cella) <= raggio
+        }
+    }
+
+    /// Proietta l'itinerario dedotto lungo una strada, da una casella in una direzione ortogonale,
+    /// «fino alla destinazione o a una ramificazione» (01 §5.10.1): le caselle successive finché
+    /// sono su strada e dentro la mappa, includendo la ramificazione e fermandosi lì. Una
+    /// ramificazione è una casella su strada con un'uscita su strada PERPENDICOLARE alla direzione
+    /// di marcia: la colonna potrebbe svoltare, sicché il seguito oltre non è più presumibile. Il
+    /// limite del numero di caselle della griglia impedisce ogni ciclo.
+    func proiettaItinerario(da origine: Cella, verso direzione: (Int, Int),
+                            stato: StatoCampagna) -> Set<Cella> {
+        var proiettate = Set<Cella>()
+        let (dr, dc) = direzione
+        var corrente = Cella(riga: origine.riga + dr, colonna: origine.colonna + dc)
+        let massimo = stato.griglia.righe * stato.griglia.colonne
+        while proiettate.count < massimo,
+              stato.griglia.contiene(corrente),
+              stato.mappa.strada(di: corrente) != .nessuna {
+            proiettate.insert(corrente)
+            // Ramificazione: un'uscita su strada perpendicolare alla direzione. Vi ci si ferma.
+            let perpendicolari = [Cella(riga: corrente.riga + dc, colonna: corrente.colonna + dr),
+                                  Cella(riga: corrente.riga - dc, colonna: corrente.colonna - dr)]
+            let ramifica = perpendicolari.contains {
+                stato.griglia.contiene($0) && stato.mappa.strada(di: $0) != .nessuna
+            }
+            if ramifica { break }
+            corrente = Cella(riga: corrente.riga + dr, colonna: corrente.colonna + dc)
+        }
+        return proiettate
     }
 
     /// Primo e unico passo realizzato della risoluzione: ogni marcia in corso avanza
@@ -662,6 +1011,10 @@ public struct MotoreCampagna: Sendable {
         var eventi: [EventoCampagna] = []
         for id in stato.gruppi.keys.sorted() {
             let gruppo = stato.gruppi[id]!
+            // Le formazioni di RICOGNIZIONE non sono soggette al taglio (01 §5.15): vivono di
+            // autonomia, il loro costo è il rischio (01 §5.4). Si saltano, e i loro contatori
+            // di rifornimento restano a zero (invariante `rifornimento_fuori_intervallo`).
+            guard !gruppo.esenteDalTaglio else { continue }
             let casella = gruppo.posizione
             // Il rifornimento dell'AVVERSARIO segue le stesse regole (nessuna asimmetria,
             // 01 §5.2.2), ma i suoi fatti NON raggiungono il giocatore: non entrano nel

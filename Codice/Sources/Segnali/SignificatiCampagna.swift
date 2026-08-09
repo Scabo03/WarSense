@@ -52,6 +52,20 @@ public struct TraduttoreEventiCampagna: Sendable {
         // (02 §11.5) e l'elenco dei suoni dedicati (02 §11.7.1) non lo prevede; non se ne
         // conia uno, come per la ripresa del rifornimento. Il fuoco non è rubato.
         case .formazioneAvversariaAvvistata: return nil
+        // Le azioni ORDINATE dal giocatore — esplorare, appostarsi, revocare l'agguato,
+        // sabotare, studiare — portano il segnale di conferma del proprio ordine, come la
+        // marcia e il presidio: nessun sedicesimo significato (02 §11.5). L'esito parlato dice
+        // com'è andata (riuscita, a mani vuote, notati, perduti; sabotaggio riuscito o fallito).
+        case .esplorazioneCompiuta, .imboscataOrdinata, .imboscataRevocata,
+             .sabotaggioCompiuto, .studioCompiuto:
+            return .conferma
+        // Lo scatto dell'imboscata ha il proprio significato tattile GIÀ assegnato nel tetto
+        // chiuso: `imboscata`, famiglia dell'allarme (02 §11.7.1, significato 12). Vale sempre —
+        // imboscante o vittima — perché il giocatore è parte dello scatto.
+        case .imboscataScattata: return .imboscata
+        // La deduzione dell'itinerario si annuncia a parole (02 §8.2.1) ma NON ha segnale
+        // tattile: il tetto dei quindici è chiuso (02 §11.5), come per l'avvistamento.
+        case .direzioneDedotta: return nil
         }
     }
 
@@ -108,6 +122,51 @@ public struct TraduttoreEventiCampagna: Sendable {
             // Il fatto e il luogo, senza nome né volume (02 §6.4.1): «una formazione
             // avversaria, e dove». È la mossa avversaria che il giocatore apprende.
             return testi.frase("campagna.formazione_avvistata", verbosita: verbosita,
+                               casella.riga, casella.colonna)
+        case .esplorazioneCompiuta(_, _, let chiave, let casella, let esito):
+            // L'annuncio varia con l'esito deterministico (01 §5.4): area rivelata, a mani
+            // vuote, notati, perduti. Ciascuno la propria frase, col nome dell'esploratore e,
+            // dove serve, il luogo per portarvi il fuoco.
+            switch esito {
+            case .riuscita:
+                return testi.frase("campagna.esplorazione_riuscita", verbosita: verbosita,
+                                   nome(chiave), casella.riga, casella.colonna)
+            case .aManiVuote:
+                return testi.frase("campagna.esplorazione_a_mani_vuote", verbosita: verbosita,
+                                   nome(chiave))
+            case .notati:
+                return testi.frase("campagna.esploratori_notati", verbosita: verbosita,
+                                   nome(chiave), casella.riga, casella.colonna)
+            case .perduti:
+                return testi.frase("campagna.esploratori_perduti", verbosita: verbosita,
+                                   nome(chiave), casella.riga, casella.colonna)
+            }
+        case .imboscataOrdinata(_, let chiave, let casella):
+            return testi.frase("campagna.imboscata_ordinata", verbosita: verbosita,
+                               nome(chiave), casella.riga, casella.colonna)
+        case .imboscataRevocata(_, let chiave, let casella):
+            return testi.frase("campagna.imboscata_revocata", verbosita: verbosita,
+                               nome(chiave), casella.riga, casella.colonna)
+        case .sabotaggioCompiuto(_, let chiave, let casella, let riuscito):
+            // Riuscito: una formazione avversaria è dispersa in un luogo. Fallito: gli
+            // esploratori si sono fatti notare. Il nome è quello del gruppo che sabota (proprio).
+            return riuscito
+                ? testi.frase("campagna.sabotaggio_riuscito", verbosita: verbosita,
+                              nome(chiave), casella.riga, casella.colonna)
+                : testi.frase("campagna.sabotaggio_fallito", verbosita: verbosita,
+                              nome(chiave), casella.riga, casella.colonna)
+        case .studioCompiuto(_, let chiave, let casella):
+            return testi.frase("campagna.formazione_studiata", verbosita: verbosita,
+                               nome(chiave), casella.riga, casella.colonna)
+        case .imboscataScattata(let casella):
+            // Il fatto e il luogo (02 §6.4.1): «un'imboscata è scattata, e dove». Vale
+            // imboscante o vittima; il giocatore ne è parte.
+            return testi.frase("campagna.imboscata_scattata", verbosita: verbosita,
+                               casella.riga, casella.colonna)
+        case .direzioneDedotta(let casella):
+            // La deduzione: una colonna segue una strada, e da dove è stata osservata
+            // (01 §5.10.1). Senza nome della colonna (02 §6.4.1).
+            return testi.frase("campagna.direzione_dedotta", verbosita: verbosita,
                                casella.riga, casella.colonna)
         }
     }

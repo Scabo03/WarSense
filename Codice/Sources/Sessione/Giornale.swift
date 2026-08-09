@@ -45,14 +45,16 @@ public struct FondazioneCampagna: Codable, Sendable {
     public let seme: UInt64
     public let identificatore: String
     public let scenario: ScenarioCampagna
-    /// Versione 4 dalla composizione dei gruppi e dal volume: ogni gruppo porta i
-    /// propri reparti, e il volume che ne discende agisce sul costo della marcia
-    /// (01 §5.6.0, §5.6.3). Un giornale di versione 3, i cui gruppi non hanno
-    /// composizione, non ha da dove leggere il volume e, rigiocato con queste regole,
-    /// produrrebbe marce di costo diverso: per questo non si riapre (00 §15.2). Era 3
-    /// dalla marcia lunga e dalla risoluzione di fine giornata, 2 da quando il comando
-    /// di marcia trasporta il costo (RDA-75).
-    public static let schemaCorrente = 4
+    /// Versione 5 dalla ricognizione e dalla correzione del registro (incarico 19): la
+    /// risoluzione di fine giornata ha passi nuovi (scatto delle imboscate, deduzione
+    /// dell'itinerario) e l'ARRIVO di un proprio gruppo NON entra più nel registro. Un
+    /// giornale di versione 4, rigiocato con queste regole, produrrebbe un registro diverso
+    /// (con le marce compiute che ora ne escono) e un'impronta diversa: per questo non si
+    /// riapre e lo si DICHIARA incompatibile invece di riaprirlo in silenzio con una storia
+    /// alterata (00 §15.2). Era 4 dalla composizione dei gruppi e dal volume, 3 dalla marcia
+    /// lunga e dalla risoluzione di fine giornata, 2 da quando il comando di marcia trasporta
+    /// il costo (RDA-75).
+    public static let schemaCorrente = 5
 
     public init(versioneSchema: Int, versioneValori: String, versioneTesti: String,
                 seme: UInt64, identificatore: String, scenario: ScenarioCampagna) {

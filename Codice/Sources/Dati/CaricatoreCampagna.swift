@@ -104,6 +104,27 @@ public enum CaricatoreCampagna {
                              file: "condotta-campagna.json")
         }
 
+        // La ricognizione e il suo rischio deterministico (01 §5.4, §12): pesi provvisori,
+        // mai una costante nel codice (00 §13.1). Il raggio di esplorazione dev'essere
+        // maggiore del raggio di osservazione ordinario, o esplorare non rivelerebbe nulla
+        // che il passaggio non riveli già; le due soglie del rischio devono essere ordinate
+        // — a mani vuote prima di notati — e positive, o le fasce degli esiti si
+        // sovrapporrebbero o si annullerebbero.
+        let ricognizione = try leggi(ValoriRicognizione.self, "ricognizione-campagna.json")
+        guard ricognizione.raggioEsplorazione > conoscenza.raggioOsservazione else {
+            throw ErroreDati(chiave: "errore.dati.ricognizione_incoerente",
+                             file: "ricognizione-campagna.json")
+        }
+        guard ricognizione.raggioNemiciVicini >= 0 else {
+            throw ErroreDati(chiave: "errore.dati.ricognizione_incoerente",
+                             file: "ricognizione-campagna.json")
+        }
+        guard 0 < ricognizione.sogliaManiVuote,
+              ricognizione.sogliaManiVuote < ricognizione.sogliaNotati else {
+            throw ErroreDati(chiave: "errore.dati.ricognizione_incoerente",
+                             file: "ricognizione-campagna.json")
+        }
+
         // Le mappe sono un albero di file: ciascuna è contenuto a sé (05 §7.6).
         let cartellaDelleMappe = cartella.appendingPathComponent(cartellaMappe)
         let contenuti = (try? FileManager.default.contentsOfDirectory(
@@ -125,7 +146,7 @@ public enum CaricatoreCampagna {
 
         return ValoriCampagna(formatiMappa: formati, mappe: mappe,
                               nomiGruppi: nomi.chiavi, marcia: marcia, conoscenza: conoscenza,
-                              condotta: condotta)
+                              condotta: condotta, ricognizione: ricognizione)
     }
 
     /// Coerenza di una mappa (05 §7.8): formato noto, caselle dentro i confini e

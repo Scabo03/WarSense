@@ -15,15 +15,16 @@
   "minimi.json": "d67b738ee9136f09d98382d60c3bd661751943c5caacb5dc1b60e12811df353c",
   "nomi-gruppi.json": "8047ad69f0dd50db80821e9140e5f95e49745ef7aada4fa91b002ffd6b481ae3",
   "offese-e-protezioni.json": "bb48b76b1c6f93837850dda262114c4cc4ce9ead5a3c4b463dee75ef65bcc35f",
+  "ricognizione-campagna.json": "665619841e52e968855ef36faa63f42c74939960087b43fd89e6a7b5111d8b2d",
   "scenari-campagna.json": "5d0e43c261c4cdc8effaad2af8b05c0e974e2148f44f8b1a9513fd0198254d54",
   "scenari.json": "c7617df35ae7dd7b5f27a45c0cd970451e22ee311f614badc0a2d69267341d2a",
   "suoni.json": "ccdadb8399bdf155ac910dc099877395f95061ec76825304279a2277e8eb665f",
   "ufficiali.json": "39447ca2b767d7b0a443f69257b67c8c71a3954c3725a3aa2169157c42f595c3",
   "vantaggi-nascosti.json": "65c7d952ce06cd5c9a8b594be77b0cfb3171045d77b6007673299c6b36d253f8"
  },
- "versione": "0.10.0",
+ "versione": "0.11.0",
  "versioni_compatibili": [
-  "0.8.0",
-  "0.9.0"
+  "0.9.0",
+  "0.10.0"
  ]
 }

@@ -163,6 +163,26 @@ extension StatoCampagna {
                 }
             }
         }
+        if studiati.values.contains(where: { !$0.isEmpty }) {
+            for parte in Parte.allCases {
+                let insieme = studiati[parte] ?? []
+                c.testo(parte.rawValue)
+                c.intero(Int64(insieme.count))
+                for id in insieme.sorted() { c.intero(id.numero) }
+            }
+        }
+        // Le imboscate scattate in attesa, nell'ordine in cui sono avvenute (un fatto di
+        // gioco): due partite in cui un'imboscata è scattata o no non sono lo stesso stato.
+        // Omesse quando nessuna è scattata, così che le partite precedenti restino identiche.
+        if !imboscateInSospeso.isEmpty {
+            c.intero(Int64(imboscateInSospeso.count))
+            for i in imboscateInSospeso {
+                i.casella.codifica(in: &c)
+                c.testo(i.imboscante.rawValue)
+                c.intero(i.intruso.numero)
+                c.intero(Int64(i.giorno))
+            }
+        }
         return SHA256.improntaEsadecimale(c.byte)
     }
 }

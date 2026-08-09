@@ -249,6 +249,58 @@ public struct ValoriCondotta: Codable, Hashable, Sendable {
     }
 }
 
+/// I valori della RICOGNIZIONE e del suo rischio deterministico (01 §5.4, §5.10.2, §12):
+/// PROVVISORI e nei dati, mai nel codice (00 §13.1). Nessuno è un tiro di dado: sono i pesi
+/// e le soglie di un confronto deterministico fra la competenza degli esploratori e
+/// l'insidiosità della zona (01 §5.4: «la riuscita discende dalla competenza … e dalle
+/// condizioni, non da un'estrazione»). Il margine è `competenza − insidiosità`; l'esito è la
+/// fascia in cui cade, in ordine decrescente: riuscita, a mani vuote, notati, perduti.
+public struct ValoriRicognizione: Codable, Hashable, Sendable {
+    /// Il raggio (ortogonale) entro cui un'esplorazione riuscita rivela le caselle attorno
+    /// all'esploratore (01 §5.4): maggiore del raggio di osservazione ordinario, o esplorare
+    /// non aggiungerebbe nulla. PROVVISORIO.
+    public let raggioEsplorazione: Int
+    /// L'insidiosità di base di ogni zona da esplorare. PROVVISORIA.
+    public let insidiositaBase: Int
+    /// Quanto ogni casella di profondità nel campo avversario — la distanza ortogonale
+    /// dell'esploratore dal proprio quartier generale — aggiunge all'insidiosità (01 §5.4):
+    /// più lontano dalla base, più rischio. PROVVISORIO.
+    public let pesoProfondita: Int
+    /// Quanto ogni gruppo armato avversario vicino aggiunge all'insidiosità. PROVVISORIO.
+    public let pesoNemiciVicini: Int
+    /// Il raggio (ortogonale) entro cui un gruppo armato avversario conta come «vicino»
+    /// all'esploratore che esplora. PROVVISORIO.
+    public let raggioNemiciVicini: Int
+    /// Il margine (competenza meno insidiosità) è confrontato con lo zero e con due soglie:
+    /// se non negativo, l'esplorazione RIESCE; se sopra `-sogliaManiVuote`, torna A MANI
+    /// VUOTE; se sopra `-sogliaNotati`, gli esploratori si fanno NOTARE; sotto, si PERDONO.
+    /// Deve valere `0 < sogliaManiVuote < sogliaNotati`. PROVVISORIE.
+    public let sogliaManiVuote: Int
+    public let sogliaNotati: Int
+
+    public init(raggioEsplorazione: Int, insidiositaBase: Int, pesoProfondita: Int,
+                pesoNemiciVicini: Int, raggioNemiciVicini: Int,
+                sogliaManiVuote: Int, sogliaNotati: Int) {
+        self.raggioEsplorazione = raggioEsplorazione
+        self.insidiositaBase = insidiositaBase
+        self.pesoProfondita = pesoProfondita
+        self.pesoNemiciVicini = pesoNemiciVicini
+        self.raggioNemiciVicini = raggioNemiciVicini
+        self.sogliaManiVuote = sogliaManiVuote
+        self.sogliaNotati = sogliaNotati
+    }
+
+    enum CodingKeys: String, CodingKey {
+        case raggioEsplorazione = "raggio_esplorazione"
+        case insidiositaBase = "insidiosita_base"
+        case pesoProfondita = "peso_profondita"
+        case pesoNemiciVicini = "peso_nemici_vicini"
+        case raggioNemiciVicini = "raggio_nemici_vicini"
+        case sogliaManiVuote = "soglia_mani_vuote"
+        case sogliaNotati = "soglia_notati"
+    }
+}
+
 /// I valori del piano di campagna caricati e validati.
 public struct ValoriCampagna: Sendable {
     public let formatiMappa: [IdentificatoreDati: FormatoMappa]
@@ -257,16 +309,19 @@ public struct ValoriCampagna: Sendable {
     public let marcia: ValoriMarcia
     public let conoscenza: ValoriConoscenza
     public let condotta: ValoriCondotta
+    public let ricognizione: ValoriRicognizione
 
     public init(formatiMappa: [IdentificatoreDati: FormatoMappa],
                 mappe: [IdentificatoreDati: DefinizioneMappa],
                 nomiGruppi: [IdentificatoreDati], marcia: ValoriMarcia,
-                conoscenza: ValoriConoscenza, condotta: ValoriCondotta) {
+                conoscenza: ValoriConoscenza, condotta: ValoriCondotta,
+                ricognizione: ValoriRicognizione) {
         self.formatiMappa = formatiMappa
         self.mappe = mappe
         self.nomiGruppi = nomiGruppi
         self.marcia = marcia
         self.conoscenza = conoscenza
         self.condotta = condotta
+        self.ricognizione = ricognizione
     }
 }

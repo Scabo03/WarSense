@@ -350,6 +350,25 @@ public struct SondaInvariantiCampagna: Sendable {
             if prima.gruppi[id]?.inMarcia == true {
                 violazioni.append(.gruppoInMarciaHaRicevutoOrdine(gruppo: id.numero))
             }
+        case .esplorazione(let id):
+            // Azione degli esploratori (01 §5.4). Con l'esito perduti l'esploratore è RIMOSSO:
+            // in quel caso non c'è agente da controllare — non ha eluso una giornata, è sparito
+            // — e le verifiche generiche dell'azione si saltano. Se resta, è l'agente. Che gli
+            // esploratori non inneschino mai battaglia lo sorveglia `esploratori_senza_battaglia`.
+            if dopo.gruppi[id] != nil { idAgente = id }
+        case .imboscata(let id):
+            idAgente = id
+            if prima.gruppi[id]?.inMarcia == true {
+                violazioni.append(.gruppoInMarciaHaRicevutoOrdine(gruppo: id.numero))
+            }
+        case .revocaImboscata:
+            // Come la revoca della marcia, NON è un'azione (01 §5.6.8.1): nessun agente, e le
+            // verifiche generiche dell'azione si saltano.
+            break
+        case .sabotaggio(let id), .studioApprofondito(let id):
+            // Azioni con un agente che resta (sabotaggio e studio non rimuovono chi agisce, ma
+            // il bersaglio): spendono la giornata come le altre.
+            idAgente = id
         }
 
         // «Azione spesa due volte»: solo per i comandi-AZIONE (marcia, presidio,

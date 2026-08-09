@@ -525,6 +525,31 @@ public enum FattoRegistrato: Hashable, Codable, Sendable {
     }
 }
 
+/// Un'imboscata SCATTATA in attesa di diventare battaglia (01 §5.11.2, §9.3.2): quando un
+/// gruppo armato avversario entra nella casella di un gruppo appostato, l'imboscata scatta e
+/// il vantaggio dell'imboscante — turni di gioco in più e sconto sul piazzaggio (01 §9.3.2) —
+/// è materia della BATTAGLIA, che questa sessione non costruisce. Lo scatto si registra qui,
+/// nello stato, dichiarando che cosa la sessione del passaggio alla battaglia dovrà
+/// raccogliere: la casella, chi imboscava (che avrà il vantaggio), e il gruppo intruso. Quella
+/// sessione leggerà questa lista per aprire la battaglia da imboscata con l'ordine dei turni di
+/// 01 §9.4.1 e il vantaggio di 01 §9.3.2; questa la riempie soltanto (RDA-98, il passo già
+/// preparato). Nulla la consuma ancora: resta a testimoniare che lo scatto è avvenuto.
+public struct ImboscataInSospeso: Hashable, Codable, Sendable {
+    /// La casella dove l'imboscata è scattata: il futuro campo di battaglia.
+    public let casella: Cella
+    /// La parte che imboscava, cui spetta il vantaggio della sorpresa (01 §9.3.2).
+    public let imboscante: Parte
+    /// Il gruppo armato avversario entrato nella casella, che subisce l'imboscata.
+    public let intruso: IdGruppo
+    /// Il giorno in cui l'imboscata è scattata.
+    public let giorno: Int
+
+    public init(casella: Cella, imboscante: Parte, intruso: IdGruppo, giorno: Int) {
+        self.casella = casella; self.imboscante = imboscante
+        self.intruso = intruso; self.giorno = giorno
+    }
+}
+
 /// Lo stato completo di una campagna (05 §2.6). Un valore, interamente Codable,
 /// senza alcun riferimento a schermate o annunci (00 §3.2).
 public struct StatoCampagna: Hashable, Codable, Sendable {
@@ -580,6 +605,18 @@ public struct StatoCampagna: Hashable, Codable, Sendable {
     /// internamente: il giocatore non riceve mai il nome della colonna (02 §6.4.1). Entra
     /// nell'impronta come la conoscenza; vuota senza esploratori attivi.
     public var ultimaPosizioneNota: [Parte: [IdGruppo: Cella]]
+    /// Le formazioni AVVERSARIE che una parte ha STUDIATO a fondo (01 §5.10.2): per
+    /// identificatore. Lo studio porta a confermato la conoscenza della formazione studiata —
+    /// composizione, carico e direzione — e quella conoscenza PERSISTE anche se la formazione
+    /// esce dall'osservazione: si è appreso ciò che quella colonna trasporta. Il giocatore
+    /// riceve i dettagli solo dove la osserva (confermato) E l'ha studiata. Vuota senza studi;
+    /// entra nell'impronta come la conoscenza.
+    public var studiati: [Parte: Set<IdGruppo>]
+    /// Le imboscate SCATTATE in attesa di diventare battaglia (01 §5.11.2): riempita dallo
+    /// scatto di fine giornata, la raccoglierà la sessione del passaggio alla battaglia. Vuota
+    /// finché nessuna imboscata scatta; entra nell'impronta, perché due partite in cui
+    /// un'imboscata è scattata o no non sono lo stesso stato.
+    public var imboscateInSospeso: [ImboscataInSospeso]
 
     public init(mappa: MappaCampagna, giorno: Int, gruppi: [IdGruppo: Gruppo],
                 prossimoIdGruppo: Int, prossimoIndiceNome: Int,
@@ -587,7 +624,9 @@ public struct StatoCampagna: Hashable, Codable, Sendable {
                 forzeNemiche: Set<Cella> = [], struttureDiRifornimento: Set<Cella> = [],
                 conoscenza: [Parte: [Cella: Int]] = [:],
                 presunti: [Parte: Set<Cella>] = [:],
-                ultimaPosizioneNota: [Parte: [IdGruppo: Cella]] = [:]) {
+                ultimaPosizioneNota: [Parte: [IdGruppo: Cella]] = [:],
+                studiati: [Parte: Set<IdGruppo>] = [:],
+                imboscateInSospeso: [ImboscataInSospeso] = []) {
         self.mappa = mappa; self.giorno = giorno; self.gruppi = gruppi
         self.prossimoIdGruppo = prossimoIdGruppo
         self.prossimoIndiceNome = prossimoIndiceNome
@@ -596,6 +635,8 @@ public struct StatoCampagna: Hashable, Codable, Sendable {
         self.conoscenza = conoscenza
         self.presunti = presunti
         self.ultimaPosizioneNota = ultimaPosizioneNota
+        self.studiati = studiati
+        self.imboscateInSospeso = imboscateInSospeso
     }
 
     public var griglia: GrigliaCampagna { mappa.griglia }

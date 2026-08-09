@@ -1,0 +1,9 @@
+{
+ "raggio_esplorazione": 2,
+ "insidiosita_base": 2,
+ "peso_profondita": 1,
+ "peso_nemici_vicini": 2,
+ "raggio_nemici_vicini": 2,
+ "soglia_mani_vuote": 2,
+ "soglia_notati": 5
+}

@@ -56,6 +56,38 @@ public enum ComandoCampagna: Hashable, Codable, Sendable {
     /// sosta dovuta dal taglio, e quando la sosta è saldata il gruppo torna rifornito
     /// (RDA-107). Vale sia per l'autonomia sia per la sosta imposta dal taglio.
     case sostaConRaccolta(gruppo: IdGruppo)
+    /// ESPLORAZIONE (01 §5.4, §5.6.8.1): riservata alle formazioni di ricognizione. Consuma
+    /// l'azione della giornata; l'esploratore resta dov'è e osserva un'area più ampia del
+    /// raggio ordinario. Il costo vero è in RISCHIO — gli esploratori possono perdersi,
+    /// tornare a mani vuote o farsi notare — reso DETERMINISTICO dal confronto fra la loro
+    /// competenza e l'insidiosità della zona (01 §5.4, §12): nessuna estrazione. Voce
+    /// dell'elenco chiuso 01 §5.6.8.1, non nuova.
+    case esplorazione(gruppo: IdGruppo)
+    /// IMBOSCATA (01 §5.11, §5.6.8.1): riservata ai gruppi armati. Colloca il gruppo in
+    /// agguato nella propria casella; resta lì attraverso le giornate, e se un gruppo armato
+    /// avversario vi entra l'imboscata scatta alla risoluzione di fine giornata. Voce
+    /// dell'elenco chiuso.
+    case imboscata(gruppo: IdGruppo)
+    /// REVOCA dell'imboscata (01 §5.11, RDA-76): come la revoca della marcia, NON è un'azione
+    /// (01 §5.6.8.1) e si compie in qualunque momento su un gruppo appostato, che così torna
+    /// libero di agire dalla giornata successiva. Il gruppo ha già consumato la propria
+    /// giornata restando in agguato e non compie altro il giorno in cui lo si revoca (come la
+    /// revoca della marcia, RDA-100). Non entra nel registro: non è fra i fatti che l'incarico
+    /// vi fa entrare, e la revoca della marcia vi sta solo per un'eccezione dichiarata (RDA-104).
+    case revocaImboscata(gruppo: IdGruppo)
+    /// SABOTAGGIO (01 §5.10.2, §5.6.8.1): lo può ordinare un gruppo armato o una formazione di
+    /// ricognizione che condivide la casella con una formazione non armata avversaria (01 §6.1,
+    /// §5.10). Consuma l'azione e disperde la formazione bersaglio, il cui carico è perduto.
+    /// Compiuto da un gruppo armato riesce sempre; compiuto da esploratori riesce solo se la
+    /// loro competenza raggiunge la soglia di protezione del bersaglio, altrimenti fallisce e
+    /// gli esploratori si fanno notare (deterministico, 01 §12). Il bersaglio è la formazione
+    /// non armata avversaria co-locata, non un parametro del comando: non apre battaglia (01 §5.10).
+    case sabotaggio(gruppo: IdGruppo)
+    /// STUDIO APPROFONDITO (01 §5.10.2, §5.6.8.1): riservato alle formazioni di ricognizione che
+    /// condividono la casella con una formazione non armata avversaria. Consuma l'azione e porta
+    /// a confermato la conoscenza della formazione studiata — composizione, carico e direzione
+    /// di marcia (01 §5.10.2). Non apre battaglia. Il bersaglio è la formazione co-locata.
+    case studioApprofondito(gruppo: IdGruppo)
 }
 
 /// I motivi chiusi di non ammissibilità sulla mappa (05 §3.2). Ogni caso
@@ -113,6 +145,36 @@ public enum MotivoNonValidoCampagna: String, Codable, Hashable, Sendable, CaseIt
     /// può marciare finché la sosta dovuta non è saldata. È ciò che il giocatore sente
     /// se prova a marciare un gruppo tenuto fermo dal taglio (RDA-107).
     case deveRifornirsi = "comando.non_valido.deve_rifornirsi"
+    /// Nuovo della campagna: l'azione è riservata a una categoria che il gruppo non ha
+    /// (01 §5.2, §5.6.8.1). Esplorazione e studio approfondito sono delle sole formazioni di
+    /// ricognizione; l'imboscata dei soli gruppi armati; il sabotaggio di armati o esploratori,
+    /// mai di una formazione non armata. La Presentazione offre solo le azioni ammesse dalla
+    /// categoria; questo rifiuto morde su un giornale estraneo o manomesso.
+    case categoriaNonAmmessa = "comando.non_valido.categoria_non_ammessa"
+    /// Nuovo della campagna: sabotaggio o studio ordinato dove non c'è una formazione non armata
+    /// avversaria da colpire (01 §5.10): il bersaglio è la formazione co-locata, e senza di essa
+    /// l'azione non ha oggetto.
+    case nessunBersaglio = "comando.non_valido.nessun_bersaglio"
+    /// Nuovo della campagna: la revoca dell'imboscata è stata chiesta per un gruppo che non è in
+    /// agguato (01 §5.11). Come la revoca della marcia su un gruppo non in marcia, morde su un
+    /// giornale estraneo o manomesso.
+    case gruppoNonInAgguato = "comando.non_valido.gruppo_non_in_agguato"
+}
+
+/// L'esito DETERMINISTICO di un'esplorazione (01 §5.4): la riuscita discende dalla
+/// competenza degli esploratori e dalle condizioni, mai da un'estrazione (01 §12). I quattro
+/// esiti sono in ordine di margine decrescente fra competenza e insidiosità della zona:
+/// riuscita, a mani vuote, notati, perduti.
+public enum EsitoEsplorazione: String, Codable, Hashable, Sendable, CaseIterable {
+    /// L'area esplorata diventa conoscenza fresca dell'esploratore (01 §5.3).
+    case riuscita
+    /// Gli esploratori tornano a mani vuote: nessuna conoscenza acquisita, ma incolumi.
+    case aManiVuote
+    /// Gli esploratori si fanno NOTARE: la loro casella diventa avvistata per l'avversario
+    /// (01 §5.4, §5.10.2), e nessuna conoscenza è acquisita.
+    case notati
+    /// Gli esploratori si PERDONO: la formazione va perduta (01 §5.4.2, personale formato).
+    case perduti
 }
 
 /// Esito della validazione di un comando di campagna: la validazione e l'anteprima
@@ -172,4 +234,33 @@ public enum EventoCampagna: Hashable, Codable, Sendable {
     /// avversaria non riceve mai questo evento sui gruppi del giocatore, perché
     /// l'evento è già proiettato per l'osservatore (`proiettaPerIlGiocatore`).
     case formazioneAvversariaAvvistata(casella: Cella)
+    /// Un'esplorazione si è compiuta, con il suo ESITO deterministico (01 §5.4). L'annuncio
+    /// varia con l'esito: area rivelata, a mani vuote, notati, perduti. Porta la PARTE che
+    /// esplora — e non solo l'identificatore del gruppo — perché con l'esito `perduti` il
+    /// gruppo è rimosso e non sarebbe più rintracciabile per stabilire a chi consegnare
+    /// l'annuncio: la proiezione lo consegna al solo giocatore guardando la parte.
+    case esplorazioneCompiuta(parte: Parte, gruppo: IdGruppo, nome: IdentificatoreDati,
+                              casella: Cella, esito: EsitoEsplorazione)
+    /// Un gruppo armato si è messo in AGGUATO nella propria casella (01 §5.11): l'ordine di
+    /// imboscata è confermato. Fatto deciso dal giocatore: annuncio di conferma, non registro.
+    case imboscataOrdinata(gruppo: IdGruppo, nome: IdentificatoreDati, casella: Cella)
+    /// L'ordine di imboscata è stato REVOCATO (01 §5.11, RDA-76): il gruppo torna libero.
+    /// Annuncio di conferma; non entra nel registro.
+    case imboscataRevocata(gruppo: IdGruppo, nome: IdentificatoreDati, casella: Cella)
+    /// Un SABOTAGGIO si è compiuto (01 §5.10.2): `riuscito` è falso solo per esploratori la cui
+    /// competenza non raggiunge la soglia del bersaglio, che così si fanno notare. È del gruppo
+    /// che sabota, consegnato al solo giocatore quando è il suo (il sabotaggio subìto dal
+    /// giocatore gli arriva dal registro, come il taglio del rifornimento).
+    case sabotaggioCompiuto(gruppo: IdGruppo, nome: IdentificatoreDati, casella: Cella, riuscito: Bool)
+    /// Uno STUDIO APPROFONDITO si è compiuto (01 §5.10.2): la conoscenza della formazione
+    /// studiata è ora confermata. È del gruppo che studia, consegnato al solo giocatore.
+    case studioCompiuto(gruppo: IdGruppo, nome: IdentificatoreDati, casella: Cella)
+    /// Un'IMBOSCATA è SCATTATA alla risoluzione di fine giornata (01 §5.11, §5.6.11): un gruppo
+    /// armato avversario è entrato nella casella di un gruppo appostato. Sempre fra parti opposte
+    /// e sempre a una casella di cui il giocatore è parte, sicché gli si consegna sempre —
+    /// imboscante o vittima — come gli avvistamenti e i confini di giornata.
+    case imboscataScattata(casella: Cella)
+    /// Una DEDUZIONE sulla direzione di marcia di una colonna avversaria (01 §5.10.1): prodotta
+    /// solo per il giocatore dai suoi esploratori, si consegna sempre.
+    case direzioneDedotta(casella: Cella)
 }
