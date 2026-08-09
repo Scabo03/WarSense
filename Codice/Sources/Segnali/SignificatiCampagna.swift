@@ -120,17 +120,25 @@ public struct TraduttoreEventiCampagna: Sendable {
     public func voceDiRegistro(_ voce: VoceRegistro) -> TestoLocalizzato {
         let chiave = voce.fatto.chiaveTesto
         switch voce.fatto {
-        case .marciaCompiuta(let gruppo, _, let a):
-            return testi.frase(chiave, voce.giorno, nome(gruppo), a.riga, a.colonna)
         case .marciaRevocata(let gruppo, let casella):
             return testi.frase(chiave, voce.giorno, nome(gruppo), casella.riga, casella.colonna)
         case .rifornimentoInterrotto(let gruppo, let casella),
              .sostaDiRifornimento(let gruppo, let casella),
              .rifornimentoRipreso(let gruppo, let casella):
             return testi.frase(chiave, voce.giorno, nome(gruppo), casella.riga, casella.colonna)
-        case .formazioneAvversariaAvvistata(let casella):
-            // Senza nome del gruppo (02 §6.4.1): il giorno e il luogo, attivabile per
-            // portarvi il fuoco (02 §6.6).
+        case .esploratoriPerduti(let gruppo, let casella),
+             .esploratoriNotati(let gruppo, let casella):
+            // Gli esploratori del giocatore, col loro nome e il luogo dove esploravano
+            // (01 §5.4): un fatto proprio, attivabile per portarvi il fuoco.
+            return testi.frase(chiave, voce.giorno, nome(gruppo), casella.riga, casella.colonna)
+        case .formazioneAvversariaAvvistata(let casella),
+             .formazioneSabotata(let casella),
+             .formazioneStudiata(let casella),
+             .imboscataScattata(let casella),
+             .direzioneDedotta(let casella):
+            // Senza nome della formazione (02 §6.4.1): il giorno e il luogo, attivabile per
+            // portarvi il fuoco (02 §6.6). Il sabotaggio, lo studio, lo scatto e la deduzione
+            // dichiarano il fatto e dove, mai il nome dell'avversario.
             return testi.frase(chiave, voce.giorno, casella.riga, casella.colonna)
         case .ordineAnnullato, .giornataAzzerata:
             return testi.frase(chiave, voce.giorno)

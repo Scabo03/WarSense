@@ -66,6 +66,69 @@ public struct Reparto: Hashable, Codable, Sendable {
     }
 }
 
+/// La CATEGORIA di una formazione sulla mappa di campagna (01 §5.2): tre e soltanto
+/// tre — gruppi armati capaci di combattere, formazioni di ricognizione (esploratori),
+/// formazioni non armate (catene di approvvigionamento e simili). Non è un'etichetta
+/// accanto al gruppo ma un tipo con valore associato, sicché uno stato impossibile — un
+/// gruppo armato con un carico da saccheggiare, un esploratore senza competenza — non è
+/// rappresentabile e non solo sconsigliato.
+///
+/// La competenza dell'esploratore (01 §5.4.2, personale formato) è la grandezza da cui
+/// discende DETERMINISTICAMENTE l'esito della ricognizione e del sabotaggio (01 §5.4,
+/// §5.10.2): nessuna estrazione, il caso resta confinato al proprio perimetro (01 §12).
+/// Il carico e la soglia di protezione della formazione non armata (01 §5.10.2) sono ciò
+/// che il sabotaggio disperde e ciò che l'esploratore deve raggiungere per riuscirvi.
+public enum CategoriaFormazione: Hashable, Codable, Sendable {
+    /// Gruppo armato, capace di combattere (01 §5.2). La categoria ordinaria e, come
+    /// tale, quella che la codifica dello scenario e l'impronta OMETTONO quando ricorre:
+    /// gli scenari e i salvataggi scritti prima di questa unità restano identici al byte
+    /// (RDA-113, e la stessa disciplina dei gruppi avversari omessi se vuoti).
+    case armato
+    /// Formazione di ricognizione, esploratori (01 §5.2): porta la propria COMPETENZA
+    /// (01 §5.4.2). Non innesca mai una battaglia (01 §5.4.1) e non è soggetta al taglio
+    /// del rifornimento (01 §5.15).
+    case ricognizione(competenza: Int)
+    /// Formazione non armata, catena di approvvigionamento e simili (01 §5.2): porta un
+    /// CARICO e una SOGLIA DI PROTEZIONE dichiarata (01 §5.10.2). Non combatte, non
+    /// esplora, non si mette in agguato; è bersaglio di sabotaggio e di studio approfondito.
+    case nonArmata(carico: Int, sogliaProtezione: Int)
+
+    /// Vero se è un esploratore.
+    public var eRicognizione: Bool { if case .ricognizione = self { return true } else { return false } }
+    /// Vero se è una formazione non armata.
+    public var eNonArmata: Bool { if case .nonArmata = self { return true } else { return false } }
+    /// Vero se è un gruppo armato.
+    public var eArmata: Bool { if case .armato = self { return true } else { return false } }
+
+    /// La competenza dell'esploratore, o nil per le altre categorie.
+    public var competenza: Int? { if case .ricognizione(let c) = self { return c } else { return nil } }
+    /// La soglia di protezione della formazione non armata, o nil per le altre.
+    public var sogliaProtezione: Int? { if case .nonArmata(_, let s) = self { return s } else { return nil } }
+    /// Il carico della formazione non armata, o nil per le altre.
+    public var carico: Int? { if case .nonArmata(let c, _) = self { return c } else { return nil } }
+
+    /// La chiave del TERMINE che nomina la categoria dell'occupante nell'annuncio
+    /// (00 §14.1). Non è un termine nuovo del vocabolario chiuso di 02 §4.4.5 — che non
+    /// contiene un insieme di categorie di formazione — ma un'etichetta composta dai
+    /// termini del consolidato 01 §5.2, gemella di `casella.occupante_avversario` (S18):
+    /// il segno disegnato e questo annuncio devono coincidere (prima correzione, incarico
+    /// 19), e da qui discendono entrambi.
+    public var chiaveCategoria: String {
+        switch self {
+        case .armato: return "categoria.gruppo_armato"
+        case .ricognizione: return "categoria.ricognizione"
+        case .nonArmata: return "categoria.non_armata"
+        }
+    }
+
+    /// Un esemplare per ciascun caso, in ordine fisso, per le prove che pretendono che
+    /// ogni categoria abbia il proprio termine e il proprio segno (come gli altri
+    /// `casiDiRiferimento`).
+    public static let casiDiRiferimento: [CategoriaFormazione] = [
+        .armato, .ricognizione(competenza: 1), .nonArmata(carico: 1, sogliaProtezione: 1),
+    ]
+}
+
 /// Un gruppo sulla mappa di campagna (01 §5.6.0): l'oggetto che dispone di
 /// un'azione al giorno. Porta l'identità, il nome, la posizione, l'azione spesa,
 /// l'eventuale marcia lunga in corso e la COMPOSIZIONE in reparti da cui discende
@@ -89,6 +152,13 @@ public struct Gruppo: Hashable, Codable, Sendable {
     /// può divergere dalla composizione — la sola via che rende impossibile lo stato
     /// sbagliato dell'invariante «il volume è la somma di ciò che lo compone».
     public var composizione: [Reparto]
+    /// La CATEGORIA della formazione (01 §5.2): gruppo armato, ricognizione o non armata.
+    /// Non muta nella vita del gruppo — un esploratore non diventa una colonna — e porta
+    /// con sé ciò che la categoria richiede (competenza; carico e soglia). Da essa
+    /// dipendono le azioni ammesse (01 §5.6.8.1), l'esenzione dal taglio (01 §5.15) e il
+    /// segno sulla mappa (prima correzione, incarico 19). L'esploratore e la formazione
+    /// non armata nascono dalla divisione conservando la categoria del gruppo di origine.
+    public let categoria: CategoriaFormazione
     /// Vero se l'azione della giornata è stata spesa DAL GIOCATORE (01 §5.6). Un
     /// gruppo in marcia lunga ha l'azione consumata ma non spesa dal giocatore nei
     /// giorni successivi all'ordine (02 §6.5.1.2): per quei giorni `azioneSpesa` è
@@ -109,16 +179,27 @@ public struct Gruppo: Hashable, Codable, Sendable {
     /// Predisposto e non ancora alimentato: la marcia forzata è materia successiva, e
     /// oggi questo campo resta a zero (dichiarato nel resoconto).
     public var turniMarciaForzata: Int
+    /// Vero se il gruppo — armato — è APPOSTATO con l'ordine di imboscata (01 §5.11): resta
+    /// fermo nella casella, consuma rifornimenti e non produce nulla (01 §5.11.3), e se un
+    /// gruppo armato avversario vi entra l'imboscata scatta alla risoluzione di fine giornata
+    /// (01 §5.6.11). Persiste attraverso le giornate senza un nuovo ordine — un gruppo in
+    /// agguato ha CONCLUSO la giornata come uno inchiodato dalla marcia lunga — finché non
+    /// scatta o il giocatore lo revoca. Solo un gruppo armato lo porta (invariante).
+    public var ordineImboscata: Bool
 
     public init(id: IdGruppo, parte: Parte, nome: IdentificatoreDati,
                 posizione: Cella, composizione: [Reparto],
+                categoria: CategoriaFormazione = .armato,
                 azioneSpesa: Bool, marcia: MarciaInCorso? = nil,
-                turniSenzaProvviste: Int = 0, sostaDovuta: Int = 0, turniMarciaForzata: Int = 0) {
+                turniSenzaProvviste: Int = 0, sostaDovuta: Int = 0, turniMarciaForzata: Int = 0,
+                ordineImboscata: Bool = false) {
         self.id = id; self.parte = parte; self.nome = nome
         self.posizione = posizione; self.composizione = composizione
+        self.categoria = categoria
         self.azioneSpesa = azioneSpesa; self.marcia = marcia
         self.turniSenzaProvviste = turniSenzaProvviste; self.sostaDovuta = sostaDovuta
         self.turniMarciaForzata = turniMarciaForzata
+        self.ordineImboscata = ordineImboscata
     }
 
     /// Il numero totale di atomi del gruppo: la somma sui reparti. Serve alla
@@ -130,19 +211,28 @@ public struct Gruppo: Hashable, Codable, Sendable {
     public var inMarcia: Bool { marcia != nil }
 
     /// Vero se il gruppo ha concluso la propria giornata, sia per averla spesa sia
-    /// perché una marcia lunga gliela consuma senza comando del giocatore. È il
-    /// criterio della chiusura automatica (01 §5.6.0.6) e dell'esclusione dal salto
-    /// e dal rotore: un gruppo in marcia non attende alcuna decisione.
-    public var haConclusoLaGiornata: Bool { azioneSpesa || inMarcia }
+    /// perché una marcia lunga o un ordine di imboscata gliela consuma senza comando del
+    /// giocatore. È il criterio della chiusura automatica (01 §5.6.0.6) e dell'esclusione
+    /// dal salto e dal rotore: un gruppo in marcia non attende alcuna decisione, e un
+    /// gruppo appostato «non fa altro» (01 §5.6.0.5, §5.11.3) — resta in agguato attraverso
+    /// le giornate senza babysitting, come uno inchiodato dalla marcia.
+    public var haConclusoLaGiornata: Bool { azioneSpesa || inMarcia || ordineImboscata }
 
     /// Lo stato che il gruppo dichiara quando lo si incontra (01 §5.16.1, 02 §4.4.1.1).
     /// La marcia lunga porta con sé i giorni mancanti (02 §4.4.5, termine chiuso
-    /// `gruppo.in_marcia` con il plurale sui giorni), e precede gli altri due stati
-    /// perché è la condizione più informativa.
+    /// `gruppo.in_marcia` con il plurale sui giorni), e precede gli altri stati perché è
+    /// la condizione più informativa; l'agguato la segue, perché non è deducibile dal
+    /// fatto che il gruppo sia fermo (01 §5.16.1, 02 §6.5.3, termine chiuso «in agguato»).
     public var statoDichiarato: StatoGruppo {
         if let marcia { return .inMarcia(giorniMancanti: marcia.giorniMancanti) }
+        if ordineImboscata { return .inAgguato }
         return azioneSpesa ? .haAgito : .inAttesa
     }
+
+    /// Vero se il gruppo è un esploratore, esente dal taglio del rifornimento (01 §5.15):
+    /// «le formazioni di ricognizione non sono soggette al taglio … vivono di autonomia e
+    /// di raccolta automatica». Il loro costo è il rischio, non il rifornimento (01 §5.4).
+    public var esenteDalTaglio: Bool { categoria.eRicognizione }
 
     /// Vero se il gruppo DEVE fermarsi a rifornirsi e non può marciare (01 §5.2.2.4):
     /// ha una sosta ancora dovuta. La validazione della marcia lo respinge.
@@ -258,6 +348,11 @@ public enum StatoGruppo: Hashable, Codable, Sendable {
     case inAttesa
     case haAgito
     case inMarcia(giorniMancanti: Int)
+    /// Gruppo appostato con ordine di imboscata (01 §5.16.1, 02 §4.4.1.1, §6.5.3): il
+    /// termine chiuso è «in agguato» (02 §4.4.5), che ESISTE GIÀ nel vocabolario e questa
+    /// unità rende esistente nel gioco senza ampliarlo. Va dichiarato perché non è
+    /// deducibile dal fatto che il gruppo sia fermo.
+    case inAgguato
 
     /// La chiave del termine chiuso (00 §14.1): il traduttore vi risolve la frase.
     public var chiaveTesto: String {
@@ -265,6 +360,7 @@ public enum StatoGruppo: Hashable, Codable, Sendable {
         case .inAttesa: return "gruppo.in_attesa"
         case .haAgito: return "gruppo.ha_agito"
         case .inMarcia: return "gruppo.in_marcia"
+        case .inAgguato: return "gruppo.in_agguato"
         }
     }
 
@@ -272,7 +368,7 @@ public enum StatoGruppo: Hashable, Codable, Sendable {
     /// che con il valore associato non si sintetizza, per le prove che pretendono
     /// che OGNI stato abbia il proprio termine (`TraduttoreCampagnaTest`).
     public static let casiDiRiferimento: [StatoGruppo] = [
-        .inAttesa, .haAgito, .inMarcia(giorniMancanti: 1),
+        .inAttesa, .haAgito, .inMarcia(giorniMancanti: 1), .inAgguato,
     ]
 }
 
@@ -296,24 +392,22 @@ public struct VoceRegistro: Hashable, Codable, Sendable {
 /// I fatti che il registro sa annotare. Insieme chiuso, come ogni vocabolario del
 /// gioco.
 ///
-/// Il registro annota i fatti che il giocatore NON ha deciso (01 §5.17.1). Con la
-/// marcia lunga esiste il primo di essi — il compimento di una marcia — e con la
-/// correzione del titolare (RDA-104) la regola di 01 §5.17.1 è RIPRISTINATA: gli
-/// ordini di marcia e di presidio ESCONO dal registro, dove erano entrati in deroga
-/// (S8, RDA-72/RDA-101) solo perché non esisteva alcun fatto non deciso. La deroga è
-/// superata. Vi restano il compimento e la revoca; la revoca vi rimane per VOLONTÀ
-/// del titolare benché decisa dal giocatore, perché è il fatto che spiega perché un
-/// gruppo si trovi fermo — eccezione voluta, non dimenticanza. Restano anche gli
-/// annullamenti, che sono fatti ricostruibili solo dal registro (RDA-72).
+/// Il registro annota i fatti che il giocatore NON ha deciso (01 §5.17.1), più poche
+/// eccezioni volute dal titolare. L'ARRIVO di un proprio gruppo a destinazione — il
+/// compimento di una marcia lunga — ESCE dal registro per decisione del titolare (incarico
+/// 19): è un fatto che il giocatore ha deciso e già conosce, mentre il registro serve a
+/// recuperare ciò che è accaduto mentre guardava altrove. L'annuncio dell'arrivo resta
+/// (`EventoCampagna.marciaCompiuta`, col richiamo tattile del completamento di marcia,
+/// 02 §11.7.1); soltanto la voce di registro se ne va. Restano la revoca — per VOLONTÀ del
+/// titolare benché decisa dal giocatore, perché spiega perché un gruppo si trovi fermo
+/// (RDA-104) —, gli annullamenti, gli avvistamenti e i fatti del rifornimento. Vi ENTRANO i
+/// fatti nuovi di questa unità: esploratori perduti e notati, formazione sabotata e
+/// studiata, imboscata scattata, direzione di marcia dedotta (incarico 19, 01 §5.17.1).
 ///
 /// Ogni caso porta con sé ciò che la frase deve dichiarare: il registro non
 /// ricalcola nulla e non rilegge lo stato, perché la voce racconta il momento in
 /// cui il fatto è avvenuto e non quello in cui la si legge.
 public enum FattoRegistrato: Hashable, Codable, Sendable {
-    /// Una marcia lunga si è compiuta alla chiusura della giornata (01 §5.17.1): il
-    /// PRIMO fatto non deciso dal giocatore, e il primo che esercita il salto al
-    /// luogo del fatto, essendo `a` una casella reale (RDA-67).
-    case marciaCompiuta(gruppo: IdentificatoreDati, da: Cella, a: Cella)
     /// Un ordine di marcia è stato revocato (01 §5.6.3.3): il gruppo perde i giorni
     /// spesi e resta nella casella di partenza. Mossa di gioco, non annullamento
     /// (RDA-76); resta nel registro per volontà del titolare (RDA-104), eccezione
@@ -341,6 +435,33 @@ public enum FattoRegistrato: Hashable, Codable, Sendable {
     /// su una casella non osservata non entra mai nel registro, o il registro darebbe al
     /// giocatore informazione che la sua conoscenza non gli ha dato.
     case formazioneAvversariaAvvistata(casella: Cella)
+    /// Gli esploratori si sono PERDUTI durante una ricognizione (01 §5.4): la formazione di
+    /// ricognizione è andata perduta — personale formato che non si rimpiazza in un turno
+    /// (01 §5.4.2) — nella casella da cui esplorava. Fatto non deciso dal giocatore, del
+    /// SOLO giocatore: gli esploratori dell'avversario che si perdono non entrano nel suo
+    /// registro. Porta il nome della propria formazione perduta.
+    case esploratoriPerduti(gruppo: IdentificatoreDati, casella: Cella)
+    /// Gli esploratori si sono fatti NOTARE (01 §5.4, §5.10.2): la loro casella è ora
+    /// avvistata per l'avversario. Fatto non deciso, del solo giocatore, col nome e il luogo.
+    case esploratoriNotati(gruppo: IdentificatoreDati, casella: Cella)
+    /// Una formazione non armata è stata SABOTATA (01 §5.10.2): dispersa, il suo carico
+    /// perduto. Il sabotaggio è sempre fra parti opposte, sicché tocca sempre il giocatore —
+    /// come sabotatore o come vittima — e la voce vi entra col luogo. Non porta il nome
+    /// della formazione (02 §6.4.1): il fatto, e dove.
+    case formazioneSabotata(casella: Cella)
+    /// Una formazione non armata avversaria è stata STUDIATA a fondo dagli esploratori del
+    /// giocatore (01 §5.10.2): composizione, carico e direzione sono ora confermati. Del
+    /// solo giocatore che studia; col luogo.
+    case formazioneStudiata(casella: Cella)
+    /// Un'IMBOSCATA è scattata (01 §5.11, §5.17.1): un gruppo armato avversario è entrato
+    /// nella casella di un gruppo appostato. Lo scatto è sempre fra parti opposte e tocca
+    /// sempre il giocatore — come imboscante o come vittima — e la voce vi entra col luogo.
+    case imboscataScattata(casella: Cella)
+    /// DEDUZIONE sulla direzione di marcia di una colonna (01 §5.10.1): gli esploratori del
+    /// giocatore hanno rilevato una colonna avversaria muoversi lungo una strada per due
+    /// caselle consecutive e se ne deduce che la segua. Del solo giocatore; il luogo è la
+    /// casella in cui la colonna è stata osservata, da cui la deduzione si proietta.
+    case direzioneDedotta(casella: Cella)
 
     /// Un esemplare per ciascun caso, in ordine fisso. Serve al collaudo per
     /// pretendere che OGNI fatto abbia la propria frase compiuta: con i valori
@@ -348,8 +469,6 @@ public enum FattoRegistrato: Hashable, Codable, Sendable {
     /// aggiunto senza frase passerebbe inosservato — la stessa ragione per cui
     /// esiste l'elenco dei codici degli invarianti.
     public static let casiDiRiferimento: [FattoRegistrato] = [
-        .marciaCompiuta(gruppo: "corvo",
-                        da: Cella(riga: 1, colonna: 1), a: Cella(riga: 1, colonna: 2)),
         .marciaRevocata(gruppo: "corvo", casella: Cella(riga: 1, colonna: 1)),
         .ordineAnnullato,
         .giornataAzzerata,
@@ -357,13 +476,18 @@ public enum FattoRegistrato: Hashable, Codable, Sendable {
         .sostaDiRifornimento(gruppo: "corvo", casella: Cella(riga: 1, colonna: 1)),
         .rifornimentoRipreso(gruppo: "corvo", casella: Cella(riga: 1, colonna: 1)),
         .formazioneAvversariaAvvistata(casella: Cella(riga: 1, colonna: 1)),
+        .esploratoriPerduti(gruppo: "corvo", casella: Cella(riga: 1, colonna: 1)),
+        .esploratoriNotati(gruppo: "corvo", casella: Cella(riga: 1, colonna: 1)),
+        .formazioneSabotata(casella: Cella(riga: 1, colonna: 1)),
+        .formazioneStudiata(casella: Cella(riga: 1, colonna: 1)),
+        .imboscataScattata(casella: Cella(riga: 1, colonna: 1)),
+        .direzioneDedotta(casella: Cella(riga: 1, colonna: 1)),
     ]
 
     /// La chiave del testo che compone la frase della voce (00 §14.1): il fatto
     /// non conosce la frase, la nomina soltanto.
     public var chiaveTesto: String {
         switch self {
-        case .marciaCompiuta: return "registro.marcia_compiuta"
         case .marciaRevocata: return "registro.marcia_revocata"
         case .ordineAnnullato: return "registro.ordine_annullato"
         case .giornataAzzerata: return "registro.giornata_azzerata"
@@ -371,6 +495,12 @@ public enum FattoRegistrato: Hashable, Codable, Sendable {
         case .sostaDiRifornimento: return "registro.sosta_di_rifornimento"
         case .rifornimentoRipreso: return "registro.rifornimento_ripreso"
         case .formazioneAvversariaAvvistata: return "registro.formazione_avvistata"
+        case .esploratoriPerduti: return "registro.esploratori_perduti"
+        case .esploratoriNotati: return "registro.esploratori_notati"
+        case .formazioneSabotata: return "registro.formazione_sabotata"
+        case .formazioneStudiata: return "registro.formazione_studiata"
+        case .imboscataScattata: return "registro.imboscata_scattata"
+        case .direzioneDedotta: return "registro.direzione_dedotta"
         }
     }
 
@@ -379,12 +509,17 @@ public enum FattoRegistrato: Hashable, Codable, Sendable {
     /// accadono in una casella.
     public var luogo: Cella? {
         switch self {
-        case .marciaCompiuta(_, _, let a): return a
         case .marciaRevocata(_, let casella): return casella
         case .rifornimentoInterrotto(_, let casella): return casella
         case .sostaDiRifornimento(_, let casella): return casella
         case .rifornimentoRipreso(_, let casella): return casella
         case .formazioneAvversariaAvvistata(let casella): return casella
+        case .esploratoriPerduti(_, let casella): return casella
+        case .esploratoriNotati(_, let casella): return casella
+        case .formazioneSabotata(let casella): return casella
+        case .formazioneStudiata(let casella): return casella
+        case .imboscataScattata(let casella): return casella
+        case .direzioneDedotta(let casella): return casella
         case .ordineAnnullato, .giornataAzzerata: return nil
         }
     }
@@ -428,18 +563,39 @@ public struct StatoCampagna: Hashable, Codable, Sendable {
     /// si ricostruisce rigiocando, sicché non tocca lo schema; entra però nell'impronta,
     /// perché due partite con memorie diverse non sono lo stesso stato.
     public var conoscenza: [Parte: [Cella: Int]]
+    /// Le caselle che ciascuna parte PRESUME occupate da una colonna avversaria (01 §5.3,
+    /// §5.10.1): il seguito dell'itinerario dedotto dagli esploratori quando una colonna si
+    /// muove lungo una strada per due caselle consecutive. Danno lo stato di conoscenza
+    /// `presunto`, che NON nasce dall'età (a differenza di avvistato) ma dalla deduzione, ed
+    /// è la sola sua sorgente (RDA-110). Si azzerano e si ricalcolano a ogni fine giornata
+    /// dagli avvistamenti freschi: una presunzione non osservata invecchia con la casella su
+    /// cui poggia. Vuote in una partita senza esploratori che deducano.
+    public var presunti: [Parte: Set<Cella>]
+    /// La MEMORIA per-formazione dell'ultima posizione in cui una parte ha osservato una
+    /// formazione AVVERSARIA (01 §5.10.1): per ciascuna parte osservatrice, la casella dove
+    /// ha visto l'ultima volta ogni gruppo avversario, per identificatore. È ciò che rende
+    /// possibile la deduzione dell'itinerario — «mossa lungo una strada per due caselle
+    /// consecutive» richiede di ricordare dov'era la colonna il turno prima — che 01 §5.10.1
+    /// e RDA-110 rinviavano esplicitamente a questo blocco (S18). L'identificatore serve solo
+    /// internamente: il giocatore non riceve mai il nome della colonna (02 §6.4.1). Entra
+    /// nell'impronta come la conoscenza; vuota senza esploratori attivi.
+    public var ultimaPosizioneNota: [Parte: [IdGruppo: Cella]]
 
     public init(mappa: MappaCampagna, giorno: Int, gruppi: [IdGruppo: Gruppo],
                 prossimoIdGruppo: Int, prossimoIndiceNome: Int,
                 registro: [VoceRegistro], prossimoNumeroVoce: Int,
                 forzeNemiche: Set<Cella> = [], struttureDiRifornimento: Set<Cella> = [],
-                conoscenza: [Parte: [Cella: Int]] = [:]) {
+                conoscenza: [Parte: [Cella: Int]] = [:],
+                presunti: [Parte: Set<Cella>] = [:],
+                ultimaPosizioneNota: [Parte: [IdGruppo: Cella]] = [:]) {
         self.mappa = mappa; self.giorno = giorno; self.gruppi = gruppi
         self.prossimoIdGruppo = prossimoIdGruppo
         self.prossimoIndiceNome = prossimoIndiceNome
         self.registro = registro; self.prossimoNumeroVoce = prossimoNumeroVoce
         self.forzeNemiche = forzeNemiche; self.struttureDiRifornimento = struttureDiRifornimento
         self.conoscenza = conoscenza
+        self.presunti = presunti
+        self.ultimaPosizioneNota = ultimaPosizioneNota
     }
 
     public var griglia: GrigliaCampagna { mappa.griglia }

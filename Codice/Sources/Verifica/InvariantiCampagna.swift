@@ -526,16 +526,33 @@ public struct SondaInvariantiCampagna: Sendable {
         guard dopo.registro.count > prima.registro.count else { return violazioni }
         for voce in dopo.registro.suffix(dopo.registro.count - prima.registro.count) {
             switch voce.fatto {
-            case .formazioneAvversariaAvvistata(let casella):
+            case .formazioneAvversariaAvvistata(let casella),
+                 .formazioneStudiata(let casella), .direzioneDedotta(let casella):
+                // Avvistamento, studio e deduzione dell'itinerario sono del solo giocatore e
+                // senza nome: legittimi solo dove il giocatore OSSERVA — dove il suo
+                // esploratore è sulla casella studiata, o entro il raggio della colonna
+                // avvistata o dedotta (01 §5.6.11, §5.10.1). Un fatto simile su una casella
+                // che non osserva è una fuga d'informazione.
                 if !osservataDalGiocatore(casella) {
                     violazioni.append(.registroRivelaIgnoto(voce: voce.numero))
                 }
-            case .marciaCompiuta(let g, _, _), .marciaRevocata(let g, _),
+            case .marciaRevocata(let g, _),
                  .rifornimentoInterrotto(let g, _), .sostaDiRifornimento(let g, _),
-                 .rifornimentoRipreso(let g, _):
+                 .rifornimentoRipreso(let g, _),
+                 .esploratoriPerduti(let g, _), .esploratoriNotati(let g, _):
+                // Fatti che portano il nome di una formazione: devono riguardare un gruppo del
+                // giocatore. Gli esploratori dell'AVVERSARIO che si perdono o si fanno notare
+                // restano nel suo perimetro e non entrano nel registro del giocatore.
                 if !nomiGiocatore.contains(g) {
                     violazioni.append(.registroRivelaIgnoto(voce: voce.numero))
                 }
+            case .formazioneSabotata, .imboscataScattata:
+                // Sabotaggio e scatto d'imboscata sono sempre fra parti opposte: con due sole
+                // parti coinvolgono sempre il giocatore — come attore o come vittima — a una
+                // casella di cui è parte (il suo bersaglio, la sua colonna, il suo agguato).
+                // Non c'è ignoto da rivelare, e la casella può non essere più osservata dopo
+                // la dispersione o l'ingresso, sicché non se ne esige l'osservazione.
+                break
             case .ordineAnnullato, .giornataAzzerata:
                 break
             }

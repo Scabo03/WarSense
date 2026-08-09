@@ -41,6 +41,22 @@ extension Gruppo: CodificabileCanonico {
         c.intero(Int64(turniSenzaProvviste))
         c.intero(Int64(sostaDovuta))
         c.intero(Int64(turniMarciaForzata))
+        // La categoria e l'ordine di imboscata (incarico 19): due gruppi altrimenti uguali
+        // ma uno esploratore e uno colonna, o uno appostato e uno no, non sono lo stesso
+        // stato. OMESSI quando il gruppo è un armato non appostato — la condizione ordinaria
+        // — così che gli scenari armati scritti prima diano la stessa impronta al byte
+        // (RDA-113). L'impronta è solo scritta e sottoposta a hash, mai decodificata, sicché
+        // l'omissione condizionale non crea ambiguità di lettura: basta che stati diversi
+        // diano byte diversi, e la stringa discriminante della categoria e il marcatore
+        // dell'agguato lo garantiscono.
+        switch categoria {
+        case .armato: break
+        case .ricognizione(let competenza):
+            c.testo("ricognizione"); c.intero(Int64(competenza))
+        case .nonArmata(let carico, let sogliaProtezione):
+            c.testo("non_armata"); c.intero(Int64(carico)); c.intero(Int64(sogliaProtezione))
+        }
+        if ordineImboscata { c.testo("in_agguato") }
     }
 }
 
@@ -51,15 +67,19 @@ extension FattoRegistrato: CodificabileCanonico {
     public func codifica(in c: inout CodificatoreCanonico) {
         c.testo(chiaveTesto)
         switch self {
-        case .marciaCompiuta(let gruppo, let da, let a):
-            c.testo(gruppo); da.codifica(in: &c); a.codifica(in: &c)
         case .marciaRevocata(let gruppo, let casella):
             c.testo(gruppo); casella.codifica(in: &c)
         case .rifornimentoInterrotto(let gruppo, let casella),
              .sostaDiRifornimento(let gruppo, let casella),
-             .rifornimentoRipreso(let gruppo, let casella):
+             .rifornimentoRipreso(let gruppo, let casella),
+             .esploratoriPerduti(let gruppo, let casella),
+             .esploratoriNotati(let gruppo, let casella):
             c.testo(gruppo); casella.codifica(in: &c)
-        case .formazioneAvversariaAvvistata(let casella):
+        case .formazioneAvversariaAvvistata(let casella),
+             .formazioneSabotata(let casella),
+             .formazioneStudiata(let casella),
+             .imboscataScattata(let casella),
+             .direzioneDedotta(let casella):
             casella.codifica(in: &c)
         case .ordineAnnullato, .giornataAzzerata:
             break
@@ -118,6 +138,29 @@ extension StatoCampagna {
             for casella in memoria.keys.sorted() {
                 casella.codifica(in: &c)
                 c.intero(Int64(memoria[casella]!))
+            }
+        }
+        // Le presunzioni dell'itinerario e la memoria per-formazione dell'ultima posizione
+        // nota (incarico 19): due partite che deducono itinerari diversi non sono lo stesso
+        // stato. OMESSE quando vuote — nessun esploratore che deduca — così che le partite
+        // precedenti diano la stessa impronta al byte (come i gruppi armati sopra).
+        if presunti.values.contains(where: { !$0.isEmpty }) {
+            for parte in Parte.allCases {
+                let insieme = presunti[parte] ?? []
+                c.testo(parte.rawValue)
+                c.intero(Int64(insieme.count))
+                for casella in insieme.sorted() { casella.codifica(in: &c) }
+            }
+        }
+        if ultimaPosizioneNota.values.contains(where: { !$0.isEmpty }) {
+            for parte in Parte.allCases {
+                let memoria = ultimaPosizioneNota[parte] ?? [:]
+                c.testo(parte.rawValue)
+                c.intero(Int64(memoria.count))
+                for id in memoria.keys.sorted() {
+                    c.intero(id.numero)
+                    memoria[id]!.codifica(in: &c)
+                }
             }
         }
         return SHA256.improntaEsadecimale(c.byte)

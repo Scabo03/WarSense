@@ -21,10 +21,61 @@ public struct ScenarioCampagna: Hashable, Codable, Sendable {
         /// La composizione del gruppo (01 §5.6.0): mai vuota. La fabbrica respinge
         /// lo scenario che ne dichiari una vuota o con reparti a zero atomi.
         public let composizione: [RepartoIniziale]
-        public init(riga: Int, colonna: Int, composizione: [RepartoIniziale]) {
+        /// La categoria dichiarata (01 §5.2): «armato» (per difetto e omesso dalla
+        /// codifica, sicché gli scenari precedenti restano identici al byte), «ricognizione»
+        /// o «non_armata». La fabbrica la traduce in `CategoriaFormazione` verificando che i
+        /// dati che la categoria richiede — competenza per la ricognizione, carico e soglia
+        /// per la non armata — siano presenti e coerenti.
+        public let categoria: String
+        /// La competenza dell'esploratore (01 §5.4.2), richiesta se e solo se
+        /// categoria = «ricognizione».
+        public let competenza: Int?
+        /// Il carico della formazione non armata (01 §5.10.2), richiesto se e solo se
+        /// categoria = «non_armata».
+        public let carico: Int?
+        /// La soglia di protezione della formazione non armata (01 §5.10.2), richiesta se e
+        /// solo se categoria = «non_armata».
+        public let sogliaProtezione: Int?
+
+        public init(riga: Int, colonna: Int, composizione: [RepartoIniziale],
+                    categoria: String = "armato", competenza: Int? = nil,
+                    carico: Int? = nil, sogliaProtezione: Int? = nil) {
             self.riga = riga; self.colonna = colonna; self.composizione = composizione
+            self.categoria = categoria; self.competenza = competenza
+            self.carico = carico; self.sogliaProtezione = sogliaProtezione
         }
         public var casella: Cella { Cella(riga: riga, colonna: colonna) }
+
+        enum CodingKeys: String, CodingKey {
+            case riga, colonna, composizione, categoria, competenza, carico
+            case sogliaProtezione = "soglia_protezione"
+        }
+
+        public init(from decoder: Decoder) throws {
+            let c = try decoder.container(keyedBy: CodingKeys.self)
+            riga = try c.decode(Int.self, forKey: .riga)
+            colonna = try c.decode(Int.self, forKey: .colonna)
+            composizione = try c.decode([RepartoIniziale].self, forKey: .composizione)
+            // Assente negli scenari precedenti a questa unità: si legge «armato» e nulla cambia.
+            categoria = try c.decodeIfPresent(String.self, forKey: .categoria) ?? "armato"
+            competenza = try c.decodeIfPresent(Int.self, forKey: .competenza)
+            carico = try c.decodeIfPresent(Int.self, forKey: .carico)
+            sogliaProtezione = try c.decodeIfPresent(Int.self, forKey: .sogliaProtezione)
+        }
+
+        public func encode(to encoder: Encoder) throws {
+            var c = encoder.container(keyedBy: CodingKeys.self)
+            try c.encode(riga, forKey: .riga)
+            try c.encode(colonna, forKey: .colonna)
+            try c.encode(composizione, forKey: .composizione)
+            // La categoria ordinaria e i campi assenti si OMETTONO: uno scenario armato — cioè
+            // tutti quelli scritti prima di questa unità — si ricodifica identico al byte, e i
+            // campioni del giornale non si muovono (RDA-113, `CompatibilitaGiornaleTest`).
+            if categoria != "armato" { try c.encode(categoria, forKey: .categoria) }
+            try c.encodeIfPresent(competenza, forKey: .competenza)
+            try c.encodeIfPresent(carico, forKey: .carico)
+            try c.encodeIfPresent(sogliaProtezione, forKey: .sogliaProtezione)
+        }
     }
 
     public let mappa: IdentificatoreDati
@@ -112,6 +163,45 @@ public enum FabbricaCampagna {
         /// Una forza nemica o una struttura FUORI dalla mappa: come i gruppi, i dati
         /// minimi del rifornimento devono stare dentro la griglia (01 §5.2.2).
         case rifornimentoFuoriMappa(Cella)
+        /// Una categoria di formazione ignota: l'insieme è chiuso a tre (01 §5.2), e una
+        /// stringa che non sia «armato», «ricognizione» o «non_armata» è respinta come un
+        /// terreno ignoto (05 §7.7).
+        case categoriaIgnota(String)
+        /// I dati della categoria sono incoerenti (01 §5.2, §5.4.2, §5.10.2): un esploratore
+        /// senza competenza o con un carico, una formazione non armata senza carico o senza
+        /// soglia o con una competenza, un gruppo armato con dati da altra categoria. Lo
+        /// stato impossibile è respinto qui, non solo sorvegliato.
+        case datiCategoriaIncoerenti(Cella)
+    }
+
+    /// Traduce i campi dichiarativi della categoria (01 §5.2) nel tipo con valore
+    /// associato, respingendo ogni combinazione incoerente: la competenza è richiesta se e
+    /// solo se «ricognizione», il carico e la soglia se e solo se «non_armata», e nessuna
+    /// categoria tollera i dati di un'altra.
+    static func categoria(di iniziale: ScenarioCampagna.GruppoIniziale) throws -> CategoriaFormazione {
+        switch iniziale.categoria {
+        case "armato":
+            guard iniziale.competenza == nil, iniziale.carico == nil,
+                  iniziale.sogliaProtezione == nil else {
+                throw ErroreScenario.datiCategoriaIncoerenti(iniziale.casella)
+            }
+            return .armato
+        case "ricognizione":
+            guard let competenza = iniziale.competenza, competenza >= 0,
+                  iniziale.carico == nil, iniziale.sogliaProtezione == nil else {
+                throw ErroreScenario.datiCategoriaIncoerenti(iniziale.casella)
+            }
+            return .ricognizione(competenza: competenza)
+        case "non_armata":
+            guard let carico = iniziale.carico, carico >= 0,
+                  let soglia = iniziale.sogliaProtezione, soglia >= 0,
+                  iniziale.competenza == nil else {
+                throw ErroreScenario.datiCategoriaIncoerenti(iniziale.casella)
+            }
+            return .nonArmata(carico: carico, sogliaProtezione: soglia)
+        default:
+            throw ErroreScenario.categoriaIgnota(iniziale.categoria)
+        }
     }
 
     /// - Parameter archetipiNoti: le chiavi degli archetipi caricati e validi
@@ -178,7 +268,8 @@ public enum FabbricaCampagna {
                 }
                 let id = IdGruppo(prossimoId)
                 gruppi[id] = Gruppo(id: id, parte: parte, nome: valori.nomiGruppi[prossimoNome],
-                                    posizione: casella, composizione: composizione, azioneSpesa: false)
+                                    posizione: casella, composizione: composizione,
+                                    categoria: try categoria(di: iniziale), azioneSpesa: false)
                 prossimoId += 1
                 prossimoNome += 1
             }

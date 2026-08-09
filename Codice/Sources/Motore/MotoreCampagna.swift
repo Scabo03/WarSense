@@ -614,10 +614,12 @@ public struct MotoreCampagna: Sendable {
                 stato.gruppi[id]!.posizione = arrivo
                 stato.gruppi[id]!.marcia = nil
                 if gruppo.parte == .giocatore {
-                    // Fatto proprio del giocatore: annuncio e voce di registro, col salto
-                    // al luogo (01 §5.17.1, 02 §6.6).
+                    // L'ARRIVO si annuncia — l'evento e il richiamo tattile del completamento
+                    // di marcia (02 §11.7.1) — ma NON entra più nel registro (seconda correzione
+                    // del titolare, incarico 19): è un fatto che il giocatore ha deciso e già
+                    // conosce, e il registro serve a recuperare ciò che è accaduto mentre
+                    // guardava altrove. La voce di registro se ne va; l'annuncio resta.
                     eventi.append(.marciaCompiuta(gruppo: id, nome: nome, da: partenza, a: arrivo))
-                    annota(.marciaCompiuta(gruppo: nome, da: partenza, a: arrivo), in: &stato)
                 } else {
                     arriviAvversari.append(arrivo)
                 }
