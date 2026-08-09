@@ -101,7 +101,14 @@ public struct ProgrammaDiVerifica: Sendable {
                                     // che gli indici di colonna che il riepilogo somma non si
                                     // spostino (incarico 18).
                                     String(corsa.gruppiAvversario), String(corsa.tagliDaAvversario),
-                                    String(corsa.aggiramenti), String(corsa.minDistanzaAvversarioQg)])
+                                    String(corsa.aggiramenti), String(corsa.minDistanzaAvversarioQg),
+                                    // I fenomeni della ricognizione, delle imboscate e delle
+                                    // azioni contro le non armate, anch'essi in CODA (incarico 19).
+                                    String(corsa.esplorazioniRiuscite), String(corsa.esplorazioniAManiVuote),
+                                    String(corsa.esploratoriNotati), String(corsa.esploratoriPerduti),
+                                    String(corsa.sabotaggiArmati), String(corsa.sabotaggiEsploratori),
+                                    String(corsa.sabotaggiFalliti), String(corsa.studi),
+                                    String(corsa.imboscatePiazzate), String(corsa.imboscateScattate)])
         }
         sezioni.append(Rapporto.Sezione(
             nome: "campagna_invarianti",
@@ -113,7 +120,11 @@ public struct ProgrammaDiVerifica: Sendable {
                            "tagli", "soste_imposte", "soste_volontarie", "riprese",
                            "passaggi_in_zona", "strutture_isolate",
                            "gruppi_avversario", "tagli_da_avversario", "aggiramenti",
-                           "min_distanza_avversario_qg"],
+                           "min_distanza_avversario_qg",
+                           "esplorazioni_riuscite", "esplorazioni_a_mani_vuote",
+                           "esploratori_notati", "esploratori_perduti",
+                           "sabotaggi_armati", "sabotaggi_esploratori", "sabotaggi_falliti",
+                           "studi", "imboscate_piazzate", "imboscate_scattate"],
             righe: righeInvarianti))
 
         // La curva, non il punto: il costo di chiusura di una giornata si misura su
@@ -254,6 +265,19 @@ public struct ProgrammaDiVerifica: Sendable {
         // giocatore, fra i soli scenari con avversario (dove la colonna è significativa).
         voce("distanza_minima_avversario_dal_qg_giocatore",
              righeInvarianti.filter { (Int($0[24]) ?? 0) > 0 }.compactMap { Int($0[27]) }.min() ?? -1)
+        // I fenomeni della ricognizione, delle imboscate e delle azioni contro le formazioni
+        // non armate (incarico 19), dalle colonne 28–37. Il banco deve GENERARLI: se un totale
+        // è zero, il fenomeno non è stato esercitato e l'invariante relativo non ha morso.
+        voce("esplorazioni_riuscite_in_totale", righeInvarianti.reduce(0) { $0 + (Int($1[28]) ?? 0) })
+        voce("esplorazioni_a_mani_vuote_in_totale", righeInvarianti.reduce(0) { $0 + (Int($1[29]) ?? 0) })
+        voce("esploratori_notati_in_totale", righeInvarianti.reduce(0) { $0 + (Int($1[30]) ?? 0) })
+        voce("esploratori_perduti_in_totale", righeInvarianti.reduce(0) { $0 + (Int($1[31]) ?? 0) })
+        voce("sabotaggi_armati_in_totale", righeInvarianti.reduce(0) { $0 + (Int($1[32]) ?? 0) })
+        voce("sabotaggi_esploratori_in_totale", righeInvarianti.reduce(0) { $0 + (Int($1[33]) ?? 0) })
+        voce("sabotaggi_falliti_in_totale", righeInvarianti.reduce(0) { $0 + (Int($1[34]) ?? 0) })
+        voce("studi_in_totale", righeInvarianti.reduce(0) { $0 + (Int($1[35]) ?? 0) })
+        voce("imboscate_piazzate_in_totale", righeInvarianti.reduce(0) { $0 + (Int($1[36]) ?? 0) })
+        voce("imboscate_scattate_in_totale", righeInvarianti.reduce(0) { $0 + (Int($1[37]) ?? 0) })
         let violazioni = righeInvarianti.reduce(0) { $0 + (Int($1[11]) ?? 0) }
         voce("violazioni_trovate_in_totale", violazioni)
         voce("ordini_a_gruppi_senza_alcuna_destinazione",

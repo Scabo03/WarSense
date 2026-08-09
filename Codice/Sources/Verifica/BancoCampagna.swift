@@ -152,6 +152,27 @@ public struct BancoCampagna: Sendable {
         /// giocatore, durante la corsa: quanto l'avversario si è avvicinato all'obiettivo.
         /// Vale la larghezza della mappa più uno quando non c'è avversario (mai avvicinato).
         public let minDistanzaAvversarioQg: Int
+        // I fenomeni della RICOGNIZIONE, delle imboscate e delle azioni contro le formazioni
+        // non armate (incarico 19): il banco deve GENERARLI, non solo renderli possibili. Se
+        // uno resta a zero, la corsa non l'ha esercitato e l'invariante relativo non ha morso.
+        /// Le esplorazioni per esito deterministico (01 §5.4): riuscite, a mani vuote, notati,
+        /// perduti. La loro somma è il numero di esplorazioni ordinate nella corsa.
+        public let esplorazioniRiuscite: Int
+        public let esplorazioniAManiVuote: Int
+        public let esploratoriNotati: Int
+        public let esploratoriPerduti: Int
+        /// I sabotaggi RIUSCITI, per categoria di chi li compie (01 §5.10.2): da gruppo armato
+        /// (riesce sempre) e da esploratori (solo con competenza sufficiente); più i sabotaggi
+        /// FALLITI, cioè esploratori sotto soglia che si fanno notare.
+        public let sabotaggiArmati: Int
+        public let sabotaggiEsploratori: Int
+        public let sabotaggiFalliti: Int
+        /// Gli studi approfonditi compiuti (01 §5.10.2).
+        public let studi: Int
+        /// Le imboscate PIAZZATE (ordine di imboscata) e quelle SCATTATE (01 §5.11): lo scatto
+        /// è sempre fra parti opposte, sicché ne conta le imboscate di entrambe le parti.
+        public let imboscatePiazzate: Int
+        public let imboscateScattate: Int
         public let violazioni: [String]
         public let improntaFinale: String
     }
@@ -188,6 +209,34 @@ public struct BancoCampagna: Sendable {
         // alla fine, perché sono i fatti non decisi che vi si annotano. I turni-gruppo in
         // zona si contano a ogni giornata. Le strutture isolate si contano allo scenario.
         var sosteVolontarie = 0, passaggiInZona = 0
+        // I fenomeni della ricognizione, delle imboscate e delle azioni contro le non armate.
+        var esplRiuscite = 0, esplManiVuote = 0, esplNotati = 0, esplPerduti = 0
+        var sabArmati = 0, sabEsploratori = 0, sabFalliti = 0, studi = 0
+        var imboscatePiazzate = 0, imboscateScattate = 0
+        // Conta i fenomeni prodotti da una serie di eventi, sullo stato PRIMA (per leggere la
+        // categoria di chi sabota, che l'evento non porta). Vale per il giocatore e per
+        // l'avversario: lo scatto d'imboscata è fra parti opposte e va contato una sola volta.
+        func contaFenomeni(_ eventi: [EventoCampagna], prima: StatoCampagna) {
+            for evento in eventi {
+                switch evento {
+                case .esplorazioneCompiuta(_, _, _, _, let esito):
+                    switch esito {
+                    case .riuscita: esplRiuscite += 1
+                    case .aManiVuote: esplManiVuote += 1
+                    case .notati: esplNotati += 1
+                    case .perduti: esplPerduti += 1
+                    }
+                case .sabotaggioCompiuto(let g, _, _, let riuscito):
+                    if riuscito {
+                        if prima.gruppi[g]?.categoria.eArmata == true { sabArmati += 1 }
+                        else { sabEsploratori += 1 }
+                    } else { sabFalliti += 1 }
+                case .studioCompiuto: studi += 1
+                case .imboscataScattata: imboscateScattate += 1
+                default: break
+                }
+            }
+        }
         // La tabella dei volumi per atomo, per l'invariante del volume come somma.
         let volumePerAtomo = motore.valori.archetipi.mapValues { $0.volumePerAtomo }
         // I volumi dei gruppi (costanti in questa unità: la composizione non muta).
@@ -246,6 +295,35 @@ public struct BancoCampagna: Sendable {
                 revoche += 1
             } else {
                 guard let gruppo = vista.prossimoGruppoInAttesa(dopo: nil) else { break }
+                // Le formazioni di RICOGNIZIONE (01 §5.4, §5.10.2, incarico 19): se co-locate con
+                // una formazione non armata avversaria, la STUDIANO o la SABOTANO a giorni
+                // alterni, per esercitare entrambe le vie; altrimenti ESPLORANO. Non marciano nel
+                // banco e non sono soggette al taglio (01 §5.15): il loro costo è il rischio.
+                if gruppo.categoria.eRicognizione {
+                    if let bersaglio = motore.bersaglioNonArmato(su: gruppo.posizione,
+                                                                 parte: .giocatore, stato: stato) {
+                        // Prima si STUDIA il bersaglio (che non lo disperde), poi lo si SABOTA:
+                        // così una stessa formazione esercita entrambe le vie (01 §5.10.2).
+                        let giaStudiato = stato.studiati[.giocatore]?.contains(bersaglio.id) == true
+                        comando = giaStudiato
+                            ? .sabotaggio(gruppo: gruppo.id)
+                            : .studioApprofondito(gruppo: gruppo.id)
+                    } else {
+                        comando = .esplorazione(gruppo: gruppo.id)
+                    }
+                }
+                // I gruppi ARMATI co-locati con una formazione non armata avversaria la SABOTANO
+                // (riesce sempre, 01 §5.10.2); ogni tanto un gruppo armato tende un'IMBOSCATA
+                // (01 §5.11), così che, entrando un armato avversario, l'imboscata del GIOCATORE
+                // scatti — l'altra metà dello scatto rispetto a quello dell'avversario.
+                else if gruppo.categoria.eArmata,
+                        motore.bersaglioNonArmato(su: gruppo.posizione, parte: .giocatore, stato: stato) != nil {
+                    comando = .sabotaggio(gruppo: gruppo.id)
+                } else if gruppo.categoria.eArmata, stato.giorno % 6 == 4,
+                          gruppo.sostaDovuta < 2, !gruppo.deveRifornirsi {
+                    comando = .imboscata(gruppo: gruppo.id)
+                    imboscatePiazzate += 1
+                }
                 // Rifornimento (01 §5.2.2). Un gruppo che DEVE rifornirsi si ferma a
                 // rifornirsi: è l'unica azione possibile, e la sosta non si elude. Un
                 // gruppo senza provviste, ogni tanto, si ferma di propria iniziativa: è
@@ -253,7 +331,7 @@ public struct BancoCampagna: Sendable {
                 // TAGLIATO presidia, così il taglio matura invece di essere aggirato
                 // marciando via — è ciò che fa emergere il taglio, la sosta imposta e la
                 // ripresa in modo deterministico, qualunque cosa faccia il resto.
-                if gruppo.deveRifornirsi {
+                else if gruppo.deveRifornirsi {
                     comando = .sostaConRaccolta(gruppo: gruppo.id)
                 } else if gruppo.turniSenzaProvviste == 1, stato.giorno % 3 == 0 {
                     comando = .sostaConRaccolta(gruppo: gruppo.id)
@@ -282,6 +360,7 @@ public struct BancoCampagna: Sendable {
             marceCompiute += eventi.reduce(0) {
                 if case .marciaCompiuta = $1 { return $0 + 1 } else { return $0 }
             }
+            contaFenomeni(eventi, prima: prima)
             violazioni.formUnion(sonda.controlla(prima: prima, comando: comando, dopo: dopo,
                                                  eventi: eventi,
                                                  adiacenti: prima.griglia.adiacenti).map(\.description))
@@ -318,6 +397,7 @@ public struct BancoCampagna: Sendable {
                 marceCompiute += eventiAvv.reduce(0) {
                     if case .marciaCompiuta = $1 { return $0 + 1 } else { return $0 }
                 }
+                contaFenomeni(eventiAvv, prima: primaAvv)
                 violazioni.formUnion(sonda.controlla(prima: primaAvv, comando: comandoAvv, dopo: dopoAvv,
                                                      eventi: eventiAvv,
                                                      adiacenti: primaAvv.griglia.adiacenti).map(\.description))
@@ -385,6 +465,11 @@ public struct BancoCampagna: Sendable {
                      tagliDaAvversario: tagliDaAvversario,
                      aggiramenti: gruppiAggiranti.count,
                      minDistanzaAvversarioQg: minDistanzaAvversarioQg,
+                     esplorazioniRiuscite: esplRiuscite, esplorazioniAManiVuote: esplManiVuote,
+                     esploratoriNotati: esplNotati, esploratoriPerduti: esplPerduti,
+                     sabotaggiArmati: sabArmati, sabotaggiEsploratori: sabEsploratori,
+                     sabotaggiFalliti: sabFalliti, studi: studi,
+                     imboscatePiazzate: imboscatePiazzate, imboscateScattate: imboscateScattate,
                      violazioni: violazioni.sorted(), improntaFinale: stato.impronta())
     }
 

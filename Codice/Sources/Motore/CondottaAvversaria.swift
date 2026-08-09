@@ -120,6 +120,13 @@ public struct CondottaAvversaria: Sendable {
         // giocatore (01 §5.2.2.4, §5.6.5). Nessuna asimmetria.
         if gruppo.deveRifornirsi { return .sostaConRaccolta(gruppo: gruppo.id) }
 
+        // Gli ESPLORATORI dell'avversario usano la ricognizione alle stesse condizioni del
+        // giocatore (01 §5.4, incarico 19): esplorano. Non partecipano all'avanzata armata —
+        // non innescano mai battaglia (01 §5.4.1) — e il loro compito è osservare. Condotta
+        // provvisoria: un esploratore esplora la propria zona; la taratura del suo impiego è
+        // rinviata come il carattere (01 §6.1.3).
+        if gruppo.categoria.eRicognizione { return .esplorazione(gruppo: gruppo.id) }
+
         let c = vista.condotta
         let noti = vista.formazioniGiocatoreNote
         let griglia = vista.griglia
@@ -169,6 +176,13 @@ public struct CondottaAvversaria: Sendable {
                 miglioreComando = comando
             }
         }
+        // In assenza di guadagno il gruppo armato PRESIDIA, come nell'incarico 18: continua ad
+        // avanzare quando conviene, e non si ferma a vuoto in modo da smettere di premere. La
+        // CAPACITÀ di tendere imboscate esiste ed è simmetrica (la validazione ammette l'ordine
+        // di imboscata per l'avversario esattamente come per il giocatore, RDA-112): che il
+        // giocatore vi possa cadere è provato da una prova dedicata (AvversarioCampagnaTest). La
+        // TATTICA con cui la condotta sceglie di appostarsi — invece di limitarsi a poterlo — è
+        // una manopola del carattere, rinviata con la sua taratura (01 §6.1.3, dichiarato in S18).
         return miglioreComando
     }
 

@@ -531,11 +531,23 @@ public struct SondaInvariantiCampagna: Sendable {
                     }
                 }
             }
-            // La memoria di conoscenza invecchia SOLO alla chiusura della giornata
-            // (01 §5.6.11): senza chiusura non deve cambiare, o un ricordo starebbe
-            // retrocedendo da confermato senza il passare del tempo (01 §5.3).
-            for parte in Parte.allCases where (dopo.conoscenza[parte] ?? [:]) != (prima.conoscenza[parte] ?? [:]) {
-                violazioni.append(.conoscenzaRegreditaSenzaTempo(parte: parte.rawValue))
+            // La memoria di conoscenza invecchia — REGREDISCE — solo alla chiusura della
+            // giornata (01 §5.6.11, §5.3): senza chiusura può soltanto MIGLIORARE, mai
+            // retrocedere. Un ricordo può nascere o rinfrescarsi a zero (esplorazione, studio,
+            // esploratori notati: incarico 19), ma nessuna età esistente può CRESCERE e nessun
+            // ricordo può SPARIRE senza il passare del tempo — quella è la regressione da
+            // confermato che l'invariante vieta.
+            for parte in Parte.allCases {
+                let prima2 = prima.conoscenza[parte] ?? [:]
+                let dopo2 = dopo.conoscenza[parte] ?? [:]
+                for (cella, etaPrima) in prima2 {
+                    guard let etaDopo = dopo2[cella] else {
+                        violazioni.append(.conoscenzaRegreditaSenzaTempo(parte: parte.rawValue)); break
+                    }
+                    if etaDopo > etaPrima {
+                        violazioni.append(.conoscenzaRegreditaSenzaTempo(parte: parte.rawValue)); break
+                    }
+                }
             }
         }
         return violazioni

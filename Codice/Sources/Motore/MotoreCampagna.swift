@@ -805,6 +805,18 @@ public struct MotoreCampagna: Sendable {
             // una proprietà di ciascuna voce (02 §6.6) e non un fatto a sé. Resta
             // l'annuncio, che il cambiamento di stato rilevante richiede (00 §11.4).
             eventi.append(.giornataAperta(giorno: stato.giorno))
+            // Un gruppo in AGGUATO ha concluso la giornata ma NON progredisce da sé — a
+            // differenza di una marcia, che si compie in un numero finito di giorni e
+            // libera il gruppo (01 §5.11.3). Se dopo la chiusura tutti i gruppi restano
+            // conclusi e NESSUNO è in marcia — sono tutti appostati (o già agito, ma
+            // l'azzeramento li avrebbe liberati) — la cascata si fermerebbe soltanto
+            // all'infinito: la giornata si chiude una volta e ci si ferma, in attesa che
+            // un'imboscata scatti o che il giocatore agisca. Senza questo, uno stato di soli
+            // agguati farebbe scorrere i giorni senza fine (difetto trovato al banco).
+            if stato.gruppi.values.allSatisfy({ $0.haConclusoLaGiornata }),
+               !stato.gruppi.values.contains(where: { $0.inMarcia }) {
+                break
+            }
         }
         return eventi
     }
