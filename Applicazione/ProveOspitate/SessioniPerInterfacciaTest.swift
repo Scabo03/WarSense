@@ -129,13 +129,16 @@ final class SessioniPerInterfacciaTest: XCTestCase {
                 XCTAssertTrue(schermata.grigliaPerProva.attivaAlTocco(
                     in: CGPoint(x: bersaglio.midX, y: bersaglio.midY)),
                               "il dito non ordina la marcia verso \(meta)")
-            case .revocaMarcia, .divisione, .riunione, .sostaConRaccolta:
+            case .revocaMarcia, .divisione, .riunione, .sostaConRaccolta,
+                 .esplorazione, .imboscata, .revocaImboscata, .sabotaggio, .studioApprofondito:
                 // La condotta delle sessioni complete non revoca, non divide, non
                 // riunisce e non sosta: le sue campagne non hanno forze nemiche (il
-                // rifornimento non si taglia mai), sicché la sosta non si presenta. Se
+                // rifornimento non si taglia mai), sicché la sosta non si presenta. Né
+                // esplora, si appòsta, sabota o studia: le sue campagne sono di soli gruppi
+                // armati, senza esploratori né formazioni non armate (incarico 19). Se
                 // accadesse, la traduzione in tocchi non sarebbe esercitata e la prova
                 // mentirebbe.
-                XCTFail("la condotta non prevede revoca, divisione, riunione o sosta in questa sessione")
+                XCTFail("la condotta non prevede revoca, divisione, riunione, sosta, esplorazione, imboscata, sabotaggio o studio in questa sessione")
             }
             ordini += 1
             try await attendi("ordine applicato") {
