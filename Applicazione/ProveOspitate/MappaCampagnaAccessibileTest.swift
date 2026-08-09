@@ -134,10 +134,12 @@ final class MappaCampagnaAccessibileTest: XCTestCase {
     func test_01_5_16_il_pannello_offre_le_azioni_disponibili_in_ordine_fisso() async throws {
         let (schermata, _, ambiente) = try await mappaAperta(taglia: .media)
         let stato = try XCTUnwrap(schermata.statoPerProva)
-        // Il primo gruppo (istmo, riga 6 casella 3) è leggero — un reparto solo, niente
-        // divisione — non è in marcia — niente revoca — e ha un vicino proprio in riga 6
-        // casella 2, con cui la riunione si offre. Ordine fisso: marcia, presidio,
-        // riunioni, revoca, chiudi.
+        // Il primo gruppo (istmo, riga 6 casella 3) è leggero e ARMATO — un reparto solo,
+        // niente divisione — non è in marcia — niente revoca — non è co-locato con una non
+        // armata avversaria — niente sabotaggio né studio — ma è armato e libero, sicché
+        // l'IMBOSCATA si offre (01 §5.11, incarico 19). Ha un vicino proprio in riga 6 casella
+        // 2, con cui la riunione si offre. Ordine fisso: marcia, presidio, riunioni, imboscata,
+        // chiudi (le azioni della ricognizione escono a categoria non ammessa e non compaiono).
         let gruppo = stato.gruppiOrdinati[0]
         let vicino = try XCTUnwrap(stato.occupante(di: Cella(riga: 6, colonna: 2)),
                                    "il secondo gruppo è adiacente al primo")
@@ -149,8 +151,9 @@ final class MappaCampagnaAccessibileTest: XCTestCase {
                        [testi.frase("pannello.designa_marcia").testo,
                         testi.frase("pannello.presidio").testo,
                         testi.frase("pannello.riunisci", nomeVicino).testo,
+                        testi.frase("pannello.imboscata").testo,
                         testi.frase("pannello.chiudi").testo],
-                       "marcia, presidio, riunione col vicino, chiusura — in ordine fisso")
+                       "marcia, presidio, riunione col vicino, imboscata, chiusura — in ordine fisso")
     }
 
     /// La divisione: la schermata dei reparti (02 §10.3), ogni riga un elemento
@@ -323,21 +326,26 @@ final class MappaCampagnaAccessibileTest: XCTestCase {
     /// giorno e il proprio luogo (01 §5.17.1): gli ordini ne escono (correzione del
     /// titolare, RDA-104), vi entra il compimento della marcia — l'arrivo. Il salto al
     /// luogo del fatto resta esercitabile, essendo la casella di arrivo reale.
-    func test_01_5_17_1_il_registro_contiene_i_compimenti_con_il_loro_luogo() async throws {
+    func test_01_5_17_1_il_registro_contiene_le_revoche_col_loro_luogo() async throws {
         let (schermata, _, ambiente) = try await mappaAperta(taglia: .media)
         let stato = try XCTUnwrap(schermata.statoPerProva)
         let gruppo = stato.gruppiOrdinati[0]
+        let partenza = gruppo.posizione
         let destinazione = try XCTUnwrap(
             stato.griglia.vicini(di: gruppo.posizione).first { stato.occupante(di: $0) == nil })
+        // L'ARRIVO di un proprio gruppo NON entra più nel registro (incarico 19, seconda
+        // correzione del titolare): la REVOCA vi resta invece per volontà del titolare (RDA-104),
+        // e porta al luogo — la casella di partenza dove il gruppo revocato rimane.
         await schermata.eseguiPerProva(
             .marcia(gruppo: gruppo.id, a: destinazione,
-                    giorni: partitaMotore(schermata).costoInGiorni(da: gruppo.posizione,
+                    giorni: partitaMotore(schermata).costoInGiorni(da: partenza,
                                                                    a: destinazione, stato: stato)))
-        try await presidiaFinoAlCompimento(schermata)
+        await schermata.eseguiPerProva(.revocaMarcia(gruppo: gruppo.id))
+        try await attendiRegistroNonVuoto(schermata)
         let dopo = try XCTUnwrap(schermata.statoPerProva)
-        XCTAssertEqual(dopo.registro.count, 1, "un solo fatto non deciso: il compimento della marcia")
+        XCTAssertEqual(dopo.registro.count, 1, "un solo fatto nel registro: la revoca")
         let voce = try XCTUnwrap(dopo.registro.first)
-        XCTAssertEqual(voce.luogo, destinazione, "la voce del compimento porta al luogo del fatto")
+        XCTAssertEqual(voce.luogo, partenza, "la voce della revoca porta al luogo del fatto")
 
         let costruttore = CostruttoreAnnunciCampagna(testi: ambiente.testi,
                                                      motore: partitaMotore(schermata),
@@ -349,22 +357,18 @@ final class MappaCampagnaAccessibileTest: XCTestCase {
                       "la voce dichiara quale gruppo: \(frase)")
     }
 
-    /// Chiude le giornate presidiando i gruppi in attesa finché una marcia in corso
-    /// si compie e annota il proprio fatto nel registro. Serve perché con la
-    /// correzione del titolare (RDA-104) è il COMPIMENTO, non l'ordine, a lasciare la
-    /// voce, e il compimento matura alla risoluzione di fine giornata (01 §5.6.11).
-    private func presidiaFinoAlCompimento(_ schermata: SchermataMappaCampagna,
-                                          file: StaticString = #filePath, line: UInt = #line) async throws {
+    /// Attende che il registro contenga un fatto (l'aggiornamento della schermata è
+    /// asincrono). Con l'incarico 19 l'arrivo non entra più nel registro: le prove del
+    /// registro usano la REVOCA, che vi resta (RDA-104) e vi entra subito senza chiusura.
+    private func attendiRegistroNonVuoto(_ schermata: SchermataMappaCampagna,
+                                         file: StaticString = #filePath, line: UInt = #line) async throws {
         var tentativi = 0
         while (schermata.statoPerProva?.registro.isEmpty ?? true), tentativi < 30 {
             tentativi += 1
-            let s = try XCTUnwrap(schermata.statoPerProva, file: file, line: line)
-            let attesa = s.gruppiInAttesa()
-            if attesa.isEmpty { break }
-            for g in attesa { await schermata.eseguiPerProva(.presidio(gruppo: g.id)) }
+            try await Task.sleep(nanoseconds: 20_000_000)
         }
         XCTAssertFalse(try XCTUnwrap(schermata.statoPerProva).registro.isEmpty,
-                       "la marcia non si è compiuta: nessun fatto nel registro", file: file, line: line)
+                       "nessun fatto nel registro", file: file, line: line)
     }
 
     /// Il salto dalla voce al luogo del fatto (02 §6.6), esercitabile per la prima
@@ -373,13 +377,17 @@ final class MappaCampagnaAccessibileTest: XCTestCase {
         let (schermata, _, _) = try await mappaAperta(taglia: .media)
         let stato = try XCTUnwrap(schermata.statoPerProva)
         let gruppo = stato.gruppiOrdinati[0]
+        let partenza = gruppo.posizione
         let destinazione = try XCTUnwrap(
             stato.griglia.vicini(di: gruppo.posizione).first { stato.occupante(di: $0) == nil })
+        // La revoca è il fatto col luogo (l'arrivo è uscito dal registro, incarico 19): il
+        // gruppo revocato resta nella casella di PARTENZA, che è il luogo cui il fuoco salta.
         await schermata.eseguiPerProva(
             .marcia(gruppo: gruppo.id, a: destinazione,
-                    giorni: partitaMotore(schermata).costoInGiorni(da: gruppo.posizione,
+                    giorni: partitaMotore(schermata).costoInGiorni(da: partenza,
                                                                    a: destinazione, stato: stato)))
-        try await presidiaFinoAlCompimento(schermata)
+        await schermata.eseguiPerProva(.revocaMarcia(gruppo: gruppo.id))
+        try await attendiRegistroNonVuoto(schermata)
         schermata.apriRegistroPerProva()
         for _ in 0..<50 where schermata.presentedViewController == nil {
             try await Task.sleep(nanoseconds: 20_000_000)
@@ -397,10 +405,10 @@ final class MappaCampagnaAccessibileTest: XCTestCase {
         XCTAssertTrue(schermata.registroFuocoPerProva.contains(.richiesto),
                       "il fuoco è stato portato sul luogo del fatto")
         // La casella su cui il fuoco arriva si annuncia: la sua etichetta è
-        // completa e dichiara il gruppo che vi si trova.
-        let elemento = try XCTUnwrap(schermata.elementiPerProva[destinazione])
+        // completa e dichiara il gruppo che vi si trova (il gruppo revocato, rimasto in partenza).
+        let elemento = try XCTUnwrap(schermata.elementiPerProva[partenza])
         let etichetta = try XCTUnwrap(elemento.accessibilityLabel)
-        XCTAssertTrue(etichetta.contains("\(destinazione.riga)"))
+        XCTAssertTrue(etichetta.contains("\(partenza.riga)"))
         XCTAssertFalse(etichetta.contains(Testi.segnaposto))
     }
 
