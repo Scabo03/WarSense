@@ -267,9 +267,16 @@
 "casella.testa" = "riga %d, casella %d";
 "casella.libera" = "libera";
 "casella.occupante_proprio" = "tuo %@, %@";
+"casella.occupante_proprio_ricognizione" = "tuo %@, formazione di ricognizione, %@";
+"casella.occupante_proprio_non_armata" = "tua %@, formazione non armata, %@";
 /* Occupante avversario di una casella osservata (incarico 18): senza nome, senza
-   volume (02 §6.4.1), senza stato d'azione. Il giocatore lo vede, non lo conosce. */
+   volume (02 §6.4.1), senza stato d'azione. Il giocatore lo vede, non lo conosce. Dall'
+   incarico 19 la CATEGORIA sì (prima correzione): gruppo armato — la ordinaria, «formazione
+   avversaria» —, ricognizione, non armata; e per la non armata STUDIATA anche il carico. */
 "casella.occupante_avversario" = "formazione avversaria";
+"casella.occupante_avversario_ricognizione" = "formazione di ricognizione avversaria";
+"casella.occupante_avversario_non_armata" = "formazione non armata avversaria";
+"casella.occupante_avversario_non_armata_studiata" = "formazione non armata avversaria, carico %d";
 /* casella.disponibile porta il costo in giorni e sta nel .stringsdict, con il
    plurale di sistema (01 §5.6.3.5: il costo si dichiara sulla voce del comando).
    casella.inchioda è la CONSEGUENZA che l'etichetta vocale aggiunge, perché l'ordine

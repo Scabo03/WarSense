@@ -60,8 +60,21 @@ struct CostruttoreAnnunciCampagna {
     /// due termini sono del vocabolario chiuso semplice.
     func fraseStato(_ stato: StatoGruppo) -> String {
         switch stato {
-        case .inAttesa, .haAgito: return testi.termine(stato.chiaveTesto).testo
+        case .inAttesa, .haAgito, .inAgguato: return testi.termine(stato.chiaveTesto).testo
         case .inMarcia(let giorniMancanti): return testi.frase(stato.chiaveTesto, giorniMancanti).testo
+        }
+    }
+
+    /// La chiave della frase dell'occupante PROPRIO, secondo la sua categoria (prima
+    /// correzione, incarico 19): il gruppo armato è la categoria ordinaria e non nomina la
+    /// categoria (02 §8.7), come il suo segno non porta marcatore; l'esploratore e la
+    /// formazione non armata la nominano, come il loro segno porta il proprio marcatore.
+    /// Ciò che si sente coincide con ciò che si vede.
+    private func chiaveOccupanteProprio(_ categoria: CategoriaFormazione) -> String {
+        switch categoria {
+        case .armato: return "casella.occupante_proprio"
+        case .ricognizione: return "casella.occupante_proprio_ricognizione"
+        case .nonArmata: return "casella.occupante_proprio_non_armata"
         }
     }
 
@@ -110,12 +123,24 @@ struct CostruttoreAnnunciCampagna {
             }
             return testi.termine(stato.chiaveTesto).testo
         case .occupante(let gruppo):
-            return testi.frase("casella.occupante_proprio", nomeGruppo(gruppo),
+            return testi.frase(chiaveOccupanteProprio(gruppo.categoria), nomeGruppo(gruppo),
                                fraseStato(gruppo.statoDichiarato)).testo
-        case .occupanteAvversario:
-            // Senza nome, senza volume, senza stato d'azione (02 §6.4.1, incarico 18):
-            // il giocatore la vede, non la conosce.
-            return testi.frase("casella.occupante_avversario").testo
+        case .occupanteAvversario(let categoria):
+            // Senza nome, senza volume, senza stato d'azione (02 §6.4.1, incarico 18): il
+            // giocatore la vede, non la conosce. Ma la CATEGORIA sì (prima correzione, incarico
+            // 19), e per la sola non armata STUDIATA a fondo anche il carico (01 §5.10.2). Ciò
+            // che l'annuncio dichiara coincide con ciò che il segno mostra.
+            switch categoria {
+            case .gruppoArmato:
+                return testi.frase("casella.occupante_avversario").testo
+            case .ricognizione:
+                return testi.frase("casella.occupante_avversario_ricognizione").testo
+            case .nonArmata(let caricoNoto):
+                if let carico = caricoNoto {
+                    return testi.frase("casella.occupante_avversario_non_armata_studiata", carico).testo
+                }
+                return testi.frase("casella.occupante_avversario_non_armata").testo
+            }
         case .rifornimento(let rifornimento):
             // Lo stato di rifornimento dell'occupante è un termine chiuso: la chiave
             // porta già il giorno (primo/secondo) o la sosta, e non prende numeri.
@@ -148,8 +173,28 @@ struct CostruttoreAnnunciCampagna {
             case .avvistato: return "'"
             case .confermato: return nil
             }
-        case .occupante(let gruppo): return inizialeGruppo(gruppo)
-        case .occupanteAvversario: return "a"
+        case .occupante(let gruppo):
+            // L'occupante PROPRIO ha la sua IDENTITÀ al centro della casella (l'iniziale del
+            // nome, una LETTERA); qui, nella riga dei segni, sta il solo marcatore di CATEGORIA
+            // (prima correzione, incarico 19). Il gruppo armato è la categoria ordinaria e non
+            // porta marcatore, come l'annuncio non ne nomina la categoria; l'esploratore porta
+            // «»» e la formazione non armata «≈». Marcatori di FORMA, non di colore.
+            switch gruppo.categoria {
+            case .armato: return nil
+            case .ricognizione: return "»"
+            case .nonArmata: return "≈"
+            }
+        case .occupanteAvversario(let categoria):
+            // La formazione AVVERSARIA si distingue dalle proprie per FORMA (prima correzione,
+            // incarico 19): non porta una lettera al centro — non se ne conosce il nome — ma un
+            // segno «×» nella riga, cui si aggiunge il marcatore di categoria «»» o «≈». «×» da
+            // solo è il gruppo armato avversario, categoria ordinaria; la lettera al centro
+            // distingue le proprie, il «×» le avversarie, il marcatore la categoria — mai il colore.
+            switch categoria {
+            case .gruppoArmato: return "×"
+            case .ricognizione: return "×»"
+            case .nonArmata: return "×≈"
+            }
         case .rifornimento(let rifornimento):
             switch rifornimento {
             case .senzaProvviste: return "!"
@@ -180,13 +225,12 @@ struct CostruttoreAnnunciCampagna {
     }
 
     /// I segni disegnati sulla casella per chi guarda, nello stesso ordine in cui
-    /// si annunciano e ricavati dallo STESSO elenco: ciò che si sente si vede.
-    /// L'occupante è escluso perché ha già il proprio segno al centro della casella.
+    /// si annunciano e ricavati dallo STESSO elenco: ciò che si sente si vede. L'IDENTITÀ
+    /// dell'occupante proprio (l'iniziale del nome) sta al centro della casella; il suo
+    /// marcatore di CATEGORIA sta invece qui, nella riga, come per l'avversario, sicché
+    /// ciascuna categoria è distinguibile per forma (prima correzione, incarico 19).
     func segniCasella(_ casella: Cella) -> String? {
-        let segni = vista.vociDiCasella(casella).compactMap { voce -> String? in
-            if case .occupante = voce { return nil }
-            return segno(di: voce)
-        }
+        let segni = vista.vociDiCasella(casella).compactMap { segno(di: $0) }
         return segni.isEmpty ? nil : segni.joined()
     }
 

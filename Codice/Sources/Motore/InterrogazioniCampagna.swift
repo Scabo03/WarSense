@@ -13,6 +13,31 @@ public struct VistaCampagna: Sendable {
         self.motore = motore; self.stato = stato; self.parte = parte
     }
 
+    /// Ciò che il giocatore OSSERVA di una formazione avversaria (prima correzione, incarico
+    /// 19): la sua CATEGORIA — visibile dalla sagoma, e distinta per segno e per annuncio da
+    /// quella delle altre categorie e delle proprie — e, per la sola non armata STUDIATA a
+    /// fondo, il suo carico (01 §5.10.2). Non porta mai nome, volume né stato d'azione
+    /// (02 §6.4.1): un tipo dedicato rende IMPOSSIBILE, non solo sconsigliato, che quei dati
+    /// trapelino: il carico è nell'oggetto solo se davvero noto.
+    public enum CategoriaAvversariaOsservata: Hashable, Sendable {
+        case gruppoArmato
+        case ricognizione
+        /// Il carico è noto solo se la formazione è stata studiata a fondo; altrimenti nil.
+        case nonArmata(caricoNoto: Int?)
+
+        /// La chiave del termine che nomina la categoria (composta dai termini di 01 §5.2, non
+        /// un termine nuovo del vocabolario chiuso — S18, incarico 19): la stessa da cui
+        /// discende il segno, sicché ciò che si vede e ciò che si sente coincidono.
+        public var chiaveCategoria: String {
+            switch self {
+            case .gruppoArmato: return "categoria.gruppo_armato"
+            case .ricognizione: return "categoria.ricognizione"
+            case .nonArmata: return "categoria.non_armata"
+            }
+        }
+        public var eStudiata: Bool { if case .nonArmata(.some) = self { return true } else { return false } }
+    }
+
     // MARK: - Contenuto della casella
 
     public func occupante(di casella: Cella) -> Gruppo? { stato.occupante(di: casella, parte: parte) }
@@ -46,8 +71,12 @@ public struct VistaCampagna: Sendable {
         /// confermato (01 §5.6.11, incarico 18): l'occultamento. Non porta il gruppo —
         /// né il suo nome né il suo volume (02 §6.4.1), né il suo stato d'azione, che
         /// tradirebbe l'ordine interno di risoluzione — perché il giocatore la vede, non
-        /// la conosce. Su una casella non confermata questa voce non compare affatto.
-        case occupanteAvversario
+        /// la conosce. Porta però la sua CATEGORIA osservata (prima correzione, incarico 19):
+        /// gruppo armato, ricognizione o non armata sono distinguibili dalla sagoma, e ciascuna
+        /// ha il proprio segno e il proprio annuncio. Il CARICO di una formazione non armata è
+        /// noto solo se la si è STUDIATA a fondo (01 §5.10.2). Su una casella non confermata
+        /// questa voce non compare affatto.
+        case occupanteAvversario(CategoriaAvversariaOsservata)
         case rifornimento(StatoRifornimento)
         case quartierGenerale(Parte)
         case terreno(TerrenoCasella)
@@ -81,8 +110,8 @@ public struct VistaCampagna: Sendable {
         // vi legge solo lo stato di conoscenza, che tace ciò che non osserva.
         let parteAvversa: Parte = parte == .giocatore ? .avversario : .giocatore
         if statoConoscenza == .confermato,
-           stato.occupante(di: casella, parte: parteAvversa) != nil {
-            voci.append(.occupanteAvversario)
+           let avversario = stato.occupante(di: casella, parte: parteAvversa) {
+            voci.append(.occupanteAvversario(categoriaOsservata(di: avversario)))
         }
         if let parte = quartierGeneraleSu(casella) { voci.append(.quartierGenerale(parte)) }
         let terreno = terreno(di: casella)
@@ -95,6 +124,18 @@ public struct VistaCampagna: Sendable {
         // di verbosità partono da qui (02 §3.8.1).
         if motore.inZonaDiRifornimento(casella, stato: stato) { voci.append(.zonaDiRifornimento) }
         return voci
+    }
+
+    /// La categoria osservata di una formazione avversaria (01 §5.2, §5.10.2): la sua categoria,
+    /// e il carico solo se la si è studiata a fondo. Il carico non entra mai nell'oggetto se non
+    /// è noto, sicché non può trapelare.
+    func categoriaOsservata(di avversario: Gruppo) -> CategoriaAvversariaOsservata {
+        let studiata = stato.studiati[parte]?.contains(avversario.id) == true
+        switch avversario.categoria {
+        case .armato: return .gruppoArmato
+        case .ricognizione: return .ricognizione
+        case .nonArmata(let carico, _): return .nonArmata(caricoNoto: studiata ? carico : nil)
+        }
     }
 
     // MARK: - Destinazioni
@@ -217,8 +258,14 @@ public struct VistaCampagna: Sendable {
         // un'azione conclusa. Chi attende è il resto: totale meno agiti meno in marcia.
         // «Senza rifornimento» è un'altra categoria ancora: raccoglie chi patisce il
         // taglio — senza provviste o in sosta imposta — indipendentemente dall'azione.
+        // «Ha agito» conta i gruppi che hanno CONCLUSO la giornata e non sono in marcia lunga:
+        // vi rientrano i gruppi appostati in agguato, che pure hanno concluso la giornata
+        // (01 §5.11.3, «un gruppo appostato è fermo e non produce nulla») e non attendono una
+        // decisione. Il loro stato di agguato si dichiara nell'annuncio della casella (02 §6.5.3),
+        // non qui, dove il formato è chiuso (02 §6.5.1.3): nessuna voce nuova. Per i gruppi non
+        // appostati «concluso e non in marcia» coincide con «azione spesa e non in marcia».
         return InformazioneDiStato(giorno: stato.giorno,
-                                   gruppiCheHannoAgito: miei.filter { $0.azioneSpesa && !$0.inMarcia }.count,
+                                   gruppiCheHannoAgito: miei.filter { $0.haConclusoLaGiornata && !$0.inMarcia }.count,
                                    gruppiInMarcia: miei.filter(\.inMarcia).count,
                                    gruppiSenzaRifornimento: miei.filter {
                                        motore.statoDiRifornimento(di: $0, stato: stato)?.eDiPrivazione == true
@@ -275,6 +322,30 @@ public struct VistaCampagna: Sendable {
         stato.gruppi(di: parte)
             .filter { motore.statoDiRifornimento(di: $0, stato: stato)?.eDiPrivazione == true }
             .map(\.posizione).sorted()
+    }
+
+    /// Il rotore delle CASELLE DA CUI È POSSIBILE ESPLORARE (02 §7.3): le posizioni delle proprie
+    /// formazioni di ricognizione che non hanno ancora concluso la giornata e possono quindi
+    /// ordinare un'esplorazione (01 §5.4). È il salto diretto agli esploratori pronti; una volta
+    /// che hanno esplorato, escono dal rotore fino al giorno dopo.
+    public var caselleEsplorabili: [Cella] {
+        stato.gruppi(di: parte)
+            .filter { $0.categoria.eRicognizione && !$0.haConclusoLaGiornata }
+            .map(\.posizione).sorted()
+    }
+
+    /// Il rotore delle INFORMAZIONI DI RICOGNIZIONE SCADUTE (02 §7.3): le caselle la cui conoscenza
+    /// non è più corrente — avvistato (vista e invecchiata) o presunto (dedotta, mai osservata
+    /// direttamente) — cioè ciò che si sa del nemico ma che il tempo o la deduzione rendono
+    /// incerto (01 §5.3). È il salto diretto a ciò che converrebbe riesplorare. In ordine di
+    /// lettura, escluse le confermate (correnti) e le inesplorate (nulla si sa).
+    public var caselleRicognizioneScadute: [Cella] {
+        stato.griglia.tutteLeCaselle.filter {
+            switch motore.conoscenza(di: $0, per: parte, stato: stato) {
+            case .avvistato, .presunto: return true
+            case .confermato, .inesplorato: return false
+            }
+        }.sorted()
     }
 
     // MARK: - Registro (01 §5.17, 02 §6.6)
