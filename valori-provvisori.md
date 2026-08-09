@@ -174,3 +174,16 @@ Introdotti dall'incarico 10 dopo la misura del corpo a corpo (incarico 09), gius
 - L'interruttore `soglia_al_secondo_contatto` è RIMOSSO (RDA-95, decisione del titolare): non è più un valore provvisorio.
 
 La versione dei valori è salita a **0.8.0** (incarico 14): incremento dovuto, non discrezionale, perché i pesi del costo in giorni cambiano il modo in cui una partita in corso di CAMPAGNA si svolgerebbe (una marcia costa ora più giorni). Le partite di campagna precedenti sono comunque già rifiutate dallo schema (`FondazioneCampagna.schemaCorrente` da 2 a 3), che morde prima della versione dei valori; il bump della versione documenta il cambiamento e vale per l'intero fascio dei valori. I valori di BATTAGLIA non cambiano. (Era 0.7.0 dall'incarico 13/RDA-92: cambiava il reparto élite e il formato dello stato. Era 0.6.0 dall'incarico 10, RDA-91.)
+
+### I valori della ricognizione — PROVVISORI (incarico 19, RDA-117)
+
+Il rischio della ricognizione è deterministico e i suoi pesi vivono nei dati (`ricognizione-campagna.json`), mai nel codice (00 §13.1). Tutti PROVVISORI, da tarare giocando; nessuna simulazione li giustifica ancora come equilibrio, il banco mostra solo che esercitano i fenomeni.
+
+- `raggio_esplorazione` = **2** (deve essere maggiore del raggio di osservazione ordinario, 1, o esplorare non rivelerebbe nulla di nuovo; validato dal caricatore).
+- `insidiosita_base` = **2**; `peso_profondita` = **1** (per casella di distanza dal proprio quartier generale); `peso_nemici_vicini` = **2** (per gruppo armato avversario); `raggio_nemici_vicini` = **2**.
+- `soglia_mani_vuote` = **2**, `soglia_notati` = **5** (devono valere `0 < mani_vuote < notati`, o le fasce si sovrappongono; validate). Il margine `competenza − insidiosità`: `≥ 0` riuscita, `≥ −2` a mani vuote, `≥ −5` notati, sotto perduti.
+- Le COMPETENZE degli esploratori, i CARICHI e le SOGLIE di protezione delle formazioni non armate vivono negli scenari (`GruppoIniziale`), non in un file di valori: sono dati di scenario, provvisori nei banchi di verifica (`campagne.json`, scenario `ricognizione_imboscate_pianura`).
+
+### La versione dei valori sale a 0.11.0 (incarico 19, RDA-120)
+
+La ricognizione, le imboscate e le azioni contro le non armate aggiungono numeri di campagna (`ricognizione-campagna.json`) e cambiano la risoluzione di fine giornata: la versione dei valori sale da 0.10.0 a **0.11.0**, su istruzione esplicita dell'incarico (regola del titolare: le versioni salgono su istruzione). Lo schema del giornale di campagna sale da 4 a **5**: un giornale 4, rigiocato con queste regole, produrrebbe un registro diverso — l'arrivo di un proprio gruppo ne esce (RDA-120) — sicché non si riapre e lo si DICHIARA incompatibile (`FondazioneCampagna.schemaCorrente` = 5; prova in `SessioneCampagnaTest`). `versioni_compatibili` = **["0.8.0", "0.9.0", "0.10.0"]**: i salvataggi di BATTAGLIA di quelle versioni si riaprono identici (i valori di battaglia non cambiano); i salvataggi di CAMPAGNA di quelle versioni sono già rifiutati dallo schema, che morde prima. Un salvataggio con versione o schema davvero incompatibili si dichiara e si rifiuta invece di fallire in silenzio (`SalvataggioBuildDistribuitaTest`). I valori di BATTAGLIA non cambiano.
