@@ -690,6 +690,71 @@ final class InvariantiCampagnaTest: XCTestCase {
                 sonda.controllaVistaAvversario(stato: base, note: [Cella(riga: 5, colonna: 5)],
                                                osservataDallAvversario: { _ in false })
             }),
+            ("esploratori_in_battaglia", {
+                // Un ESPLORATORE è l'intruso di un'imboscata scattata: non innesca battaglia
+                // (§5.4.1). Si rende ids[0] esploratore e lo si mette come intruso in sospeso.
+                sonda.controlla(stato: statoCon { s in
+                    let g = s.gruppi[ids[0]]!
+                    s.gruppi[ids[0]] = Gruppo(id: g.id, parte: g.parte, nome: g.nome, posizione: g.posizione,
+                                              composizione: g.composizione,
+                                              categoria: .ricognizione(competenza: 3), azioneSpesa: false)
+                    s.imboscateInSospeso = [ImboscataInSospeso(casella: g.posizione,
+                                            imboscante: .avversario, intruso: ids[0], giorno: 1)]
+                })
+            }),
+            ("imboscata_da_ingresso_non_armato", {
+                // Un'imboscata scattata all'ingresso di un gruppo NON armato (§5.11): l'intruso
+                // è una formazione non armata, che non fa scattare alcuna imboscata.
+                sonda.controlla(stato: statoCon { s in
+                    let g = s.gruppi[ids[0]]!
+                    s.gruppi[ids[0]] = Gruppo(id: g.id, parte: g.parte, nome: g.nome, posizione: g.posizione,
+                                              composizione: g.composizione,
+                                              categoria: .nonArmata(carico: 2, sogliaProtezione: 1),
+                                              azioneSpesa: false)
+                    s.imboscateInSospeso = [ImboscataInSospeso(casella: g.posizione,
+                                            imboscante: .avversario, intruso: ids[0], giorno: 1)]
+                })
+            }),
+            ("sabotaggio_non_disperde", {
+                // Un sabotaggio RIUSCITO che lascia la formazione bersaglio al suo posto (§5.10.2).
+                let pos = base.gruppiOrdinati[0].posizione
+                let idBers = IdGruppo(99)
+                var prima = base
+                prima.gruppi[idBers] = Gruppo(id: idBers, parte: .avversario, nome: "lupo", posizione: pos,
+                                              composizione: [Reparto(archetipo: "fanteria_leggera", atomi: 3)],
+                                              categoria: .nonArmata(carico: 5, sogliaProtezione: 1),
+                                              azioneSpesa: false)
+                var dopo = prima
+                dopo.gruppi[ids[0]]!.azioneSpesa = true  // l'attore ha agito ma il bersaglio RESTA
+                let ev: [EventoCampagna] = [.sabotaggioCompiuto(gruppo: ids[0],
+                                            nome: prima.gruppi[ids[0]]!.nome, casella: pos, riuscito: true)]
+                return sonda.controlla(prima: prima, comando: .sabotaggio(gruppo: ids[0]),
+                                       dopo: dopo, eventi: ev, adiacenti: griglia.adiacenti)
+            }),
+            ("studio_confermato_indebito", {
+                // Uno studio che porta a confermato una formazione che NON è il bersaglio
+                // co-locato (§5.10.2): `studiati` guadagna un id che non è bersaglio lecito.
+                let pos = base.gruppiOrdinati[0].posizione
+                let prima = base
+                var dopo = prima
+                dopo.gruppi[ids[0]]!.azioneSpesa = true
+                dopo.studiati[.giocatore] = [IdGruppo(99)]  // non co-locato, non esiste: illecito
+                let ev: [EventoCampagna] = [.studioCompiuto(gruppo: ids[0],
+                                            nome: prima.gruppi[ids[0]]!.nome, casella: pos)]
+                return sonda.controlla(prima: prima, comando: .studioApprofondito(gruppo: ids[0]),
+                                       dopo: dopo, eventi: ev, adiacenti: griglia.adiacenti)
+            }),
+            ("nuova_azione_non_conclude", {
+                // Un'esplorazione che NON consuma la giornata dell'agente: guadagnerebbe una
+                // giornata (§5.6.0.5). `dopo` lascia ids[0] senza azione spesa e non in agguato.
+                sonda.controlla(prima: base, comando: .esplorazione(gruppo: ids[0]),
+                                dopo: base, eventi: [], adiacenti: griglia.adiacenti)
+            }),
+            ("studiato_non_avversario", {
+                // Una formazione PROPRIA dichiarata studiata: il gioco dichiarerebbe il falso su
+                // una conoscenza (§12). ids[0] è del giocatore, non un bersaglio avversario.
+                sonda.controlla(stato: statoCon { s in s.studiati[.giocatore] = [ids[0]] })
+            }),
         ]
     }
 

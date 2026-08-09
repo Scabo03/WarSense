@@ -104,6 +104,26 @@ public struct SondaInvariantiCampagna: Sendable {
         /// controllo che rende impossibile — non solo sconsigliato — leggere lo stato
         /// reale: se la proiezione perde tenuta, questa sonda se ne accorge.
         case vistaAvversariaRivelaIgnoto(riga: Int, colonna: Int)
+        // Invarianti della ricognizione, delle imboscate e dello studio (incarico 19).
+        /// Un ESPLORATORE è l'intruso di un'imboscata scattata in sospeso: gli esploratori non
+        /// inneschiano MAI una battaglia (01 §5.4.1), e l'unica battaglia della campagna è
+        /// quella da imboscata.
+        case esploratoriInBattaglia(gruppo: Int)
+        /// Un'imboscata è scattata all'ingresso di un gruppo NON armato: scatta soltanto
+        /// all'ingresso di un gruppo armato (01 §5.11).
+        case imboscataDaIngressoNonArmato(intruso: Int)
+        /// Un sabotaggio RIUSCITO non ha disperso la formazione bersaglio: il sabotaggio la
+        /// disperde e ne perde il carico (01 §5.10.2).
+        case sabotaggioNonDisperde(riga: Int, colonna: Int)
+        /// Lo studio approfondito ha portato a confermato più della sola formazione co-locata,
+        /// o una che non ne è bersaglio lecito (01 §5.10.2).
+        case studioConfermatoIndebito(gruppo: Int)
+        /// Una nuova azione (esplorazione, imboscata, sabotaggio, studio) non ha consumato la
+        /// giornata dell'agente: una giornata guadagnata (01 §5.6.0.5).
+        case nuovaAzioneNonConclude(gruppo: Int)
+        /// Una formazione dichiarata STUDIATA non è una formazione non armata avversaria: il
+        /// gioco dichiarerebbe il falso su una conoscenza (01 §12, §5.10.2).
+        case studiatoNonAvversario(gruppo: Int)
 
         /// Il codice della violazione, senza spazi: l'uscita del programma di
         /// verifica è dato per chi sviluppa e non testo di prodotto (05 §12.6),
@@ -144,6 +164,12 @@ public struct SondaInvariantiCampagna: Sendable {
             case .conoscenzaFalsa(let p, let r, let c): return "conoscenza_falsa:parte=\(p):riga=\(r):casella=\(c)"
             case .registroRivelaIgnoto(let v): return "registro_rivela_ignoto:voce=\(v)"
             case .vistaAvversariaRivelaIgnoto(let r, let c): return "vista_avversaria_rivela_ignoto:riga=\(r):casella=\(c)"
+            case .esploratoriInBattaglia(let g): return "esploratori_in_battaglia:gruppo=\(g)"
+            case .imboscataDaIngressoNonArmato(let i): return "imboscata_da_ingresso_non_armato:intruso=\(i)"
+            case .sabotaggioNonDisperde(let r, let c): return "sabotaggio_non_disperde:riga=\(r):casella=\(c)"
+            case .studioConfermatoIndebito(let g): return "studio_confermato_indebito:gruppo=\(g)"
+            case .nuovaAzioneNonConclude(let g): return "nuova_azione_non_conclude:gruppo=\(g)"
+            case .studiatoNonAvversario(let g): return "studiato_non_avversario:gruppo=\(g)"
             }
         }
     }
@@ -188,6 +214,12 @@ public struct SondaInvariantiCampagna: Sendable {
         "conoscenza_falsa",
         "registro_rivela_ignoto",
         "vista_avversaria_rivela_ignoto",
+        "esploratori_in_battaglia",
+        "imboscata_da_ingresso_non_armato",
+        "sabotaggio_non_disperde",
+        "studio_confermato_indebito",
+        "nuova_azione_non_conclude",
+        "studiato_non_avversario",
     ]
 
     /// Il codice nudo, senza i valori: la parte prima dei due punti.
@@ -272,6 +304,31 @@ public struct SondaInvariantiCampagna: Sendable {
             for (cella, eta) in stato.conoscenza[parte] ?? [:] where eta < 0 {
                 violazioni.append(.conoscenzaFalsa(parte: parte.rawValue,
                                                    riga: cella.riga, colonna: cella.colonna))
+            }
+        }
+        // Le imboscate scattate in attesa di battaglia (01 §5.11, incarico 19): l'intruso è
+        // sempre un gruppo ARMATO — l'imboscata scatta solo all'ingresso di un armato (§5.11) —
+        // e mai un esploratore, che non innesca battaglia (§5.4.1). La sonda lo verifica sullo
+        // stato, dove lo scatto ha lasciato traccia. Un intruso già rimosso non si controlla.
+        for imboscata in stato.imboscateInSospeso {
+            guard let intruso = stato.gruppi[imboscata.intruso] else { continue }
+            if intruso.categoria.eRicognizione {
+                violazioni.append(.esploratoriInBattaglia(gruppo: intruso.id.numero))
+            }
+            if !intruso.categoria.eArmata {
+                violazioni.append(.imboscataDaIngressoNonArmato(intruso: intruso.id.numero))
+            }
+        }
+        // Le formazioni STUDIATE (01 §5.10.2, incarico 19): ciascuna, se esiste ancora, è una
+        // formazione non armata AVVERSARIA — lo studio riguarda il nemico. Dichiararne studiata
+        // una propria o una armata sarebbe dichiarare il falso su una conoscenza (01 §12). Una
+        // studiata poi sabotata sparisce da `studiati`: un id che non c'è più è lecito.
+        for parte in Parte.allCases {
+            for id in stato.studiati[parte] ?? [] {
+                guard let g = stato.gruppi[id] else { continue }
+                if g.parte == parte || !g.categoria.eNonArmata {
+                    violazioni.append(.studiatoNonAvversario(gruppo: id.numero))
+                }
             }
         }
         return violazioni
@@ -377,6 +434,33 @@ public struct SondaInvariantiCampagna: Sendable {
             violazioni.append(.azioneSpesaDueVolte(gruppo: idAgente.numero))
         }
 
+        // Il sabotaggio RIUSCITO disperde la formazione bersaglio e il suo carico (01 §5.10.2):
+        // dopo, nessuna formazione non armata avversaria occupa la casella dell'attore.
+        if case .sabotaggio(let id) = comando,
+           eventi.contains(where: { if case .sabotaggioCompiuto(_, _, _, true) = $0 { return true } else { return false } }),
+           let attore = prima.gruppi[id] {
+            let avversa: Parte = attore.parte == .giocatore ? .avversario : .giocatore
+            if dopo.gruppi.values.contains(where: {
+                $0.parte == avversa && $0.posizione == attore.posizione && $0.categoria.eNonArmata }) {
+                violazioni.append(.sabotaggioNonDisperde(riga: attore.posizione.riga,
+                                                         colonna: attore.posizione.colonna))
+            }
+        }
+        // Lo studio confema SOLO la formazione co-locata (01 §5.10.2): la differenza di
+        // `studiati` è al più quella formazione, avversaria, non armata e sulla casella
+        // dell'attore. Portare a confermato più del dovuto è confermare ciò che i documenti
+        // non prevedono.
+        if case .studioApprofondito(let id) = comando, let attore = prima.gruppi[id] {
+            let nuovi = (dopo.studiati[attore.parte] ?? []).subtracting(prima.studiati[attore.parte] ?? [])
+            let leciti = nuovi.allSatisfy { idStudiato in
+                guard let g = prima.gruppi[idStudiato] else { return false }
+                return g.parte != attore.parte && g.categoria.eNonArmata && g.posizione == attore.posizione
+            }
+            if nuovi.count > 1 || !leciti {
+                violazioni.append(.studioConfermatoIndebito(gruppo: id.numero))
+            }
+        }
+
         // Con la cascata (tutti i gruppi in marcia) una sola applicazione può
         // chiudere più giornate: il giorno avanza di TANTE quante le chiusure.
         let chiusure = eventi.reduce(0) {
@@ -422,6 +506,19 @@ public struct SondaInvariantiCampagna: Sendable {
             }
             if let idAgente, dopo.gruppi[idAgente]?.azioneSpesa != true {
                 violazioni.append(.azioneNonRegistrata(gruppo: idAgente.numero))
+            }
+            // Le nuove azioni (esplorazione, imboscata, sabotaggio, studio) consumano la
+            // giornata dell'agente (01 §5.6.0.5, incarico 19): senza chiusura, l'agente — se
+            // ancora presente — ha CONCLUSO la giornata (azione spesa o in agguato). Un agente
+            // che potrebbe ancora agire avrebbe guadagnato una giornata. L'esploratore perduto
+            // è rimosso e non si controlla.
+            switch comando {
+            case .esplorazione(let id), .imboscata(let id),
+                 .sabotaggio(let id), .studioApprofondito(let id):
+                if let g = dopo.gruppi[id], !g.haConclusoLaGiornata {
+                    violazioni.append(.nuovaAzioneNonConclude(gruppo: id.numero))
+                }
+            default: break
             }
             // Nessun gruppo PREESISTENTE (che non fosse l'agente) può aver speso
             // l'azione da sé. I gruppi nati ora sono esenti; la riunione non ha agente
