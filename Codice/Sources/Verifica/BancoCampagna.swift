@@ -405,6 +405,12 @@ public struct BancoCampagna: Sendable {
                                                  eventi: eventi,
                                                  adiacenti: prima.griglia.adiacenti).map(\.description))
             violazioni.formUnion(sonda.controlla(stato: dopo).map(\.description))
+            // L'OCCULTAMENTO dell'imboscata (01 §5.11.1, incarico 21): su una casella con un
+            // appostato, la conoscenza dell'altra parte — passata dall'esterno — non è confermato,
+            // se non l'ha scoperta. La sonda giudica la conoscenza vera del Motore.
+            violazioni.formUnion(sonda.controllaOccultamento(
+                stato: dopo, conoscenzaDelNemico: { motore.conoscenza(di: $1, per: $0, stato: dopo) }
+            ).map(\.description))
             // L'invariante del volume come somma: il volume riportato è quello che il
             // Motore calcola, la sonda ne verifica la coincidenza con la composizione.
             let volumiRiportati = Dictionary(uniqueKeysWithValues:
@@ -422,8 +428,20 @@ public struct BancoCampagna: Sendable {
             // dagli stessi invarianti di transizione e di stato del giocatore (nessuna
             // regola per una parte sola), più i due nuovi: che la sua vista non veda ciò
             // che non osserva, e che il registro non riveli al giocatore l'ignoto.
+            var passiAvv = 0
+            let limitePassiAvv = giornate * (voce.gruppi.count + voce.gruppiAvversario.count + 4) + 100
             while stato.gruppiInAttesa(di: .giocatore).isEmpty,
                   !stato.gruppiInAttesa(di: .avversario).isEmpty {
+                // Il cancello della TERMINAZIONE (incarico 21): il turno dell'avversario si esaurisce
+                // entro un limite dichiarato. Se non lo facesse — il difetto dell'incarico 20 — non
+                // si appende un freno che nasconde, ma si REGISTRA una violazione che fa fallire il
+                // collaudo, dichiarando lo scenario. Con l'imboscata che consuma l'azione non scatta.
+                passiAvv += 1
+                if passiAvv > limitePassiAvv {
+                    violazioni.insert(SondaInvariantiCampagna.Violazione
+                        .partitaNonTerminata(giornate: stato.giorno - giornoIniziale).description)
+                    break
+                }
                 let vistaAvv = motore.vistaAvversario(stato: stato)
                 let statoVista = stato
                 violazioni.formUnion(sonda.controllaVistaAvversario(
@@ -444,6 +462,9 @@ public struct BancoCampagna: Sendable {
                                                      eventi: eventiAvv,
                                                      adiacenti: primaAvv.griglia.adiacenti).map(\.description))
                 violazioni.formUnion(sonda.controlla(stato: dopoAvv).map(\.description))
+                violazioni.formUnion(sonda.controllaOccultamento(
+                    stato: dopoAvv, conoscenzaDelNemico: { motore.conoscenza(di: $1, per: $0, stato: dopoAvv) }
+                ).map(\.description))
                 violazioni.formUnion(sonda.controllaRegistro(
                     prima: primaAvv, dopo: dopoAvv,
                     osservataDalGiocatore: { motore.osservata($0, da: .giocatore, stato: dopoAvv) }
@@ -466,6 +487,10 @@ public struct BancoCampagna: Sendable {
         violazioni.formUnion(sonda.controllaRaggiungibilita(
             griglia: stato.griglia, da: Cella(riga: 1, colonna: 1),
             vicini: stato.griglia.vicini).map(\.description))
+        // La TERMINAZIONE (incarico 21): la corsa si è chiusa entro le giornate dichiarate. Con
+        // l'imboscata che consuma l'azione (decisione 1) la cascata non corre all'infinito.
+        violazioni.formUnion(sonda.controllaTerminazione(
+            giorniTrascorsi: stato.giorno - giornoIniziale, limite: giornate).map(\.description))
 
         // Il taglio, la sosta imposta e la ripresa sono i fatti NON decisi che il
         // registro annota (01 §5.17.1): li si conta di là, non dagli eventi, così che

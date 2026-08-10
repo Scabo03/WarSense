@@ -124,6 +124,19 @@ public struct SondaInvariantiCampagna: Sendable {
         /// Una formazione dichiarata STUDIATA non è una formazione non armata avversaria: il
         /// gioco dichiarerebbe il falso su una conoscenza (01 §12, §5.10.2).
         case studiatoNonAvversario(gruppo: Int)
+        /// Un gruppo APPOSTATO che non ha speso l'azione (01 §5.11, incarico 21): l'imboscata è
+        /// un'azione che CONSUMA la giornata, sicché ogni appostato ha `azioneSpesa`. Un appostato
+        /// senza azione spesa non si azzererebbe all'apertura e riaprirebbe la cascata (incarico 20).
+        case appostatoConAzioneNonSpesa(gruppo: Int)
+        /// L'OCCULTAMENTO violato (01 §5.11.1, incarico 21): la casella di un gruppo appostato è
+        /// CONFERMATA per l'avversario che non l'ha scoperta — il gioco dichiarerebbe il falso, o
+        /// mostrerebbe l'appostato che dovrebbe restare occulto. La conoscenza dell'altra parte,
+        /// su una casella con un appostato non scoperto, non è mai confermato.
+        case occultamentoViolato(parte: String, riga: Int, colonna: Int)
+        /// Una PARTITA non terminata entro il numero dichiarato di giornate (01 §5.6.0.6, incarico
+        /// 21): il turno dell'avversario, o la cascata delle chiusure, non si è fermato nel limite.
+        /// È il difetto dell'incarico 20 reso un cancello che FALLISCE invece di appendere.
+        case partitaNonTerminata(giornate: Int)
 
         /// Il codice della violazione, senza spazi: l'uscita del programma di
         /// verifica è dato per chi sviluppa e non testo di prodotto (05 §12.6),
@@ -170,6 +183,9 @@ public struct SondaInvariantiCampagna: Sendable {
             case .studioConfermatoIndebito(let g): return "studio_confermato_indebito:gruppo=\(g)"
             case .nuovaAzioneNonConclude(let g): return "nuova_azione_non_conclude:gruppo=\(g)"
             case .studiatoNonAvversario(let g): return "studiato_non_avversario:gruppo=\(g)"
+            case .appostatoConAzioneNonSpesa(let g): return "appostato_senza_azione:gruppo=\(g)"
+            case .occultamentoViolato(let p, let r, let c): return "occultamento_violato:parte=\(p):riga=\(r):casella=\(c)"
+            case .partitaNonTerminata(let g): return "partita_non_terminata:giornate=\(g)"
             }
         }
     }
@@ -220,6 +236,9 @@ public struct SondaInvariantiCampagna: Sendable {
         "studio_confermato_indebito",
         "nuova_azione_non_conclude",
         "studiato_non_avversario",
+        "appostato_senza_azione",
+        "occultamento_violato",
+        "partita_non_terminata",
     ]
 
     /// Il codice nudo, senza i valori: la parte prima dei due punti.
@@ -331,7 +350,43 @@ public struct SondaInvariantiCampagna: Sendable {
                 }
             }
         }
+        // L'imboscata CONSUMA l'azione (01 §5.11, incarico 21): un gruppo appostato ha sempre
+        // `azioneSpesa`. È ciò che garantisce che si azzeri all'apertura della giornata e che la
+        // cascata delle chiusure termini (il difetto dell'incarico 20). Un appostato senza azione
+        // spesa la violerebbe.
+        for gruppo in stato.gruppiOrdinati where gruppo.ordineImboscata && !gruppo.azioneSpesa {
+            violazioni.append(.appostatoConAzioneNonSpesa(gruppo: gruppo.id.numero))
+        }
         return violazioni
+    }
+
+    /// L'OCCULTAMENTO dell'imboscata (01 §5.11.1, incarico 21): su una casella con un gruppo
+    /// APPOSTATO, la conoscenza dell'ALTRA parte — che questa sonda riceve dall'esterno, così da
+    /// giudicarla senza rifarla col medesimo codice — non è mai «confermato», a meno che quella
+    /// parte non abbia SCOPERTO l'imboscata con la ricognizione. Se lo fosse, il gioco dichiarerebbe
+    /// il falso o mostrerebbe l'appostato che deve restare occulto. Vale simmetricamente.
+    public func controllaOccultamento(stato: StatoCampagna,
+                                      conoscenzaDelNemico: (Parte, Cella) -> StatoConoscenza) -> [Violazione] {
+        var violazioni: [Violazione] = []
+        for gruppo in stato.gruppiOrdinati where gruppo.ordineImboscata {
+            let nemico: Parte = gruppo.parte == .giocatore ? .avversario : .giocatore
+            let cella = gruppo.posizione
+            guard stato.imboscateScoperte[nemico]?.contains(cella) != true else { continue }
+            if case .confermato = conoscenzaDelNemico(nemico, cella) {
+                violazioni.append(.occultamentoViolato(parte: nemico.rawValue,
+                                                       riga: cella.riga, colonna: cella.colonna))
+            }
+        }
+        return violazioni
+    }
+
+    /// La TERMINAZIONE (01 §5.6.0.6, incarico 21): una partita si chiude entro il numero DICHIARATO
+    /// di giornate. Se i giorni trascorsi eccedono il limite, il turno dell'avversario o la cascata
+    /// delle chiusure non si è fermato — il difetto dell'incarico 20 — e questo è un cancello che
+    /// FALLISCE. Con l'imboscata che consuma l'azione (decisione 1) non accade; se accadesse, lo
+    /// scenario che lo produce va dichiarato, non nascosto con un freno.
+    public func controllaTerminazione(giorniTrascorsi: Int, limite: Int) -> [Violazione] {
+        giorniTrascorsi > limite ? [.partitaNonTerminata(giornate: giorniTrascorsi)] : []
     }
 
     // MARK: - Invarianti della transizione

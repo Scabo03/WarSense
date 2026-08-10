@@ -755,6 +755,30 @@ final class InvariantiCampagnaTest: XCTestCase {
                 // una conoscenza (§12). ids[0] è del giocatore, non un bersaglio avversario.
                 sonda.controlla(stato: statoCon { s in s.studiati[.giocatore] = [ids[0]] })
             }),
+            // Incarico 21 — i tre nuovi cancelli dell'imboscata come ordine che si rinnova.
+            ("appostato_senza_azione", {
+                // Un appostato che NON ha speso l'azione: violerebbe la decisione 1 (l'imboscata
+                // consuma la giornata), e non si azzererebbe all'apertura — la cascata dell'incarico 20.
+                sonda.controlla(stato: statoCon { s in
+                    s.gruppi[ids[0]]!.ordineImboscata = true
+                    s.gruppi[ids[0]]!.azioneSpesa = false
+                })
+            }),
+            ("occultamento_violato", {
+                // Un appostato del giocatore la cui casella l'avversario CONFERMA senza averla
+                // scoperta: il gioco dichiarerebbe il falso (§5.11.1). La conoscenza del nemico è
+                // iniettata mutante a «confermato».
+                let s = statoCon { s in
+                    s.gruppi[ids[0]]!.ordineImboscata = true
+                    s.gruppi[ids[0]]!.azioneSpesa = true
+                }
+                return sonda.controllaOccultamento(stato: s, conoscenzaDelNemico: { _, _ in .confermato })
+            }),
+            ("partita_non_terminata", {
+                // Una corsa che eccede le giornate dichiarate: il turno dell'avversario o la
+                // cascata delle chiusure non si è fermato (il difetto dell'incarico 20).
+                sonda.controllaTerminazione(giorniTrascorsi: 100, limite: 40)
+            }),
         ]
     }
 
@@ -798,5 +822,29 @@ final class InvariantiCampagnaTest: XCTestCase {
         XCTAssertGreaterThan(corsa.esplorazioniRiuscite, 0)
         XCTAssertGreaterThan(corsa.esplorazioniAManiVuote, 0)
         XCTAssertGreaterThan(corsa.esploratoriNotati, 0)
+    }
+
+    /// I FENOMENI dell'imboscata come ordine che si rinnova (incarico 21): sugli scenari con
+    /// avversario il banco genera GIORNATE con tutti i gruppi di una parte appostati e imboscate
+    /// SCATTATE (un armato che entra in una casella occultata e vi cade). Stampa le frequenze. La
+    /// scoperta dagli esploratori e la caduta del GIOCATORE in un agguato occulto — deterministiche —
+    /// sono esercitate e asserite dalle prove dedicate `RicognizioneImboscateTest` (§5.11.1). Ogni
+    /// corsa termina senza violazioni: il difetto dell'incarico 20 è sciolto.
+    func test_incarico_21_il_banco_genera_i_fenomeni_dell_imboscata() throws {
+        let banco = try banchino()
+        var tuttiAppostati = 0, scattate = 0, subite = 0, scoperte = 0
+        for voce in banco.scenari.scenari where !voce.gruppiAvversario.isEmpty {
+            let corsa = try banco.corri(voce, giornate: banco.scenari.giornateGenerate)
+            print("FENOMENI-21 \(voce.identificatore): tuttiAppostati=\(corsa.giornateTuttiAppostati)"
+                  + " scattate=\(corsa.imboscateScattate) subite=\(corsa.imboscateSubite)"
+                  + " scoperte=\(corsa.imboscateScoperte) giornate=\(corsa.giornate) violazioni=\(corsa.violazioni.count)")
+            XCTAssertTrue(corsa.violazioni.isEmpty, "\(voce.identificatore): \(corsa.violazioni)")
+            XCTAssertEqual(corsa.giornate, banco.scenari.giornateGenerate,
+                           "\(voce.identificatore) termina entro le giornate dichiarate")
+            tuttiAppostati += corsa.giornateTuttiAppostati; scattate += corsa.imboscateScattate
+            subite += corsa.imboscateSubite; scoperte += corsa.imboscateScoperte
+        }
+        XCTAssertGreaterThan(tuttiAppostati, 0, "nessuna giornata con tutti i gruppi di una parte appostati")
+        XCTAssertGreaterThan(scattate, 0, "nessuna imboscata scattata (nessuno vi è caduto)")
     }
 }

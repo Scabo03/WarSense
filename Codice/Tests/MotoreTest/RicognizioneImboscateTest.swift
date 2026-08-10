@@ -198,6 +198,90 @@ final class RicognizioneImboscateTest: XCTestCase {
         XCTAssertEqual(dopo.imboscateInSospeso.first?.imboscante, .avversario, "il vantaggio è dell'avversario")
     }
 
+    // MARK: - 01 §5.11, §5.11.1 — l'imboscata come ordine che si rinnova e l'occultamento (incarico 21)
+
+    /// L'imboscata è un'AZIONE che consuma la giornata e si RINNOVA (decisione 1, incarico 21): il
+    /// comando pone `azioneSpesa` e `ordineImboscata`; un gruppo appostato conclude la giornata.
+    func test_01_5_11_l_imboscata_consuma_l_azione_e_conclude_la_giornata() throws {
+        // Due gruppi, così che ordinare l'imboscata al primo NON chiuda la giornata (il secondo
+        // resta in attesa) e si osservi lo stato appostato prima dell'azzeramento di fine giornata.
+        let s = try stato([(.giocatore, .armato, Cella(riga: 5, colonna: 5)),
+                           (.giocatore, .armato, Cella(riga: 8, colonna: 6))])
+        let g = s.gruppi(di: .giocatore)[0].id
+        XCTAssertTrue(motore.valida(.imboscata(gruppo: g), parte: .giocatore, stato: s).eValido)
+        let (dopo, _) = motore.applica(.imboscata(gruppo: g), parte: .giocatore, stato: s)
+        XCTAssertTrue(dopo.gruppi[g]!.ordineImboscata, "il gruppo è appostato")
+        XCTAssertTrue(dopo.gruppi[g]!.azioneSpesa, "l'imboscata consuma l'azione (decisione 1)")
+        XCTAssertTrue(dopo.gruppi[g]!.haConclusoLaGiornata, "l'appostato ha concluso la giornata")
+        XCTAssertEqual(dopo.gruppi[g]!.statoDichiarato, .inAgguato, "si annuncia «in agguato»")
+    }
+
+    /// L'OCCULTAMENTO (decisione 2, 01 §5.11.1): la casella di un gruppo appostato NON è confermata
+    /// per l'avversario che le è adiacente — la sua conoscenza retrocede al ricordo — e il gioco non
+    /// dichiara il falso: mai «confermato», mai un occupante mostrato. La conoscenza propria resta.
+    func test_01_5_11_1_l_occultamento_retrocede_la_conoscenza_senza_dichiarare_il_falso() throws {
+        var s = try stato([(.giocatore, .armato, Cella(riga: 6, colonna: 5)),
+                           (.avversario, .armato, Cella(riga: 5, colonna: 5))])
+        let cella = Cella(riga: 5, colonna: 5)
+        // Adiacente, senza agguato: il giocatore CONFERMA la casella e vi vede l'avversario.
+        XCTAssertEqual(motore.conoscenza(di: cella, per: .giocatore, stato: s), .confermato)
+        let vistaPrima = VistaCampagna(motore: motore, stato: s, parte: .giocatore)
+        XCTAssertTrue(vistaPrima.vociDiCasella(cella).contains { if case .occupanteAvversario = $0 { return true }; return false })
+        // L'avversario si apposta: la conoscenza del giocatore RETROCEDE da confermato.
+        s.gruppi[s.gruppi(di: .avversario)[0].id]!.ordineImboscata = true
+        s.gruppi[s.gruppi(di: .avversario)[0].id]!.azioneSpesa = true
+        XCTAssertNotEqual(motore.conoscenza(di: cella, per: .giocatore, stato: s), .confermato,
+                          "occultato: la casella non è più confermata")
+        let vistaDopo = VistaCampagna(motore: motore, stato: s, parte: .giocatore)
+        XCTAssertFalse(vistaDopo.vociDiCasella(cella).contains { if case .occupanteAvversario = $0 { return true }; return false },
+                       "l'appostato non si mostra, e nulla dichiara il vuoto")
+        // La conoscenza PROPRIA non è toccata: il proprio gruppo resta visibile a sé.
+        XCTAssertNotNil(s.occupante(di: Cella(riga: 6, colonna: 5), parte: .giocatore))
+    }
+
+    /// La SCOPERTA (decisione 2, 01 §5.11.1): un'esplorazione riuscita che rivela l'area scopre
+    /// l'imboscata avversaria — la casella torna confermata, il fatto entra nel registro col luogo.
+    /// È il SOLO modo di scoprirla, senza estrazione (la riuscita discende dalla competenza).
+    func test_01_5_11_1_la_ricognizione_scopre_l_imboscata_avversaria() throws {
+        // Un secondo gruppo del giocatore (lontano, non concluso) tiene aperta la giornata, così che
+        // la scoperta non si azzeri con la chiusura prima di osservarla.
+        var s = try stato([(.giocatore, .ricognizione(competenza: 12), Cella(riga: 7, colonna: 7)),
+                           (.giocatore, .armato, Cella(riga: 10, colonna: 6)),
+                           (.avversario, .armato, Cella(riga: 7, colonna: 5))])
+        let esploratore = s.gruppi(di: .giocatore).first { $0.categoria.eRicognizione }!.id
+        let cella = Cella(riga: 7, colonna: 5)
+        s.gruppi[s.gruppi(di: .avversario)[0].id]!.ordineImboscata = true
+        s.gruppi[s.gruppi(di: .avversario)[0].id]!.azioneSpesa = true
+        // Occulta prima della scoperta.
+        XCTAssertNotEqual(motore.conoscenza(di: cella, per: .giocatore, stato: s), .confermato)
+        let (dopo, eventi) = motore.applica(.esplorazione(gruppo: esploratore), parte: .giocatore, stato: s)
+        XCTAssertTrue(dopo.imboscateScoperte[.giocatore]?.contains(cella) == true, "l'imboscata è scoperta")
+        XCTAssertEqual(motore.conoscenza(di: cella, per: .giocatore, stato: dopo), .confermato,
+                       "scoperta: la casella torna confermata e vi si vede l'appostato")
+        XCTAssertTrue(eventi.contains { if case .imboscataScoperta(.giocatore, cella) = $0 { return true }; return false })
+        XCTAssertTrue(dopo.registro.contains { if case .imboscataScoperta = $0.fatto { return true }; return false },
+                      "il fatto entra nel registro col luogo, attivabile")
+    }
+
+    /// La SIMMETRIA (incarico 21): un'imboscata del GIOCATORE è occulta per l'avversario, che vi può
+    /// cadere; scoperta dai suoi esploratori, entra fra le sue formazioni note e la aggira. La vista
+    /// dell'avversario esclude l'appostato occulto e include lo scoperto.
+    func test_01_5_11_la_simmetria_l_avversario_non_vede_l_occulta_ma_vede_la_scoperta() throws {
+        var s = try stato([(.giocatore, .armato, Cella(riga: 5, colonna: 5)),
+                           (.avversario, .armato, Cella(riga: 5, colonna: 4))])
+        let appostato = s.gruppi(di: .giocatore)[0].id
+        let cella = Cella(riga: 5, colonna: 5)
+        s.gruppi[appostato]!.ordineImboscata = true
+        s.gruppi[appostato]!.azioneSpesa = true
+        // Occulta: l'avversario, adiacente, NON la nota (vi può entrare e cadervi).
+        XCTAssertFalse(motore.vistaAvversario(stato: s).formazioniGiocatoreNote.contains(cella),
+                       "l'appostato del giocatore è occulto per l'avversario")
+        // Scoperta dagli esploratori dell'avversario: torna nota e l'avversario la aggira.
+        s.imboscateScoperte[.avversario] = [cella]
+        XCTAssertTrue(motore.vistaAvversario(stato: s).formazioniGiocatoreNote.contains(cella),
+                      "scoperta, la casella entra fra le note dell'avversario")
+    }
+
     // MARK: - 01 §5.13 — l'aggiramento simmetrico
 
     /// Due formazioni possono sfilarsi in caselle adiacenti senza ingaggiarsi, e una colonna
