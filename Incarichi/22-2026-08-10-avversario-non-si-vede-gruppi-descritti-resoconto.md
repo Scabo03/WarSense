@@ -57,7 +57,13 @@ Valutazione della versione dei valori, dichiarata (valori-provvisori): RESTA **0
 
 ## Il caricamento
 
-[DA COMPLETARE: numero di build, verifica ASC nei due versi, comando che accerta principale locale == remoto.]
+Build **24** caricata (`scripts/carica-testflight.sh`, «UPLOAD SUCCEEDED with no errors»). Numero di build = massimo su tutto l'account più uno: `massimo: 23 -> nuovo: 24` (query ASC `/v1/builds`). Tutti i controlli preventivi verdi prima dell'archivio: ramo spinto, versione che non torna indietro, note che reggono, registro e ASC concordi (23 build), corsa separata delle sessioni fresca (girata su 2a0e9c1). Nota di rilascio allegata alla build 24 (`nota-testflight.sh`), build registrata in `build-caricate.md`.
+
+Verifica per interfaccia di programmazione (`scripts/asc_api.py`, `/v1/builds?filter[app]=6797306323&sort=-version&include=preReleaseVersion,betaGroups`): la build 24 è VALIDA (`processingState` = VALID, `expired` = false), sul treno più alto (`preReleaseVersion` = **1.1.0**, la stessa della 23, ed è la build più alta del treno), assegnata a un gruppo di test (`betaGroups` = 1). Registro e ASC concordano NEI DUE VERSI (`scripts/controlla-build.py`): «registro e App Store Connect concordano: 24 build, la più alta è la 24». Versione di marketing 1.1.0 non toccata.
+
+## Il versionamento
+
+Ramo dedicato `avversario-visibile-gruppi-descritti`, fuso su `principale` con avanzamento veloce (solo verde), spinti entrambi; ramo cancellato dopo la fusione (`git branch -d`, che ha accettato la cancellazione perché fuso: «Deleted branch … (was 2a0e9c1)»), anche sul remoto. `principale` locale e remoto coincidono, accertato dopo l'ultima spinta: `git rev-parse principale` e `git rev-parse origin/principale` restituiscono lo stesso SHA (l'uscita è riportata nel resoconto della sessione al titolare; la spinta dell'ultimo commit — questo resoconto — precede l'accertamento).
 
 ## Registri toccati
 
