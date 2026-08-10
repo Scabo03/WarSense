@@ -184,6 +184,18 @@ public struct BancoCampagna: Sendable {
         /// il caso limite che l'incarico 20 non terminava e che ora, con l'imboscata che consuma
         /// l'azione, si chiude da sé.
         public let giornateTuttiAppostati: Int
+        /// Gli AVVISTAMENTI di formazioni avversarie da parte del giocatore lungo la corsa (01
+        /// §5.6.11, incarico 22): quanti in tutto, in quale giornata il PRIMO (nil se nessuno), e
+        /// il GAP MEDIO fra un avvistamento e il successivo (nil con meno di due). Sono il dato che
+        /// dice se e quando l'avversario si manifesta — la misura che l'incarico 22 pretende riportata.
+        public let avvistamenti: Int
+        public let primoAvvistamento: Int?
+        public let gapMedioAvvistamenti: Int?
+        /// La porzione di mappa che il giocatore OSSERVA davvero muovendo i propri gruppi, dato il
+        /// raggio di osservazione (incarico 22): le caselle viste in unione su tutte le giornate, e
+        /// il totale della griglia. Un raggio piccolo su una mappa grande lascia fuori quasi tutto.
+        public let caselleOsservate: Int
+        public let caselleTotali: Int
         public let violazioni: [String]
         public let improntaFinale: String
     }
@@ -201,7 +213,14 @@ public struct BancoCampagna: Sendable {
     /// Ogni tanto si ordina il presidio anche potendo marciare, secondo una regola
     /// fissa sul numero della giornata: senza, i gruppi si accalcherebbero tutti
     /// verso nord e la misura vedrebbe una sola situazione.
-    public func corri(_ voce: ScenariCampagna.Voce, giornate: Int) throws -> Corsa {
+    /// `partitaCompleta` dice se la corsa è una partita INTERA, giocata fino alla lunghezza
+    /// dichiarata: solo allora ha senso pretendere che il giocatore abbia avvistato l'avversario
+    /// (01 §5.6.11, incarico 22). Una corsa TRONCATA — il fumo, che chiude a poche giornate per
+    /// costare poco — può legittimamente non contenere ancora alcun avvistamento, perché il primo
+    /// arriva più tardi: pretenderlo lì sarebbe un falso allarme. Le corse intere (il collaudo, le
+    /// prove dedicate) restano il luogo dove l'invariante morde. Preimpostato a vero.
+    public func corri(_ voce: ScenariCampagna.Voce, giornate: Int,
+                      partitaCompleta: Bool = true) throws -> Corsa {
         var stato = try FabbricaCampagna.crea(
             scenario: ScenarioCampagna(mappa: voce.mappa, gruppiGiocatore: voce.gruppi,
                                        gruppiAvversario: voce.gruppiAvversario,
@@ -229,6 +248,12 @@ public struct BancoCampagna: Sendable {
         var esplRiuscite = 0, esplManiVuote = 0, esplNotati = 0, esplPerduti = 0
         var sabArmati = 0, sabEsploratori = 0, sabFalliti = 0, studi = 0
         var imboscatePiazzate = 0, imboscateScattate = 0, imboscateSubite = 0, imboscateScoperte = 0
+        // Gli AVVISTAMENTI di formazioni avversarie da parte del GIOCATORE (01 §5.6.11, incarico 22):
+        // quanti, e in quale giornata ciascuno, per misurare se e quando l'avversario si manifesta.
+        // La casella OSSERVATA da almeno un gruppo del giocatore in qualche giornata: l'unione dà la
+        // porzione di mappa che il giocatore vede davvero muovendosi (raggio di osservazione).
+        var avvistamentiGiocatore = 0, giorniAvvistamento: [Int] = []
+        var caselleOsservateUnione = Set<Cella>()
         // Le GIORNATE con tutti i gruppi di una parte appostati: insieme di giorni, contato una
         // sola volta ciascuno (il fenomeno del caso limite dell'incarico 20). Solo un gruppo armato
         // può appostarsi, sicché il caso richiede una parte di soli armati, tutti in agguato.
@@ -272,6 +297,10 @@ public struct BancoCampagna: Sendable {
                     // La scoperta dei propri esploratori (l'evento la porta con la parte): quella
                     // del giocatore è il fenomeno da riportare.
                     if parte == .giocatore { imboscateScoperte += 1 }
+                case .formazioneAvversariaAvvistata:
+                    // L'avvistamento è sempre del giocatore (prodotto solo dove il giocatore osserva,
+                    // 01 §5.6.11): il giorno è quello che si sta chiudendo (`prima.giorno`).
+                    avvistamentiGiocatore += 1; giorniAvvistamento.append(prima.giorno)
                 default: break
                 }
             }
@@ -295,6 +324,9 @@ public struct BancoCampagna: Sendable {
             // giro, così che il fenomeno risulti esercitato quando esiste una struttura.
             passaggiInZona += stato.gruppi(di: .giocatore).lazy.filter {
                 motore.inZonaDiRifornimento($0.posizione, stato: stato) }.count
+            // La porzione di mappa osservata: si accumulano le caselle che i gruppi del giocatore
+            // vedono a ogni giornata (raggio di osservazione), per l'unione a fine corsa.
+            caselleOsservateUnione.formUnion(motore.caselleOsservate(da: .giocatore, stato: stato))
 
             // L'invariante del salto si controlla percorrendolo davvero, con la
             // sequenza che la Presentazione userebbe.
@@ -418,6 +450,16 @@ public struct BancoCampagna: Sendable {
             violazioni.formUnion(sonda.controllaVolumi(
                 stato: dopo, volumePerAtomo: volumePerAtomo,
                 volumiRiportati: volumiRiportati).map(\.description))
+            // L'invariante dell'AVVISTAMENTO (incarico 22): un avvistamento avversario
+            // annotato durante la chiusura innescata dal turno del giocatore deve corrispondere
+            // a una formazione realmente osservata (§5.6.11). Va controllato anche qui, non solo
+            // dopo il turno dell'avversario, perché la cascata di fine giornata — e con essa gli
+            // arrivi avversari e i loro avvistamenti — può chiudersi sull'ultimo comando del
+            // giocatore. Nessun annuncio deve dichiarare un avvistamento senza la sua formazione.
+            violazioni.formUnion(sonda.controllaRegistro(
+                prima: prima, dopo: dopo,
+                osservataDalGiocatore: { motore.osservata($0, da: .giocatore, stato: dopo) }
+            ).map(\.description))
             stato = dopo
             aggiornaTuttiAppostati(stato)
             ordini += 1
@@ -491,6 +533,14 @@ public struct BancoCampagna: Sendable {
         // l'imboscata che consuma l'azione (decisione 1) la cascata non corre all'infinito.
         violazioni.formUnion(sonda.controllaTerminazione(
             giorniTrascorsi: stato.giorno - giornoIniziale, limite: giornate).map(\.description))
+        // L'AVVISTAMENTO AVVENUTO (incarico 22): in una partita INTERA contro l'avversario la corsa
+        // deve aver prodotto almeno un avvistamento del giocatore. Un avversario che non si manifesta
+        // mai è il difetto che il titolare vide e il collaudo non colse: ora è un cancello che
+        // FALLISCE. Solo sulle partite complete, però: una corsa troncata non ha ancora avuto il
+        // tempo del primo avvistamento, e pretenderlo sarebbe un falso allarme.
+        violazioni.formUnion(sonda.controllaAvvistamentoAvvenuto(
+            avvistamenti: avvistamentiGiocatore,
+            conAvversario: partitaCompleta && !voce.gruppiAvversario.isEmpty).map(\.description))
 
         // Il taglio, la sosta imposta e la ripresa sono i fatti NON decisi che il
         // registro annota (01 §5.17.1): li si conta di là, non dagli eventi, così che
@@ -518,6 +568,12 @@ public struct BancoCampagna: Sendable {
         // taglio è opera dell'avversario. Zero altrove.
         let tagliDaAvversario = (!voce.gruppiAvversario.isEmpty && voce.forzeNemiche.isEmpty) ? tagli : 0
 
+        let totCelle = stato.griglia.righe * stato.griglia.colonne
+        // Il GAP MEDIO fra un avvistamento e il successivo: la media dei salti di giornata, intera
+        // per troncamento, definita solo con almeno due avvistamenti (con uno solo non c'è intervallo).
+        var gaps: [Int] = []
+        for i in 1..<max(1, giorniAvvistamento.count) { gaps.append(giorniAvvistamento[i] - giorniAvvistamento[i-1]) }
+        let gapMedio = gaps.isEmpty ? nil : gaps.reduce(0, +) / gaps.count
         return Corsa(identificatore: voce.identificatore, mappa: voce.mappa,
                      gruppi: voce.gruppi.count, giornate: stato.giorno - giornoIniziale,
                      ordini: ordini, marce: marce, marceLunghe: marceLunghe,
@@ -539,6 +595,11 @@ public struct BancoCampagna: Sendable {
                      imboscatePiazzate: imboscatePiazzate, imboscateScattate: imboscateScattate,
                      imboscateSubite: imboscateSubite, imboscateScoperte: imboscateScoperte,
                      giornateTuttiAppostati: giorniTuttiAppostati.count,
+                     avvistamenti: avvistamentiGiocatore,
+                     primoAvvistamento: giorniAvvistamento.first,
+                     gapMedioAvvistamenti: gapMedio,
+                     caselleOsservate: caselleOsservateUnione.count,
+                     caselleTotali: totCelle,
                      violazioni: violazioni.sorted(), improntaFinale: stato.impronta())
     }
 

@@ -270,6 +270,11 @@
 "casella.occupante_proprio" = "tuo %@, %@";
 "casella.occupante_proprio_ricognizione" = "tuo %@, formazione di ricognizione, %@";
 "casella.occupante_proprio_non_armata" = "tua %@, formazione non armata, %@";
+/* La COMPOSIZIONE della propria formazione (incarico 22): di quali reparti e di quanti
+   atomi è fatta. Riusa la frase «N atomi di <archetipo>» della divisione, sicché non conia
+   alcun termine nuovo del vocabolario chiuso. È un dettaglio dell'occupante proprio, in coda
+   alle voci di testa: il livello sintetico la lascia cadere per prima. */
+"casella.composizione" = "composta da %@";
 /* Occupante avversario di una casella osservata (incarico 18): senza nome, senza
    volume (02 §6.4.1), senza stato d'azione. Il giocatore lo vede, non lo conosce. Dall'
    incarico 19 la CATEGORIA sì (prima correzione): gruppo armato — la ordinaria, «formazione

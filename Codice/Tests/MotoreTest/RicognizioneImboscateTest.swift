@@ -54,9 +54,13 @@ final class RicognizioneImboscateTest: XCTestCase {
                            (.giocatore, .armato, Cella(riga: 10, colonna: 6))])
         let id = s.gruppi(di: .giocatore).first { $0.categoria.eRicognizione }!.id
         XCTAssertEqual(motore.esitoEsplorazione(di: s.gruppi[id]!, stato: s), .riuscita)
+        // Prima di esplorare, una casella a distanza tre è oltre il raggio ordinario di osservazione
+        // (due, incarico 22): inesplorata. L'esplorazione vede più lontano (raggio di esplorazione tre).
+        XCTAssertNotEqual(motore.conoscenza(di: Cella(riga: 6, colonna: 5), per: .giocatore, stato: s), .confermato)
         let (dopo, eventi) = motore.applica(.esplorazione(gruppo: id), parte: .giocatore, stato: s)
-        // Una casella a distanza due — oltre il raggio ordinario di uno — è ora confermata.
-        XCTAssertEqual(motore.conoscenza(di: Cella(riga: 7, colonna: 5), per: .giocatore, stato: dopo), .confermato)
+        // Quella stessa casella, a distanza tre dall'esploratore, è ora confermata: l'esplorazione
+        // rivela oltre il raggio ordinario. È il senso della ricognizione (01 §5.4).
+        XCTAssertEqual(motore.conoscenza(di: Cella(riga: 6, colonna: 5), per: .giocatore, stato: dopo), .confermato)
         XCTAssertTrue(eventi.contains { if case .esplorazioneCompiuta(_, _, _, _, .riuscita) = $0 { return true } else { return false } })
         XCTAssertTrue(dopo.gruppi[id]!.azioneSpesa, "l'esplorazione consuma la giornata (01 §5.6.0.5)")
     }

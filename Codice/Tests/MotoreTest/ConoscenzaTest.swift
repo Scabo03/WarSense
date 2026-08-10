@@ -45,15 +45,18 @@ final class ConoscenzaTest: XCTestCase {
     // MARK: - 01 §5.3, §12 — si conferma ciò che si osserva, e nient'altro
 
     func test_5_3_si_conferma_l_osservato_e_l_inesplorato_e_ignoto() throws {
-        // Raggio uno (dai dati): la casella della formazione e le adiacenti ortogonali
-        // sono confermate; una casella a distanza due non è mai stata vista.
+        // Raggio DUE (dai dati, incarico 22): la casella della formazione, le adiacenti e le
+        // caselle a distanza ortogonale due sono confermate; una a distanza tre non è mai stata
+        // vista. L'incarico 22 ha portato il raggio da uno a due perché l'avversario si manifesti.
         let s = try crea(gruppi: [(5, 5)])
         XCTAssertEqual(motore.conoscenza(di: cella(5, 5), per: .giocatore, stato: s), .confermato)
         XCTAssertEqual(motore.conoscenza(di: cella(4, 5), per: .giocatore, stato: s), .confermato)
         XCTAssertEqual(motore.conoscenza(di: cella(5, 6), per: .giocatore, stato: s), .confermato)
-        // Il gioco non dichiara il falso: ciò che non ha visto è inesplorato, non
-        // qualcosa di inventato (01 §12).
-        XCTAssertEqual(motore.conoscenza(di: cella(3, 5), per: .giocatore, stato: s), .inesplorato)
+        // A distanza ortogonale due, ora osservata (raggio due): prima era inesplorata.
+        XCTAssertEqual(motore.conoscenza(di: cella(3, 5), per: .giocatore, stato: s), .confermato)
+        // Il gioco non dichiara il falso: ciò che non ha visto — a distanza tre — è inesplorato,
+        // non qualcosa di inventato (01 §12).
+        XCTAssertEqual(motore.conoscenza(di: cella(2, 5), per: .giocatore, stato: s), .inesplorato)
         XCTAssertEqual(motore.conoscenza(di: cella(1, 1), per: .giocatore, stato: s), .inesplorato)
     }
 

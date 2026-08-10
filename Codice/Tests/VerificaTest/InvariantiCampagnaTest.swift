@@ -779,6 +779,23 @@ final class InvariantiCampagnaTest: XCTestCase {
                 // cascata delle chiusure non si è fermato (il difetto dell'incarico 20).
                 sonda.controllaTerminazione(giorniTrascorsi: 100, limite: 40)
             }),
+            // Incarico 22 — i due nuovi cancelli dell'avvistamento.
+            ("nessun_avvistamento_in_partita", {
+                // Una partita CONTRO l'avversario chiusa senza un solo avvistamento del giocatore:
+                // l'avversario non si è mai manifestato (il difetto della build 23). Il conteggio è
+                // iniettato a zero con avversario presente.
+                sonda.controllaAvvistamentoAvvenuto(avvistamenti: 0, conAvversario: true)
+            }),
+            ("avvistamento_senza_formazione", {
+                // Un avvistamento annotato su una casella che il giocatore OSSERVA ma dove NON c'è
+                // alcuna formazione avversaria: il gioco dichiarerebbe il falso (§5.6.11). base non ha
+                // avversari, sicché qualunque casella osservata è priva di formazione.
+                var dopo = base
+                dopo.registro.append(VoceRegistro(numero: 0, giorno: 1,
+                    fatto: .formazioneAvversariaAvvistata(casella: Cella(riga: 1, colonna: 1))))
+                return sonda.controllaRegistro(prima: base, dopo: dopo,
+                                               osservataDalGiocatore: { _ in true })
+            }),
         ]
     }
 
@@ -846,5 +863,75 @@ final class InvariantiCampagnaTest: XCTestCase {
         }
         XCTAssertGreaterThan(tuttiAppostati, 0, "nessuna giornata con tutti i gruppi di una parte appostati")
         XCTAssertGreaterThan(scattate, 0, "nessuna imboscata scattata (nessuno vi è caduto)")
+    }
+
+    /// I FENOMENI dell'avvistamento (incarico 22): sugli scenari con avversario il banco misura,
+    /// per ogni corsa, quante formazioni avversarie il giocatore avvista, in quale giornata la
+    /// prima, il gap medio fra un avvistamento e il successivo, e quale porzione di mappa osserva.
+    /// Stampa i numeri (il banco «riporta i numeri misurati a ogni corsa») e pretende che NESSUNA
+    /// partita si chiuda con zero avvistamenti: è il difetto che il titolare vide giocando la build 23.
+    func test_incarico_22_il_banco_genera_e_misura_gli_avvistamenti() throws {
+        let banco = try banchino()
+        var partiteConAvversario = 0, partiteConZeroAvvistamenti = 0, avvistamentiTotali = 0
+        for voce in banco.scenari.scenari where !voce.gruppiAvversario.isEmpty {
+            let corsa = try banco.corri(voce, giornate: banco.scenari.giornateGenerate)
+            let perc = corsa.caselleOsservate * 100 / max(1, corsa.caselleTotali)
+            print("FENOMENI-22 \(voce.identificatore): avvistamenti=\(corsa.avvistamenti)"
+                  + " primo=\(corsa.primoAvvistamento.map(String.init) ?? "MAI")"
+                  + " gap_medio=\(corsa.gapMedioAvvistamenti.map(String.init) ?? "-")"
+                  + " osservate=\(corsa.caselleOsservate)/\(corsa.caselleTotali) (\(perc)%)"
+                  + " giornate=\(corsa.giornate) violazioni=\(corsa.violazioni.count)")
+            XCTAssertTrue(corsa.violazioni.isEmpty, "\(voce.identificatore): \(corsa.violazioni)")
+            partiteConAvversario += 1
+            avvistamentiTotali += corsa.avvistamenti
+            if corsa.avvistamenti == 0 { partiteConZeroAvvistamenti += 1 }
+            // Il criterio dell'incarico: un giocatore che gioca normalmente avvista l'avversario.
+            XCTAssertGreaterThan(corsa.avvistamenti, 0,
+                                 "\(voce.identificatore): l'avversario non si è mai manifestato")
+        }
+        XCTAssertGreaterThan(partiteConAvversario, 0, "nessuno scenario con avversario da misurare")
+        XCTAssertEqual(partiteConZeroAvvistamenti, 0,
+                       "in \(partiteConZeroAvvistamenti) partite il giocatore non avvista nulla")
+        XCTAssertGreaterThan(avvistamentiTotali, 0, "il banco non genera alcun avvistamento")
+    }
+
+    /// Il cancello «nessun avvistamento in partita» (incarico 22) si è visto scattare e tacere dove
+    /// deve: scatta con zero avvistamenti e avversario presente, tace con un avvistamento o senza
+    /// avversario. È l'invariante che rende impossibile ripetere il difetto della build 23.
+    func test_incarico_22_il_cancello_del_nessun_avvistamento_scatta_e_tace() throws {
+        XCTAssertEqual(sonda.controllaAvvistamentoAvvenuto(avvistamenti: 0, conAvversario: true)
+            .map(\.description), ["nessun_avvistamento_in_partita"],
+            "con zero avvistamenti e avversario il cancello deve scattare")
+        XCTAssertEqual(sonda.controllaAvvistamentoAvvenuto(avvistamenti: 1, conAvversario: true), [],
+                       "con un avvistamento il cancello tace")
+        XCTAssertEqual(sonda.controllaAvvistamentoAvvenuto(avvistamenti: 0, conAvversario: false), [],
+                       "senza avversario non c'è nulla da avvistare")
+    }
+
+    /// Il cancello «avvistamento senza formazione» (incarico 22) distingue le tre condizioni: una
+    /// casella non osservata è una fuga d'informazione (registro_rivela_ignoto); una osservata ma
+    /// vuota di avversario è un avvistamento del falso (avvistamento_senza_formazione); una osservata
+    /// con l'avversario davvero lì è legittima e non scatta nulla. È la garanzia che nessun annuncio
+    /// dichiari un avvistamento che non corrisponde a una formazione realmente osservata.
+    func test_incarico_22_il_cancello_dell_avvistamento_senza_formazione_scatta_e_tace() throws {
+        let base = try stato(gruppi: [(10, 6), (10, 5)])
+        let casella = Cella(riga: 4, colonna: 4)
+        func conAvvistamento(_ s: StatoCampagna) -> StatoCampagna {
+            var d = s
+            d.registro.append(VoceRegistro(numero: 0, giorno: 1,
+                fatto: .formazioneAvversariaAvvistata(casella: casella)))
+            return d
+        }
+        // Osservata ma senza avversario: dichiara il falso.
+        XCTAssertEqual(sonda.controllaRegistro(prima: base, dopo: conAvvistamento(base),
+                                               osservataDalGiocatore: { _ in true }).map(\.description),
+                       ["avvistamento_senza_formazione:riga=4:casella=4"])
+        // Un avversario DAVVERO sulla casella osservata: legittimo, nessuna violazione.
+        var conNemico = base
+        conNemico.gruppi[IdGruppo(99)] = Gruppo(id: IdGruppo(99), parte: .avversario, nome: "lupo",
+            posizione: casella, composizione: [Reparto(archetipo: "fanteria_leggera", atomi: 3)],
+            azioneSpesa: false)
+        XCTAssertEqual(sonda.controllaRegistro(prima: base, dopo: conAvvistamento(conNemico),
+                                               osservataDalGiocatore: { _ in true }), [])
     }
 }

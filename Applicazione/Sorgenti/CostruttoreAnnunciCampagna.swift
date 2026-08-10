@@ -145,6 +145,17 @@ struct CostruttoreAnnunciCampagna {
             // Lo stato di rifornimento dell'occupante è un termine chiuso: la chiave
             // porta già il giorno (primo/secondo) o la sosta, e non prende numeri.
             return testi.termine(rifornimento.chiaveTesto).testo
+        case .composizionePropria(let reparti):
+            // I reparti e gli atomi della propria formazione (incarico 22), con la STESSA
+            // frase della divisione — «N atomi di <archetipo>» — sicché non si conia alcun
+            // termine nuovo. La categoria sta già in alto, nella voce dell'occupante; qui il
+            // dettaglio di che cosa la compone, uniti in elenco. Riguarda le proprie truppe:
+            // il giocatore deve poter sapere che cosa muove.
+            let parti = reparti.map { reparto in
+                testi.frase("divisione.reparto", reparto.atomi,
+                            testi.frase("unita." + reparto.archetipo).testo).testo
+            }
+            return testi.frase("casella.composizione", parti.joined(separator: ", ")).testo
         case .zonaDiRifornimento:
             // La zona riusa il termine chiuso «in zona di rifornimento» (02 §4.4.5):
             // è la stessa cosa, e non se ne conia uno nuovo per la casella.
@@ -201,6 +212,12 @@ struct CostruttoreAnnunciCampagna {
             case .inSosta: return "S"
             case .inZona: return nil
             }
+        case .composizionePropria:
+            // La composizione è un DETTAGLIO parlato dell'occupante proprio, non una categoria:
+            // il segno di CATEGORIA sta già sulla voce dell'occupante (incarico 19), e l'identità
+            // (l'iniziale del nome) al centro della casella. Il numero degli atomi non ha una FORMA
+            // sulla mappa — identità e categoria bastano al colpo d'occhio — sicché non disegna nulla.
+            return nil
         case .zonaDiRifornimento: return "R"
         case .quartierGenerale(let parte): return parte == .giocatore ? "Q" : "q"
         case .terreno(let terreno):

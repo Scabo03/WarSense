@@ -78,6 +78,13 @@ public struct VistaCampagna: Sendable {
         /// questa voce non compare affatto.
         case occupanteAvversario(CategoriaAvversariaOsservata)
         case rifornimento(StatoRifornimento)
+        /// La COMPOSIZIONE della PROPRIA formazione (incarico 22): i reparti e gli atomi di
+        /// cui è fatta. Riguarda le proprie truppe e non è nascosta — il giocatore deve poter
+        /// sapere che cosa muove — ma è un DETTAGLIO di bassa priorità dell'occupante: sta DOPO
+        /// le voci di testa (la categoria compresa), sicché il livello sintetico la lascia cadere
+        /// per prima dalla coda (02 §3.8.1). Non esiste per le formazioni avversarie, di cui non
+        /// si dichiara il volume (02 §6.4.1): appartiene solo all'occupante proprio.
+        case composizionePropria([Reparto])
         case quartierGenerale(Parte)
         case terreno(TerrenoCasella)
         case strada(TipoStrada)
@@ -91,7 +98,8 @@ public struct VistaCampagna: Sendable {
         // confermato (02 §3.8.1): dichiara quanto è corrente ciò che la casella dice.
         let statoConoscenza = motore.conoscenza(di: casella, per: parte, stato: stato)
         if statoConoscenza.siAnnuncia { voci.append(.conoscenza(statoConoscenza)) }
-        if let gruppo = occupante(di: casella) {
+        let occupanteProprio = occupante(di: casella)
+        if let gruppo = occupanteProprio {
             voci.append(.occupante(gruppo))
             // Il rifornimento è la PRIMA anomalia dell'occupante (02 §3.8.1): un gruppo
             // senza provviste o in sosta lo dichiara subito dopo il proprio nome. La
@@ -112,6 +120,14 @@ public struct VistaCampagna: Sendable {
         if statoConoscenza == .confermato,
            let avversario = stato.occupante(di: casella, parte: parteAvversa) {
             voci.append(.occupanteAvversario(categoriaOsservata(di: avversario)))
+        }
+        // La COMPOSIZIONE della propria formazione va DOPO tutte le voci di testa —
+        // la categoria propria e quella avversaria comprese (02 §3.8.1): è un dettaglio
+        // non nascosto ma di bassa priorità, e i tagli di verbosità la lasciano cadere per
+        // prima dalla coda. Riguarda solo le proprie truppe; dell'avversario non si dichiara
+        // il volume (02 §6.4.1), sicché nessuna composizione ne accompagna la categoria.
+        if let gruppo = occupanteProprio {
+            voci.append(.composizionePropria(gruppo.composizione))
         }
         if let parte = quartierGeneraleSu(casella) { voci.append(.quartierGenerale(parte)) }
         let terreno = terreno(di: casella)

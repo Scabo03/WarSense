@@ -109,6 +109,37 @@ final class AnnuncioDiCasellaTest: XCTestCase {
         }
     }
 
+    /// La propria formazione DICHIARA la sua COMPOSIZIONE (incarico 22): di quali reparti e di
+    /// quanti atomi è fatta, con la stessa frase «N atomi di <archetipo>» della divisione. È un
+    /// dettaglio in coda alle voci di testa: compare nel livello normale e dettagliato, e il
+    /// sintetico la lascia cadere per prima (02 §3.8.1). Nessun termine nuovo del vocabolario.
+    func test_incarico_22_la_propria_formazione_dichiara_la_composizione() async throws {
+        let partita = try await PartitaCampagna(nuova: ambiente, taglia: .media)
+        let stato = await partita.stato
+        let gruppo = stato.gruppiOrdinati.first { $0.parte == .giocatore }!
+        // La composizione attesa, costruita con le STESSE frasi che l'annuncio userà.
+        let parti = gruppo.composizione.map { reparto in
+            ambiente.testi.frase("divisione.reparto", reparto.atomi,
+                                 ambiente.testi.frase("unita." + reparto.archetipo).testo).testo
+        }
+        let composizione = ambiente.testi.frase("casella.composizione",
+                                                parti.joined(separator: ", ")).testo
+        func annuncio(_ verbosita: Verbosita) -> String {
+            CostruttoreAnnunciCampagna(testi: ambiente.testi, motore: partita.motore,
+                                       stato: stato, verbosita: verbosita)
+                .etichettaCasella(gruppo.posizione)
+        }
+        // Il livello normale e il dettagliato la dichiarano; il sintetico la lascia cadere.
+        XCTAssertTrue(annuncio(.normale).contains(composizione),
+                      "il livello normale tace la composizione: «\(annuncio(.normale))»")
+        XCTAssertTrue(annuncio(.dettagliato).contains(composizione),
+                      "il livello dettagliato tace la composizione: «\(annuncio(.dettagliato))»")
+        XCTAssertFalse(annuncio(.sintetico).contains(composizione),
+                       "il sintetico non taglia la composizione dalla coda: «\(annuncio(.sintetico))»")
+        // La composizione non è vuota: un gruppo ha sempre almeno un reparto (01 §5.6.0.2).
+        XCTAssertFalse(gruppo.composizione.isEmpty, "il gruppo di prova deve avere una composizione")
+    }
+
     // MARK: - Griglia di battaglia (stesso meccanismo, mai controllato prima)
 
     /// La medesima verifica sulla griglia di battaglia, fra l'esplorazione di una

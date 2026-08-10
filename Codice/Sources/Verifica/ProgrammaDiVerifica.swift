@@ -80,7 +80,12 @@ public struct ProgrammaDiVerifica: Sendable {
         // Ogni scenario si corre UNA volta sola: le sezioni che ne derivano
         // leggono le stesse corse, così non possono divergere fra loro.
         let giornate = fumo ? min(4, scenari.giornateGenerate) : scenari.giornateGenerate
-        let corse = try scenari.scenari.map { try banco.corri($0, giornate: giornate) }
+        // Il fumo TRONCA la corsa a poche giornate: non è una partita intera, e l'invariante
+        // dell'avvistamento (incarico 22) — che pretende almeno un avvistamento — non vi si applica,
+        // perché il primo avvistamento può arrivare più tardi. Le corse intere restano il cancello.
+        let corse = try scenari.scenari.map {
+            try banco.corri($0, giornate: giornate, partitaCompleta: !fumo)
+        }
         var righeInvarianti: [[String]] = []
         for corsa in corse {
             righeInvarianti.append([corsa.identificatore, corsa.mappa, String(corsa.gruppi),

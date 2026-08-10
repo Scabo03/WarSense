@@ -137,6 +137,18 @@ public struct SondaInvariantiCampagna: Sendable {
         /// 21): il turno dell'avversario, o la cascata delle chiusure, non si è fermato nel limite.
         /// È il difetto dell'incarico 20 reso un cancello che FALLISCE invece di appendere.
         case partitaNonTerminata(giornate: Int)
+        // Invarianti dell'avvistamento (01 §5.6.11, incarico 22).
+        /// In una partita CONTRO l'avversario il giocatore non ha avvistato NEMMENO UNA formazione
+        /// avversaria dal principio alla fine (incarico 22): è il difetto che il collaudo non aveva
+        /// visto e che il titolare ha visto giocando — un avversario che non si manifesta mai
+        /// equivale a non esserci. Con un raggio di osservazione troppo piccolo accadeva; ora è un
+        /// cancello che FALLISCE. Vale solo dove un avversario c'è: senza, non c'è nulla da avvistare.
+        case nessunAvvistamentoInPartita
+        /// Un AVVISTAMENTO dichiarato a cui non corrisponde una formazione avversaria realmente
+        /// osservata su quella casella (incarico 22): il gioco dichiarerebbe il falso, la violazione
+        /// più grave. L'avvistamento nasce solo dove il giocatore OSSERVA e una formazione avversaria
+        /// è arrivata (01 §5.6.11); se il fatto compare senza la formazione, l'annuncio mentirebbe.
+        case avvistamentoSenzaFormazione(riga: Int, colonna: Int)
 
         /// Il codice della violazione, senza spazi: l'uscita del programma di
         /// verifica è dato per chi sviluppa e non testo di prodotto (05 §12.6),
@@ -186,6 +198,8 @@ public struct SondaInvariantiCampagna: Sendable {
             case .appostatoConAzioneNonSpesa(let g): return "appostato_senza_azione:gruppo=\(g)"
             case .occultamentoViolato(let p, let r, let c): return "occultamento_violato:parte=\(p):riga=\(r):casella=\(c)"
             case .partitaNonTerminata(let g): return "partita_non_terminata:giornate=\(g)"
+            case .nessunAvvistamentoInPartita: return "nessun_avvistamento_in_partita"
+            case .avvistamentoSenzaFormazione(let r, let c): return "avvistamento_senza_formazione:riga=\(r):casella=\(c)"
             }
         }
     }
@@ -239,6 +253,8 @@ public struct SondaInvariantiCampagna: Sendable {
         "appostato_senza_azione",
         "occultamento_violato",
         "partita_non_terminata",
+        "nessun_avvistamento_in_partita",
+        "avvistamento_senza_formazione",
     ]
 
     /// Il codice nudo, senza i valori: la parte prima dei due punti.
@@ -387,6 +403,17 @@ public struct SondaInvariantiCampagna: Sendable {
     /// scenario che lo produce va dichiarato, non nascosto con un freno.
     public func controllaTerminazione(giorniTrascorsi: Int, limite: Int) -> [Violazione] {
         giorniTrascorsi > limite ? [.partitaNonTerminata(giornate: giorniTrascorsi)] : []
+    }
+
+    /// L'AVVISTAMENTO AVVENUTO (01 §5.6.11, incarico 22): in una partita CONTRO l'avversario il
+    /// giocatore, muovendosi normalmente, avvista almeno una formazione avversaria dal principio
+    /// alla fine. Se non ne avvista nessuna, l'avversario non si è mai manifestato — il difetto che
+    /// il titolare vide giocando la build 23 e che il collaudo non aveva colto. Il conteggio arriva
+    /// dall'esterno (lo produce il banco lungo la corsa), come per la terminazione, così che la
+    /// sonda giudichi senza rifare la partita col medesimo codice. Negli scenari SENZA avversario
+    /// non c'è nulla da avvistare e l'invariante tace.
+    public func controllaAvvistamentoAvvenuto(avvistamenti: Int, conAvversario: Bool) -> [Violazione] {
+        (conAvversario && avvistamenti == 0) ? [.nessunAvvistamentoInPartita] : []
     }
 
     // MARK: - Invarianti della transizione
@@ -707,13 +734,25 @@ public struct SondaInvariantiCampagna: Sendable {
         guard dopo.registro.count > prima.registro.count else { return violazioni }
         for voce in dopo.registro.suffix(dopo.registro.count - prima.registro.count) {
             switch voce.fatto {
-            case .formazioneAvversariaAvvistata(let casella),
-                 .formazioneStudiata(let casella), .direzioneDedotta(let casella):
-                // Avvistamento, studio e deduzione dell'itinerario sono del solo giocatore e
-                // senza nome: legittimi solo dove il giocatore OSSERVA — dove il suo
-                // esploratore è sulla casella studiata, o entro il raggio della colonna
-                // avvistata o dedotta (01 §5.6.11, §5.10.1). Un fatto simile su una casella
-                // che non osserva è una fuga d'informazione.
+            case .formazioneAvversariaAvvistata(let casella):
+                // L'avvistamento è del solo giocatore e senza nome: legittimo solo dove il
+                // giocatore OSSERVA (01 §5.6.11). Un avvistamento su una casella che non osserva
+                // è una fuga d'informazione; ma non basta osservare — a un avvistamento DEVE
+                // corrispondere una formazione avversaria realmente su quella casella (incarico 22),
+                // altrimenti il gioco dichiarerebbe il falso, la violazione più grave. Le due
+                // condizioni sono distinte: la prima è ciò che il giocatore NON dovrebbe sapere, la
+                // seconda ciò che NON è vero. La presenza dell'avversario si legge sullo stato dopo,
+                // che è quello in cui il fatto è stato annotato (l'arrivo che l'ha prodotto).
+                if !osservataDalGiocatore(casella) {
+                    violazioni.append(.registroRivelaIgnoto(voce: voce.numero))
+                } else if !dopo.gruppi.values.contains(where: {
+                    $0.parte == .avversario && $0.posizione == casella }) {
+                    violazioni.append(.avvistamentoSenzaFormazione(riga: casella.riga, colonna: casella.colonna))
+                }
+            case .formazioneStudiata(let casella), .direzioneDedotta(let casella):
+                // Studio e deduzione dell'itinerario sono del solo giocatore e senza nome:
+                // legittimi solo dove il giocatore OSSERVA — dove il suo esploratore è sulla
+                // casella studiata, o entro il raggio della colonna dedotta (01 §5.6.11, §5.10.1).
                 if !osservataDalGiocatore(casella) {
                     violazioni.append(.registroRivelaIgnoto(voce: voce.numero))
                 }
