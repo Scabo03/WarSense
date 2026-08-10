@@ -79,6 +79,7 @@ extension FattoRegistrato: CodificabileCanonico {
              .formazioneSabotata(let casella),
              .formazioneStudiata(let casella),
              .imboscataScattata(let casella),
+             .imboscataScoperta(let casella),
              .direzioneDedotta(let casella):
             casella.codifica(in: &c)
         case .ordineAnnullato, .giornataAzzerata:
@@ -181,6 +182,18 @@ extension StatoCampagna {
                 c.testo(i.imboscante.rawValue)
                 c.intero(i.intruso.numero)
                 c.intero(Int64(i.giorno))
+            }
+        }
+        // Le imboscate SCOPERTE dalla ricognizione, per parte e casella (incarico 21): due
+        // partite in cui un'imboscata è scoperta o no non sono lo stesso stato (l'occultamento vi
+        // dipende). Omesse quando nessuna scoperta, così che le partite senza scoperte restino
+        // identiche al byte alle precedenti.
+        if imboscateScoperte.values.contains(where: { !$0.isEmpty }) {
+            for parte in Parte.allCases {
+                let insieme = imboscateScoperte[parte] ?? []
+                c.testo(parte.rawValue)
+                c.intero(Int64(insieme.count))
+                for casella in insieme.sorted() { casella.codifica(in: &c) }
             }
         }
         return SHA256.improntaEsadecimale(c.byte)

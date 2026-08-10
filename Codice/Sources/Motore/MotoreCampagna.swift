@@ -166,15 +166,6 @@ public struct MotoreCampagna: Sendable {
             guard gruppo.sostaDovuta < 2 else { return .nonValido(.deveRifornirsi) }
             return .valido
 
-        case .revocaImboscata(let idGruppo):
-            guard let gruppo = stato.gruppi[idGruppo], gruppo.parte == parte else {
-                return .nonValido(.gruppoIgnoto)
-            }
-            // La revoca dell'imboscata si compie solo su un gruppo appostato (01 §5.11). Non
-            // controlla `azioneSpesa`: come la revoca della marcia, non è un'azione.
-            guard gruppo.ordineImboscata else { return .nonValido(.gruppoNonInAgguato) }
-            return .valido
-
         case .sabotaggio(let idGruppo):
             guard let gruppo = stato.gruppi[idGruppo], gruppo.parte == parte else {
                 return .nonValido(.gruppoIgnoto)
@@ -348,15 +339,36 @@ public struct MotoreCampagna: Sendable {
     /// (01 §12). Il presunto nasce solo dalla deduzione dell'itinerario (01 §5.10.1,
     /// blocco successivo) e non da qui.
     public func conoscenza(di cella: Cella, per parte: Parte, stato: StatoCampagna) -> StatoConoscenza {
-        if osservata(cella, da: parte, stato: stato) { return .confermato }
-        // Un ricordo reale — anche invecchiato in avvistato — prevale sulla deduzione: chi ha
-        // visto sa più di chi presume. Il presunto interviene solo dove non c'è alcun ricordo.
-        if let eta = stato.conoscenza[parte]?[cella] {
-            return StatoConoscenza.da(eta: eta,
-                                      sogliaConfermato: valoriCampagna.conoscenza.sogliaConfermatoInAvvistato)
+        let soglia = valoriCampagna.conoscenza.sogliaConfermatoInAvvistato
+        // L'OCCULTAMENTO dell'imboscata (01 §5.11.1, incarico 21): se nella casella c'è un gruppo
+        // AVVERSARIO APPOSTATO che questa parte non ha ancora SCOPERTO con la ricognizione, la
+        // parte NON può confermarla — un gruppo nascosto non si individua osservando (§5.11.1) — e
+        // la sua conoscenza RETROCEDE al solo ricordo, mai a confermato. Non è un'eccezione alla
+        // visibilità: è la conoscenza che retrocede. Il gioco non dichiara il falso: non annuncia
+        // mai «vuoto» né «confermato», ma «avvistato» (notizia non più certa) o meno. Vale
+        // simmetricamente per le due parti. La scoperta (imboscateScoperte) leva l'occultamento.
+        let avversa: Parte = parte == .giocatore ? .avversario : .giocatore
+        let appostatoNascosto = stato.occupante(di: cella, parte: avversa)?.ordineImboscata == true
+            && stato.imboscateScoperte[parte]?.contains(cella) != true
+        if appostatoNascosto {
+            let base = statoDalRicordo(di: cella, per: parte, stato: stato, soglia: soglia)
+            // Un ricordo ancora fresco (confermato per età) retrocede al limite dell'avvistato: il
+            // gruppo si è nascosto, sicché la certezza recente non vale più. Mai «vuoto», mai il falso.
+            if case .confermato = base { return .avvistato(turni: soglia) }
+            return base
         }
-        // Il PRESUNTO nasce SOLO dalla deduzione dell'itinerario (01 §5.10.1, RDA-110): una
-        // casella a valle di una colonna che gli esploratori hanno visto seguire una strada.
+        if osservata(cella, da: parte, stato: stato) { return .confermato }
+        return statoDalRicordo(di: cella, per: parte, stato: stato, soglia: soglia)
+    }
+
+    /// Lo stato di conoscenza dal solo RICORDO, senza l'osservazione corrente (01 §5.3): un ricordo
+    /// reale — anche invecchiato in avvistato — prevale sulla deduzione, chi ha visto sa più di chi
+    /// presume; il PRESUNTO (01 §5.10.1, RDA-110) interviene solo dove non c'è alcun ricordo.
+    private func statoDalRicordo(di cella: Cella, per parte: Parte, stato: StatoCampagna,
+                                 soglia: Int) -> StatoConoscenza {
+        if let eta = stato.conoscenza[parte]?[cella] {
+            return StatoConoscenza.da(eta: eta, sogliaConfermato: soglia)
+        }
         if stato.presunti[parte]?.contains(cella) == true { return .presunto }
         return .inesplorato
     }
@@ -394,7 +406,15 @@ public struct MotoreCampagna: Sendable {
         for g in propri { volumi[g.id] = volume(di: g) }
         var note = Set<Cella>()
         for g in stato.gruppi.values where g.parte == .giocatore {
-            if osservata(g.posizione, da: .avversario, stato: stato) { note.insert(g.posizione) }
+            // Un gruppo del giocatore APPOSTATO resta occulto per l'avversario (01 §5.11.1,
+            // incarico 21): non entra fra le note — l'avversario decide sulla propria conoscenza e
+            // vi può cadere — finché i propri esploratori non lo SCOPRONO. Scoperto, l'avversario lo
+            // tratta come ostacolo e ne sta alla larga (aggiramento). Un gruppo non appostato entra
+            // fra le note appena l'avversario lo osserva, come sempre (incarico 18).
+            let confermata = g.ordineImboscata
+                ? stato.imboscateScoperte[.avversario]?.contains(g.posizione) == true
+                : osservata(g.posizione, da: .avversario, stato: stato)
+            if confermata { note.insert(g.posizione) }
         }
         return VistaAvversario(mappa: stato.mappa, marcia: valoriCampagna.marcia,
                                condotta: valoriCampagna.condotta,
@@ -424,13 +444,13 @@ public struct MotoreCampagna: Sendable {
                  .gruppoDiviso(let g, _, _, _, _), .gruppiRiuniti(let g, _, _, _),
                  .rifornimentoInterrotto(let g, _, _), .sostaDiRifornimento(let g, _, _),
                  .rifornimentoRipreso(let g, _, _),
-                 .imboscataOrdinata(let g, _, _),
-                 .imboscataRevocata(let g, _, _), .sabotaggioCompiuto(let g, _, _, _),
+                 .imboscataOrdinata(let g, _, _), .sabotaggioCompiuto(let g, _, _, _),
                  .studioCompiuto(let g, _, _):
                 return diGiocatore(g)
-            case .esplorazioneCompiuta(let p, _, _, _, _):
-                // Il gruppo può essere stato rimosso (esito perduti): si guarda la parte,
-                // non l'identificatore, per stabilire a chi consegnare l'annuncio.
+            case .esplorazioneCompiuta(let p, _, _, _, _), .imboscataScoperta(let p, _):
+                // L'esplorazione (il gruppo può essere stato rimosso, esito perduti) e la scoperta
+                // di un'imboscata si consegnano guardando la PARTE: solo le proprie scoperte
+                // raggiungono il giocatore, mai quelle dell'avversario (01 §5.11.1).
                 return p == .giocatore
             }
         }
@@ -639,6 +659,13 @@ public struct MotoreCampagna: Sendable {
                 // zero sulle caselle entro il raggio di esplorazione, più ampio dell'ordinario.
                 rivelaArea(attorno: casella, per: parte,
                            raggio: valoriCampagna.ricognizione.raggioEsplorazione, in: &nuovo)
+                // SCOPERTA DELLE IMBOSCATE (01 §5.11.1, incarico 21): l'esplorazione riuscita è il
+                // SOLO modo di scoprire un'imboscata pendente. Ogni gruppo avversario appostato
+                // nell'area scoperta viene rivelato — la sua casella entra fra le scoperte, che
+                // levano l'occultamento, e il fatto entra nel registro col luogo.
+                eventi.append(contentsOf: scopriLeImboscate(
+                    attorno: casella, per: parte,
+                    raggio: valoriCampagna.ricognizione.raggioEsplorazione, in: &nuovo))
             case .aManiVuote:
                 break
             case .notati:
@@ -662,21 +689,15 @@ public struct MotoreCampagna: Sendable {
 
         case .imboscata(let idGruppo):
             let gruppo = nuovo.gruppi[idGruppo]!
-            // Colloca il gruppo in agguato (01 §5.11): resta lì attraverso le giornate, e la
-            // sua giornata è consumata (azione spesa oggi, `ordineImboscata` da domani). Non
-            // dichiara il falso: l'avversario non lo individua perché la casella non è per lui
-            // confermata, non perché il gioco menta (01 §5.11.1). Fatto deciso: annuncio, non registro.
+            // Colloca il gruppo in agguato OGGI (01 §5.11) e CONSUMA l'azione (incarico 21):
+            // `ordineImboscata` e `azioneSpesa` valgono per questa giornata e si azzerano insieme
+            // all'apertura della prossima — l'ordine va rinnovato. L'occultamento è realizzato dalla
+            // conoscenza che retrocede (§5.11.1, `conoscenza`): il gioco non dichiara il falso —
+            // l'avversario non individua l'appostato perché la casella non è per lui confermata, non
+            // perché il gioco menta. Fatto deciso dal giocatore: annuncio di conferma, non registro.
             nuovo.gruppi[idGruppo]!.ordineImboscata = true
             nuovo.gruppi[idGruppo]!.azioneSpesa = true
             eventi.append(.imboscataOrdinata(gruppo: idGruppo, nome: gruppo.nome, casella: gruppo.posizione))
-
-        case .revocaImboscata(let idGruppo):
-            let gruppo = nuovo.gruppi[idGruppo]!
-            // La revoca leva l'agguato e spende la giornata corrente (come la revoca della
-            // marcia, RDA-100): il gruppo torna libero dalla giornata successiva. Non annota.
-            nuovo.gruppi[idGruppo]!.ordineImboscata = false
-            nuovo.gruppi[idGruppo]!.azioneSpesa = true
-            eventi.append(.imboscataRevocata(gruppo: idGruppo, nome: gruppo.nome, casella: gruppo.posizione))
 
         case .sabotaggio(let idGruppo):
             let gruppo = nuovo.gruppi[idGruppo]!
@@ -798,25 +819,23 @@ public struct MotoreCampagna: Sendable {
             eventi.append(.giornataChiusa(giorno: chiuso))
             eventi.append(contentsOf: risolviFineGiornata(&stato))
             stato.giorno += 1
-            // Le azioni si azzerano; le marce in corso restano e continuano a
-            // consumare la giornata (01 §5.16.1).
-            for id in stato.gruppi.keys.sorted() { stato.gruppi[id]!.azioneSpesa = false }
+            // Le azioni si azzerano; le marce in corso restano e continuano a consumare la
+            // giornata (01 §5.16.1). L'ORDINE DI IMBOSCATA si azzera con l'azione (incarico 21):
+            // l'imboscata è un'azione che si RINNOVA, non uno stato che dura, sicché un gruppo
+            // appostato torna in ATTESA il mattino dopo. È ciò che scioglie alla radice la
+            // cascata infinita di uno stato di soli agguati (il difetto del banco, incarico 20):
+            // un gruppo tornato in attesa non è più «concluso», e il ciclo si ferma. Nessun freno
+            // che nasconda: la terminazione discende dalla natura dell'ordine. Le imboscate
+            // SCOPERTE si azzerano con esse — ogni giornata è una nuova imboscata da scoprire (§5.4).
+            for id in stato.gruppi.keys.sorted() {
+                stato.gruppi[id]!.azioneSpesa = false
+                stato.gruppi[id]!.ordineImboscata = false
+            }
+            stato.imboscateScoperte = [:]
             // L'apertura della giornata NON produce una voce di registro: il giorno è
             // una proprietà di ciascuna voce (02 §6.6) e non un fatto a sé. Resta
             // l'annuncio, che il cambiamento di stato rilevante richiede (00 §11.4).
             eventi.append(.giornataAperta(giorno: stato.giorno))
-            // Un gruppo in AGGUATO ha concluso la giornata ma NON progredisce da sé — a
-            // differenza di una marcia, che si compie in un numero finito di giorni e
-            // libera il gruppo (01 §5.11.3). Se dopo la chiusura tutti i gruppi restano
-            // conclusi e NESSUNO è in marcia — sono tutti appostati (o già agito, ma
-            // l'azzeramento li avrebbe liberati) — la cascata si fermerebbe soltanto
-            // all'infinito: la giornata si chiude una volta e ci si ferma, in attesa che
-            // un'imboscata scatti o che il giocatore agisca. Senza questo, uno stato di soli
-            // agguati farebbe scorrere i giorni senza fine (difetto trovato al banco).
-            if stato.gruppi.values.allSatisfy({ $0.haConclusoLaGiornata }),
-               !stato.gruppi.values.contains(where: { $0.inMarcia }) {
-                break
-            }
         }
         return eventi
     }
@@ -871,6 +890,32 @@ public struct MotoreCampagna: Sendable {
             annota(.imboscataScattata(casella: casella), in: &stato)
             eventi.append(.imboscataScattata(casella: casella))
         }
+        return eventi
+    }
+
+    /// La SCOPERTA delle imboscate (01 §5.11.1, incarico 21): dentro il raggio di un'esplorazione
+    /// RIUSCITA, ogni gruppo avversario APPOSTATO non ancora scoperto viene rivelato. La sua casella
+    /// entra in `imboscateScoperte[parte]`, che leva l'occultamento (`conoscenza` la torna
+    /// confermata e la parte vi vede l'appostato), e il fatto è annotato nel registro col luogo —
+    /// del solo giocatore, come gli altri fatti (l'avversario decide sulla propria conoscenza e il
+    /// giocatore non apprende le sue scoperte). Deterministica: nessuna estrazione, discende dalla
+    /// stessa riuscita dell'esplorazione (§5.4); l'ordine delle caselle è fisso (per id del gruppo).
+    func scopriLeImboscate(attorno centro: Cella, per parte: Parte, raggio: Int,
+                           in stato: inout StatoCampagna) -> [EventoCampagna] {
+        var eventi: [EventoCampagna] = []
+        let avversa: Parte = parte == .giocatore ? .avversario : .giocatore
+        var scoperte = stato.imboscateScoperte[parte] ?? []
+        for g in stato.gruppi(di: avversa)
+        where g.ordineImboscata
+            && stato.griglia.distanza(g.posizione, centro) <= raggio
+            && !scoperte.contains(g.posizione) {
+            scoperte.insert(g.posizione)
+            if parte == .giocatore {
+                annota(.imboscataScoperta(casella: g.posizione), in: &stato)
+            }
+            eventi.append(.imboscataScoperta(parte: parte, casella: g.posizione))
+        }
+        stato.imboscateScoperte[parte] = scoperte
         return eventi
     }
 

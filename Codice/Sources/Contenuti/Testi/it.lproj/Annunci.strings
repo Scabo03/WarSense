@@ -218,8 +218,6 @@
 "campagna.esploratori_perduti.sintetico" = "%1$@ perduto in riga %2$d, casella %3$d";
 "campagna.imboscata_ordinata" = "%1$@ si è messo in agguato in riga %2$d, casella %3$d";
 "campagna.imboscata_ordinata.sintetico" = "%1$@ in agguato in riga %2$d, casella %3$d";
-"campagna.imboscata_revocata" = "%1$@: agguato revocato in riga %2$d, casella %3$d";
-"campagna.imboscata_revocata.sintetico" = "%1$@ lascia l'agguato";
 "campagna.sabotaggio_riuscito" = "%1$@ ha sabotato una formazione avversaria in riga %2$d, casella %3$d";
 "campagna.sabotaggio_riuscito.sintetico" = "%1$@ sabota in riga %2$d, casella %3$d";
 "campagna.sabotaggio_fallito" = "%1$@ si è fatto notare, sabotaggio fallito in riga %2$d, casella %3$d";
@@ -228,6 +226,8 @@
 "campagna.formazione_studiata.sintetico" = "%1$@ studia in riga %2$d, casella %3$d";
 "campagna.imboscata_scattata" = "Imboscata scattata in riga %1$d, casella %2$d";
 "campagna.imboscata_scattata.sintetico" = "Imboscata in riga %1$d, casella %2$d";
+"campagna.imboscata_scoperta" = "Imboscata avversaria scoperta in riga %1$d, casella %2$d";
+"campagna.imboscata_scoperta.sintetico" = "Imboscata scoperta in riga %1$d, casella %2$d";
 "campagna.direzione_dedotta" = "Una colonna avversaria segue una strada da riga %1$d, casella %2$d";
 "campagna.direzione_dedotta.sintetico" = "Colonna dedotta da riga %1$d, casella %2$d";
 
@@ -252,6 +252,7 @@
 "registro.formazione_sabotata" = "Giorno %1$d: formazione avversaria sabotata in riga %2$d, casella %3$d";
 "registro.formazione_studiata" = "Giorno %1$d: formazione avversaria studiata in riga %2$d, casella %3$d";
 "registro.imboscata_scattata" = "Giorno %1$d: imboscata scattata in riga %2$d, casella %3$d";
+"registro.imboscata_scoperta" = "Giorno %1$d: imboscata avversaria scoperta in riga %2$d, casella %3$d";
 "registro.direzione_dedotta" = "Giorno %1$d: dedotta la direzione di una colonna avversaria da riga %2$d, casella %3$d";
 "registro.ordine_annullato" = "Giorno %d: ordine annullato";
 "registro.giornata_azzerata" = "Giorno %d: ordini della giornata azzerati";
@@ -319,7 +320,6 @@
 "pannello.sabota" = "Sabota la formazione avversaria";
 "pannello.studia" = "Studia a fondo la formazione avversaria";
 "pannello.imboscata" = "Mettiti in agguato";
-"pannello.revoca_imboscata" = "Lascia l'agguato";
 "pannello.revoca_conferma_azione" = "Conferma la revoca";
 
 /* Schermata di divisione (01 §5.6.0.2, 02 §10.3): ogni riga una frase compatta.

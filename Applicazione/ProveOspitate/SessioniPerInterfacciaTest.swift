@@ -130,7 +130,7 @@ final class SessioniPerInterfacciaTest: XCTestCase {
                     in: CGPoint(x: bersaglio.midX, y: bersaglio.midY)),
                               "il dito non ordina la marcia verso \(meta)")
             case .revocaMarcia, .divisione, .riunione, .sostaConRaccolta,
-                 .esplorazione, .imboscata, .revocaImboscata, .sabotaggio, .studioApprofondito:
+                 .esplorazione, .imboscata, .sabotaggio, .studioApprofondito:
                 // La condotta delle sessioni complete non revoca, non divide, non
                 // riunisce e non sosta: le sue campagne non hanno forze nemiche (il
                 // rifornimento non si taglia mai), sicché la sosta non si presenta. Né

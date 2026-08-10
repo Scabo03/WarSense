@@ -181,13 +181,21 @@ public struct CondottaAvversaria: Sendable {
                 miglioreComando = comando
             }
         }
-        // In assenza di guadagno il gruppo armato PRESIDIA, come nell'incarico 18: continua ad
-        // avanzare quando conviene, e non si ferma a vuoto in modo da smettere di premere. La
-        // CAPACITÀ di tendere imboscate esiste ed è simmetrica (la validazione ammette l'ordine
-        // di imboscata per l'avversario esattamente come per il giocatore, RDA-112): che il
-        // giocatore vi possa cadere è provato da una prova dedicata (AvversarioCampagnaTest). La
-        // TATTICA con cui la condotta sceglie di appostarsi — invece di limitarsi a poterlo — è
-        // una manopola del carattere, rinviata con la sua taratura (01 §6.1.3, dichiarato in S18).
+        // L'IMBOSCATA dell'avversario (01 §5.11, incarico 21): un gruppo armato che NON guadagna
+        // avanzando (presiderebbe) ma ha una formazione nota del giocatore ADIACENTE si APPOSTA
+        // invece di restare fermo a vuoto — tende l'agguato a chi gli è alla porta anziché
+        // cederglielo. È la simmetria dell'imboscata resa reale: la casella diventa occulta per il
+        // giocatore (la sua conoscenza vi retrocede, §5.11.1), il giocatore vi può cadere entrando,
+        // e i suoi esploratori possono scoprirla. Deterministica e senza estrazione. È la tattica
+        // che S18 aveva RINVIATO come manopola del carattere (01 §6.1.3): questa decisione del
+        // titolare (incarico 21) la avvia in forma MINIMA e PROVVISORIA — la soglia dell'agguato e
+        // il suo raggio restano da tarare col gioco, come il resto del carattere.
+        if case .presidio = miglioreComando,
+           noti.contains(where: { griglia.distanza($0, partenza) == 1 }) {
+            return .imboscata(gruppo: gruppo.id)
+        }
+        // Altrimenti PRESIDIA (incarico 18): continua ad avanzare quando conviene, e non si ferma a
+        // vuoto in modo da smettere di premere.
         return miglioreComando
     }
 

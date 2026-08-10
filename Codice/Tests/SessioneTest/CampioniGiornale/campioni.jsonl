@@ -24,6 +24,5 @@
 {"numero":23,"voce":{"comandoCampagna":{"comando":{"sostaConRaccolta":{"gruppo":{"numero":1}}},"parte":"giocatore"}}}
 {"numero":24,"voce":{"comandoCampagna":{"comando":{"esplorazione":{"gruppo":{"numero":1}}},"parte":"giocatore"}}}
 {"numero":25,"voce":{"comandoCampagna":{"comando":{"imboscata":{"gruppo":{"numero":1}}},"parte":"giocatore"}}}
-{"numero":26,"voce":{"comandoCampagna":{"comando":{"revocaImboscata":{"gruppo":{"numero":1}}},"parte":"giocatore"}}}
 {"numero":27,"voce":{"comandoCampagna":{"comando":{"sabotaggio":{"gruppo":{"numero":1}}},"parte":"giocatore"}}}
 {"numero":28,"voce":{"comandoCampagna":{"comando":{"studioApprofondito":{"gruppo":{"numero":1}}},"parte":"giocatore"}}}

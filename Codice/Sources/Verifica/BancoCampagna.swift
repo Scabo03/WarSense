@@ -173,6 +173,17 @@ public struct BancoCampagna: Sendable {
         /// è sempre fra parti opposte, sicché ne conta le imboscate di entrambe le parti.
         public let imboscatePiazzate: Int
         public let imboscateScattate: Int
+        /// Le imboscate dell'avversario SUBITE dal giocatore (01 §5.11, incarico 21): lo scatto in
+        /// cui il GIOCATORE è caduto entrando in una casella occultata di cui non aveva notizia
+        /// certa. Sottoinsieme degli scatti, dalla parte di chi cade.
+        public let imboscateSubite: Int
+        /// Le imboscate avversarie SCOPERTE dalla ricognizione del giocatore (01 §5.11.1, incarico
+        /// 21): un'esplorazione riuscita ne ha rivelato la casella, prima occulta.
+        public let imboscateScoperte: Int
+        /// Le GIORNATE in cui TUTTI i gruppi di una parte erano appostati (01 §5.11, incarico 21):
+        /// il caso limite che l'incarico 20 non terminava e che ora, con l'imboscata che consuma
+        /// l'azione, si chiude da sé.
+        public let giornateTuttiAppostati: Int
         public let violazioni: [String]
         public let improntaFinale: String
     }
@@ -200,6 +211,11 @@ public struct BancoCampagna: Sendable {
         var violazioni = Set<String>()
         var ordini = 0, marce = 0, marceLunghe = 0, marceCompiute = 0, revoche = 0
         var presidi = 0, senzaDestinazione = 0, divisioni = 0, riunioni = 0
+        // La riunione va fatta «ogni tanto» (non a ogni giro): senza questo freno si fondevano
+        // tutte le coppie adiacenti nello stesso giorno, disfacendo ogni scenario stipato prima
+        // che la condotta ne ordinasse un gruppo — sicché lo STIPAMENTO (un gruppo senza
+        // destinazione, `senzaDestinazione`) non si esercitava mai. Una riunione al giorno.
+        var giornoUltimaRiunione = Int.min
         // I fenomeni dell'avversario, misurati lungo la corsa.
         let qgGiocatore = stato.mappa.quartierGenerale(di: .giocatore)
         var gruppiAggiranti = Set<IdGruppo>()
@@ -212,10 +228,22 @@ public struct BancoCampagna: Sendable {
         // I fenomeni della ricognizione, delle imboscate e delle azioni contro le non armate.
         var esplRiuscite = 0, esplManiVuote = 0, esplNotati = 0, esplPerduti = 0
         var sabArmati = 0, sabEsploratori = 0, sabFalliti = 0, studi = 0
-        var imboscatePiazzate = 0, imboscateScattate = 0
+        var imboscatePiazzate = 0, imboscateScattate = 0, imboscateSubite = 0, imboscateScoperte = 0
+        // Le GIORNATE con tutti i gruppi di una parte appostati: insieme di giorni, contato una
+        // sola volta ciascuno (il fenomeno del caso limite dell'incarico 20). Solo un gruppo armato
+        // può appostarsi, sicché il caso richiede una parte di soli armati, tutti in agguato.
+        var giorniTuttiAppostati = Set<Int>()
+        func aggiornaTuttiAppostati(_ s: StatoCampagna) {
+            for parte in [Parte.giocatore, .avversario] {
+                let propri = s.gruppi(di: parte)
+                if !propri.isEmpty, propri.allSatisfy({ $0.ordineImboscata }) {
+                    giorniTuttiAppostati.insert(s.giorno)
+                }
+            }
+        }
         // Conta i fenomeni prodotti da una serie di eventi, sullo stato PRIMA (per leggere la
-        // categoria di chi sabota, che l'evento non porta). Vale per il giocatore e per
-        // l'avversario: lo scatto d'imboscata è fra parti opposte e va contato una sola volta.
+        // categoria di chi sabota e la parte di chi ha teso l'agguato, che l'evento non porta).
+        // Vale per il giocatore e per l'avversario: lo scatto d'imboscata è fra parti opposte.
         func contaFenomeni(_ eventi: [EventoCampagna], prima: StatoCampagna) {
             for evento in eventi {
                 switch evento {
@@ -232,7 +260,18 @@ public struct BancoCampagna: Sendable {
                         else { sabEsploratori += 1 }
                     } else { sabFalliti += 1 }
                 case .studioCompiuto: studi += 1
-                case .imboscataScattata: imboscateScattate += 1
+                case .imboscataScattata(let casella):
+                    imboscateScattate += 1
+                    // Chi ha teso l'agguato, letto sullo stato PRIMA (l'evento non lo porta): se è
+                    // l'AVVERSARIO, il giocatore vi è caduto — è un'imboscata SUBITA, il fenomeno
+                    // «cadere in un agguato non scoperto» dalla parte del giocatore.
+                    if prima.gruppi.values.first(where: { $0.posizione == casella && $0.ordineImboscata })?.parte == .avversario {
+                        imboscateSubite += 1
+                    }
+                case .imboscataScoperta(let parte, _):
+                    // La scoperta dei propri esploratori (l'evento la porta con la parte): quella
+                    // del giocatore è il fenomeno da riportare.
+                    if parte == .giocatore { imboscateScoperte += 1 }
                 default: break
                 }
             }
@@ -280,10 +319,11 @@ public struct BancoCampagna: Sendable {
             // La riunione (non è un'azione): ogni tanto due gruppi adiacenti si
             // fondono, purché ne restino almeno due, così da esercitare la regola
             // dell'azione già spesa senza far collassare lo scenario a un gruppo solo.
-            if stato.giorno % 4 == 1, stato.gruppi.count > 2,
+            if stato.giorno % 4 == 1, stato.giorno != giornoUltimaRiunione, stato.gruppi.count > 2,
                let (a, b) = coppiaRiunibile(stato) {
                 comando = .riunione(gruppo: a, con: b)
                 riunioni += 1
+                giornoUltimaRiunione = stato.giorno
             // La divisione (costa l'azione): ogni tanto un gruppo divisibile stacca il
             // primo reparto in una casella libera, se un nome è disponibile.
             } else if stato.giorno % 7 == 3,
@@ -373,6 +413,7 @@ public struct BancoCampagna: Sendable {
                 stato: dopo, volumePerAtomo: volumePerAtomo,
                 volumiRiportati: volumiRiportati).map(\.description))
             stato = dopo
+            aggiornaTuttiAppostati(stato)
             ordini += 1
 
             // Il turno dell'AVVERSARIO (01 §5.6.11): appena il giocatore ha concluso, la
@@ -398,6 +439,7 @@ public struct BancoCampagna: Sendable {
                     if case .marciaCompiuta = $1 { return $0 + 1 } else { return $0 }
                 }
                 contaFenomeni(eventiAvv, prima: primaAvv)
+                aggiornaTuttiAppostati(dopoAvv)
                 violazioni.formUnion(sonda.controlla(prima: primaAvv, comando: comandoAvv, dopo: dopoAvv,
                                                      eventi: eventiAvv,
                                                      adiacenti: primaAvv.griglia.adiacenti).map(\.description))
@@ -470,6 +512,8 @@ public struct BancoCampagna: Sendable {
                      sabotaggiArmati: sabArmati, sabotaggiEsploratori: sabEsploratori,
                      sabotaggiFalliti: sabFalliti, studi: studi,
                      imboscatePiazzate: imboscatePiazzate, imboscateScattate: imboscateScattate,
+                     imboscateSubite: imboscateSubite, imboscateScoperte: imboscateScoperte,
+                     giornateTuttiAppostati: giorniTuttiAppostati.count,
                      violazioni: violazioni.sorted(), improntaFinale: stato.impronta())
     }
 

@@ -30,6 +30,7 @@ accaduto.
 
 | n. | data | materia | incarico | resoconto |
 |---|---|---|---|---|
+| 21 | 2026-08-10 | l'imboscata come ordine che si rinnova e consuma l'azione (scioglie il blocco del banco), l'occultamento per retrocessione della conoscenza senza dichiarare il falso, la scoperta riservata alla ricognizione; chiusura del lavoro sospeso e caricamento | [incarico](21-2026-08-10-imboscata-ordine-rinnovato-occultamento-incarico.md) | resoconto (in corso) |
 | 20 | 2026-08-09 | chiusura del lavoro su ricognizione, non armate e imboscate: interfaccia compilata e prove ospitate corrette, ma il collaudo si ferma su un difetto di progettazione (il banco non termina sugli scenari con avversario) — dichiarato, niente fusione né caricamento | [incarico](20-2026-08-09-chiusura-ricognizione-imboscate-incarico.md) | [resoconto](20-2026-08-09-chiusura-ricognizione-imboscate-resoconto.md) |
 | 19 | 2026-08-09 | ricognizione, formazioni non armate e imboscate (esploratori, sabotaggio e studio approfondito, aggiramento simmetrico, segni per categoria sulla mappa, arrivi fuori dal registro) | [incarico](19-2026-08-09-ricognizione-non-armate-imboscate-incarico.md) | [resoconto](19-2026-08-09-ricognizione-non-armate-imboscate-resoconto.md) |
 | 18 | 2026-08-08 | l'avversario che si muove sulla mappa di campagna (blocco 2: condotta deterministica, informazione incompleta, aggiramento, annuncio, giornale) | [incarico](18-2026-08-08-avversario-mappa-campagna-incarico.md) | [resoconto](18-2026-08-08-avversario-mappa-campagna-resoconto.md) |

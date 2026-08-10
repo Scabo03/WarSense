@@ -179,12 +179,15 @@ public struct Gruppo: Hashable, Codable, Sendable {
     /// Predisposto e non ancora alimentato: la marcia forzata è materia successiva, e
     /// oggi questo campo resta a zero (dichiarato nel resoconto).
     public var turniMarciaForzata: Int
-    /// Vero se il gruppo — armato — è APPOSTATO con l'ordine di imboscata (01 §5.11): resta
-    /// fermo nella casella, consuma rifornimenti e non produce nulla (01 §5.11.3), e se un
-    /// gruppo armato avversario vi entra l'imboscata scatta alla risoluzione di fine giornata
-    /// (01 §5.6.11). Persiste attraverso le giornate senza un nuovo ordine — un gruppo in
-    /// agguato ha CONCLUSO la giornata come uno inchiodato dalla marcia lunga — finché non
-    /// scatta o il giocatore lo revoca. Solo un gruppo armato lo porta (invariante).
+    /// Vero se il gruppo — armato — è APPOSTATO con l'ordine di imboscata OGGI (01 §5.11).
+    /// L'imboscata è un'AZIONE di giornata come le altre e ne CONSUMA l'azione (01 §5.6.0.5,
+    /// §5.6.8.1; decisione del titolare, incarico 21): non è più uno stato che dura. Si azzera
+    /// all'apertura della giornata come `azioneSpesa`, e va RINNOVATO ogni giornata perché il
+    /// gruppo resti appostato — «un ordine da ripetere, non uno stato che prosegue da sé». Se un
+    /// gruppo armato avversario entra nella casella, l'imboscata scatta alla risoluzione di fine
+    /// giornata (01 §5.6.11), PRIMA dell'azzeramento. Finché è appostato, la sua casella non è
+    /// confermata per l'avversario (l'occultamento, §5.11.1): la conoscenza dell'altra parte vi
+    /// retrocede da confermato. Solo un gruppo armato lo porta (invariante).
     public var ordineImboscata: Bool
 
     public init(id: IdGruppo, parte: Parte, nome: IdentificatoreDati,
@@ -210,13 +213,15 @@ public struct Gruppo: Hashable, Codable, Sendable {
     /// Vero se il gruppo è impegnato in una marcia lunga.
     public var inMarcia: Bool { marcia != nil }
 
-    /// Vero se il gruppo ha concluso la propria giornata, sia per averla spesa sia
-    /// perché una marcia lunga o un ordine di imboscata gliela consuma senza comando del
-    /// giocatore. È il criterio della chiusura automatica (01 §5.6.0.6) e dell'esclusione
-    /// dal salto e dal rotore: un gruppo in marcia non attende alcuna decisione, e un
-    /// gruppo appostato «non fa altro» (01 §5.6.0.5, §5.11.3) — resta in agguato attraverso
-    /// le giornate senza babysitting, come uno inchiodato dalla marcia.
-    public var haConclusoLaGiornata: Bool { azioneSpesa || inMarcia || ordineImboscata }
+    /// Vero se il gruppo ha concluso la propria giornata, sia per averla spesa — l'imboscata
+    /// compresa, che ora CONSUMA l'azione ponendo `azioneSpesa` (incarico 21) — sia perché una
+    /// marcia lunga gliela consuma senza comando del giocatore. È il criterio della chiusura
+    /// automatica (01 §5.6.0.6) e dell'esclusione dal salto e dal rotore. L'ordine di imboscata
+    /// NON compare più qui: non è più uno stato che dura oltre la giornata, ma un'azione che si
+    /// rinnova e che conclude la giornata attraverso `azioneSpesa` (§5.6.8.1). È la modifica che
+    /// scioglie la non terminazione del banco (incarico 20): un gruppo appostato torna in attesa
+    /// il mattino dopo — la giornata non può più riaprirsi all'infinito.
+    public var haConclusoLaGiornata: Bool { azioneSpesa || inMarcia }
 
     /// Lo stato che il gruppo dichiara quando lo si incontra (01 §5.16.1, 02 §4.4.1.1).
     /// La marcia lunga porta con sé i giorni mancanti (02 §4.4.5, termine chiuso
@@ -457,6 +462,11 @@ public enum FattoRegistrato: Hashable, Codable, Sendable {
     /// nella casella di un gruppo appostato. Lo scatto è sempre fra parti opposte e tocca
     /// sempre il giocatore — come imboscante o come vittima — e la voce vi entra col luogo.
     case imboscataScattata(casella: Cella)
+    /// Un'IMBOSCATA avversaria pendente è stata SCOPERTA dalla ricognizione del giocatore (01
+    /// §5.11.1, incarico 21): un'esplorazione riuscita ne ha rivelato la posizione, che torna
+    /// confermata. Del SOLO giocatore che scopre; col luogo, attivabile per portare il fuoco
+    /// sull'appostato scoperto. È il solo modo di scoprire un'imboscata (nessuna estrazione).
+    case imboscataScoperta(casella: Cella)
     /// DEDUZIONE sulla direzione di marcia di una colonna (01 §5.10.1): gli esploratori del
     /// giocatore hanno rilevato una colonna avversaria muoversi lungo una strada per due
     /// caselle consecutive e se ne deduce che la segua. Del solo giocatore; il luogo è la
@@ -481,6 +491,7 @@ public enum FattoRegistrato: Hashable, Codable, Sendable {
         .formazioneSabotata(casella: Cella(riga: 1, colonna: 1)),
         .formazioneStudiata(casella: Cella(riga: 1, colonna: 1)),
         .imboscataScattata(casella: Cella(riga: 1, colonna: 1)),
+        .imboscataScoperta(casella: Cella(riga: 1, colonna: 1)),
         .direzioneDedotta(casella: Cella(riga: 1, colonna: 1)),
     ]
 
@@ -500,6 +511,7 @@ public enum FattoRegistrato: Hashable, Codable, Sendable {
         case .formazioneSabotata: return "registro.formazione_sabotata"
         case .formazioneStudiata: return "registro.formazione_studiata"
         case .imboscataScattata: return "registro.imboscata_scattata"
+        case .imboscataScoperta: return "registro.imboscata_scoperta"
         case .direzioneDedotta: return "registro.direzione_dedotta"
         }
     }
@@ -519,6 +531,7 @@ public enum FattoRegistrato: Hashable, Codable, Sendable {
         case .formazioneSabotata(let casella): return casella
         case .formazioneStudiata(let casella): return casella
         case .imboscataScattata(let casella): return casella
+        case .imboscataScoperta(let casella): return casella
         case .direzioneDedotta(let casella): return casella
         case .ordineAnnullato, .giornataAzzerata: return nil
         }
@@ -617,6 +630,15 @@ public struct StatoCampagna: Hashable, Codable, Sendable {
     /// finché nessuna imboscata scatta; entra nell'impronta, perché due partite in cui
     /// un'imboscata è scattata o no non sono lo stesso stato.
     public var imboscateInSospeso: [ImboscataInSospeso]
+    /// Le imboscate SCOPERTE dalla ricognizione (01 §5.11.1, incarico 21): per ciascuna parte
+    /// osservatrice, le caselle in cui i propri esploratori hanno scoperto un'imboscata avversaria
+    /// pendente. È ciò che LEVA l'occultamento — una casella scoperta torna confermata per chi
+    /// l'ha scoperta, e vi si vede il gruppo appostato — mentre per chi non ha scoperto la
+    /// conoscenza resta retrocessa (§5.11.1). Si azzera all'apertura della giornata come l'ordine
+    /// di imboscata: ogni giornata è una nuova imboscata da scoprire (§5.4). Vuota senza
+    /// esploratori che scoprano; entra nell'impronta, perché due partite in cui un'imboscata è
+    /// scoperta o no non sono lo stesso stato.
+    public var imboscateScoperte: [Parte: Set<Cella>]
 
     public init(mappa: MappaCampagna, giorno: Int, gruppi: [IdGruppo: Gruppo],
                 prossimoIdGruppo: Int, prossimoIndiceNome: Int,
@@ -626,7 +648,8 @@ public struct StatoCampagna: Hashable, Codable, Sendable {
                 presunti: [Parte: Set<Cella>] = [:],
                 ultimaPosizioneNota: [Parte: [IdGruppo: Cella]] = [:],
                 studiati: [Parte: Set<IdGruppo>] = [:],
-                imboscateInSospeso: [ImboscataInSospeso] = []) {
+                imboscateInSospeso: [ImboscataInSospeso] = [],
+                imboscateScoperte: [Parte: Set<Cella>] = [:]) {
         self.mappa = mappa; self.giorno = giorno; self.gruppi = gruppi
         self.prossimoIdGruppo = prossimoIdGruppo
         self.prossimoIndiceNome = prossimoIndiceNome
@@ -637,6 +660,7 @@ public struct StatoCampagna: Hashable, Codable, Sendable {
         self.ultimaPosizioneNota = ultimaPosizioneNota
         self.studiati = studiati
         self.imboscateInSospeso = imboscateInSospeso
+        self.imboscateScoperte = imboscateScoperte
     }
 
     public var griglia: GrigliaCampagna { mappa.griglia }

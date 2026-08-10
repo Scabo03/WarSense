@@ -414,14 +414,12 @@ public struct SondaInvariantiCampagna: Sendable {
             // esploratori non inneschino mai battaglia lo sorveglia `esploratori_senza_battaglia`.
             if dopo.gruppi[id] != nil { idAgente = id }
         case .imboscata(let id):
+            // L'imboscata ora CONSUMA l'azione (incarico 21): il gruppo appostato è l'agente e la
+            // giornata gli è spesa, come le altre azioni. Sorvegliato dalle verifiche generiche.
             idAgente = id
             if prima.gruppi[id]?.inMarcia == true {
                 violazioni.append(.gruppoInMarciaHaRicevutoOrdine(gruppo: id.numero))
             }
-        case .revocaImboscata:
-            // Come la revoca della marcia, NON è un'azione (01 §5.6.8.1): nessun agente, e le
-            // verifiche generiche dell'azione si saltano.
-            break
         case .sabotaggio(let id), .studioApprofondito(let id):
             // Azioni con un agente che resta (sabotaggio e studio non rimuovono chi agisce, ma
             // il bersaglio): spendono la giornata come le altre.
@@ -674,12 +672,15 @@ public struct SondaInvariantiCampagna: Sendable {
                 if !nomiGiocatore.contains(g) {
                     violazioni.append(.registroRivelaIgnoto(voce: voce.numero))
                 }
-            case .formazioneSabotata, .imboscataScattata:
-                // Sabotaggio e scatto d'imboscata sono sempre fra parti opposte: con due sole
-                // parti coinvolgono sempre il giocatore — come attore o come vittima — a una
-                // casella di cui è parte (il suo bersaglio, la sua colonna, il suo agguato).
-                // Non c'è ignoto da rivelare, e la casella può non essere più osservata dopo
-                // la dispersione o l'ingresso, sicché non se ne esige l'osservazione.
+            case .formazioneSabotata, .imboscataScattata, .imboscataScoperta:
+                // Sabotaggio, scatto e SCOPERTA d'imboscata sono sempre fra parti opposte: con
+                // due sole parti coinvolgono sempre il giocatore — come attore o come vittima — a
+                // una casella di cui è parte (il suo bersaglio, la sua colonna, il suo agguato,
+                // l'imboscata avversaria che i SUOI esploratori hanno scoperto). La scoperta è
+                // annotata solo per il giocatore che scopre (scopriLeImboscate), sicché non c'è
+                // ignoto da rivelare; e la casella può non essere più osservata col raggio
+                // ordinario dopo la scoperta (l'esplorazione vede più lontano, §5.4), sicché non
+                // se ne esige l'osservazione.
                 break
             case .ordineAnnullato, .giornataAzzerata:
                 break

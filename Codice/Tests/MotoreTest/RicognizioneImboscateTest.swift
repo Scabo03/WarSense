@@ -145,7 +145,10 @@ final class RicognizioneImboscateTest: XCTestCase {
         var s = try stato([(.giocatore, .armato, Cella(riga: 5, colonna: 5)),
                            (.avversario, .armato, Cella(riga: 4, colonna: 5))])
         let imboscante = s.gruppi(di: .giocatore)[0].id
-        s.gruppi[imboscante]!.ordineImboscata = true  // appostato
+        // Appostato oggi: l'imboscata è un'azione che CONSUMA la giornata (incarico 21), sicché
+        // l'imboscante ha `azioneSpesa` come dopo il comando `.imboscata`, ed è concluso.
+        s.gruppi[imboscante]!.ordineImboscata = true
+        s.gruppi[imboscante]!.azioneSpesa = true
         let intruso = s.gruppi(di: .avversario)[0].id
         // L'avversario entra nella casella appostata: la sua marcia chiude la giornata
         // (l'imboscante ha già concluso), la risoluzione avanza la marcia e fa scattare.
@@ -167,6 +170,7 @@ final class RicognizioneImboscateTest: XCTestCase {
                            (.avversario, .ricognizione(competenza: 5), Cella(riga: 4, colonna: 5))])
         let imboscante = s.gruppi(di: .giocatore)[0].id
         s.gruppi[imboscante]!.ordineImboscata = true
+        s.gruppi[imboscante]!.azioneSpesa = true   // appostato consuma la giornata (incarico 21)
         let esploratore = s.gruppi(di: .avversario)[0].id
         let costo = motore.costoInGiorni(da: Cella(riga: 4, colonna: 5), a: Cella(riga: 5, colonna: 5),
                                          parte: .avversario, stato: s)
@@ -184,6 +188,7 @@ final class RicognizioneImboscateTest: XCTestCase {
                            (.giocatore, .armato, Cella(riga: 6, colonna: 5))])
         let imboscante = s.gruppi(di: .avversario)[0].id
         s.gruppi[imboscante]!.ordineImboscata = true
+        s.gruppi[imboscante]!.azioneSpesa = true   // appostato consuma la giornata (incarico 21)
         let intruso = s.gruppi(di: .giocatore)[0].id
         let costo = motore.costoInGiorni(da: Cella(riga: 6, colonna: 5), a: Cella(riga: 5, colonna: 5),
                                          parte: .giocatore, stato: s)

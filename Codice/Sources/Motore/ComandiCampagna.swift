@@ -63,18 +63,14 @@ public enum ComandoCampagna: Hashable, Codable, Sendable {
     /// competenza e l'insidiosità della zona (01 §5.4, §12): nessuna estrazione. Voce
     /// dell'elenco chiuso 01 §5.6.8.1, non nuova.
     case esplorazione(gruppo: IdGruppo)
-    /// IMBOSCATA (01 §5.11, §5.6.8.1): riservata ai gruppi armati. Colloca il gruppo in
-    /// agguato nella propria casella; resta lì attraverso le giornate, e se un gruppo armato
-    /// avversario vi entra l'imboscata scatta alla risoluzione di fine giornata. Voce
-    /// dell'elenco chiuso.
+    /// IMBOSCATA (01 §5.11, §5.6.8.1): riservata ai gruppi armati. Colloca il gruppo in agguato
+    /// nella propria casella e CONSUMA l'azione della giornata (incarico 21): non è più uno stato
+    /// che dura, ma un ordine da RINNOVARE ogni giornata. Se un gruppo armato avversario vi entra
+    /// l'imboscata scatta alla risoluzione di fine giornata. Non esiste una revoca dell'imboscata:
+    /// un gruppo non appostato oggi è semplicemente in attesa, e per non restare appostato basta
+    /// non ripetere l'ordine (01 §5.6.8.1: l'elenco chiuso non contiene alcuna revoca d'imboscata).
+    /// Voce dell'elenco chiuso.
     case imboscata(gruppo: IdGruppo)
-    /// REVOCA dell'imboscata (01 §5.11, RDA-76): come la revoca della marcia, NON è un'azione
-    /// (01 §5.6.8.1) e si compie in qualunque momento su un gruppo appostato, che così torna
-    /// libero di agire dalla giornata successiva. Il gruppo ha già consumato la propria
-    /// giornata restando in agguato e non compie altro il giorno in cui lo si revoca (come la
-    /// revoca della marcia, RDA-100). Non entra nel registro: non è fra i fatti che l'incarico
-    /// vi fa entrare, e la revoca della marcia vi sta solo per un'eccezione dichiarata (RDA-104).
-    case revocaImboscata(gruppo: IdGruppo)
     /// SABOTAGGIO (01 §5.10.2, §5.6.8.1): lo può ordinare un gruppo armato o una formazione di
     /// ricognizione che condivide la casella con una formazione non armata avversaria (01 §6.1,
     /// §5.10). Consuma l'azione e disperde la formazione bersaglio, il cui carico è perduto.
@@ -155,10 +151,6 @@ public enum MotivoNonValidoCampagna: String, Codable, Hashable, Sendable, CaseIt
     /// avversaria da colpire (01 §5.10): il bersaglio è la formazione co-locata, e senza di essa
     /// l'azione non ha oggetto.
     case nessunBersaglio = "comando.non_valido.nessun_bersaglio"
-    /// Nuovo della campagna: la revoca dell'imboscata è stata chiesta per un gruppo che non è in
-    /// agguato (01 §5.11). Come la revoca della marcia su un gruppo non in marcia, morde su un
-    /// giornale estraneo o manomesso.
-    case gruppoNonInAgguato = "comando.non_valido.gruppo_non_in_agguato"
 }
 
 /// L'esito DETERMINISTICO di un'esplorazione (01 §5.4): la riuscita discende dalla
@@ -244,9 +236,6 @@ public enum EventoCampagna: Hashable, Codable, Sendable {
     /// Un gruppo armato si è messo in AGGUATO nella propria casella (01 §5.11): l'ordine di
     /// imboscata è confermato. Fatto deciso dal giocatore: annuncio di conferma, non registro.
     case imboscataOrdinata(gruppo: IdGruppo, nome: IdentificatoreDati, casella: Cella)
-    /// L'ordine di imboscata è stato REVOCATO (01 §5.11, RDA-76): il gruppo torna libero.
-    /// Annuncio di conferma; non entra nel registro.
-    case imboscataRevocata(gruppo: IdGruppo, nome: IdentificatoreDati, casella: Cella)
     /// Un SABOTAGGIO si è compiuto (01 §5.10.2): `riuscito` è falso solo per esploratori la cui
     /// competenza non raggiunge la soglia del bersaglio, che così si fanno notare. È del gruppo
     /// che sabota, consegnato al solo giocatore quando è il suo (il sabotaggio subìto dal
@@ -260,6 +249,12 @@ public enum EventoCampagna: Hashable, Codable, Sendable {
     /// e sempre a una casella di cui il giocatore è parte, sicché gli si consegna sempre —
     /// imboscante o vittima — come gli avvistamenti e i confini di giornata.
     case imboscataScattata(casella: Cella)
+    /// Un'IMBOSCATA avversaria è stata SCOPERTA da una formazione di ricognizione (01 §5.11.1,
+    /// incarico 21): l'esplorazione riuscita ne ha rivelato la casella, che torna confermata per
+    /// chi l'ha scoperta. Porta la PARTE che ha scoperto, sicché la proiezione la consegna al solo
+    /// giocatore quando è la sua scoperta (l'avversario decide sulla propria conoscenza e il
+    /// giocatore non apprende le sue). Entra nel registro col luogo ed è attivabile.
+    case imboscataScoperta(parte: Parte, casella: Cella)
     /// Una DEDUZIONE sulla direzione di marcia di una colonna avversaria (01 §5.10.1): prodotta
     /// solo per il giocatore dai suoi esploratori, si consegna sempre.
     case direzioneDedotta(casella: Cella)

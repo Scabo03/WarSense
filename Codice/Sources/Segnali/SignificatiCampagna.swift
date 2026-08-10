@@ -52,20 +52,23 @@ public struct TraduttoreEventiCampagna: Sendable {
         // (02 §11.5) e l'elenco dei suoni dedicati (02 §11.7.1) non lo prevede; non se ne
         // conia uno, come per la ripresa del rifornimento. Il fuoco non è rubato.
         case .formazioneAvversariaAvvistata: return nil
-        // Le azioni ORDINATE dal giocatore — esplorare, appostarsi, revocare l'agguato,
-        // sabotare, studiare — portano il segnale di conferma del proprio ordine, come la
-        // marcia e il presidio: nessun sedicesimo significato (02 §11.5). L'esito parlato dice
-        // com'è andata (riuscita, a mani vuote, notati, perduti; sabotaggio riuscito o fallito).
-        case .esplorazioneCompiuta, .imboscataOrdinata, .imboscataRevocata,
+        // Le azioni ORDINATE dal giocatore — esplorare, appostarsi, sabotare, studiare — portano
+        // il segnale di conferma del proprio ordine, come la marcia e il presidio: nessun
+        // sedicesimo significato (02 §11.5). L'esito parlato dice com'è andata (riuscita, a mani
+        // vuote, notati, perduti; sabotaggio riuscito o fallito). Non esiste più la revoca
+        // dell'imboscata (incarico 21): l'imboscata è un'azione che si rinnova.
+        case .esplorazioneCompiuta, .imboscataOrdinata,
              .sabotaggioCompiuto, .studioCompiuto:
             return .conferma
         // Lo scatto dell'imboscata ha il proprio significato tattile GIÀ assegnato nel tetto
         // chiuso: `imboscata`, famiglia dell'allarme (02 §11.7.1, significato 12). Vale sempre —
         // imboscante o vittima — perché il giocatore è parte dello scatto.
         case .imboscataScattata: return .imboscata
-        // La deduzione dell'itinerario si annuncia a parole (02 §8.2.1) ma NON ha segnale
-        // tattile: il tetto dei quindici è chiuso (02 §11.5), come per l'avvistamento.
-        case .direzioneDedotta: return nil
+        // La SCOPERTA di un'imboscata avversaria e la deduzione dell'itinerario si annunciano a
+        // parole (02 §8.2.1) ed entrano nel registro, ma NON hanno segnale tattile: il tetto dei
+        // quindici è chiuso (02 §11.5), come per l'avvistamento. Alla scoperta NON si dà l'allarme
+        // dello scatto, che direbbe il falso — «è scattata» invece di «l'hai scoperta».
+        case .imboscataScoperta, .direzioneDedotta: return nil
         }
     }
 
@@ -144,9 +147,12 @@ public struct TraduttoreEventiCampagna: Sendable {
         case .imboscataOrdinata(_, let chiave, let casella):
             return testi.frase("campagna.imboscata_ordinata", verbosita: verbosita,
                                nome(chiave), casella.riga, casella.colonna)
-        case .imboscataRevocata(_, let chiave, let casella):
-            return testi.frase("campagna.imboscata_revocata", verbosita: verbosita,
-                               nome(chiave), casella.riga, casella.colonna)
+        case .imboscataScoperta(_, let casella):
+            // La scoperta: la ricognizione ha trovato un'imboscata avversaria, e dove (02 §6.4.1).
+            // Senza il nome dell'appostato (non lo si conosce). La parte è sempre il giocatore
+            // quando l'annuncio lo raggiunge (proiettaPerIlGiocatore lo filtra).
+            return testi.frase("campagna.imboscata_scoperta", verbosita: verbosita,
+                               casella.riga, casella.colonna)
         case .sabotaggioCompiuto(_, let chiave, let casella, let riuscito):
             // Riuscito: una formazione avversaria è dispersa in un luogo. Fallito: gli
             // esploratori si sono fatti notare. Il nome è quello del gruppo che sabota (proprio).
@@ -194,10 +200,11 @@ public struct TraduttoreEventiCampagna: Sendable {
              .formazioneSabotata(let casella),
              .formazioneStudiata(let casella),
              .imboscataScattata(let casella),
+             .imboscataScoperta(let casella),
              .direzioneDedotta(let casella):
             // Senza nome della formazione (02 §6.4.1): il giorno e il luogo, attivabile per
-            // portarvi il fuoco (02 §6.6). Il sabotaggio, lo studio, lo scatto e la deduzione
-            // dichiarano il fatto e dove, mai il nome dell'avversario.
+            // portarvi il fuoco (02 §6.6). Il sabotaggio, lo studio, lo scatto, la SCOPERTA
+            // dell'imboscata e la deduzione dichiarano il fatto e dove, mai il nome dell'avversario.
             return testi.frase(chiave, voce.giorno, casella.riga, casella.colonna)
         case .ordineAnnullato, .giornataAzzerata:
             return testi.frase(chiave, voce.giorno)

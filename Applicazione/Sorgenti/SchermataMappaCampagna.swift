@@ -357,23 +357,16 @@ final class SchermataMappaCampagna: UIViewController {
                 }
             })
         }
-        // L'IMBOSCATA (gruppi armati, 01 §5.11): colloca il gruppo in agguato nella casella.
+        // L'IMBOSCATA (gruppi armati, 01 §5.11): colloca il gruppo in agguato nella casella e
+        // CONSUMA l'azione della giornata (incarico 21). È un ordine da RIPETERE ogni giornata —
+        // non uno stato che dura: si offre a un gruppo in attesa come il presidio, e il mattino
+        // dopo il gruppo torna in attesa e va riappostato. Non esiste più una revoca dell'imboscata.
         if partita.motore.valida(.imboscata(gruppo: gruppo.id),
                                  parte: .giocatore, stato: costruttore.stato).eValido {
             voci.append(VocePannello(titolo: testi.frase("pannello.imboscata").testo,
                                      stile: .default) { [weak self] in
                 self?.chiudiPannello(casella: gruppo.posizione) {
                     await self?.eseguiComando(.imboscata(gruppo: gruppo.id))
-                }
-            })
-        }
-        // La REVOCA dell'imboscata si offre a un gruppo appostato (01 §5.11, RDA-76): come la
-        // revoca della marcia, lo libera dalla giornata successiva. Non è un'azione.
-        if gruppo.ordineImboscata {
-            voci.append(VocePannello(titolo: testi.frase("pannello.revoca_imboscata").testo,
-                                     stile: .destructive) { [weak self] in
-                self?.chiudiPannello(casella: gruppo.posizione) {
-                    await self?.eseguiComando(.revocaImboscata(gruppo: gruppo.id))
                 }
             })
         }
