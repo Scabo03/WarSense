@@ -1,6 +1,6 @@
 # Nota per il titolare — esploratori, imboscate e formazioni non armate
 
-Questa build aggiunge alla campagna gli esploratori, le imboscate, le formazioni non armate e il modo di agire contro di esse, e cambia due cose che avevi chiesto dopo aver giocato. In linguaggio semplice, ecco che cosa c'è e come si usa.
+Questa build aggiunge alla campagna gli esploratori, le imboscate e le formazioni non armate; l'imboscata ora si ordina ogni giornata e resta nascosta all'avversario, che solo i tuoi esploratori possono scoprire; e cambia due cose che avevi chiesto dopo aver giocato. In linguaggio semplice, ecco che cosa c'è e come si usa.
 
 ## Gli esploratori e l'esplorazione
 
@@ -19,13 +19,17 @@ Gli esploratori non danno mai battaglia: qualunque cosa capiti loro si risolve s
 
 ## Le imboscate
 
-Su qualunque casella puoi collocare un tuo **gruppo armato** con l'ordine di **«Mettiti in agguato»**. Il gruppo resta lì, fermo e nascosto, giornata dopo giornata, senza che tu debba riordinarglielo. Se un gruppo armato avversario **entra** in quella casella, l'imboscata **scatta** alla chiusura della giornata: lo senti annunciare («Imboscata scattata in riga…, casella…») e lo trovi nel registro.
+Su qualunque casella puoi mettere in agguato un tuo **gruppo armato** con l'ordine **«Mettiti in agguato»**. Attenzione, perché qui è cambiato qualcosa rispetto a prima: **l'agguato va ordinato ogni giornata**, e ordinarlo **consuma l'azione di quel gruppo** per quel giorno, esattamente come una marcia o un presidio. Non è più uno stato che prosegue da sé: il mattino dopo il gruppo torna «in attesa», e se vuoi che resti appostato glielo riordini. Il pannello ti offre «Mettiti in agguato» ogni giornata a un gruppo fermo, e finché è appostato il gruppo si annuncia «in agguato», così lo distingui da uno semplicemente fermo. Non c'è più un ordine per lasciare l'agguato: per non restare appostato, basta non ripetere l'ordine.
 
-Un gruppo in agguato si annuncia come tale quando lo incontri («in agguato»), perché altrimenti non distingueresti un gruppo appostato da uno semplicemente fermo. Se cambi idea, dal suo pannello c'è **«Lascia l'agguato»**.
+Se un gruppo armato avversario **entra** nella tua casella d'agguato, l'imboscata **scatta** alla chiusura della giornata: la senti annunciare — «Imboscata scattata in riga…, casella…» — e la trovi nel registro.
 
-L'agguato ha un costo: il gruppo è fermo, consuma rifornimenti e non produce nulla, e se l'avversario cambia strada i turni che hai speso ad aspettarlo sono persi. Il vantaggio vero dell'imboscante — schierarsi in anticipo — si vedrà quando costruiremo il passaggio alla battaglia; per ora lo scatto è registrato e pronto a essere raccolto.
+**Un gruppo appostato non è visibile all'avversario**, ed è ciò che fa funzionare l'agguato: se lo vedesse, il quadrato fermo, semplicemente non vi entrerebbe. Il gioco però non mente mai: non dichiara vuota la casella dove sei nascosto: semplicemente **l'avversario non ne ha più notizia certa** — la sua conoscenza di quella casella arretra. Chi vi entra non trova un luogo che dichiarava il vuoto, ma un luogo di cui non aveva più notizia sicura.
 
-**Anche l'avversario può tenderti imboscate**, e tu puoi caderci: se porti un gruppo armato in una casella dove lui era appostato, l'imboscata scatta a suo favore.
+**Il solo modo di scoprire un'imboscata nemica sono i tuoi esploratori.** Un'esplorazione riuscita che copra la casella dove l'avversario è appostato la rivela: la sua posizione torna certa e il fatto entra nel registro col luogo — «Imboscata avversaria scoperta in riga…, casella…» — pronto da attivare. Un gruppo armato che le passa accanto, invece, non se ne accorge.
+
+**Vale in tutti e due i sensi.** Anche l'avversario tende imboscate che tu non vedi e nelle quali puoi cadere, e i suoi esploratori possono scoprire le tue. Se porti un gruppo armato in una casella dove lui era appostato, l'imboscata scatta a suo favore.
+
+L'agguato ha un costo: il gruppo è fermo, spende ogni giornata a restare appostato e non produce nulla, e se l'avversario cambia strada i giorni che hai speso ad aspettarlo sono persi. Il vantaggio vero dell'imboscante — schierarsi in anticipo — si vedrà quando costruiremo il passaggio alla battaglia; per ora lo scatto è registrato e pronto a essere raccolto.
 
 ## Le formazioni non armate
 
@@ -48,4 +52,4 @@ Ciò che vedi e ciò che senti dicono esattamente la stessa cosa: il segno mostr
 
 ## La seconda cosa che avevi chiesto: gli arrivi escono dal registro
 
-L'arrivo di un tuo gruppo a destinazione **non compare più nel registro degli eventi**. Come dicevi, è un fatto che hai deciso tu e che già conosci, mentre il registro serve a recuperare ciò che è accaduto mentre guardavi altrove. L'arrivo continua ad annunciarsi nel momento in cui avviene; solo la voce nel registro se ne va. Nel registro restano le revoche, gli avvistamenti, i fatti dell'avversario e i fatti nuovi appena descritti (esploratori perduti o notati, formazioni sabotate o studiate, imboscate scattate, direzioni di marcia dedotte).
+L'arrivo di un tuo gruppo a destinazione **non compare più nel registro degli eventi**. Come dicevi, è un fatto che hai deciso tu e che già conosci, mentre il registro serve a recuperare ciò che è accaduto mentre guardavi altrove. L'arrivo continua ad annunciarsi nel momento in cui avviene; solo la voce nel registro se ne va. Nel registro restano le revoche, gli avvistamenti, i fatti dell'avversario e i fatti nuovi appena descritti (esploratori perduti o notati, formazioni sabotate o studiate, imboscate scattate, imboscate avversarie scoperte dai tuoi esploratori, direzioni di marcia dedotte).
