@@ -142,6 +142,19 @@ public struct VistaCampagna: Sendable {
         return voci
     }
 
+    /// Vero se il giocatore OSSERVA ORA una formazione avversaria su questa casella: il
+    /// segno del nemico sulla mappa (incarico 23). Discende dalla STESSA voce
+    /// `.occupanteAvversario` di `vociDiCasella` — l'unico elenco delle caratteristiche
+    /// della casella (02 §3.8.1) — sicché il riempimento arancione della casella e il suo
+    /// annuncio non possono divergere: dove l'uno dichiara l'avversario, l'altro lo colora.
+    /// Come la voce, è vero solo dove la conoscenza è confermato (l'occultamento, 01 §5.6.11).
+    public func avversarioAvvistato(su casella: Cella) -> Bool {
+        vociDiCasella(casella).contains {
+            if case .occupanteAvversario = $0 { return true }
+            return false
+        }
+    }
+
     /// La categoria osservata di una formazione avversaria (01 §5.2, §5.10.2): la sua categoria,
     /// e il carico solo se la si è studiata a fondo. Il carico non entra mai nell'oggetto se non
     /// è noto, sicché non può trapelare.

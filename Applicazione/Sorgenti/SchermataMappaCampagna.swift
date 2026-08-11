@@ -181,6 +181,14 @@ final class SchermataMappaCampagna: UIViewController {
                costruttore.vista.destinazioniValide(per: id).contains(casella) {
                 return .systemGreen.withAlphaComponent(0.4)
             }
+            // Il segno del nemico (incarico 23): una casella con una formazione avversaria
+            // AVVISTATA si riempie interamente di ARANCIONE, come quella di un proprio gruppo
+            // si riempie di BLU — stessa estensione, cambia il colore. Il colore non distingue
+            // le categorie (quello lo fa la FORMA: i segni «×», «×»», «×≈» restano, `segniCasella`):
+            // l'arancione dice soltanto «nemico», ridondante con la «×». Precede il blu perché la
+            // compresenza è possibile (01 §6.1) e la minaccia va segnalata; la lettera centrale del
+            // proprio gruppo e i segni di forma si disegnano comunque sopra il riempimento.
+            if costruttore.vista.avversarioAvvistato(su: casella) { return .systemOrange }
             return costruttore.vista.occupante(di: casella) != nil ? .systemBlue : nil
         }
         vistaMappa.testoCasella = { [weak self] casella in
@@ -608,6 +616,11 @@ final class SchermataMappaCampagna: UIViewController {
     func eseguiPerProva(_ comando: ComandoCampagna) async { await eseguiComando(comando) }
     func apriRegistroPerProva() { apriRegistro() }
     var motorePerProva: MotoreCampagna { partita.motore }
+    /// Il colore di riempimento che la mappa disegna per una casella, letto dallo STESSO
+    /// blocco che il disegno usa (`vistaMappa.coloreCasella`): la prova d'interfaccia verifica
+    /// così il segno del nemico — il riempimento arancione — sulla schermata vera, non su una
+    /// derivazione parallela (incarico 23).
+    func coloreCasellaPerProva(_ casella: Cella) -> UIColor? { vistaMappa.coloreCasella?(casella) }
     /// La mappa come `VistaACaselle`: le prove del tocco diretto girano con
     /// lo stesso corpo sui due piani (02 §2.11, RDA-78).
     var grigliaPerProva: VistaACaselle { vistaMappa }

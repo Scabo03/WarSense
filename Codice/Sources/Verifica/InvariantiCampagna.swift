@@ -149,6 +149,13 @@ public struct SondaInvariantiCampagna: Sendable {
         /// più grave. L'avvistamento nasce solo dove il giocatore OSSERVA e una formazione avversaria
         /// è arrivata (01 §5.6.11); se il fatto compare senza la formazione, l'annuncio mentirebbe.
         case avvistamentoSenzaFormazione(riga: Int, colonna: Int)
+        // Invariante dello scenario iniziale (01 §5.2, incarico 23).
+        /// Uno scenario di campagna GIOCABILE non schiera una delle tre categorie per una delle due
+        /// parti (incarico 23): è il difetto che ha reso inutili due build — lo scenario che arriva
+        /// in mano al giocatore conteneva soltanto gruppi armati, senza avversario, senza
+        /// ricognizione, senza formazioni non armate, sicché gli esploratori non esistevano in
+        /// partita e il nemico non si incontrava. Reso un cancello, non più un'omissione silenziosa.
+        case categoriaMancanteNelloScenario(scenario: String, parte: String, categoria: String)
 
         /// Il codice della violazione, senza spazi: l'uscita del programma di
         /// verifica è dato per chi sviluppa e non testo di prodotto (05 §12.6),
@@ -200,6 +207,7 @@ public struct SondaInvariantiCampagna: Sendable {
             case .partitaNonTerminata(let g): return "partita_non_terminata:giornate=\(g)"
             case .nessunAvvistamentoInPartita: return "nessun_avvistamento_in_partita"
             case .avvistamentoSenzaFormazione(let r, let c): return "avvistamento_senza_formazione:riga=\(r):casella=\(c)"
+            case .categoriaMancanteNelloScenario(let s, let p, let c): return "categoria_mancante_nello_scenario:scenario=\(s):parte=\(p):categoria=\(c)"
             }
         }
     }
@@ -255,6 +263,7 @@ public struct SondaInvariantiCampagna: Sendable {
         "partita_non_terminata",
         "nessun_avvistamento_in_partita",
         "avvistamento_senza_formazione",
+        "categoria_mancante_nello_scenario",
     ]
 
     /// Il codice nudo, senza i valori: la parte prima dei due punti.
@@ -414,6 +423,26 @@ public struct SondaInvariantiCampagna: Sendable {
     /// non c'è nulla da avvistare e l'invariante tace.
     public func controllaAvvistamentoAvvenuto(avvistamenti: Int, conAvversario: Bool) -> [Violazione] {
         (conAvversario && avvistamenti == 0) ? [.nessunAvvistamentoInPartita] : []
+    }
+
+    /// LE TRE CATEGORIE NELLO SCENARIO INIZIALE (01 §5.2, incarico 23): uno scenario di campagna
+    /// GIOCABILE deve schierare, per ENTRAMBE le parti, un gruppo armato, una formazione di
+    /// ricognizione e una formazione non armata. È il difetto che il programma di verifica non
+    /// vedeva — genera i propri scenari e non guarda ciò che arriva in mano al giocatore — e che ha
+    /// reso inutili due build: gli esploratori costruiti nel Motore non esistevano nella partita, e
+    /// l'avversario non c'era. La sonda riceve lo scenario dall'esterno, come gli altri cancelli
+    /// parametrici, così da giudicare i tre scenari giocabili di `scenari-campagna.json`.
+    public func controllaCategorieScenario(nome: String, scenario: ScenarioCampagna) -> [Violazione] {
+        var violazioni: [Violazione] = []
+        for (parte, gruppi) in [("giocatore", scenario.gruppiGiocatore),
+                                ("avversario", scenario.gruppiAvversario)] {
+            let categorie = Set(gruppi.map(\.categoria))
+            for categoria in ["armato", "ricognizione", "non_armata"] where !categorie.contains(categoria) {
+                violazioni.append(.categoriaMancanteNelloScenario(
+                    scenario: nome, parte: parte, categoria: categoria))
+            }
+        }
+        return violazioni
     }
 
     // MARK: - Invarianti della transizione

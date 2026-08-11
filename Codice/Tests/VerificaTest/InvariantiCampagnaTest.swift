@@ -796,7 +796,50 @@ final class InvariantiCampagnaTest: XCTestCase {
                 return sonda.controllaRegistro(prima: base, dopo: dopo,
                                                osservataDalGiocatore: { _ in true })
             }),
+            // Incarico 23 — lo scenario iniziale deve schierare le tre categorie per entrambe le parti.
+            ("categoria_mancante_nello_scenario", {
+                // Uno scenario di soli armati per il giocatore, senza avversario: come quello che
+                // arrivava in mano al giocatore prima dell'incarico 23. Mancano cinque categorie.
+                sonda.controllaCategorieScenario(nome: "guasto", scenario:
+                    ScenarioCampagna(mappa: "pianura_lunga",
+                                     gruppiGiocatore: [.init(riga: 10, colonna: 6,
+                                                             composizione: Self.composizioneLeggera)]))
+            }),
         ]
+    }
+
+    /// Il cancello delle tre categorie nello scenario iniziale (incarico 23) scatta su uno scenario
+    /// di soli armati e tace su uno ben formato; e — la garanzia vera — i TRE scenari GIOCABILI di
+    /// `scenari-campagna.json`, quelli che arrivano in mano al giocatore, le schierano tutte per
+    /// entrambe le parti. È il cancello che rende impossibile ripetere il difetto delle build che
+    /// consegnavano al giocatore uno scenario di soli armati senza avversario né esploratori.
+    func test_incarico_23_lo_scenario_iniziale_schiera_le_tre_categorie() throws {
+        // Guasto: solo armati, nessun avversario. Scatta, e nomina le categorie mancanti.
+        let guasto = ScenarioCampagna(mappa: "pianura_lunga",
+            gruppiGiocatore: [.init(riga: 10, colonna: 6, composizione: Self.composizioneLeggera)])
+        let violazioni = sonda.controllaCategorieScenario(nome: "guasto", scenario: guasto).map(\.description)
+        XCTAssertTrue(violazioni.contains("categoria_mancante_nello_scenario:scenario=guasto:parte=giocatore:categoria=ricognizione"),
+                      "manca la ricognizione del giocatore: \(violazioni)")
+        XCTAssertTrue(violazioni.contains("categoria_mancante_nello_scenario:scenario=guasto:parte=avversario:categoria=armato"),
+                      "manca del tutto l'avversario: \(violazioni)")
+
+        // Sano: le tre categorie per entrambe le parti. Tace.
+        func trio(_ r: Int) -> [ScenarioCampagna.GruppoIniziale] { [
+            .init(riga: r, colonna: 4, composizione: Self.composizioneLeggera),
+            .init(riga: r, colonna: 5, composizione: Self.composizioneLeggera, categoria: "ricognizione", competenza: 3),
+            .init(riga: r, colonna: 6, composizione: Self.composizioneLeggera, categoria: "non_armata", carico: 4, sogliaProtezione: 2),
+        ] }
+        XCTAssertEqual(sonda.controllaCategorieScenario(nome: "sano",
+            scenario: ScenarioCampagna(mappa: "pianura_lunga", gruppiGiocatore: trio(10), gruppiAvversario: trio(1))), [])
+
+        // La garanzia sul FILE giocabile: i tre scenari che il giocatore apre non hanno violazioni.
+        let url = Contenuti.valoriDiFabbrica.appendingPathComponent("scenari-campagna.json")
+        let scenari = try JSONDecoder().decode([String: ScenarioCampagna].self, from: Data(contentsOf: url))
+        XCTAssertEqual(scenari.count, 3, "i tre scenari giocabili: piccola, media, grande")
+        for (nome, scenario) in scenari {
+            XCTAssertEqual(sonda.controllaCategorieScenario(nome: nome, scenario: scenario).map(\.description), [],
+                           "lo scenario giocabile «\(nome)» non schiera le tre categorie per entrambe le parti")
+        }
     }
 
     // MARK: - Attrezzo

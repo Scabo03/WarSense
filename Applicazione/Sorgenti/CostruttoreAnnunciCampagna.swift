@@ -200,7 +200,10 @@ struct CostruttoreAnnunciCampagna {
             // incarico 19): non porta una lettera al centro — non se ne conosce il nome — ma un
             // segno «×» nella riga, cui si aggiunge il marcatore di categoria «»» o «≈». «×» da
             // solo è il gruppo armato avversario, categoria ordinaria; la lettera al centro
-            // distingue le proprie, il «×» le avversarie, il marcatore la categoria — mai il colore.
+            // distingue le proprie, il «×» le avversarie, il marcatore la categoria. Dall'incarico
+            // 23 la casella dell'avversario avvistato si riempie inoltre di ARANCIONE (in
+            // `SchermataMappaCampagna`): è un cue di PARTE ridondante col «×», non un cue di
+            // CATEGORIA — le categorie restano distinte per la sola forma, mai per il solo colore.
             switch categoria {
             case .gruppoArmato: return "×"
             case .ricognizione: return "×»"

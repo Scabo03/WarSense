@@ -311,14 +311,21 @@ final class CatenaInterfacciaMotoreTest: XCTestCase {
                        + "partita (05 §10.1, RDA-03): la voce perderebbe il proprio posto")
     }
 
-    /// I comandi di campagna del giornale, nell'ordine in cui vi sono stati scritti.
+    /// I comandi di campagna DEL GIOCATORE nel giornale, nell'ordine in cui vi sono stati
+    /// scritti. Da quando lo scenario giocabile schiera un avversario (incarico 23), il giornale
+    /// porta anche i comandi dell'AVVERSARIO — la condotta li applica come qualunque comando e li
+    /// annota (RDA-42) — ma questa prova verifica la catena dal DITO del giocatore al giornale,
+    /// sicché conta i soli comandi del giocatore. La sequenza dell'avversario, deterministica, la
+    /// riproduce da sé la sessione diretta dell'anello 4.
     private func comandiDelGiornale(_ percorso: URL) throws -> [ComandoCampagna] {
         let testo = try String(contentsOf: percorso, encoding: .utf8)
         var comandi: [ComandoCampagna] = []
         for riga in testo.split(separator: "\n") {
             guard let voce = try? JSONDecoder().decode(RigaGiornale.self, from: Data(riga.utf8))
             else { continue }
-            if case .comandoCampagna(_, let comando) = voce.voce { comandi.append(comando) }
+            if case .comandoCampagna(let parte, let comando) = voce.voce, parte == .giocatore {
+                comandi.append(comando)
+            }
         }
         return comandi
     }
