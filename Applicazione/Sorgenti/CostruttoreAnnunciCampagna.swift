@@ -292,6 +292,13 @@ struct CostruttoreAnnunciCampagna {
             frase += testi.frase("campagna.stato_senza_rifornimento",
                                  info.gruppiSenzaRifornimento).testo
         }
+        // Le battaglie in sospeso si dichiarano IN CODA, «e dove» (01 §6.3, 02 §6.5.1.3, incarico
+        // 24): finché ne resta una la campagna è preclusa, e il giocatore sa dove aprirla senza
+        // ricostruirlo per tentativi. La condizione assente non si nomina (02 §8.7.1).
+        for casella in info.battaglieInSospeso {
+            frase += testi.frase("campagna.stato_battaglia_in_sospeso",
+                                 casella.riga, casella.colonna).testo
+        }
         return frase
     }
 

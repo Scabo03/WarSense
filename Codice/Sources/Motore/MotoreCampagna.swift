@@ -20,6 +20,16 @@ public struct MotoreCampagna: Sendable {
     /// il controllo sia l'annuncio, e i due non possono divergere (05 §3.2).
     public func valida(_ comando: ComandoCampagna, parte: Parte,
                        stato: StatoCampagna) -> EsitoValidazioneCampagna {
+        // Il BLOCCO della campagna in sospeso (01 §6.3, §6.4, incarico 24): finché una battaglia
+        // non è conclusa, in questa campagna nulla avanza — nessun movimento, nessuna azione, per
+        // nessuna delle due parti. Ogni comando è respinto col MEDESIMO motivo, così che il
+        // giocatore non debba ricostruirlo per tentativi (02 §6.5). È il primo controllo, prima di
+        // ogni altro: nessun comando di campagna scavalca una battaglia in sospeso. L'apertura
+        // della battaglia non passa di qui — non è un comando di campagna ma il passaggio di
+        // schermata (01 §6.2). Il dirottamento dei superstiti (01 §6.9) non è costruito (S24c).
+        if !stato.battaglieInSospeso.isEmpty {
+            return .nonValido(.battagliaInSospeso)
+        }
         switch comando {
         case .marcia(let idGruppo, let destinazione, let giorni):
             guard let gruppo = stato.gruppi[idGruppo], gruppo.parte == parte else {
@@ -435,9 +445,11 @@ public struct MotoreCampagna: Sendable {
         return eventi.filter { evento in
             switch evento {
             case .giornataChiusa, .giornataAperta, .formazioneAvversariaAvvistata,
-                 .imboscataScattata, .direzioneDedotta:
+                 .imboscataScattata, .direzioneDedotta,
+                 .battagliaInnescata, .battagliaConclusa:
                 // Confini di giornata, avvistamenti, scatti d'imboscata (sempre fra parti
-                // opposte, il giocatore è parte) e deduzioni (prodotte solo per lui).
+                // opposte, il giocatore è parte) e deduzioni (prodotte solo per lui). Le
+                // battaglie innescate e concluse coinvolgono sempre il giocatore: si consegnano.
                 return true
             case .marciaOrdinata(let g, _, _, _, _), .presidioOrdinato(let g, _, _),
                  .marciaRevocata(let g, _, _, _), .marciaCompiuta(let g, _, _, _),
@@ -814,6 +826,7 @@ public struct MotoreCampagna: Sendable {
     func chiudiLaGiornataSeServe(_ stato: inout StatoCampagna) -> [EventoCampagna] {
         var eventi: [EventoCampagna] = []
         while !stato.gruppi.isEmpty,
+              stato.battaglieInSospeso.isEmpty, // una battaglia in sospeso ferma il corso della campagna (01 §6.4)
               stato.gruppi.values.allSatisfy({ $0.haConclusoLaGiornata }) {
             let chiuso = stato.giorno
             eventi.append(.giornataChiusa(giorno: chiuso))
@@ -859,6 +872,7 @@ public struct MotoreCampagna: Sendable {
             posizioniPrima[id] != nil && posizioniPrima[id] != g.posizione ? id : nil
         })
         eventi.append(contentsOf: scattaLeImboscate(&stato, arrivati: arrivati))
+        eventi.append(contentsOf: innescaLeBattaglie(&stato, arrivati: arrivati))
         eventi.append(contentsOf: valutaITagliDiRifornimento(&stato))
         // Passo successivo (unità futura): completaLeCostruzioni(&stato)
         eventi.append(contentsOf: deduciGliItinerari(&stato))
@@ -889,8 +903,105 @@ public struct MotoreCampagna: Sendable {
                 casella: casella, imboscante: appostato.parte, intruso: intruso.id, giorno: stato.giorno))
             annota(.imboscataScattata(casella: casella), in: &stato)
             eventi.append(.imboscataScattata(casella: casella))
+            // Lo scatto RACCOLTO e REALIZZATO (incarico 24, RDA-98): l'imboscata diventa una
+            // battaglia in sospeso col vantaggio della sorpresa (imboscante = l'appostato, che
+            // occupava per primo e agirà per primo, 01 §9.3.2, §9.4.1). L'`imboscataScattata` sopra
+            // resta il fatto di registro; la battaglia in sospeso è il record che il passaggio
+            // consuma. L'evento dedicato dà l'allarme «nuova battaglia in sospeso» (02 §11.7.1).
+            registraBattagliaInSospeso(casella: casella, primoOccupante: appostato.parte,
+                                       imboscante: appostato.parte, in: &stato)
+            eventi.append(.battagliaInnescata(casella: casella, daImboscata: true))
         }
         return eventi
+    }
+
+    /// L'INNESCO DELLE BATTAGLIE ORDINARIE (01 §6.1, §6.11, incarico 24): passo di fine giornata,
+    /// gemello dello scatto delle imboscate. Un gruppo armato che ENTRA in una casella dove sta
+    /// già un gruppo armato contrapposto impone lo scontro (01 §6.1.1: «chi arriva sceglie tempo e
+    /// luogo»; chi voleva rifiutare doveva essersene andato prima, S24a). Vale SIMMETRICAMENTE per
+    /// le due parti. Diversamente dall'imboscata non concede alcun vantaggio (01 §5.6.3.5). L'ordine
+    /// dei turni: agisce per primo chi occupava per primo, cioè chi NON è fra gli arrivati (01
+    /// §9.4.1); se entrambi sono arrivati nella stessa risoluzione, il vantaggio nascosto va al
+    /// giocatore (S24d, coerente con 01 §13, §15.2.5). L'agguato ha la precedenza sul contatto
+    /// ordinario nella stessa casella, col suo vantaggio. Ordine deterministico (per id, per casella).
+    func innescaLeBattaglie(_ stato: inout StatoCampagna, arrivati: Set<IdGruppo>) -> [EventoCampagna] {
+        var eventi: [EventoCampagna] = []
+        var caselleViste = Set<Cella>()
+        for id in stato.gruppi.keys.sorted() {
+            guard let g = stato.gruppi[id], g.categoria.eArmata else { continue }
+            let casella = g.posizione
+            guard !caselleViste.contains(casella) else { continue }
+            guard let nemico = stato.occupante(di: casella, parte: g.parte.avversaria),
+                  nemico.categoria.eArmata else { continue }
+            // La compresenza preesistente non innesca da sé: almeno uno dei due deve essere
+            // entrato in QUESTA risoluzione (S24a, 01 §6.1 «due eserciti possono restare fronte
+            // a fronte»). Chi era già lì e resta non impone nulla marcia dopo marcia.
+            guard arrivati.contains(id) || arrivati.contains(nemico.id) else { continue }
+            caselleViste.insert(casella)
+            // L'agguato precede: se un'imboscata ha già registrato la battaglia qui, col suo
+            // vantaggio, il contatto ordinario non la sostituisce né la duplica.
+            guard stato.battagliaInSospeso(su: casella) == nil else { continue }
+            let primoOccupante: Parte
+            if !arrivati.contains(id) { primoOccupante = g.parte }
+            else if !arrivati.contains(nemico.id) { primoOccupante = nemico.parte }
+            else { primoOccupante = .giocatore }
+            registraBattagliaInSospeso(casella: casella, primoOccupante: primoOccupante,
+                                       imboscante: nil, in: &stato)
+            annota(.battagliaInnescata(casella: casella), in: &stato)
+            eventi.append(.battagliaInnescata(casella: casella, daImboscata: false))
+        }
+        return eventi
+    }
+
+    /// Registra una battaglia in sospeso nella casella, risolvendo i due gruppi contrapposti
+    /// (incarico 24). Idempotente sulla casella: non ne registra due nella stessa. L'identificatore
+    /// è deterministico dalla casella e dal giorno, così che nomini lo stesso slot su disco a ogni
+    /// ripresa (05 §2.8). Non fa nulla se la casella non ospita entrambe le parti armate.
+    private func registraBattagliaInSospeso(casella: Cella, primoOccupante: Parte,
+                                            imboscante: Parte?, in stato: inout StatoCampagna) {
+        guard stato.battagliaInSospeso(su: casella) == nil,
+              let g = stato.occupante(di: casella, parte: .giocatore),
+              let a = stato.occupante(di: casella, parte: .avversario) else { return }
+        stato.battaglieInSospeso.append(BattagliaInSospeso(
+            identificatore: BattagliaInSospeso.identificatore(casella: casella, giorno: stato.giorno),
+            casella: casella, gruppoGiocatore: g.id, gruppoAvversario: a.id,
+            primoOccupante: primoOccupante, imboscante: imboscante, giorno: stato.giorno))
+    }
+
+    /// IL RITORNO IN CAMPAGNA (01 §15, incarico 24): piega sulla mappa l'esito di una battaglia
+    /// conclusa. È PURO — funzione dei soli `esito` e `stato` — sicché rigiocare il giornale di
+    /// campagna, dove l'esito è iscritto come una riga a sé, riproduce il ripiegamento identico
+    /// senza rileggere i file della battaglia (05 §6.1, invariante «rigiocatura identica»). Per
+    /// ciascuno dei due gruppi: se i superstiti sono vuoti il gruppo è annientato e SPARISCE dalla
+    /// mappa (01 §15.2.3); altrimenti la sua composizione diventa quella dei superstiti già
+    /// raggruppati (01 §4.11, §15.7) e la sua casella quella del ritorno — il vincitore nella
+    /// casella contesa (01 §15.5), lo sconfitto arretrato (01 §10.6). La battaglia in sospeso si
+    /// consuma, e la campagna si sblocca (01 §15.8). Il fatto entra nel registro col luogo e
+    /// l'esito, sicché chi torna sulla mappa sa com'è andata anche riaprendo la campagna.
+    public func applicaEsitoInCampagna(_ esito: EsitoInCampagna,
+                                       in stato: inout StatoCampagna) -> [EventoCampagna] {
+        for parte in [Parte.giocatore, .avversario] {
+            let id = esito.gruppo(di: parte)
+            let composizione = esito.composizione(di: parte)
+            if composizione.isEmpty {
+                stato.gruppi.removeValue(forKey: id) // annientato: sparisce dalla mappa (01 §15.2.3)
+            } else if stato.gruppi[id] != nil {
+                stato.gruppi[id]!.composizione = composizione
+                if let posizione = esito.posizione(di: parte) {
+                    stato.gruppi[id]!.posizione = posizione
+                }
+                // La battaglia interrompe la marcia e ogni agguato; i superstiti tornano in attesa
+                // sulla mappa, liberi di agire nel corso di campagna ripreso (01 §15.8).
+                stato.gruppi[id]!.marcia = nil
+                stato.gruppi[id]!.ordineImboscata = false
+                stato.gruppi[id]!.azioneSpesa = false
+            }
+        }
+        stato.battaglieInSospeso.removeAll { $0.identificatore == esito.identificatore }
+        annota(.battagliaConclusa(casella: esito.casella,
+                                  giocatoreSconfitto: esito.sconfitto == .giocatore), in: &stato)
+        return [.battagliaConclusa(casella: esito.casella,
+                                   giocatoreSconfitto: esito.sconfitto == .giocatore)]
     }
 
     /// La SCOPERTA delle imboscate (01 §5.11.1, incarico 21): dentro il raggio di un'esplorazione

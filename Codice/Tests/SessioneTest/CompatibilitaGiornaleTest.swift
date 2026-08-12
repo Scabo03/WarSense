@@ -53,6 +53,7 @@ final class CompatibilitaGiornaleTest: XCTestCase {
     enum SpecieDiVoce: String, CaseIterable {
         case fondazione, comando, inizioTurno, fondazioneCampagna
         case comandoCampagna, aperturaGiornata, annullamentoCampagna, risoluzioneGiornata
+        case battagliaConclusa
     }
 
     /// Specchio di `ComandoBattaglia`.
@@ -80,6 +81,7 @@ final class CompatibilitaGiornaleTest: XCTestCase {
         case .aperturaGiornata: return .aperturaGiornata
         case .annullamentoCampagna: return .annullamentoCampagna
         case .risoluzioneGiornata: return .risoluzioneGiornata
+        case .battagliaConclusa: return .battagliaConclusa
         }
     }
 
@@ -96,6 +98,7 @@ final class CompatibilitaGiornaleTest: XCTestCase {
         case .aperturaGiornata: return .aperturaGiornata(giorno: 1)
         case .annullamentoCampagna: return .annullamentoCampagna(giorno: 1, azzeramento: false)
         case .risoluzioneGiornata: return .risoluzioneGiornata(giorno: 1)
+        case .battagliaConclusa: return .battagliaConclusa(esito: Self.esitoInCampagnaDiProva)
         }
     }
 
@@ -173,6 +176,14 @@ final class CompatibilitaGiornaleTest: XCTestCase {
         scenario: ScenarioBattaglia(formato: "quindici", caratteristica: "campo_aperto",
                                     primoOccupante: .giocatore, imboscata: false,
                                     deckGiocatore: [], deckAvversario: []))
+
+    static let esitoInCampagnaDiProva = EsitoInCampagna(
+        identificatore: "battaglia-1-1-1", casella: Cella(riga: 1, colonna: 1),
+        sconfitto: .avversario, modo: .annientamento,
+        gruppoGiocatore: IdGruppo(1), gruppoAvversario: IdGruppo(2),
+        composizioneGiocatore: [Reparto(archetipo: "fanteria_leggera", atomi: 4)],
+        composizioneAvversario: [],
+        posizioneGiocatore: Cella(riga: 1, colonna: 1), posizioneAvversario: nil)
 
     static let fondazioneCampagnaDiProva = FondazioneCampagna(
         versioneSchema: FondazioneCampagna.schemaCorrente, versioneValori: "0.0.0",

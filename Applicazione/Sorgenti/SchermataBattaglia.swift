@@ -167,7 +167,19 @@ final class SchermataBattaglia: UIViewController {
         }
         let eventi = await partita.eventiIniziali
         ricevi(eventi)
+        // Se la battaglia si apre col turno dell'avversario — primo occupante l'avversario, 01
+        // §9.4.1 — lo si fa agire subito, o lo scontro resterebbe bloccato nel suo turno (incarico
+        // 24). Solo allora: negli scontri col giocatore primo occupante (tutti quelli del menu) non
+        // si tocca il flusso, per non introdurre un punto di sospensione prima del fuoco d'apertura.
+        if stato.parteDiTurno == .avversario, stato.esito == nil {
+            try? await partita.muoviAvversarioSeTocca()
+        }
         Fuoco.sposta(a: intestazioneDeck, perche: .schermataAperta)
+        // Battaglia RIPRESA già conclusa (incarico 24): se l'applicazione è stata chiusa dopo la
+        // fine dello scontro ma prima che l'esito tornasse in campagna, riaprendo la battaglia si
+        // ritrova l'esito e si mostra il resoconto, il cui congedo porta il ritorno in campagna.
+        // Alla ripresa gli eventi sono soppressi (05 §6.3), sicché `ricevi` non lo farebbe da sé.
+        if stato.esito != nil { await mostraResoconto() }
     }
 
     private func montaDeck(stato: StatoBattaglia) {

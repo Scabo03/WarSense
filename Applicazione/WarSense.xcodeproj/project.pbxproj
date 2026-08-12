@@ -45,6 +45,7 @@
 		E3377223A159BC8874F878FF /* CostruttoreAnnunci.swift in Sources */ = {isa = PBXBuildFile; fileRef = D09017EA703DD5FF54F15458 /* CostruttoreAnnunci.swift */; };
 		E92E862F8FAE7463EED1209F /* SchermataDivisione.swift in Sources */ = {isa = PBXBuildFile; fileRef = 6FCD9653D2440473853AF041 /* SchermataDivisione.swift */; };
 		F153F7238148016D1A99A85F /* RaggiungibilitaTest.swift in Sources */ = {isa = PBXBuildFile; fileRef = 03ACD38B8C2F68821502F3C4 /* RaggiungibilitaTest.swift */; };
+		F490E61A6685A9413EE8DE50 /* PassaggioBattagliaInterfacciaTest.swift in Sources */ = {isa = PBXBuildFile; fileRef = 57DF274D15CDC79502145A2C /* PassaggioBattagliaInterfacciaTest.swift */; };
 		F821EB8F313205F3828A2128 /* VistaACaselle.swift in Sources */ = {isa = PBXBuildFile; fileRef = 9D136B104384C6AF309293B3 /* VistaACaselle.swift */; };
 		F9D782BD8B4FD18B38DF5922 /* PannelloAzioniTest.swift in Sources */ = {isa = PBXBuildFile; fileRef = 325B59A8BC855637ABF9B2CB /* PannelloAzioniTest.swift */; };
 		FC1C2BFD8B30FA33CFF6F12C /* SchermataRegistro.swift in Sources */ = {isa = PBXBuildFile; fileRef = D159331FD8EEFB4F1B728089 /* SchermataRegistro.swift */; };
@@ -85,6 +86,7 @@
 		47D2EC331332BE96EB5D410B /* Servizi.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Servizi.swift; sourceTree = "<group>"; };
 		5159B9BE60E2EEEA1817D003 /* VistaMappa.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = VistaMappa.swift; sourceTree = "<group>"; };
 		52406D8EA4A880585D67DA47 /* EsploratoriAvversarioInterfacciaTest.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = EsploratoriAvversarioInterfacciaTest.swift; sourceTree = "<group>"; };
+		57DF274D15CDC79502145A2C /* PassaggioBattagliaInterfacciaTest.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = PassaggioBattagliaInterfacciaTest.swift; sourceTree = "<group>"; };
 		589A5B5EA3AF0D6D1EFB3900 /* DesignazioneBersaglioTest.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = DesignazioneBersaglioTest.swift; sourceTree = "<group>"; };
 		6FCD9653D2440473853AF041 /* SchermataDivisione.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SchermataDivisione.swift; sourceTree = "<group>"; };
 		7088EBAC70470929FF7BA18A /* SessioniPerInterfacciaTest.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SessioniPerInterfacciaTest.swift; sourceTree = "<group>"; };
@@ -207,6 +209,7 @@
 				27D480588F693D19D9E50AC7 /* LettoreAccessibilita.swift */,
 				8F2621F366CE07D66FC6A6EA /* MappaCampagnaAccessibileTest.swift */,
 				325B59A8BC855637ABF9B2CB /* PannelloAzioniTest.swift */,
+				57DF274D15CDC79502145A2C /* PassaggioBattagliaInterfacciaTest.swift */,
 				C217410DA2BE88F4B1000D93 /* PorzioneVisibileTest.swift */,
 				03ACD38B8C2F68821502F3C4 /* RaggiungibilitaTest.swift */,
 				1BE339E6703B78CDC77E5B87 /* RegistroVisibileTest.swift */,
@@ -358,6 +361,7 @@
 				72C9006DDA7298DDDD235743 /* LettoreAccessibilita.swift in Sources */,
 				D5DF93E3EFFA96EC3D8BBDE7 /* MappaCampagnaAccessibileTest.swift in Sources */,
 				F9D782BD8B4FD18B38DF5922 /* PannelloAzioniTest.swift in Sources */,
+				F490E61A6685A9413EE8DE50 /* PassaggioBattagliaInterfacciaTest.swift in Sources */,
 				A39DDBD69C59FAA46714DAE6 /* PorzioneVisibileTest.swift in Sources */,
 				F153F7238148016D1A99A85F /* RaggiungibilitaTest.swift in Sources */,
 				45C1B6E90486F2F6078B2B8B /* RegistroVisibileTest.swift in Sources */,

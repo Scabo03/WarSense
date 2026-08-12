@@ -230,6 +230,19 @@
 "campagna.imboscata_scoperta.sintetico" = "Imboscata scoperta in riga %1$d, casella %2$d";
 "campagna.direzione_dedotta" = "Una colonna avversaria segue una strada da riga %1$d, casella %2$d";
 "campagna.direzione_dedotta.sintetico" = "Colonna dedotta da riga %1$d, casella %2$d";
+/* Innesco e conclusione di una battaglia (01 §6, §15, incarico 24): l'annuncio non forza il
+   passaggio alla schermata di battaglia (02 §5.6), che avviene per scelta dal comando della
+   casella. L'innesco distingue lo scontro da imboscata — col vantaggio della sorpresa — da quello
+   ordinario; la conclusione dichiara vinta o persa e dove, a chi torna sulla mappa. */
+"campagna.battaglia_innescata" = "Battaglia in sospeso in riga %1$d, casella %2$d";
+"campagna.battaglia_innescata.sintetico" = "Battaglia in riga %1$d, casella %2$d";
+"campagna.battaglia_innescata_imboscata" = "Battaglia in sospeso da imboscata in riga %1$d, casella %2$d";
+"campagna.battaglia_innescata_imboscata.sintetico" = "Imboscata in battaglia in riga %1$d, casella %2$d";
+"campagna.battaglia_vinta" = "Battaglia vinta in riga %1$d, casella %2$d";
+"campagna.battaglia_vinta.sintetico" = "Vinta in riga %1$d, casella %2$d";
+"campagna.battaglia_persa" = "Battaglia persa in riga %1$d, casella %2$d";
+"campagna.battaglia_persa.sintetico" = "Persa in riga %1$d, casella %2$d";
+"campagna.battaglia_non_apribile" = "Non è stato possibile aprire la battaglia";
 
 /* Registro degli eventi (01 §5.17, 02 §6.6): ogni voce è una frase compiuta che
    dichiara il giorno cui si riferisce. Il giorno è una PROPRIETÀ della voce e non
@@ -254,6 +267,11 @@
 "registro.imboscata_scattata" = "Giorno %1$d: imboscata scattata in riga %2$d, casella %3$d";
 "registro.imboscata_scoperta" = "Giorno %1$d: imboscata avversaria scoperta in riga %2$d, casella %3$d";
 "registro.direzione_dedotta" = "Giorno %1$d: dedotta la direzione di una colonna avversaria da riga %2$d, casella %3$d";
+/* Innesco e conclusione di una battaglia (01 §6, §15, incarico 24): il fatto e il luogo,
+   attivabili per portare il fuoco sulla casella contesa. La conclusione dichiara l'esito. */
+"registro.battaglia_innescata" = "Giorno %1$d: battaglia in sospeso in riga %2$d, casella %3$d";
+"registro.battaglia_vinta" = "Giorno %1$d: battaglia vinta in riga %2$d, casella %3$d";
+"registro.battaglia_persa" = "Giorno %1$d: battaglia persa in riga %2$d, casella %3$d";
 "registro.ordine_annullato" = "Giorno %d: ordine annullato";
 "registro.giornata_azzerata" = "Giorno %d: ordini della giornata azzerati";
 "registro.titolo" = "Registro della campagna";
@@ -297,6 +315,9 @@
 /* Coda dell'informazione di stato (02 §6.5.1.3): i gruppi senza rifornimento, quando
    ce ne sono. Si aggiunge alle quattro forme di sopra e non le sostituisce. */
 "campagna.stato_senza_rifornimento" = ", %d senza rifornimento";
+/* Coda dell'informazione di stato (02 §6.5.1.3, incarico 24): la battaglia in sospeso e dove,
+   finché la campagna vi è preclusa. Una voce per ciascuna battaglia in sospeso. */
+"campagna.stato_battaglia_in_sospeso" = ". Battaglia in sospeso in riga %1$d, casella %2$d";
 "campagna.annullato_conferma" = "Ultimo ordine annullato";
 "campagna.azzerato_conferma" = "Ordini della giornata azzerati";
 "campagna.niente_da_annullare" = "Niente da annullare in questa giornata";
@@ -325,6 +346,9 @@
 "pannello.sabota" = "Sabota la formazione avversaria";
 "pannello.studia" = "Studia a fondo la formazione avversaria";
 "pannello.imboscata" = "Mettiti in agguato";
+/* Apertura della battaglia in sospeso dal comando della casella (01 §6.2, incarico 24): il
+   passaggio alla schermata di battaglia avviene per scelta del giocatore, non forzato. */
+"pannello.apri_battaglia" = "Apri la battaglia";
 "pannello.revoca_conferma_azione" = "Conferma la revoca";
 
 /* Schermata di divisione (01 §5.6.0.2, 02 §10.3): ogni riga una frase compatta.

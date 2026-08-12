@@ -120,6 +120,26 @@ public actor SessioneCampagna {
         return (esito, motore.proiettaPerIlGiocatore(eventi, stato: stato))
     }
 
+    /// Riporta in campagna l'esito di una battaglia conclusa (01 §15, incarico 24): iscrive
+    /// l'esito nel giornale — è il punto in cui i due giornali si toccano — e lo piega sullo
+    /// stato, rimuovendo la battaglia in sospeso. Se con ciò l'ultima battaglia si conclude, la
+    /// campagna si sblocca (01 §15.8) e, ove serva, l'avversario riprende il proprio turno nella
+    /// giornata ripresa. Rifiuta se la battaglia indicata non è in sospeso: non si conclude ciò
+    /// che non è aperto.
+    public func concludiBattaglia(_ esito: EsitoInCampagna) throws {
+        guard stato.battaglieInSospeso.contains(where: { $0.identificatore == esito.identificatore }) else {
+            throw ErroreSessione.operazioneNonDisponibile
+        }
+        do { try giornale.appendi(.battagliaConclusa(esito: esito)) }
+        catch { throw ErroreSessione.scritturaFallita }
+        _ = motore.applicaEsitoInCampagna(esito, in: &stato)
+        try Self.scattaIstantanea(giornale: giornale, stato: stato, cartella: cartella, forzata: true)
+        // Sbloccata la campagna, se i gruppi del giocatore hanno già tutti concluso la giornata
+        // ripresa (raro: p. es. l'unico gruppo che restava è caduto), l'avversario deve muovere.
+        try Self.svolgiTurnoAvversario(giornale: giornale, motore: motore,
+                                       condotta: condotta, cartella: cartella, stato: &stato)
+    }
+
     /// Muove l'avversario dopo che tutti i gruppi del giocatore hanno agito (01 §5.6.11):
     /// finché nessun gruppo del giocatore attende e un gruppo avversario sì, la condotta
     /// decide un comando per il gruppo di id minore che attende, che si appende al
@@ -137,6 +157,7 @@ public actor SessioneCampagna {
                                               stato: inout StatoCampagna) throws -> [EventoCampagna] {
         var eventi: [EventoCampagna] = []
         while stato.gruppiInAttesa(di: .giocatore).isEmpty,
+              stato.battaglieInSospeso.isEmpty, // una battaglia in sospeso ferma anche l'avversario (01 §6.4)
               !stato.gruppiInAttesa(di: .avversario).isEmpty {
             let vista = motore.vistaAvversario(stato: stato)
             guard let comando = condotta.prossimoComando(vista: vista) else { break }
@@ -358,6 +379,11 @@ public actor SessioneCampagna {
                 // Il fatto torna nel registro come al momento in cui è avvenuto:
                 // senza questo, la voce sparirebbe alla ripresa della campagna.
                 motore.annota(azzeramento ? .giornataAzzerata : .ordineAnnullato, in: &statoCorrente)
+            case .battagliaConclusa(let esito):
+                // Il ritorno in campagna si RIPIEGA identico rigiocando (incarico 24): l'esito è
+                // iscritto come dato, sicché la campagna ritrova i superstiti e le caselle senza
+                // rileggere i file della battaglia. È così che l'esito sopravvive a un riavvio.
+                _ = motore.applicaEsitoInCampagna(esito, in: &statoCorrente)
             default:
                 continue
             }

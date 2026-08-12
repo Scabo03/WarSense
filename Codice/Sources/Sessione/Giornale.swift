@@ -54,7 +54,14 @@ public struct FondazioneCampagna: Codable, Sendable {
     /// alterata (00 §15.2). Era 4 dalla composizione dei gruppi e dal volume, 3 dalla marcia
     /// lunga e dalla risoluzione di fine giornata, 2 da quando il comando di marcia trasporta
     /// il costo (RDA-75).
-    public static let schemaCorrente = 5
+    ///
+    /// Versione 6 dal passaggio alla battaglia (incarico 24): la risoluzione di fine giornata ha
+    /// un passo nuovo — l'innesco delle battaglie ordinarie e la battaglia in sospeso che blocca
+    /// la campagna — e il giornale porta un caso nuovo, `battagliaConclusa`. Un giornale di
+    /// versione 5, rigiocato con queste regole, produrrebbe uno stato diverso (una compresenza
+    /// armata che prima non accadeva nulla ora innesca una battaglia) e un'impronta diversa: per
+    /// questo lo si DICHIARA incompatibile invece di riaprirlo in silenzio (00 §15.2).
+    public static let schemaCorrente = 6
 
     public init(versioneSchema: Int, versioneValori: String, versioneTesti: String,
                 seme: UInt64, identificatore: String, scenario: ScenarioCampagna) {
@@ -117,6 +124,14 @@ public enum VoceGiornale: Codable, Sendable {
     /// registro si ricalcolano riapplicando il comando che ha chiuso la giornata;
     /// questa riga NON li duplica e serve al solo confine.
     case risoluzioneGiornata(giorno: Int)
+    /// L'ESITO di una battaglia nata dalla campagna, riportato sulla mappa (01 §15, incarico 24).
+    /// È il punto in cui i due giornali si TOCCANO: la battaglia vive nel proprio slot, col proprio
+    /// giornale che la rigioca identica; qui, nel giornale di campagna, si iscrive il solo esito già
+    /// piegato — superstiti e caselle del ritorno — come un dato autosufficiente. Rigiocare il
+    /// giornale di campagna riproduce il ripiegamento senza rileggere i file della battaglia, sicché
+    /// l'esito torna in campagna anche dopo un riavvio (05 §6.1, §6.3). Aggiunto in coda: i tre casi
+    /// preesistenti si ricodificano identici al byte (`CompatibilitaGiornaleTest`).
+    case battagliaConclusa(esito: EsitoInCampagna)
 }
 
 /// Una riga del giornale, numerata progressivamente.

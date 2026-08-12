@@ -472,6 +472,15 @@ public enum FattoRegistrato: Hashable, Codable, Sendable {
     /// caselle consecutive e se ne deduce che la segua. Del solo giocatore; il luogo è la
     /// casella in cui la colonna è stata osservata, da cui la deduzione si proietta.
     case direzioneDedotta(casella: Cella)
+    /// Una BATTAGLIA si è innescata e resta IN SOSPESO (01 §6.1, §6.3, incarico 24): due
+    /// gruppi armati contrapposti si sono trovati nella casella e lo scontro è imposto. Lo
+    /// scatto è sempre fra parti opposte e tocca sempre il giocatore, che ne è parte; la voce
+    /// vi entra col luogo, ed è attivabile per portare il fuoco sulla casella dove si aprirà.
+    case battagliaInnescata(casella: Cella)
+    /// Una BATTAGLIA nata dalla campagna si è CONCLUSA (01 §15, incarico 24): la voce dichiara
+    /// il luogo e se a soccombere è stato il giocatore, così che chi torna sulla mappa sappia
+    /// com'è andata anche riaprendo la campagna. Del solo giocatore, che è sempre parte.
+    case battagliaConclusa(casella: Cella, giocatoreSconfitto: Bool)
 
     /// Un esemplare per ciascun caso, in ordine fisso. Serve al collaudo per
     /// pretendere che OGNI fatto abbia la propria frase compiuta: con i valori
@@ -493,6 +502,8 @@ public enum FattoRegistrato: Hashable, Codable, Sendable {
         .imboscataScattata(casella: Cella(riga: 1, colonna: 1)),
         .imboscataScoperta(casella: Cella(riga: 1, colonna: 1)),
         .direzioneDedotta(casella: Cella(riga: 1, colonna: 1)),
+        .battagliaInnescata(casella: Cella(riga: 1, colonna: 1)),
+        .battagliaConclusa(casella: Cella(riga: 1, colonna: 1), giocatoreSconfitto: false),
     ]
 
     /// La chiave del testo che compone la frase della voce (00 §14.1): il fatto
@@ -513,6 +524,9 @@ public enum FattoRegistrato: Hashable, Codable, Sendable {
         case .imboscataScattata: return "registro.imboscata_scattata"
         case .imboscataScoperta: return "registro.imboscata_scoperta"
         case .direzioneDedotta: return "registro.direzione_dedotta"
+        case .battagliaInnescata: return "registro.battaglia_innescata"
+        case .battagliaConclusa(_, let giocatoreSconfitto):
+            return giocatoreSconfitto ? "registro.battaglia_persa" : "registro.battaglia_vinta"
         }
     }
 
@@ -533,6 +547,8 @@ public enum FattoRegistrato: Hashable, Codable, Sendable {
         case .imboscataScattata(let casella): return casella
         case .imboscataScoperta(let casella): return casella
         case .direzioneDedotta(let casella): return casella
+        case .battagliaInnescata(let casella): return casella
+        case .battagliaConclusa(let casella, _): return casella
         case .ordineAnnullato, .giornataAzzerata: return nil
         }
     }
@@ -560,6 +576,102 @@ public struct ImboscataInSospeso: Hashable, Codable, Sendable {
     public init(casella: Cella, imboscante: Parte, intruso: IdGruppo, giorno: Int) {
         self.casella = casella; self.imboscante = imboscante
         self.intruso = intruso; self.giorno = giorno
+    }
+}
+
+/// Una BATTAGLIA IN SOSPESO nata dalla campagna (01 §6.1, §6.3, incarico 24): due gruppi
+/// armati contrapposti si sono trovati nella stessa casella e lo scontro è imposto. La
+/// campagna che l'ha generata è preclusa finché la battaglia non si conclude (01 §6.3, §6.4);
+/// il giocatore la apre quando vuole, dal comando della casella (01 §6.2, 02 §5.6). Il record
+/// dichiara tutto ciò che la sessione del passaggio deve raccogliere per costruire lo scontro
+/// e per ritrovarlo dopo un riavvio: la casella, i due gruppi, chi occupava per primo (l'ordine
+/// dei turni, 01 §9.4.1), e — se nasce da un'imboscata — chi imboscava, cui spetta il vantaggio
+/// della sorpresa (01 §9.3.2). L'`identificatore` è DETERMINISTICO (dalla casella e dal giorno):
+/// nomina lo slot su disco della battaglia e si ricostruisce identico rigiocando il giornale,
+/// dove un identificatore casuale renderebbe la ripresa irriproducibile (05 §2.8).
+public struct BattagliaInSospeso: Hashable, Codable, Sendable {
+    /// Nome dello slot su disco e chiave stabile: `battaglia-giorno-riga-colonna`.
+    public let identificatore: String
+    /// La casella contesa: il campo di battaglia e, al ritorno, la casella del vincitore.
+    public let casella: Cella
+    public let gruppoGiocatore: IdGruppo
+    public let gruppoAvversario: IdGruppo
+    /// Chi occupava per primo la casella: agisce per primo (01 §9.4.1).
+    public let primoOccupante: Parte
+    /// La parte che imboscava, cui spetta il vantaggio (01 §9.3.2); nil per una battaglia
+    /// ordinaria, che non concede alcun vantaggio di schieramento (01 §5.6.3.5).
+    public let imboscante: Parte?
+    /// Il giorno in cui la battaglia si è innescata.
+    public let giorno: Int
+
+    public init(identificatore: String, casella: Cella, gruppoGiocatore: IdGruppo,
+                gruppoAvversario: IdGruppo, primoOccupante: Parte,
+                imboscante: Parte?, giorno: Int) {
+        self.identificatore = identificatore; self.casella = casella
+        self.gruppoGiocatore = gruppoGiocatore; self.gruppoAvversario = gruppoAvversario
+        self.primoOccupante = primoOccupante; self.imboscante = imboscante; self.giorno = giorno
+    }
+
+    /// Vero se la battaglia nasce da un'imboscata, e quindi porta il vantaggio (01 §9.3.2).
+    public var daImboscata: Bool { imboscante != nil }
+
+    /// L'identificatore deterministico dello slot dalla casella e dal giorno (05 §2.8).
+    public static func identificatore(casella: Cella, giorno: Int) -> String {
+        "battaglia-\(giorno)-\(casella.riga)-\(casella.colonna)"
+    }
+
+    /// Il gruppo della parte indicata coinvolto nella battaglia.
+    public func gruppo(di parte: Parte) -> IdGruppo {
+        parte == .giocatore ? gruppoGiocatore : gruppoAvversario
+    }
+}
+
+/// L'ESITO di una battaglia RIPORTATO IN CAMPAGNA (01 §15, incarico 24): il dato, del tutto
+/// autosufficiente, con cui la campagna piega su di sé il risultato dello scontro. Non rilegge
+/// mai lo stato della battaglia: la Presentazione lo deriva una volta dalla battaglia conclusa
+/// (`PonteCampagnaBattaglia.esito`) e lo iscrive nel giornale di campagna come una riga a sé,
+/// sicché rigiocare il giornale riproduce il ripiegamento identico anche senza i file della
+/// battaglia (05 §6.1). Porta, per ciascuno dei due gruppi, la composizione dei superstiti già
+/// raggruppata (01 §4.11, §15.7) e la casella al ritorno (01 §15.4, §15.5, §10.6); una
+/// composizione VUOTA dichiara il gruppo annientato, che sparisce dalla mappa (01 §15.2.3).
+public struct EsitoInCampagna: Hashable, Codable, Sendable {
+    public let identificatore: String
+    public let casella: Cella
+    public let sconfitto: Parte
+    public let modo: EsitoBattaglia.Modo
+    public let gruppoGiocatore: IdGruppo
+    public let gruppoAvversario: IdGruppo
+    /// Superstiti del gruppo del giocatore, già raggruppati (01 §4.11); vuoto = annientato.
+    public let composizioneGiocatore: [Reparto]
+    /// Superstiti del gruppo avversario, già raggruppati; vuoto = annientato.
+    public let composizioneAvversario: [Reparto]
+    /// Casella del gruppo del giocatore al ritorno; nil se annientato.
+    public let posizioneGiocatore: Cella?
+    /// Casella del gruppo avversario al ritorno; nil se annientato.
+    public let posizioneAvversario: Cella?
+
+    public init(identificatore: String, casella: Cella, sconfitto: Parte,
+                modo: EsitoBattaglia.Modo, gruppoGiocatore: IdGruppo, gruppoAvversario: IdGruppo,
+                composizioneGiocatore: [Reparto], composizioneAvversario: [Reparto],
+                posizioneGiocatore: Cella?, posizioneAvversario: Cella?) {
+        self.identificatore = identificatore; self.casella = casella
+        self.sconfitto = sconfitto; self.modo = modo
+        self.gruppoGiocatore = gruppoGiocatore; self.gruppoAvversario = gruppoAvversario
+        self.composizioneGiocatore = composizioneGiocatore
+        self.composizioneAvversario = composizioneAvversario
+        self.posizioneGiocatore = posizioneGiocatore
+        self.posizioneAvversario = posizioneAvversario
+    }
+
+    public var vincitore: Parte { sconfitto.avversaria }
+    public func composizione(di parte: Parte) -> [Reparto] {
+        parte == .giocatore ? composizioneGiocatore : composizioneAvversario
+    }
+    public func posizione(di parte: Parte) -> Cella? {
+        parte == .giocatore ? posizioneGiocatore : posizioneAvversario
+    }
+    public func gruppo(di parte: Parte) -> IdGruppo {
+        parte == .giocatore ? gruppoGiocatore : gruppoAvversario
     }
 }
 
@@ -639,6 +751,13 @@ public struct StatoCampagna: Hashable, Codable, Sendable {
     /// esploratori che scoprano; entra nell'impronta, perché due partite in cui un'imboscata è
     /// scoperta o no non sono lo stesso stato.
     public var imboscateScoperte: [Parte: Set<Cella>]
+    /// Le BATTAGLIE IN SOSPESO nate dalla campagna (01 §6.1, §6.3, incarico 24): riempita dallo
+    /// scatto delle imboscate e dai contatti armati di fine giornata, la consuma la conclusione
+    /// della battaglia. Finché non è vuota la campagna è preclusa (01 §6.4): ogni comando è
+    /// respinto col medesimo motivo `battaglia_in_sospeso`, e l'avversario non muove. Vuota nelle
+    /// partite che non arrivano a uno scontro; entra nell'impronta, perché due partite in cui una
+    /// battaglia è in sospeso o no non sono lo stesso stato.
+    public var battaglieInSospeso: [BattagliaInSospeso]
 
     public init(mappa: MappaCampagna, giorno: Int, gruppi: [IdGruppo: Gruppo],
                 prossimoIdGruppo: Int, prossimoIndiceNome: Int,
@@ -649,7 +768,8 @@ public struct StatoCampagna: Hashable, Codable, Sendable {
                 ultimaPosizioneNota: [Parte: [IdGruppo: Cella]] = [:],
                 studiati: [Parte: Set<IdGruppo>] = [:],
                 imboscateInSospeso: [ImboscataInSospeso] = [],
-                imboscateScoperte: [Parte: Set<Cella>] = [:]) {
+                imboscateScoperte: [Parte: Set<Cella>] = [:],
+                battaglieInSospeso: [BattagliaInSospeso] = []) {
         self.mappa = mappa; self.giorno = giorno; self.gruppi = gruppi
         self.prossimoIdGruppo = prossimoIdGruppo
         self.prossimoIndiceNome = prossimoIndiceNome
@@ -661,6 +781,13 @@ public struct StatoCampagna: Hashable, Codable, Sendable {
         self.studiati = studiati
         self.imboscateInSospeso = imboscateInSospeso
         self.imboscateScoperte = imboscateScoperte
+        self.battaglieInSospeso = battaglieInSospeso
+    }
+
+    /// La battaglia in sospeso in una casella, se ve n'è una (01 §6.2): il comando di
+    /// apertura la offre e il segno della casella la dichiara.
+    public func battagliaInSospeso(su casella: Cella) -> BattagliaInSospeso? {
+        battaglieInSospeso.first { $0.casella == casella }
     }
 
     public var griglia: GrigliaCampagna { mappa.griglia }

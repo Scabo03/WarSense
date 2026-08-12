@@ -85,6 +85,107 @@ public struct BancoCampagna: Sendable {
     /// Le chiavi degli archetipi noti, per la fabbrica (rifiuto dell'archetipo ignoto).
     private var archetipiNoti: Set<IdentificatoreDati> { Set(motore.valori.archetipi.keys) }
 
+    // MARK: - Il passaggio alla battaglia al banco (01 §6, §15, incarico 24)
+
+    /// Il modello PROVVISORIO dello scontro al banco (S24e): campo aperto standard su formato
+    /// «cento», protezione anti-saturazione, il primo ufficiale. Cornice minima; il banco non tara
+    /// il combattimento, che il titolare ha accettato.
+    private var modelloScontro: PonteCampagnaBattaglia.Modello {
+        PonteCampagnaBattaglia.Modello(formato: "cento", caratteristica: "campo_aperto",
+            protezione: .antiSaturazione, fase: nil,
+            ufficialeAvversario: motore.valori.ufficiali.keys.sorted().first)
+    }
+
+    /// Vero se un gruppo armato AVVERSARIO occupa una casella adiacente a quella del gruppo: la
+    /// condotta del banco vi tende un'imboscata, così l'ingresso dell'avversario apre una battaglia
+    /// da agguato invece che una ordinaria (incarico 24).
+    private func armatoAvversarioAdiacente(a gruppo: Gruppo, stato: StatoCampagna) -> Bool {
+        let avversa: Parte = gruppo.parte.avversaria
+        for vicino in stato.griglia.vicini(di: gruppo.posizione) {
+            if let occupante = stato.occupante(di: vicino, parte: avversa), occupante.categoria.eArmata {
+                return true
+            }
+        }
+        return false
+    }
+
+    /// I conteggi delle battaglie di una corsa.
+    struct EsitiBattaglie { var giocate = 0, vinte = 0, perse = 0, daImboscata = 0 }
+
+    /// Gioca le battaglie in sospeso e ne riporta l'esito in campagna (incarico 24): per ciascuna,
+    /// costruisce lo scenario dai due gruppi (`PonteCampagnaBattaglia.scenario`), la combatte a
+    /// conclusione con due tattici deterministici come `BancoSessioniBattaglia`, RIGIOCA la stessa
+    /// sequenza per l'invariante di determinismo, deriva l'esito e lo PIEGA sulla mappa. Sorveglia
+    /// i quattro invarianti del passaggio (conservazione, ritorno, blocco, rigiocatura). Il banco
+    /// non solo RENDE POSSIBILE la battaglia: la GENERA e la gioca, e ne conta gli esiti.
+    private func giocaBattaglieInSospeso(_ stato: inout StatoCampagna,
+                                         violazioni: inout Set<String>) -> EsitiBattaglie {
+        var conteggi = EsitiBattaglie()
+        let motoreB = MotoreBattaglia(valori: motore.valori)
+        guard let uffId = modelloScontro.ufficialeAvversario,
+              let ufficiale = motore.valori.ufficiali[uffId] else { return conteggi }
+        var sicurezza = 0
+        while let battaglia = stato.battaglieInSospeso.first, sicurezza < 100 {
+            sicurezza += 1
+            // (3) Il BLOCCO: con una battaglia in sospeso un comando è respinto col motivo dovuto.
+            let motivo = motore.valida(.presidio(gruppo: battaglia.gruppoGiocatore),
+                                       parte: .giocatore, stato: stato).motivo
+            violazioni.formUnion(sonda.controllaBloccoBattaglia(
+                haBattagliaInSospeso: true, motivoDelComando: motivo).map(\.description))
+
+            let scenario = PonteCampagnaBattaglia.scenario(da: battaglia, stato: stato, modello: modelloScontro)
+            guard var sb = try? FabbricaBattaglia.crea(scenario: scenario, valori: motore.valori).0 else {
+                stato.battaglieInSospeso.removeFirst(); continue
+            }
+            let tattici: [Parte: TatticoBattaglia] = [
+                .giocatore: TatticoBattaglia(motore: motoreB, ufficiale: ufficiale, parte: .giocatore),
+                .avversario: TatticoBattaglia(motore: motoreB, ufficiale: ufficiale, parte: .avversario)]
+            var comandi: [(Parte, ComandoBattaglia)] = []
+            var passi = 0
+            while sb.esito == nil, sb.giro <= 400, passi < 40000 {
+                passi += 1
+                let parte = sb.parteDiTurno
+                let comando = tattici[parte]!.prossimoComando(stato: sb)
+                comandi.append((parte, comando))
+                sb = motoreB.applica(comando, parte: parte, stato: sb).0
+            }
+            // (4) DETERMINISMO: rigioca la stessa sequenza e confronta l'impronta.
+            if var rigiocata = try? FabbricaBattaglia.crea(scenario: scenario, valori: motore.valori).0 {
+                for (parte, comando) in comandi where motoreB.valida(comando, parte: parte, stato: rigiocata).eValido {
+                    rigiocata = motoreB.applica(comando, parte: parte, stato: rigiocata).0
+                }
+                violazioni.formUnion(sonda.controllaRigiocaturaBattaglia(
+                    casella: battaglia.casella, improntaGiocata: sb.impronta(),
+                    improntaRigiocata: rigiocata.impronta()).map(\.description))
+            }
+            // I superstiti, contati INDIPENDENTEMENTE dal Ponte, per la conservazione.
+            func superstiti(_ parte: Parte) -> Int {
+                var totale = 0
+                for sciame in sb.sciami.values where sciame.parte == parte {
+                    let pv = motore.valori.archetipi[sciame.archetipo]?.puntiVitaPerAtomo ?? 1
+                    totale += Int(sciame.atomiPresenti(puntiVitaPerAtomo: pv,
+                                                       minimo: motore.valori.minimi.atomiMinimiSciameVivo))
+                }
+                for elemento in sb.deck[parte] ?? [] where elemento.esemplari > 0 {
+                    totale += Int(elemento.atomi) * elemento.esemplari
+                }
+                return totale
+            }
+            let esito = PonteCampagnaBattaglia.esito(da: sb, per: battaglia, stato: stato, valori: motore.valori)
+            // (1) CONSERVAZIONE: gli atomi che tornano coincidono coi superstiti.
+            violazioni.formUnion(sonda.controllaConservazioneForze(esito: esito,
+                superstiti: [.giocatore: superstiti(.giocatore), .avversario: superstiti(.avversario)]).map(\.description))
+            _ = motore.applicaEsitoInCampagna(esito, in: &stato)
+            // (2) RITORNO: annientato sparito, superstite ridotto e alla casella dovuta.
+            violazioni.formUnion(sonda.controllaRitornoInCampagna(
+                inSospeso: battaglia, esito: esito, dopo: stato).map(\.description))
+            conteggi.giocate += 1
+            if battaglia.daImboscata { conteggi.daImboscata += 1 }
+            if esito.sconfitto == .giocatore { conteggi.perse += 1 } else { conteggi.vinte += 1 }
+        }
+        return conteggi
+    }
+
     /// La composizione dei gruppi generati dalle misure interne (passi, distanze,
     /// uscite): una fanteria leggera, volume sotto la soglia, così che la misura del
     /// costo di chiusura non dipenda dal volume. La diversità di volume che l'unità
@@ -180,6 +281,14 @@ public struct BancoCampagna: Sendable {
         /// Le imboscate avversarie SCOPERTE dalla ricognizione del giocatore (01 §5.11.1, incarico
         /// 21): un'esplorazione riuscita ne ha rivelato la casella, prima occulta.
         public let imboscateScoperte: Int
+        /// Le BATTAGLIE nate dalla campagna e giocate al banco (01 §6, §15, incarico 24): quante in
+        /// tutto, quante vinte e quante perse dal giocatore, e quante nate da un'imboscata. Il banco
+        /// deve GENERARLE, non solo renderle possibili: se restano a zero negli scenari con avversario,
+        /// la funzione che il giocatore non può raggiungere non esiste.
+        public let battaglieGiocate: Int
+        public let battaglieVinte: Int
+        public let battagliePerse: Int
+        public let battaglieDaImboscata: Int
         /// Le GIORNATE in cui TUTTI i gruppi di una parte erano appostati (01 §5.11, incarico 21):
         /// il caso limite che l'incarico 20 non terminava e che ora, con l'imboscata che consuma
         /// l'azione, si chiude da sé.
@@ -248,6 +357,9 @@ public struct BancoCampagna: Sendable {
         var esplRiuscite = 0, esplManiVuote = 0, esplNotati = 0, esplPerduti = 0
         var sabArmati = 0, sabEsploratori = 0, sabFalliti = 0, studi = 0
         var imboscatePiazzate = 0, imboscateScattate = 0, imboscateSubite = 0, imboscateScoperte = 0
+        // Le BATTAGLIE nate dalla campagna, giocate al banco (incarico 24): quante, con quale
+        // esito, e quante da imboscata. Il banco le genera e le gioca, non le rende soltanto possibili.
+        var battaglieGiocate = 0, battaglieVinte = 0, battagliePerse = 0, battaglieDaImboscata = 0
         // Gli AVVISTAMENTI di formazioni avversarie da parte del GIOCATORE (01 §5.6.11, incarico 22):
         // quanti, e in quale giornata ciascuno, per misurare se e quando l'avversario si manifesta.
         // La casella OSSERVATA da almeno un gruppo del giocatore in qualche giornata: l'unione dà la
@@ -318,6 +430,16 @@ public struct BancoCampagna: Sendable {
         while stato.giorno < giornoIniziale + giornate {
             passiDiSicurezza += 1
             guard passiDiSicurezza <= giornate * (voce.gruppi.count + 4) + 10 else { break }
+            // Il PASSAGGIO ALLA BATTAGLIA (incarico 24): se un contatto ha innescato una battaglia in
+            // sospeso, la campagna è preclusa finché non si conclude (01 §6.4). Il banco la gioca e ne
+            // piega l'esito, poi la campagna riprende. Va PRIMA di generare qualunque comando, che il
+            // blocco respingerebbe (la precondizione di `applica` scatterebbe).
+            if !stato.battaglieInSospeso.isEmpty {
+                let esiti = giocaBattaglieInSospeso(&stato, violazioni: &violazioni)
+                battaglieGiocate += esiti.giocate; battaglieVinte += esiti.vinte
+                battagliePerse += esiti.perse; battaglieDaImboscata += esiti.daImboscata
+                continue
+            }
             let vista = VistaCampagna(motore: motore, stato: stato, parte: .giocatore)
 
             // I turni-gruppo passati in una zona di rifornimento: si contano a ogni
@@ -391,6 +513,15 @@ public struct BancoCampagna: Sendable {
                 else if gruppo.categoria.eArmata,
                         motore.bersaglioNonArmato(su: gruppo.posizione, parte: .giocatore, stato: stato) != nil {
                     comando = .sabotaggio(gruppo: gruppo.id)
+                }
+                // Un gruppo armato con un armato AVVERSARIO adiacente TENDE UN'IMBOSCATA invece di
+                // marciargli sopra (01 §5.11, incarico 24): così, quando l'avversario entra, la
+                // battaglia nasce da un AGGGUATO — col vantaggio della sorpresa (01 §9.3.2) — e non
+                // ordinaria. È ciò che fa GENERARE al banco battaglie da imboscata, non solo possibili.
+                else if gruppo.categoria.eArmata, gruppo.sostaDovuta < 2, !gruppo.deveRifornirsi,
+                        armatoAvversarioAdiacente(a: gruppo, stato: stato) {
+                    comando = .imboscata(gruppo: gruppo.id)
+                    imboscatePiazzate += 1
                 } else if gruppo.categoria.eArmata, stato.giorno % 6 == 4,
                           gruppo.sostaDovuta < 2, !gruppo.deveRifornirsi {
                     comando = .imboscata(gruppo: gruppo.id)
@@ -473,6 +604,7 @@ public struct BancoCampagna: Sendable {
             var passiAvv = 0
             let limitePassiAvv = giornate * (voce.gruppi.count + voce.gruppiAvversario.count + 4) + 100
             while stato.gruppiInAttesa(di: .giocatore).isEmpty,
+                  stato.battaglieInSospeso.isEmpty, // una battaglia in sospeso ferma anche l'avversario (01 §6.4)
                   !stato.gruppiInAttesa(di: .avversario).isEmpty {
                 // Il cancello della TERMINAZIONE (incarico 21): il turno dell'avversario si esaurisce
                 // entro un limite dichiarato. Se non lo facesse — il difetto dell'incarico 20 — non
@@ -526,6 +658,13 @@ public struct BancoCampagna: Sendable {
             }
         }
 
+        // Una battaglia innescata all'ULTIMA giornata va comunque giocata, o l'impronta finale
+        // porterebbe una battaglia in sospeso e la campagna resterebbe bloccata a metà.
+        if !stato.battaglieInSospeso.isEmpty {
+            let esiti = giocaBattaglieInSospeso(&stato, violazioni: &violazioni)
+            battaglieGiocate += esiti.giocate; battaglieVinte += esiti.vinte
+            battagliePerse += esiti.perse; battaglieDaImboscata += esiti.daImboscata
+        }
         violazioni.formUnion(sonda.controllaRaggiungibilita(
             griglia: stato.griglia, da: Cella(riga: 1, colonna: 1),
             vicini: stato.griglia.vicini).map(\.description))
@@ -594,6 +733,8 @@ public struct BancoCampagna: Sendable {
                      sabotaggiFalliti: sabFalliti, studi: studi,
                      imboscatePiazzate: imboscatePiazzate, imboscateScattate: imboscateScattate,
                      imboscateSubite: imboscateSubite, imboscateScoperte: imboscateScoperte,
+                     battaglieGiocate: battaglieGiocate, battaglieVinte: battaglieVinte,
+                     battagliePerse: battagliePerse, battaglieDaImboscata: battaglieDaImboscata,
                      giornateTuttiAppostati: giorniTuttiAppostati.count,
                      avvistamenti: avvistamentiGiocatore,
                      primoAvvistamento: giorniAvvistamento.first,

@@ -153,6 +153,9 @@
 /* Confine dell'annullamento (05 §6.5): ogni motivo di rifiuto ha il proprio
    termine (00 §9, principio 9), e il rifiuto non è mai silenzioso. */
 "campagna.non_si_torna_oltre_la_giornata" = "non si torna oltre la giornata in corso";
+/* Blocco della campagna in sospeso (01 §6.3, §6.4, incarico 24): ogni comando bloccato
+   dichiara il medesimo motivo, così che il giocatore non lo ricostruisca per tentativi. */
+"campagna.battaglia_in_sospeso" = "c'è una battaglia in sospeso";
 /* Nomi dei gruppi (01 §5.6.0.4): elenco chiuso, brevi e stabili. */
 "gruppo.nome.corvo" = "Corvo";
 "gruppo.nome.lupo" = "Lupo";

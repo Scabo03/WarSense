@@ -80,8 +80,11 @@ extension FattoRegistrato: CodificabileCanonico {
              .formazioneStudiata(let casella),
              .imboscataScattata(let casella),
              .imboscataScoperta(let casella),
-             .direzioneDedotta(let casella):
+             .direzioneDedotta(let casella),
+             .battagliaInnescata(let casella):
             casella.codifica(in: &c)
+        case .battagliaConclusa(let casella, let giocatoreSconfitto):
+            casella.codifica(in: &c); c.intero(giocatoreSconfitto ? 1 : 0)
         case .ordineAnnullato, .giornataAzzerata:
             break
         }
@@ -194,6 +197,22 @@ extension StatoCampagna {
                 c.testo(parte.rawValue)
                 c.intero(Int64(insieme.count))
                 for casella in insieme.sorted() { casella.codifica(in: &c) }
+            }
+        }
+        // Le battaglie in sospeso, nell'ordine in cui si sono innescate (incarico 24): due
+        // partite in cui una battaglia è in sospeso o no non sono lo stesso stato — la campagna
+        // vi è preclusa. Omesse quando nessuna è in sospeso, così che le partite che non arrivano
+        // a uno scontro restino identiche al byte alle precedenti.
+        if !battaglieInSospeso.isEmpty {
+            c.intero(Int64(battaglieInSospeso.count))
+            for b in battaglieInSospeso {
+                c.testo(b.identificatore)
+                b.casella.codifica(in: &c)
+                c.intero(b.gruppoGiocatore.numero)
+                c.intero(b.gruppoAvversario.numero)
+                c.testo(b.primoOccupante.rawValue)
+                c.testo(b.imboscante?.rawValue ?? "")
+                c.intero(Int64(b.giorno))
             }
         }
         return SHA256.improntaEsadecimale(c.byte)

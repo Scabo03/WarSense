@@ -151,6 +151,11 @@ public enum MotivoNonValidoCampagna: String, Codable, Hashable, Sendable, CaseIt
     /// avversaria da colpire (01 §5.10): il bersaglio è la formazione co-locata, e senza di essa
     /// l'azione non ha oggetto.
     case nessunBersaglio = "comando.non_valido.nessun_bersaglio"
+    /// Nuovo della campagna (incarico 24): c'è una battaglia in sospeso, e finché non si conclude
+    /// la campagna è preclusa (01 §6.3, §6.4). È il MEDESIMO motivo per ogni comando bloccato,
+    /// così che il giocatore non debba ricostruirlo per tentativi (02 §6.5). Non blocca l'apertura
+    /// della battaglia, che non è un comando di campagna ma il passaggio all'altra schermata.
+    case battagliaInSospeso = "campagna.battaglia_in_sospeso"
 }
 
 /// L'esito DETERMINISTICO di un'esplorazione (01 §5.4): la riuscita discende dalla
@@ -258,4 +263,12 @@ public enum EventoCampagna: Hashable, Codable, Sendable {
     /// Una DEDUZIONE sulla direzione di marcia di una colonna avversaria (01 §5.10.1): prodotta
     /// solo per il giocatore dai suoi esploratori, si consegna sempre.
     case direzioneDedotta(casella: Cella)
+    /// Una BATTAGLIA si è INNESCATA e resta in sospeso (01 §6.1, incarico 24): due gruppi armati
+    /// contrapposti si sono trovati nella casella e lo scontro è imposto. Sempre fra parti opposte
+    /// e a una casella di cui il giocatore è parte: gli si consegna sempre. `daImboscata` distingue
+    /// lo scontro nato da un agguato — col vantaggio della sorpresa (01 §9.3.2) — da quello ordinario.
+    case battagliaInnescata(casella: Cella, daImboscata: Bool)
+    /// Una BATTAGLIA nata dalla campagna si è CONCLUSA (01 §15, incarico 24): il risultato è tornato
+    /// sulla mappa. `giocatoreSconfitto` dice se a soccombere è stato il giocatore. Sempre consegnato.
+    case battagliaConclusa(casella: Cella, giocatoreSconfitto: Bool)
 }

@@ -34,6 +34,14 @@ final class PartitaCampagna {
             atPath: cartellaCampagna.appendingPathComponent("giornale.jsonl").path)
     }
 
+    /// Lo slot su disco di una battaglia nata dalla campagna (incarico 24): una sottocartella
+    /// dedicata sotto lo slot di campagna, nominata dall'identificatore deterministico della
+    /// battaglia in sospeso. Distinta dallo slot dello scontro di prova del menu, sicché le due
+    /// non si toccano; distinta per identificatore, sicché due battaglie non si sovrappongono.
+    static func cartellaBattaglia(_ identificatore: String) -> URL {
+        cartellaCampagna.appendingPathComponent("battaglie").appendingPathComponent(identificatore)
+    }
+
     static func scenario(_ taglia: Taglia) throws -> ScenarioCampagna {
         let nome = "scenari-campagna.json"
         let url = Ambiente.cartellaValori.appendingPathComponent(nome)
@@ -103,6 +111,47 @@ final class PartitaCampagna {
         guard esito.eValido else { return esito }
         for evento in eventi { ambiente.segnali.segnala(evento: evento, per: .giocatore) }
         return esito
+    }
+
+    // MARK: - Passaggio alla battaglia e ritorno (01 §6, §15, incarico 24)
+
+    /// Il modello PROVVISORIO dello scontro da campagna (S24e): il campo, il terreno, la
+    /// protezione, la fase e l'ufficiale che la campagna non dichiara. Li si legge dallo scenario
+    /// di prova, così che il riferimento ai dati resti nei DATI e non nel codice: il campo aperto
+    /// standard su formato «cento». Non è taratura del combattimento — che il titolare ha
+    /// accettato — ma la cornice minima entro cui i due gruppi si affrontano.
+    private func modelloScontro() throws -> PonteCampagnaBattaglia.Modello {
+        let prova = try PartitaCorrente.scenarioDiProva()
+        return PonteCampagnaBattaglia.Modello(
+            formato: prova.formato, caratteristica: prova.caratteristica,
+            protezione: prova.deckGiocatore.first?.protezione ?? .antiSaturazione,
+            fase: prova.fase, ufficialeAvversario: prova.ufficialeAvversario)
+    }
+
+    /// Apre la battaglia in sospeso: costruisce lo scenario dai due gruppi in contatto e ne apre
+    /// (o riprende) lo slot. Il passaggio alla schermata di battaglia lo decide il chiamante — non
+    /// si forza il cambio di schermata (01 §6.2, 02 §5.6).
+    func apriBattaglia(_ battaglia: BattagliaInSospeso) async throws -> PartitaCorrente {
+        let scenario = PonteCampagnaBattaglia.scenario(da: battaglia, stato: await stato,
+                                                       modello: try modelloScontro())
+        return try await PartitaCorrente(daCampagna: ambiente, scenario: scenario,
+                                         cartella: Self.cartellaBattaglia(battaglia.identificatore),
+                                         identificatore: battaglia.identificatore)
+    }
+
+    /// Riporta in campagna l'esito di una battaglia conclusa (01 §15): deriva l'esito dallo stato
+    /// finale della battaglia, lo iscrive nel giornale di campagna e lo piega sulla mappa; poi
+    /// rimuove lo slot della battaglia, che ha esaurito il suo compito (l'esito vive ora nel
+    /// giornale di campagna e vi si rigioca identico). Annuncia l'esito a chi torna sulla mappa.
+    func concludiBattaglia(_ battaglia: BattagliaInSospeso, statoBattaglia: StatoBattaglia) async throws {
+        let esito = PonteCampagnaBattaglia.esito(da: statoBattaglia, per: battaglia,
+                                                 stato: await stato, valori: ambiente.valori)
+        try await sessione.concludiBattaglia(esito)
+        ambiente.segnali.segnala(
+            evento: .battagliaConclusa(casella: esito.casella,
+                                       giocatoreSconfitto: esito.sconfitto == .giocatore),
+            per: .giocatore)
+        try? FileManager.default.removeItem(at: Self.cartellaBattaglia(battaglia.identificatore))
     }
 
     @discardableResult

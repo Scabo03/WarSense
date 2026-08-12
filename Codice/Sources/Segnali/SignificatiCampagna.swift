@@ -69,6 +69,15 @@ public struct TraduttoreEventiCampagna: Sendable {
         // quindici è chiuso (02 §11.5), come per l'avvistamento. Alla scoperta NON si dà l'allarme
         // dello scatto, che direbbe il falso — «è scattata» invece di «l'hai scoperta».
         case .imboscataScoperta, .direzioneDedotta: return nil
+        // Una battaglia innescata ha il proprio significato tattile GIÀ registrato nel tetto
+        // chiuso: `battaglia_in_sospeso`, famiglia dell'allarme (02 §11.7.1, significato 13),
+        // predisposto senza produttore da una sessione precedente e ora acceso (incarico 24).
+        // Vale sempre: il giocatore è parte di ogni battaglia.
+        case .battagliaInnescata: return .battagliaInSospeso
+        // La conclusione della battaglia si annuncia a parole (l'esito) ed entra nel registro,
+        // ma NON aggiunge un significato tattile: il tetto è chiuso (02 §11.5) e il ritorno alla
+        // mappa avviene per scelta del giocatore, non ruba il fuoco.
+        case .battagliaConclusa: return nil
         }
     }
 
@@ -174,6 +183,18 @@ public struct TraduttoreEventiCampagna: Sendable {
             // (01 §5.10.1). Senza nome della colonna (02 §6.4.1).
             return testi.frase("campagna.direzione_dedotta", verbosita: verbosita,
                                casella.riga, casella.colonna)
+        case .battagliaInnescata(let casella, let daImboscata):
+            // Il fatto e il luogo: «battaglia in sospeso, e dove». L'annuncio distingue lo scontro
+            // nato da un'imboscata da quello ordinario, così che il giocatore sappia se avrà — o
+            // subirà — il vantaggio della sorpresa (01 §9.3.2). Non forza il passaggio (02 §5.6).
+            return testi.frase(daImboscata ? "campagna.battaglia_innescata_imboscata"
+                                           : "campagna.battaglia_innescata",
+                               verbosita: verbosita, casella.riga, casella.colonna)
+        case .battagliaConclusa(let casella, let giocatoreSconfitto):
+            // Chi torna sulla mappa sente com'è andata: vinta o persa, e dove (01 §15.3).
+            return testi.frase(giocatoreSconfitto ? "campagna.battaglia_persa"
+                                                   : "campagna.battaglia_vinta",
+                               verbosita: verbosita, casella.riga, casella.colonna)
         }
     }
 
@@ -201,10 +222,14 @@ public struct TraduttoreEventiCampagna: Sendable {
              .formazioneStudiata(let casella),
              .imboscataScattata(let casella),
              .imboscataScoperta(let casella),
-             .direzioneDedotta(let casella):
+             .direzioneDedotta(let casella),
+             .battagliaInnescata(let casella),
+             .battagliaConclusa(let casella, _):
             // Senza nome della formazione (02 §6.4.1): il giorno e il luogo, attivabile per
             // portarvi il fuoco (02 §6.6). Il sabotaggio, lo studio, lo scatto, la SCOPERTA
-            // dell'imboscata e la deduzione dichiarano il fatto e dove, mai il nome dell'avversario.
+            // dell'imboscata, la deduzione, l'innesco e la conclusione di una battaglia dichiarano
+            // il fatto e dove; l'innesco e la conclusione hanno frasi distinte per l'esito, ma il
+            // giorno e il luogo bastano ai dati della voce (la chiaveTesto già distingue vinta/persa).
             return testi.frase(chiave, voce.giorno, casella.riga, casella.colonna)
         case .ordineAnnullato, .giornataAzzerata:
             return testi.frase(chiave, voce.giorno)

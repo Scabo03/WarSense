@@ -156,6 +156,23 @@ public struct SondaInvariantiCampagna: Sendable {
         /// ricognizione, senza formazioni non armate, sicché gli esploratori non esistevano in
         /// partita e il nemico non si incontrava. Reso un cancello, non più un'omissione silenziosa.
         case categoriaMancanteNelloScenario(scenario: String, parte: String, categoria: String)
+        // Invarianti del passaggio alla battaglia e del ritorno (01 §6, §15, incarico 24).
+        /// Le forze che TORNANO in campagna non coincidono coi superstiti della battaglia (01
+        /// §15.7): una forza si è persa o si è duplicata nel passaggio fra i due piani. È
+        /// l'invariante principale del passaggio — nessun atomo si crea né sparisce nella traduzione.
+        case forzaNonConservataNelPassaggio(parte: String, superstiti: Int, riportata: Int)
+        /// Il ritorno in campagna è scorretto (01 §15.2.3, §15.5, §10.6): un gruppo annientato è
+        /// rimasto sulla mappa, o un superstite è sparito, o la sua composizione ridotta non
+        /// combacia coi superstiti, o il vincitore non è nella casella contesa, o lo sconfitto non
+        /// è arretrato. Il `motivo` dice quale.
+        case ritornoInCampagnaScorretto(gruppo: Int, motivo: String)
+        /// Il BLOCCO della battaglia in sospeso non blocca ciò che deve, o blocca ciò che non deve
+        /// (01 §6.4): con una battaglia in sospeso un comando di campagna non è respinto col motivo
+        /// dovuto, oppure — senza battaglia — un comando è respinto proprio con quel motivo.
+        case bloccoBattagliaNonEffettivo(atteso: Bool)
+        /// L'esito di una battaglia RIGIOCATA dai suoi comandi diverge dall'originale (05 §6.3): la
+        /// battaglia non è deterministica, e il giornale non la riproduce identica.
+        case rigiocaturaBattagliaDivergente(casella: String)
 
         /// Il codice della violazione, senza spazi: l'uscita del programma di
         /// verifica è dato per chi sviluppa e non testo di prodotto (05 §12.6),
@@ -208,6 +225,10 @@ public struct SondaInvariantiCampagna: Sendable {
             case .nessunAvvistamentoInPartita: return "nessun_avvistamento_in_partita"
             case .avvistamentoSenzaFormazione(let r, let c): return "avvistamento_senza_formazione:riga=\(r):casella=\(c)"
             case .categoriaMancanteNelloScenario(let s, let p, let c): return "categoria_mancante_nello_scenario:scenario=\(s):parte=\(p):categoria=\(c)"
+            case .forzaNonConservataNelPassaggio(let p, let s, let r): return "forza_non_conservata_nel_passaggio:parte=\(p):superstiti=\(s):riportata=\(r)"
+            case .ritornoInCampagnaScorretto(let g, let m): return "ritorno_in_campagna_scorretto:gruppo=\(g):motivo=\(m)"
+            case .bloccoBattagliaNonEffettivo(let a): return "blocco_battaglia_non_effettivo:atteso=\(a)"
+            case .rigiocaturaBattagliaDivergente(let c): return "rigiocatura_battaglia_divergente:casella=\(c)"
             }
         }
     }
@@ -264,6 +285,10 @@ public struct SondaInvariantiCampagna: Sendable {
         "nessun_avvistamento_in_partita",
         "avvistamento_senza_formazione",
         "categoria_mancante_nello_scenario",
+        "forza_non_conservata_nel_passaggio",
+        "ritorno_in_campagna_scorretto",
+        "blocco_battaglia_non_effettivo",
+        "rigiocatura_battaglia_divergente",
     ]
 
     /// Il codice nudo, senza i valori: la parte prima dei due punti.
@@ -795,7 +820,11 @@ public struct SondaInvariantiCampagna: Sendable {
                 if !nomiGiocatore.contains(g) {
                     violazioni.append(.registroRivelaIgnoto(voce: voce.numero))
                 }
-            case .formazioneSabotata, .imboscataScattata, .imboscataScoperta:
+            case .formazioneSabotata, .imboscataScattata, .imboscataScoperta,
+                 .battagliaInnescata, .battagliaConclusa:
+                // L'innesco e la conclusione di una battaglia sono sempre fra parti opposte e
+                // coinvolgono sempre il giocatore (con due sole parti), a una casella di cui è
+                // parte: nessun ignoto da rivelare, come per lo scatto d'imboscata e il sabotaggio.
                 // Sabotaggio, scatto e SCOPERTA d'imboscata sono sempre fra parti opposte: con
                 // due sole parti coinvolgono sempre il giocatore — come attore o come vittima — a
                 // una casella di cui è parte (il suo bersaglio, la sua colonna, il suo agguato,
@@ -927,5 +956,82 @@ public struct SondaInvariantiCampagna: Sendable {
         return griglia.tutteLeCaselle
             .filter { !visitate.contains($0) }
             .map { .casellaPercorribileIrraggiungibile(riga: $0.riga, colonna: $0.colonna) }
+    }
+
+    // MARK: - Invarianti del passaggio alla battaglia e del ritorno (01 §6, §15, incarico 24)
+
+    /// (1) Che NESSUNA FORZA si perda o si duplichi nel passaggio (01 §15.7): gli atomi che
+    /// tornano in campagna per ciascuna parte coincidono con quelli dei superstiti della battaglia.
+    /// I superstiti li conta il banco dallo stato finale della battaglia (sciami in campo e riserve)
+    /// e li passa dall'esterno, così che la sonda giudichi la traduzione del Ponte senza rifarla.
+    public func controllaConservazioneForze(esito: EsitoInCampagna,
+                                            superstiti: [Parte: Int]) -> [Violazione] {
+        var violazioni: [Violazione] = []
+        for parte in Parte.allCases {
+            let riportata = esito.composizione(di: parte).reduce(0) { $0 + $1.atomi }
+            let attesi = superstiti[parte] ?? 0
+            if riportata != attesi {
+                violazioni.append(.forzaNonConservataNelPassaggio(
+                    parte: parte.rawValue, superstiti: attesi, riportata: riportata))
+            }
+        }
+        return violazioni
+    }
+
+    /// (2) Che un gruppo ANNIENTATO sparisca dalla mappa e uno che RIPIEGA sopravviva ridotto e
+    /// arretrato (01 §15.2.3, §15.5, §10.6): sullo stato di campagna DOPO il ritorno, ogni gruppo
+    /// con superstiti vuoti nell'esito non c'è più; ogni gruppo con superstiti c'è ancora, con la
+    /// composizione dei superstiti, e alla casella dovuta — il vincitore nella contesa, lo
+    /// sconfitto arretrato.
+    public func controllaRitornoInCampagna(inSospeso: BattagliaInSospeso, esito: EsitoInCampagna,
+                                           dopo: StatoCampagna) -> [Violazione] {
+        var violazioni: [Violazione] = []
+        let vincitore = esito.vincitore
+        for parte in Parte.allCases {
+            let id = esito.gruppo(di: parte)
+            let composizione = esito.composizione(di: parte)
+            if composizione.isEmpty {
+                if dopo.gruppi[id] != nil {
+                    violazioni.append(.ritornoInCampagnaScorretto(gruppo: id.numero, motivo: "annientato_non_sparito"))
+                }
+                continue
+            }
+            guard let gruppo = dopo.gruppi[id] else {
+                violazioni.append(.ritornoInCampagnaScorretto(gruppo: id.numero, motivo: "superstite_sparito"))
+                continue
+            }
+            if gruppo.atomiTotali != composizione.reduce(0, { $0 + $1.atomi }) {
+                violazioni.append(.ritornoInCampagnaScorretto(gruppo: id.numero, motivo: "superstite_non_ridotto"))
+            }
+            if parte == vincitore, gruppo.posizione != inSospeso.casella {
+                violazioni.append(.ritornoInCampagnaScorretto(gruppo: id.numero, motivo: "vincitore_fuori_casella"))
+            }
+            if parte == esito.sconfitto, gruppo.posizione == inSospeso.casella {
+                violazioni.append(.ritornoInCampagnaScorretto(gruppo: id.numero, motivo: "sconfitto_non_arretrato"))
+            }
+        }
+        return violazioni
+    }
+
+    /// (3) Che una battaglia in sospeso BLOCCHI ciò che deve e nient'altro (01 §6.4): con una
+    /// battaglia in sospeso, la validazione di un comando di campagna deve respingerlo col motivo
+    /// `battaglia_in_sospeso`; senza, non deve respingerlo con quel motivo. L'esito della
+    /// validazione arriva dall'esterno, così che la sonda non rifaccia il Motore.
+    public func controllaBloccoBattaglia(haBattagliaInSospeso: Bool,
+                                         motivoDelComando: MotivoNonValidoCampagna?) -> [Violazione] {
+        let bloccato = motivoDelComando == .battagliaInSospeso
+        if haBattagliaInSospeso != bloccato {
+            return [.bloccoBattagliaNonEffettivo(atteso: haBattagliaInSospeso)]
+        }
+        return []
+    }
+
+    /// (4) Che l'esito di una battaglia RIGIOCATA dai suoi comandi sia identico (05 §6.3): le due
+    /// impronte — quella della battaglia giocata e quella rigiocata dalla stessa sequenza — le
+    /// calcola il banco e le passa dall'esterno; se divergono, la battaglia non è deterministica.
+    public func controllaRigiocaturaBattaglia(casella: Cella, improntaGiocata: String,
+                                              improntaRigiocata: String) -> [Violazione] {
+        improntaGiocata == improntaRigiocata ? []
+            : [.rigiocaturaBattagliaDivergente(casella: "\(casella.riga)-\(casella.colonna)")]
     }
 }

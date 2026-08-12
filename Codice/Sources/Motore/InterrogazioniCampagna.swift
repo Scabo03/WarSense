@@ -277,6 +277,9 @@ public struct VistaCampagna: Sendable {
         public let gruppiInMarcia: Int
         public let gruppiSenzaRifornimento: Int
         public let gruppiTotali: Int
+        /// Le caselle delle battaglie in sospeso (01 §6.3, 02 §6.5.1.3, incarico 24): lo stato le
+        /// dichiara «e dove», in coda al formato chiuso. Vuoto quando nessuna è in sospeso.
+        public let battaglieInSospeso: [Cella]
     }
 
     public var informazioneDiStato: InformazioneDiStato {
@@ -299,7 +302,8 @@ public struct VistaCampagna: Sendable {
                                    gruppiSenzaRifornimento: miei.filter {
                                        motore.statoDiRifornimento(di: $0, stato: stato)?.eDiPrivazione == true
                                    }.count,
-                                   gruppiTotali: miei.count)
+                                   gruppiTotali: miei.count,
+                                   battaglieInSospeso: stato.battaglieInSospeso.map(\.casella))
     }
 
     /// Il secondo strato: il salto diretto al prossimo gruppo che non ha ancora

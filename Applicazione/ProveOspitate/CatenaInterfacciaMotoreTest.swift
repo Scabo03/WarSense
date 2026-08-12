@@ -175,6 +175,11 @@ final class CatenaInterfacciaMotoreTest: XCTestCase {
 
         while (await partita.stato).giorno <= ultimoGiorno {
             let stato = await partita.stato
+            // Se un contatto armato ha innescato una battaglia in sospeso (incarico 24), la campagna
+            // è preclusa e questa prova — che verifica la CATENA del gioco ordinario dal dito al
+            // Motore — ha esaurito il suo àmbito: il passaggio alla battaglia ha la propria prova
+            // dedicata (`PassaggioBattagliaInterfacciaTest`). La catena è verificata fino a qui.
+            if !stato.battaglieInSospeso.isEmpty { break }
             // Il prossimo gruppo che ATTENDE una decisione: non basta `!azioneSpesa`,
             // perché un gruppo in marcia lunga ha l'azione consumata dalla marcia e
             // non dal giocatore (azioneSpesa falsa, marcia non nulla) e non è

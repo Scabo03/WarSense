@@ -63,6 +63,29 @@ final class PartitaCorrente {
         self.tattico = Self.tattico(per: scenario, motore: motore, valori: ambiente.valori)
     }
 
+    /// Apre uno scontro NATO DA UNA CAMPAGNA nel suo slot proprio (incarico 24): scenario
+    /// esplicito derivato dai gruppi in contatto, cartella dedicata sotto lo slot di campagna,
+    /// identificatore deterministico. Se lo slot esiste già lo RIPRENDE — una battaglia chiusa e
+    /// riaperta dal giornale è la stessa (05 §6.3) —, altrimenti lo crea. È così che una battaglia
+    /// nata dalla campagna si salva, si riprende e si rigioca, anche dopo un riavvio.
+    init(daCampagna ambiente: Ambiente, scenario: ScenarioBattaglia,
+         cartella: URL, identificatore: String) async throws {
+        self.ambiente = ambiente
+        self.motore = MotoreBattaglia(valori: ambiente.valori)
+        let giornale = cartella.appendingPathComponent("giornale.jsonl")
+        if FileManager.default.fileExists(atPath: giornale.path) {
+            self.sessione = try await SessioneBattaglia(riprendi: cartella, valori: ambiente.valori)
+            let ripreso = await sessione.fondazione.scenario
+            self.tattico = Self.tattico(per: ripreso, motore: motore, valori: ambiente.valori)
+        } else {
+            var generatore = SystemRandomNumberGenerator()
+            self.sessione = try await SessioneBattaglia(
+                nuova: scenario, valori: ambiente.valori, versioneTesti: ambiente.testi.versione,
+                cartella: cartella, seme: generatore.next(), identificatore: identificatore)
+            self.tattico = Self.tattico(per: scenario, motore: motore, valori: ambiente.valori)
+        }
+    }
+
     private static func tattico(per scenario: ScenarioBattaglia, motore: MotoreBattaglia,
                                 valori: ValoriDiGioco) -> TatticoBattaglia {
         let identificatore = scenario.ufficialeAvversario
@@ -98,6 +121,20 @@ final class PartitaCorrente {
             stato = await sessione.stato
         }
         return esito
+    }
+
+    /// Fa agire l'avversario se tocca a LUI appena aperta la battaglia (01 §9.4.1): quando il
+    /// primo occupante è l'avversario — una battaglia imposta entrando nella sua casella, dove
+    /// chi attendeva riceve la prima mossa — agisce per primo, e senza questo nulla lo muoverebbe
+    /// finché il giocatore non agisce, ma il giocatore non può agire nel turno altrui: sarebbe uno
+    /// stallo. Negli scontri del menu il primo occupante è sempre il giocatore, sicché non serviva.
+    func muoviAvversarioSeTocca() async throws {
+        var stato = await sessione.stato
+        while stato.parteDiTurno == .avversario && stato.esito == nil {
+            let eventi = try await sessione.eseguiTurnoAvversario(tattico)
+            distribuisci(eventi)
+            stato = await sessione.stato
+        }
     }
 
     func annulla() async throws {

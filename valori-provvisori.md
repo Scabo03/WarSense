@@ -215,3 +215,16 @@ Lo scenario giocabile `scenari-campagna.json` schierava SOLTANTO gruppi armati d
 - **`campagna_grande`** (pianura 10×10): giocatore **5 armati → 5 armati + 1 ricognizione + 1 non armata (7)**; avversario **0 → 3 (1+1+1)**.
 
 *Criterio:* ogni parte schiera almeno un gruppo per categoria su ogni mappa; il giocatore conserva la sua forza armata di prima (identica, e nello stesso ordine, sicché `gruppiOrdinati[0]` non si sposta) e vi aggiunge un esploratore e una non armata; l'avversario ne schiera uno per categoria presso il proprio quartier generale. *Valori delle formazioni nuove, PROVVISORI:* ricognizione `competenza` = **5**; non armata `carico` = **4**, `soglia_protezione` = **2**; composizioni piccole (`fanteria_leggera` 3 atomi per gli esploratori, 4 per le non armate). Lo scenario è un DATO, non un valore tarato: la versione dei valori RESTA **0.11.0**; nessuna incompatibilità di salvataggio (lo schema del giornale non cambia). Impronte dei Contenuti rigenerate (solo l'impronta di `scenari-campagna.json` cambia; `manifest.json` dei Valori resta a 21 file, versione 0.11.0 invariata; `rigenera-impronte.py --verifica` coerente).
+
+## Il modello dello scontro nato dalla campagna (incarico 24)
+
+La campagna non dichiara con quale cornice una battaglia si combatte; `PonteCampagnaBattaglia.Modello` la fornisce, letta dallo scenario di prova (`scenari.json`). PROVVISORI, non tarati (non toccano il combattimento, che il titolare ha accettato):
+
+- **formato del campo** = `cento` (griglia 10×10, tre righe di piazzamento).
+- **terreno (caratteristica)** = `campo_aperto`.
+- **protezione dei reparti** = `anti_saturazione` (la campagna non porta la protezione, che in battaglia è scelta allo schieramento; qui un difetto uniforme).
+- **fase storica** = assente → la fabbrica assume l'antica; **ufficiale avversario** = il primo dei dati (`ufficiale_prova`).
+
+Da tarare quando la campagna porterà questi dati (terreno della casella contesa, protezione della composizione, fase del fronte). Il vantaggio dell'imboscante è invece già tarato sul lato battaglia (`FormatoBattaglia.turniVantaggioImboscante`, `scontoImboscante`) e non è provvisorio.
+
+Versione dei valori RESTA **0.11.0** (valutazione dichiarata): non si introducono valori tarati nuovi — il modello è la cornice minima provvisoria. Versione del giornale di CAMPAGNA sale da 5 a **6** (regole di fine giornata cambiate: il contatto armato ora innesca una battaglia; i salvataggi v5 si dichiarano incompatibili). Versione della battaglia (`Fondazione.schemaCorrente`) RESTA 2 (il formato di battaglia non cambia). Versione dei Testi RESTA **0.1.1** (chiavi nuove aggiunte — `pannello.apri_battaglia`, `campagna.battaglia_in_sospeso`, `campagna.battaglia_innescata[_imboscata]`, `campagna.battaglia_vinta`/`_persa`, `registro.battaglia_innescata`/`_vinta`/`_persa`, `campagna.battaglia_non_apribile` — ma il manifest dei testi porta le impronte per file, sicché la sincronizzazione non è la trappola del manifest a sola versione+lingue; impronte rigenerate).

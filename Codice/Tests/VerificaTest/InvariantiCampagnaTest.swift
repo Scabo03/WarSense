@@ -51,11 +51,13 @@ final class InvariantiCampagnaTest: XCTestCase {
             let corsa = try banco.corri(voce, giornate: scenari.giornateGenerate)
             XCTAssertEqual(corsa.violazioni, [],
                            "violazioni nello scenario \(corsa.identificatore)")
-            // Almeno le giornate chieste: l'ultima applicazione può chiudere PIÙ
-            // giornate a cascata (01 §5.6.11), sicché il conto le può oltrepassare —
-            // che con le marce di più gruppi generate da questa unità accade davvero.
-            XCTAssertGreaterThanOrEqual(corsa.giornate, scenari.giornateGenerate,
-                                        "le giornate generate sono almeno quelle chieste")
+            // Almeno le giornate chieste, SALVO che una battaglia abbia chiuso la campagna prima
+            // (incarico 24): con un contatto armato una partita può concludersi con l'annientamento
+            // di una parte molto prima del limite, ed è un esito normale (01 §15.2.3). L'ultima
+            // applicazione può invece chiudere PIÙ giornate a cascata (01 §5.6.11), oltrepassando il
+            // conto — che con le marce di più gruppi accade davvero.
+            XCTAssertTrue(corsa.giornate >= scenari.giornateGenerate || corsa.battaglieGiocate > 0,
+                          "\(corsa.identificatore): giornate \(corsa.giornate) sotto il limite senza battaglie")
             giornateTotali += corsa.giornate
             ordiniTotali += corsa.ordini
         }
@@ -805,7 +807,49 @@ final class InvariantiCampagnaTest: XCTestCase {
                                      gruppiGiocatore: [.init(riga: 10, colonna: 6,
                                                              composizione: Self.composizioneLeggera)]))
             }),
+            // Incarico 24 — i quattro invarianti del passaggio alla battaglia e del ritorno.
+            ("forza_non_conservata_nel_passaggio", {
+                // Un esito che riporta più atomi (5) dei superstiti realmente contati (3): una forza
+                // duplicata nel passaggio fra i due piani.
+                let esito = Self.esitoDiProva(ids: ids, composizioneGiocatore: [Reparto(archetipo: "fanteria_leggera", atomi: 5)])
+                return sonda.controllaConservazioneForze(esito: esito, superstiti: [.giocatore: 3, .avversario: 0])
+            }),
+            ("ritorno_in_campagna_scorretto", {
+                // L'esito dichiara il gruppo del giocatore ANNIENTATO (composizione vuota), ma sullo
+                // stato dopo il ritorno il gruppo è ancora sulla mappa: annientato non sparito.
+                let esito = Self.esitoDiProva(ids: ids, composizioneGiocatore: [])
+                let inSospeso = Self.battagliaDiProva(ids: ids)
+                return sonda.controllaRitornoInCampagna(inSospeso: inSospeso, esito: esito, dopo: base)
+            }),
+            ("blocco_battaglia_non_effettivo", {
+                // C'è una battaglia in sospeso, ma un comando NON è respinto col motivo dovuto.
+                sonda.controllaBloccoBattaglia(haBattagliaInSospeso: true, motivoDelComando: nil)
+            }),
+            ("rigiocatura_battaglia_divergente", {
+                // Due impronte diverse per la stessa battaglia: la rigiocatura non la riproduce.
+                sonda.controllaRigiocaturaBattaglia(casella: Cella(riga: 1, colonna: 1),
+                    improntaGiocata: "aaaa", improntaRigiocata: "bbbb")
+            }),
         ]
+    }
+
+    /// Una battaglia in sospeso di prova, coi due primi gruppi come contendenti.
+    static func battagliaDiProva(ids: [IdGruppo]) -> BattagliaInSospeso {
+        BattagliaInSospeso(identificatore: "battaglia-1-1-1", casella: Cella(riga: 1, colonna: 1),
+                           gruppoGiocatore: ids[0], gruppoAvversario: ids[1],
+                           primoOccupante: .avversario, imboscante: nil, giorno: 1)
+    }
+
+    /// Un esito di prova: il giocatore sconfitto e annientato salvo `composizioneGiocatore`,
+    /// l'avversario vincitore con un reparto superstite nella casella contesa.
+    static func esitoDiProva(ids: [IdGruppo], composizioneGiocatore: [Reparto]) -> EsitoInCampagna {
+        EsitoInCampagna(identificatore: "battaglia-1-1-1", casella: Cella(riga: 1, colonna: 1),
+                        sconfitto: .giocatore, modo: .annientamento,
+                        gruppoGiocatore: ids[0], gruppoAvversario: ids[1],
+                        composizioneGiocatore: composizioneGiocatore,
+                        composizioneAvversario: [Reparto(archetipo: "fanteria_leggera", atomi: 3)],
+                        posizioneGiocatore: composizioneGiocatore.isEmpty ? nil : Cella(riga: 2, colonna: 1),
+                        posizioneAvversario: Cella(riga: 1, colonna: 1))
     }
 
     /// Il cancello delle tre categorie nello scenario iniziale (incarico 23) scatta su uno scenario
@@ -897,10 +941,13 @@ final class InvariantiCampagnaTest: XCTestCase {
             let corsa = try banco.corri(voce, giornate: banco.scenari.giornateGenerate)
             print("FENOMENI-21 \(voce.identificatore): tuttiAppostati=\(corsa.giornateTuttiAppostati)"
                   + " scattate=\(corsa.imboscateScattate) subite=\(corsa.imboscateSubite)"
-                  + " scoperte=\(corsa.imboscateScoperte) giornate=\(corsa.giornate) violazioni=\(corsa.violazioni.count)")
+                  + " scoperte=\(corsa.imboscateScoperte) giornate=\(corsa.giornate) violazioni=\(corsa.violazioni.count)"
+                  + " BATT giocate=\(corsa.battaglieGiocate) vinte=\(corsa.battaglieVinte) perse=\(corsa.battagliePerse) daImb=\(corsa.battaglieDaImboscata)")
             XCTAssertTrue(corsa.violazioni.isEmpty, "\(voce.identificatore): \(corsa.violazioni)")
-            XCTAssertEqual(corsa.giornate, banco.scenari.giornateGenerate,
-                           "\(voce.identificatore) termina entro le giornate dichiarate")
+            // Termina: o raggiunge il limite, o una battaglia ha chiuso la campagna prima (incarico
+            // 24). La non terminazione oltre il limite la coglie l'invariante `partita_non_terminata`.
+            XCTAssertTrue(corsa.giornate <= banco.scenari.giornateGenerate || corsa.battaglieGiocate > 0,
+                           "\(voce.identificatore) non termina entro le giornate dichiarate")
             tuttiAppostati += corsa.giornateTuttiAppostati; scattate += corsa.imboscateScattate
             subite += corsa.imboscateSubite; scoperte += corsa.imboscateScoperte
         }

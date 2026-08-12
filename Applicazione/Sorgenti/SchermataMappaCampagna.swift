@@ -280,6 +280,19 @@ final class SchermataMappaCampagna: UIViewController {
                                          message: nil, preferredStyle: .alert)
         var voci: [VocePannello] = []
 
+        // Se la casella ha una battaglia in sospeso, il comando che la apre precede ogni altro
+        // (01 §6.2, incarico 24). NON è un comando di campagna — non passa dalla validazione, e il
+        // blocco non lo tocca — ma il passaggio all'altra schermata, che il giocatore decide (02
+        // §5.6): il fuoco non si sposta se non lo chiede. Le altre azioni, bloccate, non compaiono.
+        if let battaglia = statoCorrente?.battagliaInSospeso(su: gruppo.posizione) {
+            voci.append(VocePannello(titolo: testi.frase("pannello.apri_battaglia").testo,
+                                     stile: .default) { [weak self] in
+                self?.chiudiPannello(casella: gruppo.posizione) {
+                    await self?.apriLaBattaglia(battaglia)
+                }
+            })
+        }
+
         // La marcia si offre soltanto se esiste almeno una destinazione: un'azione
         // impossibile in ogni sua forma non compare affatto (02 §9.5).
         if costruttore.vista.esisteDestinazione(per: gruppo.id) {
@@ -436,6 +449,45 @@ final class SchermataMappaCampagna: UIViewController {
         } else {
             ripristina()
         }
+    }
+
+    // MARK: - Passaggio alla battaglia e ritorno (01 §6, §15, incarico 24)
+
+    /// Apre la battaglia in sospeso e PRESENTA la schermata di battaglia (01 §6.2): il passaggio
+    /// avviene ORA, per scelta del giocatore, e non forzato all'innesco. Al termine dello scontro
+    /// — congedato il resoconto — si torna a questa mappa e l'esito vi si piega (`concludiLaBattaglia`).
+    private func apriLaBattaglia(_ battaglia: BattagliaInSospeso) async {
+        do {
+            let partitaBattaglia = try await partita.apriBattaglia(battaglia)
+            let schermata = SchermataBattaglia(partita: partitaBattaglia)
+            schermata.modalPresentationStyle = .fullScreen
+            schermata.alTermine = { [weak self] in
+                self?.dismiss(animated: false) {
+                    Task { await self?.concludiLaBattaglia(battaglia, partitaBattaglia: partitaBattaglia) }
+                }
+            }
+            present(schermata, animated: false)
+            Fuoco.azzeraRegistro()
+        } catch {
+            partita.ambiente.segnali.annuncia(TestoLocalizzato(
+                testo: testi.frase("campagna.battaglia_non_apribile").testo, lingua: testi.lingua),
+                interrompente: true)
+        }
+    }
+
+    /// Riporta l'esito in campagna a battaglia conclusa (01 §15): legge lo stato finale della
+    /// battaglia, lo piega sulla mappa attraverso la Sessione — che lo iscrive nel giornale di
+    /// campagna — e aggiorna la schermata. Se la battaglia non è conclusa (uscita anomala) non
+    /// piega nulla: la battaglia resta in sospeso e si potrà riaprire.
+    private func concludiLaBattaglia(_ battaglia: BattagliaInSospeso,
+                                     partitaBattaglia: PartitaCorrente) async {
+        let statoBattaglia = await partitaBattaglia.stato
+        guard statoBattaglia.esito != nil else { return }
+        do {
+            try await partita.concludiBattaglia(battaglia, statoBattaglia: statoBattaglia)
+        } catch { }
+        await ricaricaStato()
+        Fuoco.sposta(a: elementi[battaglia.casella], perche: .schermataAperta)
     }
 
     // MARK: - Comandi
@@ -625,6 +677,9 @@ final class SchermataMappaCampagna: UIViewController {
     /// lo stesso corpo sui due piani (02 §2.11, RDA-78).
     var grigliaPerProva: VistaACaselle { vistaMappa }
     var partitaPerProva: PartitaCampagna { partita }
+    /// Ricarica lo stato dalla Sessione e aggiorna la schermata: la prova d'interfaccia del
+    /// passaggio alla battaglia lo usa per verificare il ritorno sulla schermata VERA (incarico 24).
+    func ricaricaStatoPerProva() async { await ricaricaStato() }
     func avviaDesignazionePerProva(gruppo: IdGruppo) {
         designazione = .marcia(gruppo: gruppo)
         if let stato = statoCorrente { aggiorna(con: stato) }
