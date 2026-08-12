@@ -8,7 +8,7 @@ Il gruppo che combatte SPENDE la giornata combattendo. Non è un'attesa: chi è 
 
 ## Lo sconfitto ripiega, e sei tu a scegliere dove
 
-Il gruppo che perde la battaglia, se non è stato annientato, non resta sulla casella contesa: ripiega di una casella all'indietro, verso il proprio quartier generale — la stessa direzione «alle spalle» della regola del rifornimento, non una nuova. E sei tu a scegliere subito quale casella, appena la battaglia si conclude: il gioco ti annuncia le caselle disponibili, una per una, e tu ne attivi una. Nessuna tabella, nessun trascinamento — la scegli ascoltando, come schieri in battaglia. Se verso il tuo quartier generale non c'è alcuna casella libera — sei al bordo della mappa, o le caselle sono occupate — il gruppo resta dov'è: non c'è dove ripiegare.
+Il gruppo che perde la battaglia, se non è stato annientato, non resta sulla casella contesa: ripiega di una casella all'indietro, verso il proprio quartier generale — la stessa direzione, quella delle sue retrovie, che la regola del rifornimento chiama alle spalle, non una nuova. E sei tu a scegliere subito quale casella, appena la battaglia si conclude: il gioco ti annuncia le caselle disponibili, una per una, e tu ne attivi una. Nessuna tabella, nessun trascinamento — la scegli ascoltando, come schieri in battaglia. Se verso il tuo quartier generale non c'è alcuna casella libera — sei al bordo della mappa, o le caselle sono occupate — il gruppo resta dov'è: non c'è dove ripiegare.
 
 ## Che cosa accade al vincitore
 
