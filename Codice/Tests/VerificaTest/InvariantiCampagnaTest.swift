@@ -830,6 +830,13 @@ final class InvariantiCampagnaTest: XCTestCase {
                 sonda.controllaRigiocaturaBattaglia(casella: Cella(riga: 1, colonna: 1),
                     improntaGiocata: "aaaa", improntaRigiocata: "bbbb")
             }),
+            // Incarico 25 — la giocabilità: nessun gruppo non-agito senza azioni disponibili.
+            ("gruppo_bloccato_senza_azioni", {
+                // Un gruppo NON-agito per cui NESSUN comando è disponibile (`ordinabile` falso), e
+                // NESSUNA battaglia in sospeso (il blocco non è legittimo): il blocco irreversibile
+                // del titolare. `base` porta gruppi non-agiti e nessuna battaglia in sospeso.
+                sonda.controllaGiocabilita(stato: base, ordinabile: { _ in false })
+            }),
         ]
     }
 
@@ -953,6 +960,32 @@ final class InvariantiCampagnaTest: XCTestCase {
         }
         XCTAssertGreaterThan(tuttiAppostati, 0, "nessuna giornata con tutti i gruppi di una parte appostati")
         XCTAssertGreaterThan(scattate, 0, "nessuna imboscata scattata (nessuno vi è caduto)")
+    }
+
+    /// Il banco GENERA partite che PROSEGUONO dopo le battaglie (incarico 25): non partite che si
+    /// fermano allo scontro. Riporta, per ogni scenario con battaglie, quante GIORNATE la partita
+    /// prosegue dopo la PRIMA battaglia — il caso che ha bloccato il titolare, la giornata dopo il
+    /// ritorno — e pretende che la MEDIA sia ben oltre zero. Nessuna corsa produce l'invariante
+    /// `gruppo_bloccato_senza_azioni`: la giocabilità dopo la battaglia è sorvegliata, non sperata.
+    func test_incarico_25_il_banco_prosegue_dopo_le_battaglie() throws {
+        let banco = try banchino()
+        var conBattaglie = 0, sommaGiornateDopo = 0, massimo = 0
+        for voce in banco.scenari.scenari {
+            let corsa = try banco.corri(voce, giornate: banco.scenari.giornateGenerate)
+            XCTAssertTrue(corsa.violazioni.isEmpty, "\(voce.identificatore): \(corsa.violazioni)")
+            guard corsa.battaglieGiocate > 0 else { continue }
+            conBattaglie += 1
+            sommaGiornateDopo += corsa.giornateDopoLaPrimaBattaglia
+            massimo = max(massimo, corsa.giornateDopoLaPrimaBattaglia)
+            print("PROSEGUE-25 \(voce.identificatore): battaglie=\(corsa.battaglieGiocate)"
+                  + " vinte=\(corsa.battaglieVinte) perse=\(corsa.battagliePerse)"
+                  + " giornateDopoLaPrimaBattaglia=\(corsa.giornateDopoLaPrimaBattaglia) giornateTotali=\(corsa.giornate)")
+        }
+        XCTAssertGreaterThan(conBattaglie, 0, "nessuno scenario ha prodotto battaglie: il banco non le esercita")
+        let media = sommaGiornateDopo / max(1, conBattaglie)
+        print("PROSEGUE-25 MEDIA giornate dopo la prima battaglia = \(media) (max \(massimo), scenari con battaglie \(conBattaglie))")
+        XCTAssertGreaterThan(massimo, 1,
+            "nessuna partita prosegue oltre il ritorno dalla battaglia: il banco non esercita il caso del blocco (incarico 25)")
     }
 
     /// I FENOMENI dell'avvistamento (incarico 22): sugli scenari con avversario il banco misura,

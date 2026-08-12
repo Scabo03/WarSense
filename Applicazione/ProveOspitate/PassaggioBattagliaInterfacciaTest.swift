@@ -84,7 +84,8 @@ final class PassaggioBattagliaInterfacciaTest: XCTestCase {
         let esito = try XCTUnwrap(statoFinale.esito, "la battaglia si è conclusa con un esito")
 
         // (5) Il RITORNO: l'esito torna in campagna, sulla schermata vera.
-        try await schermata.partitaPerProva.concludiBattaglia(battaglia, statoBattaglia: statoFinale)
+        let esitoRitorno = await schermata.partitaPerProva.esitoDiRitorno(battaglia, statoBattaglia: statoFinale)
+        try await schermata.partitaPerProva.concludiBattaglia(battaglia, esito: esitoRitorno)
         await schermata.ricaricaStatoPerProva()
         let statoRitorno = try XCTUnwrap(schermata.statoPerProva)
 
@@ -140,7 +141,8 @@ final class PassaggioBattagliaInterfacciaTest: XCTestCase {
         // Combatti a conclusione e riporta l'esito in campagna.
         let statoFinale = try await combattiAConclusione(ripresaBattaglia, ambiente: ambiente)
         let esito = try XCTUnwrap(statoFinale.esito)
-        try await schermata.partitaPerProva.concludiBattaglia(battaglia, statoBattaglia: statoFinale)
+        let esitoRitorno = await schermata.partitaPerProva.esitoDiRitorno(battaglia, statoBattaglia: statoFinale)
+        try await schermata.partitaPerProva.concludiBattaglia(battaglia, esito: esitoRitorno)
 
         // «Riapri» la campagna dallo slot su disco: l'esito è tornato, e resta dopo il riavvio —
         // la campagna lo rigioca dal giornale senza rileggere i file della battaglia (05 §6.1).
@@ -155,6 +157,126 @@ final class PassaggioBattagliaInterfacciaTest: XCTestCase {
         let idVincitore = battaglia.gruppo(di: esito.sconfitto.avversaria)
         XCTAssertEqual(statoCampagna.gruppi[idVincitore]?.posizione, battaglia.casella,
                        "il vincitore è nella casella contesa anche dopo il riavvio (01 §15.5)")
+    }
+
+    // MARK: - Incarico 25: la campagna prosegue oltre il ritorno dalla battaglia
+
+    func test_incarico_25_la_campagna_prosegue_due_giornate_oltre_il_ritorno() async throws {
+        let (schermata, ambiente) = try await mappaAperta(taglia: .piccola)
+        let battaglia = try await portaAContatto(schermata)
+
+        // Apre e combatte la battaglia attraverso la CATENA VERA dello schermo — il comando della
+        // casella, la schermata di battaglia, il resoconto e il suo congedo — non i metodi del
+        // coordinatore: è nella catena dello schermo che il difetto del titolare vive.
+        try await apriCombattiEtornaDalloSchermo(schermata, battaglia: battaglia, ambiente: ambiente)
+
+        let dopoRitorno = try XCTUnwrap(schermata.statoPerProva)
+        XCTAssertTrue(dopoRitorno.battaglieInSospeso.isEmpty,
+                      "tornato dalla battaglia dallo schermo, l'esito è piegato e nessuna battaglia resta in sospeso")
+        // IL GRUPPO CHE HA COMBATTUTO HA SPESO LA GIORNATA (la regola del titolare, 01 §5.6.0.5):
+        // il superstite di una battaglia — di qualunque parte — deve risultare AGITO, non in attesa.
+        // Sul codice della build 26 risulta NON agito, ed è la causa vera del blocco.
+        for id in [battaglia.gruppoGiocatore, battaglia.gruppoAvversario] {
+            if let combattente = dopoRitorno.gruppi[id] {
+                XCTAssertTrue(combattente.azioneSpesa,
+                    "il gruppo \(id) reduce dalla battaglia deve aver SPESO la giornata combattendo (01 §5.6.0.5): "
+                    + "è la regola che impedisce il blocco del titolare")
+            }
+        }
+        let giornoRitorno = dopoRitorno.giorno
+
+        // Prosegue per DUE giornate intere, ordinando ogni gruppo in attesa e vedendo la giornata
+        // chiudersi. È lo spazio oltre il ritorno in cui il difetto del titolare vive.
+        try await proseguiGiornate(schermata, quante: 2)
+
+        let finale = try XCTUnwrap(schermata.statoPerProva)
+        XCTAssertGreaterThanOrEqual(finale.giorno, giornoRitorno + 2,
+            "dopo il ritorno la campagna prosegue almeno due giornate: giorno \(giornoRitorno) → \(finale.giorno)")
+    }
+
+    /// Apre la battaglia dal comando della casella, la combatte a conclusione guidando la
+    /// `PartitaCorrente` della schermata di battaglia PRESENTATA (i suoi eventi la raggiungono e ne
+    /// fanno comparire il resoconto), poi congeda il resoconto come il pulsante «torna» — la stessa
+    /// catena `alTermine` del gioco, che riporta l'esito in campagna (incarico 25).
+    private func apriCombattiEtornaDalloSchermo(_ schermata: SchermataMappaCampagna,
+                                                battaglia: BattagliaInSospeso, ambiente: Ambiente) async throws {
+        XCTAssertTrue(schermata.attiva(battaglia.casella))
+        try await Task.sleep(nanoseconds: 150_000_000)
+        let apri = ambiente.testi.frase("pannello.apri_battaglia").testo
+        let voce = try XCTUnwrap(schermata.vociPannelloPerProva.first { $0.titolo == apri },
+                                 "il pannello della casella offre «Apri la battaglia»")
+        voce.esegui()
+
+        var trovata: SchermataBattaglia?
+        for _ in 0..<300 {
+            if let b = schermata.presentedViewController as? SchermataBattaglia { trovata = b; break }
+            try await Task.sleep(nanoseconds: 20_000_000)
+        }
+        let battleScreen = try XCTUnwrap(trovata, "la schermata di battaglia è stata presentata dal comando")
+        for _ in 0..<200 where battleScreen.elementiPerProva.isEmpty {
+            try await Task.sleep(nanoseconds: 20_000_000)
+        }
+        _ = try await combattiAConclusione(battleScreen.partitaPerProva, ambiente: ambiente)
+
+        var resoconto: SchermataResoconto?
+        for _ in 0..<300 {
+            if let r = battleScreen.presentedViewController as? SchermataResoconto { resoconto = r; break }
+            try await Task.sleep(nanoseconds: 20_000_000)
+        }
+        try XCTUnwrap(resoconto, "il resoconto di fine battaglia è stato presentato").chiudiTuttoPerProva()
+
+        // Attende che la mappa torni in primo piano e che l'esito sia piegato (la catena alTermine).
+        for _ in 0..<300 where schermata.presentedViewController != nil
+            || schermata.statoPerProva?.battaglieInSospeso.isEmpty == false {
+            try await Task.sleep(nanoseconds: 20_000_000)
+        }
+        await schermata.ricaricaStatoPerProva()
+    }
+
+    /// Ordina ogni gruppo del giocatore in attesa e lascia chiudere la giornata, `quante` volte.
+    /// Sorveglia LUNGO IL CAMMINO che nessun gruppo in attesa sia privo di ogni azione (il blocco).
+    private func proseguiGiornate(_ schermata: SchermataMappaCampagna, quante: Int) async throws {
+        let motore = schermata.motorePerProva
+        func haQualcheAzione(_ g: Gruppo, _ s: StatoCampagna) -> Bool {
+            let comandi: [ComandoCampagna] = [.presidio(gruppo: g.id), .sostaConRaccolta(gruppo: g.id)]
+                + s.griglia.vicini(di: g.posizione).map {
+                    .marcia(gruppo: g.id, a: $0, giorni: motore.costoInGiorni(da: g.posizione, a: $0, stato: s))
+                }
+            return comandi.contains { motore.valida($0, parte: .giocatore, stato: s).eValido }
+        }
+        let presidioTitolo = schermata.partitaPerProva.ambiente.testi.frase("pannello.presidio").testo
+        for _ in 0..<quante {
+            let giorno = schermata.statoPerProva?.giorno ?? 0
+            var protezione = 0
+            while schermata.statoPerProva?.giorno == giorno && protezione < 80 {
+                protezione += 1
+                guard let s = schermata.statoPerProva else { break }
+                for g in s.gruppiInAttesa(di: .giocatore) {
+                    XCTAssertTrue(haQualcheAzione(g, s),
+                        "gruppo \(g.id) in attesa nel giorno \(s.giorno) senza ALCUNA azione disponibile: blocco irreversibile")
+                }
+                guard let g = s.gruppiInAttesa(di: .giocatore).first else { break } // giornata chiusa
+                // Ordina ATTRAVERSO IL PANNELLO della casella, non con l'esecuzione diretta: è nel
+                // pannello — ciò che il giocatore tocca — che un gruppo può risultare non ordinabile.
+                XCTAssertTrue(schermata.attiva(g.posizione),
+                              "la casella del gruppo \(g.id) in riga \(g.posizione.riga) si attiva")
+                try? await Task.sleep(nanoseconds: 60_000_000)
+                let titoli = schermata.vociPannelloPerProva.map(\.titolo)
+                XCTAssertFalse(titoli.isEmpty,
+                    "il pannello del gruppo \(g.id) reduce dalla battaglia deve offrire almeno un'azione: blocco")
+                let voce = try XCTUnwrap(
+                    schermata.vociPannelloPerProva.first { $0.titolo == presidioTitolo }
+                        ?? schermata.vociPannelloPerProva.first { $0.stile == .default },
+                    "il pannello del gruppo \(g.id) offre un ordine (presidio o altro): «\(titoli)»")
+                voce.esegui()
+                for _ in 0..<50 where schermata.statoPerProva?.gruppi[g.id]?.haConclusoLaGiornata == false
+                    && schermata.statoPerProva?.giorno == giorno {
+                    try? await Task.sleep(nanoseconds: 20_000_000)
+                }
+            }
+            XCTAssertLessThan(protezione, 80,
+                "la giornata \(giorno) non si è chiusa: la campagna è bloccata dopo il ritorno dalla battaglia")
+        }
     }
 
     // MARK: - Attrezzi

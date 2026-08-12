@@ -61,7 +61,16 @@ public struct FondazioneCampagna: Codable, Sendable {
     /// versione 5, rigiocato con queste regole, produrrebbe uno stato diverso (una compresenza
     /// armata che prima non accadeva nulla ora innesca una battaglia) e un'impronta diversa: per
     /// questo lo si DICHIARA incompatibile invece di riaprirlo in silenzio (00 §15.2).
-    public static let schemaCorrente = 6
+    ///
+    /// Versione 7 dalla correzione del blocco dopo la battaglia (incarico 25): il ritorno in
+    /// campagna cambia — il gruppo che ha combattuto SPENDE la giornata (`azioneSpesa` a vero), lo
+    /// sconfitto ripiega verso il proprio quartier generale secondo la definizione del taglio, e la
+    /// giornata si chiude di conseguenza. Un giornale di versione 6 con una `battagliaConclusa`,
+    /// rigiocato con queste regole, produrrebbe uno stato e un'impronta diversi (il combattente
+    /// agito, la casella di ripiegamento diversa): incompatibile, dichiarato e non riaperto in
+    /// silenzio (00 §15.2). È anche la build che scioglie la campagna bloccata del titolare, che
+    /// riparte da una partita nuova.
+    public static let schemaCorrente = 7
 
     public init(versioneSchema: Int, versioneValori: String, versioneTesti: String,
                 seme: UInt64, identificatore: String, scenario: ScenarioCampagna) {

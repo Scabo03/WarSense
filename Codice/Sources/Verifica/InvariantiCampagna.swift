@@ -173,6 +173,13 @@ public struct SondaInvariantiCampagna: Sendable {
         /// L'esito di una battaglia RIGIOCATA dai suoi comandi diverge dall'originale (05 §6.3): la
         /// battaglia non è deterministica, e il giornale non la riproduce identica.
         case rigiocaturaBattagliaDivergente(casella: String)
+        // Invariante della GIOCABILITÀ (01 §5.6.0.6, incarico 25).
+        /// Un gruppo NON ha agito e NON è in marcia, ma per esso non è disponibile ALCUNA azione:
+        /// è un blocco irreversibile (la giornata non si chiude e il gruppo non si può ordinare), la
+        /// causa vera del blocco che il titolare ha visto dopo la battaglia. Va reso impossibile per
+        /// costruzione, non evitato per disciplina: 01 §5.6.0.6 vuole che «un gruppo che non ha agito
+        /// è sempre un gruppo che attende una decisione», cioè ordinabile.
+        case gruppoBloccatoSenzaAzioni(gruppo: Int, parte: String)
 
         /// Il codice della violazione, senza spazi: l'uscita del programma di
         /// verifica è dato per chi sviluppa e non testo di prodotto (05 §12.6),
@@ -229,6 +236,7 @@ public struct SondaInvariantiCampagna: Sendable {
             case .ritornoInCampagnaScorretto(let g, let m): return "ritorno_in_campagna_scorretto:gruppo=\(g):motivo=\(m)"
             case .bloccoBattagliaNonEffettivo(let a): return "blocco_battaglia_non_effettivo:atteso=\(a)"
             case .rigiocaturaBattagliaDivergente(let c): return "rigiocatura_battaglia_divergente:casella=\(c)"
+            case .gruppoBloccatoSenzaAzioni(let g, let p): return "gruppo_bloccato_senza_azioni:gruppo=\(g):parte=\(p)"
             }
         }
     }
@@ -289,6 +297,7 @@ public struct SondaInvariantiCampagna: Sendable {
         "ritorno_in_campagna_scorretto",
         "blocco_battaglia_non_effettivo",
         "rigiocatura_battaglia_divergente",
+        "gruppo_bloccato_senza_azioni",
     ]
 
     /// Il codice nudo, senza i valori: la parte prima dei due punti.
@@ -1033,5 +1042,28 @@ public struct SondaInvariantiCampagna: Sendable {
                                               improntaRigiocata: String) -> [Violazione] {
         improntaGiocata == improntaRigiocata ? []
             : [.rigiocaturaBattagliaDivergente(casella: "\(casella.riga)-\(casella.colonna)")]
+    }
+
+    // MARK: - Invariante della giocabilità (01 §5.6.0.6, incarico 25)
+
+    /// Che NESSUN GRUPPO sia bloccato senza azioni (01 §5.6.0.6): per ogni gruppo che NON ha agito e
+    /// NON è in marcia, deve esistere ALMENO UN'AZIONE disponibile, o la giornata non si chiude e il
+    /// gruppo non si può ordinare — il blocco irreversibile del titolare dopo la battaglia. La
+    /// validità dei comandi arriva dall'ESTERNO (`ordinabile`), così che la sonda giudichi senza
+    /// rifare il Motore. Si controlla quando la campagna NON ha una battaglia in sospeso: una
+    /// battaglia in sospeso è un blocco LEGITTIMO e temporaneo, che il giocatore scioglie aprendo la
+    /// battaglia dalla casella (01 §6.2), non un blocco irreversibile — perciò non è una violazione.
+    /// `ordinabile(gruppo)` è vero se per quel gruppo esiste almeno un comando di campagna valido.
+    public func controllaGiocabilita(stato: StatoCampagna,
+                                     ordinabile: (Gruppo) -> Bool) -> [Violazione] {
+        guard stato.battaglieInSospeso.isEmpty else { return [] } // blocco legittimo: si apre la battaglia
+        var violazioni: [Violazione] = []
+        for gruppo in stato.gruppiOrdinati where !gruppo.haConclusoLaGiornata {
+            if !ordinabile(gruppo) {
+                violazioni.append(.gruppoBloccatoSenzaAzioni(gruppo: gruppo.id.numero,
+                                                             parte: gruppo.parte.rawValue))
+            }
+        }
+        return violazioni
     }
 }

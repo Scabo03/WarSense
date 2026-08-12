@@ -919,45 +919,325 @@
    "identificatore": "guado_contro_avversario",
    "mappa": "guado",
    "gruppi": [
-    { "riga": 4, "colonna": 2, "composizione": [ { "archetipo": "fanteria_leggera", "atomi": 6 } ] },
-    { "riga": 3, "colonna": 3, "composizione": [ { "archetipo": "fanteria_leggera", "atomi": 18 }, { "archetipo": "fanteria_pesante", "atomi": 8 } ] }
+    {
+     "riga": 4,
+     "colonna": 2,
+     "composizione": [
+      {
+       "archetipo": "fanteria_leggera",
+       "atomi": 6
+      }
+     ]
+    },
+    {
+     "riga": 3,
+     "colonna": 3,
+     "composizione": [
+      {
+       "archetipo": "fanteria_leggera",
+       "atomi": 18
+      },
+      {
+       "archetipo": "fanteria_pesante",
+       "atomi": 8
+      }
+     ]
+    }
    ],
    "gruppi_avversario": [
-    { "riga": 1, "colonna": 2, "composizione": [ { "archetipo": "fanteria_leggera", "atomi": 6 } ] },
-    { "riga": 1, "colonna": 3, "composizione": [ { "archetipo": "fanteria_leggera", "atomi": 18 }, { "archetipo": "fanteria_pesante", "atomi": 8 } ] }
+    {
+     "riga": 1,
+     "colonna": 2,
+     "composizione": [
+      {
+       "archetipo": "fanteria_leggera",
+       "atomi": 6
+      }
+     ]
+    },
+    {
+     "riga": 1,
+     "colonna": 3,
+     "composizione": [
+      {
+       "archetipo": "fanteria_leggera",
+       "atomi": 18
+      },
+      {
+       "archetipo": "fanteria_pesante",
+       "atomi": 8
+      }
+     ]
+    }
    ]
   },
   {
    "identificatore": "pianura_contro_avversario",
    "mappa": "pianura_lunga",
    "gruppi": [
-    { "riga": 9, "colonna": 5, "composizione": [ { "archetipo": "fanteria_leggera", "atomi": 6 } ] },
-    { "riga": 9, "colonna": 6, "composizione": [ { "archetipo": "fanteria_leggera", "atomi": 18 }, { "archetipo": "fanteria_pesante", "atomi": 8 } ] },
-    { "riga": 10, "colonna": 4, "composizione": [ { "archetipo": "fanteria_pesante", "atomi": 24 }, { "archetipo": "cavalleria_manovrata", "atomi": 12 } ] }
+    {
+     "riga": 9,
+     "colonna": 5,
+     "composizione": [
+      {
+       "archetipo": "fanteria_leggera",
+       "atomi": 6
+      }
+     ]
+    },
+    {
+     "riga": 9,
+     "colonna": 6,
+     "composizione": [
+      {
+       "archetipo": "fanteria_leggera",
+       "atomi": 18
+      },
+      {
+       "archetipo": "fanteria_pesante",
+       "atomi": 8
+      }
+     ]
+    },
+    {
+     "riga": 10,
+     "colonna": 4,
+     "composizione": [
+      {
+       "archetipo": "fanteria_pesante",
+       "atomi": 24
+      },
+      {
+       "archetipo": "cavalleria_manovrata",
+       "atomi": 12
+      }
+     ]
+    }
    ],
    "gruppi_avversario": [
-    { "riga": 2, "colonna": 5, "composizione": [ { "archetipo": "fanteria_leggera", "atomi": 6 } ] },
-    { "riga": 2, "colonna": 6, "composizione": [ { "archetipo": "fanteria_leggera", "atomi": 18 }, { "archetipo": "fanteria_pesante", "atomi": 8 } ] },
-    { "riga": 1, "colonna": 4, "composizione": [ { "archetipo": "fanteria_pesante", "atomi": 24 }, { "archetipo": "cavalleria_manovrata", "atomi": 12 } ] }
+    {
+     "riga": 2,
+     "colonna": 5,
+     "composizione": [
+      {
+       "archetipo": "fanteria_leggera",
+       "atomi": 6
+      }
+     ]
+    },
+    {
+     "riga": 2,
+     "colonna": 6,
+     "composizione": [
+      {
+       "archetipo": "fanteria_leggera",
+       "atomi": 18
+      },
+      {
+       "archetipo": "fanteria_pesante",
+       "atomi": 8
+      }
+     ]
+    },
+    {
+     "riga": 1,
+     "colonna": 4,
+     "composizione": [
+      {
+       "archetipo": "fanteria_pesante",
+       "atomi": 24
+      },
+      {
+       "archetipo": "cavalleria_manovrata",
+       "atomi": 12
+      }
+     ]
+    }
    ]
   },
   {
    "identificatore": "ricognizione_imboscate_pianura",
    "mappa": "pianura_lunga",
    "gruppi": [
-    { "riga": 10, "colonna": 5, "composizione": [ { "archetipo": "fanteria_pesante", "atomi": 12 } ] },
-    { "riga": 7, "colonna": 5, "composizione": [ { "archetipo": "fanteria_pesante", "atomi": 8 } ] },
-    { "riga": 8, "colonna": 6, "composizione": [ { "archetipo": "fanteria_leggera", "atomi": 3 } ], "categoria": "ricognizione", "competenza": 8 },
-    { "riga": 5, "colonna": 6, "composizione": [ { "archetipo": "fanteria_leggera", "atomi": 3 } ], "categoria": "ricognizione", "competenza": 5 },
-    { "riga": 6, "colonna": 4, "composizione": [ { "archetipo": "fanteria_leggera", "atomi": 3 } ], "categoria": "ricognizione", "competenza": 2 },
-    { "riga": 4, "colonna": 5, "composizione": [ { "archetipo": "fanteria_leggera", "atomi": 3 } ], "categoria": "ricognizione", "competenza": 1 }
+    {
+     "riga": 10,
+     "colonna": 5,
+     "composizione": [
+      {
+       "archetipo": "fanteria_pesante",
+       "atomi": 12
+      }
+     ]
+    },
+    {
+     "riga": 7,
+     "colonna": 5,
+     "composizione": [
+      {
+       "archetipo": "fanteria_pesante",
+       "atomi": 8
+      }
+     ]
+    },
+    {
+     "riga": 8,
+     "colonna": 6,
+     "composizione": [
+      {
+       "archetipo": "fanteria_leggera",
+       "atomi": 3
+      }
+     ],
+     "categoria": "ricognizione",
+     "competenza": 8
+    },
+    {
+     "riga": 5,
+     "colonna": 6,
+     "composizione": [
+      {
+       "archetipo": "fanteria_leggera",
+       "atomi": 3
+      }
+     ],
+     "categoria": "ricognizione",
+     "competenza": 5
+    },
+    {
+     "riga": 6,
+     "colonna": 4,
+     "composizione": [
+      {
+       "archetipo": "fanteria_leggera",
+       "atomi": 3
+      }
+     ],
+     "categoria": "ricognizione",
+     "competenza": 2
+    },
+    {
+     "riga": 4,
+     "colonna": 5,
+     "composizione": [
+      {
+       "archetipo": "fanteria_leggera",
+       "atomi": 3
+      }
+     ],
+     "categoria": "ricognizione",
+     "competenza": 1
+    }
    ],
    "gruppi_avversario": [
-    { "riga": 1, "colonna": 5, "composizione": [ { "archetipo": "fanteria_pesante", "atomi": 12 } ] },
-    { "riga": 2, "colonna": 6, "composizione": [ { "archetipo": "fanteria_leggera", "atomi": 3 } ], "categoria": "ricognizione", "competenza": 5 },
-    { "riga": 7, "colonna": 5, "composizione": [ { "archetipo": "fanteria_leggera", "atomi": 4 } ], "categoria": "non_armata", "carico": 4, "soglia_protezione": 2 },
-    { "riga": 5, "colonna": 6, "composizione": [ { "archetipo": "fanteria_leggera", "atomi": 4 } ], "categoria": "non_armata", "carico": 3, "soglia_protezione": 2 },
-    { "riga": 6, "colonna": 4, "composizione": [ { "archetipo": "fanteria_leggera", "atomi": 4 } ], "categoria": "non_armata", "carico": 6, "soglia_protezione": 15 }
+    {
+     "riga": 1,
+     "colonna": 5,
+     "composizione": [
+      {
+       "archetipo": "fanteria_pesante",
+       "atomi": 12
+      }
+     ]
+    },
+    {
+     "riga": 2,
+     "colonna": 6,
+     "composizione": [
+      {
+       "archetipo": "fanteria_leggera",
+       "atomi": 3
+      }
+     ],
+     "categoria": "ricognizione",
+     "competenza": 5
+    },
+    {
+     "riga": 7,
+     "colonna": 5,
+     "composizione": [
+      {
+       "archetipo": "fanteria_leggera",
+       "atomi": 4
+      }
+     ],
+     "categoria": "non_armata",
+     "carico": 4,
+     "soglia_protezione": 2
+    },
+    {
+     "riga": 5,
+     "colonna": 6,
+     "composizione": [
+      {
+       "archetipo": "fanteria_leggera",
+       "atomi": 4
+      }
+     ],
+     "categoria": "non_armata",
+     "carico": 3,
+     "soglia_protezione": 2
+    },
+    {
+     "riga": 6,
+     "colonna": 4,
+     "composizione": [
+      {
+       "archetipo": "fanteria_leggera",
+       "atomi": 4
+      }
+     ],
+     "categoria": "non_armata",
+     "carico": 6,
+     "soglia_protezione": 15
+    }
+   ]
+  },
+  {
+   "identificatore": "pianura_vince_e_prosegue",
+   "mappa": "pianura_lunga",
+   "gruppi": [
+    {
+     "riga": 10,
+     "colonna": 5,
+     "composizione": [
+      {
+       "archetipo": "fanteria_leggera",
+       "atomi": 12
+      }
+     ]
+    },
+    {
+     "riga": 10,
+     "colonna": 4,
+     "composizione": [
+      {
+       "archetipo": "fanteria_leggera",
+       "atomi": 8
+      }
+     ]
+    },
+    {
+     "riga": 9,
+     "colonna": 6,
+     "composizione": [
+      {
+       "archetipo": "fanteria_leggera",
+       "atomi": 8
+      }
+     ]
+    }
+   ],
+   "gruppi_avversario": [
+    {
+     "riga": 6,
+     "colonna": 5,
+     "composizione": [
+      {
+       "archetipo": "fanteria_leggera",
+       "atomi": 3
+      }
+     ]
+    }
    ]
   }
  ]

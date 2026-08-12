@@ -561,6 +561,7 @@ final class SchermataBattaglia: UIViewController {
     var grigliaPerProva: VistaACaselle { vistaGriglia }
     var tesserePerProva: [TesseraDeck] { rigaDeck.arrangedSubviews.compactMap { $0 as? TesseraDeck } }
     var costruttorePerProva: CostruttoreAnnunci? { costruttore }
+    var partitaPerProva: PartitaCorrente { partita }
 }
 
 extension SchermataBattaglia: UIScrollViewDelegate {

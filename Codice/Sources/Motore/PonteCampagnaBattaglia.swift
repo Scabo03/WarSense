@@ -93,9 +93,17 @@ public enum PonteCampagnaBattaglia {
         let vincitore = esito.sconfitto.avversaria
         func posizione(di parte: Parte, composizione: [Reparto]) -> Cella? {
             if composizione.isEmpty { return nil }                 // annientato: sparisce (01 §15.2.3)
-            if parte == vincitore { return inSospeso.casella }     // il vincitore resta (01 §15.5, S24b)
-            return casellaArretrata(per: parte, da: inSospeso.casella, stato: stato)
-                ?? inSospeso.casella                               // ripiega verso casa (01 §10.6)
+            // Il vincitore resta nella casella contesa (01 §15.5). L'eccezione dei documenti — il
+            // vincitore che ripiega perché ha vinto avendo chiamato ritirata DOPO l'avversario (01
+            // §15.2.2) — è IRRAGGIUNGIBILE col motore attuale: `MotoreBattaglia.valida` respinge una
+            // seconda `dichiaraResa` (riga 325, `resaNonDisponibile`), sicché una sola parte può
+            // chiamare ritirata ed è sempre lo sconfitto; il vincitore non chiama mai ritirata (S25b).
+            if parte == vincitore { return inSospeso.casella }
+            // Lo sconfitto ripiega di una casella all'indietro (01 §10.6): la PRIMA casella di
+            // ripiegamento (verso il proprio quartier generale, secondo la definizione del taglio),
+            // come DEFAULT — il giocatore sceglie la sua dall'interfaccia. Vuoto = resta (caso limite).
+            return caselleDiRipiegamento(per: parte, da: inSospeso.casella, stato: stato).first
+                ?? inSospeso.casella
         }
         return EsitoInCampagna(
             identificatore: inSospeso.identificatore, casella: inSospeso.casella,
@@ -106,22 +114,24 @@ public enum PonteCampagnaBattaglia {
             posizioneAvversario: posizione(di: .avversario, composizione: compAvversario))
     }
 
-    /// La casella dove ripiega lo sconfitto (01 §10.6): il vicino più vicino al proprio quartier
-    /// generale, libero da un proprio gruppo, in ordine deterministico (est, ovest, nord, sud). È
-    /// «arretrata rispetto alla direzione di provenienza» reso come «verso casa»: la mappa non
-    /// tiene la provenienza, ma il verso del quartier generale è la sua approssimazione fedele
-    /// (S24). Una ritirata non può risolversi in un avanzamento: si guarda solo ai vicini più
-    /// vicini a casa. Nil se non ve n'è alcuno libero (al proprio margine): il caso degenere lo
-    /// gestisce il chiamante lasciando lo sconfitto nella casella (raro; dichiarato).
-    public static func casellaArretrata(per parte: Parte, da casella: Cella,
-                                        stato: StatoCampagna) -> Cella? {
+    /// Le CASELLE DI RIPIEGAMENTO dello sconfitto (01 §10.6, §15.6): le caselle ALLE SPALLE della
+    /// posizione secondo la STESSA definizione del taglio del rifornimento (01 §5.2.2.2, `MotoreCampagna
+    /// .caselleAlleSpalle`) — «retrostante significa dalla parte del proprio quartier generale» —
+    /// ristrette a quelle STRETTAMENTE più vicine al proprio quartier generale (un passo all'indietro,
+    /// mai un avanzamento: 01 §10.6) e libere da un proprio gruppo (una formazione per parte per casella,
+    /// 01 §5.6.0.2). Non introduce una seconda nozione di direzione: usa quella del taglio. In ordine
+    /// deterministico (per riga poi colonna). Fra queste il giocatore SCEGLIE dall'interfaccia; la
+    /// condotta e il default prendono la prima. VUOTO al margine o con le spalle occupate: il caso
+    /// limite lo gestisce il chiamante lasciando lo sconfitto nella casella contesa (S25a, dichiarato).
+    public static func caselleDiRipiegamento(per parte: Parte, da casella: Cella,
+                                             stato: StatoCampagna) -> [Cella] {
         let qg = stato.mappa.quartierGenerale(di: parte)
         let distanzaAttuale = stato.griglia.distanza(casella, qg)
-        for vicino in stato.griglia.vicini(di: casella)
-        where stato.griglia.distanza(vicino, qg) < distanzaAttuale
-            && stato.occupante(di: vicino, parte: parte) == nil {
-            return vicino
-        }
-        return nil
+        return MotoreCampagna.caselleAlleSpalle(di: casella, qg: qg, griglia: stato.griglia)
+            .filter { c in
+                stato.griglia.distanza(c, qg) < distanzaAttuale     // un passo verso casa, mai avanti
+                    && stato.occupante(di: c, parte: parte) == nil  // libera da un proprio gruppo
+            }
+            .sorted { $0.riga == $1.riga ? $0.colonna < $1.colonna : $0.riga < $1.riga }
     }
 }

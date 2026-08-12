@@ -139,13 +139,24 @@ final class PartitaCampagna {
                                          identificatore: battaglia.identificatore)
     }
 
-    /// Riporta in campagna l'esito di una battaglia conclusa (01 §15): deriva l'esito dallo stato
-    /// finale della battaglia, lo iscrive nel giornale di campagna e lo piega sulla mappa; poi
-    /// rimuove lo slot della battaglia, che ha esaurito il suo compito (l'esito vive ora nel
-    /// giornale di campagna e vi si rigioca identico). Annuncia l'esito a chi torna sulla mappa.
-    func concludiBattaglia(_ battaglia: BattagliaInSospeso, statoBattaglia: StatoBattaglia) async throws {
-        let esito = PonteCampagnaBattaglia.esito(da: statoBattaglia, per: battaglia,
-                                                 stato: await stato, valori: ambiente.valori)
+    /// L'esito da riportare in campagna, derivato dallo stato finale della battaglia (01 §15). Il
+    /// chiamante può poi sostituire la casella di ripiegamento del giocatore con quella SCELTA e
+    /// piegare il risultato con `concludiBattaglia(esito:)`.
+    func esitoDiRitorno(_ battaglia: BattagliaInSospeso, statoBattaglia: StatoBattaglia) async -> EsitoInCampagna {
+        PonteCampagnaBattaglia.esito(da: statoBattaglia, per: battaglia,
+                                     stato: await stato, valori: ambiente.valori)
+    }
+
+    /// Le caselle fra cui il giocatore SCEGLIE dove ripiegare (01 §10.6, §15.6, incarico 25): le
+    /// caselle alle spalle secondo la definizione del taglio, libere. Vuoto = nessuna scelta (resta).
+    func caselleDiRipiegamento(perLaCasella casella: Cella) async -> [Cella] {
+        PonteCampagnaBattaglia.caselleDiRipiegamento(per: .giocatore, da: casella, stato: await stato)
+    }
+
+    /// Riporta in campagna l'esito (01 §15): lo iscrive nel giornale di campagna e lo piega sulla
+    /// mappa; poi rimuove lo slot della battaglia, che ha esaurito il suo compito (l'esito vive ora
+    /// nel giornale di campagna e vi si rigioca identico). Annuncia l'esito a chi torna sulla mappa.
+    func concludiBattaglia(_ battaglia: BattagliaInSospeso, esito: EsitoInCampagna) async throws {
         try await sessione.concludiBattaglia(esito)
         ambiente.segnali.segnala(
             evento: .battagliaConclusa(casella: esito.casella,

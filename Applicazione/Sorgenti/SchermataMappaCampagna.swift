@@ -483,11 +483,37 @@ final class SchermataMappaCampagna: UIViewController {
                                      partitaBattaglia: PartitaCorrente) async {
         let statoBattaglia = await partitaBattaglia.stato
         guard statoBattaglia.esito != nil else { return }
-        do {
-            try await partita.concludiBattaglia(battaglia, statoBattaglia: statoBattaglia)
-        } catch { }
+        var esito = await partita.esitoDiRitorno(battaglia, statoBattaglia: statoBattaglia)
+        // Se il gruppo del GIOCATORE ripiega (sconfitto sopravvissuto, non nella casella contesa), il
+        // giocatore SCEGLIE dove, a battaglia appena conclusa (01 §10.6, incarico 25). Con una sola
+        // casella disponibile non c'è scelta da offrire; con nessuna, resta (il caso limite, S25a).
+        if esito.sconfitto == .giocatore, let pos = esito.posizioneGiocatore, pos != battaglia.casella {
+            let candidati = await partita.caselleDiRipiegamento(perLaCasella: battaglia.casella)
+            if candidati.count > 1, let scelta = await scegliRipiegamento(fra: candidati) {
+                esito = esito.conPosizioneGiocatore(scelta)
+            }
+        }
+        do { try await partita.concludiBattaglia(battaglia, esito: esito) }
+        catch { }
         await ricaricaStato()
-        Fuoco.sposta(a: elementi[battaglia.casella], perche: .schermataAperta)
+        Fuoco.sposta(a: elementi[esito.posizione(di: .giocatore) ?? battaglia.casella], perche: .schermataAperta)
+    }
+
+    /// Offre le CASELLE DI RIPIEGAMENTO, ciascuna come voce a sé in una frase compatta, e attende la
+    /// scelta del giocatore attivando una voce (01 §10.6, 02 §8, incarico 25). Nessuna tabella,
+    /// nessun trascinamento. Non c'è congedo: lo sconfitto DEVE ripiegare, e sceglie soltanto dove.
+    private func scegliRipiegamento(fra candidati: [Cella]) async -> Cella? {
+        await withCheckedContinuation { (cont: CheckedContinuation<Cella?, Never>) in
+            let pannello = UIAlertController(title: testi.frase("ripiegamento.titolo").testo,
+                                             message: nil, preferredStyle: .alert)
+            for cella in candidati {
+                let titolo = testi.frase("ripiegamento.casella", cella.riga, cella.colonna).testo
+                pannello.addAction(UIAlertAction(title: titolo, style: .default) { _ in
+                    cont.resume(returning: cella)
+                })
+            }
+            present(pannello, animated: false)
+        }
     }
 
     // MARK: - Comandi

@@ -673,6 +673,14 @@ public struct EsitoInCampagna: Hashable, Codable, Sendable {
     public func gruppo(di parte: Parte) -> IdGruppo {
         parte == .giocatore ? gruppoGiocatore : gruppoAvversario
     }
+    /// Una copia con la casella di ripiegamento del GIOCATORE scelta dal giocatore (incarico 25):
+    /// la scelta avviene a battaglia conclusa e va iscritta nell'esito, che il giornale registra.
+    public func conPosizioneGiocatore(_ cella: Cella) -> EsitoInCampagna {
+        EsitoInCampagna(identificatore: identificatore, casella: casella, sconfitto: sconfitto,
+                        modo: modo, gruppoGiocatore: gruppoGiocatore, gruppoAvversario: gruppoAvversario,
+                        composizioneGiocatore: composizioneGiocatore, composizioneAvversario: composizioneAvversario,
+                        posizioneGiocatore: cella, posizioneAvversario: posizioneAvversario)
+    }
 }
 
 /// Lo stato completo di una campagna (05 §2.6). Un valore, interamente Codable,

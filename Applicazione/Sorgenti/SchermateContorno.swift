@@ -215,6 +215,10 @@ final class SchermataResoconto: UIViewController {
     @objc private func chiudiTutto() {
         dismiss(animated: false) { [alTermine] in alTermine?() }
     }
+
+    /// Attrezzo per le prove ospitate: congeda il resoconto come il tocco del pulsante «torna»,
+    /// così che la prova percorra la STESSA catena di congedo del gioco (incarico 25).
+    func chiudiTuttoPerProva() { chiudiTutto() }
 }
 
 /// Le impostazioni della prima versione (02 §14, RDA-38): preferenze locali.

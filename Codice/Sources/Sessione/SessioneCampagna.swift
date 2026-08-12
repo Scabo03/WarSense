@@ -132,7 +132,13 @@ public actor SessioneCampagna {
         }
         do { try giornale.appendi(.battagliaConclusa(esito: esito)) }
         catch { throw ErroreSessione.scritturaFallita }
-        _ = motore.applicaEsitoInCampagna(esito, in: &stato)
+        // Il ritorno spende la giornata dei combattenti e la CHIUDE se erano gli ultimi in attesa
+        // (incarico 25): i marcatori di quella chiusura vanno nel giornale, o il confine
+        // dell'annullamento perderebbe l'apertura della giornata nuova (05 §6.5). I marcatori NON
+        // toccano la ricostruzione (`ricostruisci` li salta), sicché la rigiocatura resta identica.
+        let eventi = motore.applicaEsitoInCampagna(esito, in: &stato)
+        try Self.registraChiusura(eventi, avversarioHaAgito: false,
+                                  giornale: giornale, cartella: cartella, stato: stato)
         try Self.scattaIstantanea(giornale: giornale, stato: stato, cartella: cartella, forzata: true)
         // Sbloccata la campagna, se i gruppi del giocatore hanno già tutti concluso la giornata
         // ripresa (raro: p. es. l'unico gruppo che restava è caduto), l'avversario deve muovere.

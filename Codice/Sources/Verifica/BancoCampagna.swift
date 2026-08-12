@@ -96,6 +96,20 @@ public struct BancoCampagna: Sendable {
             ufficialeAvversario: motore.valori.ufficiali.keys.sorted().first)
     }
 
+    /// Vero se per un gruppo esiste ALMENO UN comando di campagna valido (incarico 25): presidio,
+    /// sosta con raccolta, una marcia verso un vicino, e — secondo la categoria — esplorazione o
+    /// imboscata. È il predicato dell'invariante della giocabilità: un gruppo non-agito ordinabile.
+    private func ordinabile(_ gruppo: Gruppo, stato: StatoCampagna) -> Bool {
+        var candidati: [ComandoCampagna] = [.presidio(gruppo: gruppo.id), .sostaConRaccolta(gruppo: gruppo.id)]
+        for vicino in stato.griglia.vicini(di: gruppo.posizione) {
+            candidati.append(.marcia(gruppo: gruppo.id, a: vicino,
+                                     giorni: motore.costoInGiorni(da: gruppo.posizione, a: vicino, stato: stato)))
+        }
+        if gruppo.categoria.eRicognizione { candidati.append(.esplorazione(gruppo: gruppo.id)) }
+        if gruppo.categoria.eArmata { candidati.append(.imboscata(gruppo: gruppo.id)) }
+        return candidati.contains { motore.valida($0, parte: gruppo.parte, stato: stato).eValido }
+    }
+
     /// Vero se un gruppo armato AVVERSARIO occupa una casella adiacente a quella del gruppo: la
     /// condotta del banco vi tende un'imboscata, così l'ingresso dell'avversario apre una battaglia
     /// da agguato invece che una ordinaria (incarico 24).
@@ -110,7 +124,7 @@ public struct BancoCampagna: Sendable {
     }
 
     /// I conteggi delle battaglie di una corsa.
-    struct EsitiBattaglie { var giocate = 0, vinte = 0, perse = 0, daImboscata = 0 }
+    struct EsitiBattaglie { var giocate = 0, vinte = 0, perse = 0, daImboscata = 0; var primoGiorno: Int? = nil }
 
     /// Gioca le battaglie in sospeso e ne riporta l'esito in campagna (incarico 24): per ciascuna,
     /// costruisce lo scenario dai due gruppi (`PonteCampagnaBattaglia.scenario`), la combatte a
@@ -179,7 +193,13 @@ public struct BancoCampagna: Sendable {
             // (2) RITORNO: annientato sparito, superstite ridotto e alla casella dovuta.
             violazioni.formUnion(sonda.controllaRitornoInCampagna(
                 inSospeso: battaglia, esito: esito, dopo: stato).map(\.description))
+            // (5) GIOCABILITÀ (incarico 25): tornata la campagna dalla battaglia, NESSUN gruppo può
+            // essere non-agito e senza azioni — il blocco del titolare. È qui, subito dopo il
+            // ritorno, che il difetto viveva; l'invariante lo rende impossibile.
+            violazioni.formUnion(sonda.controllaGiocabilita(
+                stato: stato, ordinabile: { ordinabile($0, stato: stato) }).map(\.description))
             conteggi.giocate += 1
+            if conteggi.primoGiorno == nil { conteggi.primoGiorno = battaglia.giorno }
             if battaglia.daImboscata { conteggi.daImboscata += 1 }
             if esito.sconfitto == .giocatore { conteggi.perse += 1 } else { conteggi.vinte += 1 }
         }
@@ -289,6 +309,10 @@ public struct BancoCampagna: Sendable {
         public let battaglieVinte: Int
         public let battagliePerse: Int
         public let battaglieDaImboscata: Int
+        /// Le GIORNATE che la partita PROSEGUE dopo la PRIMA battaglia (incarico 25): dal giorno del
+        /// primo scontro alla fine della corsa. Se è zero o quasi negli scenari con battaglie, il
+        /// banco non esercita il caso che ha bloccato il titolare — la giornata dopo il ritorno.
+        public let giornateDopoLaPrimaBattaglia: Int
         /// Le GIORNATE in cui TUTTI i gruppi di una parte erano appostati (01 §5.11, incarico 21):
         /// il caso limite che l'incarico 20 non terminava e che ora, con l'imboscata che consuma
         /// l'azione, si chiude da sé.
@@ -360,6 +384,7 @@ public struct BancoCampagna: Sendable {
         // Le BATTAGLIE nate dalla campagna, giocate al banco (incarico 24): quante, con quale
         // esito, e quante da imboscata. Il banco le genera e le gioca, non le rende soltanto possibili.
         var battaglieGiocate = 0, battaglieVinte = 0, battagliePerse = 0, battaglieDaImboscata = 0
+        var primoGiornoBattaglia: Int? = nil // il giorno della PRIMA battaglia, per misurare quanto la partita prosegue dopo
         // Gli AVVISTAMENTI di formazioni avversarie da parte del GIOCATORE (01 §5.6.11, incarico 22):
         // quanti, e in quale giornata ciascuno, per misurare se e quando l'avversario si manifesta.
         // La casella OSSERVATA da almeno un gruppo del giocatore in qualche giornata: l'unione dà la
@@ -438,6 +463,7 @@ public struct BancoCampagna: Sendable {
                 let esiti = giocaBattaglieInSospeso(&stato, violazioni: &violazioni)
                 battaglieGiocate += esiti.giocate; battaglieVinte += esiti.vinte
                 battagliePerse += esiti.perse; battaglieDaImboscata += esiti.daImboscata
+                if primoGiornoBattaglia == nil { primoGiornoBattaglia = esiti.primoGiorno }
                 continue
             }
             let vista = VistaCampagna(motore: motore, stato: stato, parte: .giocatore)
@@ -568,6 +594,7 @@ public struct BancoCampagna: Sendable {
                                                  eventi: eventi,
                                                  adiacenti: prima.griglia.adiacenti).map(\.description))
             violazioni.formUnion(sonda.controlla(stato: dopo).map(\.description))
+            violazioni.formUnion(sonda.controllaGiocabilita(stato: dopo, ordinabile: { ordinabile($0, stato: dopo) }).map(\.description))
             // L'OCCULTAMENTO dell'imboscata (01 §5.11.1, incarico 21): su una casella con un
             // appostato, la conoscenza dell'altra parte — passata dall'esterno — non è confermato,
             // se non l'ha scoperta. La sonda giudica la conoscenza vera del Motore.
@@ -636,6 +663,7 @@ public struct BancoCampagna: Sendable {
                                                      eventi: eventiAvv,
                                                      adiacenti: primaAvv.griglia.adiacenti).map(\.description))
                 violazioni.formUnion(sonda.controlla(stato: dopoAvv).map(\.description))
+                violazioni.formUnion(sonda.controllaGiocabilita(stato: dopoAvv, ordinabile: { ordinabile($0, stato: dopoAvv) }).map(\.description))
                 violazioni.formUnion(sonda.controllaOccultamento(
                     stato: dopoAvv, conoscenzaDelNemico: { motore.conoscenza(di: $1, per: $0, stato: dopoAvv) }
                 ).map(\.description))
@@ -664,6 +692,7 @@ public struct BancoCampagna: Sendable {
             let esiti = giocaBattaglieInSospeso(&stato, violazioni: &violazioni)
             battaglieGiocate += esiti.giocate; battaglieVinte += esiti.vinte
             battagliePerse += esiti.perse; battaglieDaImboscata += esiti.daImboscata
+                if primoGiornoBattaglia == nil { primoGiornoBattaglia = esiti.primoGiorno }
         }
         violazioni.formUnion(sonda.controllaRaggiungibilita(
             griglia: stato.griglia, da: Cella(riga: 1, colonna: 1),
@@ -735,6 +764,7 @@ public struct BancoCampagna: Sendable {
                      imboscateSubite: imboscateSubite, imboscateScoperte: imboscateScoperte,
                      battaglieGiocate: battaglieGiocate, battaglieVinte: battaglieVinte,
                      battagliePerse: battagliePerse, battaglieDaImboscata: battaglieDaImboscata,
+                     giornateDopoLaPrimaBattaglia: primoGiornoBattaglia.map { stato.giorno - $0 } ?? 0,
                      giornateTuttiAppostati: giorniTuttiAppostati.count,
                      avvistamenti: avvistamentiGiocatore,
                      primoAvvistamento: giorniAvvistamento.first,

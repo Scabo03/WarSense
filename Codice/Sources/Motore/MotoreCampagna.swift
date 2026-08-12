@@ -990,18 +990,27 @@ public struct MotoreCampagna: Sendable {
                 if let posizione = esito.posizione(di: parte) {
                     stato.gruppi[id]!.posizione = posizione
                 }
-                // La battaglia interrompe la marcia e ogni agguato; i superstiti tornano in attesa
-                // sulla mappa, liberi di agire nel corso di campagna ripreso (01 §15.8).
+                // IL GRUPPO CHE HA COMBATTUTO SPENDE LA GIORNATA COMBATTENDO (regola del titolare,
+                // 01 §5.6.0.5: «ogni azione consuma l'intera giornata del gruppo che la compie»): il
+                // superstite risulta AGITO — `azioneSpesa` a vero —, non in attesa, e la giornata si
+                // chiude di conseguenza (01 §5.6.0.6). È la causa vera del blocco della build 26, dove
+                // il vincitore tornava non-agito e non-ordinabile: reso impossibile per costruzione.
+                // La battaglia interrompe la marcia e ogni agguato.
                 stato.gruppi[id]!.marcia = nil
                 stato.gruppi[id]!.ordineImboscata = false
-                stato.gruppi[id]!.azioneSpesa = false
+                stato.gruppi[id]!.azioneSpesa = true
             }
         }
         stato.battaglieInSospeso.removeAll { $0.identificatore == esito.identificatore }
         annota(.battagliaConclusa(casella: esito.casella,
                                   giocatoreSconfitto: esito.sconfitto == .giocatore), in: &stato)
-        return [.battagliaConclusa(casella: esito.casella,
-                                   giocatoreSconfitto: esito.sconfitto == .giocatore)]
+        var eventi: [EventoCampagna] = [.battagliaConclusa(casella: esito.casella,
+                                                           giocatoreSconfitto: esito.sconfitto == .giocatore)]
+        // Sbloccata la campagna e speso il combattente, la giornata si chiude da sé se non resta
+        // altro da fare (01 §5.6.0.6): i combattenti hanno agito, e se erano gli ultimi in attesa la
+        // giornata avanza subito, senza che il giocatore debba dare un ordine di troppo al reduce.
+        eventi.append(contentsOf: chiudiLaGiornataSeServe(&stato))
+        return eventi
     }
 
     /// La SCOPERTA delle imboscate (01 §5.11.1, incarico 21): dentro il raggio di un'esplorazione
