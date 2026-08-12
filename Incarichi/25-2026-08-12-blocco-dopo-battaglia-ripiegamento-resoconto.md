@@ -48,3 +48,30 @@ Nuovo scenario di verifica `pianura_vince_e_prosegue` (`campagne.json`, cartella
 
 - L'effetto reale su chi ascolta con VoiceOver su DISPOSITIVO (la pronuncia, il fuoco): provato solo sul simulatore.
 - Le composizioni dello scenario `pianura_vince_e_prosegue` sono PROVVISORIE, scelte perché il giocatore vinca e la corsa prosegua, non un equilibrio.
+
+## Il collaudo, coi numeri e lo strumento
+
+- **Prove del pacchetto** (`swift test`, cartella `Codice`): **336 prove eseguite, 1 saltata, 0 fallite** (di cui `InvariantiCampagnaTest` con l'invariante `gruppo_bloccato_senza_azioni`, il suo mutante e la prova `test_incarico_25_il_banco_prosegue_dopo_le_battaglie`). Numero dal blocco «Executed 336 tests, with 1 test skipped and 0 failures» di `swift test` (era 335 all'incarico 24; la nuova è la prova del banco che prosegue).
+- **`scripts/collaudo-completo.sh`** (iPhone Air, `WARSENSE_SIMULATORE`): «Collaudo completo: tutto verde». Conteggio da `xcresulttool summary`: **83 prove eseguite — 73 `WarSenseTest`, 10 `WarSenseUITest` — 83 passate, 0 fallite, 0 saltate** (erano 82 all'incarico 24; la nuova è `test_incarico_25_la_campagna_prosegue_due_giornate_oltre_il_ritorno`).
+- **Vista fallire di proposito** (sul codice della build 26, prima della correzione): `xcodebuild test … test_incarico_25_…` → «il gruppo gruppo-5 reduce dalla battaglia deve aver SPESO la giornata combattendo (01 §5.6.0.5)»; «** TEST FAILED **». Verde dopo la correzione. Il mutante `gruppo_bloccato_senza_azioni` visto scattare dalla guardia dei mutanti (verde).
+- **Il banco prosegue** (`PROSEGUE-25` da `InvariantiCampagnaTest`): `pianura_vince_e_prosegue` battaglie=1 VINTA, giornateDopoLaPrimaBattaglia=**33** su 40; media **18**, massimo **33** (dallo strumento), zero violazioni di giocabilità.
+
+## La corsa completa delle sessioni
+
+`scripts/esegui-sessioni-complete.sh`: «Corsa separata: SUCCESSO». 1/2 le **144** configurazioni di CAMPAGNA per l'interfaccia (VERDE, durata prova 1020,0 s dal blocco `IDETestOperationsObserverDebug`); 2/2 le sessioni HEADLESS di campagna e le **32** di battaglia al Motore, `SessioniCompleteTest` **15 prove, 0 fallite**. Esito in `esiti-sessioni-complete/esito.json`: `successo`, `commit: 6d580a5…`.
+
+## La versione e il versionamento
+
+Versione dei valori RESTA **0.11.0** (nessun valore tarato nuovo). Schema del giornale di CAMPAGNA **6 → 7** (`FondazioneCampagna.schemaCorrente`): la regola del ritorno cambia il modo in cui una partita in corso si svolge (il combattente agito, la casella di ripiegamento); i salvataggi v6 si DICHIARANO incompatibili (`schemaIncompatibile`, annunciato da `SchermateContorno.riprendiCampagna`). È la build che scioglie la campagna bloccata del titolare, che riparte da una partita nuova. Schema della battaglia RESTA 2. Versione dei Testi RESTA **0.1.1** (chiavi nuove `ripiegamento.titolo`/`ripiegamento.casella`, etichette d'azione; impronte per file rigenerate). Marketing **1.1.0**, certificati, profili e identificatori NON toccati.
+
+Ramo dedicato `blocco-dopo-battaglia-ripiegamento`, commit **6d580a5** (codice, prove, invariante, dati, registri, nota). Fuso su `principale` con `git merge --ff-only`; spinti `principale` e il ramo. La correzione della nota per il titolare (il termine tra virgolette respinto dal controllo) è un commit successivo su `principale` (d91d7f2). Stato finale accertato con `git rev-parse principale` uguale a `git rev-parse origin/principale`.
+
+## Il caricamento e la verifica per interfaccia di programmazione
+
+Build **27** caricata (`carica-testflight.sh`, «UPLOAD SUCCEEDED with no errors», Delivery UUID `86d8ab18-1595-4bba-8671-a7dbbfefe642`). Numero di build = massimo su tutto l'account più uno (26 → 27). Cancelli preventivi verdi prima dell'archivio: `principale` locale == `origin/principale`; marketing 1.1.0 non all'indietro; `controlla-note.py` verde (nota di rilascio 2338 caratteri; nota per il titolare fresca, 36 nomi tutti esposti); `controlla-build.py` verde; `controlla-sessioni.py` (esito fresco su `6d580a5`) verde; `collaudo-completo.sh` rieseguito verde (83/83). Build 27 registrata in `build-caricate.md` (riga `| 27 | 2026-08-12 10:52:02 | 1.1.0 | d91d7f2 | …`).
+
+**Verifica per interfaccia di programmazione (`asc_api.py`/`controlla-build.py`, credenziali da `scabo_deploy.env`).** La build 27 è **`processingState = VALID`**, **`expired = False`**, sul treno **`1.1.0`** (la più alta del treno più alto), assegnata a **un gruppo di test** (`betaGroups = 1`). Registro e App Store Connect concordano NEI DUE VERSI (`controlla-build.py`): «registro e App Store Connect concordano: 27 build, la più alta è la 27».
+
+## Registri toccati
+
+`Fondamenta/registro-decisioni-architetturali.md`: RDA-135 (la causa vera del blocco), RDA-136 (il ripiegamento coi casi limite chiusi), RDA-137 (l'invariante della giocabilità). `registro-scostamenti.md`: S25 (a–d). `valori-provvisori.md`: le versioni e lo scenario di verifica. `build-caricate.md`: riga 27. `Incarichi/README.md`: riga 25. Incarico e resoconto archiviati verbatim in `Incarichi/`.
