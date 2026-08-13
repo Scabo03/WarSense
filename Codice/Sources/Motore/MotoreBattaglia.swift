@@ -721,6 +721,34 @@ public struct MotoreBattaglia: Sendable {
 
     // MARK: - Condizioni di chiusura (01 §15.2.3)
 
+    /// Il massimo che una parte potrà mai spendere in un piazzamento, da qui in avanti:
+    /// il budget di base più il tetto del riporto (01 §9.3.3), o il budget del primo turno
+    /// (01 §9.3.2) se quel turno le resta ancora da giocare. Serve a riconoscere una riserva
+    /// che non entrerà mai in campo perché anche un solo suo sciame eccede ogni budget possibile.
+    private func budgetMassimoResiduo(di parte: Parte, _ stato: StatoBattaglia) -> Int64 {
+        let f = formato(stato)
+        let regime = f.budgetVolumeBase + f.quotaRiporto.applicato(a: f.budgetVolumeBase)
+        guard (stato.turniGiocati[parte] ?? 0) == 0 else { return regime }
+        return max(regime, f.coefficientePrimoTurno.applicato(a: f.budgetVolumeBase))
+    }
+
+    /// Una parte ha una riserva schierabile se un suo elemento del deck con esemplari da
+    /// giocare può ancora entrare in campo, cioè il volume di un suo sciame sta nel budget
+    /// massimo residuo (01 §8.6). Una riserva troppo grande per il budget non tiene «viva» la
+    /// parte all'infinito: senza sciami in campo e senza riserve schierabili la battaglia si
+    /// conclude per annientamento (01 §15.2.3), una delle vie previste, in un numero finito di
+    /// turni. È il rimedio alla battaglia sbilanciata che non si concludeva: la parte in campo
+    /// non poteva forzare l'uscita di una riserva che l'avversario non poteva pagare.
+    private func haRiserveSchierabili(_ parte: Parte, _ stato: StatoBattaglia) -> Bool {
+        let tetto = budgetMassimoResiduo(di: parte, stato)
+        guard let deck = stato.deck[parte] else { return false }
+        return deck.contains { elemento in
+            guard elemento.esemplari > 0 else { return false }
+            let volumeSciame = elemento.atomi * archetipo(elemento.archetipo).volumePerAtomo
+            return volumeSciame <= tetto
+        }
+    }
+
     private func verificaCondizioniDiChiusura(_ stato: inout StatoBattaglia,
                                               eventi: inout [EventoBattaglia]) {
         guard stato.esito == nil else { return }
@@ -743,7 +771,7 @@ public struct MotoreBattaglia: Sendable {
             // restare senza nulla, la ritirata è riuscita e lo scontro finisce; lo
             // sconfitto resta chi si è ritirato, per 01 §15.2.2.
             let avanzanteVuoto = !stato.sciami.values.contains { $0.parte == avanzante }
-                && !(stato.deck[avanzante] ?? []).contains { $0.esemplari > 0 }
+                && !haRiserveSchierabili(avanzante, stato)
             if sogliaRaggiunta || ritiranteVuoto || avanzanteVuoto {
                 let esito = EsitoBattaglia(sconfitto: ritirante, modo: .ritirataCompiuta,
                                            turni: stato.giro)
@@ -753,10 +781,10 @@ public struct MotoreBattaglia: Sendable {
             return
         }
 
-        // Annientamento: nessuno sciame in campo e nessun esemplare nel deck.
+        // Annientamento: nessuno sciame in campo e nessuna riserva ancora schierabile.
         let annientate = Parte.allCases.filter { parte in
             !stato.sciami.values.contains { $0.parte == parte }
-                && !(stato.deck[parte] ?? []).contains { $0.esemplari > 0 }
+                && !haRiserveSchierabili(parte, stato)
         }
         if !annientate.isEmpty {
             // Annientamento simultaneo (01 §15.2.5): la parità non esiste (01 §15.2.2)
