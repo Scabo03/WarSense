@@ -716,6 +716,8 @@ final class SchermataMappaCampagna: UIViewController {
     var registroFuocoPerProva: [Fuoco.Movimento] { Fuoco.registro }
     func eseguiPerProva(_ comando: ComandoCampagna) async { await eseguiComando(comando) }
     func apriRegistroPerProva() { apriRegistro() }
+    /// Il pulsante «Chiudi la giornata» quale il titolare lo preme (incarico 26).
+    func chiudiGiornataPerProva() { chiudiGiornata() }
     var motorePerProva: MotoreCampagna { partita.motore }
     /// Il colore di riempimento che la mappa disegna per una casella, letto dallo STESSO
     /// blocco che il disegno usa (`vistaMappa.coloreCasella`): la prova d'interfaccia verifica
