@@ -70,7 +70,14 @@ public struct FondazioneCampagna: Codable, Sendable {
     /// agito, la casella di ripiegamento diversa): incompatibile, dichiarato e non riaperto in
     /// silenzio (00 §15.2). È anche la build che scioglie la campagna bloccata del titolare, che
     /// riparte da una partita nuova.
-    public static let schemaCorrente = 7
+    ///
+    /// Versione 8 dal comando di chiusura della giornata (incarico 26, decisione del titolare): il
+    /// giornale porta il caso nuovo `giornataChiusaDalGiocatore`, che rigiocato chiude la giornata
+    /// forzatamente (i gruppi non-agiti spendono la giornata). Un giornale di versione 7 non lo
+    /// contiene e si ricodifica identico; ma la versione va DICHIARATA perché la regola con cui una
+    /// partita in corso si svolge cambia (esiste ora un modo di chiudere la giornata che prima non
+    /// c'era). Incompatibile all'indietro, dichiarato e non riaperto in silenzio (00 §15.2).
+    public static let schemaCorrente = 8
 
     public init(versioneSchema: Int, versioneValori: String, versioneTesti: String,
                 seme: UInt64, identificatore: String, scenario: ScenarioCampagna) {
@@ -141,6 +148,12 @@ public enum VoceGiornale: Codable, Sendable {
     /// l'esito torna in campagna anche dopo un riavvio (05 §6.1, §6.3). Aggiunto in coda: i tre casi
     /// preesistenti si ricodificano identici al byte (`CompatibilitaGiornaleTest`).
     case battagliaConclusa(esito: EsitoInCampagna)
+    /// La CHIUSURA ESPLICITA della giornata da parte del giocatore (incarico 26, decisione del
+    /// titolare che rovescia una regola d'architettura: la giornata si chiudeva solo da sé). È una
+    /// via d'uscita, non un ordine: rigiocata, chiude la giornata forzatamente — i gruppi non-agiti
+    /// spendono la giornata — sicché lo stato dopo un riavvio è quello che il giocatore ha lasciato.
+    /// Aggiunta in coda: i casi preesistenti si ricodificano identici (`CompatibilitaGiornaleTest`).
+    case giornataChiusaDalGiocatore(giorno: Int)
 }
 
 /// Una riga del giornale, numerata progressivamente.

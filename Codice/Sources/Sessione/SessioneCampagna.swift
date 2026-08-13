@@ -2,6 +2,26 @@ import Foundation
 import Motore
 import Dati
 
+/// La DIAGNOSTICA di una chiusura esplicita della giornata (incarico 26): quali gruppi non avevano
+/// agito quando il titolare ha chiuso la giornata, il loro stato, e le azioni loro disponibili. È il
+/// dato che trasforma un blocco che il titolare non sa riprodurre in qualcosa di utilizzabile — se
+/// un gruppo risulta non-agito e senza alcuna azione disponibile, è il blocco, colto sul fatto. La
+/// Presentazione la scrive accanto al salvataggio, sicché viaggia con esso.
+public struct DiagnosticaChiusura: Sendable, Codable {
+    public struct GruppoNonAgito: Sendable, Codable {
+        public let numero: Int
+        public let nome: String
+        public let parte: String
+        public let stato: String
+        public let azioniDisponibili: [String]
+    }
+    public let giorno: Int
+    public let gruppiNonAgiti: [GruppoNonAgito]
+    /// Vero se la giornata NON si sarebbe chiusa da sé: c'erano gruppi non-agiti. È il caso in cui
+    /// la diagnostica va conservata; se è falso, il titolare ha chiuso una giornata già chiudibile.
+    public var laGiornataNonSiSarebbeChiusa: Bool { !gruppiNonAgiti.isEmpty }
+}
+
 /// L'orchestratore di una campagna (05 §1.7): unico proprietario dello stato
 /// corrente e unico scrittore del giornale, con la stessa disciplina della
 /// battaglia — scrittura confermata prima che l'esito diventi visibile, istantanee
@@ -144,6 +164,55 @@ public actor SessioneCampagna {
         // ripresa (raro: p. es. l'unico gruppo che restava è caduto), l'avversario deve muovere.
         try Self.svolgiTurnoAvversario(giornale: giornale, motore: motore,
                                        condotta: condotta, cartella: cartella, stato: &stato)
+    }
+
+    /// La CHIUSURA ESPLICITA della giornata (incarico 26, decisione del titolare): una via d'uscita
+    /// sempre disponibile perché il giocatore non resti bloccato da un difetto in una partita in
+    /// corso. Chiude la giornata quale che sia lo stato dei gruppi, la iscrive nel giornale — sicché
+    /// sopravvive a un riavvio — e ne registra i marcatori. Ritorna la DIAGNOSTICA di ciò che la
+    /// rendeva necessaria: i gruppi che non avevano agito, il loro stato, le azioni loro disponibili.
+    /// La chiusura automatica (01 §5.6.0.6) resta: questo comando si aggiunge, non la sostituisce.
+    @discardableResult
+    public func chiudiGiornata() throws -> DiagnosticaChiusura {
+        // La diagnostica si raccoglie PRIMA della chiusura, sullo stato che l'ha resa necessaria:
+        // ogni gruppo non-agito, il suo stato dichiarato, e le azioni che gli erano disponibili.
+        let nonAgiti = stato.gruppi.values
+            .filter { !$0.haConclusoLaGiornata }
+            .sorted { $0.id.numero < $1.id.numero }
+            .map { g in
+                DiagnosticaChiusura.GruppoNonAgito(
+                    numero: g.id.numero, nome: g.nome, parte: g.parte.rawValue,
+                    stato: g.statoDichiarato.chiaveTesto,
+                    azioniDisponibili: azioniDisponibili(per: g, in: stato))
+            }
+        let diagnostica = DiagnosticaChiusura(giorno: stato.giorno, gruppiNonAgiti: nonAgiti)
+
+        do { try giornale.appendi(.giornataChiusaDalGiocatore(giorno: stato.giorno)) }
+        catch { throw ErroreSessione.scritturaFallita }
+        let eventi = motore.chiudiLaGiornataForzata(&stato)
+        try Self.registraChiusura(eventi, avversarioHaAgito: false,
+                                  giornale: giornale, cartella: cartella, stato: stato)
+        return diagnostica
+    }
+
+    /// Le azioni disponibili a un gruppo non-agito, come codici stabili (05 §12.6): lo stesso
+    /// insieme di candidati dell'invariante della giocabilità (`ordinabile`), qui elencato invece
+    /// che ridotto a un booleano, perché la diagnostica dica quali azioni c'erano — o che non ce
+    /// n'era alcuna, il caso del blocco.
+    private func azioniDisponibili(per gruppo: Gruppo, in stato: StatoCampagna) -> [String] {
+        var codici: [String] = []
+        func ammette(_ comando: ComandoCampagna) -> Bool {
+            motore.valida(comando, parte: gruppo.parte, stato: stato).eValido
+        }
+        if ammette(.presidio(gruppo: gruppo.id)) { codici.append("presidio") }
+        if ammette(.sostaConRaccolta(gruppo: gruppo.id)) { codici.append("sosta_con_raccolta") }
+        if stato.griglia.vicini(di: gruppo.posizione).contains(where: {
+            ammette(.marcia(gruppo: gruppo.id, a: $0,
+                            giorni: motore.costoInGiorni(da: gruppo.posizione, a: $0, stato: stato)))
+        }) { codici.append("marcia") }
+        if gruppo.categoria.eRicognizione, ammette(.esplorazione(gruppo: gruppo.id)) { codici.append("esplorazione") }
+        if gruppo.categoria.eArmata, ammette(.imboscata(gruppo: gruppo.id)) { codici.append("imboscata") }
+        return codici
     }
 
     /// Muove l'avversario dopo che tutti i gruppi del giocatore hanno agito (01 §5.6.11):
@@ -390,6 +459,10 @@ public actor SessioneCampagna {
                 // iscritto come dato, sicché la campagna ritrova i superstiti e le caselle senza
                 // rileggere i file della battaglia. È così che l'esito sopravvive a un riavvio.
                 _ = motore.applicaEsitoInCampagna(esito, in: &statoCorrente)
+            case .giornataChiusaDalGiocatore:
+                // La chiusura esplicita del titolare (incarico 26): rigiocata, chiude la giornata
+                // forzatamente, sicché lo stato dopo un riavvio è quello che il giocatore ha lasciato.
+                _ = motore.chiudiLaGiornataForzata(&statoCorrente)
             default:
                 continue
             }
