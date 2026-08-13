@@ -27,3 +27,4 @@
 {"numero":27,"voce":{"comandoCampagna":{"comando":{"sabotaggio":{"gruppo":{"numero":1}}},"parte":"giocatore"}}}
 {"numero":28,"voce":{"comandoCampagna":{"comando":{"studioApprofondito":{"gruppo":{"numero":1}}},"parte":"giocatore"}}}
 {"numero":29,"voce":{"battagliaConclusa":{"esito":{"casella":{"colonna":1,"riga":1},"composizioneAvversario":[],"composizioneGiocatore":[{"archetipo":"fanteria_leggera","atomi":4}],"gruppoAvversario":{"numero":2},"gruppoGiocatore":{"numero":1},"identificatore":"battaglia-1-1-1","modo":"annientamento","posizioneGiocatore":{"colonna":1,"riga":1},"sconfitto":"avversario"}}}}
+{"numero":30,"voce":{"giornataChiusaDalGiocatore":{"giorno":1}}}

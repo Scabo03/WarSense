@@ -853,6 +853,21 @@ public struct MotoreCampagna: Sendable {
         return eventi
     }
 
+    /// La CHIUSURA ESPLICITA della giornata (incarico 26, decisione del titolare): chiude la
+    /// giornata corrente quale che sia lo stato dei gruppi, marcando come SPESA la giornata di ogni
+    /// gruppo che non l'ha ancora conclusa — la chiusura del titolare vale, per essi, come un ordine
+    /// di restare —, poi lascia proseguire la cascata automatica (`chiudiLaGiornataSeServe`). È una
+    /// via d'uscita per il giocatore, NON una correzione: la chiusura automatica (01 §5.6.0.6) resta
+    /// e vale come prima. Una battaglia in sospeso non si scavalca (01 §6.4): quel blocco si scioglie
+    /// aprendo la battaglia dalla casella, non chiudendo la giornata.
+    public func chiudiLaGiornataForzata(_ stato: inout StatoCampagna) -> [EventoCampagna] {
+        guard !stato.gruppi.isEmpty, stato.battaglieInSospeso.isEmpty else { return [] }
+        for id in stato.gruppi.keys.sorted() where !stato.gruppi[id]!.haConclusoLaGiornata {
+            stato.gruppi[id]!.azioneSpesa = true
+        }
+        return chiudiLaGiornataSeServe(&stato)
+    }
+
     /// Le risoluzioni di fine giornata (01 §5.6.11): un MOMENTO DICHIARATO E ORDINATO,
     /// non una funzione che fa una cosa sola. L'ordine è quello di 01 §5.6.11:
     /// avanzamento delle marce lunghe, SCATTO DELLE IMBOSCATE, valutazione dei tagli
