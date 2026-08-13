@@ -165,6 +165,36 @@ final class PartitaCampagna {
         try? FileManager.default.removeItem(at: Self.cartellaBattaglia(battaglia.identificatore))
     }
 
+    // MARK: - Chiusura esplicita della giornata (incarico 26)
+
+    /// Chiude ESPLICITAMENTE la giornata: la via d'uscita del titolare, sempre disponibile, perché
+    /// non resti bloccato da un difetto in una partita in corso. Ritorna la diagnostica di ciò che
+    /// la rendeva necessaria; se c'erano gruppi non-agiti — la giornata non si sarebbe chiusa da sé —
+    /// la SCRIVE accanto al salvataggio (`diagnostica-giornata-N.json`, nello slot di campagna),
+    /// sicché il titolare possa mandarla indietro insieme al giornale. Non è un canale del collaudo:
+    /// è il gioco vero che conserva la traccia di un blocco che il titolare non sa riprodurre.
+    @discardableResult
+    func chiudiGiornata() async throws -> DiagnosticaChiusura {
+        let diagnostica = try await sessione.chiudiGiornata()
+        if diagnostica.laGiornataNonSiSarebbeChiusa {
+            scriviDiagnostica(diagnostica)
+        }
+        return diagnostica
+    }
+
+    /// Dove vive la diagnostica: un file accanto a `giornale.jsonl`, nello stesso slot, sicché
+    /// viaggia con il salvataggio quando il titolare lo manda indietro. Scrittura atomica (05 §6.8).
+    static func urlDiagnostica(giorno: Int) -> URL {
+        cartellaCampagna.appendingPathComponent("diagnostica-giornata-\(giorno).json")
+    }
+
+    private func scriviDiagnostica(_ diagnostica: DiagnosticaChiusura) {
+        let codificatore = JSONEncoder()
+        codificatore.outputFormatting = [.sortedKeys, .prettyPrinted, .withoutEscapingSlashes]
+        guard let dati = try? codificatore.encode(diagnostica) else { return }
+        try? dati.write(to: Self.urlDiagnostica(giorno: diagnostica.giorno), options: .atomic)
+    }
+
     @discardableResult
     func annulla() async throws -> SessioneCampagna.EsitoAnnullamento {
         try await sessione.annulla(parte: .giocatore)
