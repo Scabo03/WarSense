@@ -280,6 +280,9 @@
 "registro.con_luogo" = "Attiva per portare il fuoco sul luogo del fatto";
 "registro.apri" = "Registro della campagna";
 "registro.chiudi" = "Chiudi il registro";
+"giornata.chiudi" = "Chiudi la giornata";
+"giornata.chiusa_conferma" = "Giornata chiusa.";
+"giornata.chiusa_con_diagnostica" = "Giornata chiusa. %1$d gruppi non avevano agito: ne è stata conservata una traccia accanto al salvataggio.";
 
 /* Mappa di campagna — interfaccia (02 §2, §3, §6). La testa fissa ha la stessa
    struttura di quella di battaglia (00 §7.1): riga, poi posizione nella riga. */

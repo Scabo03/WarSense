@@ -35,6 +35,7 @@ final class SchermataMappaCampagna: UIViewController {
     /// Altezza minima RICHIESTA della mappa: sufficiente a una riga intera di caselle.
     private static let altezzaMinimaMappa: CGFloat = 120
     private let pulsanteRegistro = UIButton(type: .system)
+    private let pulsanteChiudiGiornata = UIButton(type: .system)
     private let pulsanteAnnulla = UIButton(type: .system)
     private let pulsanteAzzera = UIButton(type: .system)
     private let pulsanteEsci = UIButton(type: .system)
@@ -77,6 +78,7 @@ final class SchermataMappaCampagna: UIViewController {
         view.addSubview(scorrimentoComandi)
         scorrimentoComandi.addSubview(colonnaComandi)
         for (pulsante, azione) in [(pulsanteRegistro, #selector(apriRegistro)),
+                                   (pulsanteChiudiGiornata, #selector(chiudiGiornata)),
                                    (pulsanteAnnulla, #selector(annulla)),
                                    (pulsanteAzzera, #selector(azzera)),
                                    (pulsanteEsci, #selector(esci))] {
@@ -131,8 +133,8 @@ final class SchermataMappaCampagna: UIViewController {
         vistaMappa.accessibilityElements = ordineCaselle.map { elementi[$0]! }
         // Ordine di lettura dichiarato: prima le caselle, poi i comandi globali
         // (02 §2.8), esattamente come in battaglia.
-        view.accessibilityElements = [vistaMappa, pulsanteRegistro, pulsanteAnnulla,
-                                      pulsanteAzzera, pulsanteEsci]
+        view.accessibilityElements = [vistaMappa, pulsanteRegistro, pulsanteChiudiGiornata,
+                                      pulsanteAnnulla, pulsanteAzzera, pulsanteEsci]
         montaRotori()
         aggiorna(con: stato)
 
@@ -171,6 +173,7 @@ final class SchermataMappaCampagna: UIViewController {
             elemento.accessibilityTraits = occupata ? [.button] : []
         }
         pulsanteRegistro.setTitle(testi.frase("registro.apri").testo, for: .normal)
+        pulsanteChiudiGiornata.setTitle(testi.frase("giornata.chiudi").testo, for: .normal)
         pulsanteAnnulla.setTitle(testi.frase("pulsante.annulla").testo, for: .normal)
         pulsanteAzzera.setTitle(testi.frase("pulsante.azzera").testo, for: .normal)
         pulsanteEsci.setTitle(testi.frase("resoconto.torna").testo, for: .normal)
@@ -539,6 +542,26 @@ final class SchermataMappaCampagna: UIViewController {
         Task { await operazioneGiornale({ try await self.partita.azzera() },
                                         conferma: "campagna.azzerato_conferma",
                                         confermaConRiapertura: "campagna.azzerato_giornata_riaperta") }
+    }
+
+    /// La CHIUSURA ESPLICITA della giornata (incarico 26, decisione del titolare): sempre
+    /// disponibile, chiude la giornata quale che sia lo stato dei gruppi. Annuncia — con significato
+    /// di conferma, non interrompente — e NON sposta il fuoco (nessun `Fuoco.sposta`), come annulla e
+    /// azzera. Se la giornata non si sarebbe chiusa da sé (c'erano gruppi non-agiti), il gioco ne ha
+    /// conservato la traccia accanto al salvataggio, e l'annuncio lo dice.
+    @objc private func chiudiGiornata() {
+        Task {
+            let diagnostica = try? await partita.chiudiGiornata()
+            await ricaricaStato()
+            let testo: String
+            if let d = diagnostica, d.laGiornataNonSiSarebbeChiusa {
+                testo = testi.frase("giornata.chiusa_con_diagnostica", d.gruppiNonAgiti.count).testo
+            } else {
+                testo = testi.frase("giornata.chiusa_conferma").testo
+            }
+            partita.ambiente.segnali.annuncia(
+                TestoLocalizzato(testo: testo, lingua: testi.lingua), significato: .conferma)
+        }
     }
 
     /// La riapertura della giornata si annuncia con una frase PROPRIA: è un
