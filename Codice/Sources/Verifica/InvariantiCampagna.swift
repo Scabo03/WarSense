@@ -180,6 +180,14 @@ public struct SondaInvariantiCampagna: Sendable {
         /// costruzione, non evitato per disciplina: 01 §5.6.0.6 vuole che «un gruppo che non ha agito
         /// è sempre un gruppo che attende una decisione», cioè ordinabile.
         case gruppoBloccatoSenzaAzioni(gruppo: Int, parte: String)
+        // Invariante della conclusione della battaglia (01 §15.2.3, incarico 26).
+        /// Una BATTAGLIA non si è conclusa entro il limite dichiarato di giri: è un blocco della
+        /// stessa specie di quello della campagna, dentro la battaglia. Accadeva in una battaglia
+        /// molto sbilanciata dove la parte perdente conservava una riserva troppo grande per il
+        /// budget — mai schierabile, mai annientata, mai in resa —, e nessuna delle vie previste
+        /// (01 §15.2.3) chiudeva lo scontro. Reso un cancello che FALLISCE: ogni battaglia deve
+        /// concludersi in un numero finito di turni.
+        case battagliaNonConclusaNelLimite(giri: Int, limite: Int)
 
         /// Il codice della violazione, senza spazi: l'uscita del programma di
         /// verifica è dato per chi sviluppa e non testo di prodotto (05 §12.6),
@@ -237,6 +245,7 @@ public struct SondaInvariantiCampagna: Sendable {
             case .bloccoBattagliaNonEffettivo(let a): return "blocco_battaglia_non_effettivo:atteso=\(a)"
             case .rigiocaturaBattagliaDivergente(let c): return "rigiocatura_battaglia_divergente:casella=\(c)"
             case .gruppoBloccatoSenzaAzioni(let g, let p): return "gruppo_bloccato_senza_azioni:gruppo=\(g):parte=\(p)"
+            case .battagliaNonConclusaNelLimite(let g, let l): return "battaglia_non_conclusa_nel_limite:giri=\(g):limite=\(l)"
             }
         }
     }
@@ -298,6 +307,7 @@ public struct SondaInvariantiCampagna: Sendable {
         "blocco_battaglia_non_effettivo",
         "rigiocatura_battaglia_divergente",
         "gruppo_bloccato_senza_azioni",
+        "battaglia_non_conclusa_nel_limite",
     ]
 
     /// Il codice nudo, senza i valori: la parte prima dei due punti.
@@ -446,6 +456,16 @@ public struct SondaInvariantiCampagna: Sendable {
     /// scenario che lo produce va dichiarato, non nascosto con un freno.
     public func controllaTerminazione(giorniTrascorsi: Int, limite: Int) -> [Violazione] {
         giorniTrascorsi > limite ? [.partitaNonTerminata(giornate: giorniTrascorsi)] : []
+    }
+
+    /// LA CONCLUSIONE DELLA BATTAGLIA (01 §15.2.3, incarico 26): ogni battaglia si chiude in un
+    /// numero finito di turni, per una delle vie previste. Se lo scontro non è concluso e i giri
+    /// giocati eccedono il limite dichiarato, la battaglia non è terminata — il difetto della
+    /// battaglia sbilanciata dove la riserva troppo grande per il budget non usciva mai e la parte
+    /// non veniva mai annientata. La sonda riceve dall'esterno l'esito e i giri (li produce il
+    /// banco che gioca la battaglia), così da giudicare senza rigiocarla col medesimo codice.
+    public func controllaConclusioneBattaglia(concluso: Bool, giri: Int, limite: Int) -> [Violazione] {
+        (!concluso && giri >= limite) ? [.battagliaNonConclusaNelLimite(giri: giri, limite: limite)] : []
     }
 
     /// L'AVVISTAMENTO AVVENUTO (01 §5.6.11, incarico 22): in una partita CONTRO l'avversario il
