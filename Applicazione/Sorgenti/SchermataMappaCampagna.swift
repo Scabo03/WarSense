@@ -321,6 +321,21 @@ final class SchermataMappaCampagna: UIViewController {
                 }
             })
         }
+        // La sosta con raccolta (01 §5.6.5, una delle sedici azioni di giornata di 01 §5.6.8.1)
+        // mancava dal pannello: il Motore la accetta sempre per un gruppo che non ha agito
+        // (invariante della giocabilità, incarico 25), ma l'interfaccia non la offriva. Un gruppo che
+        // DEVE rifornirsi non può marciare né presidiare (01 §5.2.2.4): con la sola voce di chiusura
+        // nel pannello restava in attesa per sempre, la giornata non si chiudeva da sé e il gioco si
+        // fermava. Trovato dalla prova delle partite intere (formato medio, giorno 18, incarico 27).
+        if partita.motore.valida(.sostaConRaccolta(gruppo: gruppo.id),
+                                 parte: .giocatore, stato: costruttore.stato).eValido {
+            voci.append(VocePannello(titolo: testi.frase("pannello.sosta").testo,
+                                     stile: .default) { [weak self] in
+                self?.chiudiPannello(casella: gruppo.posizione) {
+                    await self?.eseguiComando(.sostaConRaccolta(gruppo: gruppo.id))
+                }
+            })
+        }
         // La divisione si offre a un gruppo con almeno due reparti, una casella libera
         // adiacente e la giornata non conclusa (01 §5.6.0.2): apre la schermata dei
         // reparti. È l'operazione più complessa della mappa (02 §10.3).
