@@ -7,6 +7,13 @@
 # anche dallo script di caricamento: due elenchi separati tornerebbero a divergere.
 # Nessun caricamento su TestFlight da qui: il caricamento è un atto deliberato,
 # eseguito in locale con scripts/carica-testflight.sh.
+#
+# Dal 2026-08-07 al 2026-11-20 il collaudo è stato ROSSO a ogni invio su
+# `macos-15` (uscita 65 di xcodebuild nel passo del collaudo), senza che nessuno
+# lo leggesse: i registri sono scaduti prima che li si potesse vedere (incarico
+# 27). Dall'incarico 27 gira sull'immagine `xcode-27` (macOS 27), con lo stesso
+# Xcode della macchina del titolare, scelto per percorso come in locale (nessuna
+# selezione globale): l'immagine ne contiene più d'uno e il predefinito è il 27.1.
 name: collaudo
 on:
   push:
@@ -14,17 +21,30 @@ on:
   pull_request:
 jobs:
   collaudo:
-    runs-on: macos-15
+    runs-on: xcode-27
+    timeout-minutes: 90
+    env:
+      DEVELOPER_DIR: /Applications/Xcode_27.2.app/Contents/Developer
     steps:
-      - uses: actions/checkout@v4
+      # v5: la v4 gira su Node 20, che l'esecutore segnala come deprecato.
+      - uses: actions/checkout@v5
         with:
           # Il controllo di freschezza della nota per il titolare confronta due
           # commit: senza la cronologia intera `git log` non li trova.
           fetch-depth: 0
-      - name: Versione di Swift
-        run: swift --version
-      - name: xcodegen
-        run: brew install xcodegen
+      - name: Versioni dello strumentario
+        run: sw_vers; xcodebuild -version; swift --version; xcrun simctl list runtimes
+      - name: xcodegen, la stessa versione della macchina del titolare
+        # Fissata e non presa da brew: le 2.47 e 2.48 (17 e 19 novembre 2026)
+        # cambiano le impostazioni predefinite dei progetti generati, e il progetto
+        # deve uscire identico in locale e qui. L'impronta rifiuta un archivio
+        # diverso da quello verificato all'incarico 27.
+        run: |
+          curl -sSL -o "$RUNNER_TEMP/xcodegen.zip" https://github.com/yonaskolb/XcodeGen/releases/download/2.45.4/xcodegen.zip
+          echo "090ec29491aad50aec10631bf6e62253fed733c50f3aab0f5ffc86bc170bdbef  $RUNNER_TEMP/xcodegen.zip" | shasum -a 256 -c -
+          unzip -q "$RUNNER_TEMP/xcodegen.zip" -d "$RUNNER_TEMP"
+          echo "$RUNNER_TEMP/xcodegen/bin" >> "$GITHUB_PATH"
+          "$RUNNER_TEMP/xcodegen/bin/xcodegen" --version
       - name: Collaudo completo (pacchetto, ospitate, interfaccia)
         run: ./scripts/collaudo-completo.sh
       - name: I documenti consegnati nominano solo ciò che il codice espone

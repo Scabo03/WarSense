@@ -1,0 +1,36 @@
+# Uscita della corsa delle sonde (xcodebuild test, schema WarSenseEsplorazione, -only-testing SondaCanaliTest), WarSense iPhone Air iOS 27.0, 2026-11-20
+SONDA|prima dell'accensione: isEnabled=false
+SONDA|accensione: isEnabled=true in 3.44s
+SONDA|corrente all'avvio: «WarSense»
+SONDA|avanti 1: «Riprendi lo scontro in corso Pulsante» (0.52s)
+SONDA|avanti 2: «Riprendi la campagna in corso Pulsante» (0.51s)
+SONDA|avanti 3: «Nuovo scontro di prova Pulsante» (0.51s)
+SONDA|avanti 4: «Nuova campagna, mappa piccola Pulsante» (0.51s)
+SONDA|avanti 5: «Nuova campagna, mappa media Pulsante» (0.51s)
+SONDA|avanti 6: «Nuova campagna, mappa grande Pulsante» (0.51s)
+SONDA|avanti 7: «Impostazioni Pulsante» (0.51s)
+SONDA|avanti 8: «Suoni e vibrazioni del gioco Pulsante» (0.51s)
+SONDA|avanti 9: «Suoni e vibrazioni del gioco Pulsante» (2.30s)
+SONDA|avanti 10: «Suoni e vibrazioni del gioco Pulsante» (2.29s)
+SONDA|avanti 11: «Suoni e vibrazioni del gioco Pulsante» (2.30s)
+SONDA|avanti 12: «Suoni e vibrazioni del gioco Pulsante» (2.30s)
+SONDA|corrente: «Suoni e vibrazioni del gioco Pulsante»
+SONDA|indietro: «Impostazioni Pulsante»
+SONDA|dentro: ERRORE Error Domain=AXVoiceOverAutomationErrorDomain Code=3 "moveIn() requires VoiceOver Navigation Style to be set to Groups." UserInfo={NSLocalizedDescription=moveIn() requires VoiceOver Navigation Style to be set to Groups.}
+SONDA|fuori: ERRORE Error Domain=AXVoiceOverAutomationErrorDomain Code=3 "moveOut() requires VoiceOver Navigation Style to be set to Groups." UserInfo={NSLocalizedDescription=moveOut() requires VoiceOver Navigation Style to be set to Groups.}
+SONDA|descrizione del servizio: <XCUIVoiceOverService: enabled=YES>
+SONDA|spegnimento: isEnabled=false
+Test Case '-[WarSenseEsplorazione.SondaCanaliTest test_sonda_1_servizio_voiceover]' passed (29.010 seconds).
+SONDA|fuoco su: «Nuova campagna, mappa piccola Pulsante»
+SONDA|doppio tocco con VoiceOver acceso: mappa aperta=true
+SONDA|pronuncia dopo l'attivazione: «Giorno 1. Nessun gruppo ha ancora agito, sono 4»
+Test Case '-[WarSenseEsplorazione.SondaCanaliTest test_sonda_2_attivazione_col_doppio_tocco]' passed (16.145 seconds).
+SONDA|verifica: tipo=131072 «Text clipped» elemento=Nuova campagna, mappa media
+SONDA|verifica: tipo=131072 «Text clipped» elemento=Riprendi lo scontro in corso
+SONDA|verifica: tipo=131072 «Text clipped» elemento=Suoni e vibrazioni del gioco
+SONDA|verifica: tipo=131072 «Text clipped» elemento=Nuova campagna, mappa piccola
+SONDA|verifica: tipo=131072 «Text clipped» elemento=Nuovo scontro di prova
+SONDA|verifica: tipo=131072 «Text clipped» elemento=Nuova campagna, mappa grande
+SONDA|verifica: tipo=131072 «Text clipped» elemento=Riprendi la campagna in corso
+SONDA|verifica automatica conclusa: 7 rilievi sulla schermata d'avvio
+Test Case '-[WarSenseEsplorazione.SondaCanaliTest test_sonda_3_verifica_automatica_di_accessibilita]' passed (7.232 seconds).

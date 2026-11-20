@@ -1,0 +1,67 @@
+# Avvertenze del compilatore, uniche per file:riga:messaggio
+# Novembre = collaudo di partenza locale, Xcode 27.2 (27B52), Swift 6.4.2, commit f7b2941
+
+(pacchetto):: 'codice': found 7 file(s) which are unhandled; explicitly declare them as resources or exclude from the target
+1 × '…' was deprecated in iOS 17.0: Use the trait change registration APIs declared in the UITraitChangeObservable protocol
+1 × 'codice': found 7 file(s) which are unhandled; explicitly declare them as resources or exclude from the target
+1 × immutable value '…' was never used; consider replacing with '…' or removing it
+1 × main actor-isolated static property '…' can not be referenced from a nonisolated context; this is an error in the Swift 6 language mode
+2 × variable '…' was never mutated; consider changing to '…' constant
+Applicazione/ProveOspitate/CatenaInterfacciaMotoreTest.swift:291: no 'async' operations occur within 'await' expression
+Applicazione/ProveOspitate/MappaCampagnaAccessibileTest.swift:19: main actor-isolated static property 'schermoPiccolo' can not be referenced from a nonisolated context; this is an error in the Swift 6 language mode
+Applicazione/Sorgenti/PartitaCampagna.swift:74: no 'async' operations occur within 'await' expression
+Applicazione/Sorgenti/PartitaCampagna.swift:92: no 'async' operations occur within 'await' expression
+Applicazione/Sorgenti/PartitaCorrente.swift:48: no 'async' operations occur within 'await' expression
+Applicazione/Sorgenti/PartitaCorrente.swift:60: no 'async' operations occur within 'await' expression
+Applicazione/Sorgenti/PartitaCorrente.swift:77: no 'async' operations occur within 'await' expression
+Applicazione/Sorgenti/PartitaCorrente.swift:82: no 'async' operations occur within 'await' expression
+Applicazione/Sorgenti/TesseraDeck.swift:130: 'traitCollectionDidChange' was deprecated in iOS 17.0: Use the trait change registration APIs declared in the UITraitChangeObservable protocol
+Codice/Sources/Verifica/InvariantiCampagna.swift:536: immutable value 'repartiStaccati' was never used; consider replacing with '_' or removing it
+Codice/Tests/MotoreTest/DivisioneRiunioneTest.swift:84: variable 's' was never mutated; consider changing to 'let' constant
+Codice/Tests/SessioneTest/AnnullamentoGiornataTest.swift:100: no 'async' operations occur within 'await' expression
+Codice/Tests/SessioneTest/AnnullamentoGiornataTest.swift:123: no 'async' operations occur within 'await' expression
+Codice/Tests/SessioneTest/AnnullamentoGiornataTest.swift:136: no 'async' operations occur within 'await' expression
+Codice/Tests/SessioneTest/AnnullamentoGiornataTest.swift:155: no 'async' operations occur within 'await' expression
+Codice/Tests/SessioneTest/AnnullamentoGiornataTest.swift:188: no 'async' operations occur within 'await' expression
+Codice/Tests/SessioneTest/AnnullamentoGiornataTest.swift:206: no 'async' operations occur within 'await' expression
+Codice/Tests/SessioneTest/AnnullamentoGiornataTest.swift:224: no 'async' operations occur within 'await' expression
+Codice/Tests/SessioneTest/AnnullamentoGiornataTest.swift:230: no 'async' operations occur within 'await' expression
+Codice/Tests/SessioneTest/AnnullamentoGiornataTest.swift:245: no 'async' operations occur within 'await' expression
+Codice/Tests/SessioneTest/AnnullamentoGiornataTest.swift:263: no 'async' operations occur within 'await' expression
+Codice/Tests/SessioneTest/AnnullamentoGiornataTest.swift:269: no 'async' operations occur within 'await' expression
+Codice/Tests/SessioneTest/AnnullamentoGiornataTest.swift:279: no 'async' operations occur within 'await' expression
+Codice/Tests/SessioneTest/AnnullamentoGiornataTest.swift:290: no 'async' operations occur within 'await' expression
+Codice/Tests/SessioneTest/AnnullamentoGiornataTest.swift:66: no 'async' operations occur within 'await' expression
+Codice/Tests/SessioneTest/RigenerazioneOroTest.swift:57: no 'async' operations occur within 'await' expression
+Codice/Tests/SessioneTest/RiproduzioneOroRiserveTest.swift:28: no 'async' operations occur within 'await' expression
+Codice/Tests/SessioneTest/RiproduzioneOroRiserveTest.swift:72: no 'async' operations occur within 'await' expression
+Codice/Tests/SessioneTest/RiproduzioneOroTest.swift:28: no 'async' operations occur within 'await' expression
+Codice/Tests/SessioneTest/SalvataggioBuildDistribuitaTest.swift:102: no 'async' operations occur within 'await' expression
+Codice/Tests/SessioneTest/SalvataggioBuildDistribuitaTest.swift:38: no 'async' operations occur within 'await' expression
+Codice/Tests/SessioneTest/SalvataggioBuildDistribuitaTest.swift:86: no 'async' operations occur within 'await' expression
+Codice/Tests/SessioneTest/SessioneBattagliaTest.swift:114: no 'async' operations occur within 'await' expression
+Codice/Tests/SessioneTest/SessioneBattagliaTest.swift:124: no 'async' operations occur within 'await' expression
+Codice/Tests/SessioneTest/SessioneBattagliaTest.swift:131: no 'async' operations occur within 'await' expression
+Codice/Tests/SessioneTest/SessioneBattagliaTest.swift:142: no 'async' operations occur within 'await' expression
+Codice/Tests/SessioneTest/SessioneBattagliaTest.swift:152: no 'async' operations occur within 'await' expression
+Codice/Tests/SessioneTest/SessioneBattagliaTest.swift:159: no 'async' operations occur within 'await' expression
+Codice/Tests/SessioneTest/SessioneBattagliaTest.swift:173: no 'async' operations occur within 'await' expression
+Codice/Tests/SessioneTest/SessioneBattagliaTest.swift:214: no 'async' operations occur within 'await' expression
+Codice/Tests/SessioneTest/SessioneBattagliaTest.swift:232: no 'async' operations occur within 'await' expression
+Codice/Tests/SessioneTest/SessioneBattagliaTest.swift:246: no 'async' operations occur within 'await' expression
+Codice/Tests/SessioneTest/SessioneBattagliaTest.swift:46: no 'async' operations occur within 'await' expression
+Codice/Tests/SessioneTest/SessioneCampagnaTest.swift:104: no 'async' operations occur within 'await' expression
+Codice/Tests/SessioneTest/SessioneCampagnaTest.swift:114: no 'async' operations occur within 'await' expression
+Codice/Tests/SessioneTest/SessioneCampagnaTest.swift:124: no 'async' operations occur within 'await' expression
+Codice/Tests/SessioneTest/SessioneCampagnaTest.swift:138: no 'async' operations occur within 'await' expression
+Codice/Tests/SessioneTest/SessioneCampagnaTest.swift:162: no 'async' operations occur within 'await' expression
+Codice/Tests/SessioneTest/SessioneCampagnaTest.swift:179: no 'async' operations occur within 'await' expression
+Codice/Tests/SessioneTest/SessioneCampagnaTest.swift:196: no 'async' operations occur within 'await' expression
+Codice/Tests/SessioneTest/SessioneCampagnaTest.swift:209: no 'async' operations occur within 'await' expression
+Codice/Tests/SessioneTest/SessioneCampagnaTest.swift:226: no 'async' operations occur within 'await' expression
+Codice/Tests/SessioneTest/SessioneCampagnaTest.swift:232: no 'async' operations occur within 'await' expression
+Codice/Tests/SessioneTest/SessioneCampagnaTest.swift:44: no 'async' operations occur within 'await' expression
+Codice/Tests/SessioneTest/SessioneCampagnaTest.swift:57: no 'async' operations occur within 'await' expression
+Codice/Tests/SessioneTest/SessioneCampagnaTest.swift:72: no 'async' operations occur within 'await' expression
+Codice/Tests/SessioneTest/SessioneCampagnaTest.swift:93: no 'async' operations occur within 'await' expression
+Codice/Tests/VerificaTest/InvariantiCampagnaTest.swift:651: variable 'prima' was never mutated; consider changing to 'let' constant

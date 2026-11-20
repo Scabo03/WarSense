@@ -32,7 +32,6 @@ public final class PuntoSegnali {
     private let preferenze: @MainActor () -> Preferenze
     private let decisore: DecisoreCanali
     private var motoreAptico: CHHapticEngine?
-    private var lettori: [String: AVAudioPlayer] = [:]
     private var codaAnnunci: [NSAttributedString] = []
     private var annuncioInCorso = false
 
@@ -153,15 +152,28 @@ public final class PuntoSegnali {
 
     // MARK: - Suoni (02 §12)
 
+    /// I lettori dei suoni vivono quanto il PROCESSO, non quanto il punto dei segnali
+    /// (incarico 27). Un `AVAudioPlayer` liberato mentre suona riceve ancora un
+    /// messaggio che si era mandato da sé, e l'applicazione si arresta: lo ha mostrato
+    /// `PassaggioBattagliaInterfacciaTest`, con gli zombie attivi, come
+    /// «-[AVAudioPlayer performSelector:withObject:]: message sent to deallocated
+    /// instance», sia su iOS 27.0 sia su iOS 26.5. Nel gioco il punto dei segnali nasce
+    /// una volta sola e non muore mai, quindi la regola qui sotto non cambia nulla di
+    /// ciò che si sente; nelle prove ospitate invece ogni prova crea e libera il proprio
+    /// ambiente, a volte mentre un suono sta ancora suonando. La chiave è il percorso
+    /// intero del file, sicché due punti dei segnali con cartelle diverse non si
+    /// scambiano i suoni.
+    private static var lettoriDelProcesso: [URL: AVAudioPlayer] = [:]
+
     private func suona(_ significato: SignificatoSegnale) {
         guard let nomeFile = definizioni.suoni[significato.rawValue] else { return }
-        if lettori[nomeFile] == nil {
-            let url = cartellaSuoni.appendingPathComponent(nomeFile + ".wav")
-            lettori[nomeFile] = try? AVAudioPlayer(contentsOf: url)
-            lettori[nomeFile]?.prepareToPlay()
+        let url = cartellaSuoni.appendingPathComponent(nomeFile + ".wav")
+        if Self.lettoriDelProcesso[url] == nil {
+            Self.lettoriDelProcesso[url] = try? AVAudioPlayer(contentsOf: url)
+            Self.lettoriDelProcesso[url]?.prepareToPlay()
         }
-        lettori[nomeFile]?.currentTime = 0
-        lettori[nomeFile]?.play()
+        Self.lettoriDelProcesso[url]?.currentTime = 0
+        Self.lettoriDelProcesso[url]?.play()
     }
 
     // MARK: - Aptica (00 §5, 02 §11)

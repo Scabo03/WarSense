@@ -1,0 +1,7 @@
+# Corsa di riferimento con lo strumentario di agosto (GitHub Actions, corsa 44807311981, ramo temporaneo riferimento-agosto = f7b2941 + il solo file del flusso)
+# Immagine macos-26 (macOS 26.7.2, 25G332), Xcode 26.6 (17F113), Swift 6.3.3, xcodegen 2.46.0 (Homebrew dell'esecutore)
+# Uscita di scripts/collaudo-completo.sh: 65
+{'result': 'Failed', 'totalTestCount': 83, 'passedTests': 81, 'failedTests': 2, 'skippedTests': 0}
+FALLITA WarSenseTest AnnunciEFuocoTest/test_00_11_1_elementi_persistenti_e_fuoco_mai_mosso_senza_richiesta() | XCTAssertEqual failed: ("nil") is not equal to ("Optional(WarSense.Fuoco.Movimento.schermataAperta)") - l'unico movimento del fuoco è l'apertura della schermata (02 §2.9)
+FALLITA WarSenseTest AnnunciEFuocoTest/test_00_11_3_esaurimento_del_deck_senza_spostare_il_fuoco() | XCTAssertTrue failed - l'esaurimento non muove il fuoco (00 §11.3, 02 §5.3)
+apparecchio iPhone Air 26.5

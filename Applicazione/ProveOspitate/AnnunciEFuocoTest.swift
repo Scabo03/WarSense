@@ -84,16 +84,17 @@ final class AnnunciEFuocoTest: XCTestCase {
     // MARK: - Elementi persistenti e fuoco (00 §11, RDA-03)
 
     func test_00_11_1_elementi_persistenti_e_fuoco_mai_mosso_senza_richiesta() async throws {
+        // Il registro del fuoco è del processo: si azzera PRIMA di aprire la schermata, così che
+        // lo spostamento d'apertura letto sotto sia di questa schermata e non di una prova
+        // precedente (incarico 27).
+        Fuoco.azzeraRegistro()
         let partita = try await PartitaCorrente(nuova: ambiente)
         let schermata = SchermataBattaglia(partita: partita)
         let finestra = UIWindow(frame: UIScreen.main.bounds)
         finestra.rootViewController = schermata
         finestra.makeKeyAndVisible()
         schermata.loadViewIfNeeded()
-        // L'avvio è asincrono: si attende la creazione degli elementi.
-        for _ in 0..<100 where schermata.elementiPerProva.isEmpty {
-            try await Task.sleep(nanoseconds: 20_000_000)
-        }
+        try await attendiApertura(schermata)
         XCTAssertEqual(schermata.elementiPerProva.count, 100, "una griglia da cento celle")
 
         // Identità: gli elementi si creano una volta sola (05 §10.1).
@@ -123,15 +124,14 @@ final class AnnunciEFuocoTest: XCTestCase {
     }
 
     func test_00_11_3_esaurimento_del_deck_senza_spostare_il_fuoco() async throws {
+        Fuoco.azzeraRegistro()
         let partita = try await PartitaCorrente(nuova: ambiente)
         let schermata = SchermataBattaglia(partita: partita)
         let finestra = UIWindow(frame: UIScreen.main.bounds)
         finestra.rootViewController = schermata
         finestra.makeKeyAndVisible()
         schermata.loadViewIfNeeded()
-        for _ in 0..<100 where schermata.elementiPerProva.isEmpty {
-            try await Task.sleep(nanoseconds: 20_000_000)
-        }
+        try await attendiApertura(schermata)
         // Esaurisce l'elemento con due esemplari (i tiratori, indice 2).
         Fuoco.azzeraRegistro()
         _ = try await partita.esegui(.seleziona(indiceDeck: 2))
@@ -142,5 +142,20 @@ final class AnnunciEFuocoTest: XCTestCase {
         XCTAssertNil(stato.selezione[.giocatore], "deselezione automatica (01 §8.4)")
         XCTAssertTrue(schermata.registroFuocoPerProva.isEmpty,
                        "l'esaurimento non muove il fuoco (00 §11.3, 02 §5.3)")
+    }
+
+    /// Attende che l'apertura della schermata sia CONCLUSA: gli elementi creati E lo spostamento
+    /// del fuoco d'apertura avvenuto. `SchermataBattaglia.avvia()` crea gli elementi, poi passa da
+    /// un punto di sospensione (`await partita.eventiIniziali`) e SOLO DOPO sposta il fuoco
+    /// d'apertura. Fino all'incarico 26 queste prove attendevano i soli elementi: su una macchina
+    /// lenta leggevano il registro a metà dell'apertura, e la 00_11_1 trovava il registro vuoto
+    /// mentre la 00_11_3 vedeva arrivare lo spostamento d'apertura DOPO averlo azzerato. È il rosso
+    /// dell'integrazione continua dal 2026-08-07, riprodotto con lo strumentario di agosto
+    /// (incarico 27). Le asserzioni non cambiano; cambia soltanto il momento in cui si guardano.
+    private func attendiApertura(_ schermata: SchermataBattaglia) async throws {
+        for _ in 0..<250 where schermata.elementiPerProva.isEmpty
+            || !schermata.registroFuocoPerProva.contains(.schermataAperta) {
+            try await Task.sleep(nanoseconds: 20_000_000)
+        }
     }
 }
