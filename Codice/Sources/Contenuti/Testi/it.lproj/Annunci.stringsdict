@@ -58,7 +58,7 @@
   </dict>
   <key>conoscenza.avvistato</key>
   <dict>
-    <key>NSStringLocalizedFormatKey</key><string>avvistato, %#@turni@</string>
+    <key>NSStringLocalizedFormatKey</key><string>osservato, %#@turni@</string>
     <key>turni</key>
     <dict>
       <key>NSStringFormatSpecTypeKey</key><string>NSStringPluralRuleType</string>

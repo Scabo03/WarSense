@@ -1,0 +1,22 @@
+# Il cancello VocabolarioOsservatoTest visto FALLIRE (2026-11-20, ramo documenti-decisioni-novembre, prima di cambiare i testi e i documenti 03 e 05)
+# Comando: (cd Codice && swift test --filter VocabolarioOsservatoTest) — uscita 1
+
+Test Suite 'VocabolarioOsservatoTest' started at 2026-11-20 22:02:20.993.
+Test Case '-[DatiTest.VocabolarioOsservatoTest test_00_9_4_nessun_testo_del_gioco_usa_il_termine_vecchio_come_stato]' started.
+/Users/lucascabini/Developer/WarSense/Codice/Tests/DatiTest/VocabolarioOsservatoTest.swift:95: error: -[DatiTest.VocabolarioOsservatoTest test_00_9_4_nessun_testo_del_gioco_usa_il_termine_vecchio_come_stato] : XCTAssertTrue failed - il termine vecchio «avvistato» sopravvive nei testi del gioco fuori dall'avvistamento vero:
+Vocabolario.strings «conoscenza.avvistato»: …avvistato…
+Test Case '-[DatiTest.VocabolarioOsservatoTest test_00_9_4_nessun_testo_del_gioco_usa_il_termine_vecchio_come_stato]' failed (0.059 seconds).
+Test Case '-[DatiTest.VocabolarioOsservatoTest test_02_4_2_gli_stati_di_conoscenza_sono_i_quattro_termini_chiusi]' started.
+/Users/lucascabini/Developer/WarSense/Codice/Tests/DatiTest/VocabolarioOsservatoTest.swift:72: error: -[DatiTest.VocabolarioOsservatoTest test_02_4_2_gli_stati_di_conoscenza_sono_i_quattro_termini_chiusi] : XCTAssertTrue failed - lo stato di conoscenza «conoscenza.avvistato» vale «avvistato», che non è uno dei quattro termini chiusi ["confermato", "inesplorato", "osservato", "presunto"] (02 §4.2)
+/Users/lucascabini/Developer/WarSense/Codice/Tests/DatiTest/VocabolarioOsservatoTest.swift:82: error: -[DatiTest.VocabolarioOsservatoTest test_02_4_2_gli_stati_di_conoscenza_sono_i_quattro_termini_chiusi] : XCTAssertNil failed: "<NSSimpleRegularExpressionCheckingResult: 0x7bf6ca4900>{0, 9}{<NSRegularExpression: 0x7bf74a54d0> avvistat[a-zàèéìòù]* 0x1}" - la forma «avvistato, %#@turni@» di «conoscenza.avvistato» usa il termine vecchio dello stato di conoscenza
+Test Case '-[DatiTest.VocabolarioOsservatoTest test_02_4_2_gli_stati_di_conoscenza_sono_i_quattro_termini_chiusi]' failed (0.001 seconds).
+Test Case '-[DatiTest.VocabolarioOsservatoTest test_documenti_consolidati_chiamano_osservato_lo_stato_di_conoscenza]' started.
+/Users/lucascabini/Developer/WarSense/Codice/Tests/DatiTest/VocabolarioOsservatoTest.swift:126: error: -[DatiTest.VocabolarioOsservatoTest test_documenti_consolidati_chiamano_osservato_lo_stato_di_conoscenza] : XCTAssertTrue failed - il termine vecchio «avvistato» sopravvive nei documenti fuori dalle frasi ammesse:
+03-dati.md: …o i quali lo stato confermato decade in avvistato. Vincolo di direzione: il decadimento d…
+05-architettura-tecnica.md: … per ogni parte: inesplorato, presunto, avvistato con il numero di turni trascorsi, confe…
+05-architettura-tecnica.md: …01 §5.3). Lo stato confermato decade in avvistato dopo un numero di turni definito nei da…
+Test Case '-[DatiTest.VocabolarioOsservatoTest test_documenti_consolidati_chiamano_osservato_lo_stato_di_conoscenza]' failed (0.013 seconds).
+Test Suite 'VocabolarioOsservatoTest' failed at 2026-11-20 22:02:21.065.
+	 Executed 3 tests, with 4 failures (0 unexpected) in 0.072 (0.073) seconds
+	 Executed 3 tests, with 4 failures (0 unexpected) in 0.072 (0.073) seconds
+	 Executed 3 tests, with 4 failures (0 unexpected) in 0.072 (0.073) seconds
