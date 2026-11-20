@@ -142,3 +142,8 @@ Somme fatte a mano dai tempi dei registri (`date +%s` attorno agli script, `xcre
 - **Caricamento:** 488 s.
 - **Integrazione continua remota:** 14 min 50 s (riferimento), 17 min 13 s (richiesta n. 1), e le corse sui quattro invii al principale.
 - **Esplorazione:** corse di prova 194 + 221 + 145 + 192 + 1316 s, prima partenza fermata dopo circa 8 minuti, seconda partenza 1676 s: circa 63 minuti (somma a mano).
+
+## Integrazione continua all'ultimo invio verificato
+
+Corsa 44837497648 su 0bd9708, il commit con la correzione dello script dei simulatori: VERDE (2026-11-20 23:32–23:53 UTC, API di GitHub Actions). Prima della correzione la scelta del runtime era casuale: 400d834 rosso, 637ab09 verde. La correzione (0bd9708) è stata committata direttamente sul principale e non su un ramo dedicato: è uno scostamento dalla regola dei rami, dichiarato. Il commit di questo resoconto fa partire un'altra corsa, di cui non ho visto l'esito.
+

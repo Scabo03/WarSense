@@ -16,4 +16,4 @@ Corsa 44813874295, evento `pull_request` della richiesta n. 1 (`check-up-strumen
 
 ## Dopo le fusioni sul principale
 
-Corse sugli invii al principale: 44816648652 (b732674) VERDE; 44817590790 (f3efe39) VERDE; 44823308857 (1b543e8) e 44825949262 (fe736a1) ROSSE prima delle prove: `simctl create … com.apple.CoreSimulator.SimRuntime.iOS-27-2-iPhone19-4` fallito, perché lo script dei simulatori sceglieva a volte un runtime legato a un solo apparecchio (corretto, RDA-142). L'esito delle corse successive alla correzione è nel resoconto.
+Corse sugli invii al principale: 44816648652 (b732674) VERDE; 44817590790 (f3efe39) VERDE; 44823308857 (1b543e8) e 44825949262 (fe736a1) ROSSE prima delle prove: `simctl create … com.apple.CoreSimulator.SimRuntime.iOS-27-2-iPhone19-4` fallito, perché lo script dei simulatori sceglieva a volte un runtime legato a un solo apparecchio (corretto, RDA-142). Poi: 44837185592 (400d834) ROSSA e 44837314075 (637ab09) VERDE, prima della correzione (stessa scelta casuale del runtime); 44837497648 (0bd9708, con la correzione) VERDE, 23:32–23:53 UTC.
