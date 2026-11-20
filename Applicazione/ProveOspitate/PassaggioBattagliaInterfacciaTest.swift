@@ -227,8 +227,15 @@ final class PassaggioBattagliaInterfacciaTest: XCTestCase {
         try XCTUnwrap(resoconto, "il resoconto di fine battaglia è stato presentato").chiudiTuttoPerProva()
 
         // Attende che la mappa torni in primo piano e che l'esito sia piegato (la catena alTermine).
+        // Se il gruppo del giocatore è stato sconfitto e ha più caselle dove ripiegare, la mappa
+        // chiede DOVE (01 §10.6, incarico 25): la prova sceglie come il giocatore, la prima voce
+        // del pannello, con lo stesso metodo della voce. Fino all'incarico 26 la prova ignorava il
+        // pannello, riapriva la battaglia ancora in sospeso e girava in tondo senza fine (incarico 27).
         for _ in 0..<300 where schermata.presentedViewController != nil
             || schermata.statoPerProva?.battaglieInSospeso.isEmpty == false {
+            if let caselle = schermata.caselleDiRipiegamentoPerProva, let prima = caselle.first {
+                schermata.ripiegaPerProva(in: prima)
+            }
             try await Task.sleep(nanoseconds: 20_000_000)
         }
         await schermata.ricaricaStatoPerProva()
@@ -444,6 +451,13 @@ final class PassaggioBattagliaInterfacciaTest: XCTestCase {
             if let b = s.battaglieInSospeso.first {
                 try await apriCombattiEtornaDalloSchermo(schermata, battaglia: b, ambiente: ambiente)
                 battaglie += 1
+                // Una battaglia combattuta fino alla conclusione e congedata deve uscire dalle
+                // battaglie in sospeso: se resta, l'esito non è tornato in campagna e il giocatore
+                // la ritroverebbe all'infinito. È un arresto del gioco, e si dichiara (incarico 27).
+                if schermata.statoPerProva?.battaglieInSospeso.contains(where: { $0.identificatore == b.identificatore }) == true {
+                    XCTFail("IL GIOCO SI È FERMATO — formato \(taglia.rawValue), giorno \(s.giorno): la battaglia in riga \(b.casella.riga) casella \(b.casella.colonna) è conclusa e congedata ma resta in sospeso, l'esito non è tornato in campagna")
+                    return "fermata: esito non tornato in campagna"
+                }
                 continue
             }
             // 2. Conclusione naturale: una parte non ha più gruppi armati (non nascono altre battaglie).
@@ -466,8 +480,14 @@ final class PassaggioBattagliaInterfacciaTest: XCTestCase {
                 XCTAssertTrue(schermata.attiva(g.posizione),
                               "formato \(taglia.rawValue): la casella del gruppo \(g.id.numero) si attiva")
                 try? await Task.sleep(nanoseconds: 40_000_000)
-                XCTAssertFalse(schermata.vociPannelloPerProva.isEmpty,
-                    "IL GIOCO SI È FERMATO — formato \(taglia.rawValue), giorno \(s.giorno): il gruppo \(g.id.numero) in riga \(g.posizione.riga) casella \(g.posizione.colonna) è in attesa e il pannello non offre ALCUNA azione")
+                // Il pannello di un gruppo contiene SEMPRE la voce di chiusura: contarla rendeva il
+                // controllo vuoto, e un pannello senza alcuna azione passava (visto all'incarico 27 su
+                // un blocco costruito). Contano le sole voci che sono azioni.
+                let azioniOfferte = schermata.vociPannelloPerProva.filter { $0.stile != .cancel }
+                if azioniOfferte.isEmpty {
+                    XCTFail("IL GIOCO SI È FERMATO — formato \(taglia.rawValue), giorno \(s.giorno): il gruppo \(g.id.numero) in riga \(g.posizione.riga) casella \(g.posizione.colonna) è in attesa e il pannello non offre ALCUNA azione (voci: \(schermata.vociPannelloPerProva.map(\.titolo)))")
+                    return "fermata: gruppo in attesa senza azioni"
+                }
                 // Scegli un ordine VALIDO (il giocatore non dà un ordine che il gioco respinge): un
                 // armato marcia verso l'avversario più vicino se può — per il contatto —, altrimenti
                 // presidia; se nemmeno il presidio vale (deve rifornirsi), sosta con raccolta, che è
@@ -489,6 +509,13 @@ final class PassaggioBattagliaInterfacciaTest: XCTestCase {
                     }
                 }
                 await schermata.eseguiPerProva(ordine)
+                // La voce scelta dal giocatore chiude il pannello; l'ordine dato qui no. Senza chiuderlo,
+                // ogni attivazione successiva trovava il pannello ancora presentato e il nuovo veniva
+                // rifiutato («already presenting»), sicché la prova guardava le voci del pannello senza
+                // che un pannello fosse davvero mostrato (incarico 27).
+                if let pannello = schermata.presentedViewController as? UIAlertController {
+                    pannello.dismiss(animated: false)
+                }
                 for _ in 0..<40 where schermata.statoPerProva?.gruppi[g.id]?.haConclusoLaGiornata == false
                     && schermata.statoPerProva?.giorno == giorno
                     && schermata.statoPerProva?.battaglieInSospeso.isEmpty == true {

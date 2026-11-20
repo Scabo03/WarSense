@@ -507,16 +507,29 @@ final class SchermataMappaCampagna: UIViewController {
     /// nessun trascinamento. Non c'è congedo: lo sconfitto DEVE ripiegare, e sceglie soltanto dove.
     private func scegliRipiegamento(fra candidati: [Cella]) async -> Cella? {
         await withCheckedContinuation { (cont: CheckedContinuation<Cella?, Never>) in
+            ripiegamentoInAttesa = (candidati, cont)
             let pannello = UIAlertController(title: testi.frase("ripiegamento.titolo").testo,
                                              message: nil, preferredStyle: .alert)
             for cella in candidati {
                 let titolo = testi.frase("ripiegamento.casella", cella.riga, cella.colonna).testo
-                pannello.addAction(UIAlertAction(title: titolo, style: .default) { _ in
-                    cont.resume(returning: cella)
+                pannello.addAction(UIAlertAction(title: titolo, style: .default) { [weak self] _ in
+                    self?.ripiega(in: cella)
                 })
             }
             present(pannello, animated: false)
         }
+    }
+
+    /// La scelta di ripiegamento in attesa: le caselle offerte e la continuazione che il pannello
+    /// riprende. Tenuta qui (incarico 27) perché la voce del pannello e la prova che gioca le partite
+    /// intere riprendano la scelta con lo STESSO metodo, `ripiega(in:)`.
+    private var ripiegamentoInAttesa: (candidati: [Cella], cont: CheckedContinuation<Cella?, Never>)?
+
+    /// Riprende la scelta di ripiegamento con la casella attivata, una volta sola.
+    private func ripiega(in cella: Cella) {
+        guard let attesa = ripiegamentoInAttesa else { return }
+        ripiegamentoInAttesa = nil
+        attesa.cont.resume(returning: cella)
     }
 
     // MARK: - Comandi
@@ -714,6 +727,14 @@ final class SchermataMappaCampagna: UIViewController {
     var vociPannelloPerProva: [VocePannello] { vociPannello }
     var statoPerProva: StatoCampagna? { statoCorrente }
     var registroFuocoPerProva: [Fuoco.Movimento] { Fuoco.registro }
+    /// Le caselle del pannello di ripiegamento aperto, se ce n'è uno.
+    var caselleDiRipiegamentoPerProva: [Cella]? { ripiegamentoInAttesa?.candidati }
+    /// Sceglie dove ripiegare come il giocatore che attiva una voce del pannello: il pannello si
+    /// chiude e la scelta riprende con lo stesso metodo della voce (`ripiega(in:)`).
+    func ripiegaPerProva(in cella: Cella) {
+        if let pannello = presentedViewController as? UIAlertController { pannello.dismiss(animated: false) }
+        ripiega(in: cella)
+    }
     func eseguiPerProva(_ comando: ComandoCampagna) async { await eseguiComando(comando) }
     func apriRegistroPerProva() { apriRegistro() }
     /// Il pulsante «Chiudi la giornata» quale il titolare lo preme (incarico 26).

@@ -1,6 +1,6 @@
 # Nota per il titolare — perché ora l'avversario si vede, e che cosa dicono di sé i gruppi
 
-Hai riferito due cose dopo aver giocato: che portando un gruppo fino al quartier generale nemico non hai mai incontrato né avvistato alcun avversario lungo la strada, e che più tardi, interrogando il tuo quartier generale, il gioco ti parlava di un avvistamento di alcuni turni prima, con la parola che fino alla build 27 era avvistato e che dalla build 28 è «osservato». Le due cose sembravano non tornare. Questa build risponde a entrambe. In linguaggio semplice, ecco che cosa non funzionava e che cosa senti di diverso.
+Hai riferito due cose dopo aver giocato: che portando un gruppo fino al quartier generale nemico non hai mai incontrato né avvistato alcun avversario lungo la strada, e che più tardi, interrogando il tuo quartier generale, il gioco ti parlava di un avvistamento di alcuni turni prima, con la parola che allora era avvistato e che ora è «osservato». Le due cose sembravano non tornare. Questa build risponde a entrambe. In linguaggio semplice, ecco che cosa non funzionava e che cosa senti di diverso.
 
 ## Che cosa non funzionava, e che cos'è cambiato
 
@@ -10,7 +10,7 @@ Ora **il raggio di osservazione è più ampio**: i tuoi gruppi vedono una fascia
 
 ## Il numero «osservato» che senti non è un nemico
 
-Quando interroghi il tuo quartier generale e senti «osservato» seguito da un numero di turni, **non è l'avvistamento di un nemico**. Fino alla build 27 quella parola era avvistato, e dalla build 28 è osservato proprio perché non si confonda con un nemico visto davvero. Quella parola è lo stato della tua **conoscenza** di una casella: dice da quanti turni non la osservi più. Ti eri allontanato dal tuo quartier generale, e quella parola misurava semplicemente **quanto era invecchiato il tuo ultimo sguardo su casa tua** — non un avversario arrivato lì. Il gioco non ha mai dichiarato il falso: diceva una cosa vera, cioè che la tua conoscenza di quella casella era vecchia di quei turni. Con il raggio più ampio, molte meno caselle restano perennemente vecchie, e quella parola non si presta più a essere scambiata per una notizia sul nemico.
+Quando interroghi il tuo quartier generale e senti «osservato» seguito da un numero di turni, **non è l'avvistamento di un nemico**. Fino alle build dell'estate quella parola era avvistato, e ora è osservato proprio perché non si confonda con un nemico visto davvero. Quella parola è lo stato della tua **conoscenza** di una casella: dice da quanti turni non la osservi più. Ti eri allontanato dal tuo quartier generale, e quella parola misurava semplicemente **quanto era invecchiato il tuo ultimo sguardo su casa tua** — non un avversario arrivato lì. Il gioco non ha mai dichiarato il falso: diceva una cosa vera, cioè che la tua conoscenza di quella casella era vecchia di quei turni. Con il raggio più ampio, molte meno caselle restano perennemente vecchie, e quella parola non si presta più a essere scambiata per una notizia sul nemico.
 
 ## Ogni gruppo ora dice che cosa è, e di che cosa è fatto
 
