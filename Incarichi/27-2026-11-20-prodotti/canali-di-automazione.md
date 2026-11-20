@@ -19,9 +19,14 @@ Esito della sonda `test_sonda_1_servizio_voiceover` (uscita stampata dalla prova
 
 Il servizio non ha un comando di attivazione. La prima stesura di questo rapporto diceva che, con VoiceOver acceso, `XCUIApplication.doubleTap()` attiva l'elemento a fuoco: è FALSO, ed è stato smentito nella quarta parte. Il doppio tocco sintetico non passa per VoiceOver: arriva all'app come tocco grezzo nel punto centrale dello schermo. Nella sonda `test_sonda_2_attivazione_col_doppio_tocco` il fuoco era su «Nuova campagna, mappa piccola» e al centro dello schermo c'era proprio quel pulsante, perché la schermata d'avvio aveva anche i due pulsanti di ripresa: la coincidenza ha fatto sembrare riuscita l'attivazione. Nella corsa di prova dell'esplorazione, a installazione nuova, il fuoco era su «Impostazioni» (portato con `moveForward`) e il doppio tocco ha aperto la mappa media, che stava al centro.
 
-Ciò che si può fare: il TOCCO DIRETTO (`XCUIElement.tap()`), che l'app accetta su pulsanti, caselle e celle (tocco diretto dell'incarico 01; lo usa `ImpiantoInterfacciaTest.test_01_5_6_un_ordine_dato_al_dito_arriva_al_gioco`), funziona anche con VoiceOver acceso e non passa per VoiceOver. L'esplorazione quindi porta il fuoco sull'elemento scorrendo, registra ciò che VoiceOver pronuncia, e attiva col tocco diretto. Il commento di `FumoMappaCampagnaTest` secondo cui le caselle «non rispondono a un tocco grezzo» è superato.
+Ciò che si può fare, accertato con tre corse di prova della quarta parte sulla schermata d'avvio:
+- con VoiceOver acceso, il TOCCO singolo sintetico (`XCUIElement.tap()`) SPOSTA IL FUOCO sull'elemento toccato e non lo attiva: toccato «Impostazioni», VoiceOver pronuncia «Impostazioni Pulsante» e la schermata non cambia;
+- con VoiceOver acceso, il DOPPIO TOCCO SULL'ELEMENTO (`XCUIElement.doubleTap()`) lo attiva: il primo tocco porta il fuoco, il doppio tocco attiva l'elemento a fuoco, come per chi esplora al tatto. «Impostazioni» si apre e VoiceOver atterra su «Impostazioni Intestazione». Il doppio tocco al centro dello schermo attivava infatti il pulsante del centro;
+- a VoiceOver spento il tocco diretto attiva pulsanti, caselle e celle (il tocco diretto dell'incarico 01; lo usa `ImpiantoInterfacciaTest.test_01_5_6_un_ordine_dato_al_dito_arriva_al_gioco`). Il commento di `FumoMappaCampagnaTest` secondo cui le caselle «non rispondono a un tocco grezzo» è superato.
 
-NON guidabili (dichiarati, non simulati): il doppio tocco di VoiceOver, il rotore, il tocco magico (doppio tocco a due dita), lo strofinio (gesto di uscita), lo scorrimento a tre dita, l'esplorazione al tatto, le azioni personalizzate scelte con scorrimento verticale.
+L'esplorazione quindi, a VoiceOver acceso, tocca l'elemento (il fuoco vi arriva e si registra ciò che VoiceOver vi pronuncia) e lo attiva col doppio tocco sull'elemento stesso; ciò che resta non guidabile è il doppio tocco «ovunque» con il fuoco portato dagli scorrimenti.
+
+NON guidabili (dichiarati, non simulati): il doppio tocco «ovunque» che attiva l'elemento portato a fuoco dagli scorrimenti, il rotore, il tocco magico (doppio tocco a due dita), lo strofinio (gesto di uscita), lo scorrimento a tre dita, l'esplorazione al tatto, le azioni personalizzate scelte con scorrimento verticale.
 
 ## 3. Verifiche di accessibilità automatiche di Xcode — FUNZIONANO
 
@@ -49,4 +54,4 @@ NON guidabili (dichiarati, non simulati): il doppio tocco di VoiceOver, il rotor
 
 ## Conseguenza per l'esplorazione
 
-L'esplorazione si regge su: servizio VoiceOver per la lettura nell'ordine (primo giro), tocco diretto per l'attivazione (il gesto di VoiceOver non si guida), tocco ordinario e interrogazione dell'albero d'accessibilità di XCUITest per il secondo giro, `performAccessibilityAudit` sulle schermate, `simctl` per la taglia del testo e le schermate, `XCUIDevice.orientation` per l'orizzontale. Non si possono guidare il doppio tocco di VoiceOver, il rotore, il tocco magico, lo strofinio e lo stile di navigazione per gruppi.
+L'esplorazione si regge su: servizio VoiceOver per la lettura nell'ordine (primo giro), tocco e doppio tocco sull'elemento per portare il fuoco e attivare con VoiceOver acceso, tocco ordinario e interrogazione dell'albero d'accessibilità di XCUITest per il secondo giro, `performAccessibilityAudit` sulle schermate, `simctl` per la taglia del testo e le schermate, `XCUIDevice.orientation` per l'orizzontale. Non si possono guidare il doppio tocco «ovunque» sull'elemento a fuoco, il rotore, il tocco magico, lo strofinio e lo stile di navigazione per gruppi.

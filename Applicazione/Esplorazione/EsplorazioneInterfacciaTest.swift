@@ -125,7 +125,15 @@ final class EsplorazioneInterfacciaTest: XCTestCase {
     /// l'utente abbia fatto nulla, il fuoco si è spostato da solo o è arrivato un annuncio.
     @discardableResult
     private func attivaConVoiceOver(_ elemento: XCUIElement, _ azione: String, schermata: String) -> [String: Any] {
+        let eraAcceso = vo.isEnabled
         accendiVoiceOver()
+        // Appena acceso, VoiceOver non intercetta ancora i tocchi: un tocco arrivato troppo presto
+        // ATTIVA invece di portare il fuoco (dieci simulatori in parallelo, incarico 27). Si attende
+        // che il servizio risponda, poi un margine.
+        if !eraAcceso {
+            for _ in 0..<20 where (try? vo.currentSpeech()) == nil { Thread.sleep(forTimeInterval: 0.5) }
+            Thread.sleep(forTimeInterval: 1.5)
+        }
         guard elemento.waitForExistence(timeout: 5) else {
             let v: [String: Any] = ["schermata": schermata, "azione": azione, "esito": "elemento non trovato"]
             registra(v); return v
@@ -139,19 +147,22 @@ final class EsplorazioneInterfacciaTest: XCTestCase {
         elemento.tap()
         Thread.sleep(forTimeInterval: 0.6)
         let sulFuoco = corrente()
+        // Se il tocco singolo ha già attivato (l'elemento non c'è più), non si ripete l'attivazione.
+        let attivatoDalTocco = !(elemento.exists && elemento.isHittable)
         // L'attivazione è il DOPPIO TOCCO SULL'ELEMENTO, come chi esplora al tatto: con VoiceOver
         // acceso un tocco sintetico sposta il fuoco sull'elemento toccato e non lo attiva, e un doppio
         // tocco attiva l'elemento su cui il primo tocco ha portato il fuoco. Accertato nelle corse di
         // prova dell'incarico 27: il doppio tocco al centro dello schermo attivava il pulsante del
         // centro, il tocco singolo su «Impostazioni» non lo apriva.
-        elemento.doubleTap()
+        if !attivatoDalTocco { elemento.doubleTap() }
         Thread.sleep(forTimeInterval: 0.4)
         let subito = corrente()
         Thread.sleep(forTimeInterval: 1.5)
         let dopo = corrente()
         let v: [String: Any] = ["schermata": schermata, "giro": "voiceover", "azione": azione,
                                 "fuoco_prima_dell_attivazione": sulFuoco, "pronuncia_subito_dopo": subito,
-                                "pronuncia_dopo_1_5_s": dopo, "fuoco_mosso_da_solo": subito != dopo]
+                                "pronuncia_dopo_1_5_s": dopo, "fuoco_mosso_da_solo": subito != dopo,
+                                "attivato_dal_tocco_singolo": attivatoDalTocco]
         registra(v)
         return v
     }
@@ -284,6 +295,46 @@ final class EsplorazioneInterfacciaTest: XCTestCase {
         return comparso ?? true
     }
 
+    /// La cella del campo con la posizione data, qualunque sia la testa dell'etichetta.
+    private func cellaDiBattaglia(_ riga: Int, _ colonna: Int) -> XCUIElement {
+        app.descendants(matching: .any).matching(NSPredicate(format: "label MATCHES %@",
+            ".*riga \\(riga), cella \\(colonna)(,.*)?")).firstMatch
+    }
+
+    /// Chiude i turni, ritentando la resa a ogni turno, finché compare il resoconto.
+    private func arrivaAlResoconto() {
+        for _ in 0..<40 where !qualunque("label == %@", "Resoconto della battaglia").exists {
+            spegniVoiceOver()
+            if pulsante("Dichiara la resa").exists && pulsante("Dichiara la resa").isHittable { pulsante("Dichiara la resa").tap() }
+            Thread.sleep(forTimeInterval: 0.4)
+            if pulsante("Fine del turno").exists && pulsante("Fine del turno").isHittable { pulsante("Fine del turno").tap() }
+            Thread.sleep(forTimeInterval: 1.2)
+        }
+    }
+
+    /// Il primo gruppo armato in attesa marcia verso la riga più bassa raggiungibile.
+    private func marciaVersoIlNemico(_ m: String, conVoce: Bool) {
+        let gruppi = app.descendants(matching: .any).matching(NSPredicate(format: "label CONTAINS %@ AND NOT (label CONTAINS %@)", "in attesa", "formazione"))
+        guard gruppi.count > 0 else { return }
+        let gruppo = gruppi.element(boundBy: 0)
+        if conVoce { attivaConVoiceOver(gruppo, "apri il pannello del gruppo armato", schermata: m) } else { gruppo.tap() }
+        let marcia = qualunque("label BEGINSWITH %@", "Marcia")
+        guard marcia.waitForExistence(timeout: 3) else {
+            if pulsante("Chiudi il pannello").exists { pulsante("Chiudi il pannello").tap() }
+            return
+        }
+        if conVoce { attivaConVoiceOver(marcia, "avvia la marcia verso il nemico", schermata: m) } else { marcia.tap() }
+        Thread.sleep(forTimeInterval: 0.5)
+        let mete = app.descendants(matching: .any).matching(NSPredicate(format: "label CONTAINS %@", "raggiungibile in")).allElementsBoundByIndex
+        func riga(_ e: XCUIElement) -> Int {
+            guard let r = e.label.range(of: "riga [0-9]+", options: .regularExpression) else { return 99 }
+            return Int(e.label[r].dropFirst(5)) ?? 99
+        }
+        guard let meta = mete.min(by: { riga($0) < riga($1) }) else { return }
+        if conVoce { attivaConVoiceOver(meta, "ordina la marcia verso «\(meta.label.prefix(40))»", schermata: m) } else { meta.tap() }
+        Thread.sleep(forTimeInterval: 0.6)
+    }
+
     // MARK: - I percorsi
 
     /// Schermata d'avvio, impostazioni, apprendimento dei segnali.
@@ -338,7 +389,7 @@ final class EsplorazioneInterfacciaTest: XCTestCase {
 
         let tessera = qualunque("label == %@", "fanteria leggera")
         attivaConVoiceOver(tessera, "seleziona la tessera «fanteria leggera»", schermata: "battaglia")
-        let cella = qualunque("label BEGINSWITH %@", "riga 10, cella 1")
+        let cella = cellaDiBattaglia(10, 1)
         attivaConVoiceOver(cella, "piazza in riga 10, cella 1", schermata: "battaglia")
         attivaConVoiceOver(pulsante("Annulla l'ultima operazione"), "annulla", schermata: "battaglia")
         attivaConVoiceOver(tessera, "riseleziona la tessera", schermata: "battaglia")
@@ -350,13 +401,13 @@ final class EsplorazioneInterfacciaTest: XCTestCase {
         attivaConVoiceOver(pulsante("Fine del turno"), "fine del turno", schermata: "battaglia")
         Thread.sleep(forTimeInterval: 3)
         // La designazione: il pannello della cella occupata (attivazione della cella).
-        attivaConVoiceOver(qualunque("label BEGINSWITH %@", "riga 10, cella 1"), "apri il pannello della cella occupata", schermata: "battaglia")
+        attivaConVoiceOver(cellaDiBattaglia(10, 1), "apri il pannello della cella occupata", schermata: "battaglia")
         if pulsante("Chiudi il pannello").waitForExistence(timeout: 5) {
             esplora("battaglia-pannello-della-cella")
             let designa = qualunque("label BEGINSWITH %@", "Scegli la destinazione")
             if designa.exists {
                 attivaConVoiceOver(designa, "avvia la designazione del movimento", schermata: "battaglia-pannello-della-cella")
-                attivaConVoiceOver(qualunque("label BEGINSWITH %@", "riga 9, cella 1"), "designa riga 9, cella 1", schermata: "battaglia")
+                attivaConVoiceOver(cellaDiBattaglia(9, 1), "designa riga 9, cella 1", schermata: "battaglia")
             } else if pulsante("Chiudi il pannello").exists {
                 attivaConVoiceOver(pulsante("Chiudi il pannello"), "chiudi il pannello", schermata: "battaglia-pannello-della-cella")
             }
@@ -376,12 +427,7 @@ final class EsplorazioneInterfacciaTest: XCTestCase {
         esplora("battaglia-ripresa")
 
         attivaConVoiceOver(pulsante("Dichiara la resa"), "dichiara la resa", schermata: "battaglia-ripresa")
-        // La ritirata combattuta può durare più turni: si chiude il turno finché arriva il resoconto.
-        for _ in 0..<30 where !qualunque("label == %@", "Resoconto della battaglia").exists {
-            spegniVoiceOver()
-            if pulsante("Fine del turno").exists && pulsante("Fine del turno").isHittable { pulsante("Fine del turno").tap() }
-            Thread.sleep(forTimeInterval: 1.0)
-        }
+        arrivaAlResoconto()
         if qualunque("label == %@", "Resoconto della battaglia").waitForExistence(timeout: 10) {
             esplora("resoconto-della-battaglia")
             attivaConVoiceOver(pulsante("Torna all'inizio"), "torna all'inizio", schermata: "resoconto-della-battaglia")
@@ -418,7 +464,7 @@ final class EsplorazioneInterfacciaTest: XCTestCase {
                 attivaConVoiceOver(marcia, "avvia la designazione della marcia", schermata: "pannello-gruppo-\(formato)")
                 esplora("designazione-marcia-\(formato)", massimo: 320)
                 // La prima casella che si annuncia disponibile per la marcia.
-                let meta = qualunque("label CONTAINS %@", "giorn")
+                let meta = qualunque("label CONTAINS %@", "raggiungibile in")
                 attivaConVoiceOver(meta, "ordina la marcia verso la prima casella disponibile", schermata: "designazione-marcia-\(formato)")
             } else if pulsante("Chiudi il pannello").exists {
                 attivaConVoiceOver(pulsante("Chiudi il pannello"), "chiudi il pannello", schermata: "pannello-gruppo-\(formato)")
@@ -451,14 +497,20 @@ final class EsplorazioneInterfacciaTest: XCTestCase {
         }
         esplora("\(m)-dopo-gli-ordini", massimo: 320)
 
-        // La chiusura della giornata col tasto, ripetuta finché nasce una battaglia in sospeso.
+        // Verso la battaglia: ogni giorno il primo gruppo ARMATO in attesa marcia verso la riga del
+        // nemico (la casella raggiungibile con il numero di riga più basso), poi la giornata si chiude
+        // col tasto. Chiudere soltanto non basta: in quaranta giornate a vuoto l'avversario non viene
+        // a contatto (corsa di prova dell'incarico 27). Il primo giorno si fa con VoiceOver acceso.
         var giorni = 0
-        while giorni < 40, !qualunque("label CONTAINS %@", "attaglia in sospeso").exists {
+        while giorni < 30, !qualunque("label CONTAINS %@", "attaglia in sospeso").exists {
             guard pulsante("Chiudi la giornata").exists else {
                 registra(["schermata": m, "evento": "il tasto «Chiudi la giornata» non esiste"]); break
             }
+            if giorni > 0 { spegniVoiceOver() }
+            marciaVersoIlNemico(m, conVoce: giorni == 0)
+            if qualunque("label CONTAINS %@", "attaglia in sospeso").exists { break }
             if giorni == 0 { attivaConVoiceOver(pulsante("Chiudi la giornata"), "chiudi la giornata", schermata: m) }
-            else { spegniVoiceOver(); pulsante("Chiudi la giornata").tap(); Thread.sleep(forTimeInterval: 0.8) }
+            else { pulsante("Chiudi la giornata").tap(); Thread.sleep(forTimeInterval: 0.8) }
             giorni += 1
         }
         registra(["schermata": m, "evento": "giornate chiuse col tasto prima della battaglia", "giornate": giorni])
@@ -477,11 +529,7 @@ final class EsplorazioneInterfacciaTest: XCTestCase {
         _ = qualunque("label == %@", "Riserve da schierare").waitForExistence(timeout: 15)
         esplora("battaglia-di-campagna-\(formato)")
         attivaConVoiceOver(pulsante("Dichiara la resa"), "dichiara la resa", schermata: "battaglia-di-campagna-\(formato)")
-        for _ in 0..<30 where !qualunque("label == %@", "Resoconto della battaglia").exists {
-            spegniVoiceOver()
-            if pulsante("Fine del turno").exists && pulsante("Fine del turno").isHittable { pulsante("Fine del turno").tap() }
-            Thread.sleep(forTimeInterval: 1.0)
-        }
+        arrivaAlResoconto()
         guard qualunque("label == %@", "Resoconto della battaglia").waitForExistence(timeout: 10) else {
             registra(["schermata": "battaglia-di-campagna-\(formato)", "evento": "il resoconto non è comparso"]); return
         }
