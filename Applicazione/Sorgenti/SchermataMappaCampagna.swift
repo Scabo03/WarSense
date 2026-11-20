@@ -35,6 +35,7 @@ final class SchermataMappaCampagna: UIViewController {
     /// Altezza minima RICHIESTA della mappa: sufficiente a una riga intera di caselle.
     private static let altezzaMinimaMappa: CGFloat = 120
     private let pulsanteRegistro = UIButton(type: .system)
+    private let pulsanteChiudiGiornata = UIButton(type: .system)
     private let pulsanteAnnulla = UIButton(type: .system)
     private let pulsanteAzzera = UIButton(type: .system)
     private let pulsanteEsci = UIButton(type: .system)
@@ -77,6 +78,7 @@ final class SchermataMappaCampagna: UIViewController {
         view.addSubview(scorrimentoComandi)
         scorrimentoComandi.addSubview(colonnaComandi)
         for (pulsante, azione) in [(pulsanteRegistro, #selector(apriRegistro)),
+                                   (pulsanteChiudiGiornata, #selector(chiudiGiornata)),
                                    (pulsanteAnnulla, #selector(annulla)),
                                    (pulsanteAzzera, #selector(azzera)),
                                    (pulsanteEsci, #selector(esci))] {
@@ -131,8 +133,8 @@ final class SchermataMappaCampagna: UIViewController {
         vistaMappa.accessibilityElements = ordineCaselle.map { elementi[$0]! }
         // Ordine di lettura dichiarato: prima le caselle, poi i comandi globali
         // (02 §2.8), esattamente come in battaglia.
-        view.accessibilityElements = [vistaMappa, pulsanteRegistro, pulsanteAnnulla,
-                                      pulsanteAzzera, pulsanteEsci]
+        view.accessibilityElements = [vistaMappa, pulsanteRegistro, pulsanteChiudiGiornata,
+                                      pulsanteAnnulla, pulsanteAzzera, pulsanteEsci]
         montaRotori()
         aggiorna(con: stato)
 
@@ -171,6 +173,7 @@ final class SchermataMappaCampagna: UIViewController {
             elemento.accessibilityTraits = occupata ? [.button] : []
         }
         pulsanteRegistro.setTitle(testi.frase("registro.apri").testo, for: .normal)
+        pulsanteChiudiGiornata.setTitle(testi.frase("giornata.chiudi").testo, for: .normal)
         pulsanteAnnulla.setTitle(testi.frase("pulsante.annulla").testo, for: .normal)
         pulsanteAzzera.setTitle(testi.frase("pulsante.azzera").testo, for: .normal)
         pulsanteEsci.setTitle(testi.frase("resoconto.torna").testo, for: .normal)
@@ -315,6 +318,21 @@ final class SchermataMappaCampagna: UIViewController {
                                      stile: .default) { [weak self] in
                 self?.chiudiPannello(casella: gruppo.posizione) {
                     await self?.eseguiComando(.presidio(gruppo: gruppo.id))
+                }
+            })
+        }
+        // La sosta con raccolta (01 §5.6.5, una delle sedici azioni di giornata di 01 §5.6.8.1)
+        // mancava dal pannello: il Motore la accetta sempre per un gruppo che non ha agito
+        // (invariante della giocabilità, incarico 25), ma l'interfaccia non la offriva. Un gruppo che
+        // DEVE rifornirsi non può marciare né presidiare (01 §5.2.2.4): con la sola voce di chiusura
+        // nel pannello restava in attesa per sempre, la giornata non si chiudeva da sé e il gioco si
+        // fermava. Trovato dalla prova delle partite intere (formato medio, giorno 18, incarico 27).
+        if partita.motore.valida(.sostaConRaccolta(gruppo: gruppo.id),
+                                 parte: .giocatore, stato: costruttore.stato).eValido {
+            voci.append(VocePannello(titolo: testi.frase("pannello.sosta").testo,
+                                     stile: .default) { [weak self] in
+                self?.chiudiPannello(casella: gruppo.posizione) {
+                    await self?.eseguiComando(.sostaConRaccolta(gruppo: gruppo.id))
                 }
             })
         }
@@ -504,16 +522,29 @@ final class SchermataMappaCampagna: UIViewController {
     /// nessun trascinamento. Non c'è congedo: lo sconfitto DEVE ripiegare, e sceglie soltanto dove.
     private func scegliRipiegamento(fra candidati: [Cella]) async -> Cella? {
         await withCheckedContinuation { (cont: CheckedContinuation<Cella?, Never>) in
+            ripiegamentoInAttesa = (candidati, cont)
             let pannello = UIAlertController(title: testi.frase("ripiegamento.titolo").testo,
                                              message: nil, preferredStyle: .alert)
             for cella in candidati {
                 let titolo = testi.frase("ripiegamento.casella", cella.riga, cella.colonna).testo
-                pannello.addAction(UIAlertAction(title: titolo, style: .default) { _ in
-                    cont.resume(returning: cella)
+                pannello.addAction(UIAlertAction(title: titolo, style: .default) { [weak self] _ in
+                    self?.ripiega(in: cella)
                 })
             }
             present(pannello, animated: false)
         }
+    }
+
+    /// La scelta di ripiegamento in attesa: le caselle offerte e la continuazione che il pannello
+    /// riprende. Tenuta qui (incarico 27) perché la voce del pannello e la prova che gioca le partite
+    /// intere riprendano la scelta con lo STESSO metodo, `ripiega(in:)`.
+    private var ripiegamentoInAttesa: (candidati: [Cella], cont: CheckedContinuation<Cella?, Never>)?
+
+    /// Riprende la scelta di ripiegamento con la casella attivata, una volta sola.
+    private func ripiega(in cella: Cella) {
+        guard let attesa = ripiegamentoInAttesa else { return }
+        ripiegamentoInAttesa = nil
+        attesa.cont.resume(returning: cella)
     }
 
     // MARK: - Comandi
@@ -539,6 +570,26 @@ final class SchermataMappaCampagna: UIViewController {
         Task { await operazioneGiornale({ try await self.partita.azzera() },
                                         conferma: "campagna.azzerato_conferma",
                                         confermaConRiapertura: "campagna.azzerato_giornata_riaperta") }
+    }
+
+    /// La CHIUSURA ESPLICITA della giornata (incarico 26, decisione del titolare): sempre
+    /// disponibile, chiude la giornata quale che sia lo stato dei gruppi. Annuncia — con significato
+    /// di conferma, non interrompente — e NON sposta il fuoco (nessun `Fuoco.sposta`), come annulla e
+    /// azzera. Se la giornata non si sarebbe chiusa da sé (c'erano gruppi non-agiti), il gioco ne ha
+    /// conservato la traccia accanto al salvataggio, e l'annuncio lo dice.
+    @objc private func chiudiGiornata() {
+        Task {
+            let diagnostica = try? await partita.chiudiGiornata()
+            await ricaricaStato()
+            let testo: String
+            if let d = diagnostica, d.laGiornataNonSiSarebbeChiusa {
+                testo = testi.frase("giornata.chiusa_con_diagnostica", d.gruppiNonAgiti.count).testo
+            } else {
+                testo = testi.frase("giornata.chiusa_conferma").testo
+            }
+            partita.ambiente.segnali.annuncia(
+                TestoLocalizzato(testo: testo, lingua: testi.lingua), significato: .conferma)
+        }
     }
 
     /// La riapertura della giornata si annuncia con una frase PROPRIA: è un
@@ -691,8 +742,18 @@ final class SchermataMappaCampagna: UIViewController {
     var vociPannelloPerProva: [VocePannello] { vociPannello }
     var statoPerProva: StatoCampagna? { statoCorrente }
     var registroFuocoPerProva: [Fuoco.Movimento] { Fuoco.registro }
+    /// Le caselle del pannello di ripiegamento aperto, se ce n'è uno.
+    var caselleDiRipiegamentoPerProva: [Cella]? { ripiegamentoInAttesa?.candidati }
+    /// Sceglie dove ripiegare come il giocatore che attiva una voce del pannello: il pannello si
+    /// chiude e la scelta riprende con lo stesso metodo della voce (`ripiega(in:)`).
+    func ripiegaPerProva(in cella: Cella) {
+        if let pannello = presentedViewController as? UIAlertController { pannello.dismiss(animated: false) }
+        ripiega(in: cella)
+    }
     func eseguiPerProva(_ comando: ComandoCampagna) async { await eseguiComando(comando) }
     func apriRegistroPerProva() { apriRegistro() }
+    /// Il pulsante «Chiudi la giornata» quale il titolare lo preme (incarico 26).
+    func chiudiGiornataPerProva() { chiudiGiornata() }
     var motorePerProva: MotoreCampagna { partita.motore }
     /// Il colore di riempimento che la mappa disegna per una casella, letto dallo STESSO
     /// blocco che il disegno usa (`vistaMappa.coloreCasella`): la prova d'interfaccia verifica

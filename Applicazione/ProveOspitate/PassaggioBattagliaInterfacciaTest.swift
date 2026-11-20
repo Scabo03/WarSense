@@ -1,6 +1,7 @@
 import XCTest
 import Dati
 import Motore
+import Sessione
 @testable import WarSense
 
 /// La prova d'interfaccia del PASSAGGIO fra i due piani (incarico 24), che apre la campagna
@@ -226,8 +227,15 @@ final class PassaggioBattagliaInterfacciaTest: XCTestCase {
         try XCTUnwrap(resoconto, "il resoconto di fine battaglia è stato presentato").chiudiTuttoPerProva()
 
         // Attende che la mappa torni in primo piano e che l'esito sia piegato (la catena alTermine).
+        // Se il gruppo del giocatore è stato sconfitto e ha più caselle dove ripiegare, la mappa
+        // chiede DOVE (01 §10.6, incarico 25): la prova sceglie come il giocatore, la prima voce
+        // del pannello, con lo stesso metodo della voce. Fino all'incarico 26 la prova ignorava il
+        // pannello, riapriva la battaglia ancora in sospeso e girava in tondo senza fine (incarico 27).
         for _ in 0..<300 where schermata.presentedViewController != nil
             || schermata.statoPerProva?.battaglieInSospeso.isEmpty == false {
+            if let caselle = schermata.caselleDiRipiegamentoPerProva, let prima = caselle.first {
+                schermata.ripiegaPerProva(in: prima)
+            }
             try await Task.sleep(nanoseconds: 20_000_000)
         }
         await schermata.ricaricaStatoPerProva()
@@ -353,5 +361,170 @@ final class PassaggioBattagliaInterfacciaTest: XCTestCase {
             stato = await partita.stato
         }
         return stato
+    }
+
+    // MARK: - Il tasto di chiusura della giornata e la diagnostica (incarico 26)
+
+    /// Il titolare preme «Chiudi la giornata» con gruppi ancora in attesa: la giornata si chiude
+    /// quale che sia il loro stato, la chiusura sopravvive a un riavvio (è nel giornale), e — poiché
+    /// la giornata non si sarebbe chiusa da sé — il gioco ha scritto la diagnostica accanto al
+    /// salvataggio, coi gruppi non-agiti e le loro azioni. È il dato che un blocco irriproducibile
+    /// lascia dietro di sé.
+    func test_incarico_26_il_tasto_chiude_la_giornata_e_scrive_la_diagnostica() async throws {
+        let urlDiag = PartitaCampagna.urlDiagnostica(giorno: 1)
+        try? FileManager.default.removeItem(at: urlDiag)
+        let (schermata, _) = try await mappaAperta(taglia: .piccola)
+        let prima = try XCTUnwrap(schermata.statoPerProva)
+        XCTAssertEqual(prima.giorno, 1)
+        // I gruppi non-agiti di ENTRAMBE le parti: la diagnostica li registra tutti (il quadro
+        // completo per chi indaga), non i soli del giocatore.
+        let nonAgiti = prima.gruppi.values.filter { !$0.haConclusoLaGiornata }.count
+        XCTAssertGreaterThan(prima.gruppiInAttesa(di: .giocatore).count, 0,
+                             "a inizio giornata i gruppi del giocatore sono in attesa")
+
+        schermata.chiudiGiornataPerProva()
+        for _ in 0..<200 where schermata.statoPerProva?.giorno == 1 {
+            try await Task.sleep(nanoseconds: 20_000_000)
+        }
+        XCTAssertEqual(schermata.statoPerProva?.giorno, 2,
+                       "il tasto ha chiuso la giornata anche coi gruppi in attesa")
+
+        // La diagnostica è accanto al salvataggio, coi gruppi non-agiti e le loro azioni.
+        XCTAssertTrue(FileManager.default.fileExists(atPath: urlDiag.path),
+                      "la diagnostica è stata scritta accanto al giornale: \(urlDiag.lastPathComponent)")
+        let dati = try Data(contentsOf: urlDiag)
+        let diag = try JSONDecoder().decode(DiagnosticaChiusura.self, from: dati)
+        XCTAssertEqual(diag.giorno, 1)
+        XCTAssertEqual(diag.gruppiNonAgiti.count, nonAgiti,
+                       "la diagnostica elenca i gruppi che non avevano agito")
+        XCTAssertTrue(diag.gruppiNonAgiti.contains { $0.parte == "giocatore" },
+                      "la diagnostica include i gruppi del giocatore in attesa")
+        XCTAssertTrue(diag.gruppiNonAgiti.allSatisfy { !$0.azioniDisponibili.isEmpty },
+                      "ogni gruppo non-agito porta le azioni che gli erano disponibili")
+
+        // La chiusura sopravvive al riavvio: rigiocando il giornale, la giornata resta chiusa.
+        let ripresa = try await PartitaCampagna(riprendi: schermata.partitaPerProva.ambiente)
+        let statoRipreso = await ripresa.stato
+        XCTAssertEqual(statoRipreso.giorno, 2,
+                       "riaperta la campagna, la giornata chiusa dal titolare è ancora chiusa")
+    }
+
+    // MARK: - Le partite intere fino alla conclusione naturale (incarico 26)
+
+    /// Il limite DICHIARATO di giornate per una partita di prova: generoso. Una campagna non ha una
+    /// condizione di vittoria — nessuna stagione, nessun obiettivo —, sicché la sua conclusione
+    /// naturale è che una parte non abbia più gruppi ARMATI e non possa più combattere; oppure che
+    /// il limite sia raggiunto senza che il gioco si sia MAI fermato, che è comunque giocabilità. La
+    /// prova FALLISCE solo se il gioco si ferma — un gruppo in attesa senza alcuna azione offerta dal
+    /// pannello, o una battaglia che non si conclude —, dichiarando dove e perché.
+    private static let massimoGiornate = 30
+
+    /// La prova che gioca le partite FINO IN FONDO, su tutti e tre i formati, attraverso l'interfaccia
+    /// vera (incarico 26): apre la partita come il giocatore, ordina i gruppi giornata dopo giornata,
+    /// apre e combatte ogni battaglia sulla schermata di battaglia, torna in campagna, prosegue, e non
+    /// si ferma finché la partita non si conclude per una via prevista o si esaurisce il limite senza
+    /// mai bloccarsi. È la protezione che mancava: nessuna prova prima giocava una partita intera.
+    func test_incarico_26_le_partite_arrivano_alla_fine_su_ogni_formato() async throws {
+        var esiti: [String] = []
+        for taglia in PartitaCampagna.Taglia.allCases {
+            esiti.append("\(taglia.rawValue): \(try await giocaFinoAllaFine(taglia))")
+        }
+        // Numero per lo strumento: quante partite, quante concluse. Non un numero a mente.
+        print("PARTITE-INTERE-26 partite=\(esiti.count) | " + esiti.joined(separator: " | "))
+    }
+
+    /// Gioca una partita intera su un formato e ritorna un riassunto (per lo strumento). Fallisce se
+    /// il gioco si ferma; non fallisce se la partita è ancora giocabile al limite delle giornate.
+    private func giocaFinoAllaFine(_ taglia: PartitaCampagna.Taglia) async throws -> String {
+        let (schermata, ambiente) = try await mappaAperta(taglia: taglia)
+        let motore = schermata.motorePerProva
+        func dist(_ a: Cella, _ b: Cella) -> Int { abs(a.riga - b.riga) + abs(a.colonna - b.colonna) }
+        func armati(_ parte: Parte, _ s: StatoCampagna) -> [Gruppo] {
+            s.gruppi(di: parte).filter { $0.categoria.eArmata }
+        }
+        let giornoIniziale = schermata.statoPerProva?.giorno ?? 0
+        var battaglie = 0
+        while true {
+            guard let s = schermata.statoPerProva else { break }
+            // 1. Una battaglia in sospeso si combatte SUBITO, dalla catena vera dello schermo: il
+            //    comando della casella, la schermata di battaglia, il resoconto, il ritorno.
+            if let b = s.battaglieInSospeso.first {
+                try await apriCombattiEtornaDalloSchermo(schermata, battaglia: b, ambiente: ambiente)
+                battaglie += 1
+                // Una battaglia combattuta fino alla conclusione e congedata deve uscire dalle
+                // battaglie in sospeso: se resta, l'esito non è tornato in campagna e il giocatore
+                // la ritroverebbe all'infinito. È un arresto del gioco, e si dichiara (incarico 27).
+                if schermata.statoPerProva?.battaglieInSospeso.contains(where: { $0.identificatore == b.identificatore }) == true {
+                    XCTFail("IL GIOCO SI È FERMATO — formato \(taglia.rawValue), giorno \(s.giorno): la battaglia in riga \(b.casella.riga) casella \(b.casella.colonna) è conclusa e congedata ma resta in sospeso, l'esito non è tornato in campagna")
+                    return "fermata: esito non tornato in campagna"
+                }
+                continue
+            }
+            // 2. Conclusione naturale: una parte non ha più gruppi armati (non nascono altre battaglie).
+            if armati(.giocatore, s).isEmpty || armati(.avversario, s).isEmpty {
+                return "conclusa al giorno \(s.giorno) dopo \(battaglie) battaglie (armati giocatore \(armati(.giocatore, s).count), avversario \(armati(.avversario, s).count))"
+            }
+            // 3. Limite generoso: giocabile fin qui senza fermarsi mai, non un blocco.
+            if s.giorno - giornoIniziale >= Self.massimoGiornate {
+                return "giocata al limite di \(Self.massimoGiornate) giornate senza fermarsi, dopo \(battaglie) battaglie"
+            }
+            // 4. Ordina l'intera giornata attraverso il pannello. Ogni gruppo in attesa DEVE poter
+            //    agire, colto dal pannello — dov'è che il giocatore lo vedrebbe bloccato.
+            let giorno = s.giorno
+            var protezione = 0
+            while schermata.statoPerProva?.giorno == giorno,
+                  schermata.statoPerProva?.battaglieInSospeso.isEmpty == true, protezione < 80 {
+                protezione += 1
+                guard let s = schermata.statoPerProva,
+                      let g = s.gruppiInAttesa(di: .giocatore).first else { break } // giornata chiusa
+                XCTAssertTrue(schermata.attiva(g.posizione),
+                              "formato \(taglia.rawValue): la casella del gruppo \(g.id.numero) si attiva")
+                try? await Task.sleep(nanoseconds: 40_000_000)
+                // Il pannello di un gruppo contiene SEMPRE la voce di chiusura: contarla rendeva il
+                // controllo vuoto, e un pannello senza alcuna azione passava (visto all'incarico 27 su
+                // un blocco costruito). Contano le sole voci che sono azioni.
+                let azioniOfferte = schermata.vociPannelloPerProva.filter { $0.stile != .cancel }
+                if azioniOfferte.isEmpty {
+                    XCTFail("IL GIOCO SI È FERMATO — formato \(taglia.rawValue), giorno \(s.giorno): il gruppo \(g.id.numero) in riga \(g.posizione.riga) casella \(g.posizione.colonna) è in attesa e il pannello non offre ALCUNA azione (voci: \(schermata.vociPannelloPerProva.map(\.titolo)))")
+                    return "fermata: gruppo in attesa senza azioni"
+                }
+                // Scegli un ordine VALIDO (il giocatore non dà un ordine che il gioco respinge): un
+                // armato marcia verso l'avversario più vicino se può — per il contatto —, altrimenti
+                // presidia; se nemmeno il presidio vale (deve rifornirsi), sosta con raccolta, che è
+                // sempre valida per un gruppo non-agito (l'invariante della giocabilità). Così la
+                // prova avanza sempre; è il PANNELLO, sopra, a dire se un'azione ESISTE.
+                func valido(_ c: ComandoCampagna) -> Bool { motore.valida(c, parte: .giocatore, stato: s).eValido }
+                var ordine: ComandoCampagna = .sostaConRaccolta(gruppo: g.id)
+                if valido(.presidio(gruppo: g.id)) { ordine = .presidio(gruppo: g.id) }
+                if g.categoria.eArmata,
+                   let bersaglio = armati(.avversario, s).min(by: {
+                       dist(g.posizione, $0.posizione) < dist(g.posizione, $1.posizione) }) {
+                    let vista = VistaCampagna(motore: motore, stato: s, parte: .giocatore)
+                    let dest = vista.destinazioniValide(per: g.id)
+                    if let meta = dest.first(where: { $0 == bersaglio.posizione })
+                        ?? dest.min(by: { dist($0, bersaglio.posizione) < dist($1, bersaglio.posizione) }) {
+                        let marcia = ComandoCampagna.marcia(gruppo: g.id, a: meta,
+                            giorni: motore.costoInGiorni(da: g.posizione, a: meta, stato: s))
+                        if valido(marcia) { ordine = marcia }
+                    }
+                }
+                await schermata.eseguiPerProva(ordine)
+                // La voce scelta dal giocatore chiude il pannello; l'ordine dato qui no. Senza chiuderlo,
+                // ogni attivazione successiva trovava il pannello ancora presentato e il nuovo veniva
+                // rifiutato («already presenting»), sicché la prova guardava le voci del pannello senza
+                // che un pannello fosse davvero mostrato (incarico 27).
+                if let pannello = schermata.presentedViewController as? UIAlertController {
+                    pannello.dismiss(animated: false)
+                }
+                for _ in 0..<40 where schermata.statoPerProva?.gruppi[g.id]?.haConclusoLaGiornata == false
+                    && schermata.statoPerProva?.giorno == giorno
+                    && schermata.statoPerProva?.battaglieInSospeso.isEmpty == true {
+                    try? await Task.sleep(nanoseconds: 10_000_000)
+                }
+            }
+            XCTAssertLessThan(protezione, 80,
+                "IL GIOCO SI È FERMATO — formato \(taglia.rawValue): la giornata \(giorno) non si è chiusa in 80 ordini, la campagna è bloccata")
+        }
+        return "interrotta"
     }
 }

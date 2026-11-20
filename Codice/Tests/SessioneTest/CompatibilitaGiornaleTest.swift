@@ -53,7 +53,7 @@ final class CompatibilitaGiornaleTest: XCTestCase {
     enum SpecieDiVoce: String, CaseIterable {
         case fondazione, comando, inizioTurno, fondazioneCampagna
         case comandoCampagna, aperturaGiornata, annullamentoCampagna, risoluzioneGiornata
-        case battagliaConclusa
+        case battagliaConclusa, giornataChiusaDalGiocatore
     }
 
     /// Specchio di `ComandoBattaglia`.
@@ -82,6 +82,7 @@ final class CompatibilitaGiornaleTest: XCTestCase {
         case .annullamentoCampagna: return .annullamentoCampagna
         case .risoluzioneGiornata: return .risoluzioneGiornata
         case .battagliaConclusa: return .battagliaConclusa
+        case .giornataChiusaDalGiocatore: return .giornataChiusaDalGiocatore
         }
     }
 
@@ -99,6 +100,7 @@ final class CompatibilitaGiornaleTest: XCTestCase {
         case .annullamentoCampagna: return .annullamentoCampagna(giorno: 1, azzeramento: false)
         case .risoluzioneGiornata: return .risoluzioneGiornata(giorno: 1)
         case .battagliaConclusa: return .battagliaConclusa(esito: Self.esitoInCampagnaDiProva)
+        case .giornataChiusaDalGiocatore: return .giornataChiusaDalGiocatore(giorno: 1)
         }
     }
 

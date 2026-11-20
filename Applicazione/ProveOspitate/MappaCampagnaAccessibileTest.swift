@@ -64,9 +64,10 @@ final class MappaCampagnaAccessibileTest: XCTestCase {
         let ordine = LettoreAccessibilita.ordineDiLettura(radice: schermata.view!)
         let stato = try XCTUnwrap(schermata.statoPerProva)
         let caselle = stato.griglia.righe * stato.griglia.colonne
-        // Caselle, poi i quattro comandi globali: tutto presente, niente d'altro.
-        XCTAssertEqual(ordine.count, caselle + 4, "il percorso di lettura è completo")
-        guard ordine.count == caselle + 4 else { return }
+        // Caselle, poi i cinque comandi globali: tutto presente, niente d'altro. Dall'incarico 26 il
+        // tasto «Chiudi la giornata» (RDA-138) sta fra il registro e l'annullamento.
+        XCTAssertEqual(ordine.count, caselle + 5, "il percorso di lettura è completo")
+        guard ordine.count == caselle + 5 else { return }
 
         let elementi = ordine.prefix(caselle).compactMap { $0 as? ElementoCasella }
         XCTAssertEqual(elementi.count, caselle, "prima le caselle, da ovest a est e dall'alto in basso")
@@ -76,7 +77,7 @@ final class MappaCampagnaAccessibileTest: XCTestCase {
         XCTAssertEqual(elementi.map(\.casella), elementi.map(\.casella).sorted())
 
         let testi = ambiente.testi
-        for (scarto, chiave) in ["registro.apri", "pulsante.annulla",
+        for (scarto, chiave) in ["registro.apri", "giornata.chiudi", "pulsante.annulla",
                                  "pulsante.azzera", "resoconto.torna"].enumerated() {
             XCTAssertEqual(LettoreAccessibilita.etichetta(di: ordine[caselle + scarto]),
                            testi.frase(chiave).testo,
@@ -138,7 +139,7 @@ final class MappaCampagnaAccessibileTest: XCTestCase {
         // niente divisione — non è in marcia — niente revoca — non è co-locato con una non
         // armata avversaria — niente sabotaggio né studio — ma è armato e libero, sicché
         // l'IMBOSCATA si offre (01 §5.11, incarico 19). Ha un vicino proprio in riga 6 casella
-        // 2, con cui la riunione si offre. Ordine fisso: marcia, presidio, riunioni, imboscata,
+        // 2, con cui la riunione si offre. Ordine fisso: marcia, presidio, sosta, riunioni, imboscata,
         // chiudi (le azioni della ricognizione escono a categoria non ammessa e non compaiono).
         let gruppo = stato.gruppiOrdinati[0]
         let vicino = try XCTUnwrap(stato.occupante(di: Cella(riga: 6, colonna: 2)),
@@ -150,10 +151,11 @@ final class MappaCampagnaAccessibileTest: XCTestCase {
         XCTAssertEqual(schermata.vociPannelloPerProva.map(\.titolo),
                        [testi.frase("pannello.designa_marcia").testo,
                         testi.frase("pannello.presidio").testo,
+                        testi.frase("pannello.sosta").testo,
                         testi.frase("pannello.riunisci", nomeVicino).testo,
                         testi.frase("pannello.imboscata").testo,
                         testi.frase("pannello.chiudi").testo],
-                       "marcia, presidio, riunione col vicino, imboscata, chiusura — in ordine fisso")
+                       "marcia, presidio, sosta con raccolta (dall'incarico 27, RDA-150), riunione col vicino, imboscata, chiusura — in ordine fisso")
     }
 
     /// La divisione: la schermata dei reparti (02 §10.3), ogni riga un elemento

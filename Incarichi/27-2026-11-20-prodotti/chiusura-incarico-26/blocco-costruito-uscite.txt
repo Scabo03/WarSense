@@ -1,0 +1,13 @@
+# La prova delle partite intere vista fallire di proposito su un blocco costruito (incarico 27, terza parte)
+# Blocco costruito, temporaneo e poi tolto: in SchermataMappaCampagna.apriPannello(per:) le voci d'azione del gruppo azzerate (voci = []), resta la sola «Chiudi il pannello».
+# Comando: xcodebuild test-without-building … -only-testing:WarSenseTest/PassaggioBattagliaInterfacciaTest/test_incarico_26_le_partite_arrivano_alla_fine_su_ogni_formato
+
+## A. Con il controllo dell'incarico 26 (vociPannelloPerProva.isEmpty): uscita 65, ma il fallimento NON è quello del pannello vuoto
+{'result': 'Failed', 'passedTests': 0, 'failedTests': 1}
+- XCTUnwrap failed: expected non-nil value of type "VocePannello" - il pannello della casella offre «Apri la battaglia»
+(per tutte le giornate prima della battaglia i pannelli senza azioni sono passati: la voce di chiusura rendeva il controllo vuoto)
+
+## B. Con il controllo rafforzato (le sole voci d'azione): uscita 65, il fallimento dichiara dove e perché
+{'result': 'Failed', 'passedTests': 0, 'failedTests': 1}
+- failed - IL GIOCO SI È FERMATO — formato campagna_piccola, giorno 1: il gruppo 4 in riga 4 casella 1 è in attesa e il pannello non offre ALCUNA azione (voci: ["Chiudi il pannello"])
+PARTITE-INTERE-26 partite=3 | campagna_piccola: fermata: gruppo in attesa senza azioni | campagna_media: fermata: gruppo in attesa senza azioni | campagna_grande: fermata: gruppo in attesa senza azioni

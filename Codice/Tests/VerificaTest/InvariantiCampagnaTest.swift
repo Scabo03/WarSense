@@ -837,6 +837,12 @@ final class InvariantiCampagnaTest: XCTestCase {
                 // del titolare. `base` porta gruppi non-agiti e nessuna battaglia in sospeso.
                 sonda.controllaGiocabilita(stato: base, ordinabile: { _ in false })
             }),
+            ("battaglia_non_conclusa_nel_limite", {
+                // Una battaglia non conclusa (concluso falso) con i giri al limite: il blocco dentro
+                // la battaglia — la sbilanciata che non si chiudeva. Il caso guasto è fornito alla
+                // sonda dall'esterno, come per la terminazione della partita.
+                sonda.controllaConclusioneBattaglia(concluso: false, giri: 300, limite: 300)
+            }),
         ]
     }
 
