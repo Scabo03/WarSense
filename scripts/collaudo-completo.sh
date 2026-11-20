@@ -41,31 +41,12 @@ echo "== 2/3 Generazione del progetto applicativo dalla sua sorgente di verità 
 ( cd "$RADICE/Applicazione" && xcodegen generate )
 
 echo "== 3/3 Prove ospitate e d'interfaccia sul simulatore =="
-# Il simulatore non si sceglie per nome, che varia fra le macchine e fra le
-# versioni di Xcode: si prende il primo iPhone disponibile. `WARSENSE_SIMULATORE`
-# permette di imporne uno.
-if [ -n "${WARSENSE_SIMULATORE:-}" ]; then
-  DESTINAZIONE="id=$WARSENSE_SIMULATORE"
-else
-  UDID=$(xcrun simctl list devices available --json | python3 -c '
-import json, sys
-elenco = json.load(sys.stdin)["devices"]
-candidati = []
-for runtime, apparecchi in elenco.items():
-    if "iOS" not in runtime:
-        continue
-    for a in apparecchi:
-        if a.get("isAvailable") and "iPhone" in a.get("name", ""):
-            candidati.append((runtime, a["name"], a["udid"]))
-if not candidati:
-    sys.stderr.write("RIFIUTATO: nessun simulatore iPhone disponibile.\n")
-    sys.exit(1)
-candidati.sort()
-sys.stderr.write(f"simulatore scelto: {candidati[-1][1]} ({candidati[-1][0]})\n")
-print(candidati[-1][2])
-')
-  DESTINAZIONE="id=$UDID"
-fi
+# Il simulatore è quello RISERVATO a WarSense (incarico 27): l'iPhone dedicato,
+# creato da sé se manca, sul runtime iOS più recente. Fino all'incarico 26 si
+# prendeva «il primo iPhone disponibile», che poteva essere lo stesso usato da un
+# altro progetto. `WARSENSE_SIMULATORE` permette ancora di imporne uno.
+UDID=$("$RADICE/scripts/simulatore-warsense.sh" iphone)
+DESTINAZIONE="id=$UDID"
 
 # Il fascio di risultati serve al conteggio delle prove dall'ESECUTORE (sessione
 # 06): i numeri riportati nei resoconti venivano da uno scanner Python, perché

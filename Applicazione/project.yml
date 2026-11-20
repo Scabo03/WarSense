@@ -16,6 +16,15 @@ schemes:
         WarSense: all
     test:
       targets: [WarSenseTest, WarSenseUITest]
+  # L'impianto dell'esplorazione con VoiceOver (incarico 27): uno schema proprio,
+  # perché resti FUORI dal collaudo di ogni caricamento, che esegue lo schema
+  # WarSense. Si esegue con scripts/esplora-interfaccia.sh.
+  WarSenseEsplorazione:
+    build:
+      targets:
+        WarSense: all
+    test:
+      targets: [WarSenseEsplorazione]
 targets:
   WarSense:
     type: application
@@ -45,6 +54,15 @@ targets:
           - UIInterfaceOrientationPortraitUpsideDown
           - UIInterfaceOrientationLandscapeLeft
           - UIInterfaceOrientationLandscapeRight
+        # Ciclo di vita a scene, obbligatorio dall'SDK di iOS 27 (senza, l'app
+        # compilata con Xcode 27 non parte: incarico 27). Una sola scena, come
+        # prima esisteva una sola finestra; la monta SceneDelegate.
+        UIApplicationSceneManifest:
+          UIApplicationSupportsMultipleScenes: false
+          UISceneConfigurations:
+            UIWindowSceneSessionRoleApplication:
+              - UISceneConfigurationName: Default Configuration
+                UISceneDelegateClassName: $(PRODUCT_MODULE_NAME).SceneDelegate
     settings:
       base:
         PRODUCT_BUNDLE_IDENTIFIER: com.scabo.warsense
@@ -85,6 +103,15 @@ targets:
     type: bundle.ui-testing
     platform: iOS
     sources: [ProveInterfaccia]
+    dependencies:
+      - target: WarSense
+    settings:
+      base:
+        GENERATE_INFOPLIST_FILE: YES
+  WarSenseEsplorazione:
+    type: bundle.ui-testing
+    platform: iOS
+    sources: [Esplorazione]
     dependencies:
       - target: WarSense
     settings:

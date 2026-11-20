@@ -123,8 +123,14 @@ xcodebuild -exportArchive -archivePath "$CARTELLA_BUILD/WarSense.xcarchive" \
   -exportPath "$CARTELLA_BUILD/esportazione" -quiet
 
 echo "== Caricamento su TestFlight =="
-xcrun altool --upload-app -f "$CARTELLA_BUILD/esportazione/WarSense.ipa" -t ios \
-  --apiKey "$APP_STORE_CONNECT_API_KEY_ID" --apiIssuer "$APP_STORE_CONNECT_API_KEY_ISSUER_ID"
+# Dall'incarico 27 il caricamento usa `--upload-package`, la forma che la guida di
+# altool indica come corrente: `--upload-app` è dichiarato deprecato («Use the
+# --upload-package command instead»). L'altool di Xcode 27 (27.10.4) è riscritto,
+# accetta ancora la forma vecchia ma documenta le opzioni con il trattino
+# (`--api-key`, `--api-issuer`) e ricava piattaforma e versioni dal pacchetto,
+# senza `-t ios`. La chiave p8 la trova in $API_PRIVATE_KEYS_DIR, esportata sopra.
+xcrun altool --upload-package "$CARTELLA_BUILD/esportazione/WarSense.ipa" \
+  --api-key "$APP_STORE_CONNECT_API_KEY_ID" --api-issuer "$APP_STORE_CONNECT_API_KEY_ISSUER_ID"
 
 echo "== Nota di rilascio (attende l'elaborazione della build) =="
 "$RADICE/scripts/nota-testflight.sh" "$NUOVO" || \

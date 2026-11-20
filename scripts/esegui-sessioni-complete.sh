@@ -41,23 +41,10 @@ JSON
 fallito=0
 
 echo "== 1/2 Sessioni complete di CAMPAGNA per l'interfaccia (144) =="
-if [ -n "${WARSENSE_SIMULATORE:-}" ]; then
-  DEST="id=$WARSENSE_SIMULATORE"
-else
-  UDID=$(xcrun simctl list devices available --json | python3 -c '
-import json, sys
-elenco = json.load(sys.stdin)["devices"]; cand = []
-for runtime, app in elenco.items():
-    if "iOS" not in runtime: continue
-    for a in app:
-        if a.get("isAvailable") and "iPhone" in a.get("name", ""):
-            cand.append((runtime, a["name"], a["udid"]))
-if not cand:
-    sys.stderr.write("RIFIUTATO: nessun simulatore iPhone disponibile.\n"); sys.exit(1)
-cand.sort(); sys.stderr.write(f"simulatore: {cand[-1][1]} ({cand[-1][0]})\n"); print(cand[-1][2])
-')
-  DEST="id=$UDID"
-fi
+# Il simulatore RISERVATO a WarSense (incarico 27), creato da sé se manca;
+# `WARSENSE_SIMULATORE` permette ancora di imporne uno.
+UDID=$("$RADICE/scripts/simulatore-warsense.sh" iphone)
+DEST="id=$UDID"
 ( cd "$RADICE/Applicazione" && xcodegen generate )
 # Solo test_00_3_9 (le 144 complete). La selezione è per NOME: xcodebuild non
 # propaga l'ambiente della shell al processo di prova sul simulatore, sicché una

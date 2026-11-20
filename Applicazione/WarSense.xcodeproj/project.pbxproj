@@ -11,10 +11,12 @@
 		116EEE5C15D49181561AFDB5 /* DesignazioneBersaglioTest.swift in Sources */ = {isa = PBXBuildFile; fileRef = 589A5B5EA3AF0D6D1EFB3900 /* DesignazioneBersaglioTest.swift */; };
 		14B5803E132A5513A223659C /* EsploratoriAvversarioTest.swift in Sources */ = {isa = PBXBuildFile; fileRef = 70C73D2597EF834F084727EB /* EsploratoriAvversarioTest.swift */; };
 		190E7D5DC3B892BF2DFD277B /* SchermateContorno.swift in Sources */ = {isa = PBXBuildFile; fileRef = 44914552A51BDF0197E99DAF /* SchermateContorno.swift */; };
+		2B717BF9114D8E349751F99B /* SondaCanaliTest.swift in Sources */ = {isa = PBXBuildFile; fileRef = 079A9D5EB3AB1D2FBEF55BDA /* SondaCanaliTest.swift */; };
 		2C201369597A009507BC172C /* Verifica in Frameworks */ = {isa = PBXBuildFile; productRef = 63388568CF69F6ECF3CB5E3C /* Verifica */; };
 		321465D14C83340BB6030A0F /* CatenaInterfacciaMotoreTest.swift in Sources */ = {isa = PBXBuildFile; fileRef = 2F77F23D7958A0EE7DC80E0A /* CatenaInterfacciaMotoreTest.swift */; };
 		33BCAD29CAC0333FB4B83594 /* FumoInterfacciaTest.swift in Sources */ = {isa = PBXBuildFile; fileRef = 921003768253D7D483CCC1D8 /* FumoInterfacciaTest.swift */; };
 		35D13AF917D421DA151C322C /* PartitaCampagna.swift in Sources */ = {isa = PBXBuildFile; fileRef = D05C93D40ACCC919E14E0F90 /* PartitaCampagna.swift */; };
+		3A719F3F9A3306DF020170F4 /* SceneDelegate.swift in Sources */ = {isa = PBXBuildFile; fileRef = 2C1F0D6D91DB97F16EA042A1 /* SceneDelegate.swift */; };
 		4019BE980D8938B2E6B4D120 /* ImpiantoInterfacciaTest.swift in Sources */ = {isa = PBXBuildFile; fileRef = 75B409D97C3092A3CC3CDA17 /* ImpiantoInterfacciaTest.swift */; };
 		45C1B6E90486F2F6078B2B8B /* RegistroVisibileTest.swift in Sources */ = {isa = PBXBuildFile; fileRef = 1BE339E6703B78CDC77E5B87 /* RegistroVisibileTest.swift */; };
 		4F7ECFCC6A61E15D90A39997 /* SessioniPerInterfacciaTest.swift in Sources */ = {isa = PBXBuildFile; fileRef = 7088EBAC70470929FF7BA18A /* SessioniPerInterfacciaTest.swift */; };
@@ -66,11 +68,19 @@
 			remoteGlobalIDString = 6EC252CE584D47188A424F76;
 			remoteInfo = WarSense;
 		};
+		926A7C1E6F3402082B74BE26 /* PBXContainerItemProxy */ = {
+			isa = PBXContainerItemProxy;
+			containerPortal = 2202CCC898E70930EF4DDCA3 /* Project object */;
+			proxyType = 1;
+			remoteGlobalIDString = 6EC252CE584D47188A424F76;
+			remoteInfo = WarSense;
+		};
 /* End PBXContainerItemProxy section */
 
 /* Begin PBXFileReference section */
 		026CC99253672C0BE5244297 /* StabilitaDellaDisposizioneTest.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = StabilitaDellaDisposizioneTest.swift; sourceTree = "<group>"; };
 		03ACD38B8C2F68821502F3C4 /* RaggiungibilitaTest.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = RaggiungibilitaTest.swift; sourceTree = "<group>"; };
+		079A9D5EB3AB1D2FBEF55BDA /* SondaCanaliTest.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SondaCanaliTest.swift; sourceTree = "<group>"; };
 		10A40D60A1907135F70F1FB4 /* ToccoDirettoTest.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ToccoDirettoTest.swift; sourceTree = "<group>"; };
 		1BE339E6703B78CDC77E5B87 /* RegistroVisibileTest.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = RegistroVisibileTest.swift; sourceTree = "<group>"; };
 		1C877A8D5733D587BE7B618F /* AnnunciEFuocoTest.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AnnunciEFuocoTest.swift; sourceTree = "<group>"; };
@@ -78,6 +88,7 @@
 		2056BAAA10D05410497482F4 /* TesseraDeck.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = TesseraDeck.swift; sourceTree = "<group>"; };
 		20FCEB4CE0D4D3CD0648E660 /* WarSense.app */ = {isa = PBXFileReference; includeInIndex = 0; lastKnownFileType = wrapper.application; path = WarSense.app; sourceTree = BUILT_PRODUCTS_DIR; };
 		27D480588F693D19D9E50AC7 /* LettoreAccessibilita.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = LettoreAccessibilita.swift; sourceTree = "<group>"; };
+		2C1F0D6D91DB97F16EA042A1 /* SceneDelegate.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SceneDelegate.swift; sourceTree = "<group>"; };
 		2F77F23D7958A0EE7DC80E0A /* CatenaInterfacciaMotoreTest.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = CatenaInterfacciaMotoreTest.swift; sourceTree = "<group>"; };
 		325B59A8BC855637ABF9B2CB /* PannelloAzioniTest.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = PannelloAzioniTest.swift; sourceTree = "<group>"; };
 		33237A45EB1B4EBEA09B1769 /* SchermataMappaCampagna.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SchermataMappaCampagna.swift; sourceTree = "<group>"; };
@@ -93,6 +104,7 @@
 		70C73D2597EF834F084727EB /* EsploratoriAvversarioTest.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = EsploratoriAvversarioTest.swift; sourceTree = "<group>"; };
 		75B409D97C3092A3CC3CDA17 /* ImpiantoInterfacciaTest.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ImpiantoInterfacciaTest.swift; sourceTree = "<group>"; };
 		780DA0404CFBE7DD9B420A68 /* AppDelegate.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AppDelegate.swift; sourceTree = "<group>"; };
+		7C40901ACB5C245090E7BD61 /* WarSenseEsplorazione.xctest */ = {isa = PBXFileReference; includeInIndex = 0; lastKnownFileType = wrapper.cfbundle; path = WarSenseEsplorazione.xctest; sourceTree = BUILT_PRODUCTS_DIR; };
 		849A458FA8292F265DF9BE68 /* SchermataBattaglia.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SchermataBattaglia.swift; sourceTree = "<group>"; };
 		88D7A0731824F60DFDBEED2D /* AnnuncioDiCasellaTest.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AnnuncioDiCasellaTest.swift; sourceTree = "<group>"; };
 		8F2621F366CE07D66FC6A6EA /* MappaCampagnaAccessibileTest.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = MappaCampagnaAccessibileTest.swift; sourceTree = "<group>"; };
@@ -154,6 +166,7 @@
 				B7792DA00B9CCC289C68A7E6 /* Info.plist */,
 				D05C93D40ACCC919E14E0F90 /* PartitaCampagna.swift */,
 				9EF7773BD1ED816307203E97 /* PartitaCorrente.swift */,
+				2C1F0D6D91DB97F16EA042A1 /* SceneDelegate.swift */,
 				849A458FA8292F265DF9BE68 /* SchermataBattaglia.swift */,
 				6FCD9653D2440473853AF041 /* SchermataDivisione.swift */,
 				33237A45EB1B4EBEA09B1769 /* SchermataMappaCampagna.swift */,
@@ -189,6 +202,7 @@
 		DFE14AE3E506189D746AC20A = {
 			isa = PBXGroup;
 			children = (
+				E6132B977B5AE29AB4A779A1 /* Esplorazione */,
 				AFED96A9193448D0A198C343 /* Packages */,
 				529C20C0D56E839B2075FA8A /* ProveInterfaccia */,
 				F2E0B78C84777F8B85F27F44 /* ProveOspitate */,
@@ -196,6 +210,14 @@
 				430F28DE05769CF06CAA3C90 /* Sorgenti */,
 				FFE1B0C26F82E06F9C98A30A /* Products */,
 			);
+			sourceTree = "<group>";
+		};
+		E6132B977B5AE29AB4A779A1 /* Esplorazione */ = {
+			isa = PBXGroup;
+			children = (
+				079A9D5EB3AB1D2FBEF55BDA /* SondaCanaliTest.swift */,
+			);
+			path = Esplorazione;
 			sourceTree = "<group>";
 		};
 		F2E0B78C84777F8B85F27F44 /* ProveOspitate */ = {
@@ -225,6 +247,7 @@
 			isa = PBXGroup;
 			children = (
 				20FCEB4CE0D4D3CD0648E660 /* WarSense.app */,
+				7C40901ACB5C245090E7BD61 /* WarSenseEsplorazione.xctest */,
 				3CAF296EB8CDAA34921D17B6 /* WarSenseTest.xctest */,
 				95889945EEE20611E0341AC7 /* WarSenseUITest.xctest */,
 			);
@@ -296,6 +319,24 @@
 			productReference = 95889945EEE20611E0341AC7 /* WarSenseUITest.xctest */;
 			productType = "com.apple.product-type.bundle.ui-testing";
 		};
+		E2E7276650EA2A9C64F948EF /* WarSenseEsplorazione */ = {
+			isa = PBXNativeTarget;
+			buildConfigurationList = 1B7C2B1095173B940C8CD421 /* Build configuration list for PBXNativeTarget "WarSenseEsplorazione" */;
+			buildPhases = (
+				6DD25578AB9BD9BEBAE80FF9 /* Sources */,
+			);
+			buildRules = (
+			);
+			dependencies = (
+				C4C9541ACA56BF9D51C4D6A9 /* PBXTargetDependency */,
+			);
+			name = WarSenseEsplorazione;
+			packageProductDependencies = (
+			);
+			productName = WarSenseEsplorazione;
+			productReference = 7C40901ACB5C245090E7BD61 /* WarSenseEsplorazione.xctest */;
+			productType = "com.apple.product-type.bundle.ui-testing";
+		};
 /* End PBXNativeTarget section */
 
 /* Begin PBXProject section */
@@ -309,6 +350,9 @@
 						DevelopmentTeam = D2KQYQ8YU8;
 					};
 					902D811EF19EF448852FE986 = {
+						TestTargetID = 6EC252CE584D47188A424F76;
+					};
+					E2E7276650EA2A9C64F948EF = {
 						TestTargetID = 6EC252CE584D47188A424F76;
 					};
 				};
@@ -331,6 +375,7 @@
 			projectRoot = "";
 			targets = (
 				6EC252CE584D47188A424F76 /* WarSense */,
+				E2E7276650EA2A9C64F948EF /* WarSenseEsplorazione */,
 				0114F15C2F1FCF704B490AD0 /* WarSenseTest */,
 				902D811EF19EF448852FE986 /* WarSenseUITest */,
 			);
@@ -349,6 +394,14 @@
 /* End PBXResourcesBuildPhase section */
 
 /* Begin PBXSourcesBuildPhase section */
+		6DD25578AB9BD9BEBAE80FF9 /* Sources */ = {
+			isa = PBXSourcesBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+				2B717BF9114D8E349751F99B /* SondaCanaliTest.swift in Sources */,
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
 		739CB62F3D38E3667239127E /* Sources */ = {
 			isa = PBXSourcesBuildPhase;
 			buildActionMask = 2147483647;
@@ -382,6 +435,7 @@
 				D6B5BFD367B286153800292A /* GrigliaAccessibile.swift in Sources */,
 				35D13AF917D421DA151C322C /* PartitaCampagna.swift in Sources */,
 				9834F71661D44043584E4993 /* PartitaCorrente.swift in Sources */,
+				3A719F3F9A3306DF020170F4 /* SceneDelegate.swift in Sources */,
 				5F9166348949834153CEF7FA /* SchermataBattaglia.swift in Sources */,
 				E92E862F8FAE7463EED1209F /* SchermataDivisione.swift in Sources */,
 				939EB534A7DF2E8F28165724 /* SchermataMappaCampagna.swift in Sources */,
@@ -418,6 +472,11 @@
 			target = 6EC252CE584D47188A424F76 /* WarSense */;
 			targetProxy = 7C25A1DE2713AC42C7A799BF /* PBXContainerItemProxy */;
 		};
+		C4C9541ACA56BF9D51C4D6A9 /* PBXTargetDependency */ = {
+			isa = PBXTargetDependency;
+			target = 6EC252CE584D47188A424F76 /* WarSense */;
+			targetProxy = 926A7C1E6F3402082B74BE26 /* PBXContainerItemProxy */;
+		};
 /* End PBXTargetDependency section */
 
 /* Begin XCBuildConfiguration section */
@@ -452,6 +511,22 @@
 				TEST_HOST = "$(BUILT_PRODUCTS_DIR)/WarSense.app/$(BUNDLE_EXECUTABLE_FOLDER_PATH)/WarSense";
 			};
 			name = Debug;
+		};
+		35EFC4FA52A5FB20F676BFAA /* Release */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				BUNDLE_LOADER = "$(TEST_HOST)";
+				GENERATE_INFOPLIST_FILE = YES;
+				LD_RUNPATH_SEARCH_PATHS = (
+					"$(inherited)",
+					"@executable_path/Frameworks",
+					"@loader_path/Frameworks",
+				);
+				SDKROOT = iphoneos;
+				TARGETED_DEVICE_FAMILY = "1,2";
+				TEST_TARGET_NAME = WarSense;
+			};
+			name = Release;
 		};
 		49644451D6DAC136E436467E /* Debug */ = {
 			isa = XCBuildConfiguration;
@@ -513,6 +588,22 @@
 				SWIFT_ACTIVE_COMPILATION_CONDITIONS = DEBUG;
 				SWIFT_OPTIMIZATION_LEVEL = "-Onone";
 				SWIFT_VERSION = 5.0;
+			};
+			name = Debug;
+		};
+		5F1CC222376F16E7A21EFCA0 /* Debug */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				BUNDLE_LOADER = "$(TEST_HOST)";
+				GENERATE_INFOPLIST_FILE = YES;
+				LD_RUNPATH_SEARCH_PATHS = (
+					"$(inherited)",
+					"@executable_path/Frameworks",
+					"@loader_path/Frameworks",
+				);
+				SDKROOT = iphoneos;
+				TARGETED_DEVICE_FAMILY = "1,2";
+				TEST_TARGET_NAME = WarSense;
 			};
 			name = Debug;
 		};
@@ -654,6 +745,15 @@
 			buildConfigurations = (
 				EB03778277BF39032DB61DBF /* Debug */,
 				AD5EBAE8EC3CE536CD232087 /* Release */,
+			);
+			defaultConfigurationIsVisible = 0;
+			defaultConfigurationName = Debug;
+		};
+		1B7C2B1095173B940C8CD421 /* Build configuration list for PBXNativeTarget "WarSenseEsplorazione" */ = {
+			isa = XCConfigurationList;
+			buildConfigurations = (
+				5F1CC222376F16E7A21EFCA0 /* Debug */,
+				35EFC4FA52A5FB20F676BFAA /* Release */,
 			);
 			defaultConfigurationIsVisible = 0;
 			defaultConfigurationName = Debug;
