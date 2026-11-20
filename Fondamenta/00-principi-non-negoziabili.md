@@ -1,6 +1,8 @@
 # Carta dei principi non negoziabili
 
-Documento 00 di 05 — versione 1.2
+Documento 00 di 05 — versione 1.3
+
+Novità della versione 1.3 (2026-11-20), per decisione del titolare fra il 18 e il 20 novembre 2026 (incarico 27). Il gioco ha due modalità di battaglia, a sciami sulla griglia esagonale e a campioni su due linee, e la carta resta UNA SOLA per tutto il gioco: vale per intero per entrambe. Cambiano: il contesto minimo, che descrive le due modalità; il punto 12.2, che definisce le unità per funzione in entrambe; il principio 7, esteso allo scontro a due linee e alle schermate di campagne e fronti (7.1, 7.2, 7.3, 7.4); i punti che presupponevano una sola modalità, che ora dichiarano di valere per la modalità a sciami o nominano l'equivalente nella modalità a campioni (1.4, 2.4, 3.4, 4.3, 5.3, 8.2, 9.2, 9.3, 10.2, 10.3, 10.4, 11.3, 11.5, 11.6, 12.4, 13.3, 16.2); il punto 9.4, dove lo stato di conoscenza «avvistato» diventa «osservato»; i punti 13.2.3 e 15.3, dove «campagna» stava per partita e diventa «partita», perché campagna ha ora il significato del documento 01 (5.6.9); il riepilogo dei documenti, con il riferimento superato alla versione del documento 03 corretto e il documento della modalità a campioni aggiunto. Una regola generale di lettura: dove un punto non ancora riformulato parla di celle, griglia, deck, volume, schieramento o campo esagonale, vale per la modalità a sciami.
 
 ## A cosa serve questo documento e come si usa
 
@@ -20,7 +22,7 @@ Un principio non è una linea guida da bilanciare con altre considerazioni. È u
 
 ## Contesto minimo del progetto
 
-Gioco gestionale e strategico militare a turni, scritto in Swift puro per iOS e iPadOS, distribuito tramite TestFlight in fase di sviluppo. Due piani di gioco: una mappa di campagna a caselle quadrate, con regno persistente, logistica, installazioni militari, addestramento, ricognizione e informazione nascosta; un campo di battaglia a celle esagonali, a informazione completa salvo il solo turno di schieramento di chi subisce un'imboscata, nel quale si piazza e si manovra spendendo una capacità di volume che si rigenera a ogni turno. Progressione per fasi storiche, di cui la prima versione copre la fase arcaica e la fase antica insieme alla transizione tra le due. Partita contro avversari gestiti dal programma, con difficoltà generale e con ufficiali nemici dal comportamento differenziato; predisposizione a una futura partita amichevole tra dispositivi vicini sulla stessa rete locale, senza server, senza poste in gioco e senza ricompense.
+Gioco gestionale e strategico militare a turni, scritto in Swift puro per iOS e iPadOS, distribuito tramite TestFlight in fase di sviluppo. Un solo gioco, con un regno persistente, identico in tutto il gioco, e due modalità di battaglia, che si scelgono all'inizio della partita, valgono per il regno e per tutte le campagne, e sono presentate alla pari come due stili di combattimento. Una campagna è la guerra contro un regno nemico; dentro una campagna ci sono più fronti. Nella modalità a sciami ogni fronte ha una mappa a caselle quadrate, con logistica, installazioni militari, ricognizione e informazione nascosta, e la battaglia si combatte su un campo a celle esagonali, a informazione completa salvo il solo turno di schieramento di chi subisce un'imboscata, nel quale si piazza e si manovra spendendo una capacità di volume che si rigenera a ogni turno. Nella modalità a campioni il fronte non ha mappa, l'informazione sugli avversari è in gran parte certa, e lo scontro si combatte fra combattenti ed eroi disposti su due linee, che sono elenchi e non geometria, con il caso confinato alle probabilità dichiarate di quello scontro. Il gioco non presenta mai la modalità a campioni come la versione per chi non vede: entrambe sono tenute per intero a questa carta, e chi preferirà la seconda la preferirà per il carico mentale della griglia, non per l'accesso. Addestramento ed economia appartengono al regno. Progressione per fasi storiche, di cui la prima versione copre la fase arcaica e la fase antica insieme alla transizione tra le due. Partita contro avversari gestiti dal programma, con difficoltà generale e con ufficiali nemici dal comportamento differenziato; predisposizione a una futura partita amichevole tra dispositivi vicini sulla stessa rete locale, senza server, senza poste in gioco e senza ricompense.
 
 ---
 
@@ -32,7 +34,7 @@ Gioco gestionale e strategico militare a turni, scritto in Swift puro per iOS e 
 
 1.3 Una funzione non accessibile non è una funzione incompleta da sistemare in seguito. Non entra nel gioco. Non esistono funzioni accessibili in una versione successiva.
 
-1.4 Esempio di violazione da respingere: una mappa in cui la fascia di schieramento valida è evidenziata a colori e, per chi ascolta, si può conoscere solo interrogando le celle una a una. L'informazione formalmente c'è, la parità no.
+1.4 Esempio di violazione da respingere, nella modalità a sciami: una mappa in cui la fascia di schieramento valida è evidenziata a colori e, per chi ascolta, si può conoscere solo interrogando le celle una a una. L'informazione formalmente c'è, la parità no.
 
 1.5 Esempio di violazione meno evidente: un pannello che elenca le unità disponibili in una tabella a righe e colonne, dove ogni casella è un elemento distinto. L'informazione è tutta presente e tutta raggiungibile, ma per ricostruire una riga occorrono sei operazioni invece di una, e il confronto tra due unità diventa impraticabile.
 
@@ -44,7 +46,7 @@ Gioco gestionale e strategico militare a turni, scritto in Swift puro per iOS e 
 
 2.3 Ogni elemento con cui il giocatore interagisce è un elemento accessibile dotato di nome, ruolo, valore e, dove pertinente, azioni. Nessun elemento interattivo è un semplice disegno con un'area sensibile al tocco sovrapposta.
 
-2.4 Le celle della griglia esagonale e della mappa di campagna sono elementi accessibili a tutti gli effetti, non porzioni di un'immagine.
+2.4 Le celle della griglia esagonale e le caselle della mappa di un fronte, nella modalità a sciami, e i combattenti delle due linee, nella modalità a campioni, sono elementi accessibili a tutti gli effetti, non porzioni di un'immagine.
 
 ## Principio 3 — Logica separata dall'interfaccia
 
@@ -54,7 +56,7 @@ Gioco gestionale e strategico militare a turni, scritto in Swift puro per iOS e 
 
 3.3 Il confine tra i due va tenuto in modo rigoroso anche quando attraversarlo sembra una scorciatoia innocua. È il singolo requisito da cui dipende il maggior numero di funzioni già decise, e l'unico che non si può recuperare in seguito senza riscrivere il gioco.
 
-3.4 Da questo requisito dipendono direttamente: il salvataggio automatico dello stato completo a ogni singola azione e non a fine turno; la futura partita tra dispositivi vicini, che consiste nello scambio della sequenza di comandi; il programma di verifica del bilanciamento, che gioca migliaia di partite senza interfaccia; l'annullamento dell'ultima mossa e l'azzeramento dello schieramento; la possibilità di rigiocare una partita conclusa per capire dove è andata storta.
+3.4 Da questo requisito dipendono direttamente: il salvataggio automatico dello stato completo a ogni singola azione e non a fine turno; la futura partita tra dispositivi vicini, che consiste nello scambio della sequenza di comandi; il programma di verifica del bilanciamento, che gioca migliaia di partite senza interfaccia; l'annullamento dell'ultima mossa e, nella modalità a sciami, l'azzeramento dello schieramento; la possibilità di rigiocare una partita conclusa per capire dove è andata storta.
 
 3.5 Il salvataggio automatico a ogni azione è un requisito di base e non un'aggiunta successiva, perché una partita senza limiti di tempo può restare aperta per giorni e venire interrotta in qualunque istante.
 
@@ -64,7 +66,7 @@ Gioco gestionale e strategico militare a turni, scritto in Swift puro per iOS e 
 
 4.2 Nessuna meccanica può richiedere prontezza di reazione, nessun conto alla rovescia può scadere, nessuna opportunità può svanire per il passare del tempo reale. Ascoltare richiede più tempo che guardare, e qualunque vincolo di durata reintroduce per via indiretta la disparità vietata dal principio 1.
 
-4.3 Ogni vincolo che nella progettazione si presenta spontaneamente come una durata va riformulato come una quantità. Esempio già adottato: il vantaggio di chi coglie l'avversario di sorpresa non è un tempo di schieramento più breve per la vittima, ma un numero maggiore di turni di gioco per chi tende l'imboscata, unito a un costo di piazzamento ridotto durante quei turni. Chi subisce non patisce alcuna fretta imposta né alcuna riduzione della propria profondità di schieramento. L'effetto sul gioco è lo stesso, la disparità scompare, e per di più il vincolo diventa deterministico e quindi misurabile dalle simulazioni.
+4.3 Ogni vincolo che nella progettazione si presenta spontaneamente come una durata va riformulato come una quantità. Esempio già adottato nella modalità a sciami: il vantaggio di chi coglie l'avversario di sorpresa non è un tempo di schieramento più breve per la vittima, ma un numero maggiore di turni di gioco per chi tende l'imboscata, unito a un costo di piazzamento ridotto durante quei turni. Chi subisce non patisce alcuna fretta imposta né alcuna riduzione della propria profondità di schieramento. L'effetto sul gioco è lo stesso, la disparità scompare, e per di più il vincolo diventa deterministico e quindi misurabile dalle simulazioni.
 
 4.4 Questa riformulazione va applicata sistematicamente a ogni nuova meccanica proposta, non solo a quelle già decise.
 
@@ -74,7 +76,7 @@ Gioco gestionale e strategico militare a turni, scritto in Swift puro per iOS e 
 
 5.2 Di conseguenza, nessuna informazione può essere trasmessa esclusivamente per via tattile. Ogni segnale aptico ha sempre una controparte sonora o testuale che veicola la stessa informazione.
 
-5.3 Un solo punto centrale del programma riceve gli eventi di gioco in forma astratta, per esempio battaglia vinta, risorsa esaurita, cambio di riga nella navigazione, piazzamento confermato, e decide da sé quali canali attivare in base all'apparecchio in uso e alle preferenze dell'utente. Il resto del programma non contiene alcun riferimento a vibrazioni, suoni o annunci: si limita a segnalare che un evento è avvenuto.
+5.3 Un solo punto centrale del programma riceve gli eventi di gioco in forma astratta, per esempio battaglia vinta, risorsa esaurita e, nella modalità a sciami, cambio di riga nella navigazione e piazzamento confermato, e decide da sé quali canali attivare in base all'apparecchio in uso e alle preferenze dell'utente. Il resto del programma non contiene alcun riferimento a vibrazioni, suoni o annunci: si limita a segnalare che un evento è avvenuto.
 
 5.4 Il vocabolario aptico è costruito prima di tutto sulla struttura temporale, cioè su ritmo e durata, e solo in second'ordine su intensità e nitidezza. Due impulsi separati da una pausa si distinguono da tre impulsi in qualunque condizione d'uso; due livelli di intensità ravvicinati si confondono se l'apparecchio è appoggiato a un tavolo, tenuto con una mano sola o dentro una custodia spessa. Intensità e nitidezza sono ammesse come sfumature interne a famiglie già distinte per ritmo.
 
@@ -94,13 +96,13 @@ Gioco gestionale e strategico militare a turni, scritto in Swift puro per iOS e 
 
 ## Principio 7 — Un solo linguaggio di interazione
 
-7.1 Gesti, formato degli annunci, logica dei rotori, comportamento del fuoco e vocabolario degli stati sono identici sulla mappa di campagna e sul campo di battaglia.
+7.1 Gesti, formato degli annunci, logica dei rotori, comportamento del fuoco e vocabolario degli stati sono identici su ogni superficie di gioco: sulla mappa di un fronte e sul campo di battaglia esagonale della modalità a sciami, nello scontro a due linee della modalità a campioni, e nelle schermate delle campagne e dei fronti.
 
-7.2 L'unica differenza ammessa tra i due piani è il numero di celle vicine: quattro sulla mappa di campagna a caselle quadrate senza diagonali, sei sul campo di battaglia esagonale.
+7.2 Fra le due superfici a celle della modalità a sciami l'unica differenza ammessa è il numero di celle vicine: quattro sulla mappa di un fronte a caselle quadrate senza diagonali, sei sul campo di battaglia esagonale. Lo scontro a due linee e le schermate delle campagne e dei fronti non hanno celle: vi valgono gli stessi gesti, lo stesso formato degli annunci, la stessa logica dei rotori, lo stesso comportamento del fuoco e lo stesso vocabolario, e l'unica differenza ammessa è che i loro elementi si percorrono come elenchi e non come righe di celle.
 
-7.3 Chi ha imparato a muoversi su un piano deve saper muoversi sull'altro senza reimparare nulla. Due dialetti diversi nello stesso gioco sono la cosa che affatica di più chi ascolta.
+7.3 Chi ha imparato a muoversi su una superficie deve saper muoversi sulle altre senza reimparare nulla, in entrambe le modalità. Due dialetti diversi nello stesso gioco sono la cosa che affatica di più chi ascolta.
 
-7.4 Il modello di navigazione è unico: gli scorrimenti orizzontali percorrono la riga da est a ovest e viceversa, proseguendo nella riga successiva alle estremità; le direzioni restanti stanno nelle azioni personalizzate, in numero non superiore a quattro; le azioni di gioco relative alla cella stanno in un pannello dedicato che si apre con l'attivazione della cella, e non nelle azioni personalizzate.
+7.4 Il modello di navigazione è unico: gli scorrimenti orizzontali percorrono la riga da est a ovest e viceversa, proseguendo nella riga successiva alle estremità; le direzioni restanti stanno nelle azioni personalizzate, in numero non superiore a quattro; le azioni di gioco relative alla cella stanno in un pannello dedicato che si apre con l'attivazione della cella, e non nelle azioni personalizzate. Nello scontro a due linee lo stesso modello vale sugli elenchi: gli scorrimenti orizzontali percorrono i combattenti di una linea e proseguono nell'altra alle estremità, e le azioni di gioco relative a un combattente stanno nel pannello che si apre con la sua attivazione, come per una cella.
 
 7.5 Le azioni personalizzate non superano mai le cinque voci. Oltre quella soglia ritrovare quella giusta costa più tempo che aprire un pannello, e il vantaggio sparisce.
 
@@ -108,7 +110,7 @@ Gioco gestionale e strategico militare a turni, scritto in Swift puro per iOS e 
 
 8.1 In nessun punto del gioco un'operazione richiede di afferrare un oggetto e portarlo altrove. Il trascinamento come manipolazione non è disponibile quando VoiceOver è attivo.
 
-8.2 Lo schema universale è: si seleziona l'elemento da una lista, si naviga fino alla destinazione, si conferma. Questo vale per lo schieramento, per gli spostamenti sulla mappa di campagna, per l'assegnazione di unità a colonne e per qualunque operazione futura di natura analoga.
+8.2 Lo schema universale è: si seleziona l'elemento da una lista, si naviga fino alla destinazione, si conferma. Questo vale, nella modalità a sciami, per lo schieramento, per gli spostamenti sulla mappa di un fronte e per l'assegnazione di unità a colonne; nella modalità a campioni, per la distribuzione dei campioni fra i fronti e per l'occupazione di una posizione lasciata libera nelle due linee; e per qualunque operazione futura di natura analoga.
 
 8.3 Va distinta l'esplorazione al tatto, cioè appoggiare il dito e farlo scorrere sentendo annunciare ciò che si attraversa, che è pienamente disponibile e va sfruttata: è una modalità normale di uso di VoiceOver. Ciò che non esiste è il trascinamento con manipolazione. La somiglianza tra i due gesti non deve indurre a confonderli in fase di progettazione.
 
@@ -116,11 +118,11 @@ Gioco gestionale e strategico militare a turni, scritto in Swift puro per iOS e 
 
 9.1 Ogni informazione che chi vede riceve a colpo d'occhio deve essere dichiarata a voce, mai lasciata da ricostruire.
 
-9.2 Ricadono obbligatoriamente in questa categoria: la validità di una cella rispetto all'elemento attualmente selezionato e il motivo dell'eventuale non validità; il costo di un'azione prima della conferma e il residuo che ne conseguirebbe; il budget disponibile, consultabile in qualunque momento con un gesto fisso e senza uscire dalla griglia; l'affidabilità di un dato di ricognizione; la posizione della cella in cui si trova il fuoco.
+9.2 Ricadono obbligatoriamente in questa categoria, nella modalità a sciami: la validità di una cella rispetto all'elemento attualmente selezionato e il motivo dell'eventuale non validità; il costo di un'azione prima della conferma e il residuo che ne conseguirebbe; il budget disponibile, consultabile in qualunque momento con un gesto fisso e senza uscire dalla griglia; l'affidabilità di un dato di ricognizione; la posizione della cella in cui si trova il fuoco. Nella modalità a campioni vi ricadono: il pedaggio vero e completo di un varco prima della conferma, la reazione zero di un difensore, ogni probabilità prima della decisione che vi espone, lo stato di pericolo mortale di un campione (documento della modalità a campioni, punti 4.3, 5.7, 6.5).
 
-9.3 Esempio di riferimento, già stabilito: con un elemento selezionato nel deck, una cella si annuncia come disponibile con l'indicazione di quanto volume spenderebbe e di quanto ne resterebbe, oppure come non disponibile con il motivo, cioè troppo avanzata rispetto alla profondità concessa oppure capienza della cella esaurita. Chi vede ha una barra che si consuma e celle colorate per fascia di costo, e non ci pensa. La parità si ottiene solo dicendolo.
+9.3 Esempio di riferimento, già stabilito nella modalità a sciami: con un elemento selezionato nel deck, una cella si annuncia come disponibile con l'indicazione di quanto volume spenderebbe e di quanto ne resterebbe, oppure come non disponibile con il motivo, cioè troppo avanzata rispetto alla profondità concessa oppure capienza della cella esaurita. Chi vede ha una barra che si consuma e celle colorate per fascia di costo, e non ci pensa. La parità si ottiene solo dicendolo.
 
-9.4 Il vocabolario che esprime questi stati è chiuso, fisso e identico in tutto il gioco. I termini vanno scelti una volta e mai variati, perché il giocatore li userà come segnali e non come frasi. Esempio per la ricognizione: inesplorato, presunto, avvistato con il numero di turni trascorsi, confermato. Nessun sinonimo, nessuna variazione stilistica, in nessun punto.
+9.4 Il vocabolario che esprime questi stati è chiuso, fisso e identico in tutto il gioco. I termini vanno scelti una volta e mai variati, perché il giocatore li userà come segnali e non come frasi. Esempio per la ricognizione: inesplorato, presunto, osservato con il numero di turni trascorsi, confermato. Nessun sinonimo, nessuna variazione stilistica, in nessun punto.
 
 9.5 Le impostazioni offrono tre livelli di verbosità degli annunci: sintetico, normale, dettagliato. L'ordine di priorità delle informazioni all'interno di ogni annuncio è fisso e dichiarato, così che nei livelli più brevi si taglino le ultime voci e non porzioni arbitrarie.
 
@@ -128,11 +130,11 @@ Gioco gestionale e strategico militare a turni, scritto in Swift puro per iOS e 
 
 10.1 Nessuna informazione spaziale è accessibile soltanto appoggiando il dito allo schermo. Tutto è raggiungibile anche a scorrimenti, perché molti giocatori esperti navigano quasi esclusivamente così, essendo più affidabile e non richiedendo di sapere dove si trovino fisicamente le cose.
 
-10.2 Per ogni insieme di elementi che il giocatore consulta ripetutamente esiste un rotore dedicato, che permette di saltarvi direttamente. Insiemi previsti: le proprie unità, le unità nemiche note, le installazioni, le celle valide per l'elemento attualmente selezionato, le caselle da cui è possibile esplorare, le informazioni di ricognizione scadute, gli eventi del turno.
+10.2 Per ogni insieme di elementi che il giocatore consulta ripetutamente esiste un rotore dedicato, che permette di saltarvi direttamente. Insiemi previsti: le proprie unità, le unità nemiche note, le installazioni, gli eventi del turno e, nella modalità a sciami, le celle valide per l'elemento attualmente selezionato, le caselle da cui è possibile esplorare, le informazioni di ricognizione scadute.
 
-10.3 I rotori non sono una comodità accessoria: percorrere una griglia un passo alla volta è sempre lento, e su cento celle diventa impraticabile. Sono il principale strumento di parità nell'accesso a una superficie estesa.
+10.3 I rotori non sono una comodità accessoria: percorrere una griglia della modalità a sciami un passo alla volta è sempre lento, e su cento celle diventa impraticabile. Sono il principale strumento di parità nell'accesso a una superficie estesa.
 
-10.4 La griglia da cento celle non viene compressa a forza dentro lo schermo di un iPhone, perché ne risulterebbero bersagli inferiori alla dimensione minima raccomandata e l'esplorazione al tatto diventerebbe imprecisa. La griglia è ingrandibile e scorrevole; tutte le celle restano raggiungibili a scorrimenti anche quando sono fuori dalla porzione visibile, e il fuoco che si sposta su una cella non visibile fa scorrere la vista di conseguenza.
+10.4 Nella modalità a sciami, la griglia da cento celle non viene compressa a forza dentro lo schermo di un iPhone, perché ne risulterebbero bersagli inferiori alla dimensione minima raccomandata e l'esplorazione al tatto diventerebbe imprecisa. La griglia è ingrandibile e scorrevole; tutte le celle restano raggiungibili a scorrimenti anche quando sono fuori dalla porzione visibile, e il fuoco che si sposta su una cella non visibile fa scorrere la vista di conseguenza.
 
 ## Principio 11 — Il fuoco non si sposta da solo
 
@@ -140,23 +142,23 @@ Gioco gestionale e strategico militare a turni, scritto in Swift puro per iOS e 
 
 11.2 Questo requisito va imposto esplicitamente perché il comportamento predefinito del sistema, quando il contenuto di una schermata cambia, tende a riportare il fuoco all'inizio. È il difetto che rompe più spesso i giochi accessibili.
 
-11.3 Esempi vincolanti. Confermato un piazzamento, il fuoco resta sulla cella appena usata, perché il modello di schieramento prevede di piazzare più elementi su celle vicine con conferme successive: se il fuoco torna al deck, ogni piazzamento costa il viaggio di ritorno e il modello crolla. Esaurito un elemento del deck, con conseguente deselezione automatica, il fuoco resta dove è e l'esaurimento viene annunciato. Aggiornato un valore in una schermata di gestione, il fuoco non si muove.
+11.3 Esempi vincolanti. Nella modalità a sciami, confermato un piazzamento, il fuoco resta sulla cella appena usata, perché il modello di schieramento prevede di piazzare più elementi su celle vicine con conferme successive: se il fuoco torna al deck, ogni piazzamento costa il viaggio di ritorno e il modello crolla. Esaurito un elemento del deck, con conseguente deselezione automatica, il fuoco resta dove è e l'esaurimento viene annunciato. In entrambe le modalità, aggiornato un valore in una schermata di gestione, il fuoco non si muove.
 
 11.4 Ogni cambiamento di stato rilevante viene annunciato senza rubare il fuoco.
 
-11.5 L'ordine di lettura è definito esplicitamente dal gioco, elemento per elemento, e non lasciato dedurre al sistema dalla disposizione sullo schermo. Con una griglia esagonale le righe sono sfalsate e i centri delle celle non sono allineati: l'ordinamento automatico produce percorsi imprevedibili. L'ordine stabilito è: le celle della griglia da ovest a est e dall'alto in basso, poi il deck, poi i comandi di annullamento e di azzeramento.
+11.5 L'ordine di lettura è definito esplicitamente dal gioco, elemento per elemento, e non lasciato dedurre al sistema dalla disposizione sullo schermo. Con una griglia esagonale le righe sono sfalsate e i centri delle celle non sono allineati: l'ordinamento automatico produce percorsi imprevedibili. L'ordine stabilito sul campo della modalità a sciami è: le celle della griglia da ovest a est e dall'alto in basso, poi il deck, poi i comandi di annullamento e di azzeramento. Lo scontro a due linee obbedisce allo stesso obbligo: il suo ordine di lettura si dichiara elemento per elemento quando la schermata viene progettata (documento della modalità a campioni, punto 11.9).
 
-11.6 Il passaggio da una riga alla successiva, che comporta un salto attraverso tutto il campo, è segnalato da un impulso aptico riconoscibile con la sua controparte sonora, e il numero di riga compare nell'annuncio.
+11.6 Sulle superfici a celle della modalità a sciami, il passaggio da una riga alla successiva, che comporta un salto attraverso tutto il campo, è segnalato da un impulso aptico riconoscibile con la sua controparte sonora, e il numero di riga compare nell'annuncio.
 
 ## Principio 12 — Nessun riferimento storico diretto
 
 12.1 Il gioco non contiene riferimenti storici diretti: né popoli, né personaggi, né unità o macchine identificabili con una civiltà determinata.
 
-12.2 Le unità sono archetipi definiti per funzione, ai quali si applicano tratti modificatori. Questo risolve insieme la questione della licenza storica e un problema di progettazione: la fanteria d'élite di tipo spartano e la guardia scelta di tipo persiano sono entrambe guardia d'élite, l'una con un tratto di tenuta in formazione e l'altra con un tratto di versatilità e capacità di tiro, e il giocatore può disporre di entrambe senza alcuna incongruenza.
+12.2 Le unità sono definite per funzione e mai per popolo. Nella modalità a sciami sono archetipi con tratti modificatori; nella modalità a campioni sono classi e sottoclassi con armamento ed equipaggiamento, tre assi separati composti da una formula sola (documento della modalità a campioni, punto 7.1). Questo risolve insieme la questione della licenza storica e un problema di progettazione: la fanteria d'élite di tipo spartano e la guardia scelta di tipo persiano sono entrambe guardia d'élite, l'una con un tratto di tenuta in formazione e l'altra con un tratto di versatilità e capacità di tiro, e il giocatore può disporre di entrambe senza alcuna incongruenza. La stessa funzione, nella modalità a campioni, è una classe con la sua sottoclasse.
 
 12.3 La fedeltà alla fase storica riguarda i parametri fisici e logistici, non i nomi: quali materiali esistono, quanto lontano si può colpire, quanto pesa e quanto costa alimentare una colonna in marcia, quale autonomia ha, quanto tempo richiede addestrare o costruire. È lì che la verosimiglianza si percepisce.
 
-12.4 Poiché l'estensione reale di una cella varia con la dimensione dello scontro, portate e autonomie non sono espresse in metri o in giorni, ma in numero di celle e in numero di turni. Questa regola va rispettata senza eccezioni, altrimenti la stessa arma risulta più efficace su una griglia piccola che su una grande.
+12.4 Nella modalità a sciami, poiché l'estensione reale di una cella varia con la dimensione dello scontro, portate e autonomie non sono espresse in metri o in giorni, ma in numero di celle e in numero di turni. Questa regola va rispettata senza eccezioni, altrimenti la stessa arma risulta più efficace su una griglia piccola che su una grande. Nella modalità a campioni non esistono distanze: la portata di un'arma è la linea che raggiunge (documento della modalità a campioni, punto 5.8).
 
 12.5 Non viene dichiarata alcuna scala reale per i formati. La scala del gioco è interna e si fonda sulle proporzioni e sui rapporti fra le misure storiche, non su una conversione lineare di unità di misura. La ragione è che il dato di ancoraggio non esiste: per la fase arcaica non è documentata alcuna misura di spazio, per la fase antica il valore chiave è conteso con uno scarto del doppio, e lo spazio occupato dallo stesso numero di uomini varia di sei volte a seconda della disposizione. Dichiarare una scala reale significherebbe presentare come dato una decisione di progetto.
 
@@ -172,11 +174,11 @@ Gioco gestionale e strategico militare a turni, scritto in Swift puro per iOS e 
 
 13.2.2 Ogni valore che ammette variazione è quindi definito da un intervallo più una regola di variazione, e non da una cifra sola. Al giocatore continua ad arrivare un numero intero, secondo i punti 13.4 e 13.5.
 
-13.2.3 Un valore si muove dentro la forbice soltanto per una causa dichiarata e riconoscibile. Un numero che cambiasse a ogni partita senza una causa annunciata renderebbe inutile ciò che il giocatore ha imparato nella campagna precedente e violerebbe il principio 9.1. Le differenze di partenza fra un regno e l'altro, cioè quelle anteriori a qualunque miglioramento, sono fissate una volta sola e non riestratte a ogni partita.
+13.2.3 Un valore si muove dentro la forbice soltanto per una causa dichiarata e riconoscibile. Un numero che cambiasse a ogni partita senza una causa annunciata renderebbe inutile ciò che il giocatore ha imparato nella partita precedente e violerebbe il principio 9.1. Le differenze di partenza fra un regno e l'altro, cioè quelle anteriori a qualunque miglioramento, sono fissate una volta sola e non riestratte a ogni partita.
 
 13.2.4 Conseguenza sul programma di verifica: le simulazioni provano gli estremi degli intervalli e non una sola configurazione, per accertare che nemmeno il caso peggiore risulti ingiocabile. Vedi il principio 16.
 
-13.3 Ogni comportamento che dipende da più fattori è espresso da una formula unica condivisa più un coefficiente per tipo di elemento, mai da una tabella a doppia entrata. Esempio già stabilito: il costo in volume di un piazzamento cresce con la profondità e dipende dal tipo di unità. Non esiste una tabella tipo per riga per formato di griglia, che sarebbero centinaia di numeri indipendenti. Esiste un coefficiente di penalità di avanzamento per tipo di unità, basso per la fanteria e altissimo per una macchina d'assedio, e una sola formula che lo combina con la profondità espressa in proporzione alla griglia, così che i tre formati si regolino da sé.
+13.3 Ogni comportamento che dipende da più fattori è espresso da una formula unica condivisa più un coefficiente per tipo di elemento, mai da una tabella a doppia entrata. Esempio già stabilito nella modalità a sciami: il costo in volume di un piazzamento cresce con la profondità e dipende dal tipo di unità. Non esiste una tabella tipo per riga per formato di griglia, che sarebbero centinaia di numeri indipendenti. Esiste un coefficiente di penalità di avanzamento per tipo di unità, basso per la fanteria e altissimo per una macchina d'assedio, e una sola formula che lo combina con la profondità espressa in proporzione alla griglia, così che i tre formati si regolino da sé. Nella modalità a campioni la stessa regola compone classe, sottoclasse, arma ed equipaggiamento, mai riuniti in profili preconfezionati.
 
 13.4 I coefficienti possono essere decimali nei file di dati, dove nessuno li ascolta. I costi e i valori mostrati al giocatore sono sempre numeri interi.
 
@@ -206,7 +208,7 @@ Gioco gestionale e strategico militare a turni, scritto in Swift puro per iOS e 
 
 15.2 Davanti a un salvataggio incompatibile, il gioco lo dichiara esplicitamente e non lo apre, invece di caricarlo e comportarsi in modo imprevedibile.
 
-15.3 La ragione è pratica e riguarda i tester. Con un regno persistente le partite durano molte ore, e durante il bilanciamento i file dei valori cambiano continuamente. Il giorno in cui un tester perde una campagna da dieci ore senza spiegazione, smette di collaborare, e i tester competenti sono la risorsa più scarsa del progetto.
+15.3 La ragione è pratica e riguarda i tester. Con un regno persistente le partite durano molte ore, e durante il bilanciamento i file dei valori cambiano continuamente. Il giorno in cui un tester perde una partita da dieci ore senza spiegazione, smette di collaborare, e i tester competenti sono la risorsa più scarsa del progetto.
 
 15.4 I file di dati vengono copiati, al primo avvio, in una posizione accessibile dall'applicazione File dell'apparecchio, così che siano modificabili anche direttamente su iPad durante la fase di messa a punto, senza passare dal computer e senza ricompilare.
 
@@ -214,7 +216,7 @@ Gioco gestionale e strategico militare a turni, scritto in Swift puro per iOS e 
 
 16.1 Il bilanciamento non si valuta a sensazione. Esiste un programma di verifica, separato dal gioco e senza interfaccia, che simula un grande numero di scontri e confronti e riporta percentuali di esito. Ogni richiesta di rimodulazione dei valori si verifica con quei numeri.
 
-16.2 Le simulazioni misurano in particolare i margini che non si percepiscono giocando, per esempio quale budget di schieramento renda una posizione praticamente indifendibile e quale la renda una vittoria automatica.
+16.2 Le simulazioni misurano in particolare i margini che non si percepiscono giocando, per esempio, nella modalità a sciami, quale budget di schieramento renda una posizione praticamente indifendibile e quale la renda una vittoria automatica, e, nella modalità a campioni, quanti campioni muoiano ogni cento scontri, come distribuzione e non come media, quando una delle due parti è giocata da un tattico deliberatamente indebolito.
 
 16.3 Tester non vedenti reali sono coinvolti tramite TestFlight dal primo prototipo giocabile, non alla fine. La verifica in prima persona con VoiceOver attivo è utile ma insufficiente, perché chi ha progettato il gioco sa già dove si trovano le cose.
 
@@ -226,13 +228,15 @@ Gioco gestionale e strategico militare a turni, scritto in Swift puro per iOS e 
 
 00 Carta dei principi non negoziabili — questo documento.
 
-01 Documento di progetto del gioco — fasi storiche e transizione, economia, archetipi di unità e tratti, mappa di campagna, ricognizione, campagne e ufficiali nemici, ponte tra i due piani, regole di scala.
+01 Documento di progetto del gioco — fasi storiche e transizione, economia, campagne e fronti, archetipi di unità e tratti, mappa dei fronti e campo di battaglia della modalità a sciami, ricognizione, ufficiali nemici, ponte fra la campagna e la battaglia, caso e determinismo, regole di scala.
 
 02 Documento di accessibilità — modello di navigazione, azioni personalizzate e pannelli, rotori, formato esatto degli annunci, vocabolario chiuso, vocabolario aptico e corrispondenze, impostazioni di accessibilità.
 
-03 Documento dei dati — struttura dei file di valori, coefficienti e formule, regole di arrotondamento e minimi, grandezze da tarare con le simulazioni, funzionamento del programma di verifica. Creato nella fase tre e attualmente in versione 1.0; alla data della sua creazione registra quali grandezze esistono e da dove provengono, non i numeri, che restano da determinare.
+03 Documento dei dati — struttura dei file di valori, coefficienti e formule, regole di arrotondamento e minimi, grandezze da tarare con le simulazioni, funzionamento del programma di verifica. Creato nella fase tre: la versione 1.0 registrava quali grandezze esistono e da dove provengono, non i numeri; le versioni successive contengono anche valori tarati e le misure del programma di verifica. La versione in vigore è quella dichiarata in testa al documento stesso, alla data di questa versione della carta la 2.5.
 
-04 Riferimenti storici — un file per fase, con distinzione tra valori documentati e stime.
+04 Riferimenti storici — un file unico, con una parte per fase, con distinzione tra valori documentati e stime.
+
+Documento della modalità a campioni (`modalita-a-campioni.md`) — la seconda modalità di battaglia: scontro su due linee, salute, ferite e morte, combattenti ed eroi, il regno della modalità, ciò che è scartato, note di taratura e punti aperti. Non ancora consolidato; subordinato a questa carta come ogni altro documento.
 
 Documento di lavoro collegato: le decisioni di scrematura dei fattori storici, che registrano per ciascun fattore emerso dalla ricerca l'esito assegnato e la relativa motivazione. Non è un documento di progetto ma la memoria delle scelte, da consultare prima di riaprire una questione già chiusa.
 

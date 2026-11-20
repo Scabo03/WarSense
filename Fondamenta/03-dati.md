@@ -1,6 +1,8 @@
 # Documento dei dati
 
-Documento 03 di 05 — versione 2.4
+Documento 03 di 05 — versione 2.5
+
+Novità della versione 2.5 (2026-11-20), per decisione del titolare fra il 18 e il 20 novembre 2026 (incarico 27). Nessun valore cambia. Il gioco ha due modalità di battaglia (documento 01, versione 3.8): le grandezze di questo documento sono della modalità a sciami e del regno; quelle della modalità a campioni, a cominciare dalle soglie della scala delle ferite, entreranno nei dati quando la modalità sarà costruita (documento della modalità a campioni, punto 6.4). I termini campagna e fronte si scambiano il posto come nel documento 01 (5.6.9): riformulati 4.5.3, il titolo di 4.6 e 4.6.1, 6.7 e la voce delle mappe in 9.4. Lo stato di conoscenza avvistato diventa osservato (4.8.1). Il caso esiste soltanto dentro lo scontro a campioni (documento 01, 12.1): riformulati 4.8.4, 4.9.2, 4.11.1, la voce del meteo in 9.4 e 10.2.
 
 Novità della versione 2.4, prodotta dalla prima taratura sui numeri della fase C. È la prima versione in cui alcuni valori cessano di essere provvisori perché una misura li giustifica, e non perché siano parsi ragionevoli. Cambiano: i due estremi della curva del tiro (5.15), il passo dell'accerchiamento (5.16), i parametri di carattere degli ufficiali (6.5), la riduzione della propensione alla ritirata avversaria (7.4) e le composizioni dello scenario di prova (nuovo punto 5.18). Si aggiunge la sezione 10 con la forma del programma di verifica e le misure della prima corsa; si aggiornano le grandezze critiche 6.1, 6.5, 6.9 e 6.10 con i numeri misurati.
 
@@ -100,11 +102,11 @@ Le voci sono divise per provenienza del valore: quelle che derivano dalla docume
 
 4.5.2 Valori dei vantaggi in combattimento conferiti dalle opere da campo. Fonte: documento 01, punto 5.14.1.
 
-4.5.3 Peso delle torri di osservazione sull'apporto informativo invernale, cumulativo per fronte. Fonte: documento 01, punti 5.14.6 e 5.9.1.7.
+4.5.3 Peso delle torri di osservazione sull'apporto informativo invernale, cumulativo per campagna, cioè per regno nemico. Fonte: documento 01, punti 5.14.6 e 5.9.1.7.
 
-### 4.6 Campagne contemporanee
+### 4.6 Fronti contemporanei
 
-4.6.1 Distanza alla quale scatta l'avviso che precede il blocco per scarto massimo fra campagne, essendo il blocco fissato a due settimane. Fonte: documento 01, punti 5.6.9.1 e 5.6.9.3.
+4.6.1 Distanza alla quale scatta l'avviso che precede il blocco per scarto massimo fra i fronti aperti, essendo il blocco fissato a due settimane. Fonte: documento 01, punti 5.6.9.1 e 5.6.9.3.
 
 ### 4.7 Progressione e avversari
 
@@ -118,19 +120,19 @@ Le voci sono divise per provenienza del valore: quelle che derivano dalla docume
 
 ### 4.8 Conoscenza e ricognizione
 
-4.8.1 Numero di turni dopo i quali lo stato confermato decade in avvistato. Vincolo di direzione: il decadimento deve mordere, perché la certezza deve restare rara. Fonte: documento 01, punto 5.3; decisioni di fase due, punto 1.8.
+4.8.1 Numero di turni dopo i quali lo stato confermato decade in osservato. Vincolo di direzione: il decadimento deve mordere, perché la certezza deve restare rara. Fonte: documento 01, punto 5.3; decisioni di fase due, punto 1.8.
 
 4.8.2 Raggio di osservazione dei gruppi ordinari e portata di esplorazione delle formazioni di ricognizione in funzione della competenza degli esploratori. Fonte: documento 01, punti 5.4 e 5.4.2.
 
 4.8.3 Soglie di competenza richieste per il sabotaggio compiuto da esploratori e soglia di protezione dichiarata di ciascun tipo di formazione non armata. Fonte: documento 01, punto 5.10.2.
 
-4.8.4 Parametri deterministici degli esiti sfavorevoli della ricognizione, cioè le condizioni in cui gli esploratori si perdono, tornano a mani vuote o si fanno notare, in funzione di competenza, distanza e presenza nemica. Il caso non vi interviene, poiché resta confinato a meteo e guasti. Fonte: documento 01, punti 5.4 e 12.2.
+4.8.4 Parametri deterministici degli esiti sfavorevoli della ricognizione, cioè le condizioni in cui gli esploratori si perdono, tornano a mani vuote o si fanno notare, in funzione di competenza, distanza e presenza nemica. Il caso non vi interviene, poiché esiste soltanto dentro lo scontro a campioni (documento 01, punto 12.1, versione 3.8). Fonte: documento 01, punti 5.4 e 12.2.
 
 ### 4.9 Stanchezza e manutenzione
 
 4.9.1 Moltiplicatori di punti vita e capacità offensiva applicati all'apertura della battaglia in funzione dei malus di marcia forzata e di mancanza di provviste, e coefficiente di sensibilità alla stanchezza per archetipo. Vincolo: i malus da mancanza di provviste sono più marcati di quelli della marcia forzata, come già registrato al punto 4.3.1. Fonte: documento 01, punti 5.7 e 3.4.
 
-4.9.2 Passi di degrado dello stato di manutenzione per giorni di movimento e per impiego in battaglia, e probabilità di guasto per ciascuno dei due stati operativi. Fonte: documento 01, punti 5.7.1 e 12.2.
+4.9.2 Passi di degrado dello stato di manutenzione per giorni di movimento e per impiego in battaglia, e la regola del guasto per ciascuno dei due stati operativi, che fino alla versione 2.4 era una probabilità e la cui forma senza caso è un punto aperto (documento 01, punti 12.2 e 16.7). Fonte: documento 01, punti 5.7.1 e 12.2.
 
 ### 4.10 Sortita
 
@@ -138,7 +140,7 @@ Le voci sono divise per provenienza del valore: quelle che derivano dalla docume
 
 ### 4.11 Meteo e stagioni
 
-4.11.1 Probabilità degli eventi meteorologici per ciascuna stagione operativa ed effetto di ciascun evento sul costo in giorni della marcia, entro le forbici e per causa dichiarata. Nella prima versione le stagioni intermedie differiscono soltanto per queste probabilità. Fonte: documento 01, punti 5.9.2, 5.9.3 e 12.2.
+4.11.1 Eventi meteorologici per ciascuna stagione operativa (fino alla versione 2.4 probabilità; la loro forma senza caso è un punto aperto, documento 01, punti 12.2 e 16.7) ed effetto di ciascun evento sul costo in giorni della marcia, entro le forbici e per causa dichiarata. Nella prima versione le stagioni intermedie differiscono soltanto per questi eventi. Fonte: documento 01, punti 5.9.2, 5.9.3 e 12.2.
 
 ## 5. Valori del campo di battaglia
 
@@ -208,7 +210,7 @@ Le voci di questa sezione non si determinano a tavolino. Il programma di verific
 
 6.6 Rapporto fra volume disponibile e profondità concessa, che determina quanto pesi il vantaggio della sorpresa. Fonte: documento 01, punto 16.4.
 
-6.7 Precisione dell'apporto informativo invernale in funzione di ricognizione, penetrazione delle campagne e numero di torri. La taratura è espressamente delegata alla fase di realizzazione. Fonte: documento 01, punto 5.9.1.7.
+6.7 Precisione dell'apporto informativo invernale in funzione di ricognizione, penetrazione dei fronti e numero di torri. La taratura è espressamente delegata alla fase di realizzazione. Fonte: documento 01, punto 5.9.1.7.
 
 6.8 Peso effettivo della fortezza in una campagna difensiva, tenuto conto che all'aggressore basta espugnarla una volta per neutralizzarla per il resto della campagna. Fonte: documento 01, punto 5.14.3.5.
 
@@ -264,7 +266,7 @@ Sezione aggiunta nella versione 2.0. La struttura è definita dal documento di a
 
 9.3 Forma delle voci. Ogni grandezza è una base di fase, un coefficiente riferito alla base, oppure un intervallo con regola di variazione, cioè l'elenco delle cause dichiarate che spostano il valore e del passo di ciascuna. Le tabelle a doppia entrata sono vietate e la validazione le respinge. Fonte: carta, principio 13.
 
-9.4 Elenco dei file dei valori e corrispondenza con questo documento. fasi.json: basi di fase e progressione monetaria (4.4.2). archetipi.json: i parametri del punto 3.4 del documento 01 come coefficienti, comprese soglie di disingaggio (5.8), dotazioni (5.7), sensibilità alla stanchezza (4.9.1), coefficienti di penalità di avanzamento (5.1). assetti.json: taglie e composizioni (documento 01, punto 4.7). acquisizioni.json: ambiti, ordinamenti, costi, durate, effetti tipizzati (4.7.4). terreni-e-strade.json: costi in giorni e pesi di partenza e arrivo (4.1). meteo.json: probabilità per stagione ed effetti (4.11). opere.json: costi, durate e effetti delle opere permanenti e da campo (4.4.5, 4.5). caratteristiche-campo.json: modificatori (5.12). ufficiali.json: parametri di carattere (6.5). regni.json: differenze di partenza, fissate una volta sola (3.1). vantaggi-nascosti.json: i vantaggi della sezione 7, letti anche dal programma di verifica. minimi.json: i minimi obbligatori della sezione 8. formato-battaglia.json: capacità di volume, riporto, zone e soglie per formato (5.2, 5.10, 5.13). nomi-gruppi.json: la lista chiusa dei nomi propri dei gruppi (documento 01, punto 5.6.0.4). mappe/: un file per mappa, raggruppate per fronte, almeno cinque per fronte (documento 01, punto 5.6.9). aptica.json: i pattern tattili con nomi parlanti (carta, principio 5.5). suoni.json: segnali sonori, ambienti e temi per fase.
+9.4 Elenco dei file dei valori e corrispondenza con questo documento. fasi.json: basi di fase e progressione monetaria (4.4.2). archetipi.json: i parametri del punto 3.4 del documento 01 come coefficienti, comprese soglie di disingaggio (5.8), dotazioni (5.7), sensibilità alla stanchezza (4.9.1), coefficienti di penalità di avanzamento (5.1). assetti.json: taglie e composizioni (documento 01, punto 4.7). acquisizioni.json: ambiti, ordinamenti, costi, durate, effetti tipizzati (4.7.4). terreni-e-strade.json: costi in giorni e pesi di partenza e arrivo (4.1). meteo.json: eventi per stagione ed effetti (4.11). opere.json: costi, durate e effetti delle opere permanenti e da campo (4.4.5, 4.5). caratteristiche-campo.json: modificatori (5.12). ufficiali.json: parametri di carattere (6.5). regni.json: differenze di partenza, fissate una volta sola (3.1). vantaggi-nascosti.json: i vantaggi della sezione 7, letti anche dal programma di verifica. minimi.json: i minimi obbligatori della sezione 8. formato-battaglia.json: capacità di volume, riporto, zone e soglie per formato (5.2, 5.10, 5.13). nomi-gruppi.json: la lista chiusa dei nomi propri dei gruppi (documento 01, punto 5.6.0.4). mappe/: un file per mappa, raggruppate per campagna, almeno cinque per campagna, nella sola modalità a sciami (documento 01, punto 5.6.9). aptica.json: i pattern tattili con nomi parlanti (carta, principio 5.5). suoni.json: segnali sonori, ambienti e temi per fase.
 
 9.5 Testi. L'albero Testi contiene un pacchetto di localizzazione per lingua, nel formato di sistema che gestisce i plurali, più il file del vocabolario chiuso con chiavi stabili per insieme e per termine, e il proprio manifest con la versione e, dalla versione 2.1 di questo documento, con le impronte dei file: sono le impronte a far rinfrescare la copia in Documenti quando i testi cambiano, sicché la versione resta ferma finché il titolare non ne ordina il cambio. Ogni annuncio è una frase intera con segnaposto e dichiara la propria lingua. La versione dei testi non blocca mai l'apertura dei salvataggi. Fonte: carta, principio 14; documento 02, sezioni 4 e 15.
 
@@ -276,7 +278,7 @@ Sezione aggiunta nella versione 2.0. La struttura è definita dal documento di a
 
 10.1 Forma realizzata. Il programma di verifica è la libreria `Verifica` più il guscio da riga di comando `StrumentoVerifica` (05 §12.1, RDA-58). Non contiene alcuna regola propria: gioca battaglie intere applicando i comandi del Motore e facendo agire il tattico del Motore su ENTRAMBE le parti, sicché la condotta è pari per costruzione e ogni sbilanciamento che resta è strutturale. Dove una misura richiedeva una grandezza che il Motore non esponeva — la soglia di resa del tattico — la grandezza è stata esposta dal Motore, non riscritta nel programma.
 
-10.2 Variazione e riproducibilità. La battaglia non contiene alcuna estrazione del caso (01 §12.1): due corse sugli stessi dati e sulla stessa configurazione danno lo stesso identico esito, e il seme di 05 §12.6 non ha oggetto sul piano di battaglia. La distribuzione viene quindi dagli ESTREMI degli intervalli (00 §13.2.4), enumerati come assi dichiarati nello scenario: chi occupa per primo, ogni combinazione di ufficiali fra le due parti, vantaggi nascosti accesi e spenti, scontro ordinario e da imboscata. L'insieme degli assi è chiuso e un asse ignoto è respinto in caricamento. Il rapporto è identico fra una corsa e l'altra, ed è collaudato che lo sia.
+10.2 Variazione e riproducibilità. La battaglia a sciami non contiene alcuna estrazione del caso (01 §12.1, che dalla versione 3.8 confina il caso allo scontro a campioni): due corse sugli stessi dati e sulla stessa configurazione danno lo stesso identico esito, e il seme di 05 §12.6 non ha oggetto sul piano di battaglia. La distribuzione viene quindi dagli ESTREMI degli intervalli (00 §13.2.4), enumerati come assi dichiarati nello scenario: chi occupa per primo, ogni combinazione di ufficiali fra le due parti, vantaggi nascosti accesi e spenti, scontro ordinario e da imboscata. L'insieme degli assi è chiuso e un asse ignoto è respinto in caricamento. Il rapporto è identico fra una corsa e l'altra, ed è collaudato che lo sia.
 
 10.3 Misura della curva del tiro. Per ogni reparto da tiro e ogni distanza della sua gittata: coefficiente, danno prodotto dal comando davvero applicato, e la fascia di perdite che ne risulta sul bersaglio di riferimento. È la misura su cui la taratura del punto 5.15.1 è stata decisa.
 

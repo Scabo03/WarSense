@@ -1,7 +1,7 @@
 /* Vocabolario chiuso (02 §4): termini fissi, mai variati, nessun sinonimo. */
 "conoscenza.inesplorato" = "inesplorato";
 "conoscenza.presunto" = "presunto";
-"conoscenza.avvistato" = "avvistato";
+"conoscenza.avvistato" = "osservato";
 "conoscenza.confermato" = "confermato";
 "cella.troppo_avanzata" = "troppo avanzata";
 "cella.occupata" = "occupata";

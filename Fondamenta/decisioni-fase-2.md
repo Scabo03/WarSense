@@ -2,6 +2,8 @@
 
 Documento di lavoro. Versione 1.1, scrematura completata e modifiche applicate ai documenti consolidati.
 
+Avvertenza del 2026-11-20 (incarico 27). Questo documento è la memoria delle scelte della fase due e resta com'era. Alcune scelte qui registrate sono superate dalle decisioni del titolare del 18–20 novembre 2026: le due modalità di battaglia, lo scambio dei termini campagna e fronte, il caso confinato allo scontro a campioni (che ritira il caso da meteo e guasti, §1.16, §1.17, §6.3), lo stato di conoscenza «osservato» al posto del termine vecchio (§1.8). Prevalgono i documenti consolidati nelle versioni 00 1.3, 01 3.8, 02 2.6, 03 2.5, 05 1.4 e il documento della modalità a campioni (registro delle decisioni, RDA-144–147).
+
 ## 0. Che cosa contiene e a che punto siamo
 
 Questo documento registra le decisioni prese dal titolare del progetto nella fase due, con la motivazione di ciascuna, l'esito assegnato ai fattori dell'inventario di fase uno, l'elenco delle modifiche che ne discendono per i documenti 00, 01 e 02, e i punti rimasti aperti.
