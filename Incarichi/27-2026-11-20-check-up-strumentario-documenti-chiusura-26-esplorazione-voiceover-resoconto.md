@@ -69,6 +69,8 @@ Collaudo completo verde (227 s; pacchetto 339 eseguite, 0 fallite, 1 saltata; 83
 
 **Caricamento:** 488 s per l'intero script; «UPLOAD SUCCEEDED with no errors» (consegna c34b2d29-…, 1 586 590 byte in 4,76 s); una riga «ERROR … CDUploaderStateInfoResumeFilePath … The file doesn't exist» stampata da altool, che riguarda il file di ripresa del caricamento e non ha avuto effetti; nota allegata all'elaborazione; riga scritta in `build-caricate.md`. Verifica per API in `prodotti/chiusura-incarico-26/asc-build-28.md`.
 
+**Integrazione continua dopo la terza parte:** le corse su 1b543e8 e fe736a1 sono fallite prima delle prove, alla creazione del simulatore dedicato. L'esecutore ha anche un runtime iOS 27.2 legato a un solo apparecchio (`iOS-27-2-iPhone19-4`), e il mio script poteva sceglierlo come «il più recente» (sulla richiesta n. 1 era andata bene per caso). Corretto a fine sessione (RDA-142, nota del 2026-11-21); l'esito della corsa sull'ultimo invio è riportato in fondo.
+
 ## Quarta parte — che cosa è successo
 
 Sul principale con il codice della build 28, ramo `esplorazione-interfaccia`, poi fuso (400d834). Impianto nel bersaglio `WarSenseEsplorazione`, fuori dal collaudo. Osservazioni con gravità e passi in `prodotti/esplorazione/osservazioni.md`; ciò che funziona in `confermato.md`; trascrizioni nell'ordine in `trascrizioni-voiceover.md`; rilievi grezzi in `rilievi-*.jsonl` (637 righe, conteggio dello script di sintesi); 52 schermate ridotte in `schermate/` (3,3 MB, somma dello script di scelta).

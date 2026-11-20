@@ -49,18 +49,29 @@ if istanza > 1:
 d = json.loads(os.environ["ELENCO_SIMULATORI"])
 def versione(r):
     return tuple(int(p) for p in r["version"].split("."))
-runtime = [r for r in d["runtimes"] if r.get("isAvailable") and "SimRuntime.iOS-" in r.get("identifier", "")]
+disponibili = {t["identifier"] for t in d["devicetypes"]}
+tipi = [t for t in tipi_ammessi if t in disponibili]
+if not tipi:
+    sys.stderr.write("RIFIUTATO: nessuno dei modelli %s esiste in questo Xcode.\n" % tipi_ammessi); sys.exit(1)
+# Il runtime più recente che SUPPORTA il modello. Un'immagine può avere, accanto al runtime
+# generale, runtime della stessa versione legati a un solo apparecchio (per esempio
+# «iOS-27-2-iPhone19-4» sull'immagine xcode-27): a parità di versione si preferisce il generale,
+# e un runtime che non supporta il modello si scarta (corse 44823308857 e 44825949262, incarico 27).
+def supporta(r):
+    elenco = r.get("supportedDeviceTypes")
+    return True if elenco is None else any(x.get("identifier") in tipi for x in elenco)
+def generale(r):
+    import re
+    return 1 if re.search(r"SimRuntime\.iOS-[0-9]+-[0-9]+$", r.get("identifier", "")) else 0
+runtime = [r for r in d["runtimes"] if r.get("isAvailable") and "SimRuntime.iOS-" in r.get("identifier", "") and supporta(r)]
 if not runtime:
-    sys.stderr.write("RIFIUTATO: nessun runtime iOS disponibile.\n"); sys.exit(1)
-recente = max(runtime, key=versione)
+    sys.stderr.write("RIFIUTATO: nessun runtime iOS disponibile per %s.\n" % tipi); sys.exit(1)
+recente = max(runtime, key=lambda r: (versione(r), generale(r)))
 for a in d["devices"].get(recente["identifier"], []):
     if a.get("name") == nome and a.get("isAvailable"):
         sys.stderr.write("simulatore dedicato: %s (%s) %s\n" % (nome, recente["name"], a["udid"]))
         print(a["udid"]); sys.exit(0)
-disponibili = {t["identifier"] for t in d["devicetypes"]}
-scelto = next((t for t in tipi_ammessi if t in disponibili), None)
-if scelto is None:
-    sys.stderr.write("RIFIUTATO: nessuno dei modelli %s esiste in questo Xcode.\n" % tipi_ammessi); sys.exit(1)
+scelto = next(t for t in tipi if any(x.get("identifier") == t for x in recente.get("supportedDeviceTypes", [{"identifier": t}])))
 udid = subprocess.run(["xcrun", "simctl", "create", nome, scelto, recente["identifier"]],
                       check=True, capture_output=True, text=True).stdout.strip()
 sys.stderr.write("simulatore dedicato CREATO: %s (%s) %s\n" % (nome, recente["name"], udid))
