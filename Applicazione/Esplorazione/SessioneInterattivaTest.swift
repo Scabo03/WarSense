@@ -190,7 +190,9 @@ final class SessioneInterattivaTest: XCTestCase {
             }
             esito["pronunce"] = pronunce
         case "tocca", "doppio_tocco", "attiva", "multi_tocco", "rotazione", "scorri", "pressione":
-            guard let e = (c["etichetta"] ?? c["prefisso"] ?? c["contiene"]) != nil ? elemento(c) : app as XCUIElement?,
+            // Senza bersaglio, la finestra dell'app: sull'iPad l'intera applicazione non ha coordinate
+            // calcolabili per i gesti («unable to compute coordinates»), la finestra sì.
+            guard let e = (c["etichetta"] ?? c["prefisso"] ?? c["contiene"]) != nil ? elemento(c) : app.windows.firstMatch,
                   e.exists else { esito["errore"] = "elemento non trovato"; break }
             esito["elemento"] = e.label
             switch azione {
