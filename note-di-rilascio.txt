@@ -1,15 +1,19 @@
-Questa build corregge il tasto per chiudere la giornata e ciò che una lunga esplorazione del gioco con VoiceOver ha trovato nelle schermate.
+Questa build corregge ciò che una lunga sessione di gioco con VoiceOver ha trovato, e cambia il modo in cui il gioco parla in quattro punti decisi dal titolare.
 
-IL TASTO «CHIUDI LA GIORNATA» NON TOGLIE PIÙ IL TURNO ALL'AVVERSARIO. Nella build precedente il tasto chiudeva la giornata anche per i gruppi del nemico, che così non muovevano: premendolo ogni giorno, l'avversario restava fermo. Ora il tasto ferma in guardia soltanto i tuoi gruppi che non avevano ancora agito; poi l'avversario muove come sempre e la giornata si chiude da sé. L'annuncio conta soltanto i tuoi gruppi, e subito dopo senti ciò che è accaduto nel turno del nemico e all'apertura della giornata nuova, come dopo l'ultimo ordine. Se c'è una battaglia in sospeso, il tasto lo dice e non chiude nulla.
+IL TESTO SEGUE LA DIMENSIONE SCELTA NELLE IMPOSTAZIONI DI SISTEMA, in ogni schermata: pulsanti, etichette, pannelli, impostazioni, suoni e vibrazioni, registro, resoconto, divisione. Restano di misura fissa le tessere delle riserve, le celle della griglia e le caselle della mappa. Nelle impostazioni la verbosità e l'intensità delle vibrazioni sono ora un elenco di voci, una sotto l'altra: la voce scelta si annuncia come selezionata.
 
-IL RESOCONTO DI FINE BATTAGLIA DICE DI NUOVO COME È ANDATA: esito, durata, perdite tue e inflitte, unità evacuate, scariche residue e riserve mai schierate. Prima mostrava soltanto il titolo e il pulsante per tornare.
+LE FRASI SI ACCORDANO AL GENERE del reparto o del gruppo: «La tua fanteria leggera A è stata ingaggiata», «I tuoi tiratori C sono stati ingaggiati», «tuo Corvo», «tua Aquila». Il nome non cambia; cambiano articoli e accordi.
 
-CON IL TESTO PIÙ GRANDE, E IN ORIZZONTALE, OGNI SCHERMATA SCORRE. «Fine del turno», «Torna all'inizio» e tutti i comandi dell'avvio si raggiungono sempre, a scorrimenti e al tatto. I titoli lunghi vanno a capo invece di essere tagliati.
+LA SCELTA DELLA DESTINAZIONE: ogni casella comincia dalla sua posizione, poi dice che cosa contiene e infine il costo, per esempio «riga 3, casella 3, libera, raggiungibile in 2 giorni». L'avvertimento sul gruppo che resta fermo fino all'arrivo lo dice una volta sola il comando di marcia, quando lo scegli. Lo stesso in battaglia: con una riserva scelta, la cella dice prima dove si trova, poi che cosa contiene, poi il costo e il volume che resta.
 
-CHIUSA UNA SCHERMATA, IL FUOCO TORNA SUL COMANDO CHE L'AVEVA APERTA, per esempio su «Impostazioni» quando chiudi le impostazioni, o sul comando che aveva aperto lo scontro quando torni dal resoconto, anche con il testo più grande.
+LE CORREZIONI:
+- Con una battaglia in sospeso, il pannello di un gruppo che non vi combatte dice perché non offre ordini e dove sta la battaglia; e non offre più la revoca della marcia, che il gioco avrebbe rifiutato.
+- «Ha agito 1 gruppo su 4», non più «Hanno agito 1 gruppi su 4».
+- Sull'iPad, aprendo uno scontro il fuoco va sempre sull'intestazione delle riserve, anche quando il gioco impiega più tempo a prepararlo.
+- Il gesto di uscita, lo strofinio a due dita, chiude anche le impostazioni, i suoni e vibrazioni e il resoconto, come già il registro.
+- Una riserva appena scelta o tolta dichiara subito il suo stato nuovo.
+- «Azzera» senza nulla da azzerare lo dice, invece di confermare.
 
-NELLE IMPOSTAZIONI i segmenti della verbosità e dell'intensità e le leve dei suoni e delle vibrazioni hanno un bersaglio più alto, che si trova più facilmente al tatto.
+LE PARTITE SALVATE CON LA BUILD PRECEDENTE SI RIAPRONO, campagne e scontri: le regole del gioco non sono cambiate.
 
-LE CAMPAGNE SALVATE CON LA BUILD PRECEDENTE NON SI RIAPRONO, perché il tasto cambia il modo in cui la giornata si chiude: il gioco lo dice quando provi a riprenderle, e si comincia una partita nuova. Gli scontri di prova salvati si riaprono.
-
-COSA PROVARE. Gioca una campagna lasciando ogni tanto un gruppo senza ordini e premendo «Chiudi la giornata»: il nemico deve continuare a muovere. Gioca uno scontro fino alla fine e ascolta il resoconto. Se usi il testo grande, gira l'apparecchio in orizzontale e percorri l'avvio, la battaglia e la mappa fino all'ultimo comando.
+COSA PROVARE. Con il testo grande nelle impostazioni dell'apparecchio, percorri impostazioni, suoni e vibrazioni, uno scontro e una campagna: ogni testo deve crescere e nulla deve restare tagliato. Ascolta le frasi della battaglia e della mappa: articoli e accordi devono seguire il nome. Ordina una marcia e ascolta le caselle mentre scegli la destinazione. Se una battaglia resta in sospeso, apri il pannello di un altro gruppo. Prova lo strofinio a due dita sulle impostazioni e sul resoconto.

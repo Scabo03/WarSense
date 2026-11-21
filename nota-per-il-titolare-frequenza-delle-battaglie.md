@@ -1,0 +1,14 @@
+# Quante battaglie nascono in una campagna, e che cosa si potrebbe cambiare
+
+Ho fatto giocare al banco, per ciascuno dei tre formati, duecento partite con un giocatore competente e duecento con uno prudente sul modello del tester, fino a due anni di giornate o alla fine naturale. I numeri, con lo strumento che li ha prodotti, sono nel resoconto dell'incarico; qui il senso. Non ho cambiato nulla nel gioco: la decisione è tua.
+
+**Che cosa succede oggi.** Le battaglie sono rare. Nei primi quattro mesi di gioco, nel caso migliore, ne nasce una ogni due mesi circa: è quello che è successo al tester, e non dipende soltanto dalla sua prudenza. Poi diventano ancora più rare. Chi gioca con prudenza ne trova una all'inizio sulla mappa piccola, un paio sulla media e nessuna sulla grande. Nessuna partita prudente arriva alla fine, e poche delle competenti: per lo più sulla mappa piccola, e lì per lo più perché il giocatore resta senza gruppi armati.
+
+**Perché.** Tre ragioni, tutte misurate. In ogni scenario l'avversario ha un solo gruppo armato: quando quel gruppo non incontra i tuoi, non c'è nessun altro con cui combattere. Il suo carattere lo porta ad aggirare i gruppi che conosce, e a tornare a difendere il quartier generale. E le battaglie non sono decisive: chi perde ripiega e torna, tanto che in una partita il giocatore vince una battaglia ogni pochi giorni per due anni senza che il gruppo nemico sparisca mai. La campagna, poi, non ha una condizione di fine: finisce soltanto se una parte resta senza armati.
+
+**Che cosa proporrei, con l'effetto misurato dove si poteva misurare.**
+
+1. Dare all'avversario più di un gruppo armato: almeno due, tre sulla mappa grande. Con un secondo gruppo, sulla mappa media le battaglie diventano circa il triplo; sulla grande il doppio, la prima arriva in poco più di tre settimane invece che in quasi due mesi, e anche chi gioca con prudenza comincia a incontrarne.
+2. Dare alla campagna una fine: per esempio la stagione, che i documenti già prevedono, o la presa del quartier generale. Senza, le partite continuano anche quando nessuno combatte più. Questo non si misura finché la regola non esiste.
+3. Non toccare da sola l'aggressività dell'avversario: alzarla sopra la difesa del quartier generale raddoppia le battaglie sulla mappa media, ma le dimezza sulla piccola e le riduce sulla grande. Un carattere che cerchi lo scontro andrebbe costruito come regola nuova, e oggi non si può misurare.
+4. Prima di tutto, guardare una cosa che la misura ha trovato: in quasi tre partite su cento fra tutte quelle giocate, e in otto su cento di quelle competenti sulle mappe media e grande, il banco incontra una battaglia che non si conclude, per lo più nella prima riga della mappa, quella del quartier generale nemico. A chi gioca resterebbe soltanto la resa per uscirne. Va accertata prima di tarare qualunque cosa.
