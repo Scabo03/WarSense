@@ -1,0 +1,86 @@
+warning: 'codice': found 7 file(s) which are unhandled; explicitly declare them as resources or exclude from the target
+    /Users/lucascabini/Developer/WarSense/Codice/Tests/SessioneTest/CampioniGiornale/campioni.jsonl
+    /Users/lucascabini/Developer/WarSense/Codice/Tests/SessioneTest/RiproduzioneOro/giornale.jsonl
+    /Users/lucascabini/Developer/WarSense/Codice/Tests/SessioneTest/RiproduzioneOro/impronta.txt
+    /Users/lucascabini/Developer/WarSense/Codice/Tests/SessioneTest/RiproduzioneOroRiserve/giornale.jsonl
+    /Users/lucascabini/Developer/WarSense/Codice/Tests/SessioneTest/RiproduzioneOroRiserve/impronta.txt
+    /Users/lucascabini/Developer/WarSense/Codice/Tests/SessioneTest/SalvataggioBuildDistribuita/giornale.jsonl
+    /Users/lucascabini/Developer/WarSense/Codice/Tests/SessioneTest/SalvataggioBuildDistribuita/impronta.txt
+Building for debugging...
+[Computing dependencies]
+[2 / 6] Motore
+[3 / 7] Motore
+[7 / 10] Motore
+[10 / 11] MotoreTest-product
+[13 / 14] SegnaliTest-product
+[16 / 17] SessioneTest-product
+[19 / 20] VerificaTest-product
+[26 / 27] StrumentoVerifica-product
+Build complete! (2,24 s)
+Test Suite 'Selected tests' started at 2026-11-21 12:16:24.808.
+Test Suite 'VerificaTest.xctest' started at 2026-11-21 12:16:24.809.
+Test Suite 'ChiusuraGiornataTest' started at 2026-11-21 12:16:24.809.
+Test Case '-[VerificaTest.ChiusuraGiornataTest test_incarico_28_il_banco_preme_il_tasto_senza_violazioni]' started.
+/Users/lucascabini/Developer/WarSense/Codice/Tests/VerificaTest/ChiusuraGiornataTest.swift:210: error: -[VerificaTest.ChiusuraGiornataTest test_incarico_28_il_banco_preme_il_tasto_senza_violazioni] : XCTAssertEqual failed: ("["azione_avversaria_sottratta:gruppo=3", "azione_avversaria_sottratta:gruppo=4"]") is not equal to ("[]") - guado_contro_avversario
+/Users/lucascabini/Developer/WarSense/Codice/Tests/VerificaTest/ChiusuraGiornataTest.swift:210: error: -[VerificaTest.ChiusuraGiornataTest test_incarico_28_il_banco_preme_il_tasto_senza_violazioni] : XCTAssertEqual failed: ("["azione_avversaria_sottratta:gruppo=4", "azione_avversaria_sottratta:gruppo=5", "azione_avversaria_sottratta:gruppo=6"]") is not equal to ("[]") - pianura_contro_avversario
+/Users/lucascabini/Developer/WarSense/Codice/Tests/VerificaTest/ChiusuraGiornataTest.swift:210: error: -[VerificaTest.ChiusuraGiornataTest test_incarico_28_il_banco_preme_il_tasto_senza_violazioni] : XCTAssertEqual failed: ("["azione_avversaria_sottratta:gruppo=11", "azione_avversaria_sottratta:gruppo=7", "azione_avversaria_sottratta:gruppo=8"]") is not equal to ("[]") - ricognizione_imboscate_pianura
+/Users/lucascabini/Developer/WarSense/Codice/Tests/VerificaTest/ChiusuraGiornataTest.swift:210: error: -[VerificaTest.ChiusuraGiornataTest test_incarico_28_il_banco_preme_il_tasto_senza_violazioni] : XCTAssertEqual failed: ("["azione_avversaria_sottratta:gruppo=4"]") is not equal to ("[]") - pianura_vince_e_prosegue
+Test Case '-[VerificaTest.ChiusuraGiornataTest test_incarico_28_il_banco_preme_il_tasto_senza_violazioni]' failed (0.185 seconds).
+Test Case '-[VerificaTest.ChiusuraGiornataTest test_incarico_28_il_tasto_lascia_muovere_l_avversario]' started.
+/Users/lucascabini/Developer/WarSense/Codice/Tests/VerificaTest/ChiusuraGiornataTest.swift:87: error: -[VerificaTest.ChiusuraGiornataTest test_incarico_28_il_tasto_lascia_muovere_l_avversario] : XCTAssertEqual failed: ("["azione_avversaria_sottratta:gruppo=4", "azione_avversaria_sottratta:gruppo=5"]") is not equal to ("[]") - il tasto ha tolto il turno all'avversario
+/Users/lucascabini/Developer/WarSense/Codice/Tests/VerificaTest/ChiusuraGiornataTest.swift:88: error: -[VerificaTest.ChiusuraGiornataTest test_incarico_28_il_tasto_lascia_muovere_l_avversario] : XCTAssertEqual failed: ("[]") is not equal to ("[gruppo-4, gruppo-5]") - ogni gruppo avversario ha agito col proprio comando
+Test Case '-[VerificaTest.ChiusuraGiornataTest test_incarico_28_il_tasto_lascia_muovere_l_avversario]' failed (0.011 seconds).
+Test Case '-[VerificaTest.ChiusuraGiornataTest test_incarico_28_l_annullamento_dopo_il_tasto]' started.
+/Users/lucascabini/Developer/WarSense/Codice/Tests/VerificaTest/ChiusuraGiornataTest.swift:155: error: -[VerificaTest.ChiusuraGiornataTest test_incarico_28_l_annullamento_dopo_il_tasto] : failed - annullare dopo il turno dell'avversario equivarrebbe alla prova a rovescio
+Test Case '-[VerificaTest.ChiusuraGiornataTest test_incarico_28_l_annullamento_dopo_il_tasto]' failed (0.012 seconds).
+Test Case '-[VerificaTest.ChiusuraGiornataTest test_incarico_28_la_diagnostica_distingue_le_due_parti]' started.
+Test Case '-[VerificaTest.ChiusuraGiornataTest test_incarico_28_la_diagnostica_distingue_le_due_parti]' passed (0.008 seconds).
+Test Case '-[VerificaTest.ChiusuraGiornataTest test_incarico_28_la_ripresa_riproduce_la_chiusura]' started.
+Test Case '-[VerificaTest.ChiusuraGiornataTest test_incarico_28_la_ripresa_riproduce_la_chiusura]' passed (0.011 seconds).
+Test Case '-[VerificaTest.ChiusuraGiornataTest test_incarico_28_ripetuto_ogni_giorno_l_avversario_muove_comunque]' started.
+/Users/lucascabini/Developer/WarSense/Codice/Tests/VerificaTest/ChiusuraGiornataTest.swift:111: error: -[VerificaTest.ChiusuraGiornataTest test_incarico_28_ripetuto_ogni_giorno_l_avversario_muove_comunque] : XCTAssertEqual failed: ("["azione_avversaria_sottratta:gruppo=4", "azione_avversaria_sottratta:gruppo=5", "azione_avversaria_sottratta:gruppo=4", "azione_avversaria_sottratta:gruppo=5", "azione_avversaria_sottratta:gruppo=4", "azione_avversaria_sottratta:gruppo=5", "azione_avversaria_sottratta:gruppo=4", "azione_avversaria_sottratta:gruppo=5", "azione_avversaria_sottratta:gruppo=4", "azione_avversaria_sottratta:gruppo=5", "azione_avversaria_sottratta:gruppo=4", "azione_avversaria_sottratta:gruppo=5"]") is not equal to ("[]") - giornate in cui il tasto ha tolto il turno all'avversario
+/Users/lucascabini/Developer/WarSense/Codice/Tests/VerificaTest/ChiusuraGiornataTest.swift:113: error: -[VerificaTest.ChiusuraGiornataTest test_incarico_28_ripetuto_ogni_giorno_l_avversario_muove_comunque] : XCTAssertNotEqual failed: ("[Motore.Cella(riga: 1, colonna: 5), Motore.Cella(riga: 1, colonna: 6)]") is equal to ("[Motore.Cella(riga: 1, colonna: 5), Motore.Cella(riga: 1, colonna: 6)]") - in sei giornate chiuse col tasto l'avversario non si è mai mosso
+Test Case '-[VerificaTest.ChiusuraGiornataTest test_incarico_28_ripetuto_ogni_giorno_l_avversario_muove_comunque]' failed (0.011 seconds).
+Test Suite 'ChiusuraGiornataTest' failed at 2026-11-21 12:16:25.048.
+	 Executed 6 tests, with 9 failures (0 unexpected) in 0.238 (0.239) seconds
+Test Suite 'VerificaTest.xctest' failed at 2026-11-21 12:16:25.048.
+	 Executed 6 tests, with 9 failures (0 unexpected) in 0.238 (0.239) seconds
+Test Suite 'Selected tests' failed at 2026-11-21 12:16:25.048.
+	 Executed 6 tests, with 9 failures (0 unexpected) in 0.238 (0.239) seconds
+TASTO-28 guado_contro_avversario: chiusure=20 giornate=40 battaglie=1 violazioni=2 azione_avversaria_sottratta:gruppo=3;azione_avversaria_sottratta:gruppo=4
+TASTO-28 pianura_contro_avversario: chiusure=18 giornate=40 battaglie=0 violazioni=3 azione_avversaria_sottratta:gruppo=4;azione_avversaria_sottratta:gruppo=5;azione_avversaria_sottratta:gruppo=6
+TASTO-28 ricognizione_imboscate_pianura: chiusure=20 giornate=40 battaglie=0 violazioni=3 azione_avversaria_sottratta:gruppo=11;azione_avversaria_sottratta:gruppo=7;azione_avversaria_sottratta:gruppo=8
+TASTO-28 pianura_vince_e_prosegue: chiusure=20 giornate=40 battaglie=1 violazioni=1 azione_avversaria_sottratta:gruppo=4
+TASTO-28 TOTALE corse=4 chiusure=78
+Test Suite 'Selected tests' started at 2026-11-21 12:16:25.113.
+Test Suite 'SessioneTest.xctest' started at 2026-11-21 12:16:25.113.
+Test Suite 'SessioneTest.xctest' passed at 2026-11-21 12:16:25.113.
+	 Executed 0 tests, with 0 failures (0 unexpected) in 0.000 (0.000) seconds
+Test Suite 'Selected tests' passed at 2026-11-21 12:16:25.113.
+	 Executed 0 tests, with 0 failures (0 unexpected) in 0.000 (0.001) seconds
+Test Suite 'Selected tests' started at 2026-11-21 12:16:25.178.
+Test Suite 'SegnaliTest.xctest' started at 2026-11-21 12:16:25.178.
+Test Suite 'SegnaliTest.xctest' passed at 2026-11-21 12:16:25.178.
+	 Executed 0 tests, with 0 failures (0 unexpected) in 0.000 (0.000) seconds
+Test Suite 'Selected tests' passed at 2026-11-21 12:16:25.178.
+	 Executed 0 tests, with 0 failures (0 unexpected) in 0.000 (0.001) seconds
+Test Suite 'Selected tests' started at 2026-11-21 12:16:25.246.
+Test Suite 'MotoreTest.xctest' started at 2026-11-21 12:16:25.247.
+Test Suite 'MotoreTest.xctest' passed at 2026-11-21 12:16:25.247.
+	 Executed 0 tests, with 0 failures (0 unexpected) in 0.000 (0.000) seconds
+Test Suite 'Selected tests' passed at 2026-11-21 12:16:25.247.
+	 Executed 0 tests, with 0 failures (0 unexpected) in 0.000 (0.001) seconds
+Test Suite 'Selected tests' started at 2026-11-21 12:16:25.312.
+Test Suite 'DatiTest.xctest' started at 2026-11-21 12:16:25.313.
+Test Suite 'DatiTest.xctest' passed at 2026-11-21 12:16:25.313.
+	 Executed 0 tests, with 0 failures (0 unexpected) in 0.000 (0.000) seconds
+Test Suite 'Selected tests' passed at 2026-11-21 12:16:25.313.
+	 Executed 0 tests, with 0 failures (0 unexpected) in 0.000 (0.001) seconds
+Test Suite 'Selected tests' started at 2026-11-21 12:16:25.381.
+Test Suite 'ConfiniTest.xctest' started at 2026-11-21 12:16:25.382.
+Test Suite 'ConfiniTest.xctest' passed at 2026-11-21 12:16:25.382.
+	 Executed 0 tests, with 0 failures (0 unexpected) in 0.000 (0.000) seconds
+Test Suite 'Selected tests' passed at 2026-11-21 12:16:25.382.
+	 Executed 0 tests, with 0 failures (0 unexpected) in 0.000 (0.001) seconds
+Note: Some test targets reported failures:
+  - VerificaTest (XCTest)

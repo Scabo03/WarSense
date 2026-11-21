@@ -109,8 +109,15 @@ final class PartitaCampagna {
     func esegui(_ comando: ComandoCampagna) async throws -> EsitoValidazioneCampagna {
         let (esito, eventi) = try await sessione.esegui(comando, parte: .giocatore)
         guard esito.eValido else { return esito }
-        for evento in eventi { ambiente.segnali.segnala(evento: evento, per: .giocatore) }
+        segnala(eventi)
         return esito
+    }
+
+    /// Consegna al punto dei segnali gli eventi che il giocatore è titolato a conoscere, già
+    /// proiettati dalla Sessione: la sola via per cui un fatto della campagna diventa annuncio,
+    /// suono o vibrazione (00 §5.3). La usano l'ordine e la chiusura esplicita della giornata.
+    func segnala(_ eventi: [EventoCampagna]) {
+        for evento in eventi { ambiente.segnali.segnala(evento: evento, per: .giocatore) }
     }
 
     // MARK: - Passaggio alla battaglia e ritorno (01 §6, §15, incarico 24)
@@ -168,18 +175,22 @@ final class PartitaCampagna {
     // MARK: - Chiusura esplicita della giornata (incarico 26)
 
     /// Chiude ESPLICITAMENTE la giornata: la via d'uscita del titolare, sempre disponibile, perché
-    /// non resti bloccato da un difetto in una partita in corso. Ritorna la diagnostica di ciò che
-    /// la rendeva necessaria; se c'erano gruppi non-agiti — la giornata non si sarebbe chiusa da sé —
-    /// la SCRIVE accanto al salvataggio (`diagnostica-giornata-N.json`, nello slot di campagna),
-    /// sicché il titolare possa mandarla indietro insieme al giornale. Non è un canale del collaudo:
-    /// è il gioco vero che conserva la traccia di un blocco che il titolare non sa riprodurre.
+    /// non resti bloccato da un difetto in una partita in corso. Dall'incarico 28 il tasto conclude la
+    /// giornata dei soli gruppi del giocatore, con l'ordine di restare, e l'avversario svolge poi il
+    /// suo turno per la via di sempre. Ritorna la diagnostica — le due parti, distinte — e gli eventi
+    /// del turno avversario e della chiusura, che il chiamante consegna con `segnala` DOPO l'annuncio
+    /// della chiusura, perché il giocatore senta prima che cosa ha fatto il tasto e poi che cosa è
+    /// accaduto. Se la giornata non si sarebbe chiusa da sé, SCRIVE la diagnostica accanto al
+    /// salvataggio (`diagnostica-giornata-N.json`, nello slot di campagna), sicché il titolare possa
+    /// mandarla indietro insieme al giornale. Non è un canale del collaudo: è il gioco vero che
+    /// conserva la traccia di un blocco che il titolare non sa riprodurre.
     @discardableResult
-    func chiudiGiornata() async throws -> DiagnosticaChiusura {
-        let diagnostica = try await sessione.chiudiGiornata()
-        if diagnostica.laGiornataNonSiSarebbeChiusa {
-            scriviDiagnostica(diagnostica)
+    func chiudiGiornata() async throws -> EsitoChiusura {
+        let esito = try await sessione.chiudiGiornata()
+        if esito.diagnostica.laGiornataNonSiSarebbeChiusa {
+            scriviDiagnostica(esito.diagnostica)
         }
-        return diagnostica
+        return esito
     }
 
     /// Dove vive la diagnostica: un file accanto a `giornale.jsonl`, nello stesso slot, sicché

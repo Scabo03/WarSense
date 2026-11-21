@@ -243,3 +243,7 @@ Nessun valore di combattimento toccato. Le grandezze in gioco:
 
 Nessun numero cambia. Cambia una REGOLA del combattimento, il criterio dell'annientamento (RDA-140): per 03 §9.2.1 la versione sale da 0.11.0 a **0.12.0**. `versioni_compatibili` = **["0.8.0", "0.9.0", "0.10.0", "0.11.0"]**: i salvataggi di BATTAGLIA di quelle versioni proseguono identici salvo nello stato della battaglia senza fine, che è il difetto corretto; i salvataggi di CAMPAGNA sono già rifiutati dallo schema 8 del giornale di campagna.
 
+
+### La versione dei valori sale a 0.13.0 (incarico 28; RDA-151)
+
+Nessun numero cambia. Cambia una REGOLA della campagna, il tasto «Chiudi la giornata»: conclude la giornata dei soli gruppi del giocatore, con l'ordine di restare, e l'avversario muove per la via di sempre (fino alla build 28 il tasto spendeva anche la giornata dei gruppi avversari). Per 03 §9.2.1 una campagna salvata prima, riaperta dopo, proseguirebbe diversamente alla prima pressione del tasto: la versione sale da 0.12.0 a **0.13.0**. `versioni_compatibili` = **["0.8.0", "0.9.0", "0.10.0", "0.11.0", "0.12.0"]**: la regola cambiata è della sola campagna, gli scontri di prova salvati non ne sono toccati, e le campagne salvate sono già rifiutate dallo schema del giornale di campagna, che sale da 8 a **9**. Lo schema del giornale di battaglia resta 2; la versione dei testi resta 0.1.1, con le impronte rigenerate.

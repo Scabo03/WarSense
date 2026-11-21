@@ -188,6 +188,14 @@ public struct SondaInvariantiCampagna: Sendable {
         /// (01 §15.2.3) chiudeva lo scontro. Reso un cancello che FALLISCE: ogni battaglia deve
         /// concludersi in un numero finito di turni.
         case battagliaNonConclusaNelLimite(giri: Int, limite: Int)
+        // Invariante del turno dell'avversario (incarico 28).
+        /// Un gruppo AVVERSARIO che attendeva prima di un gesto del giocatore ha perso la propria
+        /// azione: dopo il gesto e il turno avversario che ne segue la sua giornata è conclusa — o
+        /// la giornata è passata — senza che abbia agito con un proprio comando. È il difetto del
+        /// tasto «Chiudi la giornata» fino alla build 28, che segnava spesa la giornata di TUTTI i
+        /// gruppi non-agiti, compresi quelli dell'avversario: ripetuto ogni giorno, l'avversario non
+        /// muoveva mai. Nessun comando del giocatore può togliere un'azione all'altra parte.
+        case azioneAvversariaSottratta(gruppo: Int)
 
         /// Il codice della violazione, senza spazi: l'uscita del programma di
         /// verifica è dato per chi sviluppa e non testo di prodotto (05 §12.6),
@@ -246,6 +254,7 @@ public struct SondaInvariantiCampagna: Sendable {
             case .rigiocaturaBattagliaDivergente(let c): return "rigiocatura_battaglia_divergente:casella=\(c)"
             case .gruppoBloccatoSenzaAzioni(let g, let p): return "gruppo_bloccato_senza_azioni:gruppo=\(g):parte=\(p)"
             case .battagliaNonConclusaNelLimite(let g, let l): return "battaglia_non_conclusa_nel_limite:giri=\(g):limite=\(l)"
+            case .azioneAvversariaSottratta(let g): return "azione_avversaria_sottratta:gruppo=\(g)"
             }
         }
     }
@@ -308,6 +317,7 @@ public struct SondaInvariantiCampagna: Sendable {
         "rigiocatura_battaglia_divergente",
         "gruppo_bloccato_senza_azioni",
         "battaglia_non_conclusa_nel_limite",
+        "azione_avversaria_sottratta",
     ]
 
     /// Il codice nudo, senza i valori: la parte prima dei due punti.
@@ -1082,6 +1092,31 @@ public struct SondaInvariantiCampagna: Sendable {
             if !ordinabile(gruppo) {
                 violazioni.append(.gruppoBloccatoSenzaAzioni(gruppo: gruppo.id.numero,
                                                              parte: gruppo.parte.rawValue))
+            }
+        }
+        return violazioni
+    }
+
+    // MARK: - Invariante del turno dell'avversario (incarico 28)
+
+    /// Che NESSUN GESTO DEL GIOCATORE faccia perdere un'azione all'avversario: ogni gruppo avversario
+    /// che ATTENDEVA prima del gesto — un ordine, un annullamento, un azzeramento, la chiusura
+    /// esplicita della giornata — e che dopo il gesto, e il turno avversario che ne segue, non attende
+    /// più nella stessa giornata (l'ha conclusa) o ha visto passare la giornata, deve avere agito con
+    /// un PROPRIO comando nel frattempo. Un gruppo che non esiste più (disperso da un sabotaggio,
+    /// assorbito da una riunione) non ha perso un'azione: non c'è più. I comandi avversari arrivano
+    /// dall'ESTERNO — dal giornale nella Sessione, dal turno avversario nel banco —, così che la sonda
+    /// giudichi senza rifare né la Sessione né il Motore.
+    public func controllaAzioniAvversarie(attesaPrima: [IdGruppo], giornoPrima: Int,
+                                          dopo: StatoCampagna,
+                                          comandatiDallAvversario: Set<IdGruppo>) -> [Violazione] {
+        var violazioni: [Violazione] = []
+        for id in attesaPrima.sorted() {
+            guard let gruppo = dopo.gruppi[id], gruppo.parte == .avversario else { continue }
+            guard !comandatiDallAvversario.contains(id) else { continue }
+            let ancoraInAttesa = dopo.giorno == giornoPrima && !gruppo.haConclusoLaGiornata
+            if !ancoraInAttesa {
+                violazioni.append(.azioneAvversariaSottratta(gruppo: id.numero))
             }
         }
         return violazioni

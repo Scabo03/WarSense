@@ -44,7 +44,7 @@ let package = Package(
         .testTarget(name: "MotoreTest", dependencies: ["Motore", "Dati", "Contenuti"]),
         .testTarget(name: "SessioneTest", dependencies: ["Sessione", "Motore", "Dati", "Contenuti"]),
         .testTarget(name: "SegnaliTest", dependencies: ["Segnali", "Dati", "Contenuti"]),
-        .testTarget(name: "VerificaTest", dependencies: ["Verifica", "Motore", "Dati", "Contenuti"]),
+        .testTarget(name: "VerificaTest", dependencies: ["Verifica", "Sessione", "Motore", "Dati", "Contenuti"]),
         .testTarget(name: "ConfiniTest", dependencies: []),
     ]
 )

@@ -122,4 +122,15 @@
       <key>other</key><string>Revoca la marcia di %1$@. Perdi %2$d giorni e il gruppo resta senza azione oggi.</string>
     </dict>
   </dict>
+  <key>giornata.chiusa_con_diagnostica</key>
+  <dict>
+    <key>NSStringLocalizedFormatKey</key><string>%#@gruppi@</string>
+    <key>gruppi</key>
+    <dict>
+      <key>NSStringFormatSpecTypeKey</key><string>NSStringPluralRuleType</string>
+      <key>NSStringFormatValueTypeKey</key><string>d</string>
+      <key>one</key><string>Giornata chiusa. %d gruppo non aveva agito e resta fermo: ne è stata conservata una traccia accanto al salvataggio.</string>
+      <key>other</key><string>Giornata chiusa. %d gruppi non avevano agito e restano fermi: ne è stata conservata una traccia accanto al salvataggio.</string>
+    </dict>
+  </dict>
 </dict></plist>

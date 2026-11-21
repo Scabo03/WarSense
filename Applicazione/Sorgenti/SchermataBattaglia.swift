@@ -31,10 +31,10 @@ final class SchermataBattaglia: UIViewController {
     /// Altezza minima RICHIESTA della griglia: sufficiente a una riga intera di celle
     /// più i margini (00 §10.4, principio 1). È il numero che impedisce il collasso.
     private static let altezzaMinimaGriglia: CGFloat = 120
-    private let pulsanteAnnulla = UIButton(type: .system)
-    private let pulsanteAzzera = UIButton(type: .system)
-    private let pulsanteResa = UIButton(type: .system)
-    private let pulsanteFineTurno = UIButton(type: .system)
+    private let pulsanteAnnulla = PulsanteMultiriga(type: .system)
+    private let pulsanteAzzera = PulsanteMultiriga(type: .system)
+    private let pulsanteResa = PulsanteMultiriga(type: .system)
+    private let pulsanteFineTurno = PulsanteMultiriga(type: .system)
 
     init(partita: PartitaCorrente) {
         self.partita = partita
@@ -110,6 +110,9 @@ final class SchermataBattaglia: UIViewController {
             pulsante.addTarget(self, action: azione, for: .touchUpInside)
             pulsante.titleLabel?.font = .preferredFont(forTextStyle: .body)
             pulsante.titleLabel?.adjustsFontForContentSizeCategory = true
+            pulsante.titleLabel?.numberOfLines = 0
+            pulsante.titleLabel?.lineBreakMode = .byWordWrapping
+            pulsante.titleLabel?.textAlignment = .center
             colonnaDeck.addArrangedSubview(pulsante)
             pulsante.heightAnchor.constraint(greaterThanOrEqualToConstant: 44).isActive = true
         }
@@ -193,19 +196,27 @@ final class SchermataBattaglia: UIViewController {
             rigaDeck.addArrangedSubview(tessera)
         }
         // L'ordine di lettura dichiarato: celle, deck, annullamento, azzeramento (02 §2.8),
-        // poi la resa e la fine del turno (RDA-49).
-        view.accessibilityElements = [vistaGriglia, intestazioneDeck] + tessereDeck
+        // poi la resa e la fine del turno (RDA-49). Il deck e i comandi si dichiarano sulla COLONNA
+        // SCORREVOLE che li contiene, non sulla vista radice (incarico 28): così il contenitore
+        // scorrevole sta sul loro percorso d'accessibilità e VoiceOver li porta in vista. Dichiarati
+        // sulla radice, a testo massimo «Fine del turno» restava sotto il bordo e né VoiceOver né il
+        // tocco lo raggiungevano (osservazione 1 dell'esplorazione dell'incarico 27).
+        scorrimentoColonna.accessibilityElements = [intestazioneDeck] + tessereDeck
             + [pulsanteAnnulla, pulsanteAzzera, pulsanteResa, pulsanteFineTurno]
+        view.accessibilityElements = [vistaGriglia, scorrimentoColonna]
     }
 
     // MARK: - Aggiornamento sul posto (RDA-03)
 
+    /// Lo stato si ricarica PRIMA di mostrare il resoconto, nello stesso compito (incarico 28). Fino
+    /// alla build 28 i due erano compiti separati: la ricarica si sospendeva sull'attesa dello stato,
+    /// il resoconto partiva intanto e si costruiva sullo stato di PRIMA della fine, senza esito, sicché
+    /// mostrava il solo titolo e il congedo (osservazione 2 dell'esplorazione dell'incarico 27).
     private func ricevi(_ eventi: [EventoBattaglia]) {
-        Task { await ricaricaStato() }
-        for evento in eventi {
-            if case .battagliaConclusa = evento {
-                Task { await mostraResoconto() }
-            }
+        let conclusa = eventi.contains { if case .battagliaConclusa = $0 { return true } else { return false } }
+        Task {
+            await ricaricaStato()
+            if conclusa { await mostraResoconto() }
         }
     }
 

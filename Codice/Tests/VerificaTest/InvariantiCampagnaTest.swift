@@ -423,6 +423,38 @@ final class InvariantiCampagnaTest: XCTestCase {
                        "un mutante produce un codice che non compare fra quelli noti")
     }
 
+    /// L'invariante del turno dell'avversario (incarico 28), sui due versi: un gruppo avversario che
+    /// attendeva e non ha agito mentre la giornata è passata fa scattare `azione_avversaria_sottratta`;
+    /// lo stesso gruppo con un proprio comando, o ancora in attesa nella stessa giornata, o sparito
+    /// (disperso), no. Il caso guasto è quello del tasto «Chiudi la giornata» fino alla build 28.
+    func test_incarico_28_nessun_gesto_del_giocatore_toglie_un_azione_all_avversario() throws {
+        let s = try FabbricaCampagna.crea(
+            scenario: ScenarioCampagna(mappa: "pianura_lunga",
+                                       gruppiGiocatore: [.init(riga: 10, colonna: 6, composizione: Self.composizioneLeggera)],
+                                       gruppiAvversario: [.init(riga: 1, colonna: 6, composizione: Self.composizioneLeggera),
+                                                          .init(riga: 1, colonna: 5, composizione: Self.composizioneLeggera)]),
+            valori: valoriCampagna, archetipiNoti: Set(valori.archetipi.keys))
+        let avv = s.gruppi(di: .avversario).map(\.id).sorted()
+        var passata = s; passata.giorno += 1
+        // Guasto: la giornata è passata e nessuno dei due ha agito.
+        XCTAssertEqual(descrizioni(sonda.controllaAzioniAvversarie(
+            attesaPrima: avv, giornoPrima: s.giorno, dopo: passata, comandatiDallAvversario: [])),
+            avv.map { "azione_avversaria_sottratta:gruppo=\($0.numero)" })
+        // Guasto nella stessa giornata: il primo segnato come spento senza un suo comando.
+        var spento = s; spento.gruppi[avv[0]]!.azioneSpesa = true
+        XCTAssertEqual(descrizioni(sonda.controllaAzioniAvversarie(
+            attesaPrima: avv, giornoPrima: s.giorno, dopo: spento, comandatiDallAvversario: [])),
+            ["azione_avversaria_sottratta:gruppo=\(avv[0].numero)"])
+        // Sani: entrambi hanno agito; oppure la giornata è ferma e attendono ancora; oppure uno è sparito.
+        XCTAssertEqual(sonda.controllaAzioniAvversarie(
+            attesaPrima: avv, giornoPrima: s.giorno, dopo: passata, comandatiDallAvversario: Set(avv)), [])
+        XCTAssertEqual(sonda.controllaAzioniAvversarie(
+            attesaPrima: avv, giornoPrima: s.giorno, dopo: s, comandatiDallAvversario: []), [])
+        var disperso = passata; disperso.gruppi[avv[0]] = nil
+        XCTAssertEqual(descrizioni(sonda.controllaAzioniAvversarie(
+            attesaPrima: avv, giornoPrima: s.giorno, dopo: disperso, comandatiDallAvversario: [avv[1]])), [])
+    }
+
     /// La tavola dei mutanti: nome e chiusura che produce le violazioni. Ciascuno
     /// ha anche la propria prova dedicata sopra, che dice quale difetto descrive;
     /// qui servono tutti insieme per la guardia di copertura.
@@ -437,6 +469,13 @@ final class InvariantiCampagnaTest: XCTestCase {
         func statoCon(_ modifica: (inout StatoCampagna) -> Void) -> StatoCampagna {
             var s = base; modifica(&s); return s
         }
+        // Uno stato con un gruppo AVVERSARIO in attesa, per l'invariante del suo turno (incarico 28).
+        let conAvversario = try FabbricaCampagna.crea(
+            scenario: ScenarioCampagna(mappa: "pianura_lunga",
+                                       gruppiGiocatore: [.init(riga: 10, colonna: 6, composizione: Self.composizioneLeggera)],
+                                       gruppiAvversario: [.init(riga: 1, colonna: 6, composizione: Self.composizioneLeggera)]),
+            valori: valoriCampagna, archetipiNoti: Set(valori.archetipi.keys))
+        let idAvversario = conAvversario.gruppi(di: .avversario)[0].id
 
         return [
             ("gruppo_in_piu_caselle", {
@@ -842,6 +881,16 @@ final class InvariantiCampagnaTest: XCTestCase {
                 // la battaglia — la sbilanciata che non si chiudeva. Il caso guasto è fornito alla
                 // sonda dall'esterno, come per la terminazione della partita.
                 sonda.controllaConclusioneBattaglia(concluso: false, giri: 300, limite: 300)
+            }),
+            // Incarico 28 — nessun gesto del giocatore toglie un'azione all'avversario.
+            ("azione_avversaria_sottratta", {
+                // Un gruppo avversario ATTENDEVA; dopo il gesto del giocatore la giornata è passata e
+                // il gruppo non ha alcun comando proprio: ha perso l'azione. È ciò che faceva il tasto
+                // «Chiudi la giornata» fino alla build 28, che segnava spesa la sua giornata.
+                var dopo = conAvversario; dopo.giorno += 1
+                return sonda.controllaAzioniAvversarie(attesaPrima: [idAvversario],
+                                                       giornoPrima: conAvversario.giorno,
+                                                       dopo: dopo, comandatiDallAvversario: [])
             }),
         ]
     }

@@ -235,6 +235,8 @@ public struct BancoCampagna: Sendable {
         /// corsa non le ha esercitate, e gli invarianti relativi non hanno morso.
         public let divisioni: Int
         public let riunioni: Int
+        /// Le volte che il giocatore del banco ha premuto «Chiudi la giornata» (incarico 28).
+        public let chiusureDelGiocatore: Int
         /// Ordini impartiti a un gruppo che NON aveva alcuna destinazione libera:
         /// è il caso di stipamento, quello in cui l'azione di marcia non si offre
         /// affatto (02 §9.5). Se questo numero è zero, la corsa non ha esercitato
@@ -352,8 +354,15 @@ public struct BancoCampagna: Sendable {
     /// costare poco — può legittimamente non contenere ancora alcun avvistamento, perché il primo
     /// arriva più tardi: pretenderlo lì sarebbe un falso allarme. Le corse intere (il collaudo, le
     /// prove dedicate) restano il luogo dove l'invariante morde. Preimpostato a vero.
+    ///
+    /// `chiudeLaGiornataOgni` (incarico 28): se valorizzato, nei giorni multipli di quel numero il
+    /// giocatore del banco ordina tutti i gruppi tranne l'ultimo e preme il tasto «Chiudi la
+    /// giornata» (`MotoreCampagna.concludiLaGiornataDelGiocatore`, la funzione che la Sessione usa e
+    /// rigioca), poi l'avversario svolge il suo turno come sempre. Senza, la corsa è quella di prima,
+    /// identica: gli scenari e le misure delle altre prove non cambiano.
     public func corri(_ voce: ScenariCampagna.Voce, giornate: Int,
-                      partitaCompleta: Bool = true) throws -> Corsa {
+                      partitaCompleta: Bool = true,
+                      chiudeLaGiornataOgni: Int? = nil) throws -> Corsa {
         var stato = try FabbricaCampagna.crea(
             scenario: ScenarioCampagna(mappa: voce.mappa, gruppiGiocatore: voce.gruppi,
                                        gruppiAvversario: voce.gruppiAvversario,
@@ -363,6 +372,7 @@ public struct BancoCampagna: Sendable {
         var violazioni = Set<String>()
         var ordini = 0, marce = 0, marceLunghe = 0, marceCompiute = 0, revoche = 0
         var presidi = 0, senzaDestinazione = 0, divisioni = 0, riunioni = 0
+        var chiusureDelGiocatore = 0
         // La riunione va fatta «ogni tanto» (non a ogni giro): senza questo freno si fondevano
         // tutte le coppie adiacenti nello stesso giorno, disfacendo ogni scenario stipato prima
         // che la condotta ne ordinasse un gruppo — sicché lo STIPAMENTO (un gruppo senza
@@ -495,11 +505,17 @@ public struct BancoCampagna: Sendable {
             // regola fissa sul giorno, per esercitare la revoca e i suoi invarianti;
             // altrimenti si ordina il prossimo gruppo in attesa, con la prima
             // destinazione valida o il presidio. Deterministica, senza caso.
-            let comando: ComandoCampagna
+            // `nil` è il tasto «Chiudi la giornata» (incarico 28), premuto con un solo gruppo del
+            // giocatore ancora in attesa nei giorni dichiarati da `chiudeLaGiornataOgni`.
+            let comando: ComandoCampagna?
+            if let ogni = chiudeLaGiornataOgni, stato.giorno % ogni == 0,
+               stato.gruppiInAttesa(di: .giocatore).count == 1 {
+                comando = nil
+                chiusureDelGiocatore += 1
             // La riunione (non è un'azione): ogni tanto due gruppi adiacenti si
             // fondono, purché ne restino almeno due, così da esercitare la regola
             // dell'azione già spesa senza far collassare lo scenario a un gruppo solo.
-            if stato.giorno % 4 == 1, stato.giorno != giornoUltimaRiunione, stato.gruppi.count > 2,
+            } else if stato.giorno % 4 == 1, stato.giorno != giornoUltimaRiunione, stato.gruppi.count > 2,
                let (a, b) = coppiaRiunibile(stato) {
                 comando = .riunione(gruppo: a, con: b)
                 riunioni += 1
@@ -578,21 +594,37 @@ public struct BancoCampagna: Sendable {
                         let destinazione = destinazioni[gruppo.id.numero % destinazioni.count]
                         // Il comando lo forma l'interrogazione, che vi mette il costo in
                         // giorni prescritto dai dati: nemmeno il banco lo inventa.
-                        comando = vista.comandoDiMarcia(per: gruppo.id, a: destinazione)!
-                        if case .marcia(_, _, let giorni) = comando, giorni > 1 { marceLunghe += 1 }
+                        let marcia = vista.comandoDiMarcia(per: gruppo.id, a: destinazione)!
+                        comando = marcia
+                        if case .marcia(_, _, let giorni) = marcia, giorni > 1 { marceLunghe += 1 }
                         marce += 1
                     }
                 }
             }
             let prima = stato
-            let (dopo, eventi) = motore.applica(comando, parte: .giocatore, stato: stato)
+            // L'invariante del turno dell'avversario (incarico 28): i gruppi avversari che attendono
+            // PRIMA del gesto del giocatore, e il giorno; dopo il gesto e il turno avversario che ne
+            // segue, ciascuno deve avere agito con un proprio comando, o attendere ancora.
+            let attesaAvversariaPrima = stato.gruppiInAttesa(di: .avversario).map(\.id)
+            let giornoPrimaDelGesto = stato.giorno
+            var comandatiDallAvversario = Set<IdGruppo>()
+            let (dopo, eventi): (StatoCampagna, [EventoCampagna])
+            if let comando {
+                (dopo, eventi) = motore.applica(comando, parte: .giocatore, stato: stato)
+            } else {
+                var chiuso = stato
+                eventi = motore.concludiLaGiornataDelGiocatore(&chiuso).eventi
+                dopo = chiuso
+            }
             marceCompiute += eventi.reduce(0) {
                 if case .marciaCompiuta = $1 { return $0 + 1 } else { return $0 }
             }
             contaFenomeni(eventi, prima: prima)
-            violazioni.formUnion(sonda.controlla(prima: prima, comando: comando, dopo: dopo,
-                                                 eventi: eventi,
-                                                 adiacenti: prima.griglia.adiacenti).map(\.description))
+            if let comando {
+                violazioni.formUnion(sonda.controlla(prima: prima, comando: comando, dopo: dopo,
+                                                     eventi: eventi,
+                                                     adiacenti: prima.griglia.adiacenti).map(\.description))
+            }
             violazioni.formUnion(sonda.controlla(stato: dopo).map(\.description))
             violazioni.formUnion(sonda.controllaGiocabilita(stato: dopo, ordinabile: { ordinabile($0, stato: dopo) }).map(\.description))
             // L'OCCULTAMENTO dell'imboscata (01 §5.11.1, incarico 21): su una casella con un
@@ -651,6 +683,7 @@ public struct BancoCampagna: Sendable {
                 ).map(\.description))
                 guard let comandoAvv = condotta.prossimoComando(vista: vistaAvv) else { break }
                 let primaAvv = stato
+                comandatiDallAvversario.insert(comandoAvv.gruppo)
                 let (dopoAvv, eventiAvv) = motore.applica(comandoAvv, parte: .avversario, stato: stato)
                 // Una marcia del GIOCATORE può compiersi alla chiusura innescata
                 // dall'ultimo comando avversario: la si conta di qui.
@@ -673,6 +706,9 @@ public struct BancoCampagna: Sendable {
                 ).map(\.description))
                 stato = dopoAvv
             }
+            violazioni.formUnion(sonda.controllaAzioniAvversarie(
+                attesaPrima: attesaAvversariaPrima, giornoPrima: giornoPrimaDelGesto,
+                dopo: stato, comandatiDallAvversario: comandatiDallAvversario).map(\.description))
             // Le misure dell'avversario, sullo stato dopo il suo turno: quanto si è
             // avvicinato al quartier generale del giocatore, e quali suoi gruppi hanno
             // AGGIRATO la linea (si sono portati più vicini al quartier generale del
@@ -747,6 +783,7 @@ public struct BancoCampagna: Sendable {
                      ordini: ordini, marce: marce, marceLunghe: marceLunghe,
                      marceCompiute: marceCompiute, revoche: revoche, presidi: presidi,
                      divisioni: divisioni, riunioni: riunioni,
+                     chiusureDelGiocatore: chiusureDelGiocatore,
                      senzaDestinazione: senzaDestinazione,
                      volumeMinimo: volumeMinimo, volumeMassimo: volumeMassimo,
                      tagli: tagli, sosteImposte: sosteImposte, sosteVolontarie: sosteVolontarie,

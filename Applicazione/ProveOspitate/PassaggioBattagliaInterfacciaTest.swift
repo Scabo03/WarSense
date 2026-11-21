@@ -377,9 +377,10 @@ final class PassaggioBattagliaInterfacciaTest: XCTestCase {
         let prima = try XCTUnwrap(schermata.statoPerProva)
         XCTAssertEqual(prima.giorno, 1)
         // I gruppi non-agiti di ENTRAMBE le parti: la diagnostica li registra tutti (il quadro
-        // completo per chi indaga), non i soli del giocatore.
-        let nonAgiti = prima.gruppi.values.filter { !$0.haConclusoLaGiornata }.count
-        XCTAssertGreaterThan(prima.gruppiInAttesa(di: .giocatore).count, 0,
+        // completo per chi indaga), dall'incarico 28 in due elenchi DISTINTI.
+        let nonAgitiGiocatore = prima.gruppiInAttesa(di: .giocatore).count
+        let nonAgitiAvversario = prima.gruppiInAttesa(di: .avversario).count
+        XCTAssertGreaterThan(nonAgitiGiocatore, 0,
                              "a inizio giornata i gruppi del giocatore sono in attesa")
 
         schermata.chiudiGiornataPerProva()
@@ -395,12 +396,14 @@ final class PassaggioBattagliaInterfacciaTest: XCTestCase {
         let dati = try Data(contentsOf: urlDiag)
         let diag = try JSONDecoder().decode(DiagnosticaChiusura.self, from: dati)
         XCTAssertEqual(diag.giorno, 1)
-        XCTAssertEqual(diag.gruppiNonAgiti.count, nonAgiti,
-                       "la diagnostica elenca i gruppi che non avevano agito")
-        XCTAssertTrue(diag.gruppiNonAgiti.contains { $0.parte == "giocatore" },
-                      "la diagnostica include i gruppi del giocatore in attesa")
-        XCTAssertTrue(diag.gruppiNonAgiti.allSatisfy { !$0.azioniDisponibili.isEmpty },
+        XCTAssertEqual(diag.giocatore.count, nonAgitiGiocatore,
+                       "la diagnostica elenca i gruppi del giocatore che non avevano agito")
+        XCTAssertEqual(diag.avversario.count, nonAgitiAvversario,
+                       "e, a parte, quelli dell'avversario che non avevano ancora mosso")
+        XCTAssertTrue((diag.giocatore + diag.avversario).allSatisfy { !$0.azioniDisponibili.isEmpty },
                       "ogni gruppo non-agito porta le azioni che gli erano disponibili")
+        XCTAssertTrue(diag.giocatore.allSatisfy { $0.ordineDato == "presidio" || $0.ordineDato == "sosta_con_raccolta" },
+                      "il tasto ha dato ai gruppi del giocatore l'ordine di restare")
 
         // La chiusura sopravvive al riavvio: rigiocando il giornale, la giornata resta chiusa.
         let ripresa = try await PartitaCampagna(riprendi: schermata.partitaPerProva.ambiente)

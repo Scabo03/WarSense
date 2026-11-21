@@ -119,7 +119,7 @@ final class ImpiantoInterfacciaTest: XCTestCase {
     /// etichetta. Un elemento dichiarato e assente di lì è muto per il giocatore.
     func test_02_2_8_ogni_elemento_dichiarato_esiste_nell_albero_dell_accessibilita() throws {
         apriLaMappaPiccola()
-        let etichette = percorsoDiLettura().map(\.label)
+        let etichette = percorsoDiLettura().map { $0.label }
         var mancanti: [String] = []
         for riga in 1...4 {
             for colonna in 1...4 where !etichette.contains(where: {
@@ -237,7 +237,7 @@ final class ImpiantoInterfacciaTest: XCTestCase {
     /// necessaria, non quella sufficiente, e non va letta come di più.
     func test_00_11_1_dopo_un_ordine_la_schermata_resta_e_gli_elementi_no_spariscono() throws {
         apriLaMappaPiccola()
-        let etichettePrima = Set(percorsoDiLettura().map(\.label))
+        let etichettePrima = Set(percorsoDiLettura().map { $0.label })
 
         casellaDelGruppoInAttesa().tap()
         let presidio = app.buttons["Presidia: resta fermo in guardia"]
@@ -247,7 +247,7 @@ final class ImpiantoInterfacciaTest: XCTestCase {
                       "la schermata dello scontro è stata sostituita dopo un ordine: "
                       + "per chi ascolta è indistinguibile da un riavvio (P5)")
 
-        let etichetteDopo = Set(percorsoDiLettura().map(\.label))
+        let etichetteDopo = Set(percorsoDiLettura().map { $0.label })
         let sparite = etichettePrima.subtracting(etichetteDopo)
         // Cambia la sola casella del gruppo, che ora dichiara un altro stato.
         XCTAssertLessThanOrEqual(sparite.count, 1,
