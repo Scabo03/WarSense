@@ -2,7 +2,7 @@
 
 Documento di lavoro della fase di architettura — versione 1.0
 
-Avvertenza del 2026-11-20 (incarico 27). La matrice si riferisce a versioni superate dei documenti (01 3.2, 02 2.1, 03 2.0) e non registra le decisioni del titolare del 18–20 novembre 2026: le due modalità di battaglia, lo scambio dei termini campagna e fronte, il caso confinato allo scontro a campioni, lo stato di conoscenza «osservato». Le righe che vi dipendono (01 §5.6.9–5.6.10, 5.7.1, 5.9.2, 5.9.3, 5.9.1.7, 12.1–12.5; 02 §4.2, 4.4, 6.5–6.7, 7.3, 7.4; 03 §4.6, 4.8.1, 4.8.4, 4.9.2, 4.11.1, 9.4) vanno lette con i documenti consolidati correnti; il suo aggiornamento appartiene al riallineamento dei consolidati.
+Avvertenza del 2026-11-20 (incarico 27). La matrice si riferisce a versioni superate dei documenti (01 3.2, 02 2.1, 03 2.0) e non registra le decisioni del titolare del 18–20 novembre 2026: le due modalità di battaglia, lo scambio dei termini campagna e fronte, il caso confinato allo scontro a campioni, lo stato di conoscenza «osservato». Le righe che vi dipendono (01 §5.6.9–5.6.10, 5.7.1, 5.9.2, 5.9.3, 5.9.1.7, 12.1–12.5; 02 §4.2, 4.4, 6.5–6.7, 7.3, 7.4; 03 §4.6, 4.8.1, 4.8.4, 4.9.2, 4.11.1, 9.4) vanno lette con i documenti consolidati correnti; il suo aggiornamento appartiene al riallineamento dei consolidati. Il 2026-11-21 (incarico 28) il titolare ha riportato al caso meteo e guasti delle macchine, come eccezione dichiarata accanto allo scontro a campioni (01 3.9 §12.1, §12.2; RDA-152): per quella parte valgono il documento 01 nella versione 3.9, 02 2.7, 03 2.6 e 05 1.5.
 
 ## 0. Che cosa contiene e come si usa
 
