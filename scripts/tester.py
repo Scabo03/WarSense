@@ -85,7 +85,9 @@ def etichette():
 
 
 def tocco_magico():
-    e = cmd({"azione": "multi_tocco", "tocchi": 2, "dita": 2, "ascolto": 3.0})
+    # Il gesto su un elemento concreto: sull'iPad l'applicazione e la sua finestra non hanno coordinate
+    # calcolabili per un tocco a più dita, e per VoiceOver il tocco magico vale ovunque.
+    e = cmd({"azione": "multi_tocco", "contiene": "riga 1, c", "tocchi": 2, "dita": 2, "ascolto": 3.0})
     s = sentito(e)
     diario("tocco_magico", sentito=s)
     return s
@@ -111,32 +113,39 @@ def battaglia():
         if "Resoconto della battaglia" in nomi:
             break
         # 1. Schieramento: la prima tessera con esemplari, poi la prima cella valida, fino a tre volte.
+        #    Con una tessera scelta le celle valide dichiarano in testa costo e residuo.
         for _ in range(3):
-            tessere = [r for r in albero() if "esemplar" in r and "=" in r]
+            tessere = [r for r in albero() if "esemplar" in r and "=" in r and "0 esemplari" not in r]
             if not tessere:
                 break
             nome = re.sub(r" \[.*$", "", tessere[0])
             attiva(etichetta=nome)
-            if not scegli_rotore("Celle valide"):
-                break
-            cella = prossimo_nel_rotore()
-            m = re.match(r"(riga \d+, cella \d+)", cella)
+            valide = [n for n in etichette() if n.startswith("costa ") and ", libera" in n]
+            m = re.search(r"riga \d+, cella \d+", valide[0]) if valide else None
             if not m:
+                attiva(etichetta=nome)  # toglie la scelta
                 break
-            attiva(prefisso=m.group(1) + ",")
-        # 2. Attacco: ogni proprio reparto con azione, dal suo pannello, ingaggia o tira se può.
-        if scegli_rotore("Tuoi reparti da muovere"):
-            visti = set()
-            for _ in range(6):
-                s = prossimo_nel_rotore()
-                m = re.match(r"(riga \d+, cella \d+)", s)
-                if not m or m.group(1) in visti:
-                    break
-                visti.add(m.group(1))
-                attiva(prefisso=m.group(1) + ",")
-                voci = etichette()
-                scelta = next((v for v in voci if v.startswith("Ingaggia") or v.startswith("Tira su")), None)
-                attiva(etichetta=scelta or PANNELLO["chiudi"], tipo="pulsante")
+            attiva(contiene=m.group(0) + ",")
+        # 2. Attacco: ogni proprio reparto dal suo pannello ingaggia o tira se può, altrimenti avanza.
+        propri = [re.search(r"riga \d+, cella \d+", n).group(0) for n in etichette()
+                  if re.search(r"riga \d+, cella \d+, tuo", n)]
+        for cella in propri[:4]:
+            attiva(contiene=cella + ",")
+            voci = etichette()
+            scelta = next((v for v in voci if v.startswith("Ingaggia") or v.startswith("Tira su")), None)
+            if scelta:
+                attiva(etichetta=scelta, tipo="pulsante")
+            elif "Scegli la destinazione sulla griglia" in voci:
+                attiva(etichetta="Scegli la destinazione sulla griglia", tipo="pulsante")
+                mete = [n for n in etichette() if n.startswith("costa ") and ", libera" in n]
+                # la meta più avanzata (riga più bassa) fra quelle raggiungibili
+                mete.sort(key=lambda n: int(re.search(r"riga (\d+)", n).group(1)))
+                if mete:
+                    attiva(contiene=re.search(r"riga \d+, cella \d+", mete[0]).group(0) + ",")
+                else:
+                    attiva(contiene=cella + ",")
+            else:
+                attiva(etichetta=PANNELLO["chiudi"], tipo="pulsante")
         # 3. Resa se la battaglia si allunga, altrimenti fine del turno.
         if turno >= 14 and "Dichiara la resa" in etichette():
             attiva(etichetta="Dichiara la resa", tipo="pulsante", ascolto=3)
