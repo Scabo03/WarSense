@@ -49,6 +49,24 @@ final class MisuraFrequenzaBattaglieTest: XCTestCase {
         XCTAssertGreaterThan(confronti, 0, "almeno uno scenario confrontato")
     }
 
+    /// Nessuna partita misurata viola un invariante dello stato. Le due partite qui sono quelle in cui la
+    /// misura dell'incarico 29 ha visto due gruppi del giocatore nella stessa casella (01 §5.6.0.2): lo
+    /// sconfitto di una battaglia ripiegava nella meta di una marcia propria in corso. Da lì la scelta del
+    /// gruppo che combatte la battaglia successiva dipendeva dall'ordine del dizionario dei gruppi, diverso
+    /// a ogni processo: la stessa partita dava due esiti diversi fra una corsa e l'altra.
+    func test_le_partite_che_avevano_due_gruppi_nella_stessa_casella_non_violano_invarianti() throws {
+        let (_, misura, _) = try strumenti()
+        let dati = try Data(contentsOf: Contenuti.valoriDiFabbrica.appendingPathComponent("scenari-campagna.json"))
+        let scenari = try JSONDecoder().decode([String: ScenarioCampagna].self, from: dati)
+        for (formato, seme, giornate) in [("campagna_media", UInt64(179), 90), ("campagna_grande", UInt64(196), 50)] {
+            let scenario = try XCTUnwrap(scenari[formato])
+            let partita = try misura.gioca(scenario: scenario, formato: formato, condotta: .competente,
+                                           seme: seme, limiteGiornate: giornate)
+            XCTAssertEqual(partita.violazioni, [],
+                           "\(formato)/competente/\(seme): violazioni dal giorno \(partita.giornoPrimaViolazione ?? 0)")
+        }
+    }
+
     /// Le partite misurate sono coerenti: nessuna si ferma, le battaglie contate sono quelle elencate, la
     /// prima battaglia è la prima elencata, la durata non supera il limite.
     func test_le_partite_misurate_sono_coerenti() throws {
@@ -57,6 +75,7 @@ final class MisuraFrequenzaBattaglieTest: XCTestCase {
         XCTAssertEqual(rapporto.partite.count, 2 * 2 * FrequenzaBattaglieDaRigaDiComando.formati.count)
         for p in rapporto.partite {
             XCTAssertNotEqual(p.fine, .ferma, "\(p.formato)/\(p.condotta)/\(p.seme): la partita si è fermata")
+            XCTAssertEqual(p.violazioni, [], "\(p.formato)/\(p.condotta)/\(p.seme): invarianti violati")
             XCTAssertEqual(p.battaglie, p.giornateDelleBattaglie.count)
             XCTAssertEqual(p.primaBattaglia, p.giornateDelleBattaglie.first)
             XCTAssertLessThanOrEqual(p.giornate, 40)

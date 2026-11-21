@@ -1,0 +1,15 @@
+# Prove rosse del ripiegamento nella meta di una marcia propria (incarico 29), sul codice prima della correzione
+# comando: cd Codice && swift test --filter "RipiegamentoTest|MisuraFrequenzaBattaglieTest"
+# commit del codice provato: c61c131 più le sole prove nuove; data: 2026-11-21 20:55
+	 Executed 2 tests, with 1 failure (0 unexpected) in 0.121 (0.121) seconds
+	 Executed 2 tests, with 1 failure (0 unexpected) in 0.121 (0.122) seconds
+	 Executed 3 tests, with 2 failures (0 unexpected) in 0.671 (0.672) seconds
+	 Executed 3 tests, with 2 failures (0 unexpected) in 0.671 (0.673) seconds
+/Users/lucascabini/Developer/WarSense/Codice/Tests/MotoreTest/RipiegamentoTest.swift:55: error: -[MotoreTest.RipiegamentoTest test_01_5_6_0_2_lo_sconfitto_non_ripiega_nella_meta_di_una_marcia_propria] : XCTAssertFalse failed - lo sconfitto ripiegherebbe in Cella(riga: 2, colonna: 2), meta della marcia del gruppo gruppo-2: all'arrivo la casella ospiterebbe due gruppi del giocatore (01 §5.6.0.2)
+/Users/lucascabini/Developer/WarSense/Codice/Tests/VerificaTest/MisuraFrequenzaBattaglieTest.swift:65: error: -[VerificaTest.MisuraFrequenzaBattaglieTest test_le_partite_che_avevano_due_gruppi_nella_stessa_casella_non_violano_invarianti] : XCTAssertEqual failed: ("["due_gruppi_stessa_casella"]") is not equal to ("[]") - campagna_grande/competente/196: violazioni dal giorno 41
+/Users/lucascabini/Developer/WarSense/Codice/Tests/VerificaTest/MisuraFrequenzaBattaglieTest.swift:65: error: -[VerificaTest.MisuraFrequenzaBattaglieTest test_le_partite_che_avevano_due_gruppi_nella_stessa_casella_non_violano_invarianti] : XCTAssertEqual failed: ("["due_gruppi_stessa_casella"]") is not equal to ("[]") - campagna_media/competente/179: violazioni dal giorno 77
+Test Case '-[MotoreTest.RipiegamentoTest test_01_5_6_0_2_lo_sconfitto_non_ripiega_nella_meta_di_una_marcia_propria]' failed (0.110 seconds).
+Test Case '-[MotoreTest.RipiegamentoTest test_la_meta_della_marcia_dello_sconfitto_stesso_resta_disponibile]' passed (0.011 seconds).
+Test Case '-[VerificaTest.MisuraFrequenzaBattaglieTest test_la_condotta_competente_e_quella_del_banco]' passed (0.288 seconds).
+Test Case '-[VerificaTest.MisuraFrequenzaBattaglieTest test_le_partite_che_avevano_due_gruppi_nella_stessa_casella_non_violano_invarianti]' failed (0.210 seconds).
+Test Case '-[VerificaTest.MisuraFrequenzaBattaglieTest test_le_partite_misurate_sono_coerenti]' passed (0.173 seconds).

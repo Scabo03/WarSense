@@ -61,6 +61,13 @@ public struct MisuraFrequenzaBattaglie: Sendable {
         public let armatiAvversario: Int
         /// Perché la partita si è fermata, se si è fermata (fine `ferma`): il dato per capirlo.
         public let motivoFerma: String?
+        /// I codici degli invarianti dello stato violati durante la partita (`SondaInvariantiCampagna
+        /// .controlla(stato:)`, interrogata dopo ogni cambiamento dello stato), senza ripetizioni e in
+        /// ordine; vuoto se nessuno. La misura gioca molte più giornate del banco e delle sessioni, e
+        /// incontra stati che quelli non raggiungono.
+        public let violazioni: [String]
+        /// Il giorno della partita (contato da 1) in cui la sonda ha visto la prima violazione.
+        public let giornoPrimaViolazione: Int?
         enum CodingKeys: String, CodingKey {
             case formato, condotta, seme, giornate, battaglie, vinte, perse, fine
             case giornateDelleBattaglie = "giornate_delle_battaglie"
@@ -69,11 +76,14 @@ public struct MisuraFrequenzaBattaglie: Sendable {
             case armatiGiocatore = "armati_giocatore"
             case armatiAvversario = "armati_avversario"
             case motivoFerma = "motivo_ferma"
+            case violazioni
+            case giornoPrimaViolazione = "giorno_prima_violazione"
         }
     }
 
     let banco: BancoCampagna
     var motore: MotoreCampagna { banco.motore }
+    let sonda = SondaInvariantiCampagna()
 
     public init(motore: MotoreCampagna, valoriCampagna: ValoriCampagna) {
         banco = BancoCampagna(motore: motore, valoriCampagna: valoriCampagna,
@@ -122,6 +132,15 @@ public struct MisuraFrequenzaBattaglie: Sendable {
         var fine: Fine = .limite
         var motivoFerma: String?
         let tettoPassiPerGiornata = 400
+        var violazioni = Set<String>()
+        var giornoPrimaViolazione: Int?
+        /// La sonda degli invarianti dello stato, dopo ogni cambiamento dello stato.
+        func sorveglia() {
+            let viste = sonda.controlla(stato: stato).map(SondaInvariantiCampagna.codice(di:))
+            guard !viste.isEmpty else { return }
+            if giornoPrimaViolazione == nil { giornoPrimaViolazione = stato.giorno - giornoIniziale + 1 }
+            violazioni.formUnion(viste)
+        }
 
         /// Le battaglie in sospeso, giocate col modello del banco (`giocaBattagliaComeAlBanco`). Una
         /// battaglia che non si conclude entro i tetti del banco ferma la partita e si registra.
@@ -134,6 +153,7 @@ public struct MisuraFrequenzaBattaglie: Sendable {
                     return "battaglia_non_conclusa:giri=\(Self.tettoGiri):giorno=\(battaglia.giorno):casella=\(battaglia.casella.riga),\(battaglia.casella.colonna):imboscata=\(imboscata)"
                 }
                 _ = motore.applicaEsitoInCampagna(esito, in: &stato)
+                sorveglia()
                 giornateBattaglie.append(battaglia.giorno)
                 if battaglia.daImboscata { daImboscata += 1 }
                 if esito.sconfitto == .giocatore { perse += 1 } else { vinte += 1 }
@@ -170,6 +190,7 @@ public struct MisuraFrequenzaBattaglie: Sendable {
             if let comando {
                 if motore.valida(comando, parte: .giocatore, stato: stato).eValido {
                     stato = motore.applica(comando, parte: .giocatore, stato: stato).0
+                    sorveglia()
                 } else {
                     // Un ordine che il Motore respinge non si dà: il gruppo resta. Non accade con le due
                     // condotte (scelgono fra comandi validati), ma la misura non si ferma sull'errore.
@@ -192,11 +213,13 @@ public struct MisuraFrequenzaBattaglie: Sendable {
                 guard let comandoAvversario = banco.condotta.prossimoComando(
                     vista: motore.vistaAvversario(stato: stato)) else { break }
                 stato = motore.applica(comandoAvversario, parte: .avversario, stato: stato).0
+                sorveglia()
             }
             // Nessuno attende e la giornata non si è chiusa: la chiude il tasto del giocatore (01 §5.6.0.6).
             if stato.gruppiInAttesa(di: .giocatore).isEmpty, stato.gruppiInAttesa(di: .avversario).isEmpty,
                stato.battaglieInSospeso.isEmpty, comando == nil {
                 _ = motore.concludiLaGiornataDelGiocatore(&stato)
+                sorveglia()
             }
         }
         _ = passi
@@ -206,7 +229,8 @@ public struct MisuraFrequenzaBattaglie: Sendable {
                        primaBattaglia: giornateBattaglie.first.map { $0 - giornoIniziale + 1 },
                        vinte: vinte, perse: perse, daImboscata: daImboscata, fine: fine,
                        armatiGiocatore: armati(.giocatore, stato), armatiAvversario: armati(.avversario, stato),
-                       motivoFerma: motivoFerma),
+                       motivoFerma: motivoFerma, violazioni: violazioni.sorted(),
+                       giornoPrimaViolazione: giornoPrimaViolazione),
                 stato)
     }
 
@@ -422,18 +446,22 @@ public enum FrequenzaBattaglieDaRigaDiComando {
         righe.append("frequenza.versione_valori=\(valori.versioneEffettiva)")
         righe.append(["frequenza.partite_per_cella=\(partite)", "giornate_massime=\(giornateMassime)",
                       "partite_giocate=\(giocate.count)", "partite_previste=\(compiti.count)"].joined(separator: ","))
-        righe.append("formato|condotta|partite|battaglie_ogni_10_giornate|battaglie_per_partita|prima_battaglia_mediana|partite_senza_battaglie|giornate_mediana|giornate_min|giornate_max|fine_avversario_senza_armati|fine_giocatore_senza_armati|fine_limite|ferma|giornate_mediane_fino_alla_fine_naturale")
+        righe.append("formato|condotta|partite|battaglie_ogni_10_giornate|battaglie_per_partita|prima_battaglia_mediana|partite_senza_battaglie|giornate_mediana|giornate_min|giornate_max|fine_avversario_senza_armati|fine_giocatore_senza_armati|fine_limite|ferma|giornate_mediane_fino_alla_fine_naturale|partite_con_violazioni")
         for r in MisuraFrequenzaBattaglie.riepiloga(giocate) {
             let vinte = r.fini[.avversarioSenzaArmati, default: 0], perse = r.fini[.giocatoreSenzaArmati, default: 0]
             let alLimite = r.fini[.limite, default: 0], ferme = r.fini[.ferma, default: 0]
             let mediane = r.giornateMedianeFinoAllaFineNaturale.map(String.init)
+            let conViolazioni = giocate.filter {
+                $0.formato == r.formato && $0.condotta == r.condotta && !$0.violazioni.isEmpty
+            }.count
             righe.append([r.formato, r.condotta.rawValue, "\(r.partite)",
                           String(format: "%.2f", r.battaglieOgniDieciGiornate),
                           String(format: "%.2f", r.mediaBattagliePerPartita),
                           r.primaBattagliaMediana.map(String.init) ?? "-",
                           "\(r.partiteSenzaBattaglie)", "\(r.giornateMediana)", "\(r.giornateMinimo)",
                           "\(r.giornateMassimo)",
-                          "\(vinte)", "\(perse)", "\(alLimite)", "\(ferme)", mediane ?? "-"].joined(separator: "|"))
+                          "\(vinte)", "\(perse)", "\(alLimite)", "\(ferme)", mediane ?? "-",
+                          "\(conViolazioni)"].joined(separator: "|"))
         }
         return Rapporto(grezzi: grezzi, testo: righe.joined(separator: "\n"), partite: giocate)
     }

@@ -1,9 +1,9 @@
-frequenza.versione_valori=0.13.0
-frequenza.partite_per_cella=200 giornate_massime=730 partite_giocate=1200 su 1200
-formato|condotta|partite|battaglie_ogni_10_giornate|battaglie_per_partita|prima_battaglia_mediana|partite_senza_battaglie|giornate_mediana|giornate_min|giornate_max|fine_avversario_senza_armati|fine_giocatore_senza_armati|fine_limite|ferma|giornate_mediane_fino_alla_fine_naturale
-campagna_grande|competente|200|0.01|0.86|52|117|730|29|730|15|0|174|11|58
-campagna_grande|prudente|200|0.00|0.01|26|199|730|730|730|0|0|200|0|-
-campagna_media|competente|200|0.15|9.52|58|102|730|26|733|0|0|173|27|-
-campagna_media|prudente|200|0.03|2.04|11|1|730|730|730|0|0|200|0|-
-campagna_piccola|competente|200|0.04|2.03|21|12|730|9|730|15|42|142|1|43
-campagna_piccola|prudente|200|0.01|1.00|6|0|730|730|730|0|0|200|0|-
+frequenza.versione_valori=0.14.0
+frequenza.partite_per_cella=200,giornate_massime=730,partite_giocate=1200,partite_previste=1200
+formato|condotta|partite|battaglie_ogni_10_giornate|battaglie_per_partita|prima_battaglia_mediana|partite_senza_battaglie|giornate_mediana|giornate_min|giornate_max|fine_avversario_senza_armati|fine_giocatore_senza_armati|fine_limite|ferma|giornate_mediane_fino_alla_fine_naturale|partite_con_violazioni
+campagna_grande|competente|200|0.01|0.86|52|117|730|29|730|15|0|173|12|58|0
+campagna_grande|prudente|200|0.00|0.01|26|199|730|730|730|0|0|200|0|-|0
+campagna_media|competente|200|0.15|9.52|58|102|730|26|733|0|0|173|27|-|0
+campagna_media|prudente|200|0.03|2.04|11|1|730|730|730|0|0|200|0|-|0
+campagna_piccola|competente|200|0.04|2.03|21|12|730|9|730|15|42|142|1|43|0
+campagna_piccola|prudente|200|0.01|1.00|6|0|730|730|730|0|0|200|0|-|0

@@ -118,8 +118,14 @@ public enum PonteCampagnaBattaglia {
     /// posizione secondo la STESSA definizione del taglio del rifornimento (01 §5.2.2.2, `MotoreCampagna
     /// .caselleAlleSpalle`) — «retrostante significa dalla parte del proprio quartier generale» —
     /// ristrette a quelle STRETTAMENTE più vicine al proprio quartier generale (un passo all'indietro,
-    /// mai un avanzamento: 01 §10.6) e libere da un proprio gruppo (una formazione per parte per casella,
-    /// 01 §5.6.0.2). Non introduce una seconda nozione di direzione: usa quella del taglio. In ordine
+    /// mai un avanzamento: 01 §10.6), libere da un proprio gruppo (una formazione per parte per casella,
+    /// 01 §5.6.0.2) e NON META di una marcia propria in corso: la destinazione di una marcia è prenotata
+    /// quanto una casella occupata, come per la validazione della marcia (`MotoreCampagna.valida`), perché
+    /// all'arrivo ospiterebbe due gruppi della stessa parte (incarico 29: la misura della frequenza ha visto
+    /// lo sconfitto ripiegare nella meta di una marcia, e da lì la scelta del gruppo della battaglia
+    /// successiva dipendeva dall'ordine del dizionario dei gruppi). La prenotazione dello sconfitto stesso
+    /// non conta: la battaglia ne interrompe la marcia (`applicaEsitoInCampagna`). Non introduce una
+    /// seconda nozione di direzione: usa quella del taglio. In ordine
     /// deterministico (per riga poi colonna). Fra queste il giocatore SCEGLIE dall'interfaccia; la
     /// condotta e il default prendono la prima. VUOTO al margine o con le spalle occupate: il caso
     /// limite lo gestisce il chiamante lasciando lo sconfitto nella casella contesa (S25a, dichiarato).
@@ -127,10 +133,14 @@ public enum PonteCampagnaBattaglia {
                                              stato: StatoCampagna) -> [Cella] {
         let qg = stato.mappa.quartierGenerale(di: parte)
         let distanzaAttuale = stato.griglia.distanza(casella, qg)
+        let prenotate = Set(stato.gruppi.values.compactMap { gruppo -> Cella? in
+            gruppo.parte == parte && gruppo.posizione != casella ? gruppo.marcia?.destinazione : nil
+        })
         return MotoreCampagna.caselleAlleSpalle(di: casella, qg: qg, griglia: stato.griglia)
             .filter { c in
                 stato.griglia.distanza(c, qg) < distanzaAttuale     // un passo verso casa, mai avanti
                     && stato.occupante(di: c, parte: parte) == nil  // libera da un proprio gruppo
+                    && !prenotate.contains(c)                       // e non meta di una marcia propria
             }
             .sorted { $0.riga == $1.riga ? $0.colonna < $1.colonna : $0.riga < $1.riga }
     }
