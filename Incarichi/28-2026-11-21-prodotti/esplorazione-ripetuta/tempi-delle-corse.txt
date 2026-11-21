@@ -1,0 +1,10 @@
+iphone-orizzontale-predefinito-ridotta ampiezza=ridotta uscita=65 durata=1068s simulatore=E2C6F42C-A154-485C-B504-DB8BB5C3FFA4
+iphone-orizzontale-grande-ridotta ampiezza=ridotta uscita=65 durata=1068s simulatore=4CD3DC60-42FA-4F78-9F73-B9B92A81F1DC
+ipad-orizzontale-grande-ridotta ampiezza=ridotta uscita=65 durata=1222s simulatore=2B3AB121-5461-4299-997F-E14C79EB7403
+ipad-orizzontale-predefinito-ridotta ampiezza=ridotta uscita=65 durata=1350s simulatore=75A249BF-88AB-46A0-86A9-9378408D540E
+iphone-verticale-predefinito-formati ampiezza=formati uscita=0 durata=1903s simulatore=76DF33B6-7EA7-489D-98AD-459879B75C2D
+ipad-verticale-predefinito-formati ampiezza=formati uscita=0 durata=1948s simulatore=8D3583DB-1E8D-4688-93E7-5F959B7B7D62
+iphone-verticale-predefinito-ridotta ampiezza=ridotta uscita=0 durata=2101s simulatore=C86CB490-B9AE-48E8-BC1B-FDD2C52274B4
+ipad-verticale-predefinito-ridotta ampiezza=ridotta uscita=0 durata=2116s simulatore=D01FE19F-2594-4B94-98A0-E3F2486DAD1F
+iphone-verticale-grande-ridotta ampiezza=ridotta uscita=138 durata=2146s simulatore=87AB2F55-5E5C-4A25-B2FE-7D8975F1E8CA
+ipad-verticale-grande-ridotta ampiezza=ridotta uscita=138 durata=2164s simulatore=1DF852F1-3D6F-4551-A71F-F3B3A80C0AFC

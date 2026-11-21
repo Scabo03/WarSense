@@ -1,0 +1,4 @@
+iphone-verticale-grande ampiezza=completa uscita=0 durata=199s simulatore=76DF33B6-7EA7-489D-98AD-459879B75C2D
+iphone-verticale-predefinito ampiezza=completa uscita=0 durata=199s simulatore=C86CB490-B9AE-48E8-BC1B-FDD2C52274B4
+ipad-verticale-predefinito ampiezza=completa uscita=0 durata=200s simulatore=D01FE19F-2594-4B94-98A0-E3F2486DAD1F
+ipad-verticale-grande ampiezza=completa uscita=0 durata=200s simulatore=8D3583DB-1E8D-4688-93E7-5F959B7B7D62

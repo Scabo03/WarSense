@@ -20,6 +20,8 @@ final class SchermataAvvio: UIViewController {
     /// torna lì (02 §5.1, osservazione 6 dell'esplorazione dell'incarico 27). Per chiave e non per
     /// oggetto, perché tornando da uno scontro o da una campagna le voci si ricostruiscono.
     private var chiaveDiOrigine: String?
+    /// Il contenitore scorrevole della colonna, per portare in vista il comando d'origine.
+    private var scorrimento: UIScrollView?
 
     override func viewDidLoad() {
         super.viewDidLoad()
@@ -28,7 +30,7 @@ final class SchermataAvvio: UIViewController {
         colonna.spacing = 16
         // A testo massimo o in orizzontale le voci non entrano nello schermo: la colonna scorre
         // (osservazioni 3 e 7). Quando entrano, sta al centro come prima.
-        ColonnaScorrevole.monta(colonna, in: view, centrata: true)
+        scorrimento = ColonnaScorrevole.monta(colonna, in: view, centrata: true)
         let titolo = UILabel()
         titolo.text = testi.frase("avvio.titolo").testo
         titolo.font = .preferredFont(forTextStyle: .largeTitle)
@@ -51,11 +53,30 @@ final class SchermataAvvio: UIViewController {
     /// Chiusa una schermata aperta da qui, il fuoco torna sul comando che l'aveva aperta, dove il
     /// giocatore l'aveva lasciato (02 §5.1). Se quel comando non c'è più — «Riprendi lo scontro in
     /// corso» sparisce quando lo scontro si conclude —, il fuoco va al titolo dell'avvio.
+    ///
+    /// La notifica si emette a chiusura COMPIUTA, un istante dopo: emessa dentro l'attivazione del
+    /// pulsante che chiude, VoiceOver la scavalcava con la propria rifocalizzazione sull'elemento
+    /// sparito (esplorazione ripetuta dell'incarico 28: dopo le impostazioni restava su «Chiudi il
+    /// pannello» o andava al titolo, in cinque chiusure su undici).
     private func riportaIlFuoco() {
-        let origine = chiaveDiOrigine.flatMap { pulsante(perChiave: $0) }
+        let chiave = chiaveDiOrigine
         chiaveDiOrigine = nil
-        Fuoco.sposta(a: origine ?? colonna.arrangedSubviews.first, perche: .schermataChiusa)
+        DispatchQueue.main.asyncAfter(deadline: .now() + Self.attesaDelRitorno) { [weak self] in
+            guard let self else { return }
+            let origine = chiave.flatMap { self.pulsante(perChiave: $0) }
+            // A testo massimo la colonna è più alta dello schermo: il comando d'origine si porta
+            // in vista prima, perché VoiceOver non ripieghi sul primo elemento visibile.
+            if let origine, let scorrimento = self.scorrimento {
+                scorrimento.layoutIfNeeded()
+                scorrimento.scrollRectToVisible(origine.convert(origine.bounds, to: scorrimento), animated: false)
+            }
+            Fuoco.sposta(a: origine ?? self.colonna.arrangedSubviews.first, perche: .schermataChiusa)
+        }
     }
+
+    /// Quanto attendere, chiusa una schermata, prima di riportare il fuoco: tempo d'interfaccia, non
+    /// numero di gioco (05 §0.4), il minimo perché VoiceOver abbia concluso la propria rifocalizzazione.
+    private static let attesaDelRitorno: TimeInterval = 0.4
 
     private func ricostruisciVoci() {
         for vista in colonna.arrangedSubviews.dropFirst() { vista.removeFromSuperview() }

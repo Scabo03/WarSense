@@ -68,6 +68,7 @@ final class SchermataBattaglia: UIViewController {
         scorrimento.addSubview(vistaGriglia)
 
         intestazioneDeck.font = .preferredFont(forTextStyle: .headline)
+        intestazioneDeck.numberOfLines = 0 // a testo massimo andava tagliata (incarico 28, osservazione 8)
         intestazioneDeck.adjustsFontForContentSizeCategory = true
         intestazioneDeck.isAccessibilityElement = true
         intestazioneDeck.accessibilityTraits = .header
