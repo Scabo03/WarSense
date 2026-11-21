@@ -36,5 +36,5 @@ Build osservata: il codice della build 29 (principale b8abc93 e successivi, che 
 
 ## Che cosa NON è stato percorso con VoiceOver, e perché
 
-- **Orizzontale, oltre la lettura:** in orizzontale il doppio tocco sintetico non attiva nulla (limite del canale): letta la schermata, non attivati i comandi.
-- **Gesto di uscita, azioni personalizzate eseguite, doppio tocco ovunque:** non guidabili dal vivo; verificati un livello sotto (`GestiUnLivelloSottoTest`), salvo il punto 4.
+- **Orizzontale, oltre la lettura:** in orizzontale il doppio tocco non attiva nulla, né con XCUITest né con Device Hub. Safari si comporta allo stesso modo, quindi il limite è del simulatore e non di WarSense (`../device-hub/trascrizione.md`, passi 8–9 e 22–23). La schermata l'ho letta, i comandi non li ho attivati.
+- **Gesto di uscita ed esecuzione delle azioni personalizzate:** non guidabili dal vivo con nessuno dei due canali; verificati un livello sotto (`GestiUnLivelloSottoTest`), salvo il punto 4. **Doppio tocco ovunque:** non guidabile, e Safari fa lo stesso (passi 4–6 e 24–25).

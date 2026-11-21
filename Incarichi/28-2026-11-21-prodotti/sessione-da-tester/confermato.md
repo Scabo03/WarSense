@@ -21,3 +21,9 @@ Ogni voce cita ciò che VoiceOver ha pronunciato (pilota, servizio VoiceOver del
 - **Battaglia nata in campagna e ritorno:** aperta dal pannello del gruppo coinvolto («Apri la battaglia»), fuoco sull'intestazione del deck, avversario per primo; dopo il resoconto e «Torna all'inizio», la campagna riprende: «Giorno 9. Nessun gruppo ha ancora agito, sono 3».
 - **Tocco magico** (doppio tocco a due dita, guidato dal vivo): l'informazione di stato della campagna e quella della battaglia («Volume residuo 330, turno 5, avversari fino alla riga 1»).
 - **Rotori da tastiera:** i sei rotori della mappa, e il salto «Gruppi da muovere» da Corvo a Lupo a Falco.
+
+## Con Device Hub (gesti a un dito, eventi di sistema; `../device-hub/trascrizione.md`)
+- **Impostazioni:** il doppio tocco su «Impostazioni» le apre, con il fuoco sull'intestazione; il doppio tocco su «Chiudi il pannello» le chiude e il fuoco torna su «Impostazioni Pulsante». È l'osservazione 6 dell'incarico 27 corretta, vista anche con questo canale.
+- **Pannello del gruppo:** il doppio tocco sulla casella di Lupo apre «Azioni per Lupo in riga 1, casella 3»; il doppio tocco su «Chiudi il pannello» lo chiude e il fuoco torna sulla casella di Lupo.
+- **Colpetti:** a destra «riga 1, casella 4, formazione non armata avversaria, bosco…», a sinistra di nuovo Lupo, in giù «Vai a sud» (le azioni personalizzate della casella).
+- **Etichette intere**, lette dall'albero che Device Hub espone, senza il taglio a 64 caratteri: per esempio «riga 1, casella 3, tuo Lupo, in attesa, in sosta di rifornimento, formazione di ricognizione avversaria, composta da 18 atomi di fanteria leggera, 8 atomi di fanteria pesante».

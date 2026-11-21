@@ -1,0 +1,5 @@
+$ DH_PID=$(pgrep -x DeviceHub) devicehub righe | grep scelta
+1 [scelta] Ipad | iPad Pro 11-inch (M5) | 27.0 | Simulator
+$ devicehub clicg 795 400 1
+RIFIUTO: la finestra di Device Hub mostra «iPad Pro 11-inch (M5) – iPadOS 27.0», non un apparecchio di WarSense
+uscita: 2

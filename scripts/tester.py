@@ -20,6 +20,10 @@ import time
 CARTELLA = pathlib.Path(sys.argv[1])
 FORMATO = sys.argv[2]
 GIORNATE = int(sys.argv[3]) if len(sys.argv) > 3 else 30
+# Opzioni (dal quinto argomento in poi): «resa» = in battaglia si dichiara la resa appena è
+# disponibile (lo sconfitto sopravvive e ripiega: il percorso del ripiegamento); «tutti» = ogni gruppo
+# armato marcia verso nord quando può, per cercare il contatto (altrimenti uno su due).
+OPZIONI = set(sys.argv[5:])
 DIARIO = CARTELLA / f"diario-{FORMATO}.jsonl"
 
 PANNELLO = {
@@ -87,7 +91,10 @@ def etichette():
 def tocco_magico():
     # Il gesto su un elemento concreto: sull'iPad l'applicazione e la sua finestra non hanno coordinate
     # calcolabili per un tocco a più dita, e per VoiceOver il tocco magico vale ovunque.
-    e = cmd({"azione": "multi_tocco", "contiene": "riga 1, c", "tocchi": 2, "dita": 2, "ascolto": 3.0})
+    nomi = etichette()
+    bersaglio = next((n for n in ("Registro della campagna", "Fine del turno", "Chiudi la giornata") if n in nomi), None)
+    c = {"etichetta": bersaglio, "tipo": "pulsante"} if bersaglio else {"contiene": "riga 1, c"}
+    e = cmd(dict({"azione": "multi_tocco", "tocchi": 2, "dita": 2, "ascolto": 3.0}, **c))
     s = sentito(e)
     diario("tocco_magico", sentito=s)
     return s
@@ -147,8 +154,13 @@ def battaglia():
             else:
                 attiva(etichetta=PANNELLO["chiudi"], tipo="pulsante")
         # 3. Resa se la battaglia si allunga, altrimenti fine del turno.
-        if turno >= 14 and "Dichiara la resa" in etichette():
-            attiva(etichetta="Dichiara la resa", tipo="pulsante", ascolto=3)
+        soglia_resa = 2 if "resa" in OPZIONI else 14
+        if turno >= soglia_resa and "Dichiara la resa" in etichette():
+            e = attiva(etichetta="Dichiara la resa", tipo="pulsante", ascolto=3)
+            diario("resa", turno=turno, sentito=sentito(e))
+            if "Resoconto della battaglia" in etichette():
+                break
+            attiva(etichetta="Fine del turno", tipo="pulsante", ascolto=4)
         else:
             attiva(etichetta="Fine del turno", tipo="pulsante", ascolto=4)
         diario("turno", numero=turno, stato=tocco_magico())
@@ -158,9 +170,11 @@ def battaglia():
     # Il ripiegamento, se lo sconfitto ha più caselle: la prima voce del pannello.
     voci = etichette()
     if "Scegli dove ripiegare" in voci:
-        v = next((v for v in voci if v.startswith("In riga ")), None)
-        if v:
-            attiva(etichetta=v, tipo="pulsante", ascolto=3)
+        caselle = [v for v in voci if v.startswith("In riga ")]
+        diario("ripiegamento_proposto", caselle=caselle)
+        if caselle:
+            e = attiva(etichetta=caselle[0], tipo="pulsante", ascolto=3)
+            diario("ripiegamento_scelto", casella=caselle[0], sentito=sentito(e))
     diario("ritorno_in_campagna", stato=tocco_magico())
 
 
@@ -194,7 +208,18 @@ def giornata(numero):
         m = re.search(r"riga (\d+), casella (\d+)", s)
         r, c = int(m.group(1)), int(m.group(2))
         gia.add(m.group(0))
-        nord = next((n for n in etichette() if f"riga {r - 1}, casella {c}," in n), "")
+        tutte = etichette()
+        nord = next((n for n in tutte if f"riga {r - 1}, casella {c}," in n), "")
+        meta = (r - 1, c)
+        if "tutti" in OPZIONI:
+            # Con «tutti» il gruppo armato cerca il contatto: una casella vicina con il quartier generale
+            # o una formazione armata avversaria ha la precedenza sulla marcia verso nord.
+            for dr, dc in ((-1, 0), (0, -1), (0, 1), (1, 0)):
+                n = next((x for x in tutte if f"riga {r + dr}, casella {c + dc}," in x), "")
+                if n and "tuo " not in n and "tua " not in n and \
+                        ("quartier generale avversario" in n or "formazione avversaria" in n):
+                    nord, meta = n, (r + dr, c + dc)
+                    break
         attiva(contiene=f"riga {r}, casella {c},")
         voci = etichette()
         if PANNELLO["apri"] in voci:
@@ -204,9 +229,10 @@ def giornata(numero):
             battaglia()
             return "battaglia"
         if armato(s) and nord and "tuo " not in nord and "tua " not in nord \
-                and PANNELLO["marcia"] in voci and ordinati % 2 == 0:
+                and PANNELLO["marcia"] in voci and (ordinati % 2 == 0 or "tutti" in OPZIONI):
             attiva(etichetta=PANNELLO["marcia"], tipo="pulsante")
-            esito = sentito(attiva(contiene=f"riga {r - 1}, casella {c},", ascolto=2.5))
+            esito = sentito(attiva(contiene=f"riga {meta[0]}, casella {meta[1]},", ascolto=2.5))
+            diario("marcia", da=f"riga {r}, casella {c}", verso=f"riga {meta[0]}, casella {meta[1]}", sentito=esito)
             if "marcia verso" not in esito:
                 diario("osservazione_tester", testo="marcia non confermata", sentito=esito)
         elif PANNELLO["esplora"] in voci:
