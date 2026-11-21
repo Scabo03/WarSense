@@ -1,0 +1,22 @@
+{"azione": "termina", "ascolto": 0.3, "n": 1}
+{"azione": "avvia", "ascolto": 2, "n": 2}
+{"azione": "vo_accendi", "ascolto": 1, "n": 3}
+{"azione": "attiva", "ascolto": 3, "etichetta": "Impostazioni", "tipo": "pulsante", "n": 4}
+{"azione": "giro", "ascolto": 0.5, "con_schermata": true, "nome": "iphone-testo-massimo-impostazioni", "n": 5}
+{"azione": "tasto", "tasto": "esc", "modificatori": [], "ascolto": 1.5, "n": 6}
+{"azione": "albero", "ascolto": 0.2, "n": 7}
+{"azione": "albero", "ascolto": 0.2, "n": 8}
+{"azione": "attiva", "ascolto": 3.0, "etichetta": "Chiudi il pannello", "tipo": "pulsante", "n": 9}
+{"azione": "attiva", "ascolto": 3, "etichetta": "Suoni e vibrazioni del gioco", "tipo": "pulsante", "n": 10}
+{"azione": "giro", "ascolto": 0.5, "con_schermata": true, "nome": "iphone-testo-massimo-apprendimento", "n": 11}
+{"azione": "attiva", "ascolto": 3.0, "etichetta": "Chiudi il pannello", "tipo": "pulsante", "n": 12}
+{"azione": "attiva", "ascolto": 6, "etichetta": "Nuovo scontro di prova", "tipo": "pulsante", "n": 13}
+{"azione": "giro", "ascolto": 0.5, "con_schermata": true, "nome": "iphone-testo-massimo-battaglia", "n": 14}
+{"azione": "termina", "ascolto": 0.3, "n": 15}
+{"azione": "avvia", "ascolto": 2, "n": 16}
+{"azione": "vo_accendi", "ascolto": 1, "n": 17}
+{"azione": "attiva", "ascolto": 6, "etichetta": "Nuova campagna, mappa piccola", "tipo": "pulsante", "n": 18}
+{"azione": "attiva", "ascolto": 3, "etichetta": "Registro della campagna", "tipo": "pulsante", "n": 19}
+{"azione": "giro", "ascolto": 0.5, "con_schermata": true, "nome": "iphone-testo-massimo-registro", "n": 20}
+{"azione": "attiva", "ascolto": 3.0, "etichetta": "Chiudi il registro", "tipo": "pulsante", "n": 21}
+{"azione": "fine", "n": 22}

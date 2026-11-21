@@ -1,0 +1,13 @@
+ok  oss3: fuoco d'apertura sull'intestazione del deck — Nuovo scontro di prova Pulsante || Battaglia su WarSense, 10 righe per 10 celle. Il campo è campo a || Riserve da schierare Intestazione Usa il rotore per accedere a T || Riserve da schierare Intestazione Usa il rotore p
+ok  oss6: azzeramento a vuoto in battaglia — Niente da azzerare in questo turno || Niente da azzerare in questo turno
+ok  dec3: con un elemento scelto la cella comincia dalla posizione e chiude col costo — ['riga 8, cella 1, libera, costa 55, restano 305', 'riga 8, cella 2, libera, costa 55, restano 305']
+ok  dec2: «tua fanteria leggera A» nella cella piazzata — ['riga 8, cella 1, tua fanteria leggera A, occupata', 'Piazzato: costa 55, restano 305 || Piazzato: costa 55, restano 305']
+NO  oss5: la tessera appena deselezionata non si dichiara selezionata — {'scelta': 'tiratori 5 atomi, volume 50, 1 esemplare Riserva da schierare: a || tiratori 5 atomi, volume 50, 1 esemplare Riserva da schierare: a', 'deselezione': 'è selezionato tiratori 5 atomi, volume 50, 1 esemplare, s
+NO  dec2: la tessera scelta dice «selezionati» per i tiratori — tiratori 5 atomi, volume 50, 1 esemplare Riserva da schierare: a || tiratori 5 atomi, volume 50, 1 esemplare Riserva da schierare: a
+ok  oss6: azzeramento con comandi del turno conferma — Schieramento del turno azzerato || Schieramento del turno azzerato
+ok  dec2: il possessivo si accorda al nome del gruppo — ['riga 4, casella 1, tuo Orso, formazione non armata, in attesa, composta da 4 atomi di fanteria leggera', 'riga 4, casella 2, tuo Corvo, in attesa, composta da 6 atomi di fanteria leggera, tuo quartier generale, strada 
+ok  oss2: «Ha agito 1 gruppo su …» — Giorno 1. Ha agito 1 gruppo su 4 || Giorno 1. Ha agito 1 gruppo su 4
+ok  dec3: il comando di marcia dice l'avvertimento una volta — Scegli la casella di destinazione e attivala per dare l'ordine d || riga 4, casella 2, tuo Corvo, in attesa, composta da 6 atomi di  || riga 4, casella 2, tuo Corvo, in attesa, composta da 6 atomi di 
+ok  dec3: le caselle in designazione cominciano dalla posizione e chiudono col costo — ['riga 3, casella 2, strada battuta, raggiungibile in 1 giorno']
+ok  dec3: attivata la casella, l'ordine di marcia parte — riga 3, casella 2, strada battuta, raggiungibile in 1 giorno Azi || Corvo marcia verso riga 3, casella 2, 1 giorno al termine || Corvo marcia verso riga 3, casella 2, 1 giorno al termine
+fatto

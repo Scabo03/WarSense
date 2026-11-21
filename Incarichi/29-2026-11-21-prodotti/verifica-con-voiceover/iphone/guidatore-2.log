@@ -1,0 +1,10 @@
+ok  oss3: fuoco d'apertura sull'intestazione del deck — Nuovo scontro di prova Pulsante || Battaglia su WarSense, 10 righe per 10 celle. Il campo è campo a || Riserve da schierare Intestazione Usa il rotore per accedere a T || Riserve da schierare Intestazione Usa il rotore p
+ok  oss6: azzeramento a vuoto in battaglia — Niente da azzerare in questo turno || Niente da azzerare in questo turno
+ok  dec3: con un elemento scelto la cella comincia dalla posizione e chiude col costo — ['riga 8, cella 1, libera, costa 55, restano 305', 'riga 8, cella 2, libera, costa 55, restano 305']
+ok  dec2: «tua fanteria leggera A» nella cella piazzata — ['riga 8, cella 1, tua fanteria leggera A, occupata', 'riga 8, cella 1, libera, costa 55, restano 305 Scorri verso l’al || Piazzato: costa 55, restano 305 || Piazzato: costa 55, restano 305']
+ok  oss5: alla messa a fuoco prima del doppio tocco la tessera scelta si dichiara selezionata (è la frase dell'incarico 28) — è selezionato tiratori 5 atomi, volume 50, 1 esemplare, selezion
+ok  oss5: dopo il doppio tocco VoiceOver non pronuncia uno stato vecchio — ['è selezionato tiratori 5 atomi, volume 50, 1 esemplare, selezion']
+ok  oss5: riletta dopo la deselezione, la tessera non si dichiara selezionata — tiratori 5 atomi, volume 50, 1 esemplare Riserva da schierare: a
+NO  dec2: riletta dopo la scelta, la tessera dei tiratori dice «selezionati» — è selezionato tiratori 5 atomi, volume 50, 1 esemplare, selezion
+ok  oss6: azzeramento con comandi del turno conferma — Schieramento del turno azzerato || Schieramento del turno azzerato
+fatto

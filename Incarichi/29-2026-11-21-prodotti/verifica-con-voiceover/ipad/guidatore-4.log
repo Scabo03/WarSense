@@ -1,0 +1,8 @@
+ok  oss1: il pannello del gruppo bloccato dichiara il motivo e il luogo — Nessun ordine possibile: c'è una battaglia in sospeso in riga 2, casella 2
+ok  dec1: impostazioni a testo massimo, letta per intero con VoiceOver — ['Impostazioni Intestazione', 'Verbosità degli annunci Sintetico Pulsante', 'è selezionato Normale Pulsante', 'Dettagliato Pulsante', 'Suoni del gioco', 'Suoni del gioco Interruttore attivo Tocca due volte per attivare',
+ok  dec1: le voci della verbosità sono pulsanti a capo, la scelta è dichiarata — ['Dettagliato Pulsante']
+NO  oss4: il gesto di uscita dal vivo (tentativo col tasto Esc) — ancora aperte: il gesto non si guida dal vivo
+ok  dec1: apprendimento a testo massimo, letta per intero con VoiceOver — ['Suoni e vibrazioni Intestazione', 'Ogni segnale del gioco, con il suo significato. Attiva una voce ', 'Cambio di riga sulla griglia Pulsante Ogni segnale del gioco, co', 'Cambio di riga, con forze avversarie nella riga
+ok  dec1: battaglia a testo massimo, letta fino a «Fine del turno» — ["Annulla l'ultima operazione Pulsante", 'Azzera lo schieramento del turno Pulsante', 'Dichiara la resa Pulsante', 'Fine del turno Pulsante']
+ok  dec1: registro a testo massimo, letto fino al congedo — ['Registro della campagna Intestazione', 'Il registro non contiene ancora alcun fatto', 'Chiudi il registro Pulsante']
+fatto

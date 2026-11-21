@@ -7,7 +7,7 @@ VoiceOver ha detto, l'albero) e registra per ogni controllo l'atteso, il trovato
 <cartella>/controlli.jsonl.
 
 Uso: python3 percorsi.py <cartella del pilota> <udid> <apparecchio: iphone|ipad> [blocchi...]
-Blocchi: battaglia, campagna, blocco, testo (predefiniti: tutti).
+Blocchi: battaglia, campagna, blocco, testo, selezione (predefiniti: i primi quattro).
 """
 import json
 import pathlib
@@ -243,6 +243,24 @@ def blocco_blocco(giornate=15):
               "una battaglia in sospeso entro le giornate", f"nessuna battaglia in sospeso in {giornate} giornate")
 
 
+# ------------------------------------------------------------------------------------------ selezione
+def blocco_selezione():
+    """La tessera scelta, letta dall'albero di accessibilità: la pronuncia che il servizio di VoiceOver
+    restituisce si tronca a 64 caratteri e taglia «selezionati»; il valore dell'elemento no."""
+    avvia_pulito()
+    attiva(etichetta="Nuovo scontro di prova", tipo="pulsante", ascolto=6)
+    attiva(etichetta="tiratori", ascolto=2.5)
+    grezzo = cmd({"azione": "albero", "ascolto": 0.2}).get("albero", [])
+    tessera = [n for n in grezzo if n.startswith("tiratori")]
+    controlla("dec2: la tessera dei tiratori scelta ha il valore «selezionati» (dall'albero)",
+              any(n.endswith("selezionati") for n in tessera), "tiratori … =…, selezionati", tessera)
+    attiva(etichetta="tiratori", ascolto=2.5)
+    grezzo = cmd({"azione": "albero", "ascolto": 0.2}).get("albero", [])
+    tessera = [n for n in grezzo if n.startswith("tiratori")]
+    controlla("oss5: tolta la scelta, il valore della tessera non dice più «selezionati» (dall'albero)",
+              bool(tessera) and not any("selezionat" in n for n in tessera), "tiratori … =5 atomi, volume 50, 1 esemplare", tessera)
+
+
 # ------------------------------------------------------------------------------------------ testo massimo
 def blocco_testo():
     subprocess.run(["xcrun", "simctl", "ui", UDID, "content_size", "accessibility-extra-extra-extra-large"], check=False)
@@ -287,5 +305,6 @@ def blocco_testo():
 
 
 for blocco in BLOCCHI:
-    {"battaglia": blocco_battaglia, "campagna": blocco_campagna, "blocco": blocco_blocco, "testo": blocco_testo}[blocco]()
+    {"battaglia": blocco_battaglia, "campagna": blocco_campagna, "blocco": blocco_blocco, "testo": blocco_testo,
+     "selezione": blocco_selezione}[blocco]()
 print("fatto", flush=True)

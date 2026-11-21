@@ -1,0 +1,13 @@
+== 1/2 Sessioni complete di CAMPAGNA per l'interfaccia (144) ==
+== 2/2 Sessioni complete HEADLESS: campagna e 32 di BATTAGLIA (Motore) ==
+	 Executed 15 tests, with 0 failures (0 unexpected) in 8.727 (8.727) seconds
+Test Suite 'VerificaTest.xctest' passed at 2026-11-21 21:33:18.315.
+	 Executed 15 tests, with 0 failures (0 unexpected) in 8.727 (8.729) seconds
+Test Suite 'SessioneTest.xctest' passed at 2026-11-21 21:33:18.387.
+Test Suite 'SegnaliTest.xctest' passed at 2026-11-21 21:33:18.453.
+Test Suite 'MotoreTest.xctest' passed at 2026-11-21 21:33:18.520.
+Test Suite 'DatiTest.xctest' passed at 2026-11-21 21:33:18.585.
+Test Suite 'ConfiniTest.xctest' passed at 2026-11-21 21:33:18.651.
+  esito scritto in esiti-sessioni-complete/esito.json: successo
+== Corsa separata: SUCCESSO ==
+uscita=0 durata=549s
