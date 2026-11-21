@@ -1,0 +1,42 @@
+== Controllo preventivo: il ramo principale è spinto sul remoto ==
+  principale locale e origin/principale coincidono: si procede
+== Controllo preventivo: la versione non torna mai indietro ==
+versione da caricare: 1.1.0; più alta già presente: 1.1.0 — si procede
+== Numero di build: massimo su tutto l'account più uno ==
+massimo: 29 -> nuovo: 30
+== Controllo preventivo: i documenti consegnati ==
+i documenti consegnati reggono a tutti i controlli: si procede
+== Controllo preventivo: registro delle build e App Store Connect ==
+registro e App Store Connect concordano: 29 build, la più alta è la 29
+== Controllo preventivo: freschezza della corsa separata delle sessioni complete ==
+== Collaudo COMPLETO prima del caricamento (pacchetto, ospitate, interfaccia) ==
+== 0/3 Cancello dei simboli d'archetipo (biiezione archetipi <-> simboli, RDA-97) ==
+== 0b/3 Cancello delle impronte dei Contenuti (RDA-105) ==
+== 1/3 Collaudo del pacchetto (Motore, Dati, Sessione, Segnali, Verifica, Confini) ==
+Test Case '-[VerificaTest.InvariantiCampagnaTest test_mutante_un_azione_ordinata_e_non_registrata_viene_vista]' started.
+Test Case '-[VerificaTest.InvariantiCampagnaTest test_mutante_un_azione_ordinata_e_non_registrata_viene_vista]' passed (0.006 seconds).
+Test Suite 'VerificaTest.xctest' passed at 2026-11-21 21:34:52.847.
+Test Suite 'SessioneTest.xctest' passed at 2026-11-21 21:34:53.355.
+Test Suite 'SegnaliTest.xctest' passed at 2026-11-21 21:34:53.849.
+Test Suite 'MotoreTest.xctest' passed at 2026-11-21 21:34:55.125.
+Test Suite 'DatiTest.xctest' passed at 2026-11-21 21:34:55.528.
+Test Suite 'ConfiniTest.xctest' passed at 2026-11-21 21:34:55.681.
+== 2/3 Generazione del progetto applicativo dalla sua sorgente di verità ==
+== 3/3 Prove ospitate e d'interfaccia sul simulatore ==
+== Conteggio delle prove ospitate e d'interfaccia, dall'esecutore ==
+  esecutore (xcresulttool summary): 124 prove eseguite fra ospitate e interfaccia — 124 passate, 0 fallite, 0 saltate; esito Passed
+    per bersaglio: WarSenseTest = 109
+    per bersaglio: WarSenseUITest = 15
+== Collaudo completo: tutto verde ==
+== Generazione del progetto e archivio ==
+== Esportazione firmata ==
+== Caricamento su TestFlight ==
+==========================================
+UPLOAD SUCCEEDED with no errors
+No errors uploading archive at '/Users/lucascabini/Developer/WarSense/Applicazione/build/esportazione/WarSense.ipa'.
+== Nota di rilascio (attende l'elaborazione della build) ==
+nota allegata alla build 30
+== Registrazione della build nel registro ==
+build 30 registrata in build-caricate.md
+== Fatto: build 30 caricata ==
+uscita=0 durata=546s

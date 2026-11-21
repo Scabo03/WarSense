@@ -2,7 +2,7 @@ Resoconto — Incarico 29: le osservazioni del tester, quattro decisioni del tit
 
 ## In testa
 
-- ⟨IN ATTESA: build 30⟩
+- Build 30 caricata su TestFlight da `principale` a 402a9b1: VALID, treno 1.1.0 (il più alto), IN_BETA_TESTING per il gruppo interno WarLab, nota allegata uguale a `note-di-rilascio.txt`, registro concorde (30 build). Verifica per API in `Incarichi/29-2026-11-21-prodotti/build-30/asc-build-30.md`.
 - Le sei osservazioni della sessione da tester: ciascuna riprodotta da una prova che fallisce sul codice della build 29 e poi corretta (9a83674). L'intermittenza del fuoco sull'iPad (osservazione 3) ha una causa accertata con otto serie controllate: la notifica del gioco partiva dopo il caricamento asincrono dello stato e, se il caricamento durava abbastanza, cadeva nella finestra in cui VoiceOver applicava il proprio fuoco predefinito sulla prima cella; ora parte in `viewDidAppear`, 20 aperture su 20 sull'intestazione con i ritardi che prima la facevano cadere. La causa dell'osservazione 5 è quella ipotizzata (tratti aggiornati soltanto dopo la ricarica asincrona), più un reperto dal vivo: la frase «è selezionato» dell'incarico 28 era la lettura della messa a fuoco PRIMA del doppio tocco che deselezionava.
 - Decisioni del 21 novembre: D1 (testo dinamico, una prova per schermata alla dimensione massima, vista fallire), D2 (frasi accordate al genere, cancello visto fallire), D3 (designazione: prima la posizione, poi il costo; l'avvertimento lo dice il comando) realizzate; D4 (previsione del meteo) nei documenti, nessun codice; punto aperto 11.10 della modalità a campioni.
 - Frequenza delle battaglie misurata col banco su 1200 partite intere per misura (strumento `MisuraFrequenzaBattaglie`, `StrumentoVerifica --frequenza-battaglie`): rare, fra 0 e 0,104 ogni dieci giornate; tre cause strutturali; proposta al titolare, nessuna taratura.
@@ -151,6 +151,10 @@ Tre controlli «NO» della prima corsa del blocco «battaglia» (20:33) e uno de
 
 **Osservato, non corretto.** Le azioni d'ingaggio e le voci di mischia dicono la posizione senza virgola («Ingaggia fanteria leggera A avversaria in riga 1 cella 2, …»; chiavi `pannello.ingaggia.*`, `battaglia.mischia_voce`), mentre ovunque altrove si dice «riga 1, cella 2». C'era già sul codice della build 29 (`git show 72aec4c:…/Annunci.strings`); non toccato per non riaprire collaudo e sessioni a fine incarico.
 
+## App Store Connect
+
+Prima del caricamento, i controlli preventivi di `scripts/carica-testflight.sh` (registro in `P/build-30/caricamento-30.txt`): `principale` uguale a `origin/principale`; versione 1.1.0 non inferiore alla più alta (1.1.0); numero di build dal massimo sull'account, 29, più uno: 30; documenti consegnati freschi e senza numeri non dichiarati; «registro e App Store Connect concordano: 29 build, la più alta è la 29», che è anche la verifica per API della build 29 di partenza; sessioni complete fresche; collaudo completo verde (124 su 124 fra ospitate e interfaccia, sull'iPhone principale, ormai libero dai piloti). Archivio, esportazione firmata con il profilo esistente (nessun certificato toccato, nessuna firma automatica), «UPLOAD SUCCEEDED with no errors», «nota allegata alla build 30», riga scritta nel registro. Dopo, per API (`P/build-30/asc-build-30.md`, script `verifica_asc.py` accanto): build 30 VALID, caricata 2026-11-21T12:42:06-08:00, non scaduta, treno 1.1.0 sopra 29 e 28; `internalBuildState` IN_BETA_TESTING, `externalBuildState` READY_FOR_BETA_SUBMISSION; nota (it) di 2930 caratteri uguale a `note-di-rilascio.txt`; gruppo «WarLab» interno con accesso a tutte le build; `controlla-build.py`: «registro e App Store Connect concordano: 30 build, la più alta è la 30».
+
 ## Le versioni: la valutazione
 
 Valori 0.13.0 → 0.14.0 con `versioni_compatibili` che aggiunge 0.13.0 (RDA-161, `valori-provvisori.md`): cambia l'applicazione di una regola della campagna, il ripiegamento; una campagna della build 29 prosegue diversamente soltanto dove il Motore di prima produceva lo stato vietato, e il suo giornale si rigioca identico perché la riga `battagliaConclusa` porta le caselle del ritorno. Nessuna delle altre modifiche tocca una regola che una partita in corso legga: le sei osservazioni e D1–D3 sono presentazione e Sessione (l'azzeramento a vuoto si rifiuta prima di scrivere nel giornale), D4 è documento. Schema del giornale di campagna 9 e di battaglia 2, fermi: nessuna riga nuova né cambiata. Testi 0.1.1, fermi, con le impronte rigenerate (9a83674). Versione di marketing 1.1.0, non toccata. Le campagne e gli scontri salvati con la build 29 si riaprono: lo dicono le due note.
@@ -167,7 +171,9 @@ Valori 0.13.0 → 0.14.0 con `versioni_compatibili` che aggiunge 0.13.0 (RDA-161
 8. **Osservazione 1: la revoca della marcia non si offre più se il Motore la respinge.** Trovato dalla prova dell'osservazione; 02 §9.5 vieta di offrire un'azione respinta.
 9. **La misura della frequenza: due condotte, 200 partite per cella, 730 giornate, cinque varianti scelte fra le grandezze che i documenti indicano come manopole della frequenza.** La condotta competente dà il primo ordine valido della sequenza del banco (S27g); la prudente non riproduce la resa del tester (S27h). Nessuna taratura.
 10. **Le battaglie che al banco non si concludono, registrate e non corrette.** La causa non è accertata (tattico del banco o regola); correggerla senza accertarla era tarare prima di misurare.
-11. **Il collaudo sul secondo iPhone di WarSense** (`simulatore-warsense.sh iphone 2`), in parallelo ai piloti sui due apparecchi principali, per non fermare la verifica con VoiceOver.
+11. **Il collaudo sul secondo iPhone di WarSense** (`simulatore-warsense.sh iphone 2`), in parallelo ai piloti sui due apparecchi principali, per non fermare la verifica con VoiceOver; la ripetuta con l'app corretta su un terzo, con i prodotti in una cartella separata (`Applicazione/build/esplorazione-29b`), per non interrompere il tester sul primo.
+12. **La leva oltre il bordo corretta a fine incarico**, invece di dichiararla: era un difetto della mia realizzazione di D1, visibile a chi usa il testo grande, e la correzione costava una prova, un collaudo e una corsa delle sessioni ripetuti (la prima corsa delle sessioni, già partita, l'ho fermata perché sarebbe risultata vecchia).
+13. **Il formato «in riga 1 cella 2» delle azioni d'ingaggio non corretto**: è precedente all'incarico e toccarlo a fine incarico voleva dire ripetere collaudo e sessioni per una virgola; dichiarato.
 
 ## Modifiche, per commit
 
@@ -186,7 +192,8 @@ Percorsi relativi alla radice; `P/` sta per `Incarichi/29-2026-11-21-prodotti/`.
 - e68e39d — `Applicazione/Sorgenti/SchermateContorno.swift` (la riga della leva), `Applicazione/ProveOspitate/TestoDinamicoTest.swift` (`fuoriDalBordo`), `P/prove-rosse/leva-oltre-il-bordo-a-testo-massimo.txt`.
 - 144c23c — `note-di-rilascio.txt`, `nota-per-il-titolare-genere-testo-marcia-e-correzioni.md`, `Fondamenta/registro-decisioni-architetturali.md` (RDA-158, il reperto dal vivo).
 - 0b8a110, 39ec83c — `nota-per-il-titolare-genere-testo-marcia-e-correzioni.md` (titolo: il controllo delle cifre ha rifiutato il «21» della data).
-- ⟨IN ATTESA: prodotti della verifica, resoconto, fusione⟩
+- 402a9b1 — `P/verifica-con-voiceover/{README.md,iphone,ipad,iphone-app-corretta,tester-iphone,schermate}/`, `P/collaudo/`, la bozza di questo resoconto, `Incarichi/README.md` (riga 29 col resoconto). È il commit da cui è uscita la build 30.
+- il commit che chiude l'incarico, l'ultimo di `principale` — `build-caricate.md` (riga 30, scritta dallo script), `P/build-30/`, questo resoconto completo.
 
 ## Ciò che ho fatto senza che fosse chiesto
 
@@ -195,6 +202,8 @@ Percorsi relativi alla radice; `P/` sta per `Incarichi/29-2026-11-21-prodotti/`.
 - Cinque varianti della misura della frequenza, per dare alla proposta un effetto misurato.
 - `scripts/tester.py` aggiornato alle etichette nuove (cella in designazione che comincia dalla posizione; possessivo nelle quattro forme accordate): senza, il tester dell'incarico 28 non avrebbe più riconosciuto le celle valide né i propri gruppi.
 - RDA-160 corretto (il conteggio delle partite ferme e il «quasi sempre» sul quartier generale, che i dati non sostengono: 22 su 33).
+- Il controllo `fuoriDalBordo` in `TestoDinamicoTest`, che estende la prova per schermata di D1 alla geometria dei controlli, e la ripetuta dal vivo con l'app corretta.
+- Il blocco «selezione» del guidatore, che legge lo stato della tessera dall'albero perché la pronuncia restituita si tronca.
 
 ## Ciò che era chiesto e non ho fatto
 
@@ -210,8 +219,12 @@ Percorsi relativi alla radice; `P/` sta per `Incarichi/29-2026-11-21-prodotti/`.
 Sessione dalle 18:42 (primo comando) alla chiusura. Fonte di ogni durata fra parentesi; ciò che non è stato misurato è detto.
 
 - **Compilazione.** `swift build -c release --product StrumentoVerifica`: 8,2 s, 8,7 s e 33,1 s (riga «Build complete» di SwiftPM). Prove ospitate mirate (`xcodebuild test -only-testing:WarSenseTest/TestoDinamicoTest`, compilazione compresa): 35 s e 35 s (`date +%s`). `build-for-testing` dell'app del pilota corretto: non misurato. Archivio Release per la build 30: dentro il caricamento.
-- **Collaudo.** `collaudo-completo.sh` tre volte (`date +%s`): 53 s, fermato da `ConfiniTest` (i motivi dello strumento di frequenza erano testo nel codice: cancello vero, corretto in c61c131); 388 s verde; 343 s verde sul codice finale. `swift test` del pacchetto da solo: 60 s. Sessioni complete: ⟨IN ATTESA⟩; una prima corsa, partita alle 21:13, fermata dopo circa tre minuti perché la correzione della leva l'avrebbe resa vecchia.
+- **Collaudo.** `collaudo-completo.sh` tre volte (`date +%s`): 53 s, fermato da `ConfiniTest` (i motivi dello strumento di frequenza erano testo nel codice: cancello vero, corretto in c61c131); 388 s verde; 343 s verde sul codice finale. `swift test` del pacchetto da solo: 60 s. Sessioni complete (`esegui-sessioni-complete.sh` sul secondo iPhone): 549 s, successo, esito sul commit 39ec83c (`P/collaudo/sessioni-complete-esito.json`); lo script ne stima 1258,6 in testa, su un'altra macchina. Una prima corsa, partita alle 21:13, fermata dopo circa tre minuti perché la correzione della leva l'avrebbe resa vecchia.
 - **Simulatore.** Indagine dell'osservazione 3 sull'iPad: dalle 18:55 alle 19:33 (README dell'indagine). Percorsi «battaglia» e «campagna»: dalle 20:32 alle 20:37 (orari dei controlli). Primo percorso «blocco», senza marce: durata non registrata, fermato poco prima delle 21:06. Secondo «blocco» e «testo»: dalle 21:04 circa alle 21:13 (controlli alle 21:08 e alle 21:12). «Selezione»: 21:13. Ripetuta a testo massimo con l'app corretta: 256 s (`date +%s`).
 - **Misura della frequenza.** 1200 partite con la sonda: 8 s; misura principale e cinque varianti, 7200 partite: 106 s (`date +%s`); le corse di riproducibilità (da 360 e da 1200 partite) non misurate.
 - **Esplorazione.** Il tester: 870 s (`date +%s`).
-- **Caricamento.** ⟨IN ATTESA⟩
+- **Caricamento.** `scripts/carica-testflight.sh`: 546 s (`date +%s`), compreso il suo collaudo completo; la nota si è allegata al primo tentativo dello script.
+
+## Integrazione continua all'ultimo invio verificato
+
+Corse sugli invii al principale (API pubblica di GitHub Actions; il flusso `collaudo.yml` gira soltanto lì): 44926586539 su 72aec4c, lo stato di partenza, VERDE; 44946937501 su 402a9b1, il commit della build 30, VERDE (dalle 20:33:50Z alle 20:46:15Z). La corsa sull'ultimo invio, quello che chiude l'incarico con il registro, i prodotti della build e questo resoconto (nessun file di codice), parte dopo la chiusura del resoconto: il suo esito non l'ho visto.
