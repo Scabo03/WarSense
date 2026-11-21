@@ -1,6 +1,8 @@
 # Documento di architettura tecnica
 
-Documento 05 di 05 — versione 1.5
+Documento 05 di 05 — versione 1.6
+
+Novità della versione 1.6 (2026-11-21, incarico 29). Tre realizzazioni delle decisioni del titolare del 21 novembre e una regola sul fuoco: le frasi accordate al genere (nuovo 8.7); il testo che segue la dimensione di sistema (nuovo 10.14); il fuoco d'apertura di una schermata portato alla comparsa e non dopo un caricamento asincrono (10.3, lettera f).
 
 Novità della versione 1.5 (2026-11-21), per decisione del titolare (incarico 28). Meteo e guasti delle macchine restano affidati al caso, come eccezione dichiarata (documento 01, versione 3.9, punti 12.1 e 12.2): il caso interviene nello scontro a campioni e, sul piano di campagna, nell'estrazione del meteo all'apertura della giornata e nella prova di guasto delle macchine. Riformulati 2.10, 3.8, 4.2, 4.4, 7.5 e 12.3.1, che dicevano il caso confinato allo scontro a campioni. Meteo e guasti non sono ancora costruiti, e nessuna estrazione del caso è oggi nel codice.
 
@@ -224,6 +226,8 @@ Novità della versione 1.1, in conseguenza del limite dei bersagli simultanei di
 
 8.6 Versione. `Testi/manifest.json` dichiara la versione dei testi; non blocca mai l'apertura dei salvataggi (A §6.6).
 
+8.7 Genere dei soggetti (versione 1.6; 02 §4.6). I termini che fanno da soggetto di frase — archetipi, nomi dei gruppi, e le categorie future come i titoli dei campioni — stanno nel vocabolario con la dichiarazione del genere (`genere.<chiave>`: maschile, femminile, maschile_plurale, femminile_plurale). Il modulo dei testi li consegna come `Soggetto`, il cui testo non esce se non dentro una frase: `Testi.frase(_:soggetto:…)` sceglie la forma `<chiave>.<genere>`, scritta intera per ciascun genere nel file degli annunci, col soggetto come argomento 1. Il collaudo (`AccordoDiGenereTest`) rifiuta il termine senza genere, la frase senza una delle quattro forme e il sorgente che incolla un soggetto fuori dalle forme accordate (RDA-157).
+
 ---
 
 ## 9. La presentazione
@@ -246,7 +250,7 @@ Novità della versione 1.1, in conseguenza del limite dei bersagli simultanei di
 
 10.2 Ordine di lettura esplicito. L'ordine è dichiarato elemento per elemento, mai dedotto dalla geometria (00 §11.5): celle da ovest a est e dall'alto in basso, poi il deck, poi annullamento e azzeramento (02 §2.8). All'apertura della battaglia il fuoco è sull'intestazione del deck (02 §2.9). I due comandi globali sono distanziati dal bordo inferiore e di altezza piena (02 §8.5).
 
-10.3 Fuoco: regole operative. (a) Nessun aggiornamento di contenuto pubblica notifiche che riposizionano il fuoco; gli aggiornamenti avvengono sugli elementi esistenti. (b) L'apertura di un pannello sposta il fuoco al suo primo elemento con notifica esplicita; la chiusura lo riporta all'elemento di origine, memorizzato dalla Presentazione. (c) Dopo una conferma di piazzamento il fuoco resta sulla cella (00 §11.3). (d) L'esaurimento di un elemento del deck deseleziona senza spostare il fuoco, con annuncio (02 §5.3). (e) Ogni cambiamento di stato rilevante è annunciato senza rubare il fuoco (00 §11.4). Il collaudo di integrazione contiene una prova per ciascuna di queste regole (A §14.4).
+10.3 Fuoco: regole operative. (a) Nessun aggiornamento di contenuto pubblica notifiche che riposizionano il fuoco; gli aggiornamenti avvengono sugli elementi esistenti. (b) L'apertura di un pannello sposta il fuoco al suo primo elemento con notifica esplicita; la chiusura lo riporta all'elemento di origine, memorizzato dalla Presentazione. (c) Dopo una conferma di piazzamento il fuoco resta sulla cella (00 §11.3). (d) L'esaurimento di un elemento del deck deseleziona senza spostare il fuoco, con annuncio (02 §5.3). (e) Ogni cambiamento di stato rilevante è annunciato senza rubare il fuoco (00 §11.4). (f) Versione 1.6: il fuoco d'apertura di una schermata si porta nel momento in cui la schermata compare (`viewDidAppear`), non al termine di un caricamento asincrono, perché VoiceOver applica il proprio fuoco di sistema circa 770 ms dopo la presentazione e una notifica del gioco che cada in quella finestra va perduta (RDA-155). Il collaudo di integrazione contiene una prova per ciascuna di queste regole (A §14.4).
 
 10.4 Pannello della cella. L'attivazione di una cella apre il pannello con le azioni di gioco possibili (00 §7.4), ciascuna con costo ed effetto dichiarati dall'esito di validazione. Criterio di composizione: le azioni che l'oggetto non possiede o che il suo stato rende inefficaci non compaiono, come per un reparto impegnato (02 §9.4); le azioni possedute ma al momento non valide compaiono con il motivo del vocabolario chiuso, perché l'assenza silenziosa di un'azione conosciuta lascerebbe il giocatore a indovinare il perché (00 §9.1). La sequenza a due celle (unità poi bersaglio) segue 02 §9.2.1: scelta del bersaglio da elenco nel pannello oppure designazione sulla griglia, con annullamento esplicito e stato "in attesa di bersaglio" dichiarato.
 
@@ -267,6 +271,8 @@ Novità della versione 1.1, in conseguenza del limite dei bersagli simultanei di
 10.12 Schermate di gestione. Nessuna tabella a caselle: ogni riga è un unico elemento che si annuncia in una frase e apre il dettaglio (02 §10.3). Le voci di spesa dichiarano costo su riserva per le sole risorse consumate (02 §8.7); il riquadro delle riserve è un elenco navigabile (02 §8.7.2).
 
 10.13 Registro degli eventi. Ogni voce è un elemento a sé, in ordine dal più recente, con il giorno; l'attivazione porta il fuoco sulla casella del fatto (02 §6.6).
+
+10.14 Dimensione del testo (versione 1.6; 02 §10.4). Ogni testo dell'interfaccia usa il carattere di uno stile di sistema con adeguamento automatico alla taglia e va a capo (`TestoDinamico`, `PulsanteMultiriga`); le scelte fra poche voci sono colonne di pulsanti (`SceltaAVoci`) e non selettori a segmenti, che non seguono la taglia. Eccezioni dichiarate: tessere del deck, celle e caselle. Una prova per schermata alla dimensione più grande (`TestoDinamicoTest`, RDA-158).
 
 ---
 

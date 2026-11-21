@@ -378,3 +378,21 @@ I documenti prescrivono l'innesco, il blocco, lo schieramento, l'ordine dei turn
 **S26c — La battaglia sbilanciata: la riserva non schierabile non tiene viva la parte.** Vedi RDA-140. Cambia il criterio di «parte vuota» nell'annientamento (01 §15.2.3), non un valore del combattimento: l'incarico lo consente esplicitamente («salvo quanto serva a far concludere le battaglie sbilanciate, e in quel caso dichiara che cosa hai cambiato e perché»). Cambiato: `haRiserveSchierabili` esclude dal «vivo» una riserva il cui sciame eccede il budget massimo residuo. Perché: era la causa del non-concludersi.
 
 **S26d — La versione dei valori RESTA 0.11.0; l'incompatibilità dei salvataggi in corso è dichiarata dallo SCHEMA (7→8).** L'incarico chiede di incrementare la versione dei valori «se cambiano regole che incidono sul modo in cui una partita in corso si svolgerebbe». Valutazione dichiarata: le regole cambiano (la battaglia sbilanciata si conclude; esiste il comando di chiusura), ma NESSUN valore dei dati è toccato — i file dei Valori sono identici, il rigeneratore delle impronte lascia 0.11.0 «invariata». Il meccanismo che dichiara incompatibile un salvataggio in corso è la versione dello SCHEMA del giornale, portata da 7 a 8 (`FondazioneCampagna.schemaCorrente`): un salvataggio della build 27 non si riapre in silenzio (00 §15.2), esattamente come alla correzione dell'incarico 25 (schema 6→7 a valori invariati). Coerente col precedente.
+
+## S27 — Le osservazioni del tester e le quattro decisioni del 21 novembre: dove i documenti tacevano o si contraddicevano (incarico 29)
+
+**S27a — La designazione comincia dalla posizione anche sul campo di battaglia.** La decisione del titolare nomina la marcia; 02 §3.3 valeva identico per i due piani, e la carta vuole identico il formato degli annunci su ogni superficie (00 §7.1). Applicata alla sola mappa avrebbe violato la carta: la si applica ai due piani (RDA-156). Dichiarato come decisione presa da solo.
+
+**S27b — «domani pioggia probabile» e i termini chiusi.** L'esempio della decisione usa «probabile», che non è fra i termini chiusi della probabilità (02 §4.4: possibilità bassa, possibilità alta), mentre la decisione chiede i termini chiusi. Prevale la regola sull'esempio: «domani pioggia, possibilità alta»; un termine nuovo per decisione (RDA-159).
+
+**S27c — I termini di stato dopo un soggetto femminile restano invariabili.** «tua fanteria leggera A, impegnato»: «impegnato» è un termine chiuso dello stato di controllo (02 §4.4.5), invariabile per 02 §4.1 e §4.5, e la decisione vuole invariabile il termine; cambiano articoli e accordi della frase, che qui è una voce distinta. Lettura dichiarata (RDA-157).
+
+**S27d — Il genere dei nomi dei gruppi è quello del nome comune.** I documenti non dicono se «Aquila» sia un gruppo («il gruppo Aquila») o un nome femminile; la decisione vuole che ogni termine soggetto dichiari il proprio genere: dichiarato quello del nome (RDA-157).
+
+**S27e — Quattro generi per ogni frase.** «Una frase priva della forma per un genere che può ricevere»: ogni categoria può ricevere ciascuno dei quattro generi con un termine nuovo, sicché il controllo li pretende tutti, anche dove oggi nessun termine li porta (RDA-157).
+
+**S27f — Le scelte a segmenti delle impostazioni diventano voci.** La decisione chiede che i testi seguano la taglia; il selettore a segmenti non la segue e a testo grande taglierebbe i titoli: lo si sostituisce con una colonna di voci (RDA-158).
+
+**S27g — La condotta competente della misura dà il primo ordine valido della sequenza del banco.** Con lo sfasamento una regola del banco può dare un ordine che il Motore respinge (il sabotaggio a un gruppo che deve rifornirsi); il banco, sui suoi scenari, non incontra mai il caso. La misura passa alla regola successiva (RDA-160).
+
+**S27h — La condotta prudente non riproduce la resa del tester in battaglia.** Le battaglie si combattono col tattico del banco per entrambe le condotte (RDA-160).
