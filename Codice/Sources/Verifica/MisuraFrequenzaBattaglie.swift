@@ -128,7 +128,10 @@ public struct MisuraFrequenzaBattaglie: Sendable {
         func giocaLeBattaglie() -> String? {
             while let battaglia = stato.battaglieInSospeso.first {
                 guard let esito = giocaBattagliaComeAlBanco(battaglia, stato: stato) else {
-                    return "battaglia non conclusa entro \(Self.tettoGiri) giri, giorno \(battaglia.giorno), casella \(battaglia.casella.riga),\(battaglia.casella.colonna)\(battaglia.daImboscata ? ", da imboscata" : "")"
+                    // I motivi sono chiavi con i loro valori, come le altre uscite del programma di
+                    // verifica: nessun testo nel codice (00 §14.1).
+                    let imboscata = battaglia.daImboscata
+                    return "battaglia_non_conclusa:giri=\(Self.tettoGiri):giorno=\(battaglia.giorno):casella=\(battaglia.casella.riga),\(battaglia.casella.colonna):imboscata=\(imboscata)"
                 }
                 _ = motore.applicaEsitoInCampagna(esito, in: &stato)
                 giornateBattaglie.append(battaglia.giorno)
@@ -143,7 +146,7 @@ public struct MisuraFrequenzaBattaglie: Sendable {
             if stato.giorno != giornoDelControllo { giornoDelControllo = stato.giorno; passiNelGiorno = 0 }
             passiNelGiorno += 1
             if passiNelGiorno > tettoPassiPerGiornata {
-                fine = .ferma; motivoFerma = "oltre \(tettoPassiPerGiornata) passi nel giorno \(stato.giorno)"; break
+                fine = .ferma; motivoFerma = "passi_oltre_il_tetto:tetto=\(tettoPassiPerGiornata):giorno=\(stato.giorno)"; break
             }
             if !stato.battaglieInSospeso.isEmpty {
                 if let motivo = giocaLeBattaglie() { fine = .ferma; motivoFerma = motivo; break }
@@ -171,11 +174,12 @@ public struct MisuraFrequenzaBattaglie: Sendable {
                     // Un ordine che il Motore respinge non si dà: il gruppo resta. Non accade con le due
                     // condotte (scelgono fra comandi validati), ma la misura non si ferma sull'errore.
                     fine = .ferma
-                    motivoFerma = "comando respinto al giorno \(stato.giorno): \(comando) — \(motore.valida(comando, parte: .giocatore, stato: stato))"
+                    let motivo = motore.valida(comando, parte: .giocatore, stato: stato)
+                    motivoFerma = "comando_respinto:giorno=\(stato.giorno):comando=\(comando):esito=\(motivo)"
                     break partita
                 }
             } else if stato.gruppiInAttesa(di: .giocatore).isEmpty == false {
-                fine = .ferma; motivoFerma = "nessun ordine con gruppi in attesa al giorno \(stato.giorno)"; break partita
+                fine = .ferma; motivoFerma = "nessun_ordine_con_gruppi_in_attesa:giorno=\(stato.giorno)"; break partita
             }
             // Il turno dell'avversario, come al banco (01 §5.6.11): quando il giocatore ha concluso.
             var passiAvversario = 0
@@ -183,7 +187,7 @@ public struct MisuraFrequenzaBattaglie: Sendable {
                   !stato.gruppiInAttesa(di: .avversario).isEmpty {
                 passiAvversario += 1
                 if passiAvversario > 2000 {
-                    fine = .ferma; motivoFerma = "avversario oltre 2000 passi al giorno \(stato.giorno)"; break partita
+                    fine = .ferma; motivoFerma = "avversario_oltre_il_tetto:giorno=\(stato.giorno)"; break partita
                 }
                 guard let comandoAvversario = banco.condotta.prossimoComando(
                     vista: motore.vistaAvversario(stato: stato)) else { break }
@@ -416,18 +420,20 @@ public enum FrequenzaBattaglieDaRigaDiComando {
             .joined(separator: "\n") + "\n"
         var righe: [String] = []
         righe.append("frequenza.versione_valori=\(valori.versioneEffettiva)")
-        righe.append("frequenza.partite_per_cella=\(partite) giornate_massime=\(giornateMassime) partite_giocate=\(giocate.count) su \(compiti.count)")
+        righe.append(["frequenza.partite_per_cella=\(partite)", "giornate_massime=\(giornateMassime)",
+                      "partite_giocate=\(giocate.count)", "partite_previste=\(compiti.count)"].joined(separator: ","))
         righe.append("formato|condotta|partite|battaglie_ogni_10_giornate|battaglie_per_partita|prima_battaglia_mediana|partite_senza_battaglie|giornate_mediana|giornate_min|giornate_max|fine_avversario_senza_armati|fine_giocatore_senza_armati|fine_limite|ferma|giornate_mediane_fino_alla_fine_naturale")
         for r in MisuraFrequenzaBattaglie.riepiloga(giocate) {
+            let vinte = r.fini[.avversarioSenzaArmati, default: 0], perse = r.fini[.giocatoreSenzaArmati, default: 0]
+            let alLimite = r.fini[.limite, default: 0], ferme = r.fini[.ferma, default: 0]
+            let mediane = r.giornateMedianeFinoAllaFineNaturale.map(String.init)
             righe.append([r.formato, r.condotta.rawValue, "\(r.partite)",
                           String(format: "%.2f", r.battaglieOgniDieciGiornate),
                           String(format: "%.2f", r.mediaBattagliePerPartita),
                           r.primaBattagliaMediana.map(String.init) ?? "-",
                           "\(r.partiteSenzaBattaglie)", "\(r.giornateMediana)", "\(r.giornateMinimo)",
                           "\(r.giornateMassimo)",
-                          "\(r.fini[.avversarioSenzaArmati] ?? 0)", "\(r.fini[.giocatoreSenzaArmati] ?? 0)",
-                          "\(r.fini[.limite] ?? 0)", "\(r.fini[.ferma] ?? 0)",
-                          r.giornateMedianeFinoAllaFineNaturale.map(String.init) ?? "-"].joined(separator: "|"))
+                          "\(vinte)", "\(perse)", "\(alLimite)", "\(ferme)", mediane ?? "-"].joined(separator: "|"))
         }
         return Rapporto(grezzi: grezzi, testo: righe.joined(separator: "\n"), partite: giocate)
     }
