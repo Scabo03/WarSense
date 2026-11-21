@@ -1,4 +1,4 @@
-# Che cosa cambia per chi gioca: le tue quattro decisioni sulla sessione da tester e le correzioni
+# Che cosa cambia per chi gioca: le tue quattro decisioni e le correzioni della sessione da tester
 
 **Il testo segue la dimensione scelta nelle impostazioni di sistema**, in ogni schermata. Restano di misura fissa, come hai deciso, le tessere delle riserve, le celle della griglia e le caselle della mappa. Nelle impostazioni la verbosità e l'intensità delle vibrazioni sono diventate un elenco di voci una sotto l'altra, perché il selettore di prima non cresceva col testo e a testo grande ne tagliava i nomi. Sul simulatore, a testo massimo, la leva dei suoni nelle impostazioni dell'iPhone usciva dal bordo dello schermo: ora la sua etichetta va a capo, e il collaudo controlla in ogni schermata che nessun comando esca dal bordo.
 
