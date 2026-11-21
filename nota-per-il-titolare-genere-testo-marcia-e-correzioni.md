@@ -10,6 +10,8 @@
 
 **Le correzioni.** Con una battaglia in sospeso, il pannello di un gruppo che non vi combatte dice perché non offre ordini e dove sta la battaglia. L'informazione di stato accorda il verbo al numero dei gruppi. Sull'iPad, aprendo uno scontro, il fuoco va sempre su «Riserve da schierare»: cadeva sulla prima cella quando il gioco impiegava più tempo a preparare lo scontro. Il «gesto di fuga» chiude anche le impostazioni, i suoni e vibrazioni e il resoconto. Una riserva appena scelta o tolta dichiara subito il suo stato. «Azzera lo schieramento del turno» senza nulla da azzerare risponde «Niente da azzerare in questo turno».
 
-**Le partite salvate con la build precedente si riaprono**, campagne e scontri: nessuna regola del gioco è cambiata, e il formato dei salvataggi è lo stesso.
+**Una correzione del gioco che nessuno aveva chiesto.** Dopo una battaglia persa, il gruppo non ripiega più nella casella dove sta arrivando la marcia di un altro gruppo della stessa parte: all'arrivo i due si trovavano nella stessa casella, cosa che le regole vietano, e da lì il gioco poteva scegliere in modo diverso, da un avvio all'altro, quale dei due mandare alla battaglia successiva. L'ha trovato la misura delle battaglie, in due delle partite giocate dal banco; vale per te e per l'avversario.
+
+**Le partite salvate con la build precedente si riaprono**, campagne e scontri, con la loro storia intatta. L'unica regola che cambia è quella del ripiegamento qui sopra: una campagna salvata prosegue con la regola nuova, che la cambia soltanto là dove la vecchia avrebbe messo due gruppi nella stessa casella.
 
 Le verifiche le ha fatte il collaudo automatico, e sul simulatore con VoiceOver acceso; ciò che non si è potuto guidare in automatico è dichiarato nel resoconto dell'incarico, e non è una prova che tocca a te.

@@ -1,4 +1,4 @@
-Questa build corregge ciò che una lunga sessione di gioco con VoiceOver ha trovato, e cambia il modo in cui il gioco parla in quattro punti decisi dal titolare.
+Questa build corregge ciò che una lunga sessione di gioco con VoiceOver ha trovato, e cambia il modo in cui il gioco parla in tre punti decisi dal titolare.
 
 IL TESTO SEGUE LA DIMENSIONE SCELTA NELLE IMPOSTAZIONI DI SISTEMA, in ogni schermata: pulsanti, etichette, pannelli, impostazioni, suoni e vibrazioni, registro, resoconto, divisione. Restano di misura fissa le tessere delle riserve, le celle della griglia e le caselle della mappa. Nelle impostazioni la verbosità e l'intensità delle vibrazioni sono ora un elenco di voci, una sotto l'altra: la voce scelta si annuncia come selezionata.
 
@@ -13,7 +13,8 @@ LE CORREZIONI:
 - Il gesto di uscita, lo strofinio a due dita, chiude anche le impostazioni, i suoni e vibrazioni e il resoconto, come già il registro.
 - Una riserva appena scelta o tolta dichiara subito il suo stato nuovo.
 - «Azzera» senza nulla da azzerare lo dice, invece di confermare.
+- Dopo una battaglia persa, il gruppo non ripiega più nella casella dove sta arrivando un altro gruppo della stessa parte in marcia: prima i due potevano finire nella stessa casella.
 
-LE PARTITE SALVATE CON LA BUILD PRECEDENTE SI RIAPRONO, campagne e scontri: le regole del gioco non sono cambiate.
+LE PARTITE SALVATE CON LA BUILD PRECEDENTE SI RIAPRONO, campagne e scontri. Cambia soltanto la regola del ripiegamento qui sopra: una campagna salvata prosegue con la regola nuova.
 
 COSA PROVARE. Con il testo grande nelle impostazioni dell'apparecchio, percorri impostazioni, suoni e vibrazioni, uno scontro e una campagna: ogni testo deve crescere e nulla deve restare tagliato. Ascolta le frasi della battaglia e della mappa: articoli e accordi devono seguire il nome. Ordina una marcia e ascolta le caselle mentre scegli la destinazione. Se una battaglia resta in sospeso, apri il pannello di un altro gruppo. Prova lo strofinio a due dita sulle impostazioni e sul resoconto.

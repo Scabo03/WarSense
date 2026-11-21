@@ -181,7 +181,7 @@ def blocco_campagna():
 
 
 # ------------------------------------------------------------------------------------------ blocco da battaglia
-def blocco_blocco(giornate=30):
+def blocco_blocco(giornate=15):
     """Gioca la campagna piccola cercando il contatto finché nasce una battaglia in sospeso; allora apre il
     pannello di un ALTRO gruppo e legge il messaggio (oss. 1)."""
     avvia_pulito()
@@ -213,21 +213,25 @@ def blocco_blocco(giornate=30):
                 attiva(etichetta="Chiudi il pannello", tipo="pulsante")
                 continue
             armato = "ricognizione" not in s and "non armata" not in s
-            meta = None
+            # A pannello aperto l'albero contiene soltanto le voci del pannello (è modale): la meta si sceglie
+            # DOPO aver scelto la marcia, fra le caselle che la designazione offre come raggiungibili — la più
+            # a nord, cioè verso il quartier generale avversario. (Nella prima versione la si cercava fra le
+            # voci del pannello, non la si trovava mai, e il gruppo presidiava: diciassette giornate senza
+            # che nessuno lasciasse la riga di partenza.)
             if armato and "Marcia: scegli la casella sulla mappa" in voci:
-                for dr, dc in ((-1, 0), (0, -1), (0, 1), (1, 0)):
-                    n = next((x for x in voci if f"riga {r + dr}, casella {c + dc}," in x), "")
-                    if n and not PROPRIO.search(n) and ("formazione avversaria" in n or "quartier generale avversario" in n):
-                        meta = (r + dr, c + dc)
-                        break
-                if meta is None:
-                    nord = next((x for x in voci if f"riga {r - 1}, casella {c}," in x), "")
-                    if nord and not PROPRIO.search(nord):
-                        meta = (r - 1, c)
-            if meta:
                 attiva(etichetta="Marcia: scegli la casella sulla mappa", tipo="pulsante")
-                attiva(contiene=f"riga {meta[0]}, casella {meta[1]},", ascolto=2.5)
-            elif "Esplora la zona" in voci:
+                mete = []
+                for n in albero():
+                    mm = re.match(r"riga (\d+), casella (\d+), .*raggiungibile in \d+ giorn[oi]$", n)
+                    if mm:
+                        mete.append((int(mm.group(1)), abs(int(mm.group(2)) - c), int(mm.group(2))))
+                if mete:
+                    rr, _, cc = min(mete)
+                    attiva(contiene=f"riga {rr}, casella {cc},", ascolto=2.5)
+                    continue
+                attiva(etichetta="Chiudi il pannello", tipo="pulsante")
+                continue
+            if "Esplora la zona" in voci:
                 attiva(etichetta="Esplora la zona", tipo="pulsante")
             elif "Presidia: resta fermo in guardia" in voci:
                 attiva(etichetta="Presidia: resta fermo in guardia", tipo="pulsante")
