@@ -1,0 +1,4 @@
+$ scripts/chiudi-device-hub.sh   # acceso un simulatore temporaneo non di WarSense, creato apposta
+RIFIUTO: chiudere Device Hub spegnerebbe anche simulatori che non sono di WarSense:
+    Prova del cancello di Device Hub (BD9ADEDF-C9B2-40F6-8DDB-E2B80B4886E0) (Booted) 
+uscita: 2

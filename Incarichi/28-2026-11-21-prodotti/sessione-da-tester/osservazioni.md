@@ -26,9 +26,10 @@ Build osservata: il codice della build 29 (principale b8abc93 e successivi, che 
 - **Atteso:** il gesto di fuga risale di un livello (02 §6.7); un pannello si chiude col gesto, come il registro e la divisione.
 - **Verificato un livello sotto, letto nel codice:** `SchermataImpostazioni`, `SchermataApprendimento` e `SchermataResoconto` non ridefiniscono `accessibilityPerformEscape`, quindi il gesto non le chiude; il giocatore deve trovare «Chiudi il pannello» o «Torna all'inizio». Il gesto dal vivo non si guida (`../canali-di-automazione.md`).
 
-## 5. DA ACCERTARE — Tolta la scelta di una tessera, VoiceOver la dice ancora «selezionato»
+## 5. IMPERFEZIONE, DA ACCERTARE DAL VIVO — Tolta la scelta di una tessera, VoiceOver la dice ancora «selezionato»
 
-- **Visto e sentito:** iPad, battaglia, tessera «tiratori» scelta; doppio tocco sulla tessera per toglierla: VoiceOver dice «è selezionato tiratori 5 atomi, volume 50, 1 esemplare, selezion…». La scelta però è tolta: subito dopo il pannello del reparto si apre invece del rifiuto «occupata». Non accertato se l'etichetta si aggiorni in ritardo o se VoiceOver ripeta lo stato precedente.
+- **Visto e sentito:** iPad, battaglia, tessera «tiratori» scelta; doppio tocco sulla tessera per toglierla: VoiceOver dice «è selezionato tiratori 5 atomi, volume 50, 1 esemplare, selezion…». La scelta però è tolta: subito dopo il pannello del reparto si apre invece del rifiuto «occupata».
+- **Letto nel codice, dopo la ripresa:** la causa è probabilmente l'ordine dei fatti nell'app. `TesseraDeck.accessibilityActivate` invia l'azione e restituisce subito; i tratti della tessera (`.selected`) si aggiornano soltanto per la via asincrona: comando alla sessione, poi `SchermataBattaglia.ricevi` → `Task` → `ricaricaStato` → `aggiorna(con:)` → `TesseraDeck.aggiorna`. VoiceOver, che rilegge l'elemento subito dopo l'attivazione, può trovarvi ancora lo stato di prima. Ipotesi coerente con ciò che si è sentito, non accertata dal vivo: il servizio VoiceOver delle prove non dice quando ha letto i tratti.
 
 ## 6. MINORE — L'azzeramento senza nulla da azzerare conferma lo stesso
 
@@ -36,5 +37,5 @@ Build osservata: il codice della build 29 (principale b8abc93 e successivi, che 
 
 ## Che cosa NON è stato percorso con VoiceOver, e perché
 
-- **Orizzontale, oltre la lettura:** in orizzontale il doppio tocco sintetico non attiva nulla (limite del canale): letta la schermata, non attivati i comandi.
-- **Gesto di uscita, azioni personalizzate eseguite, doppio tocco ovunque:** non guidabili dal vivo; verificati un livello sotto (`GestiUnLivelloSottoTest`), salvo il punto 4.
+- **Orizzontale, oltre la lettura:** in orizzontale il doppio tocco non attiva nulla, né con XCUITest né con Device Hub. Safari si comporta allo stesso modo, quindi il limite è del simulatore e non di WarSense (`../device-hub/trascrizione.md`, passi 8–9 e 22–23). La schermata l'ho letta, i comandi non li ho attivati.
+- **Gesto di uscita ed esecuzione delle azioni personalizzate:** non guidabili dal vivo con nessuno dei due canali; verificati un livello sotto (`GestiUnLivelloSottoTest`), salvo il punto 4. **Doppio tocco ovunque:** non guidabile, e Safari fa lo stesso (passi 4–6 e 24–25).

@@ -1,0 +1,34 @@
+# Chiusura di Device Hub e caduta dei piloti (incarico 28, 2026-11-21)
+
+## Dal registro del pilota sull'iPad (ipad-r.log), avviato alle 16:43:24
+2222:    t =  1045.37s     Synthesize event
+13:2026-11-21 16:43:21.814456+0100 WarSenseEsplorazione-Runner[28027:2541430] [Default] Running tests...
+2223:2026-11-21 17:03:38.417673+0100 WarSenseEsplorazione-Runner[31959:2634635] [Default] Running tests...
+2227:Restarting after unexpected exit, crash, or test timeout; summary will include totals from previous launches.
+2245:** TEST EXECUTE FAILED **
+
+## Dal registro del pilota sull'iPhone 2 (iphone2-r.log), avviato alle 16:43:24
+1548:    t =  1042.67s     Synthesize event
+13:2026-11-21 16:43:25.995083+0100 WarSenseEsplorazione-Runner[28029:2541478] [Default] Running tests...
+1550:2026-11-21 17:03:37.673101+0100 WarSenseEsplorazione-Runner[31948:2634492] [Default] Running tests...
+1553:Restarting after unexpected exit, crash, or test timeout; summary will include totals from previous launches.
+1571:** TEST EXECUTE FAILED **
+
+t ≈ 1042–1045 s dall'avvio = 17:00:47 circa; Device Hub chiuso la prima volta alle 17:00 (osascript quit), la seconda dopo la prova del cancello.
+
+## Data di modifica dei device.plist dei simulatori cambiati di stato il 2026-11-21 (stat, plutil), letta alle 17:06
+14:05:23 702BC124 iPad Pro 11-inch (M5) stato=1
+14:06:29 C3A972FD iPad Pro 11-inch (M5) stato=1
+14:09:32 87AB2F55 WarSense iPhone Air · 4 stato=1
+14:09:36 4CD3DC60 WarSense iPhone Air · 5 stato=1
+14:09:36 8D3583DB WarSense iPad Pro 13 · 2 stato=1
+14:09:37 1DF852F1 WarSense iPad Pro 13 · 4 stato=1
+14:09:37 75A249BF WarSense iPad Pro 13 · 3 stato=1
+14:09:41 2B3AB121 WarSense iPad Pro 13 · 5 stato=1
+15:01:09 E2C6F42C WarSense iPhone Air · 3 stato=1
+15:02:06 6EFC9B42 iPhone 18 Pro stato=1
+17:04:02 76DF33B6 WarSense iPhone Air · 2 stato=1
+17:04:02 C86CB490 WarSense iPhone Air stato=1
+17:04:02 D01FE19F WarSense iPad Pro 13 stato=1
+
+stato=1 è «spento». Alle 17:04:02 si spengono insieme i tre simulatori di WarSense accesi; nessun altro simulatore cambia stato dopo le 15:02:06. «xcrun simctl list devices booted» alle 17:05: nessun apparecchio acceso.

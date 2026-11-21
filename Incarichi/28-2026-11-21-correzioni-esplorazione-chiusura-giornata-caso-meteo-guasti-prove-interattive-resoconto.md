@@ -5,11 +5,12 @@ Resoconto — Incarico 28: correzioni dall'esplorazione, chiusura della giornata
 - Build 29 caricata su TestFlight: VALID, treno 1.1.0 (il più alto), IN_BETA_TESTING per il gruppo interno WarLab, nota allegata, registro concorde (29 build). Verifica per API in `Incarichi/28-2026-11-21-prodotti/build-29/asc-build-29.md`.
 - Il tasto «Chiudi la giornata» toglieva davvero il turno all'avversario: riprodotto sul codice della build 28 (in sei giornate chiuse col tasto l'avversario non si è mai mosso) e corretto; invariante nuovo `azione_avversaria_sottratta`, visto fallire tre volte (RDA-151). Valori 0.13.0, schema del giornale di campagna 9.
 - Le nove osservazioni dell'incarico 27: otto corrette, ciascuna prima vista fallire sul codice della build 28; il pannello del gruppo a testo massimo non è un difetto dell'app (lo legge VoiceOver, si blocca XCUITest); la parte del carattere dinamico è una proposta, non decisa. Esplorazione ripetuta sugli stessi percorsi.
-- Seconda parte: un canale nuovo a passi brevi (il pilota) e un tester che gioca con VoiceOver; il tocco magico e il rotore si guidano dal vivo; l'uscita, l'esecuzione delle azioni personalizzate, il doppio tocco ovunque e l'attivazione in orizzontale no. Osservazioni in `sessione-da-tester/osservazioni.md`, la più seria: con una battaglia in sospeso il pannello di un gruppo non dice perché non offre azioni (02 §6.5).
+- Seconda parte: un canale nuovo a passi brevi (il pilota) e un tester che gioca con VoiceOver; il tocco magico e il rotore si guidano dal vivo con XCUITest, i colpetti con Device Hub. Non si guidano: l'uscita, l'esecuzione delle azioni personalizzate, il doppio tocco ovunque e l'attivazione in orizzontale; per le ultime due Safari si comporta allo stesso modo, quindi il limite è del simulatore e non di WarSense. Osservazioni in `sessione-da-tester/osservazioni.md`, la più seria: con una battaglia in sospeso il pannello di un gruppo non dice perché non offre azioni (02 §6.5).
+- Device Hub esercitato dopo la ripresa della sessione (`device-hub/trascrizione.md`). Chiuderlo spegne tutti i simulatori accesi: è successo ai tre di WarSense, nessuno di altri progetti era acceso. La regola sta in `memoria-infrastruttura.md` e in CLAUDE.md, con un cancello nuovo, `scripts/chiudi-device-hub.sh`, visto rifiutare.
 
 ## Lo stato di partenza, verificato
 
-`git fetch --all --prune`, `git rev-parse principale origin/principale`: entrambi 972aeb8; `git status` pulito; `riferimento-agosto` locale = remoto = 62e0828, con il solo commit non fuso 62e0828 (`git log principale..origin/riferimento-agosto`). RDA fino a 150, S fino a 26. Nessuna discrepanza. Sulla macchina girava per tutta la sessione un altro progetto (scabopdf-mac-lab: prove d'interfaccia macOS, `AutomationModeUI` attivo); non l'ho toccato.
+`git fetch --all --prune`, `git rev-parse principale origin/principale`: entrambi 972aeb8; `git status` pulito; `riferimento-agosto` locale = remoto = 62e0828, con il solo commit non fuso 62e0828 (`git log principale..origin/riferimento-agosto`). RDA fino a 150, S fino a 26. Nessuna discrepanza. Sulla macchina girava un altro progetto (scabopdf-mac-lab: prove d'interfaccia macOS, `AutomationModeUI` attivo) fino alla pausa della sessione; alla ripresa le sue prove non giravano più. Non l'ho toccato.
 
 ## Le versioni della macchina
 
@@ -47,19 +48,39 @@ Commit della correzione 01c2439 salvo dove detto, fuso in 2fefedb. «Rossa» = v
 4. SERIA, il tasto conta i gruppi avversari — CORRETTA (con il tasto intero). Prove: `test_osservazione_4_l_annuncio_del_tasto_conta_i_soli_gruppi_del_giocatore` (rossa: «7 gruppi» con 4), `ChiusuraGiornataTest`.
 5. SERIA, comandi sotto il bordo a testo massimo — MAPPA CORRETTA (`test_osservazione_5_la_mappa_e_raggiungibile_in_ogni_configurazione` rossa, `test_osservazione_5_torna_all_inizio_dalla_mappa_a_testo_massimo` rossa); PANNELLO NON UN DIFETTO DELL'APP: VoiceOver ne legge tutte le voci a testo massimo, XCUITest no (sopra).
 6. IMPERFEZIONE, fuoco al ritorno — CORRETTA in 01c2439 ed e30f479. Prove: `test_osservazione_6_chiuse_le_impostazioni_il_fuoco_torna_al_pulsante` (rossa), `test_osservazione_6_congedato_il_resoconto_il_fuoco_torna_al_comando_d_origine`. Esplorazioni mirate: 8 su 8.
-7. IMPERFEZIONE, «Impostazioni» in orizzontale — CORRETTA nella geometria (prova ospitata rossa, poi verde); la prova d'interfaccia col tocco passava già sul codice della build 28; con VoiceOver NON VERIFICATA, perché in orizzontale il doppio tocco sintetico non attiva nulla (limite del canale).
+7. IMPERFEZIONE, «Impostazioni» in orizzontale — CORRETTA nella geometria (prova ospitata rossa, poi verde); la prova d'interfaccia col tocco passava già sul codice della build 28; con VoiceOver NON VERIFICATA, perché in orizzontale il doppio tocco non attiva nulla, né con XCUITest né con Device Hub. Safari in orizzontale fa lo stesso, quindi il limite è del simulatore (`device-hub/trascrizione.md`, passi 8–9 e 22–23).
 8. IMPERFEZIONE, verifica automatica — testo tagliato CORRETTO in parte (`test_osservazione_8_nessun_testo_tagliato_sull_avvio_e_sulle_impostazioni`, rossa; esplorazione 86 → 53, i restanti per lo più senza elemento attribuito); carattere dinamico PROPOSTO (sotto); «Potentially inaccessible text» non esaminato elemento per elemento.
 9. IMPERFEZIONE, segmenti a 32 punti — CORRETTA, insieme alle leve a 28 punti trovate dalla prova nuova (`test_osservazioni_3_5_9_le_schermate_di_contorno_sono_raggiungibili`, rossa). Esplorazione: segmenti 44–45, leve 44.
 
 ## Seconda parte — che cosa è successo
 
-**Device Hub.** Accertato in parte e non esercitato come canale d'ingresso, per convivenza: guidarlo vuol dire portare in primo piano la sua finestra e generare eventi di mouse e tastiera di macOS, mentre l'altro progetto faceva girare prove d'interfaccia macOS con la modalità d'automazione attiva. Dettagli e limiti in `canali-di-automazione.md`.
+**La pausa.** La sessione si è fermata verso le 15:50 per il limite d'uso, dopo il primo invio di questo resoconto, ed è ripresa alle 16:40. Alla ripresa l'integrazione continua era verde sugli ultimi due invii; ho aperto il ramo `prove-interattive-2` per ciò che restava scoperto: Device Hub, le partite, il ripiegamento.
+
+**Device Hub.** Fino alla pausa non l'avevo esercitato, per convivenza: guidarlo vuol dire portarne in primo piano la finestra e generare eventi di sistema, mentre l'altro progetto faceva girare prove d'interfaccia macOS con la modalità d'automazione attiva. Alla ripresa quelle prove non giravano più (`pgrep` vuoto, controllato prima di ogni gruppo di azioni), e l'ho esercitato dalle 16:44 alle 17:00 sul WarSense iPhone Air, con VoiceOver acceso e il pilota in ascolto. La trascrizione passo per passo sta in `device-hub/trascrizione.md`, il rapporto in `canali-di-automazione.md` §1.
+- Gli eventi inviati al solo processo di Device Hub non hanno alcun effetto; quelli di sistema, con Device Hub in primo piano, sì.
+- Device Hub espone anche l'albero d'accessibilità dell'apparecchio, con le etichette intere: una via di lettura senza il taglio a 64 caratteri. In orizzontale però le cornici risultano scambiate.
+- Funzionano dal vivo, con VoiceOver: il tocco (fuoco sotto il dito), il doppio tocco sull'elemento in verticale, i colpetti a destra, a sinistra e in giù. Con questo canale ho verificato anche il ritorno del fuoco dopo le impostazioni e dopo il pannello del gruppo.
+- Non funzionano: i gesti a due dita, i comandi da tastiera, l'esecuzione dell'azione personalizzata scelta, il doppio tocco ovunque, l'attivazione in orizzontale.
+- Il controllo con Safari, aperto sullo stesso simulatore, dà gli stessi due esiti negativi per le ultime due. Non sono difetti di WarSense.
+
+All'apertura la finestra mostrava un apparecchio non di WarSense: non l'ho toccato, ho scelto il nostro nella barra laterale e alla fine ho rimesso la scelta com'era. Lo strumento (`scripts/devicehub.swift`) rifiuta le finestre che non mostrano un apparecchio di WarSense; il cancello l'ho visto rifiutare una volta di proposito.
+
+**La chiusura di Device Hub spegne i simulatori.** L'ho chiuso due volte: alle 17:00, finite le prove, e dopo la prova del cancello. Alle 17:00:47 i piloti delle due partite in corso (iPad, campagna media; iPhone 2, campagna grande) sono caduti a metà di un tocco: «Restarting after unexpected exit, crash, or test timeout», poi «TEST EXECUTE FAILED». Alle 17:04:02 i tre simulatori di WarSense accesi si sono spenti tutti insieme: lo dice la data di modifica dei loro `device.plist`, passati allo stato spento nello stesso secondo. Nessun simulatore di altri progetti era acceso: i loro `device.plist` avevano cambiato stato l'ultima volta prima delle 15:03, ed erano già spenti. Non ho disturbato nessuno, ma chiudere Device Hub è un comando che agisce su tutti i simulatori insieme, cioè ciò che la convivenza vieta. Ne ho fatto una regola (`memoria-infrastruttura.md`, CLAUDE.md) e un cancello, `scripts/chiudi-device-hub.sh`, che rifiuta se è acceso un simulatore che non è di WarSense. L'ho visto rifiutare con un simulatore temporaneo creato apposta e poi cancellato (`device-hub/cancello-chiusura-device-hub.txt`, uscita 2). Il registro di sistema (`log show`) non ha restituito nulla per quell'intervallo.
 
 **Il canale usato: il pilota.** Una prova d'interfaccia resta accesa sul simulatore e legge i comandi da un file del Mac; per ciascuno esegue l'azione e scrive ciò che VoiceOver ha pronunciato prima e dopo (annunci compresi, quando VoiceOver li dice), l'albero e, a richiesta, una schermata. L'ho usato a passi singoli (`scripts/interattivo.py`) per i gesti e per i percorsi sbagliati, e attraverso il tester (`scripts/tester.py`), che gioca le partite decidendo su ciò che sente e vede. Due limiti del canale accertati strada facendo: il servizio VoiceOver delle prove restituisce le pronunce TRONCATE a 64 caratteri (l'informazione di stato perde la sua coda, per esempio la battaglia in sospeso), e su elementi fuori vista o sull'intera applicazione sull'iPad XCUITest non calcola le coordinate di un tocco a più dita e il pilota cade («unable to compute coordinates for gesture»): tre cadute, ciascuna seguita da un riavvio, una sola sull'iPhone con l'intera applicazione.
 
 **I percorsi sbagliati, a passi brevi** (iPad, scontro di prova; iPhone 2, campagna piccola): bersaglio non valido in schieramento e in designazione, annullamento ripetuto, azzeramento, app chiusa e riaperta a metà azione (in battaglia e durante la designazione di una marcia), rotazione a metà azione (in battaglia e durante la designazione), taglia del testo cambiata a partita in corso, VoiceOver spento e riacceso, comando ripetuto, tasto della giornata con gruppi fermi e annullamento subito dopo. Esiti in `sessione-da-tester/confermato.md` e nelle trascrizioni.
 
 **Le partite col tester.** Tre formati in parallelo su tre simulatori, con VoiceOver acceso, a circa nove secondi per attivazione. Campagna PICCOLA (iPhone): 305 attivazioni, giorni di gioco 1–37, poi il limite di 30 giornate del tester; nessun errore del canale, nessun arresto né blocco dell'app; 62 presidi, 37 esplorazioni, 20 soste con raccolta, 6 marce (conteggi dello script sulle pronunce del diario); una battaglia nata in campagna, aperta dal pannello del gruppo, combattuta per 14 turni (un piazzamento, quattro spostamenti, l'avversario che ingaggia) e conclusa con l'annientamento del gruppo del giocatore; resoconto letto per intero; ritorno in campagna con tre gruppi; nessuna conclusione naturale entro il limite. Campagna MEDIA (iPad): 209 attivazioni, giorni 1–24, nessun errore, nessuna battaglia (il tester marcia con un gruppo armato su due e non ha raggiunto il contatto); interrotta da me alle 15:33. Campagna GRANDE (iPhone 2): due tentativi caduti al primo tocco magico, perché la prima casella della mappa grande sta fuori vista e XCUITest non vi calcola il tocco a due dita; non portata avanti, per i tempi: con VoiceOver una campagna grande costa ore. Il tester stesso è stato corretto tre volte durante la sessione (rotore che non resta scelto dopo un ordine, etichette che in designazione cominciano con la disponibilità, battaglia in sospeso non sentita per il troncamento a 64 caratteri, schieramento col rotore che in battaglia non riusciva): le versioni e i diari di ciascun tentativo sono nelle trascrizioni. Il ripiegamento non si è presentato: l'unica battaglia in campagna è finita con l'annientamento, che non lascia nulla da ripiegare.
+
+**Le partite dopo la ripresa.** Dalle 16:43 ho ripreso la campagna media sull'iPad (dal giorno 24) e ne ho cominciata una grande nuova sull'iPhone 2, col tester che cerca il contatto e si arrende appena può. Alle 17:00:47 i due piloti sono caduti per la chiusura di Device Hub (sopra). La media era arrivata al giorno 33 (91 attivazioni), la grande al giorno 7 (87 attivazioni), senza battaglie. Dalle 17:07, con i simulatori riaccesi, ho fatto giocare una campagna piccola nuova sull'iPhone e la grande ripresa sull'iPhone 2.
+
+- **Piccola: una battaglia al giorno 4, alle 17:12.** Il tester ha tentato la resa ai turni 2 e 3 («resa non ancora disponibile») e l'ha dichiarata al turno 4 («Resa dichiarata: comincia la tua ritirata combattuta»). Poi però ha continuato a portare avanti il suo reparto invece di evacuarlo. Il reparto è stato disfatto al turno 7: «Il tuo fanteria leggera A è disfatto in riga 1, cella 1», «La battaglia è conclusa: la ritirata è compiuta». VoiceOver ha letto il resoconto per intero: «Sconfitta: si è ritirato», «Durata: 7 turni», «Perdite tue: 600 punti su 600 impegnati», «Unità evacuate: 0». Il modo «si è ritirato» con nulla di salvato è quello che prescrive 01 §15.2.3.1. Tornati in campagna: «Battaglia persa in riga 2, casella 2», il gruppo scompare e la scelta del ripiegamento non compare, perché non c'era nulla da far ripiegare.
+- **Correzione del tester.** Dopo la resa ora evacua i reparti dalle righe arretrate («Evacua questa unità») invece di portarli avanti. Così corretto ha giocato la piccola fino al giorno 24 (175 attivazioni dal 17:07), senza un'altra battaglia: i tre gruppi rimasti non hanno trovato il contatto.
+- **Grande:** dal giorno 7 al 22, 205 attivazioni, 9 marce verso il contatto, nessuna battaglia. Sulla mappa grande le marce durano più giorni.
+- **Una caduta del pilota.** Il pilota della piccola è caduto una volta, sul tocco magico di ripiego, perché era rimasto aperto un pannello del tester che avevo fermato per correggerlo. Ora il tester chiude il pannello e, senza un pulsante visibile, non tenta il tocco.
+
+Ho fermato tutto alle 17:46, alla fine di una giornata per ciascun tester. Il ripiegamento dal vivo non si è presentato. Un livello sotto lo coprono le prove ospitate verdi nel collaudo: `PassaggioBattagliaInterfacciaTest.test_incarico_24_dalla_mappa_alla_battaglia_e_ritorno` («lo sconfitto che ripiega arretra dalla casella contesa (01 §10.6)») e, per la fine delle partite su ogni formato, `test_incarico_26_le_partite_arrivano_alla_fine_su_ogni_formato`. Nessun errore dell'app in queste partite; gli errori del canale sono le cadute dei piloti già dette.
 
 **Le osservazioni della seconda parte** stanno in `sessione-da-tester/osservazioni.md`, con gravità e passi; non ho corretto nulla.
 
@@ -68,15 +89,18 @@ Commit della correzione 01c2439 salvo dove detto, fuso in 2fefedb. «Rossa» = v
 - Rotore (scelta dell'insieme e salto all'elemento): GUIDATO dal vivo, da tastiera (Control+Opzione+Comando+frecce) e, per la scelta, anche con la rotazione a due dita sintetica; e verificato un livello sotto (le sei ricerche della mappa e le sei della battaglia percorrono il proprio insieme).
 - Tocco magico: GUIDATO dal vivo (`tapWithNumberOfTaps:2 numberOfTouches:2`) e verificato un livello sotto (annuncio uguale all'informazione di stato, fuoco fermo).
 - Strofinio (uscita): SCOPERTO dal vivo (nessuna API di trascinamento a più dita; Esc e Control+Opzione+Esc non lo producono); verificato un livello sotto per mappa, battaglia e registro; impostazioni, apprendimento e resoconto non lo gestiscono (osservazione 4 della seconda parte).
-- Azioni personalizzate: la SCELTA è guidata da tastiera, l'ESECUZIONE è SCOPERTA dal vivo (Control+Opzione+Spazio non attiva; il doppio tocco sintetico riporta il fuoco sull'elemento ed esegue l'azione predefinita); verificata un livello sotto (le direzioni della mappa e le quattro diagonali della battaglia portano il fuoco sulla cella giusta).
-- Doppio tocco ovunque: SCOPERTO (il doppio tocco sintetico attiva ciò che sta sotto il dito); coperto in verticale dal doppio tocco sull'elemento, che è guidato.
-- Attivazione con VoiceOver in orizzontale: SCOPERTA (il doppio tocco sintetico non attiva nulla in orizzontale, né pulsanti né caselle; in verticale sì).
+- Azioni personalizzate: la SCELTA è guidata, da tastiera (XCUITest) e col colpetto in giù (Device Hub: «Vai a sud»). L'ESECUZIONE è SCOPERTA dal vivo: Control+Opzione+Spazio non attiva; il doppio tocco sintetico di XCUITest riporta il fuoco sull'elemento ed esegue l'azione predefinita; il doppio clic di Device Hub non esegue nulla. Verificata un livello sotto: le direzioni della mappa e le quattro diagonali della battaglia portano il fuoco sulla cella giusta.
+- Doppio tocco ovunque: SCOPERTO. Con XCUITest il doppio tocco sintetico attiva ciò che sta sotto il dito; con Device Hub non attiva nulla. Safari si comporta allo stesso modo: è il simulatore. In verticale lo copre il doppio tocco sull'elemento, che è guidato.
+- Attivazione con VoiceOver in orizzontale: SCOPERTA. Il doppio tocco non attiva nulla in orizzontale, né pulsanti né caselle, né con XCUITest né con Device Hub; in verticale sì. Safari in orizzontale fa lo stesso: è il simulatore, non l'app.
+- Passo avanti e indietro: GUIDATO col servizio VoiceOver e da tastiera (XCUITest) e, come colpetto vero, con Device Hub.
 
 ## Per ciascun percorso, il canale usato
 
 - Gesti e percorsi sbagliati in battaglia (iPad): pilota a passi singoli, VoiceOver acceso; taglia del testo da `simctl ui content_size`.
 - Percorsi sbagliati in campagna (iPhone 2): pilota a passi singoli.
 - Partite intere e battaglie nate in campagna: tester sul pilota (iPhone: piccola; iPad: media; iPhone 2: grande, interrotta).
+- Avvio, impostazioni aperte e chiuse col ritorno del fuoco, ripresa della campagna, colpetti e azioni sulla mappa, pannello del gruppo aperto e chiuso: Device Hub con eventi di sistema, VoiceOver acceso, il pilota in ascolto.
+- Attivazione in orizzontale e doppio tocco ovunque: XCUITest e Device Hub, con il controllo su Safari.
 - Verifiche un livello sotto: prove ospitate (`GestiUnLivelloSottoTest`), nel collaudo.
 - Annunci: nel pilota, dove VoiceOver li pronuncia; nelle prove ospitate, dalla coda del punto dei segnali.
 
@@ -95,7 +119,10 @@ Da valutare dal titolare anche: il termine chiuso «tuo» resta invariabile dava
 - Il ritorno del fuoco spostato a chiusura compiuta, dopo l'esplorazione ripetuta.
 - La prova del pannello a testo massimo tolta, perché misura un limite di XCUITest.
 - Il cancello delle prove a mano anche sulle note già consegnate, con le loro richieste di prova tolte.
-- La campagna grande non portata avanti col tester, per i tempi (sotto).
+- La campagna grande non portata avanti col tester prima della pausa, per i tempi (sotto).
+- Device Hub esercitato soltanto dopo aver verificato che non girassero prove d'interfaccia macOS di altri progetti, e soltanto sulla finestra di un apparecchio di WarSense.
+- Dopo la ripresa, il tester cerca il contatto (una casella vicina con il quartier generale o una formazione armata avversaria) e in battaglia si arrende appena può, poi evacua: è la via per arrivare al ripiegamento.
+- Fermate le partite alle 17:46, alla fine di una giornata per ciascun tester, invece di continuare senza un contatto in vista.
 
 ## Modifiche, per commit
 
@@ -111,8 +138,10 @@ Da valutare dal titolare anche: il termine chiuso «tuo» resta invariabile dava
 - b495ea0 — `Incarichi/28-2026-11-21-prodotti/sessione-da-tester/` (trascrizioni, diari, schermate, `confermato.md`)
 - aa1e59a — `Incarichi/28-…-resoconto.md`, `Incarichi/README.md`
 - f0e64b3 — `scripts/tester.py` (la forma con cui ha giocato le partite)
-- la coda di questo resoconto — `Incarichi/28-…-resoconto.md`
-- fusioni sul principale: 2fefedb, b8abc93, 257aac2, d6e7887, e quella della coda di questo resoconto
+- 74b211a — `Incarichi/28-…-resoconto.md` (la coda)
+- 0d2adb5 — `CLAUDE.md`, `memoria-infrastruttura.md`, `scripts/tester.py`, `scripts/devicehub.swift`, `scripts/chiudi-device-hub.sh`, `Incarichi/28-2026-11-21-prodotti/device-hub/`, `…/canali-di-automazione.md`, `…/sessione-da-tester/osservazioni.md`, `…/sessione-da-tester/confermato.md`
+- l'ultimo commit del ramo `prove-interattive-2` — questo resoconto; `scripts/tester.py` (evacuazione dopo la resa, tocco magico senza bersaglio); `Incarichi/28-2026-11-21-prodotti/sessione-da-tester/` (trascrizioni dopo la ripresa, schermata del resoconto, `osservazioni.md`); `…/device-hub/chiusura-e-caduta-dei-piloti.txt`
+- fusioni sul principale: 2fefedb, b8abc93, 257aac2, d6e7887, 8a61817, e quella del ramo `prove-interattive-2`
 
 ## Ciò che ho fatto senza che fosse chiesto
 
@@ -125,28 +154,33 @@ Da valutare dal titolare anche: il termine chiuso «tuo» resta invariabile dava
 - Il cancello delle prove a mano, e le richieste di prova tolte dalle note già consegnate.
 - Le verifiche un livello sotto entrate nel collaudo (`GestiUnLivelloSottoTest`, 9 prove).
 - La correzione del rapporto dell'incarico 27 sugli strumenti contenuti in Xcode.
+- Il controllo con Safari, che separa i limiti del simulatore dai difetti dell'app.
+- La causa probabile dell'osservazione 5 della seconda parte, letta nel codice e scritta in `sessione-da-tester/osservazioni.md` (non corretta).
+- `scripts/devicehub.swift` con i suoi cancelli, e `scripts/chiudi-device-hub.sh`; la regola sulla chiusura di Device Hub in `memoria-infrastruttura.md` e in CLAUDE.md.
 
 ## Ciò che era chiesto e non ho fatto
 
-- Device Hub non esercitato come canale d'ingresso: avrebbe disturbato le prove macOS dell'altro progetto.
-- Con VoiceOver, in orizzontale, nessun comando attivato (limite del canale); la correzione dell'osservazione 7 è verificata solo nella geometria e col tocco senza VoiceOver.
+- Device Hub esercitato solo dopo la ripresa. I gesti a due dita e la tastiera non passano per Device Hub: tocco magico, uscita e rotore non li ho guidati con questo canale.
+- Con VoiceOver, in orizzontale, nessun comando attivato (limite del simulatore, accertato con Safari): la correzione dell'osservazione 7 è verificata solo nella geometria e col tocco senza VoiceOver.
 - Il carattere dinamico: proposto, non deciso.
 - Le schermate dell'esplorazione ripetuta, perdute con la cartella che lo script di caricamento cancella.
-- Partite intere fino alla conclusione naturale: la piccola giocata per 37 giorni senza concludersi, la media per 24, la grande non giocata (sopra); nessun ripiegamento incontrato.
+- Partite intere fino alla conclusione naturale: nessuna dal vivo. Prima della pausa la piccola per 37 giorni, la media per 24, la grande non giocata; dopo la ripresa la piccola nuova fino al giorno 24, la media fino al 33, la grande fino al 22. La fine delle partite su ogni formato la copre soltanto un livello sotto `test_incarico_26_le_partite_arrivano_alla_fine_su_ogni_formato`.
+- Il ripiegamento dal vivo: non si è presentato. L'unica resa ha perso tutto nella ritirata, prima che il tester sapesse evacuare. Coperto soltanto un livello sotto (`test_incarico_24_dalla_mappa_alla_battaglia_e_ritorno`).
 - La sessione da tester non ha percorso con VoiceOver le schermate dopo l'avvio in orizzontale (attivazione non guidabile), né l'apprendimento dei segnali e il registro oltre quanto già nell'esplorazione ripetuta.
 
 ## Tempi
 
-Somme fatte a mano dai tempi dei registri (`date +%s` attorno agli script, `xcresulttool`), marcate come tali. Sessione dalle 11:55 alle 15:45 circa del 2026-11-21.
+Somme fatte a mano dai tempi dei registri (`date +%s` attorno agli script, `xcresulttool`), marcate come tali. Sessione dalle 11:55 alle 15:50 circa e, dopo la pausa per il limite d'uso, dalle 16:40 alle 17:55 circa del 2026-11-21.
 - Compilazione e collaudi completi: 358 + 391 + 315 s (ramo della prima parte), 360 s (ramo della seconda parte), più quello dentro il caricamento: circa 24 minuti più il caricamento (somma a mano).
 - Prove rosse sul codice della build 28: 101 s; pacchetto e prove mirate: pochi minuti, non misurati uno per uno.
 - Sessioni complete: 647 s.
 - Caricamento: 592 s.
 - Esplorazione ripetuta: 2307 s; esplorazioni mirate: 208 e 203 s.
 - Sessione da tester (sonde dei gesti, percorsi sbagliati e partite col tester): dalle 14:14 alle 15:33, circa 80 minuti (somma a mano), con fino a tre simulatori insieme.
-- Device Hub e canali: circa 15 minuti, senza eventi di macOS.
+- Device Hub e canali: circa 15 minuti prima della pausa, senza eventi di sistema; 16 minuti dopo la ripresa (16:44–17:00), con 32 passi, più la prova dei due cancelli.
+- Secondo giro del tester, dopo la ripresa: dalle 16:43 alle 17:46, con fino a tre simulatori, interrotto dalla caduta delle 17:00:47 e ripreso alle 17:07; circa 60 minuti (somma a mano).
 
 ## Integrazione continua all'ultimo invio verificato
 
-Corse sui tre invii al principale della prima parte, tutte VERDI (API pubblica di GitHub Actions): 44905527544 su 2fefedb, 44906411692 su b8abc93, 44907355868 su 257aac2. Le corse su d6e7887 e sull'invio di questa coda partono dopo la chiusura del resoconto: il loro esito non l'ho visto.
+Corse sugli invii al principale, tutte VERDI (API pubblica di GitHub Actions): 44905527544 su 2fefedb, 44906411692 su b8abc93, 44907355868 su 257aac2, 44914759816 su d6e7887, 44914788175 su 8a61817. La corsa sull'ultima fusione parte dopo la chiusura del resoconto: il suo esito non l'ho visto.
 
