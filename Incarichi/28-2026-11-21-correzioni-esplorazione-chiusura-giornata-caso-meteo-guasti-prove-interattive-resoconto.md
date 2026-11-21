@@ -109,8 +109,10 @@ Da valutare dal titolare anche: il termine chiuso «tuo» resta invariabile dava
 - 8de3905 — `.gitignore`, `Applicazione/Esplorazione/SessioneInterattivaTest.swift`, `Applicazione/ProveOspitate/GestiUnLivelloSottoTest.swift`, `scripts/interattivo.py`, `Applicazione/WarSense.xcodeproj/project.pbxproj`
 - 04d7ac3 — `scripts/tester.py`, `Applicazione/Esplorazione/SessioneInterattivaTest.swift`, `Incarichi/28-2026-11-21-prodotti/canali-di-automazione.md`, `…/sessione-da-tester/osservazioni.md`
 - b495ea0 — `Incarichi/28-2026-11-21-prodotti/sessione-da-tester/` (trascrizioni, diari, schermate, `confermato.md`)
-- il commit di questo resoconto — `Incarichi/28-…-resoconto.md`, `Incarichi/README.md`
-- fusioni sul principale: 2fefedb, b8abc93, 257aac2, e la fusione del ramo della seconda parte dopo questo resoconto
+- aa1e59a — `Incarichi/28-…-resoconto.md`, `Incarichi/README.md`
+- f0e64b3 — `scripts/tester.py` (la forma con cui ha giocato le partite)
+- la coda di questo resoconto — `Incarichi/28-…-resoconto.md`
+- fusioni sul principale: 2fefedb, b8abc93, 257aac2, d6e7887, e quella della coda di questo resoconto
 
 ## Ciò che ho fatto senza che fosse chiesto
 
@@ -143,3 +145,8 @@ Somme fatte a mano dai tempi dei registri (`date +%s` attorno agli script, `xcre
 - Esplorazione ripetuta: 2307 s; esplorazioni mirate: 208 e 203 s.
 - Sessione da tester (sonde dei gesti, percorsi sbagliati e partite col tester): dalle 14:14 alle 15:33, circa 80 minuti (somma a mano), con fino a tre simulatori insieme.
 - Device Hub e canali: circa 15 minuti, senza eventi di macOS.
+
+## Integrazione continua all'ultimo invio verificato
+
+Corse sui tre invii al principale della prima parte, tutte VERDI (API pubblica di GitHub Actions): 44905527544 su 2fefedb, 44906411692 su b8abc93, 44907355868 su 257aac2. Le corse su d6e7887 e sull'invio di questa coda partono dopo la chiusura del resoconto: il loro esito non l'ho visto.
+
