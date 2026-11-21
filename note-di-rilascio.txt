@@ -6,7 +6,7 @@ IL RESOCONTO DI FINE BATTAGLIA DICE DI NUOVO COME È ANDATA: esito, durata, perd
 
 CON IL TESTO PIÙ GRANDE, E IN ORIZZONTALE, OGNI SCHERMATA SCORRE. «Fine del turno», «Torna all'inizio» e tutti i comandi dell'avvio si raggiungono sempre, a scorrimenti e al tatto. I titoli lunghi vanno a capo invece di essere tagliati.
 
-CHIUSA UNA SCHERMATA, IL FUOCO TORNA SUL COMANDO CHE L'AVEVA APERTA, per esempio su «Impostazioni» quando chiudi le impostazioni, o sul comando che aveva aperto lo scontro quando torni dal resoconto.
+CHIUSA UNA SCHERMATA, IL FUOCO TORNA SUL COMANDO CHE L'AVEVA APERTA, per esempio su «Impostazioni» quando chiudi le impostazioni, o sul comando che aveva aperto lo scontro quando torni dal resoconto, anche con il testo più grande.
 
 NELLE IMPOSTAZIONI i segmenti della verbosità e dell'intensità e le leve dei suoni e delle vibrazioni hanno un bersaglio più alto, che si trova più facilmente al tatto.
 
