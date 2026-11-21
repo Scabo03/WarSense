@@ -69,8 +69,25 @@ DOCUMENTI = [
     {
         "modello": "nota-per-il-titolare-*.md",
         "destinatario": "il titolare, letta prima di provare la build",
-        "controlli": {"esistenza", "vocabolario", "misure", "cifre", "freschezza"},
+        "controlli": {"esistenza", "vocabolario", "misure", "cifre", "prove_a_mano", "freschezza"},
     },
+]
+
+# Le richieste di prova al titolare (incarico 28, regola di CLAUDE.md): il titolare non esegue
+# prove a mano, ogni verifica si fa con le automazioni e i simulatori, e ciò che non si riesce ad
+# automatizzare si dichiara scoperto nel resoconto. Una nota che gli passi una prova da fare è
+# rifiutata. Le forme sono quelle con cui una richiesta di prova si scrive in italiano, rivolte al
+# lettore della nota; la nota può raccontare che cosa è cambiato, non chiedergli di accertarlo.
+RICHIESTE_DI_PROVA = [
+    r"\b(?:prova|verifica|controlla|accerta|ascolta|guarda)(?:\s+(?:tu|anche|pure))?\s+(?:a\s+mano|sul\s+(?:tuo\s+)?(?:dispositivo|telefono|iphone|ipad))",
+    r"\b(?:ti\s+chiedo\s+di|ti\s+chiediamo\s+di|puoi|potresti|dovresti|devi|occorre)\s+(?:provare|verificare|controllare|accertare|riprovare)",
+    r"\bprov[ae]\s+da\s+fare\b",
+    r"\bda\s+(?:provare|verificare)\s+(?:a\s+mano|sul\s+dispositivo|da\s+te)\b",
+    r"\bprova\s+tu\b",
+    # Le sezioni che assegnano prove, e gli imperativi con cui una prova si chiede al lettore.
+    r"^\s*#*\s*(?:che\s+)?cosa\s+provare\b",
+    r"\b(?:verifica|controlla|accertati|assicurati|ascolta\s+e\s+verifica)\s+che\b",
+    r"\bprova\s+(?:a|ad)\s+\w+",
 ]
 
 LIMITE_WHATS_NEW = 4000
@@ -276,6 +293,19 @@ def controllo_cifre(percorsi, _modello):
     print("  cifre: nessun numero non dichiarato nel corpo")
 
 
+def controllo_prove_a_mano(percorsi, _modello):
+    for percorso in percorsi:
+        corpo = re.sub(r"<!--.*?-->", "", percorso.read_text(encoding="utf-8"), flags=re.DOTALL)
+        for modello in RICHIESTE_DI_PROVA:
+            trovato = re.search(modello, corpo, flags=re.IGNORECASE | re.MULTILINE)
+            if trovato:
+                rifiuta(f"{percorso.name} chiede al titolare una prova da fare: «{trovato.group(0)}». "
+                        "Il titolare non esegue prove a mano (CLAUDE.md, incarico 28): ogni verifica "
+                        "si fa con le automazioni e i simulatori, e ciò che non si riesce ad "
+                        "automatizzare si dichiara scoperto nel resoconto, con le vie tentate.")
+    print("  prove a mano: nessuna prova chiesta al titolare")
+
+
 def ultimo_commit(percorsi):
     esito = subprocess.run(["git", "log", "-1", "--format=%H %ct", "--"] +
                            [str(p) for p in percorsi],
@@ -309,6 +339,7 @@ CONTROLLI = {
     "vocabolario": controllo_vocabolario,
     "misure": controllo_misure,
     "cifre": controllo_cifre,
+    "prove_a_mano": controllo_prove_a_mano,
     "freschezza": controllo_freschezza,
 }
 
@@ -324,7 +355,7 @@ DIPENDE_DA = {"cifre": "misure"}
 
 # L'ordine è quello della tabella e non quello del dizionario: prima l'esistenza,
 # poi ciò che è a buon mercato, poi ciò che costa.
-ORDINE = ["esistenza", "lunghezza", "vocabolario", "misure", "cifre", "freschezza"]
+ORDINE = ["esistenza", "lunghezza", "vocabolario", "misure", "cifre", "prove_a_mano", "freschezza"]
 
 
 def main():

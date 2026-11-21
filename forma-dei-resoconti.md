@@ -4,7 +4,9 @@ File di memoria permanente del progetto. Ogni sessione che debba consegnare un r
 
 ## La regola in vigore
 
-**Il resoconto di sessione si scrive per un lettore tecnico.** Nomi reali di tipi, protocolli, file, funzioni, prove e obiettivi. Firme modificate e punti di chiamata toccati, dichiarati. Le modifiche descritte in termini di che cosa è cambiato, dove, e quale invariante o requisito ne risulta coperto. Nessuna perifrasi al posto di un termine tecnico, nessuna analogia esplicativa, nessuna semplificazione. Niente preamboli, niente riepilogo di ciò che è stato chiesto, nessuna formula di cortesia.
+**Il resoconto di sessione si scrive per un lettore tecnico.** Nomi reali di tipi, protocolli, file, funzioni, prove e obiettivi. Nessuna perifrasi al posto di un termine tecnico, nessuna analogia esplicativa, nessuna semplificazione. Niente preamboli, niente riepilogo di ciò che è stato chiesto, nessuna formula di cortesia.
+
+**Ciò che si legge nel repo non si descrive** (forma della consegna di `CLAUDE.md`, incarico 27; la contraddizione con la regola di prima l'ha risolta il titolare nell'incarico 28 a favore di questa). Chi esamina il lavoro legge il repo remoto: per ogni modifica il resoconto porta UNA RIGA, con il commit e il percorso, e nessuna parafrasi dei file modificati — né dei documenti né del codice, né delle firme né degli invarianti, che stanno nei file e nei messaggi dei commit. Spiega invece PER INTERO ciò che dal repo non si vede: che cosa è successo durante l'esecuzione, che cosa si è visto e sentito sul simulatore, i fallimenti anche risolti e le intermittenze, lo stato su App Store Connect, le versioni della macchina, i tempi, le decisioni prese da soli e perché, ciò che non si è riusciti a fare. Fino all'incarico 27 questa sezione voleva invece le modifiche «descritte in termini di che cosa è cambiato, dove, e quale invariante o requisito ne risulta coperto»: quella prescrizione è revocata.
 
 ## La regola revocata, e perché
 
