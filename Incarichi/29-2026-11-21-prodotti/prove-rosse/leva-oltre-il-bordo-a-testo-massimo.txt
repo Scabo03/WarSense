@@ -1,0 +1,15 @@
+# Prova rossa della leva oltre il bordo a testo massimo (incarico 29), sul codice prima della correzione
+# comando: xcodebuild test -project Applicazione/WarSense.xcodeproj -scheme WarSense -destination id=76DF33B6-7EA7-489D-98AD-459879B75C2D (WarSense iPhone Air · 2, iOS 27.0) -derivedDataPath Applicazione/build/collaudo -only-testing:WarSenseTest/TestoDinamicoTest
+# codice provato: d8fc804 più la sola verifica nuova fuoriDalBordo in TestoDinamicoTest; data: 2026-11-21 21:17
+	 Executed 8 tests, with 1 failure (0 unexpected) in 1.648 (1.653) seconds
+	 Executed 8 tests, with 1 failure (0 unexpected) in 1.648 (1.654) seconds
+** TEST FAILED **
+/Users/lucascabini/Developer/WarSense/Applicazione/ProveOspitate/TestoDinamicoTest.swift:160: error: -[WarSenseTest.TestoDinamicoTest test_02_10_4_impostazioni] : XCTAssertEqual failed: ("["impostazioni: «Suoni del gioco» esce dal bordo: da 379 a 442 punti su 420"]") is not equal to ("[]") - impostazioni: «Suoni del gioco» esce dal bordo: da 379 a 442 punti su 420
+Test Case '-[WarSenseTest.TestoDinamicoTest test_02_10_4_apprendimento_dei_segnali]' passed (0.090 seconds).
+Test Case '-[WarSenseTest.TestoDinamicoTest test_02_10_4_avvio]' passed (0.070 seconds).
+Test Case '-[WarSenseTest.TestoDinamicoTest test_02_10_4_battaglia_e_il_suo_pannello]' passed (1.147 seconds).
+Test Case '-[WarSenseTest.TestoDinamicoTest test_02_10_4_divisione]' passed (0.058 seconds).
+Test Case '-[WarSenseTest.TestoDinamicoTest test_02_10_4_impostazioni]' failed (0.050 seconds).
+Test Case '-[WarSenseTest.TestoDinamicoTest test_02_10_4_mappa_e_il_suo_pannello]' passed (0.160 seconds).
+Test Case '-[WarSenseTest.TestoDinamicoTest test_02_10_4_registro_con_voci_e_vuoto]' passed (0.039 seconds).
+Test Case '-[WarSenseTest.TestoDinamicoTest test_02_10_4_resoconto]' passed (0.034 seconds).

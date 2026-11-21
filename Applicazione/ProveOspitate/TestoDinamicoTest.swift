@@ -8,7 +8,8 @@ import Sessione
 /// titolare del 2026-11-21, incarico 29): una prova per ogni schermata, alla dimensione più grande
 /// (`accessibilityExtraExtraExtraLarge`), confrontata con quella predefinita (`large`). Per ogni testo
 /// della schermata: alla dimensione più grande il carattere è più grande; il testo segue i cambiamenti
-/// a partita in corso (`adjustsFontForContentSizeCategory`); e nessun testo si taglia. Fanno eccezione,
+/// a partita in corso (`adjustsFontForContentSizeCategory`); nessun testo si taglia; nessun controllo esce dal
+/// bordo della schermata (`fuoriDalBordo`). Fanno eccezione,
 /// dichiarata, le tessere del deck, le celle della griglia e le caselle della mappa (misure fisse per
 /// ragioni di geometria): i loro testi non si contano. I pannelli sono avvisi di sistema: se ne
 /// controlla soltanto la crescita del carattere.
@@ -81,6 +82,34 @@ final class TestoDinamicoTest: XCTestCase {
         return esito
     }
 
+    /// I controlli che alla dimensione più grande escono dal bordo della schermata. Una leva di sistema ha
+    /// misura propria: se la riga la comprime, la sua cornice si stringe ma la leva si disegna intera, oltre
+    /// la cornice; per questo della leva si misura l'estensione naturale, non la cornice. Trovato dal vivo
+    /// sull'iPhone (incarico 29, percorso a testo massimo): la leva «Suoni del gioco» oltre il bordo destro.
+    /// Restano fuori le eccezioni dichiarate e ciò che sta in un contenitore che scorre in orizzontale.
+    static func fuoriDalBordo(in radice: UIView) -> [String] {
+        var esito: [String] = []
+        let larghezza = radice.bounds.width
+        func scendi(_ vista: UIView, scorreInOrizzontale: Bool) {
+            guard !vista.isHidden, vista.alpha > 0.01 else { return }
+            if vista is TesseraDeck || vista is VistaGriglia || vista is VistaMappa { return }
+            var orizzontale = scorreInOrizzontale
+            if let contenitore = vista as? UIScrollView,
+               contenitore.contentSize.width > contenitore.bounds.width + 1 { orizzontale = true }
+            if let controllo = vista as? UIControl, !orizzontale, controllo.bounds.width > 0 {
+                let cornice = controllo.convert(controllo.bounds, to: radice)
+                let estensione = controllo is UISwitch ? controllo.sizeThatFits(.zero).width : cornice.width
+                if cornice.minX < -1 || cornice.minX + estensione > larghezza + 1 {
+                    let nome = controllo.accessibilityLabel ?? String(describing: type(of: controllo))
+                    esito.append("«\(nome)» esce dal bordo: da \(Int(cornice.minX)) a \(Int(cornice.minX + estensione)) punti su \(Int(larghezza))")
+                }
+            }
+            for sotto in vista.subviews { scendi(sotto, scorreInOrizzontale: orizzontale) }
+        }
+        scendi(radice, scorreInOrizzontale: false)
+        return esito
+    }
+
     /// I difetti di una schermata: confronta i testi alle due taglie, per testo.
     static func difetti(_ nome: String, predefinita: [Testo], massima: [Testo]) -> [String] {
         var difetti: [String] = []
@@ -104,14 +133,16 @@ final class TestoDinamicoTest: XCTestCase {
     private func confronta(_ nome: String, _ fabbrica: () async throws -> UIViewController,
                            pronta: (UIViewController) async throws -> Void = { _ in }) async throws -> [String] {
         var raccolti: [[Testo]] = []
+        var fuori: [String] = []
         for taglia in [Self.predefinita, Self.massima] {
             let schermata = try await fabbrica()
             let finestra = monta(schermata, taglia: taglia)
             try await pronta(schermata)
             finestra.layoutIfNeeded()
             raccolti.append(Self.testi(in: schermata.view))
+            if taglia == Self.massima { fuori = Self.fuoriDalBordo(in: schermata.view).map { "\(nome): \($0)" } }
         }
-        return Self.difetti(nome, predefinita: raccolti[0], massima: raccolti[1])
+        return Self.difetti(nome, predefinita: raccolti[0], massima: raccolti[1]) + fuori
     }
 
     // MARK: - Una prova per ogni schermata

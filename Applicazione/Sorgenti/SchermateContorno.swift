@@ -340,6 +340,11 @@ final class SchermataImpostazioni: UIViewController {
         leva.isOn = attivo
         leva.addTarget(self, action: azione, for: .valueChanged)
         leva.accessibilityLabel = etichetta.text
+        // A testo grande cede l'etichetta, che va a capo; la leva ha misura propria e, compressa, si
+        // disegnerebbe oltre la sua cornice e oltre il bordo (trovato dal vivo sull'iPhone, incarico 29).
+        etichetta.setContentCompressionResistancePriority(.defaultLow, for: .horizontal)
+        leva.setContentCompressionResistancePriority(.required, for: .horizontal)
+        leva.setContentHuggingPriority(.required, for: .horizontal)
         riga.addArrangedSubview(etichetta)
         riga.addArrangedSubview(leva)
         return riga
