@@ -1,6 +1,6 @@
 Questa build corregge ciò che una lunga sessione di gioco con VoiceOver ha trovato, e cambia il modo in cui il gioco parla in tre punti decisi dal titolare.
 
-IL TESTO SEGUE LA DIMENSIONE SCELTA NELLE IMPOSTAZIONI DI SISTEMA, in ogni schermata: pulsanti, etichette, pannelli, impostazioni, suoni e vibrazioni, registro, resoconto, divisione. Restano di misura fissa le tessere delle riserve, le celle della griglia e le caselle della mappa. Nelle impostazioni la verbosità e l'intensità delle vibrazioni sono ora un elenco di voci, una sotto l'altra: la voce scelta si annuncia come selezionata.
+IL TESTO SEGUE LA DIMENSIONE SCELTA NELLE IMPOSTAZIONI DI SISTEMA, in ogni schermata: pulsanti, etichette, pannelli, impostazioni, suoni e vibrazioni, registro, resoconto, divisione. Restano di misura fissa le tessere delle riserve, le celle della griglia e le caselle della mappa. Nelle impostazioni la verbosità e l'intensità delle vibrazioni sono ora un elenco di voci, una sotto l'altra: la voce scelta si annuncia come selezionata. A testo grande l'etichetta di un interruttore va a capo, e l'interruttore resta dentro lo schermo.
 
 LE FRASI SI ACCORDANO AL GENERE del reparto o del gruppo: «La tua fanteria leggera A è stata ingaggiata», «I tuoi tiratori C sono stati ingaggiati», «tuo Corvo», «tua Aquila». Il nome non cambia; cambiano articoli e accordi.
 
