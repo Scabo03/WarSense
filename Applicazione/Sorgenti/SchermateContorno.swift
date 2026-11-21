@@ -247,6 +247,14 @@ final class SchermataResoconto: UIViewController {
         dismiss(animated: false) { [alTermine] in alTermine?() }
     }
 
+    /// Il gesto di fuga congeda il resoconto come «Torna all'inizio» (02 §6.7; incarico 29, osservazione
+    /// 4 della sessione da tester): fino alla build 29 non era gestito, e il giocatore doveva cercare il
+    /// pulsante.
+    override func accessibilityPerformEscape() -> Bool {
+        chiudiTutto()
+        return true
+    }
+
     /// Attrezzo per le prove ospitate: congeda il resoconto come il tocco del pulsante «torna»,
     /// così che la prova percorra la STESSA catena di congedo del gioco (incarico 25).
     func chiudiTuttoPerProva() { chiudiTutto() }
@@ -276,41 +284,38 @@ final class SchermataImpostazioni: UIViewController {
         ColonnaScorrevole.monta(colonna, in: view, centrata: false)
         let titolo = UILabel()
         titolo.text = testi.frase("impostazioni.titolo").testo
-        titolo.font = .preferredFont(forTextStyle: .title1)
-        titolo.numberOfLines = 0
+        TestoDinamico.applica(titolo, stile: .title1) // segue la taglia di sistema (02 §10.4)
         titolo.accessibilityTraits = .header
         colonna.addArrangedSubview(titolo)
 
-        // Verbosità: tre livelli (00 §9.5). I segmenti alti almeno 44 punti (02 §8.5,
-        // osservazione 9: erano 32).
-        let etichettaVerbosita = UILabel()
+        // Verbosità: tre livelli (00 §9.5). Dal 2026-11-21 (incarico 29) una colonna di voci invece del
+        // selettore a segmenti, che non seguiva la taglia del testo e a testo grande ne tagliava i titoli
+        // (02 §10.4). L'etichetta visibile dà il nome al gruppo di voci, che lo porta per chi atterra su
+        // una voce (02 §1.3): per non sentirlo due volte, l'etichetta in sé non è un elemento.
+        let etichettaVerbosita = TestoDinamico.applica(UILabel(), stile: .body)
         etichettaVerbosita.text = testi.frase("impostazioni.verbosita").testo
-        etichettaVerbosita.numberOfLines = 0
+        etichettaVerbosita.isAccessibilityElement = false
         colonna.addArrangedSubview(etichettaVerbosita)
-        let selettore = UISegmentedControl(items: Verbosita.allCases.map {
-            testi.frase("impostazioni.verbosita." + $0.rawValue).testo })
-        selettore.selectedSegmentIndex = Verbosita.allCases.firstIndex(of: Impostazioni.verbosita) ?? 1
-        selettore.addTarget(self, action: #selector(cambiaVerbosita(_:)), for: .valueChanged)
-        selettore.accessibilityLabel = etichettaVerbosita.text
-        selettore.heightAnchor.constraint(greaterThanOrEqualToConstant: 44).isActive = true
-        colonna.addArrangedSubview(selettore)
+        let verbosita = SceltaAVoci(nome: etichettaVerbosita.text ?? "",
+                                    voci: Verbosita.allCases.map { testi.frase("impostazioni.verbosita." + $0.rawValue).testo },
+                                    scelta: Verbosita.allCases.firstIndex(of: Impostazioni.verbosita) ?? 1)
+        verbosita.alCambio = { Impostazioni.verbosita = Verbosita.allCases[$0] }
+        colonna.addArrangedSubview(verbosita)
 
         colonna.addArrangedSubview(interruttore("impostazioni.suoni", attivo: Impostazioni.suoniAttivi,
                                                 azione: #selector(cambiaSuoni(_:)), testi: testi))
         colonna.addArrangedSubview(interruttore("impostazioni.aptica", attivo: Impostazioni.apticaAttiva,
                                                 azione: #selector(cambiaAptica(_:)), testi: testi))
 
-        // Intensità tattile su tre passi (02 §14.3).
-        let etichettaIntensita = UILabel()
+        // Intensità tattile su tre passi (02 §14.3), con la stessa colonna di voci.
+        let etichettaIntensita = TestoDinamico.applica(UILabel(), stile: .body)
         etichettaIntensita.text = testi.frase("impostazioni.intensita").testo
-        etichettaIntensita.numberOfLines = 0
+        etichettaIntensita.isAccessibilityElement = false
         colonna.addArrangedSubview(etichettaIntensita)
-        let passi = UISegmentedControl(items: (1...3).map(String.init))
-        passi.selectedSegmentIndex = Impostazioni.passoIntensita - 1
-        passi.addTarget(self, action: #selector(cambiaIntensita(_:)), for: .valueChanged)
-        passi.accessibilityLabel = etichettaIntensita.text
-        passi.heightAnchor.constraint(greaterThanOrEqualToConstant: 44).isActive = true
-        colonna.addArrangedSubview(passi)
+        let intensita = SceltaAVoci(nome: etichettaIntensita.text ?? "", voci: (1...3).map(String.init),
+                                    scelta: Impostazioni.passoIntensita - 1)
+        intensita.alCambio = { Impostazioni.passoIntensita = $0 + 1 }
+        colonna.addArrangedSubview(intensita)
 
         let chiudi = PulsanteMultiriga.crea(titolo: testi.frase("pannello.chiudi").testo, stile: .body)
         chiudi.addTarget(self, action: #selector(chiudiSchermata), for: .touchUpInside)
@@ -327,9 +332,8 @@ final class SchermataImpostazioni: UIViewController {
         riga.axis = .horizontal
         riga.spacing = 12
         riga.alignment = .center
-        let etichetta = UILabel()
+        let etichetta = TestoDinamico.applica(UILabel(), stile: .body) // segue la taglia (02 §10.4)
         etichetta.text = testi.frase(chiave).testo
-        etichetta.numberOfLines = 0
         // Il bersaglio della leva alto almeno 44 punti (02 §8.5): le leve di iOS 27 sono alte 28.
         let leva = InterruttoreAmpio()
         riga.heightAnchor.constraint(greaterThanOrEqualToConstant: InterruttoreAmpio.altezzaMinima).isActive = true
@@ -341,15 +345,16 @@ final class SchermataImpostazioni: UIViewController {
         return riga
     }
 
-    @objc private func cambiaVerbosita(_ selettore: UISegmentedControl) {
-        Impostazioni.verbosita = Verbosita.allCases[selettore.selectedSegmentIndex]
-    }
     @objc private func cambiaSuoni(_ leva: UISwitch) { Impostazioni.suoniAttivi = leva.isOn }
     @objc private func cambiaAptica(_ leva: UISwitch) { Impostazioni.apticaAttiva = leva.isOn }
-    @objc private func cambiaIntensita(_ selettore: UISegmentedControl) {
-        Impostazioni.passoIntensita = selettore.selectedSegmentIndex + 1
-    }
     @objc private func chiudiSchermata() { dismiss(animated: false) }
+
+    /// Il gesto di fuga chiude le impostazioni come «Chiudi il pannello», e il fuoco torna sul comando
+    /// che le aveva aperte (02 §6.7; incarico 29, osservazione 4 della sessione da tester).
+    override func accessibilityPerformEscape() -> Bool {
+        chiudiSchermata()
+        return true
+    }
 }
 
 /// La schermata di apprendimento dei segnali (02 §13): ogni segnale riascoltabile,
@@ -388,22 +393,18 @@ final class SchermataApprendimento: UIViewController {
             colonna.bottomAnchor.constraint(equalTo: scorrimento.bottomAnchor, constant: -16),
             colonna.widthAnchor.constraint(equalTo: view.widthAnchor, constant: -48),
         ])
+        // Tutti i testi seguono la taglia di sistema (02 §10.4, incarico 29).
         let titolo = UILabel()
         titolo.text = testi.frase("apprendimento.titolo").testo
-        titolo.font = .preferredFont(forTextStyle: .title1)
-        titolo.numberOfLines = 0
+        TestoDinamico.applica(titolo, stile: .title1)
         titolo.accessibilityTraits = .header
         colonna.addArrangedSubview(titolo)
-        let spiegazione = UILabel()
+        let spiegazione = TestoDinamico.applica(UILabel(), stile: .body)
         spiegazione.text = testi.frase("apprendimento.spiegazione").testo
-        spiegazione.numberOfLines = 0
         colonna.addArrangedSubview(spiegazione)
         for significato in SignificatoSegnale.allCases {
-            let pulsante = UIButton(type: .system)
-            pulsante.setTitle(testi.frase("significato." + significato.rawValue).testo, for: .normal)
-            pulsante.contentHorizontalAlignment = .leading
-            pulsante.titleLabel?.numberOfLines = 0
-            pulsante.heightAnchor.constraint(greaterThanOrEqualToConstant: 44).isActive = true
+            let pulsante = PulsanteMultiriga.crea(titolo: testi.frase("significato." + significato.rawValue).testo,
+                                                  stile: .body, allineamento: .natural)
             pulsante.accessibilityHint = spiegazione.text
             pulsante.addAction(UIAction { [weak self] _ in
                 self?.ambiente.segnali.annuncia(
@@ -423,4 +424,11 @@ final class SchermataApprendimento: UIViewController {
     }
 
     @objc private func chiudiSchermata() { dismiss(animated: false) }
+
+    /// Il gesto di fuga chiude l'apprendimento come «Chiudi il pannello», e il fuoco torna sul comando
+    /// che l'aveva aperto (02 §6.7; incarico 29, osservazione 4 della sessione da tester).
+    override func accessibilityPerformEscape() -> Bool {
+        chiudiSchermata()
+        return true
+    }
 }

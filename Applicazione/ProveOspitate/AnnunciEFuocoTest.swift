@@ -41,22 +41,34 @@ final class AnnunciEFuocoTest: XCTestCase {
         }
     }
 
-    func test_02_3_3_con_selezione_la_disponibilita_precede_la_testa() throws {
+    /// Con un elemento selezionato la cella comincia dalla sua posizione e chiude con la disponibilità
+    /// (02 §3.3 dalla versione 2.8, incarico 29): la testa fissa resta in testa, il costo e il residuo —
+    /// o il motivo chiuso — vengono dopo il contenuto, e non si tagliano. Fino alla versione 2.7 la
+    /// disponibilità precedeva la testa; la prova verificava lo stesso, nell'ordine di allora.
+    func test_02_3_3_con_selezione_la_cella_comincia_dalla_posizione_e_chiude_con_la_disponibilita() throws {
         var stato = try statoDiProva()
         stato.selezione[.giocatore] = 0
-        let c = costruttore(stato, .normale)
-        // Cella valida della zona di schieramento: il costo precede la testa.
-        let valida = c.etichettaCella(Cella(riga: 10, colonna: 1))
-        let costoPrefisso = ambiente.testi.frase("cella.disponibile", 0, 0).testo.prefix(5)
-        XCTAssertTrue(valida.hasPrefix(String(costoPrefisso)),
-                      "prima la disponibilità, poi la testa (02 §3.3): \(valida)")
-        // Cella fuori zona: il motivo chiuso precede la testa (02 §3.5).
-        let fuoriZona = c.etichettaCella(Cella(riga: 5, colonna: 1))
-        XCTAssertTrue(fuoriZona.hasPrefix(ambiente.testi.termine("cella.troppo_avanzata").testo),
-                      "il motivo apre l'annuncio: \(fuoriZona)")
-        // L'ostacolo usa il suo termine chiuso (02 §3.5.1).
-        let ostacolo = c.etichettaCella(Cella(riga: 5, colonna: 5))
-        XCTAssertTrue(ostacolo.hasPrefix(ambiente.testi.termine("cella.ostacolo").testo))
+        for verbosita in Verbosita.allCases {
+            let c = costruttore(stato, verbosita)
+            // Cella valida della zona di schieramento: la testa, poi il costo e il residuo in coda.
+            let valida = c.etichettaCella(Cella(riga: 10, colonna: 1))
+            XCTAssertTrue(valida.hasPrefix(ambiente.testi.frase("cella.testa", 10, 1).testo),
+                          "la testa apre l'annuncio (02 §3.3): \(valida)")
+            let esito = try XCTUnwrap(MotoreBattaglia(valori: ambiente.valori)
+                .valida(.piazza(cella: Cella(riga: 10, colonna: 1)), parte: .giocatore, stato: stato).costi)
+            XCTAssertTrue(valida.hasSuffix(ambiente.testi.frase("cella.disponibile", Int(esito.volume),
+                                                                Int(esito.residuoDopo)).testo),
+                          "il costo e il residuo chiudono l'annuncio, a ogni verbosità: \(valida)")
+            // Cella fuori zona: la testa, poi il motivo chiuso in coda (02 §3.5).
+            let fuoriZona = c.etichettaCella(Cella(riga: 5, colonna: 1))
+            XCTAssertTrue(fuoriZona.hasPrefix(ambiente.testi.frase("cella.testa", 5, 1).testo), fuoriZona)
+            XCTAssertTrue(fuoriZona.hasSuffix(ambiente.testi.termine("cella.troppo_avanzata").testo),
+                          "il motivo chiude l'annuncio: \(fuoriZona)")
+            // L'ostacolo usa il suo termine chiuso (02 §3.5.1).
+            let ostacolo = c.etichettaCella(Cella(riga: 5, colonna: 5))
+            XCTAssertTrue(ostacolo.hasPrefix(ambiente.testi.frase("cella.testa", 5, 5).testo), ostacolo)
+            XCTAssertTrue(ostacolo.hasSuffix(ambiente.testi.termine("cella.ostacolo").testo), ostacolo)
+        }
     }
 
     func test_02_3_10_nel_sintetico_la_cella_vuota_e_poche_parole() throws {
@@ -117,7 +129,7 @@ final class AnnunciEFuocoTest: XCTestCase {
         // L'etichetta della cella piazzata è stata aggiornata sul posto, con la
         // lettera in posizione fissa dopo il nome (01 §9.4.3, 02 §3.8.1).
         let etichetta = schermata.elementiPerProva[Cella(riga: 10, colonna: 1)]?.accessibilityLabel ?? ""
-        let nomeConLettera = ambiente.testi.frase("unita.fanteria_leggera").testo
+        let nomeConLettera = ambiente.testi.nomeIsolato(ambiente.testi.soggetto(.unita, "fanteria_leggera")).testo
             + " " + ambiente.testi.termine("lettera.1").testo
         XCTAssertTrue(etichetta.contains(nomeConLettera),
                       "aggiornamento sul posto con la lettera: \(etichetta)")

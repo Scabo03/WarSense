@@ -78,10 +78,11 @@ public struct TraduttoreEventi: Sendable {
         return inflitte >= subite
     }
 
-    /// Il nome parlato di un archetipo e la lettera del reparto (01 §9.4.3):
-    /// termini del vocabolario chiuso, in posizione fissa dopo il nome.
-    private func nome(_ archetipo: IdentificatoreDati) -> String {
-        testi.frase("unita." + archetipo).testo
+    /// Il nome parlato di un archetipo, col suo genere (02 §4.6), e la lettera del reparto (01 §9.4.3):
+    /// termini del vocabolario chiuso, la lettera in posizione fissa dopo il nome. Il nome entra nelle
+    /// frasi soltanto come soggetto, nella forma scritta per il suo genere.
+    private func soggetto(_ archetipo: IdentificatoreDati) -> Soggetto {
+        testi.soggetto(.unita, archetipo)
     }
     private func lettera(_ ordinale: Int) -> String {
         testi.termine("lettera.\(ordinale)").testo
@@ -104,8 +105,8 @@ public struct TraduttoreEventi: Sendable {
         case .piazzamentoConfermato(let p, _, let archetipo, let letteraOrdinale, let cella, let costo, let residuo):
             guard p == parte else {
                 // L'ingresso di forze avversarie si annuncia (02 §8.2.1), senza volume.
-                return testi.frase("battaglia.ingresso_avversario", verbosita: verbosita,
-                                   nome(archetipo), lettera(letteraOrdinale), cella.riga, cella.colonna)
+                return testi.frase("battaglia.ingresso_avversario", soggetto: soggetto(archetipo),
+                                   verbosita: verbosita, lettera(letteraOrdinale), cella.riga, cella.colonna)
             }
             return testi.frase("battaglia.piazzamento_confermato", verbosita: verbosita,
                                Int(costo), Int(residuo))
@@ -113,31 +114,31 @@ public struct TraduttoreEventi: Sendable {
             return p == parte ? testi.frase("battaglia.elemento_esaurito", verbosita: verbosita) : nil
         case .spostamentoEseguito(let p, _, let archetipo, let letteraOrdinale, let a, let costo, let residuo):
             guard p == parte else {
-                return testi.frase("battaglia.spostamento_avversario", verbosita: verbosita,
-                                   nome(archetipo), lettera(letteraOrdinale), a.riga, a.colonna)
+                return testi.frase("battaglia.spostamento_avversario", soggetto: soggetto(archetipo),
+                                   verbosita: verbosita, lettera(letteraOrdinale), a.riga, a.colonna)
             }
             return testi.frase("battaglia.spostamento", verbosita: verbosita,
                                a.riga, a.colonna, Int(costo), Int(residuo))
         case .tiroEseguito(let p, _, _, let archetipo, let letteraOrdinale, _, let fascia, _):
             if p == parte {
-                return testi.frase("battaglia.tiro_eseguito", verbosita: verbosita,
-                                   nome(archetipo), lettera(letteraOrdinale),
+                return testi.frase("battaglia.tiro_eseguito", soggetto: soggetto(archetipo),
+                                   verbosita: verbosita, lettera(letteraOrdinale),
                                    fasciaFrase(fascia, inflitte: true))
             }
-            return testi.frase("battaglia.tiro_subito", verbosita: verbosita,
-                               nome(archetipo), lettera(letteraOrdinale),
+            return testi.frase("battaglia.tiro_subito", soggetto: soggetto(archetipo),
+                               verbosita: verbosita, lettera(letteraOrdinale),
                                fasciaFrase(fascia, inflitte: false))
         case .contattoRisolto(let p, let archetipo, let letteraOrdinale, let esito):
             // L'esito segue immediatamente l'azione che lo ha causato, nella stessa
             // forma del tiro: una frase sola, in fasce, mai cifre (02 §8.9.2).
             if p == parte {
-                return testi.frase("battaglia.contatto_eseguito", verbosita: verbosita,
-                                   nome(archetipo), lettera(letteraOrdinale),
+                return testi.frase("battaglia.contatto_eseguito", soggetto: soggetto(archetipo),
+                                   verbosita: verbosita, lettera(letteraOrdinale),
                                    fasciaFrase(esito.fascia(di: parte.avversaria), inflitte: true),
                                    fasciaFrase(esito.fascia(di: parte), inflitte: false))
             }
-            return testi.frase("battaglia.contatto_subito", verbosita: verbosita,
-                               nome(archetipo), lettera(letteraOrdinale),
+            return testi.frase("battaglia.contatto_subito", soggetto: soggetto(archetipo),
+                               verbosita: verbosita, lettera(letteraOrdinale),
                                fasciaFrase(esito.fascia(di: parte.avversaria), inflitte: true),
                                fasciaFrase(esito.fascia(di: parte), inflitte: false))
         case .esitoMischiaComplessivo(let esiti):
@@ -162,9 +163,12 @@ public struct TraduttoreEventi: Sendable {
         case .disingaggio(_, _, let a):
             return testi.frase("battaglia.disingaggio", verbosita: verbosita, a.riga, a.colonna)
         case .sciameDisfatto(_, let archetipo, let letteraOrdinale, let cella, let p):
-            let chiave = p == parte ? "battaglia.disfatto_proprio" : "battaglia.disfatto_avversario"
-            return testi.frase(chiave, verbosita: verbosita,
-                               nome(archetipo), lettera(letteraOrdinale), cella.riga, cella.colonna)
+            if p == parte {
+                return testi.frase("battaglia.disfatto_proprio", soggetto: soggetto(archetipo),
+                                   verbosita: verbosita, lettera(letteraOrdinale), cella.riga, cella.colonna)
+            }
+            return testi.frase("battaglia.disfatto_avversario", soggetto: soggetto(archetipo),
+                               verbosita: verbosita, lettera(letteraOrdinale), cella.riga, cella.colonna)
         case .munizioniEsaurite(_, let cella):
             return testi.frase("battaglia.munizioni_esaurite", verbosita: verbosita, cella.riga, cella.colonna)
         case .resaDichiarata(let p):

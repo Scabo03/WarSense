@@ -61,7 +61,8 @@ final class SchermataDivisione: UIViewController {
         ])
 
         colonna.addArrangedSubview(intestazione(
-            testi.frase("divisione.titolo", nomeGruppo(gruppo)).testo, .title1, .header))
+            testi.frase("divisione.titolo", soggetto: testi.soggetto(.gruppo, gruppo.nome)).testo,
+            .title1, .header))
         colonna.addArrangedSubview(intestazione(
             testi.frase("divisione.scegli_reparti").testo, .headline, .header))
 
@@ -117,16 +118,12 @@ final class SchermataDivisione: UIViewController {
 
     // MARK: - Etichette
 
-    private func nomeGruppo(_ gruppo: Gruppo) -> String {
-        testi.termine("gruppo.nome." + gruppo.nome).testo
-    }
-
     /// La frase compatta di un reparto: gli atomi, l'archetipo, e se sia da tenere o
     /// da staccare — tutto in una riga sola (02 §10.3).
     private func etichettaReparto(_ indice: Int) -> String {
         let reparto = gruppo.composizione[indice]
-        let nome = testi.frase("unita." + reparto.archetipo).testo
-        let base = testi.frase("divisione.reparto", reparto.atomi, nome).testo
+        let base = testi.frase("divisione.reparto", soggetto: testi.soggetto(.unita, reparto.archetipo),
+                               reparto.atomi).testo
         let stato = staccati.contains(indice)
             ? testi.frase("divisione.da_staccare").testo
             : testi.frase("divisione.da_tenere").testo

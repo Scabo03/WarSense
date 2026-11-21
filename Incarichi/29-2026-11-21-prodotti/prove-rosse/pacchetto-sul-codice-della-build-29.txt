@@ -1,0 +1,68 @@
+warning: 'codice': found 7 file(s) which are unhandled; explicitly declare them as resources or exclude from the target
+    /Users/lucascabini/Developer/WarSense/Applicazione/build/rosso-29/Codice/Tests/SessioneTest/CampioniGiornale/campioni.jsonl
+    /Users/lucascabini/Developer/WarSense/Applicazione/build/rosso-29/Codice/Tests/SessioneTest/RiproduzioneOro/giornale.jsonl
+    /Users/lucascabini/Developer/WarSense/Applicazione/build/rosso-29/Codice/Tests/SessioneTest/RiproduzioneOro/impronta.txt
+    /Users/lucascabini/Developer/WarSense/Applicazione/build/rosso-29/Codice/Tests/SessioneTest/RiproduzioneOroRiserve/giornale.jsonl
+    /Users/lucascabini/Developer/WarSense/Applicazione/build/rosso-29/Codice/Tests/SessioneTest/RiproduzioneOroRiserve/impronta.txt
+    /Users/lucascabini/Developer/WarSense/Applicazione/build/rosso-29/Codice/Tests/SessioneTest/SalvataggioBuildDistribuita/giornale.jsonl
+    /Users/lucascabini/Developer/WarSense/Applicazione/build/rosso-29/Codice/Tests/SessioneTest/SalvataggioBuildDistribuita/impronta.txt
+Building for debugging...
+[Provisioning 1 / 21]
+[2 / 4] DatiTest-product
+Build complete! (0,42 s)
+Test Suite 'Selected tests' started at 2026-11-21 19:50:57.386.
+Test Suite 'VerificaTest.xctest' started at 2026-11-21 19:50:57.387.
+Test Suite 'VerificaTest.xctest' passed at 2026-11-21 19:50:57.387.
+	 Executed 0 tests, with 0 failures (0 unexpected) in 0.000 (0.000) seconds
+Test Suite 'Selected tests' passed at 2026-11-21 19:50:57.387.
+	 Executed 0 tests, with 0 failures (0 unexpected) in 0.000 (0.001) seconds
+Test Suite 'Selected tests' started at 2026-11-21 19:50:57.450.
+Test Suite 'SessioneTest.xctest' started at 2026-11-21 19:50:57.450.
+Test Suite 'SessioneBattagliaTest' started at 2026-11-21 19:50:57.450.
+Test Case '-[SessioneTest.SessioneBattagliaTest test_incarico_29_azzeramento_a_vuoto_rifiutato]' started.
+/Users/lucascabini/Developer/WarSense/Applicazione/build/rosso-29/Codice/Tests/SessioneTest/SessioneBattagliaTest.swift:197: error: -[SessioneTest.SessioneBattagliaTest test_incarico_29_azzeramento_a_vuoto_rifiutato] : failed - all'inizio del turno non c'è nulla da azzerare
+/Users/lucascabini/Developer/WarSense/Applicazione/build/rosso-29/Codice/Tests/SessioneTest/SessioneBattagliaTest.swift:205: error: -[SessioneTest.SessioneBattagliaTest test_incarico_29_azzeramento_a_vuoto_rifiutato] : failed - dopo due annullamenti che hanno tolto tutto non c'è nulla da azzerare
+Test Case '-[SessioneTest.SessioneBattagliaTest test_incarico_29_azzeramento_a_vuoto_rifiutato]' failed (0.047 seconds).
+Test Suite 'SessioneBattagliaTest' failed at 2026-11-21 19:50:57.497.
+	 Executed 1 test, with 2 failures (0 unexpected) in 0.047 (0.047) seconds
+Test Suite 'SessioneTest.xctest' failed at 2026-11-21 19:50:57.497.
+	 Executed 1 test, with 2 failures (0 unexpected) in 0.047 (0.047) seconds
+Test Suite 'Selected tests' failed at 2026-11-21 19:50:57.497.
+	 Executed 1 test, with 2 failures (0 unexpected) in 0.047 (0.048) seconds
+Test Suite 'Selected tests' started at 2026-11-21 19:50:57.558.
+Test Suite 'SegnaliTest.xctest' started at 2026-11-21 19:50:57.559.
+Test Suite 'SegnaliTest.xctest' passed at 2026-11-21 19:50:57.559.
+	 Executed 0 tests, with 0 failures (0 unexpected) in 0.000 (0.000) seconds
+Test Suite 'Selected tests' passed at 2026-11-21 19:50:57.559.
+	 Executed 0 tests, with 0 failures (0 unexpected) in 0.000 (0.001) seconds
+Test Suite 'Selected tests' started at 2026-11-21 19:50:57.620.
+Test Suite 'MotoreTest.xctest' started at 2026-11-21 19:50:57.621.
+Test Suite 'MotoreTest.xctest' passed at 2026-11-21 19:50:57.621.
+	 Executed 0 tests, with 0 failures (0 unexpected) in 0.000 (0.000) seconds
+Test Suite 'Selected tests' passed at 2026-11-21 19:50:57.621.
+	 Executed 0 tests, with 0 failures (0 unexpected) in 0.000 (0.001) seconds
+Test Suite 'Selected tests' started at 2026-11-21 19:50:57.683.
+Test Suite 'DatiTest.xctest' started at 2026-11-21 19:50:57.683.
+Test Suite 'AccordoAlNumeroTest' started at 2026-11-21 19:50:57.683.
+Test Case '-[DatiTest.AccordoAlNumeroTest test_nessun_gruppo_ha_agito]' started.
+/Users/lucascabini/Developer/WarSense/Applicazione/build/rosso-29/Codice/Tests/DatiTest/AccordoAlNumeroTest.swift:28: error: -[DatiTest.AccordoAlNumeroTest test_nessun_gruppo_ha_agito] : XCTAssertEqual failed: ("Giorno 1. Nessun gruppo ha ancora agito, sono 1") is not equal to ("Giorno 1. Il solo gruppo non ha ancora agito")
+Test Case '-[DatiTest.AccordoAlNumeroTest test_nessun_gruppo_ha_agito]' failed (0.047 seconds).
+Test Case '-[DatiTest.AccordoAlNumeroTest test_un_gruppo_che_ha_agito]' started.
+/Users/lucascabini/Developer/WarSense/Applicazione/build/rosso-29/Codice/Tests/DatiTest/AccordoAlNumeroTest.swift:16: error: -[DatiTest.AccordoAlNumeroTest test_un_gruppo_che_ha_agito] : XCTAssertEqual failed: ("Giorno 3. Hanno agito 1 gruppi su 4") is not equal to ("Giorno 3. Ha agito 1 gruppo su 4")
+/Users/lucascabini/Developer/WarSense/Applicazione/build/rosso-29/Codice/Tests/DatiTest/AccordoAlNumeroTest.swift:18: error: -[DatiTest.AccordoAlNumeroTest test_un_gruppo_che_ha_agito] : XCTAssertEqual failed: ("Giorno 5. Hanno agito 1 gruppi su 4, 2 in marcia lunga") is not equal to ("Giorno 5. Ha agito 1 gruppo su 4, 2 in marcia lunga")
+Test Case '-[DatiTest.AccordoAlNumeroTest test_un_gruppo_che_ha_agito]' failed (0.011 seconds).
+Test Suite 'AccordoAlNumeroTest' failed at 2026-11-21 19:50:57.741.
+	 Executed 2 tests, with 3 failures (0 unexpected) in 0.058 (0.058) seconds
+Test Suite 'DatiTest.xctest' failed at 2026-11-21 19:50:57.741.
+	 Executed 2 tests, with 3 failures (0 unexpected) in 0.058 (0.058) seconds
+Test Suite 'Selected tests' failed at 2026-11-21 19:50:57.741.
+	 Executed 2 tests, with 3 failures (0 unexpected) in 0.058 (0.059) seconds
+Test Suite 'Selected tests' started at 2026-11-21 19:50:57.801.
+Test Suite 'ConfiniTest.xctest' started at 2026-11-21 19:50:57.802.
+Test Suite 'ConfiniTest.xctest' passed at 2026-11-21 19:50:57.802.
+	 Executed 0 tests, with 0 failures (0 unexpected) in 0.000 (0.000) seconds
+Test Suite 'Selected tests' passed at 2026-11-21 19:50:57.802.
+	 Executed 0 tests, with 0 failures (0 unexpected) in 0.000 (0.001) seconds
+Note: Some test targets reported failures:
+  - SessioneTest (XCTest)
+  - DatiTest (XCTest)

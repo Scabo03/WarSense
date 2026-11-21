@@ -25,6 +25,8 @@ GIORNATE = int(sys.argv[3]) if len(sys.argv) > 3 else 30
 # armato marcia verso nord quando può, per cercare il contatto (altrimenti uno su due).
 OPZIONI = set(sys.argv[5:])
 DIARIO = CARTELLA / f"diario-{FORMATO}.jsonl"
+# Il possessivo che dichiara una formazione propria, nelle quattro forme accordate (02 §4.6).
+PROPRIO = re.compile(r"\btu(o|a|oi|e) ")
 
 PANNELLO = {
     "marcia": "Marcia: scegli la casella sulla mappa", "presidio": "Presidia: resta fermo in guardia",
@@ -124,7 +126,7 @@ def evacua():
     """Dopo la resa (ritirata combattuta, 01 §10.4): ogni proprio reparto che il pannello lascia evacuare
     esce dal campo; gli altri restano. Le forze evacuate tornano sulla mappa e ripiegano (01 §10.6)."""
     propri = [re.search(r"riga \d+, cella \d+", n).group(0) for n in etichette()
-              if re.search(r"riga \d+, cella \d+, tuo", n)]
+              if re.search(r"riga \d+, cella \d+, tu(o|a|oi|e) ", n)]
     for cella in propri[:6]:
         attiva(contiene=cella + ",")
         voci = etichette()
@@ -151,7 +153,8 @@ def battaglia():
                 break
             nome = re.sub(r" \[.*$", "", tessere[0])
             attiva(etichetta=nome)
-            valide = [n for n in etichette() if n.startswith("costa ") and ", libera" in n]
+            # Dalla versione 2.8 di 02 §3.3 la cella comincia dalla posizione e chiude col costo.
+            valide = [n for n in etichette() if re.search(r", libera, costa \d+, restano \d+$", n)]
             m = re.search(r"riga \d+, cella \d+", valide[0]) if valide else None
             if not m:
                 attiva(etichetta=nome)  # toglie la scelta
@@ -160,7 +163,7 @@ def battaglia():
         # 2. Attacco: ogni proprio reparto dal suo pannello ingaggia o tira se può, altrimenti avanza.
         #    Con «resa» i reparti restano nelle righe arretrate, da cui si evacuano dopo la resa.
         propri = [re.search(r"riga \d+, cella \d+", n).group(0) for n in etichette()
-                  if re.search(r"riga \d+, cella \d+, tuo", n)]
+                  if re.search(r"riga \d+, cella \d+, tu(o|a|oi|e) ", n)]
         if "resa" in OPZIONI:
             propri = []
             if ritirata:
@@ -173,7 +176,7 @@ def battaglia():
                 attiva(etichetta=scelta, tipo="pulsante")
             elif "Scegli la destinazione sulla griglia" in voci:
                 attiva(etichetta="Scegli la destinazione sulla griglia", tipo="pulsante")
-                mete = [n for n in etichette() if n.startswith("costa ") and ", libera" in n]
+                mete = [n for n in etichette() if re.search(r", libera, costa \d+, restano \d+$", n)]
                 # la meta più avanzata (riga più bassa) fra quelle raggiungibili
                 mete.sort(key=lambda n: int(re.search(r"riga (\d+)", n).group(1)))
                 if mete:
@@ -219,7 +222,8 @@ def battaglia():
 # ---------------------------------------------------------------- la campagna
 
 def armato(etichetta):
-    return ("tuo " in etichetta or "tua " in etichetta) and "ricognizione" not in etichetta and "non armata" not in etichetta
+    # «tuo», «tua», «tuoi», «tue»: le frasi si accordano al genere del nome del gruppo (incarico 29).
+    return bool(PROPRIO.search(etichetta)) and "ricognizione" not in etichetta and "non armata" not in etichetta
 
 
 def giornata(numero):
@@ -238,7 +242,7 @@ def giornata(numero):
     gia = set()
     for _ in range(14):
         attesa = [n for n in etichette() if re.search(r"riga \d+, casella \d+", n)
-                  and ", in attesa" in n and ("tuo " in n or "tua " in n)]
+                  and ", in attesa" in n and PROPRIO.search(n)]
         attesa = [n for n in attesa if re.search(r"riga \d+, casella \d+", n).group(0) not in gia]
         if not attesa:
             break
@@ -254,7 +258,7 @@ def giornata(numero):
             # o una formazione armata avversaria ha la precedenza sulla marcia verso nord.
             for dr, dc in ((-1, 0), (0, -1), (0, 1), (1, 0)):
                 n = next((x for x in tutte if f"riga {r + dr}, casella {c + dc}," in x), "")
-                if n and "tuo " not in n and "tua " not in n and \
+                if n and not PROPRIO.search(n) and \
                         ("quartier generale avversario" in n or "formazione avversaria" in n):
                     nord, meta = n, (r + dr, c + dc)
                     break
@@ -266,7 +270,7 @@ def giornata(numero):
             attiva(etichetta=PANNELLO["apri"], tipo="pulsante", ascolto=4)
             battaglia()
             return "battaglia"
-        if armato(s) and nord and "tuo " not in nord and "tua " not in nord \
+        if armato(s) and nord and not PROPRIO.search(nord) \
                 and PANNELLO["marcia"] in voci and (ordinati % 2 == 0 or "tutti" in OPZIONI):
             attiva(etichetta=PANNELLO["marcia"], tipo="pulsante")
             esito = sentito(attiva(contiene=f"riga {meta[0]}, casella {meta[1]},", ascolto=2.5))

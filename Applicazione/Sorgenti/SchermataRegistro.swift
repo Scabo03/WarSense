@@ -78,10 +78,8 @@ final class SchermataRegistro: UIViewController {
         colonna.addArrangedSubview(titolo)
 
         if voci.isEmpty {
-            let vuoto = UILabel()
+            let vuoto = TestoDinamico.applica(UILabel(), stile: .body) // segue la taglia (02 §10.4)
             vuoto.text = testi.frase("registro.vuoto").testo
-            vuoto.numberOfLines = 0
-            vuoto.adjustsFontForContentSizeCategory = true
             colonna.addArrangedSubview(vuoto)
         }
 
@@ -121,10 +119,9 @@ final class SchermataRegistro: UIViewController {
             }
         }
 
-        let chiudi = UIButton(type: .system)
-        chiudi.setTitle(testi.frase("registro.chiudi").testo, for: .normal)
-        chiudi.titleLabel?.adjustsFontForContentSizeCategory = true
-        chiudi.heightAnchor.constraint(greaterThanOrEqualToConstant: 48).isActive = true
+        // Il congedo segue la taglia di sistema come ogni comando (02 §10.4, incarico 29): era un pulsante
+        // di sistema col carattere fisso.
+        let chiudi = PulsanteMultiriga.crea(titolo: testi.frase("registro.chiudi").testo, stile: .body)
         chiudi.addTarget(self, action: #selector(chiudiSchermata), for: .touchUpInside)
         colonna.addArrangedSubview(chiudi)
     }

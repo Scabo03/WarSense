@@ -29,13 +29,16 @@ final class FumoInterfacciaTest: XCTestCase {
         // Un archetipo può comparire in PIÙ tessere, perché il mazzo può portarne
         // esemplari di protezione diversa (taratura della fase C): si prende la
         // prima corrispondenza, non l'unica, altrimenti la ricerca è ambigua.
-        for nome in ["fanteria leggera", "fanteria pesante", "tiratori"] {
+        // «selezionato» si accorda al nome dell'archetipo (02 §4.6, incarico 29): «selezionata» per la
+        // fanteria, «selezionati» per i tiratori.
+        for (nome, accordo) in [("fanteria leggera", "selezionata"), ("fanteria pesante", "selezionata"),
+                                ("tiratori", "selezionati")] {
             let tessera = app.descendants(matching: .any)
                 .matching(NSPredicate(format: "label == %@", nome)).firstMatch
             XCTAssertTrue(tessera.waitForExistence(timeout: 10),
                           "la tessera «\(nome)» è un elemento a sé")
             tessera.tap()
-            let selezionata = NSPredicate(format: "value CONTAINS %@", "selezionato")
+            let selezionata = NSPredicate(format: "label == %@ AND value CONTAINS %@", nome, accordo)
             XCTAssertTrue(app.descendants(matching: .any).matching(selezionata)
                             .firstMatch.waitForExistence(timeout: 5),
                           "il tocco della tessera «\(nome)» la seleziona davvero")

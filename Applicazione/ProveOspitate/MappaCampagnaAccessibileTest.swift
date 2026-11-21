@@ -147,12 +147,12 @@ final class MappaCampagnaAccessibileTest: XCTestCase {
         XCTAssertTrue(schermata.attiva(gruppo.posizione), "la casella di un proprio gruppo si attiva")
         try await Task.sleep(nanoseconds: 100_000_000)
         let testi = ambiente.testi
-        let nomeVicino = testi.termine("gruppo.nome." + vicino.nome).testo
+        let nomeVicino = testi.soggetto(.gruppo, vicino.nome)
         XCTAssertEqual(schermata.vociPannelloPerProva.map(\.titolo),
                        [testi.frase("pannello.designa_marcia").testo,
                         testi.frase("pannello.presidio").testo,
                         testi.frase("pannello.sosta").testo,
-                        testi.frase("pannello.riunisci", nomeVicino).testo,
+                        testi.frase("pannello.riunisci", soggetto: nomeVicino).testo,
                         testi.frase("pannello.imboscata").testo,
                         testi.frase("pannello.chiudi").testo],
                        "marcia, presidio, sosta con raccolta (dall'incarico 27, RDA-150), riunione col vicino, imboscata, chiusura — in ordine fisso")
@@ -196,9 +196,11 @@ final class MappaCampagnaAccessibileTest: XCTestCase {
 
     /// Attivare una destinazione durante la designazione ORDINA la marcia
     /// DIRETTAMENTE, senza pannello di conferma (correzione del titolare, RDA-104).
-    /// Il costo in giorni e la conseguenza dell'inchiodamento stanno sulla VOCE della
-    /// casella di destinazione, che chi ascolta sente prima di attivarla, al posto
-    /// dei nove pallini che chi vede riceve (02 §9.2.1, 01 §5.6.3.5).
+    /// Il costo in giorni sta sulla VOCE della casella di destinazione, dopo la sua
+    /// posizione e il suo contenuto, e la conseguenza dell'inchiodamento la dice una
+    /// volta il comando di marcia quando lo si sceglie (decisione del titolare del
+    /// 2026-11-21, incarico 29): chi ascolta sente entrambi prima di attivare la
+    /// destinazione, al posto dei nove pallini che chi vede riceve (02 §9.2.1, 01 §5.6.3.5).
     func test_02_9_2_1_l_attivazione_della_destinazione_ordina_la_marcia_senza_pannello() async throws {
         let (schermata, _, ambiente) = try await mappaAperta(taglia: .media)
         let stato = try XCTUnwrap(schermata.statoPerProva)
@@ -208,14 +210,32 @@ final class MappaCampagnaAccessibileTest: XCTestCase {
         let costo = schermata.motorePerProva.costoInGiorni(da: gruppo.posizione, a: meta, stato: stato)
         let testi = ambiente.testi
 
-        schermata.avviaDesignazionePerProva(gruppo: gruppo.id)
-        // La voce della casella di destinazione dichiara il costo E la conseguenza
-        // dell'inchiodamento, PRIMA dell'attivazione: è ciò che chi ascolta riceve.
+        // Il comando di marcia, quando lo si sceglie, dice UNA VOLTA la conseguenza dell'inchiodamento
+        // (decisione del titolare del 2026-11-21, incarico 29; 01 §5.6.3.5): la si sente prima di
+        // attivare qualunque destinazione, e non più su ogni casella.
+        let voce = testi.frase("pannello.designa_marcia").testo
+        XCTAssertTrue(schermata.attiva(gruppo.posizione))
+        try await Task.sleep(nanoseconds: 80_000_000)
+        let marcia = try XCTUnwrap(schermata.vociPannelloPerProva.first { $0.titolo == voce },
+                                   "il pannello offre «\(voce)»")
+        if let pannello = schermata.presentedViewController as? UIAlertController {
+            pannello.dismiss(animated: false)
+        }
+        ambiente.segnali.azzeraAnnunciPronunciati()
+        marcia.esegui()
+        let avvertimento = testi.frase("pannello.marcia_designazione_avviata").testo
+        XCTAssertEqual(ambiente.segnali.annunciPronunciati.last?.testo, avvertimento)
+        XCTAssertTrue(avvertimento.contains("resterà fermo fino all'arrivo"),
+                      "l'annuncio del comando dice la conseguenza dell'inchiodamento: «\(avvertimento)»")
+        // La voce della casella di destinazione COMINCIA DALLA POSIZIONE, poi il contenuto, poi il
+        // costo in giorni, PRIMA dell'attivazione: è ciò che chi ascolta riceve.
         let etichetta = try XCTUnwrap(schermata.elementiPerProva[meta]?.accessibilityLabel)
-        XCTAssertTrue(etichetta.contains("\(costo)"),
-                      "la voce della destinazione dichiara il costo in giorni: «\(etichetta)»")
-        XCTAssertTrue(etichetta.contains(testi.frase("casella.inchioda").testo),
-                      "la voce dichiara la conseguenza dell'inchiodamento: «\(etichetta)»")
+        XCTAssertTrue(etichetta.hasPrefix(testi.frase("casella.testa", meta.riga, meta.colonna).testo),
+                      "la voce della destinazione comincia dalla sua posizione: «\(etichetta)»")
+        XCTAssertTrue(etichetta.hasSuffix(testi.frase("casella.disponibile", costo).testo),
+                      "la voce della destinazione chiude col costo in giorni: «\(etichetta)»")
+        XCTAssertFalse(etichetta.contains("resterà fermo"),
+                       "l'avvertimento non si ripete su ogni casella: «\(etichetta)»")
 
         XCTAssertTrue(schermata.attiva(meta), "la destinazione designata si attiva")
         for _ in 0..<50 where !((try? XCTUnwrap(schermata.statoPerProva))?.gruppi[gruppo.id]?.inMarcia ?? false) {
@@ -355,7 +375,7 @@ final class MappaCampagnaAccessibileTest: XCTestCase {
         let frase = costruttore.voceDiRegistro(voce)
         XCTAssertFalse(frase.contains(Testi.segnaposto), "chiave irrisolta nella voce: \(frase)")
         XCTAssertTrue(frase.contains("\(voce.giorno)"), "la voce dichiara il giorno")
-        XCTAssertTrue(frase.contains(costruttore.nomeGruppo(dopo.gruppi[gruppo.id]!)),
+        XCTAssertTrue(frase.contains(ambiente.testi.nomeIsolato(costruttore.soggettoGruppo(dopo.gruppi[gruppo.id]!)).testo),
                       "la voce dichiara quale gruppo: \(frase)")
     }
 

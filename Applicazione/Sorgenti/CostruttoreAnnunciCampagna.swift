@@ -27,31 +27,30 @@ struct CostruttoreAnnunciCampagna {
     // MARK: - Etichetta di casella
 
     /// L'etichetta completa di una casella. La testa fissa non si taglia mai (02 §3.9).
-    /// Con una designazione in corso la disponibilità precede la testa, esattamente
-    /// come in battaglia con un elemento selezionato (02 §3.3).
+    ///
+    /// Con una designazione di marcia in corso la casella COMINCIA DALLA SUA POSIZIONE, come la testa
+    /// fissa di ogni casella, poi dice ciò che contiene e infine il costo — «riga 3, casella 3, libera,
+    /// raggiungibile in 2 giorni» — oppure il motivo per cui non è una destinazione (decisione del
+    /// titolare del 2026-11-21, incarico 29; 02 §3.3 dalla versione 2.8). Fino alla build 29 la
+    /// disponibilità precedeva la testa e ogni casella raggiungibile ripeteva l'avvertimento
+    /// sull'inchiodamento: ora lo dice una volta sola il comando di marcia, quando lo si sceglie
+    /// (`pannello.marcia_designazione_avviata`). I tagli di verbosità toccano il solo contenuto: il
+    /// costo e il motivo, con cui si decide, non si tagliano.
     func etichettaCasella(_ casella: Cella, designazione: Designazione = .nessuna) -> String {
-        var parti: [String] = []
+        var parti: [String] = [testi.frase("casella.testa", casella.riga, casella.colonna).testo]
+        parti.append(contentsOf: contenutoCasella(casella))
         if case .marcia(let id) = designazione {
             switch vista.anteprimaMarcia(da: id, a: casella) {
             case .valido:
-                // La disponibilità dichiara il COSTO IN GIORNI dello scatto e la
-                // CONSEGUENZA dell'inchiodamento, prima dell'ordine (01 §5.6.3.5,
-                // correzione del titolare, RDA-104): l'ordine parte direttamente da
-                // questa voce, senza pannello, e chi ascolta deve sentire prima di
-                // attivarla che il gruppo resterà fermo fino all'arrivo e non potrà
-                // sfilarsi senza perdere i giorni spesi. Chi vede riceve la stessa
-                // informazione dai nove pallini dell'avanzamento (01 §5.6.3.4): è la
-                // parità ottenuta per due vie diverse. Il plurale di sistema sui giorni.
+                // Il costo in GIORNI dello scatto, col plurale di sistema (01 §5.6.3.5). Chi vede
+                // riceve la stessa informazione dai nove pallini dell'avanzamento (01 §5.6.3.4).
                 let giorni = vista.comandoDiMarcia(per: id, a: casella).flatMap {
                     if case .marcia(_, _, let g) = $0 { return g } else { return nil }
                 } ?? 1
                 parti.append(testi.frase("casella.disponibile", giorni).testo)
-                parti.append(testi.frase("casella.inchioda").testo)
             case .nonValido(let motivo): parti.append(testi.termine(motivo.rawValue).testo)
             }
         }
-        parti.append(testi.frase("casella.testa", casella.riga, casella.colonna).testo)
-        parti.append(contentsOf: contenutoCasella(casella))
         return parti.joined(separator: ", ")
     }
 
@@ -65,16 +64,21 @@ struct CostruttoreAnnunciCampagna {
         }
     }
 
-    /// La chiave della frase dell'occupante PROPRIO, secondo la sua categoria (prima
-    /// correzione, incarico 19): il gruppo armato è la categoria ordinaria e non nomina la
-    /// categoria (02 §8.7), come il suo segno non porta marcatore; l'esploratore e la
-    /// formazione non armata la nominano, come il loro segno porta il proprio marcatore.
-    /// Ciò che si sente coincide con ciò che si vede.
-    private func chiaveOccupanteProprio(_ categoria: CategoriaFormazione) -> String {
-        switch categoria {
-        case .armato: return "casella.occupante_proprio"
-        case .ricognizione: return "casella.occupante_proprio_ricognizione"
-        case .nonArmata: return "casella.occupante_proprio_non_armata"
+    /// La frase dell'occupante PROPRIO, secondo la sua categoria (prima correzione, incarico 19): il
+    /// gruppo armato è la categoria ordinaria e non nomina la categoria (02 §8.7), come il suo segno non
+    /// porta marcatore; l'esploratore e la formazione non armata la nominano, come il loro segno porta il
+    /// proprio marcatore. Ciò che si sente coincide con ciò che si vede. La frase è accordata al genere
+    /// del nome del gruppo (02 §4.6): «tuo Corvo», «tua Aquila».
+    private func fraseOccupanteProprio(_ gruppo: Gruppo) -> String {
+        let nome = soggettoGruppo(gruppo)
+        let stato = fraseStato(gruppo.statoDichiarato)
+        switch gruppo.categoria {
+        case .armato:
+            return testi.frase("casella.occupante_proprio", soggetto: nome, stato).testo
+        case .ricognizione:
+            return testi.frase("casella.occupante_proprio_ricognizione", soggetto: nome, stato).testo
+        case .nonArmata:
+            return testi.frase("casella.occupante_proprio_non_armata", soggetto: nome, stato).testo
         }
     }
 
@@ -123,8 +127,7 @@ struct CostruttoreAnnunciCampagna {
             }
             return testi.termine(stato.chiaveTesto).testo
         case .occupante(let gruppo):
-            return testi.frase(chiaveOccupanteProprio(gruppo.categoria), nomeGruppo(gruppo),
-                               fraseStato(gruppo.statoDichiarato)).testo
+            return fraseOccupanteProprio(gruppo)
         case .occupanteAvversario(let categoria):
             // Senza nome, senza volume, senza stato d'azione (02 §6.4.1, incarico 18): il
             // giocatore la vede, non la conosce. Ma la CATEGORIA sì (prima correzione, incarico
@@ -152,8 +155,8 @@ struct CostruttoreAnnunciCampagna {
             // dettaglio di che cosa la compone, uniti in elenco. Riguarda le proprie truppe:
             // il giocatore deve poter sapere che cosa muove.
             let parti = reparti.map { reparto in
-                testi.frase("divisione.reparto", reparto.atomi,
-                            testi.frase("unita." + reparto.archetipo).testo).testo
+                testi.frase("divisione.reparto", soggetto: testi.soggetto(.unita, reparto.archetipo),
+                            reparto.atomi).testo
             }
             return testi.frase("casella.composizione", parti.joined(separator: ", ")).testo
         case .zonaDiRifornimento:
@@ -234,14 +237,16 @@ struct CostruttoreAnnunciCampagna {
         }
     }
 
-    /// Il nome parlato di un gruppo (01 §5.6.0.4): termine del vocabolario chiuso.
-    func nomeGruppo(_ gruppo: Gruppo) -> String {
-        testi.termine("gruppo.nome." + gruppo.nome).testo
+    /// Il nome parlato di un gruppo (01 §5.6.0.4), col suo genere (02 §4.6): termine del vocabolario
+    /// chiuso, che entra nelle frasi soltanto come soggetto, nella forma scritta per il suo genere.
+    func soggettoGruppo(_ gruppo: Gruppo) -> Soggetto {
+        testi.soggetto(.gruppo, gruppo.nome)
     }
 
-    /// L'iniziale che compare a schermo sulla casella: ciò che si sente si vede.
+    /// L'iniziale che compare a schermo sulla casella: ciò che si sente si vede. È il nome da solo, non
+    /// una frase: una delle uscite isolate che il controllo del genere ammette (`AccordoDiGenereTest`).
     func inizialeGruppo(_ gruppo: Gruppo) -> String {
-        String(nomeGruppo(gruppo).prefix(1))
+        String(testi.nomeIsolato(soggettoGruppo(gruppo)).testo.prefix(1))
     }
 
     /// I segni disegnati sulla casella per chi guarda, nello stesso ordine in cui
@@ -258,7 +263,7 @@ struct CostruttoreAnnunciCampagna {
 
     /// Il titolo del pannello di un gruppo.
     func titoloPannello(_ gruppo: Gruppo) -> String {
-        testi.frase("pannello.casella_titolo", nomeGruppo(gruppo),
+        testi.frase("pannello.casella_titolo", soggetto: soggettoGruppo(gruppo),
                     gruppo.posizione.riga, gruppo.posizione.colonna).testo
     }
 

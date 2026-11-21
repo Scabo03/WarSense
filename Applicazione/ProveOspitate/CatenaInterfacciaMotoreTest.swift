@@ -200,10 +200,10 @@ final class CatenaInterfacciaMotoreTest: XCTestCase {
                 let bersaglio = VistaMappa.cornice(di: meta)
                 // ANELLO 1: il tocco risolve l'elemento e lo attiva. Attivare la
                 // destinazione ORDINA la marcia DIRETTAMENTE, senza pannello di
-                // conferma (correzione del titolare, RDA-104): il costo e la
-                // conseguenza dell'inchiodamento sono già sulla voce della casella
-                // (casella.disponibile e casella.inchioda), che chi ascolta ha sentito
-                // prima di attivarla. L'ordine è asincrono e la sua applicazione si
+                // conferma (correzione del titolare, RDA-104): il costo è già sulla
+                // voce della casella (casella.disponibile) e la conseguenza
+                // dell'inchiodamento l'ha detta il comando di marcia (incarico 29),
+                // e chi ascolta li ha sentiti prima di attivarla. L'ordine è asincrono e la sua applicazione si
                 // attende sotto, con il cambiamento d'impronta.
                 XCTAssertTrue(schermata.grigliaPerProva.attivaAlTocco(
                     in: CGPoint(x: bersaglio.midX, y: bersaglio.midY)),

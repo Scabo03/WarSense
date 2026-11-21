@@ -2,8 +2,6 @@
 "battaglia.turno" = "Turno %d";
 "battaglia.piazzamento_confermato" = "Piazzato: costa %d, restano %d";
 "battaglia.elemento_esaurito" = "Elemento esaurito, deselezionato";
-"battaglia.contatto_eseguito" = "Ingaggiato %@ %@ avversario, %@, %@";
-"battaglia.contatto_subito" = "Il tuo %@ %@ è stato ingaggiato, %@, %@";
 "battaglia.disingaggio" = "Un reparto si è disingaggiato in riga %d, cella %d";
 "battaglia.munizioni_esaurite" = "Munizioni esaurite per il reparto in riga %d, cella %d";
 "battaglia.resa_dichiarata" = "Resa dichiarata: comincia la ritirata combattuta";
@@ -37,21 +35,15 @@
 "battaglia.turno_avversario" = "Turno %d, agisce l'avversario";
 "battaglia.turno_avversario.sintetico" = "Turno %d, avversario";
 "battaglia.spostamento" = "Spostato in riga %d, cella %d: costa %d, restano %d";
-"battaglia.tiro_eseguito" = "Tiro su %@ %@ avversario, %@";
-"battaglia.tiro_subito" = "Tiro avversario sul tuo %@ %@, %@";
 "battaglia.mischia_complessiva" = "Esito delle mischie, %d contatti: ";
 "battaglia.mischia_complessiva.sintetico" = "Mischie, %d: ";
 "battaglia.mischia_voce" = "riga %d cella %d, %@, %@";
 "battaglia.mischia_voce_stallo" = "riga %d cella %d, %@";
 "battaglia.mischia_separatore" = "; ";
-"battaglia.disfatto_proprio" = "Il tuo %@ %@ è disfatto in riga %d, cella %d";
-"battaglia.disfatto_avversario" = "%@ %@ avversario disfatto in riga %d, cella %d";
 "battaglia.resa_propria" = "Resa dichiarata: comincia la tua ritirata combattuta";
 "battaglia.resa_avversaria" = "L'avversario si ritira";
 "battaglia.evacuata" = "Unità evacuata: costa %d";
 "battaglia.sorpresa_conclusa" = "Le posizioni sono ora tutte scoperte";
-"battaglia.ingresso_avversario" = "Entra in campo %@ %@ avversario in riga %d, cella %d";
-"battaglia.spostamento_avversario" = "%@ %@ avversario si sposta in riga %d, cella %d";
 "battaglia.evacuata_avversaria" = "L'avversario evacua un'unità";
 
 /* Interfaccia della battaglia (02 §2, §3, §8): testa fissa e contenuti di cella. */
@@ -59,13 +51,10 @@
 "cella.libera" = "libera";
 "cella.ostacolo_contenuto" = "ostacolo";
 "cella.occupante" = "%@, %@";
-"cella.occupante_proprio" = "tuo %@ %@";
-"cella.occupante_avversario" = "%@ %@ avversario";
 "cella.disponibile" = "costa %d, restano %d";
 "cella.bersaglio" = "%@, %@";
 "deck.intestazione" = "Riserve da schierare";
 "deck.volume" = "volume %d";
-"deck.selezionato" = "selezionato";
 "deck.rinforzo" = "rinforzo";
 "deck.elemento_indicazione" = "Riserva da schierare: attivala per selezionarla, poi conferma sulla cella di destinazione";
 /* Le sigle dell'archetipo (deck.sigla.*) sono state RIMOSSE (RDA-97): il simbolo
@@ -83,6 +72,9 @@
 "battaglia.annullato_conferma" = "Ultima operazione annullata";
 "battaglia.azzerato_conferma" = "Schieramento del turno azzerato";
 "battaglia.niente_da_annullare" = "Niente da annullare in questo turno";
+/* L'azzeramento senza alcun comando del turno da azzerare lo dice, invece di confermare
+   (incarico 29, osservazione 6 della sessione da tester). */
+"battaglia.niente_da_azzerare" = "Niente da azzerare in questo turno";
 "battaglia.opacita_avviso" = "Le posizioni avversarie non sono note: lo diverranno al loro prossimo turno";
 
 /* Pannello della cella (00 §7.4, 02 §9). */
@@ -93,10 +85,6 @@
    bersaglio, efficacia, vicinanza (solo tiro), accerchiamento. Frasi intere e non
    somme di parole (00 §14.2): la variante con accerchiamento è una frase a sé,
    perché quando il bersaglio è isolato la voce non deve dirlo (02 §8.7.1). */
-"pannello.tira_su" = "Tira su %@ %@ avversario, %@, %@";
-"pannello.tira_su_accerchiato" = "Tira su %@ %@ avversario, %@, %@, %@";
-"pannello.ingaggia" = "Ingaggia %@ %@ avversario in riga %d cella %d, %@, %@";
-"pannello.ingaggia_accerchiato" = "Ingaggia %@ %@ avversario in riga %d cella %d, %@, %@, %@";
 "pannello.ritira_unita" = "Evacua questa unità: costa %d";
 "pannello.disingaggia" = "Disingaggia dalla mischia";
 "battaglia.reparto_elite" = "reparto scelto: per l'addestramento superiore resta ai tuoi ordini anche in mischia";
@@ -119,16 +107,6 @@
 "rotore.rinforzi" = "Rinforzi del turno";
 "rotore.ostacoli" = "Ostacoli";
 
-/* Unità (00 §12.2: archetipi per funzione). */
-"unita.fanteria_leggera" = "fanteria leggera";
-"unita.fanteria_pesante" = "fanteria pesante";
-"unita.guardia_elite" = "guardia scelta";
-"unita.tiratori" = "tiratori";
-"unita.cavalleria_ricognizione" = "cavalleria da ricognizione";
-"unita.cavalleria_manovrata" = "cavalleria manovrata";
-"unita.piattaforma_trainata" = "piattaforma trainata";
-"unita.macchina_assedio" = "macchina d'assedio";
-"unita.macchina_tiro" = "macchina da tiro";
 
 /* Avvio, resoconto, impostazioni, apprendimento. */
 "avvio.titolo" = "WarSense";
@@ -181,49 +159,19 @@
    segnaposto, mai somme di parole (00 §14.2). La marcia ordinata e quella revocata
    dichiarano i giorni con il plurale di sistema e stanno nel .stringsdict; qui
    restano gli annunci senza conteggio. */
-"campagna.marcia_compiuta" = "%@ è arrivato in riga %d, casella %d";
-"campagna.marcia_compiuta.sintetico" = "%@ in riga %d, casella %d";
-"campagna.presidio_ordinato" = "%@ presidia in riga %d, casella %d";
-"campagna.presidio_ordinato.sintetico" = "%@ presidia";
 /* Divisione e riunione (01 §5.6.0.2, §5.6.0.3). La divisione annuncia il DISTACCAMENTO
    e dove è nato; la riunione il gruppo RISULTANTE e la sua casella. */
-"campagna.gruppo_diviso" = "Nuovo gruppo %1$@ in riga %2$d, casella %3$d";
-"campagna.gruppo_diviso.sintetico" = "Nuovo %1$@";
-"campagna.gruppi_riuniti" = "%1$@ riunito in riga %2$d, casella %3$d";
-"campagna.gruppi_riuniti.sintetico" = "%1$@ riunito";
 "campagna.giornata_aperta" = "Giornata conclusa: comincia il giorno %d";
 "campagna.giornata_aperta.sintetico" = "Giorno %d";
 /* Rifornimento (01 §5.2.2): il taglio interrompe, la sosta imposta ferma, la catena
    ricomposta fa riprendere. Sono fatti della catena e dichiarano il luogo. La ripresa
    è un annuncio a sé, distinto dallo stato «rifornito» che non si annuncia (02 §8.7):
    dice il passaggio, non la quiete. */
-"campagna.rifornimento_interrotto" = "Rifornimento di %@ interrotto in riga %d, casella %d";
-"campagna.rifornimento_interrotto.sintetico" = "%@ senza rifornimento";
-"campagna.sosta_di_rifornimento" = "%@ in sosta di rifornimento in riga %d, casella %d";
-"campagna.sosta_di_rifornimento.sintetico" = "%@ in sosta di rifornimento";
-"campagna.rifornimento_ripreso" = "Rifornimento di %@ ripreso in riga %d, casella %d";
-"campagna.rifornimento_ripreso.sintetico" = "%@ di nuovo rifornito";
 /* Avvistamento di una formazione avversaria (02 §8.2.1, incarico 18): il fatto e il
    luogo, senza nome né volume (02 §6.4.1). È la mossa avversaria che il giocatore
    apprende, e passa dalla conoscenza confermato. */
 "campagna.formazione_avvistata" = "Formazione avversaria avvistata in riga %d, casella %d";
 "campagna.formazione_avvistata.sintetico" = "Avversario in riga %d, casella %d";
-"campagna.esplorazione_riuscita" = "%1$@ ha esplorato la zona attorno a riga %2$d, casella %3$d";
-"campagna.esplorazione_riuscita.sintetico" = "%1$@ esplora riga %2$d, casella %3$d";
-"campagna.esplorazione_a_mani_vuote" = "%@ è tornato a mani vuote dall'esplorazione";
-"campagna.esplorazione_a_mani_vuote.sintetico" = "%@ a mani vuote";
-"campagna.esploratori_notati" = "%1$@ si è fatto notare esplorando in riga %2$d, casella %3$d";
-"campagna.esploratori_notati.sintetico" = "%1$@ notato in riga %2$d, casella %3$d";
-"campagna.esploratori_perduti" = "%1$@ si è perduto esplorando in riga %2$d, casella %3$d";
-"campagna.esploratori_perduti.sintetico" = "%1$@ perduto in riga %2$d, casella %3$d";
-"campagna.imboscata_ordinata" = "%1$@ si è messo in agguato in riga %2$d, casella %3$d";
-"campagna.imboscata_ordinata.sintetico" = "%1$@ in agguato in riga %2$d, casella %3$d";
-"campagna.sabotaggio_riuscito" = "%1$@ ha sabotato una formazione avversaria in riga %2$d, casella %3$d";
-"campagna.sabotaggio_riuscito.sintetico" = "%1$@ sabota in riga %2$d, casella %3$d";
-"campagna.sabotaggio_fallito" = "%1$@ si è fatto notare, sabotaggio fallito in riga %2$d, casella %3$d";
-"campagna.sabotaggio_fallito.sintetico" = "%1$@ sabotaggio fallito";
-"campagna.formazione_studiata" = "%1$@ ha studiato una formazione avversaria in riga %2$d, casella %3$d";
-"campagna.formazione_studiata.sintetico" = "%1$@ studia in riga %2$d, casella %3$d";
 "campagna.imboscata_scattata" = "Imboscata scattata in riga %1$d, casella %2$d";
 "campagna.imboscata_scattata.sintetico" = "Imboscata in riga %1$d, casella %2$d";
 "campagna.imboscata_scoperta" = "Imboscata avversaria scoperta in riga %1$d, casella %2$d";
@@ -251,17 +199,10 @@
    RDA-104): il registro annota i fatti che il giocatore non ha deciso (01 §5.17.1).
    Restano il compimento della marcia (l'arrivo) e la revoca — quest'ultima per
    volontà del titolare, perché spiega perché un gruppo si trovi fermo. */
-"registro.marcia_compiuta" = "Giorno %1$d: %2$@ è arrivato in riga %3$d, casella %4$d";
-"registro.marcia_revocata" = "Giorno %1$d: %2$@ revoca la marcia in riga %3$d, casella %4$d";
 /* Fatti del rifornimento (01 §5.2.2, §5.17.1): il taglio, la sosta imposta e la
    ripresa sono fatti che il giocatore NON ha deciso, e perciò si annotano, con il
    giorno e il luogo. La sosta VOLONTARIA, che è un ordine, non entra nel registro. */
-"registro.rifornimento_interrotto" = "Giorno %1$d: rifornimento di %2$@ interrotto in riga %3$d, casella %4$d";
-"registro.sosta_di_rifornimento" = "Giorno %1$d: %2$@ costretto alla sosta di rifornimento in riga %3$d, casella %4$d";
-"registro.rifornimento_ripreso" = "Giorno %1$d: rifornimento di %2$@ ripreso in riga %3$d, casella %4$d";
 "registro.formazione_avvistata" = "Giorno %1$d: formazione avversaria avvistata in riga %2$d, casella %3$d";
-"registro.esploratori_perduti" = "Giorno %1$d: gli esploratori %2$@ si sono perduti in riga %3$d, casella %4$d";
-"registro.esploratori_notati" = "Giorno %1$d: gli esploratori %2$@ si sono fatti notare in riga %3$d, casella %4$d";
 "registro.formazione_sabotata" = "Giorno %1$d: formazione avversaria sabotata in riga %2$d, casella %3$d";
 "registro.formazione_studiata" = "Giorno %1$d: formazione avversaria studiata in riga %2$d, casella %3$d";
 "registro.imboscata_scattata" = "Giorno %1$d: imboscata scattata in riga %2$d, casella %3$d";
@@ -287,9 +228,6 @@
    struttura di quella di battaglia (00 §7.1): riga, poi posizione nella riga. */
 "casella.testa" = "riga %d, casella %d";
 "casella.libera" = "libera";
-"casella.occupante_proprio" = "tuo %@, %@";
-"casella.occupante_proprio_ricognizione" = "tuo %@, formazione di ricognizione, %@";
-"casella.occupante_proprio_non_armata" = "tua %@, formazione non armata, %@";
 /* La COMPOSIZIONE della propria formazione (incarico 22): di quali reparti e di quanti
    atomi è fatta. Riusa la frase «N atomi di <archetipo>» della divisione, sicché non conia
    alcun termine nuovo del vocabolario chiuso. È un dettaglio dell'occupante proprio, in coda
@@ -303,16 +241,14 @@
 "casella.occupante_avversario_ricognizione" = "formazione di ricognizione avversaria";
 "casella.occupante_avversario_non_armata" = "formazione non armata avversaria";
 "casella.occupante_avversario_non_armata_studiata" = "formazione non armata avversaria, carico %d";
-/* casella.disponibile porta il costo in giorni e sta nel .stringsdict, con il
-   plurale di sistema (01 §5.6.3.5: il costo si dichiara sulla voce del comando).
-   casella.inchioda è la CONSEGUENZA che l'etichetta vocale aggiunge, perché l'ordine
-   parte direttamente dalla voce senza pannello (correzione del titolare, RDA-104):
-   chi vede riceve la stessa informazione dai nove pallini dell'avanzamento. */
-"casella.inchioda" = "il gruppo resterà fermo fino all'arrivo e non potrà sfilarsi senza perdere i giorni spesi";
+/* casella.disponibile porta il costo in giorni e sta nel .stringsdict, con il plurale di sistema
+   (01 §5.6.3.5). Dal 2026-11-21 (decisione del titolare, incarico 29) segue la testa e il contenuto
+   della casella, e l'avvertimento sull'inchiodamento non è più su ogni casella: lo dice una volta sola
+   il comando di marcia, quando lo si sceglie (pannello.marcia_designazione_avviata). */
 "campagna.annuncio_apertura" = "Mappa %@, %d righe per %d caselle. Il tuo quartier generale è in riga %d, casella %d";
-"campagna.stato" = "Giorno %d. Hanno agito %d gruppi su %d";
-"campagna.stato_con_marcia" = "Giorno %d. Hanno agito %d gruppi su %d, %d in marcia lunga";
-"campagna.stato_tutti_fermi" = "Giorno %d. Nessun gruppo ha ancora agito, sono %d";
+/* campagna.stato, campagna.stato_con_marcia e campagna.stato_tutti_fermi portano il numero dei
+   gruppi col plurale di sistema e stanno nel .stringsdict (incarico 29, osservazione 2 della
+   sessione da tester: «Hanno agito 1 gruppi su 4»). */
 "campagna.stato_solo_marcia" = "Giorno %d. Nessun gruppo ha agito, %d in marcia lunga su %d";
 /* Coda dell'informazione di stato (02 §6.5.1.3): i gruppi senza rifornimento, quando
    ce ne sono. Si aggiunge alle quattro forme di sopra e non le sostituisce. */
@@ -323,24 +259,28 @@
 "campagna.annullato_conferma" = "Ultimo ordine annullato";
 "campagna.azzerato_conferma" = "Ordini della giornata azzerati";
 "campagna.niente_da_annullare" = "Niente da annullare in questa giornata";
+"campagna.niente_da_azzerare" = "Niente da azzerare in questa giornata";
 "campagna.slot_incompatibile" = "La campagna salvata appartiene a valori di versione %@ e questa versione usa %@: non può essere aperta";
 "campagna.slot_schema_incompatibile" = "La campagna salvata è stata scritta in un formato precedente e non può essere aperta. Comincia una campagna nuova";
 
 /* Pannello della casella (00 §7.4, 02 §9). Un'azione impossibile in ogni sua
    forma non compare affatto (02 §9.5). */
-"pannello.casella_titolo" = "Azioni per %@ in riga %d, casella %d";
 "pannello.designa_marcia" = "Marcia: scegli la casella sulla mappa";
-"pannello.marcia_designazione_avviata" = "Scegli la casella di destinazione e attivala per dare l'ordine di marcia";
+/* Il messaggio del pannello di un gruppo bloccato da una battaglia in sospeso altrove (02 §6.5;
+   incarico 29, osservazione 1 della sessione da tester): il medesimo motivo chiuso di ogni comando
+   bloccato (campagna.battaglia_in_sospeso) e il luogo della battaglia. */
+"pannello.bloccato_da_battaglia" = "Nessun ordine possibile: %1$@ in riga %2$d, casella %3$d";
+"pannello.marcia_designazione_avviata" = "Scegli la casella di destinazione e attivala per dare l'ordine di marcia. Il gruppo resterà fermo fino all'arrivo e non potrà sfilarsi senza perdere i giorni spesi";
 "pannello.presidio" = "Presidia: resta fermo in guardia";
 "pannello.sosta" = "Sosta con raccolta: resta fermo e raccogli provviste";
 /* Divisione e riunione (01 §5.6.0.2, §5.6.0.3). «Dividi» apre la schermata dei
    reparti; «Riunisci con» si offre una volta per ciascun gruppo proprio adiacente. */
 "pannello.dividi" = "Dividi: scegli i reparti da staccare";
-"pannello.riunisci" = "Riunisci con %@";
 /* Il pannello di conferma della marcia NON esiste più: l'ordine parte direttamente
    dalla voce della casella di destinazione (correzione del titolare, RDA-104). Il
-   costo e la conseguenza dell'inchiodamento stanno su quella voce (casella.disponibile
-   e casella.inchioda). Resta la sola voce di rinuncia, condivisa con la revoca. */
+   costo sta su quella voce (casella.disponibile); la conseguenza dell'inchiodamento la
+   dice il comando di marcia quando lo si sceglie (incarico 29). Resta la sola voce di
+   rinuncia, condivisa con la revoca. */
 "pannello.marcia_rinuncia_azione" = "Rinuncia";
 /* Pannello di revoca della marcia (01 §5.6.3.3, §5.6.3.5): dichiara i giorni persi
    e che il gruppo resta senza azione, prima della conferma. */
@@ -361,7 +301,6 @@
 
 /* Schermata di divisione (01 §5.6.0.2, 02 §10.3): ogni riga una frase compatta.
    `divisione.reparto` porta il plurale sugli atomi e sta nel .stringsdict. */
-"divisione.titolo" = "Dividi %@";
 "divisione.scegli_reparti" = "Scegli i reparti da staccare";
 "divisione.scegli_dove" = "Scegli dove collocare il distaccamento";
 "divisione.da_tenere" = "da tenere";
@@ -409,3 +348,242 @@
    ritiro di un ordine e chi ascolta deve poterli distinguere. */
 "campagna.annullato_giornata_riaperta" = "Ultimo ordine annullato: torna il giorno %d e il gruppo attende di nuovo";
 "campagna.azzerato_giornata_riaperta" = "Ordini azzerati: torna il giorno %d e tutti i gruppi attendono di nuovo";
+
+/* Frasi accordate al genere (02 §4.6, decisione del titolare del 2026-11-21, incarico 29).
+   Ogni frase che contiene un termine soggetto — il nome di un archetipo, il nome di un gruppo —
+   è scritta INTERA per ciascuno dei quattro generi: <chiave>.maschile, .femminile,
+   .maschile_plurale, .femminile_plurale, e la variante di verbosità dopo il genere. Il soggetto è
+   sempre l'argomento 1. Il termine resta invariabile (02 §4.5); cambiano articoli e accordi.
+   AccordoDiGenereTest rifiuta la frase a cui manca una forma. */
+"battaglia.contatto_eseguito.maschile" = "Ingaggiato %@ %@ avversario, %@, %@";
+"battaglia.contatto_eseguito.femminile" = "Ingaggiata %@ %@ avversaria, %@, %@";
+"battaglia.contatto_eseguito.maschile_plurale" = "Ingaggiati %@ %@ avversari, %@, %@";
+"battaglia.contatto_eseguito.femminile_plurale" = "Ingaggiate %@ %@ avversarie, %@, %@";
+"battaglia.contatto_subito.maschile" = "Il tuo %@ %@ è stato ingaggiato, %@, %@";
+"battaglia.contatto_subito.femminile" = "La tua %@ %@ è stata ingaggiata, %@, %@";
+"battaglia.contatto_subito.maschile_plurale" = "I tuoi %@ %@ sono stati ingaggiati, %@, %@";
+"battaglia.contatto_subito.femminile_plurale" = "Le tue %@ %@ sono state ingaggiate, %@, %@";
+"battaglia.tiro_eseguito.maschile" = "Tiro su %@ %@ avversario, %@";
+"battaglia.tiro_eseguito.femminile" = "Tiro su %@ %@ avversaria, %@";
+"battaglia.tiro_eseguito.maschile_plurale" = "Tiro su %@ %@ avversari, %@";
+"battaglia.tiro_eseguito.femminile_plurale" = "Tiro su %@ %@ avversarie, %@";
+"battaglia.tiro_subito.maschile" = "Tiro avversario sul tuo %@ %@, %@";
+"battaglia.tiro_subito.femminile" = "Tiro avversario sulla tua %@ %@, %@";
+"battaglia.tiro_subito.maschile_plurale" = "Tiro avversario sui tuoi %@ %@, %@";
+"battaglia.tiro_subito.femminile_plurale" = "Tiro avversario sulle tue %@ %@, %@";
+"battaglia.disfatto_proprio.maschile" = "Il tuo %@ %@ è disfatto in riga %d, cella %d";
+"battaglia.disfatto_proprio.femminile" = "La tua %@ %@ è disfatta in riga %d, cella %d";
+"battaglia.disfatto_proprio.maschile_plurale" = "I tuoi %@ %@ sono disfatti in riga %d, cella %d";
+"battaglia.disfatto_proprio.femminile_plurale" = "Le tue %@ %@ sono disfatte in riga %d, cella %d";
+"battaglia.disfatto_avversario.maschile" = "%@ %@ avversario disfatto in riga %d, cella %d";
+"battaglia.disfatto_avversario.femminile" = "%@ %@ avversaria disfatta in riga %d, cella %d";
+"battaglia.disfatto_avversario.maschile_plurale" = "%@ %@ avversari disfatti in riga %d, cella %d";
+"battaglia.disfatto_avversario.femminile_plurale" = "%@ %@ avversarie disfatte in riga %d, cella %d";
+"battaglia.ingresso_avversario.maschile" = "Entra in campo %@ %@ avversario in riga %d, cella %d";
+"battaglia.ingresso_avversario.femminile" = "Entra in campo %@ %@ avversaria in riga %d, cella %d";
+"battaglia.ingresso_avversario.maschile_plurale" = "Entrano in campo %@ %@ avversari in riga %d, cella %d";
+"battaglia.ingresso_avversario.femminile_plurale" = "Entrano in campo %@ %@ avversarie in riga %d, cella %d";
+"battaglia.spostamento_avversario.maschile" = "%@ %@ avversario si sposta in riga %d, cella %d";
+"battaglia.spostamento_avversario.femminile" = "%@ %@ avversaria si sposta in riga %d, cella %d";
+"battaglia.spostamento_avversario.maschile_plurale" = "%@ %@ avversari si spostano in riga %d, cella %d";
+"battaglia.spostamento_avversario.femminile_plurale" = "%@ %@ avversarie si spostano in riga %d, cella %d";
+"cella.occupante_proprio.maschile" = "tuo %@ %@";
+"cella.occupante_proprio.femminile" = "tua %@ %@";
+"cella.occupante_proprio.maschile_plurale" = "tuoi %@ %@";
+"cella.occupante_proprio.femminile_plurale" = "tue %@ %@";
+"cella.occupante_avversario.maschile" = "%@ %@ avversario";
+"cella.occupante_avversario.femminile" = "%@ %@ avversaria";
+"cella.occupante_avversario.maschile_plurale" = "%@ %@ avversari";
+"cella.occupante_avversario.femminile_plurale" = "%@ %@ avversarie";
+"pannello.tira_su.maschile" = "Tira su %@ %@ avversario, %@, %@";
+"pannello.tira_su.femminile" = "Tira su %@ %@ avversaria, %@, %@";
+"pannello.tira_su.maschile_plurale" = "Tira su %@ %@ avversari, %@, %@";
+"pannello.tira_su.femminile_plurale" = "Tira su %@ %@ avversarie, %@, %@";
+"pannello.tira_su_accerchiato.maschile" = "Tira su %@ %@ avversario, %@, %@, %@";
+"pannello.tira_su_accerchiato.femminile" = "Tira su %@ %@ avversaria, %@, %@, %@";
+"pannello.tira_su_accerchiato.maschile_plurale" = "Tira su %@ %@ avversari, %@, %@, %@";
+"pannello.tira_su_accerchiato.femminile_plurale" = "Tira su %@ %@ avversarie, %@, %@, %@";
+"pannello.ingaggia.maschile" = "Ingaggia %@ %@ avversario in riga %d cella %d, %@, %@";
+"pannello.ingaggia.femminile" = "Ingaggia %@ %@ avversaria in riga %d cella %d, %@, %@";
+"pannello.ingaggia.maschile_plurale" = "Ingaggia %@ %@ avversari in riga %d cella %d, %@, %@";
+"pannello.ingaggia.femminile_plurale" = "Ingaggia %@ %@ avversarie in riga %d cella %d, %@, %@";
+"pannello.ingaggia_accerchiato.maschile" = "Ingaggia %@ %@ avversario in riga %d cella %d, %@, %@, %@";
+"pannello.ingaggia_accerchiato.femminile" = "Ingaggia %@ %@ avversaria in riga %d cella %d, %@, %@, %@";
+"pannello.ingaggia_accerchiato.maschile_plurale" = "Ingaggia %@ %@ avversari in riga %d cella %d, %@, %@, %@";
+"pannello.ingaggia_accerchiato.femminile_plurale" = "Ingaggia %@ %@ avversarie in riga %d cella %d, %@, %@, %@";
+"deck.selezionato.maschile" = "selezionato";
+"deck.selezionato.femminile" = "selezionata";
+"deck.selezionato.maschile_plurale" = "selezionati";
+"deck.selezionato.femminile_plurale" = "selezionate";
+"campagna.marcia_compiuta.maschile" = "%@ è arrivato in riga %d, casella %d";
+"campagna.marcia_compiuta.femminile" = "%@ è arrivata in riga %d, casella %d";
+"campagna.marcia_compiuta.maschile_plurale" = "%@ sono arrivati in riga %d, casella %d";
+"campagna.marcia_compiuta.femminile_plurale" = "%@ sono arrivate in riga %d, casella %d";
+"campagna.marcia_compiuta.maschile.sintetico" = "%@ in riga %d, casella %d";
+"campagna.marcia_compiuta.femminile.sintetico" = "%@ in riga %d, casella %d";
+"campagna.marcia_compiuta.maschile_plurale.sintetico" = "%@ in riga %d, casella %d";
+"campagna.marcia_compiuta.femminile_plurale.sintetico" = "%@ in riga %d, casella %d";
+"campagna.presidio_ordinato.maschile" = "%@ presidia in riga %d, casella %d";
+"campagna.presidio_ordinato.femminile" = "%@ presidia in riga %d, casella %d";
+"campagna.presidio_ordinato.maschile_plurale" = "%@ presidiano in riga %d, casella %d";
+"campagna.presidio_ordinato.femminile_plurale" = "%@ presidiano in riga %d, casella %d";
+"campagna.presidio_ordinato.maschile.sintetico" = "%@ presidia";
+"campagna.presidio_ordinato.femminile.sintetico" = "%@ presidia";
+"campagna.presidio_ordinato.maschile_plurale.sintetico" = "%@ presidiano";
+"campagna.presidio_ordinato.femminile_plurale.sintetico" = "%@ presidiano";
+"campagna.gruppo_diviso.maschile" = "Nuovo gruppo %1$@ in riga %2$d, casella %3$d";
+"campagna.gruppo_diviso.femminile" = "Nuovo gruppo %1$@ in riga %2$d, casella %3$d";
+"campagna.gruppo_diviso.maschile_plurale" = "Nuovo gruppo %1$@ in riga %2$d, casella %3$d";
+"campagna.gruppo_diviso.femminile_plurale" = "Nuovo gruppo %1$@ in riga %2$d, casella %3$d";
+"campagna.gruppo_diviso.maschile.sintetico" = "Nuovo %1$@";
+"campagna.gruppo_diviso.femminile.sintetico" = "Nuova %1$@";
+"campagna.gruppo_diviso.maschile_plurale.sintetico" = "Nuovi %1$@";
+"campagna.gruppo_diviso.femminile_plurale.sintetico" = "Nuove %1$@";
+"campagna.gruppi_riuniti.maschile" = "%1$@ riunito in riga %2$d, casella %3$d";
+"campagna.gruppi_riuniti.femminile" = "%1$@ riunita in riga %2$d, casella %3$d";
+"campagna.gruppi_riuniti.maschile_plurale" = "%1$@ riuniti in riga %2$d, casella %3$d";
+"campagna.gruppi_riuniti.femminile_plurale" = "%1$@ riunite in riga %2$d, casella %3$d";
+"campagna.gruppi_riuniti.maschile.sintetico" = "%1$@ riunito";
+"campagna.gruppi_riuniti.femminile.sintetico" = "%1$@ riunita";
+"campagna.gruppi_riuniti.maschile_plurale.sintetico" = "%1$@ riuniti";
+"campagna.gruppi_riuniti.femminile_plurale.sintetico" = "%1$@ riunite";
+"campagna.rifornimento_interrotto.maschile" = "Rifornimento di %@ interrotto in riga %d, casella %d";
+"campagna.rifornimento_interrotto.femminile" = "Rifornimento di %@ interrotto in riga %d, casella %d";
+"campagna.rifornimento_interrotto.maschile_plurale" = "Rifornimento di %@ interrotto in riga %d, casella %d";
+"campagna.rifornimento_interrotto.femminile_plurale" = "Rifornimento di %@ interrotto in riga %d, casella %d";
+"campagna.rifornimento_interrotto.maschile.sintetico" = "%@ senza rifornimento";
+"campagna.rifornimento_interrotto.femminile.sintetico" = "%@ senza rifornimento";
+"campagna.rifornimento_interrotto.maschile_plurale.sintetico" = "%@ senza rifornimento";
+"campagna.rifornimento_interrotto.femminile_plurale.sintetico" = "%@ senza rifornimento";
+"campagna.sosta_di_rifornimento.maschile" = "%@ in sosta di rifornimento in riga %d, casella %d";
+"campagna.sosta_di_rifornimento.femminile" = "%@ in sosta di rifornimento in riga %d, casella %d";
+"campagna.sosta_di_rifornimento.maschile_plurale" = "%@ in sosta di rifornimento in riga %d, casella %d";
+"campagna.sosta_di_rifornimento.femminile_plurale" = "%@ in sosta di rifornimento in riga %d, casella %d";
+"campagna.sosta_di_rifornimento.maschile.sintetico" = "%@ in sosta di rifornimento";
+"campagna.sosta_di_rifornimento.femminile.sintetico" = "%@ in sosta di rifornimento";
+"campagna.sosta_di_rifornimento.maschile_plurale.sintetico" = "%@ in sosta di rifornimento";
+"campagna.sosta_di_rifornimento.femminile_plurale.sintetico" = "%@ in sosta di rifornimento";
+"campagna.rifornimento_ripreso.maschile" = "Rifornimento di %@ ripreso in riga %d, casella %d";
+"campagna.rifornimento_ripreso.femminile" = "Rifornimento di %@ ripreso in riga %d, casella %d";
+"campagna.rifornimento_ripreso.maschile_plurale" = "Rifornimento di %@ ripreso in riga %d, casella %d";
+"campagna.rifornimento_ripreso.femminile_plurale" = "Rifornimento di %@ ripreso in riga %d, casella %d";
+"campagna.rifornimento_ripreso.maschile.sintetico" = "%@ di nuovo rifornito";
+"campagna.rifornimento_ripreso.femminile.sintetico" = "%@ di nuovo rifornita";
+"campagna.rifornimento_ripreso.maschile_plurale.sintetico" = "%@ di nuovo riforniti";
+"campagna.rifornimento_ripreso.femminile_plurale.sintetico" = "%@ di nuovo rifornite";
+"campagna.esplorazione_riuscita.maschile" = "%1$@ ha esplorato la zona attorno a riga %2$d, casella %3$d";
+"campagna.esplorazione_riuscita.femminile" = "%1$@ ha esplorato la zona attorno a riga %2$d, casella %3$d";
+"campagna.esplorazione_riuscita.maschile_plurale" = "%1$@ hanno esplorato la zona attorno a riga %2$d, casella %3$d";
+"campagna.esplorazione_riuscita.femminile_plurale" = "%1$@ hanno esplorato la zona attorno a riga %2$d, casella %3$d";
+"campagna.esplorazione_riuscita.maschile.sintetico" = "%1$@ esplora riga %2$d, casella %3$d";
+"campagna.esplorazione_riuscita.femminile.sintetico" = "%1$@ esplora riga %2$d, casella %3$d";
+"campagna.esplorazione_riuscita.maschile_plurale.sintetico" = "%1$@ esplorano riga %2$d, casella %3$d";
+"campagna.esplorazione_riuscita.femminile_plurale.sintetico" = "%1$@ esplorano riga %2$d, casella %3$d";
+"campagna.esplorazione_a_mani_vuote.maschile" = "%@ è tornato a mani vuote dall'esplorazione";
+"campagna.esplorazione_a_mani_vuote.femminile" = "%@ è tornata a mani vuote dall'esplorazione";
+"campagna.esplorazione_a_mani_vuote.maschile_plurale" = "%@ sono tornati a mani vuote dall'esplorazione";
+"campagna.esplorazione_a_mani_vuote.femminile_plurale" = "%@ sono tornate a mani vuote dall'esplorazione";
+"campagna.esplorazione_a_mani_vuote.maschile.sintetico" = "%@ a mani vuote";
+"campagna.esplorazione_a_mani_vuote.femminile.sintetico" = "%@ a mani vuote";
+"campagna.esplorazione_a_mani_vuote.maschile_plurale.sintetico" = "%@ a mani vuote";
+"campagna.esplorazione_a_mani_vuote.femminile_plurale.sintetico" = "%@ a mani vuote";
+"campagna.esploratori_notati.maschile" = "%1$@ si è fatto notare esplorando in riga %2$d, casella %3$d";
+"campagna.esploratori_notati.femminile" = "%1$@ si è fatta notare esplorando in riga %2$d, casella %3$d";
+"campagna.esploratori_notati.maschile_plurale" = "%1$@ si sono fatti notare esplorando in riga %2$d, casella %3$d";
+"campagna.esploratori_notati.femminile_plurale" = "%1$@ si sono fatte notare esplorando in riga %2$d, casella %3$d";
+"campagna.esploratori_notati.maschile.sintetico" = "%1$@ notato in riga %2$d, casella %3$d";
+"campagna.esploratori_notati.femminile.sintetico" = "%1$@ notata in riga %2$d, casella %3$d";
+"campagna.esploratori_notati.maschile_plurale.sintetico" = "%1$@ notati in riga %2$d, casella %3$d";
+"campagna.esploratori_notati.femminile_plurale.sintetico" = "%1$@ notate in riga %2$d, casella %3$d";
+"campagna.esploratori_perduti.maschile" = "%1$@ si è perduto esplorando in riga %2$d, casella %3$d";
+"campagna.esploratori_perduti.femminile" = "%1$@ si è perduta esplorando in riga %2$d, casella %3$d";
+"campagna.esploratori_perduti.maschile_plurale" = "%1$@ si sono perduti esplorando in riga %2$d, casella %3$d";
+"campagna.esploratori_perduti.femminile_plurale" = "%1$@ si sono perdute esplorando in riga %2$d, casella %3$d";
+"campagna.esploratori_perduti.maschile.sintetico" = "%1$@ perduto in riga %2$d, casella %3$d";
+"campagna.esploratori_perduti.femminile.sintetico" = "%1$@ perduta in riga %2$d, casella %3$d";
+"campagna.esploratori_perduti.maschile_plurale.sintetico" = "%1$@ perduti in riga %2$d, casella %3$d";
+"campagna.esploratori_perduti.femminile_plurale.sintetico" = "%1$@ perdute in riga %2$d, casella %3$d";
+"campagna.imboscata_ordinata.maschile" = "%1$@ si è messo in agguato in riga %2$d, casella %3$d";
+"campagna.imboscata_ordinata.femminile" = "%1$@ si è messa in agguato in riga %2$d, casella %3$d";
+"campagna.imboscata_ordinata.maschile_plurale" = "%1$@ si sono messi in agguato in riga %2$d, casella %3$d";
+"campagna.imboscata_ordinata.femminile_plurale" = "%1$@ si sono messe in agguato in riga %2$d, casella %3$d";
+"campagna.imboscata_ordinata.maschile.sintetico" = "%1$@ in agguato in riga %2$d, casella %3$d";
+"campagna.imboscata_ordinata.femminile.sintetico" = "%1$@ in agguato in riga %2$d, casella %3$d";
+"campagna.imboscata_ordinata.maschile_plurale.sintetico" = "%1$@ in agguato in riga %2$d, casella %3$d";
+"campagna.imboscata_ordinata.femminile_plurale.sintetico" = "%1$@ in agguato in riga %2$d, casella %3$d";
+"campagna.sabotaggio_riuscito.maschile" = "%1$@ ha sabotato una formazione avversaria in riga %2$d, casella %3$d";
+"campagna.sabotaggio_riuscito.femminile" = "%1$@ ha sabotato una formazione avversaria in riga %2$d, casella %3$d";
+"campagna.sabotaggio_riuscito.maschile_plurale" = "%1$@ hanno sabotato una formazione avversaria in riga %2$d, casella %3$d";
+"campagna.sabotaggio_riuscito.femminile_plurale" = "%1$@ hanno sabotato una formazione avversaria in riga %2$d, casella %3$d";
+"campagna.sabotaggio_riuscito.maschile.sintetico" = "%1$@ sabota in riga %2$d, casella %3$d";
+"campagna.sabotaggio_riuscito.femminile.sintetico" = "%1$@ sabota in riga %2$d, casella %3$d";
+"campagna.sabotaggio_riuscito.maschile_plurale.sintetico" = "%1$@ sabotano in riga %2$d, casella %3$d";
+"campagna.sabotaggio_riuscito.femminile_plurale.sintetico" = "%1$@ sabotano in riga %2$d, casella %3$d";
+"campagna.sabotaggio_fallito.maschile" = "%1$@ si è fatto notare, sabotaggio fallito in riga %2$d, casella %3$d";
+"campagna.sabotaggio_fallito.femminile" = "%1$@ si è fatta notare, sabotaggio fallito in riga %2$d, casella %3$d";
+"campagna.sabotaggio_fallito.maschile_plurale" = "%1$@ si sono fatti notare, sabotaggio fallito in riga %2$d, casella %3$d";
+"campagna.sabotaggio_fallito.femminile_plurale" = "%1$@ si sono fatte notare, sabotaggio fallito in riga %2$d, casella %3$d";
+"campagna.sabotaggio_fallito.maschile.sintetico" = "%1$@ sabotaggio fallito";
+"campagna.sabotaggio_fallito.femminile.sintetico" = "%1$@ sabotaggio fallito";
+"campagna.sabotaggio_fallito.maschile_plurale.sintetico" = "%1$@ sabotaggio fallito";
+"campagna.sabotaggio_fallito.femminile_plurale.sintetico" = "%1$@ sabotaggio fallito";
+"campagna.formazione_studiata.maschile" = "%1$@ ha studiato una formazione avversaria in riga %2$d, casella %3$d";
+"campagna.formazione_studiata.femminile" = "%1$@ ha studiato una formazione avversaria in riga %2$d, casella %3$d";
+"campagna.formazione_studiata.maschile_plurale" = "%1$@ hanno studiato una formazione avversaria in riga %2$d, casella %3$d";
+"campagna.formazione_studiata.femminile_plurale" = "%1$@ hanno studiato una formazione avversaria in riga %2$d, casella %3$d";
+"campagna.formazione_studiata.maschile.sintetico" = "%1$@ studia in riga %2$d, casella %3$d";
+"campagna.formazione_studiata.femminile.sintetico" = "%1$@ studia in riga %2$d, casella %3$d";
+"campagna.formazione_studiata.maschile_plurale.sintetico" = "%1$@ studiano in riga %2$d, casella %3$d";
+"campagna.formazione_studiata.femminile_plurale.sintetico" = "%1$@ studiano in riga %2$d, casella %3$d";
+"registro.marcia_compiuta.maschile" = "Giorno %2$d: %1$@ è arrivato in riga %3$d, casella %4$d";
+"registro.marcia_compiuta.femminile" = "Giorno %2$d: %1$@ è arrivata in riga %3$d, casella %4$d";
+"registro.marcia_compiuta.maschile_plurale" = "Giorno %2$d: %1$@ sono arrivati in riga %3$d, casella %4$d";
+"registro.marcia_compiuta.femminile_plurale" = "Giorno %2$d: %1$@ sono arrivate in riga %3$d, casella %4$d";
+"registro.marcia_revocata.maschile" = "Giorno %2$d: %1$@ revoca la marcia in riga %3$d, casella %4$d";
+"registro.marcia_revocata.femminile" = "Giorno %2$d: %1$@ revoca la marcia in riga %3$d, casella %4$d";
+"registro.marcia_revocata.maschile_plurale" = "Giorno %2$d: %1$@ revocano la marcia in riga %3$d, casella %4$d";
+"registro.marcia_revocata.femminile_plurale" = "Giorno %2$d: %1$@ revocano la marcia in riga %3$d, casella %4$d";
+"registro.rifornimento_interrotto.maschile" = "Giorno %2$d: rifornimento di %1$@ interrotto in riga %3$d, casella %4$d";
+"registro.rifornimento_interrotto.femminile" = "Giorno %2$d: rifornimento di %1$@ interrotto in riga %3$d, casella %4$d";
+"registro.rifornimento_interrotto.maschile_plurale" = "Giorno %2$d: rifornimento di %1$@ interrotto in riga %3$d, casella %4$d";
+"registro.rifornimento_interrotto.femminile_plurale" = "Giorno %2$d: rifornimento di %1$@ interrotto in riga %3$d, casella %4$d";
+"registro.sosta_di_rifornimento.maschile" = "Giorno %2$d: %1$@ costretto alla sosta di rifornimento in riga %3$d, casella %4$d";
+"registro.sosta_di_rifornimento.femminile" = "Giorno %2$d: %1$@ costretta alla sosta di rifornimento in riga %3$d, casella %4$d";
+"registro.sosta_di_rifornimento.maschile_plurale" = "Giorno %2$d: %1$@ costretti alla sosta di rifornimento in riga %3$d, casella %4$d";
+"registro.sosta_di_rifornimento.femminile_plurale" = "Giorno %2$d: %1$@ costrette alla sosta di rifornimento in riga %3$d, casella %4$d";
+"registro.rifornimento_ripreso.maschile" = "Giorno %2$d: rifornimento di %1$@ ripreso in riga %3$d, casella %4$d";
+"registro.rifornimento_ripreso.femminile" = "Giorno %2$d: rifornimento di %1$@ ripreso in riga %3$d, casella %4$d";
+"registro.rifornimento_ripreso.maschile_plurale" = "Giorno %2$d: rifornimento di %1$@ ripreso in riga %3$d, casella %4$d";
+"registro.rifornimento_ripreso.femminile_plurale" = "Giorno %2$d: rifornimento di %1$@ ripreso in riga %3$d, casella %4$d";
+"registro.esploratori_perduti.maschile" = "Giorno %2$d: gli esploratori %1$@ si sono perduti in riga %3$d, casella %4$d";
+"registro.esploratori_perduti.femminile" = "Giorno %2$d: gli esploratori %1$@ si sono perduti in riga %3$d, casella %4$d";
+"registro.esploratori_perduti.maschile_plurale" = "Giorno %2$d: gli esploratori %1$@ si sono perduti in riga %3$d, casella %4$d";
+"registro.esploratori_perduti.femminile_plurale" = "Giorno %2$d: gli esploratori %1$@ si sono perduti in riga %3$d, casella %4$d";
+"registro.esploratori_notati.maschile" = "Giorno %2$d: gli esploratori %1$@ si sono fatti notare in riga %3$d, casella %4$d";
+"registro.esploratori_notati.femminile" = "Giorno %2$d: gli esploratori %1$@ si sono fatti notare in riga %3$d, casella %4$d";
+"registro.esploratori_notati.maschile_plurale" = "Giorno %2$d: gli esploratori %1$@ si sono fatti notare in riga %3$d, casella %4$d";
+"registro.esploratori_notati.femminile_plurale" = "Giorno %2$d: gli esploratori %1$@ si sono fatti notare in riga %3$d, casella %4$d";
+"casella.occupante_proprio.maschile" = "tuo %@, %@";
+"casella.occupante_proprio.femminile" = "tua %@, %@";
+"casella.occupante_proprio.maschile_plurale" = "tuoi %@, %@";
+"casella.occupante_proprio.femminile_plurale" = "tue %@, %@";
+"casella.occupante_proprio_ricognizione.maschile" = "tuo %@, formazione di ricognizione, %@";
+"casella.occupante_proprio_ricognizione.femminile" = "tua %@, formazione di ricognizione, %@";
+"casella.occupante_proprio_ricognizione.maschile_plurale" = "tuoi %@, formazione di ricognizione, %@";
+"casella.occupante_proprio_ricognizione.femminile_plurale" = "tue %@, formazione di ricognizione, %@";
+"casella.occupante_proprio_non_armata.maschile" = "tuo %@, formazione non armata, %@";
+"casella.occupante_proprio_non_armata.femminile" = "tua %@, formazione non armata, %@";
+"casella.occupante_proprio_non_armata.maschile_plurale" = "tuoi %@, formazione non armata, %@";
+"casella.occupante_proprio_non_armata.femminile_plurale" = "tue %@, formazione non armata, %@";
+"pannello.casella_titolo.maschile" = "Azioni per %@ in riga %d, casella %d";
+"pannello.casella_titolo.femminile" = "Azioni per %@ in riga %d, casella %d";
+"pannello.casella_titolo.maschile_plurale" = "Azioni per %@ in riga %d, casella %d";
+"pannello.casella_titolo.femminile_plurale" = "Azioni per %@ in riga %d, casella %d";
+"pannello.riunisci.maschile" = "Riunisci con %@";
+"pannello.riunisci.femminile" = "Riunisci con %@";
+"pannello.riunisci.maschile_plurale" = "Riunisci con %@";
+"pannello.riunisci.femminile_plurale" = "Riunisci con %@";
+"divisione.titolo.maschile" = "Dividi %@";
+"divisione.titolo.femminile" = "Dividi %@";
+"divisione.titolo.maschile_plurale" = "Dividi %@";
+"divisione.titolo.femminile_plurale" = "Dividi %@";

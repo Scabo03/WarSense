@@ -162,6 +162,13 @@ public actor SessioneBattaglia {
             }
         }
         guard let indice = indiceMarcatore else { throw ErroreSessione.operazioneNonDisponibile }
+        // Niente da azzerare (incarico 29): nessun comando della parte dopo il marcatore. Il rifiuto
+        // non tocca il giornale e lascia dire alla Presentazione che non c'era nulla da azzerare,
+        // invece di confermare un azzeramento che non è avvenuto.
+        let comandiDelTurno = giornale.righe.dropFirst(indice + 1).contains {
+            if case .comando(let p, _) = $0.voce { return p == parte } else { return false }
+        }
+        guard comandiDelTurno else { throw ErroreSessione.operazioneNonDisponibile }
         try ritira(a: indice + 1)
     }
 

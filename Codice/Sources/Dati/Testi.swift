@@ -102,8 +102,13 @@ public struct Testi: Sendable {
     }
 
     /// Un termine del vocabolario chiuso (02 §4, 05 §8.4): tavola dedicata, mai variato.
+    /// I termini che fanno da soggetto (02 §4.6) non passano di qui: si leggono con `soggetto(_:_:)`,
+    /// che porta con sé il genere, e qui danno il marcatore di chiave irrisolta.
     public func termine(_ chiave: String) -> TestoLocalizzato {
-        risolvi(chiave, tavola: "Vocabolario", argomenti: [])
+        if CategoriaSoggetto.allCases.contains(where: { chiave.hasPrefix($0.prefisso) }) {
+            return TestoLocalizzato(testo: Testi.segnaposto, lingua: lingua)
+        }
+        return risolvi(chiave, tavola: "Vocabolario", argomenti: [])
     }
 
     /// Vero se la chiave esiste nel pacchetto: usato dal collaudo di completezza.
@@ -112,7 +117,7 @@ public struct Testi: Sendable {
         return bundle.localizedString(forKey: chiave, value: Testi.segnaposto, table: tavola) != Testi.segnaposto
     }
 
-    private func risolvi(_ chiave: String, tavola: String, argomenti: [any CVarArg]) -> TestoLocalizzato {
+    func risolvi(_ chiave: String, tavola: String, argomenti: [any CVarArg]) -> TestoLocalizzato {
         guard let bundle else { return TestoLocalizzato(testo: Testi.segnaposto, lingua: lingua) }
         let formato = bundle.localizedString(forKey: chiave, value: Testi.segnaposto, table: tavola)
         guard formato != Testi.segnaposto else { return TestoLocalizzato(testo: Testi.segnaposto, lingua: lingua) }

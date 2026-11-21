@@ -1,0 +1,285 @@
+{"evento":"avvio_app","t":"1795283856.349"}
+{"elemento":"PulsanteMultiriga: Nuovo scontro di prova","evento":"fuoco_voiceover","t":"1795283883.184"}
+{"evento":"present_battaglia_prima","t":"1795283889.316"}
+{"evento":"present_battaglia_dopo","t":"1795283889.319"}
+{"evento":"battaglia_viewWillAppear","t":"1795283889.321"}
+{"evento":"avvia_inizio","t":"1795283889.325"}
+{"evento":"battaglia_viewDidAppear","t":"1795283889.326"}
+{"evento":"present_battaglia_completata","t":"1795283889.326"}
+{"evento":"avvia_stato_letto","t":"1795283889.326"}
+{"evento":"avvia_elementi_montati","t":"1795283889.333"}
+{"evento":"avvia_eventi_iniziali","n":"1","t":"1795283889.348"}
+{"bersaglio":"UILabel: Riserve da schierare","evento":"fuoco_sposta","perche":"schermataAperta","t":"1795283889.351"}
+{"evento":"battaglia_ricarica","t":"1795283889.354"}
+{"elemento":"nil","evento":"fuoco_voiceover","t":"1795283889.357"}
+{"elemento":"UILabel: Riserve da schierare","evento":"fuoco_voiceover","t":"1795283890.123"}
+{"evento":"avvio_app","t":"1795283925.455"}
+{"elemento":"PulsanteMultiriga: Nuovo scontro di prova","evento":"fuoco_voiceover","t":"1795283931.826"}
+{"evento":"present_battaglia_prima","t":"1795283937.954"}
+{"evento":"present_battaglia_dopo","t":"1795283937.956"}
+{"evento":"battaglia_viewWillAppear","t":"1795283937.959"}
+{"evento":"avvia_inizio","t":"1795283937.963"}
+{"evento":"battaglia_viewDidAppear","t":"1795283937.964"}
+{"evento":"present_battaglia_completata","t":"1795283937.964"}
+{"evento":"avvia_stato_letto","t":"1795283937.964"}
+{"evento":"avvia_elementi_montati","t":"1795283937.971"}
+{"evento":"avvia_eventi_iniziali","n":"1","t":"1795283937.973"}
+{"bersaglio":"UILabel: Riserve da schierare","evento":"fuoco_sposta","perche":"schermataAperta","t":"1795283937.976"}
+{"elemento":"nil","evento":"fuoco_voiceover","t":"1795283937.989"}
+{"evento":"battaglia_ricarica","t":"1795283937.992"}
+{"elemento":"UILabel: Riserve da schierare","evento":"fuoco_voiceover","t":"1795283938.759"}
+{"evento":"avvio_app","t":"1795283949.826"}
+{"elemento":"PulsanteMultiriga: Riprendi lo scontro in corso","evento":"fuoco_voiceover","t":"1795283955.851"}
+{"evento":"present_battaglia_prima","t":"1795283961.975"}
+{"evento":"present_battaglia_dopo","t":"1795283961.977"}
+{"evento":"battaglia_viewWillAppear","t":"1795283961.980"}
+{"evento":"avvia_inizio","t":"1795283961.984"}
+{"evento":"battaglia_viewDidAppear","t":"1795283961.985"}
+{"evento":"present_battaglia_completata","t":"1795283961.985"}
+{"evento":"avvia_stato_letto","t":"1795283961.987"}
+{"evento":"avvia_elementi_montati","t":"1795283961.994"}
+{"evento":"avvia_eventi_iniziali","n":"0","t":"1795283961.996"}
+{"bersaglio":"UILabel: Riserve da schierare","evento":"fuoco_sposta","perche":"schermataAperta","t":"1795283961.999"}
+{"elemento":"nil","evento":"fuoco_voiceover","t":"1795283961.999"}
+{"evento":"battaglia_ricarica","t":"1795283962.002"}
+{"elemento":"UILabel: Riserve da schierare","evento":"fuoco_voiceover","t":"1795283962.772"}
+{"evento":"avvio_app","t":"1795283973.962"}
+{"elemento":"PulsanteMultiriga: Nuovo scontro di prova","evento":"fuoco_voiceover","t":"1795283979.995"}
+{"evento":"present_battaglia_prima","t":"1795283986.125"}
+{"evento":"present_battaglia_dopo","t":"1795283986.127"}
+{"evento":"battaglia_viewWillAppear","t":"1795283986.130"}
+{"evento":"avvia_inizio","t":"1795283986.135"}
+{"evento":"battaglia_viewDidAppear","t":"1795283986.135"}
+{"evento":"present_battaglia_completata","t":"1795283986.135"}
+{"evento":"avvia_stato_letto","t":"1795283986.137"}
+{"evento":"avvia_elementi_montati","t":"1795283986.144"}
+{"evento":"avvia_eventi_iniziali","n":"1","t":"1795283986.146"}
+{"bersaglio":"UILabel: Riserve da schierare","evento":"fuoco_sposta","perche":"schermataAperta","t":"1795283986.149"}
+{"elemento":"nil","evento":"fuoco_voiceover","t":"1795283986.150"}
+{"evento":"battaglia_ricarica","t":"1795283986.153"}
+{"elemento":"UILabel: Riserve da schierare","evento":"fuoco_voiceover","t":"1795283986.925"}
+{"evento":"avvio_app","t":"1795283997.937"}
+{"elemento":"PulsanteMultiriga: Riprendi lo scontro in corso","evento":"fuoco_voiceover","t":"1795284004.200"}
+{"evento":"present_battaglia_prima","t":"1795284010.331"}
+{"evento":"present_battaglia_dopo","t":"1795284010.333"}
+{"evento":"avvia_inizio","t":"1795284010.333"}
+{"evento":"avvia_stato_letto","t":"1795284010.333"}
+{"evento":"avvia_elementi_montati","t":"1795284010.340"}
+{"evento":"avvia_eventi_iniziali","n":"0","t":"1795284010.342"}
+{"bersaglio":"UILabel: Riserve da schierare","evento":"fuoco_sposta","perche":"schermataAperta","t":"1795284010.344"}
+{"evento":"battaglia_viewWillAppear","t":"1795284010.347"}
+{"evento":"battaglia_viewDidAppear","t":"1795284010.360"}
+{"evento":"present_battaglia_completata","t":"1795284010.360"}
+{"elemento":"nil","evento":"fuoco_voiceover","t":"1795284010.364"}
+{"evento":"battaglia_ricarica","t":"1795284010.367"}
+{"elemento":"UILabel: Riserve da schierare","evento":"fuoco_voiceover","t":"1795284011.135"}
+{"evento":"avvio_app","t":"1795284022.377"}
+{"elemento":"PulsanteMultiriga: Nuovo scontro di prova","evento":"fuoco_voiceover","t":"1795284028.654"}
+{"evento":"present_battaglia_prima","t":"1795284034.770"}
+{"evento":"present_battaglia_dopo","t":"1795284034.773"}
+{"evento":"battaglia_viewWillAppear","t":"1795284034.775"}
+{"evento":"avvia_inizio","t":"1795284034.780"}
+{"evento":"battaglia_viewDidAppear","t":"1795284034.780"}
+{"evento":"present_battaglia_completata","t":"1795284034.781"}
+{"evento":"avvia_stato_letto","t":"1795284034.781"}
+{"evento":"avvia_elementi_montati","t":"1795284034.788"}
+{"evento":"avvia_eventi_iniziali","n":"1","t":"1795284034.790"}
+{"bersaglio":"UILabel: Riserve da schierare","evento":"fuoco_sposta","perche":"schermataAperta","t":"1795284034.793"}
+{"elemento":"nil","evento":"fuoco_voiceover","t":"1795284034.806"}
+{"evento":"battaglia_ricarica","t":"1795284034.809"}
+{"elemento":"UILabel: Riserve da schierare","evento":"fuoco_voiceover","t":"1795284035.577"}
+{"evento":"avvio_app","t":"1795284047.034"}
+{"elemento":"PulsanteMultiriga: Riprendi lo scontro in corso","evento":"fuoco_voiceover","t":"1795284053.289"}
+{"evento":"present_battaglia_prima","t":"1795284059.409"}
+{"evento":"present_battaglia_dopo","t":"1795284059.411"}
+{"evento":"battaglia_viewWillAppear","t":"1795284059.414"}
+{"evento":"avvia_inizio","t":"1795284059.419"}
+{"evento":"battaglia_viewDidAppear","t":"1795284059.419"}
+{"evento":"present_battaglia_completata","t":"1795284059.419"}
+{"evento":"avvia_stato_letto","t":"1795284059.421"}
+{"evento":"avvia_elementi_montati","t":"1795284059.428"}
+{"evento":"avvia_eventi_iniziali","n":"0","t":"1795284059.430"}
+{"bersaglio":"UILabel: Riserve da schierare","evento":"fuoco_sposta","perche":"schermataAperta","t":"1795284059.433"}
+{"elemento":"nil","evento":"fuoco_voiceover","t":"1795284059.434"}
+{"evento":"battaglia_ricarica","t":"1795284059.437"}
+{"elemento":"UILabel: Riserve da schierare","evento":"fuoco_voiceover","t":"1795284060.208"}
+{"evento":"avvio_app","t":"1795284071.278"}
+{"elemento":"PulsanteMultiriga: Nuovo scontro di prova","evento":"fuoco_voiceover","t":"1795284077.548"}
+{"evento":"present_battaglia_prima","t":"1795284083.684"}
+{"evento":"present_battaglia_dopo","t":"1795284083.687"}
+{"evento":"battaglia_viewWillAppear","t":"1795284083.689"}
+{"evento":"avvia_inizio","t":"1795284083.694"}
+{"evento":"battaglia_viewDidAppear","t":"1795284083.694"}
+{"evento":"present_battaglia_completata","t":"1795284083.694"}
+{"evento":"avvia_stato_letto","t":"1795284083.695"}
+{"evento":"avvia_elementi_montati","t":"1795284083.701"}
+{"evento":"avvia_eventi_iniziali","n":"1","t":"1795284083.704"}
+{"bersaglio":"UILabel: Riserve da schierare","evento":"fuoco_sposta","perche":"schermataAperta","t":"1795284083.707"}
+{"elemento":"nil","evento":"fuoco_voiceover","t":"1795284083.720"}
+{"evento":"battaglia_ricarica","t":"1795284083.723"}
+{"elemento":"UILabel: Riserve da schierare","evento":"fuoco_voiceover","t":"1795284084.491"}
+{"evento":"avvio_app","t":"1795284095.970"}
+{"elemento":"PulsanteMultiriga: Riprendi lo scontro in corso","evento":"fuoco_voiceover","t":"1795284102.235"}
+{"evento":"present_battaglia_prima","t":"1795284108.353"}
+{"evento":"present_battaglia_dopo","t":"1795284108.356"}
+{"evento":"battaglia_viewWillAppear","t":"1795284108.359"}
+{"evento":"avvia_inizio","t":"1795284108.363"}
+{"evento":"battaglia_viewDidAppear","t":"1795284108.363"}
+{"evento":"present_battaglia_completata","t":"1795284108.364"}
+{"evento":"avvia_stato_letto","t":"1795284108.364"}
+{"evento":"avvia_elementi_montati","t":"1795284108.371"}
+{"elemento":"nil","evento":"fuoco_voiceover","t":"1795284108.373"}
+{"evento":"avvia_eventi_iniziali","n":"0","t":"1795284108.374"}
+{"bersaglio":"UILabel: Riserve da schierare","evento":"fuoco_sposta","perche":"schermataAperta","t":"1795284108.377"}
+{"evento":"battaglia_ricarica","t":"1795284108.392"}
+{"elemento":"UILabel: Riserve da schierare","evento":"fuoco_voiceover","t":"1795284109.158"}
+{"evento":"avvio_app","t":"1795284193.987"}
+{"elemento":"PulsanteMultiriga: Nuovo scontro di prova","evento":"fuoco_voiceover","t":"1795284197.795"}
+{"evento":"present_battaglia_prima","t":"1795284203.893"}
+{"evento":"present_battaglia_dopo","t":"1795284203.895"}
+{"evento":"battaglia_viewWillAppear","t":"1795284203.897"}
+{"evento":"avvia_inizio","t":"1795284203.901"}
+{"evento":"battaglia_viewDidAppear","t":"1795284203.901"}
+{"evento":"present_battaglia_completata","t":"1795284203.901"}
+{"evento":"avvia_stato_letto","t":"1795284203.901"}
+{"evento":"avvia_elementi_montati","t":"1795284203.907"}
+{"evento":"avvia_eventi_iniziali","n":"1","t":"1795284203.909"}
+{"bersaglio":"UILabel: Riserve da schierare","evento":"fuoco_sposta","perche":"schermataAperta","t":"1795284203.912"}
+{"elemento":"nil","evento":"fuoco_voiceover","t":"1795284203.924"}
+{"evento":"battaglia_ricarica","t":"1795284203.927"}
+{"elemento":"UILabel: Riserve da schierare","evento":"fuoco_voiceover","t":"1795284204.692"}
+{"evento":"avvio_app","t":"1795284215.772"}
+{"elemento":"PulsanteMultiriga: Riprendi lo scontro in corso","evento":"fuoco_voiceover","t":"1795284219.757"}
+{"evento":"present_battaglia_prima","t":"1795284225.882"}
+{"evento":"present_battaglia_dopo","t":"1795284225.884"}
+{"evento":"avvia_inizio","t":"1795284225.884"}
+{"evento":"avvia_stato_letto","t":"1795284225.885"}
+{"evento":"avvia_elementi_montati","t":"1795284225.891"}
+{"evento":"avvia_eventi_iniziali","n":"0","t":"1795284225.893"}
+{"bersaglio":"UILabel: Riserve da schierare","evento":"fuoco_sposta","perche":"schermataAperta","t":"1795284225.896"}
+{"evento":"battaglia_viewWillAppear","t":"1795284225.899"}
+{"evento":"battaglia_viewDidAppear","t":"1795284225.912"}
+{"evento":"present_battaglia_completata","t":"1795284225.912"}
+{"elemento":"nil","evento":"fuoco_voiceover","t":"1795284225.916"}
+{"evento":"battaglia_ricarica","t":"1795284225.919"}
+{"elemento":"UILabel: Riserve da schierare","evento":"fuoco_voiceover","t":"1795284226.681"}
+{"evento":"avvio_app","t":"1795284238.190"}
+{"elemento":"PulsanteMultiriga: Nuovo scontro di prova","evento":"fuoco_voiceover","t":"1795284242.019"}
+{"evento":"present_battaglia_prima","t":"1795284248.135"}
+{"evento":"present_battaglia_dopo","t":"1795284248.137"}
+{"evento":"battaglia_viewWillAppear","t":"1795284248.140"}
+{"evento":"avvia_inizio","t":"1795284248.144"}
+{"evento":"battaglia_viewDidAppear","t":"1795284248.145"}
+{"evento":"present_battaglia_completata","t":"1795284248.145"}
+{"evento":"avvia_stato_letto","t":"1795284248.145"}
+{"evento":"avvia_elementi_montati","t":"1795284248.152"}
+{"evento":"avvia_eventi_iniziali","n":"1","t":"1795284248.154"}
+{"bersaglio":"UILabel: Riserve da schierare","evento":"fuoco_sposta","perche":"schermataAperta","t":"1795284248.157"}
+{"elemento":"nil","evento":"fuoco_voiceover","t":"1795284248.171"}
+{"evento":"battaglia_ricarica","t":"1795284248.174"}
+{"elemento":"UILabel: Riserve da schierare","evento":"fuoco_voiceover","t":"1795284248.935"}
+{"evento":"avvio_app","t":"1795284260.031"}
+{"elemento":"PulsanteMultiriga: Riprendi lo scontro in corso","evento":"fuoco_voiceover","t":"1795284263.872"}
+{"evento":"present_battaglia_prima","t":"1795284269.969"}
+{"evento":"present_battaglia_dopo","t":"1795284269.971"}
+{"evento":"battaglia_viewWillAppear","t":"1795284269.974"}
+{"evento":"avvia_inizio","t":"1795284269.978"}
+{"evento":"battaglia_viewDidAppear","t":"1795284269.979"}
+{"evento":"present_battaglia_completata","t":"1795284269.979"}
+{"evento":"avvia_stato_letto","t":"1795284269.979"}
+{"evento":"avvia_elementi_montati","t":"1795284269.986"}
+{"elemento":"nil","evento":"fuoco_voiceover","t":"1795284269.988"}
+{"evento":"avvia_eventi_iniziali","n":"0","t":"1795284269.989"}
+{"bersaglio":"UILabel: Riserve da schierare","evento":"fuoco_sposta","perche":"schermataAperta","t":"1795284269.991"}
+{"evento":"battaglia_ricarica","t":"1795284270.007"}
+{"elemento":"UILabel: Riserve da schierare","evento":"fuoco_voiceover","t":"1795284270.769"}
+{"evento":"avvio_app","t":"1795284281.893"}
+{"elemento":"PulsanteMultiriga: Nuovo scontro di prova","evento":"fuoco_voiceover","t":"1795284285.715"}
+{"evento":"present_battaglia_prima","t":"1795284291.842"}
+{"evento":"present_battaglia_dopo","t":"1795284291.844"}
+{"evento":"battaglia_viewWillAppear","t":"1795284291.847"}
+{"evento":"avvia_inizio","t":"1795284291.851"}
+{"evento":"battaglia_viewDidAppear","t":"1795284291.852"}
+{"evento":"present_battaglia_completata","t":"1795284291.852"}
+{"evento":"avvia_stato_letto","t":"1795284291.852"}
+{"evento":"avvia_elementi_montati","t":"1795284291.858"}
+{"evento":"avvia_eventi_iniziali","n":"1","t":"1795284291.861"}
+{"bersaglio":"UILabel: Riserve da schierare","evento":"fuoco_sposta","perche":"schermataAperta","t":"1795284291.864"}
+{"elemento":"nil","evento":"fuoco_voiceover","t":"1795284291.877"}
+{"evento":"battaglia_ricarica","t":"1795284291.879"}
+{"elemento":"UILabel: Riserve da schierare","evento":"fuoco_voiceover","t":"1795284292.648"}
+{"evento":"avvio_app","t":"1795284303.711"}
+{"elemento":"PulsanteMultiriga: Riprendi lo scontro in corso","evento":"fuoco_voiceover","t":"1795284307.553"}
+{"evento":"present_battaglia_prima","t":"1795284313.666"}
+{"evento":"present_battaglia_dopo","t":"1795284313.668"}
+{"evento":"avvia_inizio","t":"1795284313.668"}
+{"evento":"avvia_stato_letto","t":"1795284313.668"}
+{"evento":"avvia_elementi_montati","t":"1795284313.675"}
+{"evento":"avvia_eventi_iniziali","n":"0","t":"1795284313.677"}
+{"bersaglio":"UILabel: Riserve da schierare","evento":"fuoco_sposta","perche":"schermataAperta","t":"1795284313.679"}
+{"evento":"battaglia_viewWillAppear","t":"1795284313.682"}
+{"evento":"battaglia_viewDidAppear","t":"1795284313.695"}
+{"evento":"present_battaglia_completata","t":"1795284313.696"}
+{"elemento":"nil","evento":"fuoco_voiceover","t":"1795284313.700"}
+{"evento":"battaglia_ricarica","t":"1795284313.702"}
+{"elemento":"UILabel: Riserve da schierare","evento":"fuoco_voiceover","t":"1795284314.470"}
+{"evento":"avvio_app","t":"1795284325.960"}
+{"elemento":"PulsanteMultiriga: Nuovo scontro di prova","evento":"fuoco_voiceover","t":"1795284329.782"}
+{"evento":"present_battaglia_prima","t":"1795284335.901"}
+{"evento":"present_battaglia_dopo","t":"1795284335.903"}
+{"evento":"battaglia_viewWillAppear","t":"1795284335.905"}
+{"evento":"avvia_inizio","t":"1795284335.910"}
+{"evento":"battaglia_viewDidAppear","t":"1795284335.910"}
+{"evento":"present_battaglia_completata","t":"1795284335.910"}
+{"evento":"avvia_stato_letto","t":"1795284335.910"}
+{"evento":"avvia_elementi_montati","t":"1795284335.917"}
+{"evento":"avvia_eventi_iniziali","n":"1","t":"1795284335.919"}
+{"bersaglio":"UILabel: Riserve da schierare","evento":"fuoco_sposta","perche":"schermataAperta","t":"1795284335.922"}
+{"elemento":"nil","evento":"fuoco_voiceover","t":"1795284335.934"}
+{"evento":"battaglia_ricarica","t":"1795284335.937"}
+{"elemento":"UILabel: Riserve da schierare","evento":"fuoco_voiceover","t":"1795284336.699"}
+{"evento":"avvio_app","t":"1795284347.817"}
+{"elemento":"PulsanteMultiriga: Riprendi lo scontro in corso","evento":"fuoco_voiceover","t":"1795284351.625"}
+{"evento":"present_battaglia_prima","t":"1795284357.724"}
+{"evento":"present_battaglia_dopo","t":"1795284357.726"}
+{"evento":"battaglia_viewWillAppear","t":"1795284357.728"}
+{"evento":"avvia_inizio","t":"1795284357.732"}
+{"evento":"battaglia_viewDidAppear","t":"1795284357.732"}
+{"evento":"present_battaglia_completata","t":"1795284357.732"}
+{"evento":"avvia_stato_letto","t":"1795284357.733"}
+{"evento":"avvia_elementi_montati","t":"1795284357.738"}
+{"elemento":"nil","evento":"fuoco_voiceover","t":"1795284357.741"}
+{"evento":"avvia_eventi_iniziali","n":"0","t":"1795284357.741"}
+{"bersaglio":"UILabel: Riserve da schierare","evento":"fuoco_sposta","perche":"schermataAperta","t":"1795284357.744"}
+{"evento":"battaglia_ricarica","t":"1795284357.758"}
+{"elemento":"UILabel: Riserve da schierare","evento":"fuoco_voiceover","t":"1795284358.527"}
+{"evento":"avvio_app","t":"1795284369.617"}
+{"elemento":"PulsanteMultiriga: Nuovo scontro di prova","evento":"fuoco_voiceover","t":"1795284373.431"}
+{"evento":"present_battaglia_prima","t":"1795284379.526"}
+{"evento":"present_battaglia_dopo","t":"1795284379.528"}
+{"evento":"battaglia_viewWillAppear","t":"1795284379.531"}
+{"evento":"avvia_inizio","t":"1795284379.535"}
+{"evento":"battaglia_viewDidAppear","t":"1795284379.535"}
+{"evento":"present_battaglia_completata","t":"1795284379.536"}
+{"evento":"avvia_stato_letto","t":"1795284379.536"}
+{"evento":"avvia_elementi_montati","t":"1795284379.541"}
+{"evento":"avvia_eventi_iniziali","n":"1","t":"1795284379.555"}
+{"bersaglio":"UILabel: Riserve da schierare","evento":"fuoco_sposta","perche":"schermataAperta","t":"1795284379.557"}
+{"evento":"battaglia_ricarica","t":"1795284379.560"}
+{"elemento":"nil","evento":"fuoco_voiceover","t":"1795284379.563"}
+{"elemento":"UILabel: Riserve da schierare","evento":"fuoco_voiceover","t":"1795284380.326"}
+{"evento":"avvio_app","t":"1795284391.391"}
+{"elemento":"PulsanteMultiriga: Riprendi lo scontro in corso","evento":"fuoco_voiceover","t":"1795284395.206"}
+{"evento":"present_battaglia_prima","t":"1795284401.330"}
+{"evento":"present_battaglia_dopo","t":"1795284401.333"}
+{"evento":"battaglia_viewWillAppear","t":"1795284401.335"}
+{"evento":"avvia_inizio","t":"1795284401.339"}
+{"evento":"battaglia_viewDidAppear","t":"1795284401.340"}
+{"evento":"present_battaglia_completata","t":"1795284401.340"}
+{"evento":"avvia_stato_letto","t":"1795284401.342"}
+{"evento":"avvia_elementi_montati","t":"1795284401.349"}
+{"elemento":"nil","evento":"fuoco_voiceover","t":"1795284401.351"}
+{"evento":"avvia_eventi_iniziali","n":"0","t":"1795284401.352"}
+{"bersaglio":"UILabel: Riserve da schierare","evento":"fuoco_sposta","perche":"schermataAperta","t":"1795284401.354"}
+{"evento":"battaglia_ricarica","t":"1795284401.366"}
+{"elemento":"UILabel: Riserve da schierare","evento":"fuoco_voiceover","t":"1795284402.123"}

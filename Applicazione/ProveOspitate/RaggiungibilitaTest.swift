@@ -82,7 +82,7 @@ final class RaggiungibilitaTest: XCTestCase {
                        "dopo le celle viene l'intestazione del deck (02 §2.9)")
         for indice in 0..<vociDeck {
             let elemento = ordine[101 + indice]
-            let nome = testi.frase("unita." + stato.deck[.giocatore]![indice].archetipo).testo
+            let nome = testi.nomeIsolato(testi.soggetto(.unita, stato.deck[.giocatore]![indice].archetipo)).testo
             XCTAssertTrue(LettoreAccessibilita.etichetta(di: elemento)
                             .localizedCaseInsensitiveContains(nome),
                           "l'elemento \(indice) del deck dichiara la propria identità (02 §8.2)")

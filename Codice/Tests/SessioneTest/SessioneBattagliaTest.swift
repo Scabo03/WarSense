@@ -183,6 +183,31 @@ final class SessioneBattagliaTest: XCTestCase {
                        "l'azzeramento riporta al marcatore di inizio turno (05 §6.4)")
     }
 
+    /// L'azzeramento senza alcun comando del turno da azzerare è rifiutato e non tocca il giornale
+    /// (incarico 29, osservazione 6 della sessione da tester): la Presentazione dice allora che non c'era
+    /// nulla da azzerare, invece di confermare. Vale anche dopo annullamenti che hanno tolto tutto.
+    func test_incarico_29_azzeramento_a_vuoto_rifiutato() async throws {
+        let cartella = cartellaProva()
+        let sessione = try await SessioneBattaglia(
+            nuova: scenario(), valori: valori, versioneTesti: "0.1.0",
+            cartella: cartella, seme: 7, identificatore: "azzera-a-vuoto")
+        let righePrima = await sessione.numeroRigheGiornale
+        do {
+            try await sessione.azzera(parte: .giocatore)
+            XCTFail("all'inizio del turno non c'è nulla da azzerare")
+        } catch { /* atteso */ }
+        try await esegui(sessione, .seleziona(indiceDeck: 0), .giocatore)
+        try await esegui(sessione, .piazza(cella: Cella(riga: 4, colonna: 1)), .giocatore)
+        try await sessione.annulla(parte: .giocatore)
+        try await sessione.annulla(parte: .giocatore)
+        do {
+            try await sessione.azzera(parte: .giocatore)
+            XCTFail("dopo due annullamenti che hanno tolto tutto non c'è nulla da azzerare")
+        } catch { /* atteso */ }
+        let righeDopo = await sessione.numeroRigheGiornale
+        XCTAssertEqual(righeDopo, righePrima, "il rifiuto non ha toccato il giornale")
+    }
+
     // MARK: - Salvataggi versionati (00 §15)
 
     func test_00_15_2_salvataggio_incompatibile_dichiarato_e_non_aperto() async throws {

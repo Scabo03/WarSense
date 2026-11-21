@@ -1,0 +1,78 @@
+warning: 'codice': found 7 file(s) which are unhandled; explicitly declare them as resources or exclude from the target
+    /Users/lucascabini/Developer/WarSense/Codice/Tests/SessioneTest/CampioniGiornale/campioni.jsonl
+    /Users/lucascabini/Developer/WarSense/Codice/Tests/SessioneTest/RiproduzioneOro/giornale.jsonl
+    /Users/lucascabini/Developer/WarSense/Codice/Tests/SessioneTest/RiproduzioneOro/impronta.txt
+    /Users/lucascabini/Developer/WarSense/Codice/Tests/SessioneTest/RiproduzioneOroRiserve/giornale.jsonl
+    /Users/lucascabini/Developer/WarSense/Codice/Tests/SessioneTest/RiproduzioneOroRiserve/impronta.txt
+    /Users/lucascabini/Developer/WarSense/Codice/Tests/SessioneTest/SalvataggioBuildDistribuita/giornale.jsonl
+    /Users/lucascabini/Developer/WarSense/Codice/Tests/SessioneTest/SalvataggioBuildDistribuita/impronta.txt
+Building for debugging...
+[Provisioning 1 / 21]
+[1 / 1]
+[13 / 23] Segnali
+[19 / 29] Segnali
+[25 / 30] SegnaliTest-product
+[27 / 32] SegnaliTest-product
+[31 / 32] SegnaliTest-product
+Build complete! (1,19 s)
+Test Suite 'Selected tests' started at 2026-11-21 20:03:17.070.
+Test Suite 'VerificaTest.xctest' started at 2026-11-21 20:03:17.071.
+Test Suite 'VerificaTest.xctest' passed at 2026-11-21 20:03:17.071.
+	 Executed 0 tests, with 0 failures (0 unexpected) in 0.000 (0.000) seconds
+Test Suite 'Selected tests' passed at 2026-11-21 20:03:17.071.
+	 Executed 0 tests, with 0 failures (0 unexpected) in 0.000 (0.001) seconds
+Test Suite 'Selected tests' started at 2026-11-21 20:03:17.131.
+Test Suite 'SessioneTest.xctest' started at 2026-11-21 20:03:17.132.
+Test Suite 'SessioneTest.xctest' passed at 2026-11-21 20:03:17.132.
+	 Executed 0 tests, with 0 failures (0 unexpected) in 0.000 (0.000) seconds
+Test Suite 'Selected tests' passed at 2026-11-21 20:03:17.132.
+	 Executed 0 tests, with 0 failures (0 unexpected) in 0.000 (0.001) seconds
+Test Suite 'Selected tests' started at 2026-11-21 20:03:17.192.
+Test Suite 'SegnaliTest.xctest' started at 2026-11-21 20:03:17.192.
+Test Suite 'SegnaliTest.xctest' passed at 2026-11-21 20:03:17.192.
+	 Executed 0 tests, with 0 failures (0 unexpected) in 0.000 (0.000) seconds
+Test Suite 'Selected tests' passed at 2026-11-21 20:03:17.192.
+	 Executed 0 tests, with 0 failures (0 unexpected) in 0.000 (0.001) seconds
+Test Suite 'Selected tests' started at 2026-11-21 20:03:17.252.
+Test Suite 'MotoreTest.xctest' started at 2026-11-21 20:03:17.253.
+Test Suite 'MotoreTest.xctest' passed at 2026-11-21 20:03:17.253.
+	 Executed 0 tests, with 0 failures (0 unexpected) in 0.000 (0.000) seconds
+Test Suite 'Selected tests' passed at 2026-11-21 20:03:17.253.
+	 Executed 0 tests, with 0 failures (0 unexpected) in 0.000 (0.001) seconds
+Test Suite 'Selected tests' started at 2026-11-21 20:03:17.297.
+Test Suite 'DatiTest.xctest' started at 2026-11-21 20:03:17.298.
+Test Suite 'AccordoDiGenereTest' started at 2026-11-21 20:03:17.298.
+Test Case '-[DatiTest.AccordoDiGenereTest test_il_codice_inserisce_i_soggetti_soltanto_nelle_forme_accordate]' started.
+/Users/lucascabini/Developer/WarSense/Codice/Tests/DatiTest/AccordoDiGenereTest.swift:171: error: -[DatiTest.AccordoDiGenereTest test_il_codice_inserisce_i_soggetti_soltanto_nelle_forme_accordate] : XCTAssertEqual failed: ("["Codice/Sources/Segnali/Significati.swift: legge un termine soggetto senza Testi.soggetto (chiave «unita.…» o «gruppo.nome.…» nel codice)"]") is not equal to ("[]") - il codice incolla soggetti fuori dalle forme accordate:
+Codice/Sources/Segnali/Significati.swift: legge un termine soggetto senza Testi.soggetto (chiave «unita.…» o «gruppo.nome.…» nel codice)
+Test Case '-[DatiTest.AccordoDiGenereTest test_il_codice_inserisce_i_soggetti_soltanto_nelle_forme_accordate]' failed (0.072 seconds).
+Test Case '-[DatiTest.AccordoDiGenereTest test_le_frasi_si_risolvono_nella_forma_del_genere]' started.
+/Users/lucascabini/Developer/WarSense/Codice/Tests/DatiTest/AccordoDiGenereTest.swift:182: error: -[DatiTest.AccordoDiGenereTest test_le_frasi_si_risolvono_nella_forma_del_genere] : XCTAssertEqual failed: ("nil") is not equal to ("Optional(Dati.Genere.maschilePlurale)")
+/Users/lucascabini/Developer/WarSense/Codice/Tests/DatiTest/AccordoDiGenereTest.swift:185: error: -[DatiTest.AccordoDiGenereTest test_le_frasi_si_risolvono_nella_forma_del_genere] : XCTAssertEqual failed: ("‼️") is not equal to ("I tuoi tiratori C sono stati ingaggiati, x, y")
+/Users/lucascabini/Developer/WarSense/Codice/Tests/DatiTest/AccordoDiGenereTest.swift:194: error: -[DatiTest.AccordoDiGenereTest test_le_frasi_si_risolvono_nella_forma_del_genere] : XCTAssertEqual failed: ("‼️") is not equal to ("6 atomi di tiratori")
+Test Case '-[DatiTest.AccordoDiGenereTest test_le_frasi_si_risolvono_nella_forma_del_genere]' failed (0.018 seconds).
+Test Case '-[DatiTest.AccordoDiGenereTest test_ogni_frase_accordata_ha_la_forma_per_ciascun_genere]' started.
+/Users/lucascabini/Developer/WarSense/Codice/Tests/DatiTest/AccordoDiGenereTest.swift:99: error: -[DatiTest.AccordoDiGenereTest test_ogni_frase_accordata_ha_la_forma_per_ciascun_genere] : XCTAssertEqual failed: ("["«battaglia.contatto_subito»: manca la forma per il genere maschile (battaglia.contatto_subito.maschile)"]") is not equal to ("[]") - frasi accordate incomplete:
+«battaglia.contatto_subito»: manca la forma per il genere maschile (battaglia.contatto_subito.maschile)
+Test Case '-[DatiTest.AccordoDiGenereTest test_ogni_frase_accordata_ha_la_forma_per_ciascun_genere]' failed (0.002 seconds).
+Test Case '-[DatiTest.AccordoDiGenereTest test_ogni_termine_soggetto_dichiara_genere_e_numero]' started.
+/Users/lucascabini/Developer/WarSense/Codice/Tests/DatiTest/AccordoDiGenereTest.swift:60: error: -[DatiTest.AccordoDiGenereTest test_ogni_termine_soggetto_dichiara_genere_e_numero] : XCTAssertEqual failed: ("["«unita.tiratori» non dichiara il genere (genere.unita.tiratori)"]") is not equal to ("[]") - termini soggetto senza genere:
+«unita.tiratori» non dichiara il genere (genere.unita.tiratori)
+Test Case '-[DatiTest.AccordoDiGenereTest test_ogni_termine_soggetto_dichiara_genere_e_numero]' failed (0.000 seconds).
+Test Suite 'AccordoDiGenereTest' failed at 2026-11-21 20:03:17.390.
+	 Executed 4 tests, with 6 failures (0 unexpected) in 0.092 (0.092) seconds
+Test Suite 'DatiTest.xctest' failed at 2026-11-21 20:03:17.390.
+	 Executed 4 tests, with 6 failures (0 unexpected) in 0.092 (0.093) seconds
+Test Suite 'Selected tests' failed at 2026-11-21 20:03:17.390.
+	 Executed 4 tests, with 6 failures (0 unexpected) in 0.092 (0.093) seconds
+ACCORDO-DI-GENERE chiamate-con-soggetto=44
+ACCORDO-DI-GENERE frasi=47 forme=247
+Test Suite 'Selected tests' started at 2026-11-21 20:03:17.449.
+Test Suite 'ConfiniTest.xctest' started at 2026-11-21 20:03:17.450.
+Test Suite 'ConfiniTest.xctest' passed at 2026-11-21 20:03:17.450.
+	 Executed 0 tests, with 0 failures (0 unexpected) in 0.000 (0.000) seconds
+Test Suite 'Selected tests' passed at 2026-11-21 20:03:17.450.
+	 Executed 0 tests, with 0 failures (0 unexpected) in 0.000 (0.001) seconds
+Note: Some test targets reported failures:
+  - DatiTest (XCTest)
+uscita=1

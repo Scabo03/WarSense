@@ -1,0 +1,156 @@
+diff --git a/Applicazione/Sorgenti/SceneDelegate.swift b/Applicazione/Sorgenti/SceneDelegate.swift
+index 8df5775..bd48209 100644
+--- a/Applicazione/Sorgenti/SceneDelegate.swift
++++ b/Applicazione/Sorgenti/SceneDelegate.swift
+@@ -13,6 +13,7 @@ final class SceneDelegate: UIResponder, UIWindowSceneDelegate {
+                willConnectTo session: UISceneSession,
+                options connectionOptions: UIScene.ConnectionOptions) {
+         guard let scenaFinestra = scene as? UIWindowScene else { return }
++        DiagnosiFuoco.avvia()
+         let finestra = UIWindow(windowScene: scenaFinestra)
+         do {
+             let ambiente = try Ambiente()
+diff --git a/Applicazione/Sorgenti/SchermataBattaglia.swift b/Applicazione/Sorgenti/SchermataBattaglia.swift
+index 8283c37..a381606 100644
+--- a/Applicazione/Sorgenti/SchermataBattaglia.swift
++++ b/Applicazione/Sorgenti/SchermataBattaglia.swift
+@@ -35,6 +35,7 @@ final class SchermataBattaglia: UIViewController {
+     private let pulsanteAzzera = PulsanteMultiriga(type: .system)
+     private let pulsanteResa = PulsanteMultiriga(type: .system)
+     private let pulsanteFineTurno = PulsanteMultiriga(type: .system)
++    private var fuocoDiAperturaDato = false
+ 
+     init(partita: PartitaCorrente) {
+         self.partita = partita
+@@ -70,6 +71,7 @@ final class SchermataBattaglia: UIViewController {
+         intestazioneDeck.font = .preferredFont(forTextStyle: .headline)
+         intestazioneDeck.numberOfLines = 0 // a testo massimo andava tagliata (incarico 28, osservazione 8)
+         intestazioneDeck.adjustsFontForContentSizeCategory = true
++        intestazioneDeck.text = testi.frase("deck.intestazione").testo
+         intestazioneDeck.isAccessibilityElement = true
+         intestazioneDeck.accessibilityTraits = .header
+         colonnaDeck.axis = .vertical
+@@ -144,8 +146,23 @@ final class SchermataBattaglia: UIViewController {
+         ])
+     }
+ 
++    override func viewWillAppear(_ animated: Bool) {
++        super.viewWillAppear(animated)
++        DiagnosiFuoco.scrivi("battaglia_viewWillAppear")
++    }
++    override func viewDidAppear(_ animated: Bool) {
++        super.viewDidAppear(animated)
++        DiagnosiFuoco.scrivi("battaglia_viewDidAppear")
++        if !fuocoDiAperturaDato, DiagnosiFuoco.modo != "nessuno" {
++            fuocoDiAperturaDato = true
++            Fuoco.sposta(a: intestazioneDeck, perche: .schermataAperta)
++        }
++    }
++
+     private func avvia() async {
++        DiagnosiFuoco.scrivi("avvia_inizio")
+         let stato = await partita.stato
++        DiagnosiFuoco.scrivi("avvia_stato_letto")
+         statoCorrente = stato
+         vistaGriglia.griglia = stato.griglia
+         let dimensione = VistaGriglia.dimensione(per: stato.griglia)
+@@ -163,6 +180,7 @@ final class SchermataBattaglia: UIViewController {
+         montaDeck(stato: stato)
+         montaRotori()
+         aggiorna(con: stato)
++        DiagnosiFuoco.scrivi("avvia_elementi_montati")
+ 
+         // Annuncio di apertura (02 §4.4.2) e fuoco sull'intestazione del deck (02 §2.9).
+         if let costruttore {
+@@ -170,6 +188,7 @@ final class SchermataBattaglia: UIViewController {
+                 TestoLocalizzato(testo: costruttore.annuncioApertura(), lingua: testi.lingua))
+         }
+         let eventi = await partita.eventiIniziali
++        DiagnosiFuoco.scrivi("avvia_eventi_iniziali", ["n": "\(eventi.count)"])
+         ricevi(eventi)
+         // Se la battaglia si apre col turno dell'avversario — primo occupante l'avversario, 01
+         // §9.4.1 — lo si fa agire subito, o lo scontro resterebbe bloccato nel suo turno (incarico
+@@ -178,7 +197,11 @@ final class SchermataBattaglia: UIViewController {
+         if stato.parteDiTurno == .avversario, stato.esito == nil {
+             try? await partita.muoviAvversarioSeTocca()
+         }
+-        Fuoco.sposta(a: intestazioneDeck, perche: .schermataAperta)
++        if DiagnosiFuoco.modo.hasPrefix("lento"), let ms = UInt64(DiagnosiFuoco.modo.dropFirst(5)) {
++            // Simula un caricamento lento (macchina carica): con la correzione non porta più il fuoco.
++            try? await Task.sleep(nanoseconds: ms * 1_000_000)
++            DiagnosiFuoco.scrivi("caricamento_lento_concluso", ["ms": "\(ms)"])
++        }
+         // Battaglia RIPRESA già conclusa (incarico 24): se l'applicazione è stata chiusa dopo la
+         // fine dello scontro ma prima che l'esito tornasse in campagna, riaprendo la battaglia si
+         // ritrova l'esito e si mostra il resoconto, il cui congedo porta il ritorno in campagna.
+@@ -225,6 +248,7 @@ final class SchermataBattaglia: UIViewController {
+         let stato = await partita.stato
+         statoCorrente = stato
+         aggiorna(con: stato)
++        DiagnosiFuoco.scrivi("battaglia_ricarica")
+     }
+ 
+     /// Aggiorna etichette e valori degli elementi ESISTENTI: mai ricreare,
+diff --git a/Applicazione/Sorgenti/SchermateContorno.swift b/Applicazione/Sorgenti/SchermateContorno.swift
+index 5b19d9c..6a45802 100644
+--- a/Applicazione/Sorgenti/SchermateContorno.swift
++++ b/Applicazione/Sorgenti/SchermateContorno.swift
+@@ -133,7 +133,9 @@ final class SchermataAvvio: UIViewController {
+         schermata.alTermine = { [weak self] in
+             self?.dismiss(animated: false) { self?.riportaIlFuoco() }
+         }
+-        present(schermata, animated: false)
++        DiagnosiFuoco.scrivi("present_battaglia_prima")
++        present(schermata, animated: false) { DiagnosiFuoco.scrivi("present_battaglia_completata") }
++        DiagnosiFuoco.scrivi("present_battaglia_dopo")
+         Fuoco.azzeraRegistro()
+     }
+ 
+diff --git a/Applicazione/Sorgenti/Servizi.swift b/Applicazione/Sorgenti/Servizi.swift
+index 1789373..4ffdbc3 100644
+--- a/Applicazione/Sorgenti/Servizi.swift
++++ b/Applicazione/Sorgenti/Servizi.swift
+@@ -128,6 +128,7 @@ enum Fuoco {
+     static func sposta(a elemento: Any?, perche movimento: Movimento) {
+         registro.append(movimento)
+         ultimoBersaglio = elemento as AnyObject?
++        DiagnosiFuoco.scrivi("fuoco_sposta", ["bersaglio": DiagnosiFuoco.descrivi(elemento), "perche": "\(movimento)"])
+         UIAccessibility.post(notification: .screenChanged, argument: elemento)
+     }
+ 
+diff --git a/Applicazione/WarSense.xcodeproj/project.pbxproj b/Applicazione/WarSense.xcodeproj/project.pbxproj
+index 9231ca2..3c63d73 100644
+--- a/Applicazione/WarSense.xcodeproj/project.pbxproj
++++ b/Applicazione/WarSense.xcodeproj/project.pbxproj
+@@ -32,6 +32,7 @@
+ 		873D9C045E99E55A19A8AC00 /* Servizi.swift in Sources */ = {isa = PBXBuildFile; fileRef = 47D2EC331332BE96EB5D410B /* Servizi.swift */; };
+ 		8C28A2B62F03F542DD08122D /* Contenuti in Frameworks */ = {isa = PBXBuildFile; productRef = 4EA3C58AA15BA2930E7F7E45 /* Contenuti */; };
+ 		910699A922C8982CE07BAEE1 /* Impaginazione.swift in Sources */ = {isa = PBXBuildFile; fileRef = B35836D88F72DCE771CB2A93 /* Impaginazione.swift */; };
++		91D98F97B34A654E945AD43B /* DiagnosiFuoco.swift in Sources */ = {isa = PBXBuildFile; fileRef = 7F4892E1392241ACE5D25DB7 /* DiagnosiFuoco.swift */; };
+ 		939EB534A7DF2E8F28165724 /* SchermataMappaCampagna.swift in Sources */ = {isa = PBXBuildFile; fileRef = 33237A45EB1B4EBEA09B1769 /* SchermataMappaCampagna.swift */; };
+ 		94A9A556DB6F6992ED60E383 /* StabilitaDellaDisposizioneTest.swift in Sources */ = {isa = PBXBuildFile; fileRef = 026CC99253672C0BE5244297 /* StabilitaDellaDisposizioneTest.swift */; };
+ 		97001026DB01BF5F115E1088 /* Immagini.xcassets in Resources */ = {isa = PBXBuildFile; fileRef = 1D9A4053BF022DBABE96D5E9 /* Immagini.xcassets */; };
+@@ -113,6 +114,7 @@
+ 		75B409D97C3092A3CC3CDA17 /* ImpiantoInterfacciaTest.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ImpiantoInterfacciaTest.swift; sourceTree = "<group>"; };
+ 		780DA0404CFBE7DD9B420A68 /* AppDelegate.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AppDelegate.swift; sourceTree = "<group>"; };
+ 		7C40901ACB5C245090E7BD61 /* WarSenseEsplorazione.xctest */ = {isa = PBXFileReference; includeInIndex = 0; lastKnownFileType = wrapper.cfbundle; path = WarSenseEsplorazione.xctest; sourceTree = BUILT_PRODUCTS_DIR; };
++		7F4892E1392241ACE5D25DB7 /* DiagnosiFuoco.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = DiagnosiFuoco.swift; sourceTree = "<group>"; };
+ 		849A458FA8292F265DF9BE68 /* SchermataBattaglia.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SchermataBattaglia.swift; sourceTree = "<group>"; };
+ 		88D7A0731824F60DFDBEED2D /* AnnuncioDiCasellaTest.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AnnuncioDiCasellaTest.swift; sourceTree = "<group>"; };
+ 		8F2621F366CE07D66FC6A6EA /* MappaCampagnaAccessibileTest.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = MappaCampagnaAccessibileTest.swift; sourceTree = "<group>"; };
+@@ -174,6 +176,7 @@
+ 				780DA0404CFBE7DD9B420A68 /* AppDelegate.swift */,
+ 				D09017EA703DD5FF54F15458 /* CostruttoreAnnunci.swift */,
+ 				C50CAE1A5AEB350F4FEDAB36 /* CostruttoreAnnunciCampagna.swift */,
++				7F4892E1392241ACE5D25DB7 /* DiagnosiFuoco.swift */,
+ 				F5CF5758DBDF15E75D992F76 /* GrigliaAccessibile.swift */,
+ 				B35836D88F72DCE771CB2A93 /* Impaginazione.swift */,
+ 				B7792DA00B9CCC289C68A7E6 /* Info.plist */,
+@@ -454,6 +457,7 @@
+ 				BE4EC8B2E7DE3588E5B9CFFB /* AppDelegate.swift in Sources */,
+ 				E3377223A159BC8874F878FF /* CostruttoreAnnunci.swift in Sources */,
+ 				78DBF35F0D2BCE57B8D29F25 /* CostruttoreAnnunciCampagna.swift in Sources */,
++				91D98F97B34A654E945AD43B /* DiagnosiFuoco.swift in Sources */,
+ 				D6B5BFD367B286153800292A /* GrigliaAccessibile.swift in Sources */,
+ 				910699A922C8982CE07BAEE1 /* Impaginazione.swift in Sources */,
+ 				35D13AF917D421DA151C322C /* PartitaCampagna.swift in Sources */,

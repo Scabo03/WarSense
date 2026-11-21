@@ -35,6 +35,9 @@ final class SchermataBattaglia: UIViewController {
     private let pulsanteAzzera = PulsanteMultiriga(type: .system)
     private let pulsanteResa = PulsanteMultiriga(type: .system)
     private let pulsanteFineTurno = PulsanteMultiriga(type: .system)
+    /// Vero dopo che il fuoco d'apertura è stato portato sull'intestazione del deck: si porta una volta
+    /// sola, alla prima comparsa (incarico 29).
+    private var fuocoDiAperturaDato = false
 
     init(partita: PartitaCorrente) {
         self.partita = partita
@@ -59,6 +62,23 @@ final class SchermataBattaglia: UIViewController {
         Task { await avvia() }
     }
 
+    /// Il fuoco d'apertura sull'intestazione del deck (02 §2.9), portato ALLA COMPARSA della schermata,
+    /// nello stesso giro del filo principale che conclude la presentazione, e una volta sola (incarico
+    /// 29, osservazione 3 della sessione da tester). Fino alla build 29 partiva alla fine del caricamento
+    /// asincrono dello stato: VoiceOver applica ogni cambio di schermata circa 770 ms dopo averlo
+    /// ricevuto, e quando il caricamento si allungava la notifica del gioco cadeva nella finestra in cui
+    /// VoiceOver stava per applicare quella automatica della presentazione; il fuoco passava allora
+    /// dall'intestazione al primo elemento dell'ordine di lettura, «riga 1, cella 1». Accertato sul
+    /// simulatore dell'iPad con una copia di diagnosi (`Incarichi/29-2026-11-21-prodotti/
+    /// fuoco-apertura-ipad/`). Portata alla comparsa, la notifica non dipende più da quanto dura il
+    /// caricamento: gli elementi della griglia e del deck arrivano dopo, e il fuoco resta dov'è.
+    override func viewDidAppear(_ animated: Bool) {
+        super.viewDidAppear(animated)
+        guard !fuocoDiAperturaDato else { return }
+        fuocoDiAperturaDato = true
+        Fuoco.sposta(a: intestazioneDeck, perche: .schermataAperta)
+    }
+
     private func montaViste() {
         scorrimento.translatesAutoresizingMaskIntoConstraints = false
         scorrimento.maximumZoomScale = 2.5
@@ -67,6 +87,9 @@ final class SchermataBattaglia: UIViewController {
         view.addSubview(scorrimento)
         scorrimento.addSubview(vistaGriglia)
 
+        // Il testo dell'intestazione non dipende dallo stato: si scrive qui, perché alla comparsa della
+        // schermata — quando il fuoco d'apertura vi si porta — sia già un elemento con la sua etichetta.
+        intestazioneDeck.text = testi.frase("deck.intestazione").testo
         intestazioneDeck.font = .preferredFont(forTextStyle: .headline)
         intestazioneDeck.numberOfLines = 0 // a testo massimo andava tagliata (incarico 28, osservazione 8)
         intestazioneDeck.adjustsFontForContentSizeCategory = true
@@ -174,11 +197,12 @@ final class SchermataBattaglia: UIViewController {
         // Se la battaglia si apre col turno dell'avversario — primo occupante l'avversario, 01
         // §9.4.1 — lo si fa agire subito, o lo scontro resterebbe bloccato nel suo turno (incarico
         // 24). Solo allora: negli scontri col giocatore primo occupante (tutti quelli del menu) non
-        // si tocca il flusso, per non introdurre un punto di sospensione prima del fuoco d'apertura.
+        // si tocca il flusso.
         if stato.parteDiTurno == .avversario, stato.esito == nil {
             try? await partita.muoviAvversarioSeTocca()
         }
-        Fuoco.sposta(a: intestazioneDeck, perche: .schermataAperta)
+        // Il fuoco d'apertura NON si porta più qui, alla fine del caricamento, ma alla comparsa
+        // (`viewDidAppear`, incarico 29).
         // Battaglia RIPRESA già conclusa (incarico 24): se l'applicazione è stata chiusa dopo la
         // fine dello scontro ma prima che l'esito tornasse in campagna, riaprendo la battaglia si
         // ritrova l'esito e si mostra il resoconto, il cui congedo porta il ritorno in campagna.
@@ -187,7 +211,6 @@ final class SchermataBattaglia: UIViewController {
     }
 
     private func montaDeck(stato: StatoBattaglia) {
-        intestazioneDeck.text = testi.frase("deck.intestazione").testo
         for indice in (stato.deck[.giocatore] ?? []).indices {
             let tessera = TesseraDeck()
             tessera.tag = indice
@@ -405,31 +428,56 @@ final class SchermataBattaglia: UIViewController {
             if case .nonValido(let motivo) = esito {
                 partita.ambiente.segnali.annuncia(
                     TestoLocalizzato(testo: testi.termine(motivo.rawValue).testo, lingua: testi.lingua))
+                // Un comando respinto non produce eventi, quindi nessuna ricarica: la si fa qui, perché
+                // la schermata non resti su uno stato anticipato che la Sessione non ha accettato.
+                await ricaricaStato()
             }
         } catch {
             await ricaricaStato()
         }
     }
 
+    /// La scelta di una tessera del deck. Lo stato che ne deriva si mostra SUBITO, prima che
+    /// l'attivazione ritorni (incarico 29, osservazione 5 della sessione da tester): VoiceOver rilegge
+    /// l'elemento appena l'attivazione ritorna, e fino alla build 29 i tratti della tessera si
+    /// aggiornavano soltanto per la via asincrona — comando alla Sessione, ricarica dello stato —, sicché
+    /// la tessera appena deselezionata si dichiarava ancora «selezionato». Lo stato anticipato non lo
+    /// calcola la schermata (00 §3.2): è il Motore ad applicare il comando, se lo valida, allo stato che
+    /// la schermata mostra; poi la Sessione lo esegue davvero e la ricarica riporta lo stato vero, che
+    /// coincide. Se la Sessione lo respingesse, la ricarica che segue il rifiuto rimetterebbe le cose come
+    /// sono (`eseguiComando`).
     @objc private func toccaElementoDeck(_ tessera: UIControl) {
         guard let stato = statoCorrente else { return }
         designazione = .nessuna
         let comando: ComandoBattaglia = stato.selezione[.giocatore] == tessera.tag
             ? .deseleziona : .seleziona(indiceDeck: tessera.tag)
+        if partita.motore.valida(comando, parte: .giocatore, stato: stato).eValido {
+            let anticipato = partita.motore.applica(comando, parte: .giocatore, stato: stato).0
+            statoCorrente = anticipato
+            aggiorna(con: anticipato)
+        }
         Task { await eseguiComando(comando) }
     }
 
-    @objc private func annulla() { Task { await operazioneGiornale { try await self.partita.annulla() }
-        .map { self.conferma("battaglia.annullato_conferma", significato: .annullamento) } } }
+    @objc private func annulla() {
+        Task { await operazioneGiornale({ try await self.partita.annulla() }, senzaNulla: "battaglia.niente_da_annullare")
+            .map { self.conferma("battaglia.annullato_conferma", significato: .annullamento) } }
+    }
 
-    @objc private func azzera() { Task { await operazioneGiornale { try await self.partita.azzera() }
-        .map { self.conferma("battaglia.azzerato_conferma", significato: .annullamento) } } }
+    /// L'azzeramento senza nulla da azzerare lo dice con una frase propria, invece di confermare
+    /// (incarico 29, osservazione 6 della sessione da tester): la Sessione lo rifiuta quando dopo il
+    /// marcatore d'inizio turno non c'è alcun comando del giocatore.
+    @objc private func azzera() {
+        Task { await operazioneGiornale({ try await self.partita.azzera() }, senzaNulla: "battaglia.niente_da_azzerare")
+            .map { self.conferma("battaglia.azzerato_conferma", significato: .annullamento) } }
+    }
 
-    private func operazioneGiornale(_ operazione: () async throws -> Void) async -> Void? {
+    private func operazioneGiornale(_ operazione: () async throws -> Void,
+                                    senzaNulla chiave: String) async -> Void? {
         do { try await operazione(); await ricaricaStato(); return () }
         catch {
             partita.ambiente.segnali.annuncia(TestoLocalizzato(
-                testo: testi.frase("battaglia.niente_da_annullare").testo, lingua: testi.lingua))
+                testo: testi.frase(chiave).testo, lingua: testi.lingua))
             return nil
         }
     }

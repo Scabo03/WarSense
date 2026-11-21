@@ -127,8 +127,34 @@ final class TraduttoreEventiTest: XCTestCase {
         }
         // L'ingresso di forze avversarie però si annuncia, con nome e lettera (02 §8.2.1, 01 §9.4.3).
         let ingresso = traduttore.annuncio(per: eventi[0], verbosita: .normale)!
-        XCTAssertTrue(ingresso.testo.contains(testi.frase("unita.tiratori").testo))
+        XCTAssertTrue(ingresso.testo.contains(testi.nomeIsolato(testi.soggetto(.unita, "tiratori")).testo))
         XCTAssertTrue(ingresso.testo.contains(testi.termine("lettera.3").testo))
+    }
+
+    /// Gli annunci di battaglia con un reparto per soggetto si accordano al genere del nome
+    /// dell'archetipo (02 §4.6, incarico 29): l'esempio della decisione del titolare, per i generi che il
+    /// vocabolario porta oggi — femminile (fanteria leggera) e maschile plurale (tiratori).
+    func test_incarico_29_gli_annunci_si_accordano_al_genere_del_reparto() throws {
+        let cella = Cella(riga: 3, colonna: 4)
+        let esito = EsitoContatto(partePrimo: .avversario, cellaPrimo: Cella(riga: 2, colonna: 4),
+                                  cellaSecondo: cella, dannoAlPrimo: 0, dannoAlSecondo: 0,
+                                  fasciaAlPrimo: .nessuna, fasciaAlSecondo: .nessuna)
+        let subitoFanteria = traduttore.annuncio(
+            per: .contattoRisolto(parte: .avversario, bersaglioArchetipo: "fanteria_leggera", bersaglioLettera: 1, esito: esito),
+            verbosita: .normale)!.testo
+        XCTAssertTrue(subitoFanteria.hasPrefix("La tua fanteria leggera A è stata ingaggiata"), subitoFanteria)
+        let subitoTiratori = traduttore.annuncio(
+            per: .contattoRisolto(parte: .avversario, bersaglioArchetipo: "tiratori", bersaglioLettera: 3, esito: esito),
+            verbosita: .normale)!.testo
+        XCTAssertTrue(subitoTiratori.hasPrefix("I tuoi tiratori C sono stati ingaggiati"), subitoTiratori)
+        let disfatta = traduttore.annuncio(
+            per: .sciameDisfatto(sciame: IdSciame(1), archetipo: "fanteria_leggera", lettera: 1,
+                                 cella: cella, parte: .giocatore), verbosita: .normale)!.testo
+        XCTAssertEqual(disfatta, "La tua fanteria leggera A è disfatta in riga 3, cella 4")
+        let entrano = traduttore.annuncio(
+            per: .piazzamentoConfermato(parte: .avversario, sciame: IdSciame(9), archetipo: "tiratori",
+                                        lettera: 2, cella: cella, costo: 10, residuo: 10), verbosita: .normale)!.testo
+        XCTAssertEqual(entrano, "Entrano in campo tiratori B avversari in riga 3, cella 4")
     }
 
     func test_02_8_9_1_la_mischia_annuncia_fasce_e_stallo_mai_numeri() throws {

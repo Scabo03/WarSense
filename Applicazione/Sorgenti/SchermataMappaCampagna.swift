@@ -263,7 +263,8 @@ final class SchermataMappaCampagna: UIViewController {
               let giorniPersi = costruttore.vista.giorniPersiRevocando(per: gruppo.id) else { return }
         let pannello = UIAlertController(
             title: costruttore.titoloPannello(gruppo),
-            message: testi.frase("pannello.revoca_conferma", costruttore.nomeGruppo(gruppo), giorniPersi).testo,
+            message: testi.frase("pannello.revoca_conferma", soggetto: costruttore.soggettoGruppo(gruppo),
+                                 giorniPersi).testo,
             preferredStyle: .alert)
         let voci = [
             VocePannello(titolo: testi.frase("pannello.revoca_conferma_azione").testo,
@@ -287,7 +288,8 @@ final class SchermataMappaCampagna: UIViewController {
     private func apriPannello(per gruppo: Gruppo) {
         guard let costruttore else { return }
         let pannello = UIAlertController(title: costruttore.titoloPannello(gruppo),
-                                         message: nil, preferredStyle: .alert)
+                                         message: motivoDelBlocco(per: gruppo, costruttore: costruttore),
+                                         preferredStyle: .alert)
         var voci: [VocePannello] = []
 
         // Se la casella ha una battaglia in sospeso, il comando che la apre precede ogni altro
@@ -362,7 +364,7 @@ final class SchermataMappaCampagna: UIViewController {
         // proprio adiacente e non in marcia. Attivarla riunisce e non apre schermate.
         for altro in costruttore.vista.gruppiRiunibili(con: gruppo.id) {
             voci.append(VocePannello(
-                titolo: testi.frase("pannello.riunisci", costruttore.nomeGruppo(altro)).testo,
+                titolo: testi.frase("pannello.riunisci", soggetto: costruttore.soggettoGruppo(altro)).testo,
                 stile: .default) { [weak self] in
                 self?.chiudiPannello(casella: gruppo.posizione) {
                     await self?.eseguiComando(.riunione(gruppo: gruppo.id, con: altro.id))
@@ -416,9 +418,13 @@ final class SchermataMappaCampagna: UIViewController {
                 }
             })
         }
-        // La revoca si offre soltanto a un gruppo in marcia lunga: congeda il
-        // pannello del gruppo e apre quello di conferma, che dichiara i giorni persi.
-        if gruppo.inMarcia {
+        // La revoca si offre soltanto a un gruppo in marcia lunga, e soltanto se il Motore la accetta
+        // (00 §3.2): con una battaglia in sospeso è bloccata come ogni altro comando, e fino alla build 29
+        // compariva lo stesso, per essere respinta dopo il pannello di conferma (trovato dalla prova
+        // dell'osservazione 1 della sessione da tester, incarico 29; 02 §9.5). Congeda il pannello del
+        // gruppo e apre quello di conferma, che dichiara i giorni persi.
+        if gruppo.inMarcia, partita.motore.valida(.revocaMarcia(gruppo: gruppo.id), parte: .giocatore,
+                                                  stato: costruttore.stato).eValido {
             voci.append(VocePannello(titolo: testi.frase("pannello.revoca").testo,
                                      stile: .destructive) { [weak self] in
                 guard let self else { return }
@@ -439,6 +445,27 @@ final class SchermataMappaCampagna: UIViewController {
         }
         vociPannello = voci
         present(pannello, animated: false)
+    }
+
+    /// Il messaggio del pannello di un gruppo che non combatte in una battaglia in sospeso, mentre la
+    /// campagna vi è bloccata (incarico 29, osservazione 1 della sessione da tester): le sue azioni,
+    /// bloccate, non compaiono (02 §9.5), e il pannello dichiara perché con il MEDESIMO motivo di ogni
+    /// comando bloccato e il luogo della battaglia, così che il giocatore non debba ricostruirlo per
+    /// tentativi (02 §6.5). Il blocco lo decide il Motore (00 §3.2): qui si chiede, non si giudica.
+    /// Il pannello del gruppo che sta nella casella contesa non ne ha bisogno: offre «Apri la battaglia».
+    private func motivoDelBlocco(per gruppo: Gruppo, costruttore: CostruttoreAnnunciCampagna) -> String? {
+        let motivo = partita.motore.valida(.presidio(gruppo: gruppo.id), parte: .giocatore,
+                                           stato: costruttore.stato).motivo
+        guard motivo == .battagliaInSospeso,
+              costruttore.stato.battagliaInSospeso(su: gruppo.posizione) == nil,
+              let prima = costruttore.vista.informazioneDiStato.battaglieInSospeso.first else { return nil }
+        var messaggio = testi.frase("pannello.bloccato_da_battaglia",
+                                    testi.termine(MotivoNonValidoCampagna.battagliaInSospeso.rawValue).testo,
+                                    prima.riga, prima.colonna).testo
+        for altra in costruttore.vista.informazioneDiStato.battaglieInSospeso.dropFirst() {
+            messaggio += testi.frase("campagna.stato_battaglia_in_sospeso", altra.riga, altra.colonna).testo
+        }
+        return messaggio
     }
 
     /// Presenta la schermata di divisione del gruppo (01 §5.6.0.2, 02 §10.3). Alla
@@ -570,13 +597,18 @@ final class SchermataMappaCampagna: UIViewController {
     @objc private func annulla() {
         Task { await operazioneGiornale({ try await self.partita.annulla() },
                                         conferma: "campagna.annullato_conferma",
-                                        confermaConRiapertura: "campagna.annullato_giornata_riaperta") }
+                                        confermaConRiapertura: "campagna.annullato_giornata_riaperta",
+                                        senzaNulla: "campagna.niente_da_annullare") }
     }
 
+    /// Senza alcun ordine da azzerare, l'azzeramento lo dice con la propria frase (incarico 29,
+    /// osservazione 6 della sessione da tester, nella forma della campagna): prima diceva «Niente da
+    /// annullare», che è la frase dell'altro comando.
     @objc private func azzera() {
         Task { await operazioneGiornale({ try await self.partita.azzera() },
                                         conferma: "campagna.azzerato_conferma",
-                                        confermaConRiapertura: "campagna.azzerato_giornata_riaperta") }
+                                        confermaConRiapertura: "campagna.azzerato_giornata_riaperta",
+                                        senzaNulla: "campagna.niente_da_azzerare") }
     }
 
     /// La CHIUSURA ESPLICITA della giornata (incarico 26, decisione del titolare; incarico 28): sempre
@@ -615,7 +647,8 @@ final class SchermataMappaCampagna: UIViewController {
     /// ma che il calendario è tornato indietro.
     private func operazioneGiornale(_ operazione: () async throws -> SessioneCampagna.EsitoAnnullamento,
                                     conferma chiave: String,
-                                    confermaConRiapertura chiaveRiapertura: String) async {
+                                    confermaConRiapertura chiaveRiapertura: String,
+                                    senzaNulla chiaveVuota: String) async {
         do {
             let esito = try await operazione()
             await ricaricaStato()
@@ -634,7 +667,7 @@ final class SchermataMappaCampagna: UIViewController {
                 lingua: testi.lingua))
         } catch {
             partita.ambiente.segnali.annuncia(TestoLocalizzato(
-                testo: testi.frase("campagna.niente_da_annullare").testo, lingua: testi.lingua))
+                testo: testi.frase(chiaveVuota).testo, lingua: testi.lingua))
         }
     }
 

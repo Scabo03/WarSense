@@ -218,7 +218,7 @@ final class DesignazioneBersaglioTest: XCTestCase {
         ])
         let c = costruttore(stato)
         let bersaglio = stato.sciami[ids[1]]!
-        let nome = ambiente.testi.frase("unita.fanteria_pesante").testo
+        let nome = ambiente.testi.nomeIsolato(ambiente.testi.soggetto(.unita, "fanteria_pesante")).testo
         let efficace = ambiente.testi.termine(EfficaciaQualitativa.efficace.rawValue).testo
         let stretto = ambiente.testi.termine(FasciaAccerchiamento.stretto.rawValue).testo
 

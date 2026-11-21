@@ -81,9 +81,10 @@ public struct TraduttoreEventiCampagna: Sendable {
         }
     }
 
-    /// Il nome parlato di un gruppo (01 §5.6.0.4): termine del vocabolario chiuso.
-    private func nome(_ chiave: IdentificatoreDati) -> String {
-        testi.termine("gruppo.nome." + chiave).testo
+    /// Il nome parlato di un gruppo (01 §5.6.0.4), col suo genere (02 §4.6): termine del vocabolario
+    /// chiuso, che entra nelle frasi soltanto come soggetto, nella forma scritta per il suo genere.
+    private func soggetto(_ chiave: IdentificatoreDati) -> Soggetto {
+        testi.soggetto(.gruppo, chiave)
     }
 
     /// L'annuncio per l'evento, già risolto nel livello di verbosità e nella lingua.
@@ -93,25 +94,25 @@ public struct TraduttoreEventiCampagna: Sendable {
         case .marciaOrdinata(_, let chiave, _, let a, let giorni):
             // La marcia ordinata dichiara i giorni: la grandezza di origine che chi
             // ascolta riceve (01 §5.6.3.3), con il plurale di sistema.
-            return testi.frase("campagna.marcia_ordinata", verbosita: verbosita,
-                               nome(chiave), a.riga, a.colonna, giorni)
+            return testi.frase("campagna.marcia_ordinata", soggetto: soggetto(chiave),
+                               verbosita: verbosita, a.riga, a.colonna, giorni)
         case .marciaCompiuta(_, let chiave, _, let a):
-            return testi.frase("campagna.marcia_compiuta", verbosita: verbosita,
-                               nome(chiave), a.riga, a.colonna)
+            return testi.frase("campagna.marcia_compiuta", soggetto: soggetto(chiave),
+                               verbosita: verbosita, a.riga, a.colonna)
         case .marciaRevocata(_, let chiave, _, let giorniPersi):
-            return testi.frase("campagna.marcia_revocata", verbosita: verbosita,
-                               nome(chiave), giorniPersi)
+            return testi.frase("campagna.marcia_revocata", soggetto: soggetto(chiave),
+                               verbosita: verbosita, giorniPersi)
         case .presidioOrdinato(_, let chiave, let casella):
-            return testi.frase("campagna.presidio_ordinato", verbosita: verbosita,
-                               nome(chiave), casella.riga, casella.colonna)
+            return testi.frase("campagna.presidio_ordinato", soggetto: soggetto(chiave),
+                               verbosita: verbosita, casella.riga, casella.colonna)
         case .gruppoDiviso(_, _, _, let chiaveDistaccamento, let a):
             // L'annuncio nomina il DISTACCAMENTO e dove è nato: è il fatto nuovo, e il
             // gruppo di origine resta dove il giocatore lo vede (01 §5.6.0.2).
-            return testi.frase("campagna.gruppo_diviso", verbosita: verbosita,
-                               nome(chiaveDistaccamento), a.riga, a.colonna)
+            return testi.frase("campagna.gruppo_diviso", soggetto: soggetto(chiaveDistaccamento),
+                               verbosita: verbosita, a.riga, a.colonna)
         case .gruppiRiuniti(_, let chiave, _, let casella):
-            return testi.frase("campagna.gruppi_riuniti", verbosita: verbosita,
-                               nome(chiave), casella.riga, casella.colonna)
+            return testi.frase("campagna.gruppi_riuniti", soggetto: soggetto(chiave),
+                               verbosita: verbosita, casella.riga, casella.colonna)
         case .giornataChiusa:
             // Un fatto solo, una frase sola: l'apertura porta già la chiusura.
             return nil
@@ -122,14 +123,14 @@ public struct TraduttoreEventiCampagna: Sendable {
         // stato «rifornito» che non si annuncia mai (02 §8.7): dice il passaggio, non la
         // quiete.
         case .rifornimentoInterrotto(_, let chiave, let casella):
-            return testi.frase("campagna.rifornimento_interrotto", verbosita: verbosita,
-                               nome(chiave), casella.riga, casella.colonna)
+            return testi.frase("campagna.rifornimento_interrotto", soggetto: soggetto(chiave),
+                               verbosita: verbosita, casella.riga, casella.colonna)
         case .sostaDiRifornimento(_, let chiave, let casella):
-            return testi.frase("campagna.sosta_di_rifornimento", verbosita: verbosita,
-                               nome(chiave), casella.riga, casella.colonna)
+            return testi.frase("campagna.sosta_di_rifornimento", soggetto: soggetto(chiave),
+                               verbosita: verbosita, casella.riga, casella.colonna)
         case .rifornimentoRipreso(_, let chiave, let casella):
-            return testi.frase("campagna.rifornimento_ripreso", verbosita: verbosita,
-                               nome(chiave), casella.riga, casella.colonna)
+            return testi.frase("campagna.rifornimento_ripreso", soggetto: soggetto(chiave),
+                               verbosita: verbosita, casella.riga, casella.colonna)
         case .formazioneAvversariaAvvistata(let casella):
             // Il fatto e il luogo, senza nome né volume (02 §6.4.1): «una formazione
             // avversaria, e dove». È la mossa avversaria che il giocatore apprende.
@@ -141,21 +142,20 @@ public struct TraduttoreEventiCampagna: Sendable {
             // dove serve, il luogo per portarvi il fuoco.
             switch esito {
             case .riuscita:
-                return testi.frase("campagna.esplorazione_riuscita", verbosita: verbosita,
-                                   nome(chiave), casella.riga, casella.colonna)
+                return testi.frase("campagna.esplorazione_riuscita", soggetto: soggetto(chiave),
+                                   verbosita: verbosita, casella.riga, casella.colonna)
             case .aManiVuote:
-                return testi.frase("campagna.esplorazione_a_mani_vuote", verbosita: verbosita,
-                                   nome(chiave))
+                return testi.frase("campagna.esplorazione_a_mani_vuote", soggetto: soggetto(chiave), verbosita: verbosita)
             case .notati:
-                return testi.frase("campagna.esploratori_notati", verbosita: verbosita,
-                                   nome(chiave), casella.riga, casella.colonna)
+                return testi.frase("campagna.esploratori_notati", soggetto: soggetto(chiave),
+                                   verbosita: verbosita, casella.riga, casella.colonna)
             case .perduti:
-                return testi.frase("campagna.esploratori_perduti", verbosita: verbosita,
-                                   nome(chiave), casella.riga, casella.colonna)
+                return testi.frase("campagna.esploratori_perduti", soggetto: soggetto(chiave),
+                                   verbosita: verbosita, casella.riga, casella.colonna)
             }
         case .imboscataOrdinata(_, let chiave, let casella):
-            return testi.frase("campagna.imboscata_ordinata", verbosita: verbosita,
-                               nome(chiave), casella.riga, casella.colonna)
+            return testi.frase("campagna.imboscata_ordinata", soggetto: soggetto(chiave),
+                               verbosita: verbosita, casella.riga, casella.colonna)
         case .imboscataScoperta(_, let casella):
             // La scoperta: la ricognizione ha trovato un'imboscata avversaria, e dove (02 §6.4.1).
             // Senza il nome dell'appostato (non lo si conosce). La parte è sempre il giocatore
@@ -166,13 +166,13 @@ public struct TraduttoreEventiCampagna: Sendable {
             // Riuscito: una formazione avversaria è dispersa in un luogo. Fallito: gli
             // esploratori si sono fatti notare. Il nome è quello del gruppo che sabota (proprio).
             return riuscito
-                ? testi.frase("campagna.sabotaggio_riuscito", verbosita: verbosita,
-                              nome(chiave), casella.riga, casella.colonna)
-                : testi.frase("campagna.sabotaggio_fallito", verbosita: verbosita,
-                              nome(chiave), casella.riga, casella.colonna)
+                ? testi.frase("campagna.sabotaggio_riuscito", soggetto: soggetto(chiave),
+                              verbosita: verbosita, casella.riga, casella.colonna)
+                : testi.frase("campagna.sabotaggio_fallito", soggetto: soggetto(chiave),
+                              verbosita: verbosita, casella.riga, casella.colonna)
         case .studioCompiuto(_, let chiave, let casella):
-            return testi.frase("campagna.formazione_studiata", verbosita: verbosita,
-                               nome(chiave), casella.riga, casella.colonna)
+            return testi.frase("campagna.formazione_studiata", soggetto: soggetto(chiave),
+                               verbosita: verbosita, casella.riga, casella.colonna)
         case .imboscataScattata(let casella):
             // Il fatto e il luogo (02 §6.4.1): «un'imboscata è scattata, e dove». Vale
             // imboscante o vittima; il giocatore ne è parte.
@@ -207,16 +207,17 @@ public struct TraduttoreEventiCampagna: Sendable {
         let chiave = voce.fatto.chiaveTesto
         switch voce.fatto {
         case .marciaRevocata(let gruppo, let casella):
-            return testi.frase(chiave, voce.giorno, nome(gruppo), casella.riga, casella.colonna)
+            return testi.frase(chiave, soggetto: soggetto(gruppo), voce.giorno, casella.riga, casella.colonna)
         case .rifornimentoInterrotto(let gruppo, let casella),
              .sostaDiRifornimento(let gruppo, let casella),
              .rifornimentoRipreso(let gruppo, let casella):
-            return testi.frase(chiave, voce.giorno, nome(gruppo), casella.riga, casella.colonna)
+            return testi.frase(chiave, soggetto: soggetto(gruppo), voce.giorno, casella.riga, casella.colonna)
         case .esploratoriPerduti(let gruppo, let casella),
              .esploratoriNotati(let gruppo, let casella):
             // Gli esploratori del giocatore, col loro nome e il luogo dove esploravano
-            // (01 §5.4): un fatto proprio, attivabile per portarvi il fuoco.
-            return testi.frase(chiave, voce.giorno, nome(gruppo), casella.riga, casella.colonna)
+            // (01 §5.4): un fatto proprio, attivabile per portarvi il fuoco. Il nome del gruppo è il
+            // soggetto (argomento 1) delle forme accordate, il giorno l'argomento 2 (02 §4.6).
+            return testi.frase(chiave, soggetto: soggetto(gruppo), voce.giorno, casella.riga, casella.colonna)
         case .formazioneAvversariaAvvistata(let casella),
              .formazioneSabotata(let casella),
              .formazioneStudiata(let casella),

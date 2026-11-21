@@ -24,14 +24,19 @@ struct CostruttoreAnnunci {
     // MARK: - Etichetta di cella
 
     /// L'etichetta completa di una cella. La testa fissa non si taglia mai (02 §3.9).
+    ///
+    /// Con un elemento del deck selezionato o una designazione di movimento in corso, la cella comincia
+    /// dalla sua posizione, poi dice ciò che contiene e infine la disponibilità — il costo e il residuo,
+    /// oppure il motivo chiuso (02 §3.3 dalla versione 2.8, incarico 29). È lo stesso formato che il
+    /// titolare ha deciso il 2026-11-21 per le caselle della mappa in designazione di marcia: la carta
+    /// vuole identico il formato degli annunci su ogni superficie (00 §7.1), e i due piani cambiano
+    /// insieme. Fino alla build 29 la disponibilità precedeva la testa. I tagli di verbosità toccano il
+    /// solo contenuto: costo, residuo e motivo non si tagliano.
     func etichettaCella(_ cella: Cella, designazione: Designazione = .nessuna) -> String {
-        let testa = testi.frase("cella.testa", cella.riga, cella.colonna).testo
-        var parti: [String] = []
-
-        // Con un elemento selezionato, la disponibilità precede la testa (02 §3.3).
+        var parti: [String] = [testi.frase("cella.testa", cella.riga, cella.colonna).testo]
+        parti.append(contentsOf: contenutoCella(cella))
         if case .movimento(let id) = designazione {
             parti.append(contentsOf: disponibilitaMovimento(da: id, a: cella))
-            parti.append(testa)
         } else if stato.selezione[.giocatore] != nil, stato.parteDiTurno == .giocatore {
             let esito = motore.valida(.piazza(cella: cella), parte: .giocatore, stato: stato)
             switch esito {
@@ -40,12 +45,7 @@ struct CostruttoreAnnunci {
             case .nonValido(let motivo):
                 parti.append(testi.termine(motivo.rawValue).testo)
             }
-            parti.append(testa)
-        } else {
-            parti.append(testa)
         }
-
-        parti.append(contentsOf: contenutoCella(cella))
         return parti.joined(separator: ", ")
     }
 
@@ -83,11 +83,14 @@ struct CostruttoreAnnunci {
             return verbosita == .sintetico ? [] : [testi.frase("cella.libera").testo]
         }
         var parti: [String] = []
-        let nome = testi.frase("unita." + sciame.archetipo).testo
-        // La lettera in posizione fissa subito dopo il nome (01 §9.4.3, 02 §3.8.1).
-        parti.append(sciame.parte == .giocatore
-                     ? testi.frase("cella.occupante_proprio", nome, lettera(sciame)).testo
-                     : testi.frase("cella.occupante_avversario", nome, lettera(sciame)).testo)
+        let nome = testi.soggetto(.unita, sciame.archetipo)
+        // La lettera in posizione fissa subito dopo il nome (01 §9.4.3, 02 §3.8.1); la frase accordata
+        // al genere del nome (02 §4.6).
+        if sciame.parte == .giocatore {
+            parti.append(testi.frase("cella.occupante_proprio", soggetto: nome, lettera(sciame)).testo)
+        } else {
+            parti.append(testi.frase("cella.occupante_avversario", soggetto: nome, lettera(sciame)).testo)
+        }
         guard verbosita != .sintetico else { return parti }
         // Reparto élite della fase corrente (incarico 11, terza decisione): la ragione è
         // l'addestramento superiore, non la meccanica; l'annuncio rende riconoscibile la
@@ -125,13 +128,13 @@ struct CostruttoreAnnunci {
     func voceTiro(da sciame: IdSciame, su bersaglio: Sciame) -> String? {
         guard let anteprima = vista.anteprimaTiro(da: sciame, su: bersaglio.id),
               let vicinanza = anteprima.vicinanza else { return nil }
-        let nome = testi.frase("unita." + bersaglio.archetipo).testo
+        let nome = testi.soggetto(.unita, bersaglio.archetipo)
         if anteprima.accerchiamento == .isolato {
-            return testi.frase("pannello.tira_su", nome, lettera(bersaglio),
+            return testi.frase("pannello.tira_su", soggetto: nome, lettera(bersaglio),
                                testi.termine(anteprima.efficacia.rawValue).testo,
                                testi.termine(vicinanza.rawValue).testo).testo
         }
-        return testi.frase("pannello.tira_su_accerchiato", nome, lettera(bersaglio),
+        return testi.frase("pannello.tira_su_accerchiato", soggetto: nome, lettera(bersaglio),
                            testi.termine(anteprima.efficacia.rawValue).testo,
                            testi.termine(vicinanza.rawValue).testo,
                            testi.termine(anteprima.accerchiamento.rawValue).testo).testo
@@ -144,14 +147,14 @@ struct CostruttoreAnnunci {
     func voceIngaggio(da sciame: IdSciame, su bersaglio: Sciame) -> String? {
         guard let anteprima = vista.anteprimaIngaggio(da: sciame, su: bersaglio.id),
               let risposta = anteprima.risposta else { return nil }
-        let nome = testi.frase("unita." + bersaglio.archetipo).testo
+        let nome = testi.soggetto(.unita, bersaglio.archetipo)
         if anteprima.accerchiamento == .isolato {
-            return testi.frase("pannello.ingaggia", nome, lettera(bersaglio),
+            return testi.frase("pannello.ingaggia", soggetto: nome, lettera(bersaglio),
                                bersaglio.posizione.riga, bersaglio.posizione.colonna,
                                testi.termine(anteprima.efficacia.rawValue).testo,
                                testi.termine(risposta.rawValue).testo).testo
         }
-        return testi.frase("pannello.ingaggia_accerchiato", nome, lettera(bersaglio),
+        return testi.frase("pannello.ingaggia_accerchiato", soggetto: nome, lettera(bersaglio),
                            bersaglio.posizione.riga, bersaglio.posizione.colonna,
                            testi.termine(anteprima.efficacia.rawValue).testo,
                            testi.termine(anteprima.accerchiamento.rawValue).testo,
@@ -165,10 +168,12 @@ struct CostruttoreAnnunci {
         return mazzo[indice]
     }
 
-    /// L'identità di un elemento del deck: il nome del suo archetipo (02 §8.2).
+    /// L'identità di un elemento del deck: il nome del suo archetipo (02 §8.2). È l'etichetta della
+    /// tessera, il termine da solo e non una frase: una delle uscite isolate che il controllo del genere
+    /// ammette (`AccordoDiGenereTest`).
     func nomeElementoDeck(indice: Int) -> String {
         guard let elemento = elementoDeck(indice) else { return "" }
-        return testi.frase("unita." + elemento.archetipo).testo
+        return testi.nomeIsolato(testi.soggetto(.unita, elemento.archetipo)).testo
     }
 
     /// Il valore annunciato di un elemento del deck, in ordine fisso: atomi,
@@ -187,7 +192,9 @@ struct CostruttoreAnnunci {
             testi.frase("deck.esemplari", elemento.esemplari).testo,
         ]
         if comeSelezionato || stato.selezione[.giocatore] == indice {
-            parti.append(testi.frase("deck.selezionato").testo)
+            // «selezionato» si accorda al nome dell'archetipo che la tessera porta come etichetta (02 §4.6).
+            parti.append(testi.frase("deck.selezionato",
+                                     soggetto: testi.soggetto(.unita, elemento.archetipo)).testo)
         }
         return parti.joined(separator: ", ")
     }

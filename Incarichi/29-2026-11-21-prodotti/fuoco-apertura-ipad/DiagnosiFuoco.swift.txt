@@ -1,0 +1,53 @@
+import UIKit
+
+// DIAGNOSI TEMPORANEA dell'incarico 29 (osservazione 3 della sessione da tester): registra con
+// l'orario ogni fuoco che VoiceOver assegna, ogni notifica di fuoco del gioco e i momenti della
+// presentazione della battaglia. Le righe si tengono in memoria e si scrivono ogni mezzo secondo,
+// per non spostare i tempi del filo principale. Vive soltanto nella copia di diagnosi in
+// Applicazione/build: non entra nel ramo né in una build.
+@MainActor
+enum DiagnosiFuoco {
+    static let url = FileManager.default.urls(for: .documentDirectory, in: .userDomainMask)[0]
+        .appendingPathComponent("diagnosi-fuoco.jsonl")
+    private static var righe: [Data] = []
+    /// Il modo della prova controllata, dagli argomenti di lancio: «attuale» (il codice com'è),
+    /// «nessuno» (nessuna notifica del gioco), «anticipato» (notifica alla comparsa, prima della
+    /// fine della presentazione), «ritardato» (notifica mezzo secondo dopo la comparsa).
+    static var modo: String { UserDefaults.standard.string(forKey: "diagnosiModo") ?? "attuale" }
+
+    static func scrivi(_ evento: String, _ dettagli: [String: String] = [:]) {
+        var riga = dettagli
+        riga["evento"] = evento
+        riga["t"] = String(format: "%.3f", Date().timeIntervalSince1970)
+        guard let dati = try? JSONSerialization.data(withJSONObject: riga, options: [.sortedKeys]) else { return }
+        righe.append(dati + Data("\n".utf8))
+    }
+
+    private static func svuota() {
+        guard !righe.isEmpty else { return }
+        let blocco = righe.reduce(Data(), +)
+        righe = []
+        if let maniglia = try? FileHandle(forWritingTo: url) {
+            maniglia.seekToEndOfFile(); maniglia.write(blocco); try? maniglia.close()
+        } else {
+            try? blocco.write(to: url)
+        }
+    }
+
+    static func descrivi(_ oggetto: Any?) -> String {
+        guard let o = oggetto as? NSObject else { return "nil" }
+        return "\(type(of: o)): \(o.accessibilityLabel ?? "")"
+    }
+
+    static func avvia() {
+        scrivi("avvio_app", ["modo": modo])
+        Timer.scheduledTimer(withTimeInterval: 0.5, repeats: true) { _ in
+            MainActor.assumeIsolated { svuota() }
+        }
+        NotificationCenter.default.addObserver(forName: UIAccessibility.elementFocusedNotification,
+                                               object: nil, queue: .main) { n in
+            nonisolated(unsafe) let e = n.userInfo?[UIAccessibility.focusedElementUserInfoKey]
+            MainActor.assumeIsolated { scrivi("fuoco_voiceover", ["elemento": descrivi(e)]) }
+        }
+    }
+}

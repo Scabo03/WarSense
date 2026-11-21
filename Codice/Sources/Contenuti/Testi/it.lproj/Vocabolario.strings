@@ -181,3 +181,51 @@
 "gruppo.nome.sciacallo" = "Sciacallo";
 "gruppo.nome.ermellino" = "Ermellino";
 "gruppo.nome.muflone" = "Muflone";
+
+/* Termini che fanno da soggetto di frase (02 §4.6): reparti e archetipi (00 §12.2, archetipi per
+   funzione). Ciascuno dichiara il proprio genere e numero in genere.<chiave>: maschile, femminile,
+   maschile_plurale, femminile_plurale. Il termine resta invariabile; le frasi che lo contengono
+   sono scritte per ciascun genere in Annunci.strings. Si leggono con Testi.soggetto. */
+"unita.fanteria_leggera" = "fanteria leggera";
+"unita.fanteria_pesante" = "fanteria pesante";
+"unita.guardia_elite" = "guardia scelta";
+"unita.tiratori" = "tiratori";
+"unita.cavalleria_ricognizione" = "cavalleria da ricognizione";
+"unita.cavalleria_manovrata" = "cavalleria manovrata";
+"unita.piattaforma_trainata" = "piattaforma trainata";
+"unita.macchina_assedio" = "macchina d'assedio";
+"unita.macchina_tiro" = "macchina da tiro";
+"genere.unita.fanteria_leggera" = "femminile";
+"genere.unita.fanteria_pesante" = "femminile";
+"genere.unita.guardia_elite" = "femminile";
+"genere.unita.tiratori" = "maschile_plurale";
+"genere.unita.cavalleria_ricognizione" = "femminile";
+"genere.unita.cavalleria_manovrata" = "femminile";
+"genere.unita.piattaforma_trainata" = "femminile";
+"genere.unita.macchina_assedio" = "femminile";
+"genere.unita.macchina_tiro" = "femminile";
+/* I generi dei nomi dei gruppi (01 §5.6.0.4): il genere del nome. */
+"genere.gruppo.nome.corvo" = "maschile";
+"genere.gruppo.nome.lupo" = "maschile";
+"genere.gruppo.nome.falco" = "maschile";
+"genere.gruppo.nome.orso" = "maschile";
+"genere.gruppo.nome.cervo" = "maschile";
+"genere.gruppo.nome.lince" = "femminile";
+"genere.gruppo.nome.aquila" = "femminile";
+"genere.gruppo.nome.volpe" = "femminile";
+"genere.gruppo.nome.ariete" = "maschile";
+"genere.gruppo.nome.bisonte" = "maschile";
+"genere.gruppo.nome.martora" = "femminile";
+"genere.gruppo.nome.stambecco" = "maschile";
+"genere.gruppo.nome.cinghiale" = "maschile";
+"genere.gruppo.nome.tasso" = "maschile";
+"genere.gruppo.nome.gufo" = "maschile";
+"genere.gruppo.nome.nibbio" = "maschile";
+"genere.gruppo.nome.camoscio" = "maschile";
+"genere.gruppo.nome.faina" = "femminile";
+"genere.gruppo.nome.ghiro" = "maschile";
+"genere.gruppo.nome.donnola" = "femminile";
+"genere.gruppo.nome.poiana" = "femminile";
+"genere.gruppo.nome.sciacallo" = "maschile";
+"genere.gruppo.nome.ermellino" = "maschile";
+"genere.gruppo.nome.muflone" = "maschile";

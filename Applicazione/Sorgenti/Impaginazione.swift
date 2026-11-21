@@ -122,3 +122,71 @@ enum ColonnaScorrevole {
         return scorrimento
     }
 }
+
+/// Le etichette che seguono la dimensione del testo scelta nelle impostazioni di sistema (02 §10.4,
+/// decisione del titolare del 2026-11-21, incarico 29): carattere dello stile indicato, adeguamento
+/// automatico quando la taglia cambia a partita in corso, e il testo va a capo invece di tagliarsi.
+@MainActor
+enum TestoDinamico {
+    @discardableResult
+    static func applica(_ etichetta: UILabel, stile: UIFont.TextStyle) -> UILabel {
+        etichetta.font = .preferredFont(forTextStyle: stile)
+        etichetta.adjustsFontForContentSizeCategory = true
+        etichetta.numberOfLines = 0
+        return etichetta
+    }
+}
+
+/// La scelta di una voce fra poche, come una colonna di pulsanti (incarico 29): sostituisce il
+/// selettore a segmenti delle impostazioni, che non segue la dimensione del testo di sistema e a testo
+/// grande taglia i titoli in segmenti stretti (02 §10.4). Ogni voce è un pulsante che va a capo, alto
+/// almeno 48 punti (02 §8.5), e quella scelta porta il tratto «selezionato» e, per chi vede, fondo e
+/// bordo del colore d'accento. Il gruppo è un raggruppamento semantico che porta il proprio nome: chi atterra su una voce sa a
+/// quale scelta appartiene (02 §1.3).
+@MainActor
+final class SceltaAVoci: UIStackView {
+    private(set) var pulsanti: [PulsanteMultiriga] = []
+    private(set) var scelta: Int
+    /// Chiamato a ogni scelta del giocatore, con l'indice della voce.
+    var alCambio: ((Int) -> Void)?
+
+    init(nome: String, voci: [String], scelta: Int) {
+        self.scelta = scelta
+        super.init(frame: .zero)
+        axis = .vertical
+        spacing = 4
+        accessibilityContainerType = .semanticGroup
+        accessibilityLabel = nome
+        for (indice, voce) in voci.enumerated() {
+            let pulsante = PulsanteMultiriga.crea(titolo: voce, stile: .body, allineamento: .natural)
+            pulsante.accessibilityLabel = voce
+            pulsante.addAction(UIAction { [weak self] _ in self?.scegli(indice) }, for: .touchUpInside)
+            pulsanti.append(pulsante)
+            addArrangedSubview(pulsante)
+        }
+        aggiornaAspetto()
+    }
+    required init(coder: NSCoder) { fatalError() }
+
+    /// La scelta di una voce, come il tocco del suo pulsante.
+    func scegli(_ indice: Int) {
+        guard pulsanti.indices.contains(indice) else { return }
+        scelta = indice
+        aggiornaAspetto()
+        alCambio?(indice)
+    }
+
+    private func aggiornaAspetto() {
+        for (indice, pulsante) in pulsanti.enumerated() {
+            let scelto = indice == scelta
+            pulsante.isSelected = scelto
+            pulsante.accessibilityTraits = scelto ? [.button, .selected] : [.button]
+            // Per chi vede, la voce scelta ha il fondo e il bordo del colore d'accento: un segno che non
+            // tocca il testo, sicché la voce va a capo allo stesso modo scelta o no.
+            pulsante.layer.cornerRadius = 8
+            pulsante.layer.borderWidth = scelto ? 2 : 0
+            pulsante.layer.borderColor = tintColor.cgColor
+            pulsante.backgroundColor = scelto ? .secondarySystemFill : .clear
+        }
+    }
+}

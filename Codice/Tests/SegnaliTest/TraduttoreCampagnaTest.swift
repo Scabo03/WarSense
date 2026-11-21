@@ -156,7 +156,7 @@ final class TraduttoreCampagnaTest: XCTestCase {
     func test_01_5_6_0_4_ogni_nome_dell_elenco_chiuso_ha_il_proprio_testo() throws {
         let valori = try CaricatoreCampagna.carica(da: Contenuti.valoriDiFabbrica)
         for chiave in valori.nomiGruppi {
-            XCTAssertTrue(testi.esiste("gruppo.nome." + chiave, tavola: "Vocabolario"),
+            XCTAssertTrue(testi.esiste(CategoriaSoggetto.gruppo.prefisso + chiave, tavola: "Vocabolario"),
                           "manca il nome parlato del gruppo \(chiave)")
         }
     }
@@ -179,6 +179,58 @@ final class TraduttoreCampagnaTest: XCTestCase {
             let frase = traduttore.voceDiRegistro(voce)
             XCTAssertFalse(frase.testo.contains(Testi.segnaposto), "manca la frase per \(fatto)")
             XCTAssertTrue(frase.testo.contains("7"), "la voce dichiara il giorno cui si riferisce")
+        }
+    }
+
+    /// Le voci del registro con un gruppo per soggetto si accordano al suo genere (02 §4.6, incarico 29):
+    /// la chiave della frase viene dal fatto (`chiaveTesto`) e non è scritta nel codice, sicché il
+    /// controllo statico dei sorgenti la ammette e la verifica qui, risolvendola per un nome maschile e
+    /// per uno femminile. Nessuna forma manca, e dove l'accordo cambia la frase cambia.
+    func test_incarico_29_le_voci_del_registro_si_accordano_al_genere() throws {
+        let casella = Cella(riga: 4, colonna: 2)
+        func fatti(_ nome: String) -> [FattoRegistrato] {
+            [.marciaRevocata(gruppo: nome, casella: casella),
+             .rifornimentoInterrotto(gruppo: nome, casella: casella),
+             .sostaDiRifornimento(gruppo: nome, casella: casella),
+             .rifornimentoRipreso(gruppo: nome, casella: casella),
+             .esploratoriPerduti(gruppo: nome, casella: casella),
+             .esploratoriNotati(gruppo: nome, casella: casella)]
+        }
+        for nome in ["corvo", "aquila"] {
+            for fatto in fatti(nome) {
+                let frase = traduttore.voceDiRegistro(VoceRegistro(numero: 0, giorno: 7, fatto: fatto)).testo
+                XCTAssertFalse(frase.contains(Testi.segnaposto), "manca la forma per \(fatto)")
+                XCTAssertTrue(frase.hasPrefix("Giorno 7: "), "il giorno apre la voce: «\(frase)»")
+                XCTAssertTrue(frase.contains(nome.capitalized), "il soggetto è nella voce: «\(frase)»")
+            }
+        }
+        let sostaAquila = traduttore.voceDiRegistro(VoceRegistro(numero: 0, giorno: 7,
+            fatto: .sostaDiRifornimento(gruppo: "aquila", casella: casella))).testo
+        XCTAssertEqual(sostaAquila, "Giorno 7: Aquila costretta alla sosta di rifornimento in riga 4, casella 2")
+        let sostaCorvo = traduttore.voceDiRegistro(VoceRegistro(numero: 0, giorno: 7,
+            fatto: .sostaDiRifornimento(gruppo: "corvo", casella: casella))).testo
+        XCTAssertEqual(sostaCorvo, "Giorno 7: Corvo costretto alla sosta di rifornimento in riga 4, casella 2")
+    }
+
+    /// Gli annunci con un gruppo per soggetto si accordano al suo genere (02 §4.6, incarico 29), in ogni
+    /// livello di verbosità: «Aquila è arrivata», «Corvo è arrivato».
+    func test_incarico_29_gli_annunci_si_accordano_al_genere_del_gruppo() throws {
+        let a = Cella(riga: 9, colonna: 6)
+        let arrivoAquila = traduttore.annuncio(per: .marciaCompiuta(gruppo: IdGruppo(1), nome: "aquila",
+                                                                    da: a, a: a), verbosita: .normale)
+        XCTAssertEqual(arrivoAquila?.testo, "Aquila è arrivata in riga 9, casella 6")
+        let agguato = traduttore.annuncio(per: .imboscataOrdinata(gruppo: IdGruppo(1), nome: "volpe", casella: a),
+                                          verbosita: .normale)
+        XCTAssertEqual(agguato?.testo, "Volpe si è messa in agguato in riga 9, casella 6")
+        for nome in ["corvo", "aquila"] {
+            for evento in [EventoCampagna.marciaCompiuta(gruppo: IdGruppo(1), nome: nome, da: a, a: a),
+                           .gruppiRiuniti(risultante: IdGruppo(1), nome: nome, assorbito: IdGruppo(2), casella: a),
+                           .esplorazioneCompiuta(parte: .giocatore, gruppo: IdGruppo(1), nome: nome, casella: a, esito: .notati)] {
+                for verbosita in Verbosita.allCases {
+                    let testo = traduttore.annuncio(per: evento, verbosita: verbosita)?.testo ?? ""
+                    XCTAssertFalse(testo.contains(Testi.segnaposto), "manca la forma per \(evento) a \(verbosita)")
+                }
+            }
         }
     }
 

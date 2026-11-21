@@ -98,12 +98,25 @@ final class AnnuncioDiCasellaTest: XCTestCase {
                     XCTAssertTrue(livello.contains(testa),
                                   "la testa fissa è stata tagliata in \(casella): «\(livello)»")
                 }
+                // In designazione la disponibilità — il costo o il motivo — chiude l'annuncio in OGNI
+                // livello e non si taglia (02 §3.3 dalla versione 2.8): è la stessa voce nei tre livelli,
+                // e la si mette da parte prima di confrontare il resto.
+                var (s1, n1, d1) = (sintetico, normale, dettagliato)
+                if case .marcia = designazione {
+                    let coda = sintetico.components(separatedBy: ", ").last ?? ""
+                    for livello in [sintetico, normale, dettagliato] {
+                        XCTAssertTrue(livello.hasSuffix(", " + coda),
+                                      "la disponibilità non chiude ogni livello in \(casella): «\(livello)»")
+                    }
+                    func senzaCoda(_ t: String) -> String { String(t.dropLast(coda.count + 2)) }
+                    (s1, n1, d1) = (senzaCoda(sintetico), senzaCoda(normale), senzaCoda(dettagliato))
+                }
                 // Il livello più breve è un PREFISSO del più lungo: si taglia dalla
                 // coda, mai in mezzo.
-                XCTAssertTrue(normale.hasPrefix(sintetico),
+                XCTAssertTrue(n1.hasPrefix(s1),
                               "il taglio non parte dalla coda in \(casella): "
-                              + "«\(sintetico)» non è in testa a «\(normale)»")
-                XCTAssertTrue(dettagliato.hasPrefix(normale),
+                              + "«\(s1)» non è in testa a «\(n1)»")
+                XCTAssertTrue(d1.hasPrefix(n1),
                               "il dettagliato non estende il normale in coda in \(casella)")
             }
         }
@@ -119,8 +132,8 @@ final class AnnuncioDiCasellaTest: XCTestCase {
         let gruppo = stato.gruppiOrdinati.first { $0.parte == .giocatore }!
         // La composizione attesa, costruita con le STESSE frasi che l'annuncio userà.
         let parti = gruppo.composizione.map { reparto in
-            ambiente.testi.frase("divisione.reparto", reparto.atomi,
-                                 ambiente.testi.frase("unita." + reparto.archetipo).testo).testo
+            ambiente.testi.frase("divisione.reparto", soggetto: ambiente.testi.soggetto(.unita, reparto.archetipo),
+                                 reparto.atomi).testo
         }
         let composizione = ambiente.testi.frase("casella.composizione",
                                                 parti.joined(separator: ", ")).testo
@@ -169,25 +182,26 @@ final class AnnuncioDiCasellaTest: XCTestCase {
 
     // MARK: - Attrezzo
 
-    /// Ogni voce dell'esplorazione compare nella designazione, nello stesso ordine,
-    /// e la designazione aggiunge in TESTA la disponibilità o il motivo (02 §3.3).
+    /// Ogni voce dell'esplorazione compare nella designazione, nello stesso ordine e IN TESTA, e la
+    /// designazione aggiunge in CODA la disponibilità o il motivo (02 §3.3 dalla versione 2.8: la cella
+    /// comincia dalla sua posizione e chiude col costo). Fino alla versione 2.7 l'aggiunta stava in testa.
     private func accertaCheLaDesignazioneConservi(_ esplorazione: String, in designazione: String,
                                                  dove: String,
                                                  file: StaticString = #filePath, line: UInt = #line) {
         let attese = esplorazione.components(separatedBy: ", ")
         let trovate = designazione.components(separatedBy: ", ")
-        XCTAssertEqual(Array(trovate.suffix(attese.count)), attese,
-                       "\(dove): la designazione non conserva l'annuncio di esplorazione in coda.\n"
+        XCTAssertEqual(Array(trovate.prefix(attese.count)), attese,
+                       "\(dove): la designazione non conserva l'annuncio di esplorazione in testa.\n"
                        + "esplorazione: «\(esplorazione)»\ndesignazione: «\(designazione)»",
                        file: file, line: line)
-        // La designazione AGGIUNGE in testa, senza togliere nulla: per una
-        // destinazione valida la disponibilità E la conseguenza dell'inchiodamento
-        // (due voci, correzione del titolare RDA-104); per una non valida il solo
-        // motivo (una voce). Nessuna delle due toglie l'esplorazione dalla coda.
+        // La designazione AGGIUNGE in coda, senza togliere nulla: il motivo, oppure il costo — una voce
+        // sulla mappa («raggiungibile in N giorni»), due sul campo («costa N», «restano M»). Dal
+        // 2026-11-21 (decisione del titolare, incarico 29) l'avvertimento sull'inchiodamento non sta più
+        // sulla casella: lo dice una volta il comando di marcia.
         let aggiunte = trovate.count - attese.count
         XCTAssertTrue(aggiunte == 1 || aggiunte == 2,
-                      "\(dove): la designazione aggiunge il motivo (1) o disponibilità e "
-                      + "inchiodamento (2), non \(aggiunte).\ndesignazione: «\(designazione)»",
+                      "\(dove): la designazione aggiunge il motivo o il costo (1 o 2 voci), non \(aggiunte).\n"
+                      + "designazione: «\(designazione)»",
                       file: file, line: line)
     }
 }

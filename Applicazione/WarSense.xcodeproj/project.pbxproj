@@ -21,6 +21,8 @@
 		3A719F3F9A3306DF020170F4 /* SceneDelegate.swift in Sources */ = {isa = PBXBuildFile; fileRef = 2C1F0D6D91DB97F16EA042A1 /* SceneDelegate.swift */; };
 		4019BE980D8938B2E6B4D120 /* ImpiantoInterfacciaTest.swift in Sources */ = {isa = PBXBuildFile; fileRef = 75B409D97C3092A3CC3CDA17 /* ImpiantoInterfacciaTest.swift */; };
 		45C1B6E90486F2F6078B2B8B /* RegistroVisibileTest.swift in Sources */ = {isa = PBXBuildFile; fileRef = 1BE339E6703B78CDC77E5B87 /* RegistroVisibileTest.swift */; };
+		47BD548F691A31A53FD0B380 /* OsservazioniTesterTest.swift in Sources */ = {isa = PBXBuildFile; fileRef = A169EFE841A32EA35429F504 /* OsservazioniTesterTest.swift */; };
+		4C9FE42BA5064D47AB9D4065 /* TestoDinamicoTest.swift in Sources */ = {isa = PBXBuildFile; fileRef = 8FAC923367D6E5FAA3E5B619 /* TestoDinamicoTest.swift */; };
 		4F7ECFCC6A61E15D90A39997 /* SessioniPerInterfacciaTest.swift in Sources */ = {isa = PBXBuildFile; fileRef = 7088EBAC70470929FF7BA18A /* SessioniPerInterfacciaTest.swift */; };
 		55F02441809BDE8C6D282CC4 /* Dati in Frameworks */ = {isa = PBXBuildFile; productRef = CFCCD206E6A2E53A407BA042 /* Dati */; };
 		5F9166348949834153CEF7FA /* SchermataBattaglia.swift in Sources */ = {isa = PBXBuildFile; fileRef = 849A458FA8292F265DF9BE68 /* SchermataBattaglia.swift */; };
@@ -116,11 +118,13 @@
 		849A458FA8292F265DF9BE68 /* SchermataBattaglia.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SchermataBattaglia.swift; sourceTree = "<group>"; };
 		88D7A0731824F60DFDBEED2D /* AnnuncioDiCasellaTest.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AnnuncioDiCasellaTest.swift; sourceTree = "<group>"; };
 		8F2621F366CE07D66FC6A6EA /* MappaCampagnaAccessibileTest.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = MappaCampagnaAccessibileTest.swift; sourceTree = "<group>"; };
+		8FAC923367D6E5FAA3E5B619 /* TestoDinamicoTest.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = TestoDinamicoTest.swift; sourceTree = "<group>"; };
 		921003768253D7D483CCC1D8 /* FumoInterfacciaTest.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = FumoInterfacciaTest.swift; sourceTree = "<group>"; };
 		95889945EEE20611E0341AC7 /* WarSenseUITest.xctest */ = {isa = PBXFileReference; includeInIndex = 0; lastKnownFileType = wrapper.cfbundle; path = WarSenseUITest.xctest; sourceTree = BUILT_PRODUCTS_DIR; };
 		9B5A65298E62BF03714DD82F /* OsservazioniEsplorazioneTest.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = OsservazioniEsplorazioneTest.swift; sourceTree = "<group>"; };
 		9D136B104384C6AF309293B3 /* VistaACaselle.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = VistaACaselle.swift; sourceTree = "<group>"; };
 		9EF7773BD1ED816307203E97 /* PartitaCorrente.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = PartitaCorrente.swift; sourceTree = "<group>"; };
+		A169EFE841A32EA35429F504 /* OsservazioniTesterTest.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = OsservazioniTesterTest.swift; sourceTree = "<group>"; };
 		B35836D88F72DCE771CB2A93 /* Impaginazione.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Impaginazione.swift; sourceTree = "<group>"; };
 		B3FD0402E55F3494E1F28DCF /* SimboliDegliArchetipiTest.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SimboliDegliArchetipiTest.swift; sourceTree = "<group>"; };
 		B61635E47EDED9D5E8A15EA1 /* Codice */ = {isa = PBXFileReference; lastKnownFileType = folder; name = Codice; path = ../Codice; sourceTree = SOURCE_ROOT; };
@@ -248,6 +252,7 @@
 				27D480588F693D19D9E50AC7 /* LettoreAccessibilita.swift */,
 				8F2621F366CE07D66FC6A6EA /* MappaCampagnaAccessibileTest.swift */,
 				9B5A65298E62BF03714DD82F /* OsservazioniEsplorazioneTest.swift */,
+				A169EFE841A32EA35429F504 /* OsservazioniTesterTest.swift */,
 				325B59A8BC855637ABF9B2CB /* PannelloAzioniTest.swift */,
 				57DF274D15CDC79502145A2C /* PassaggioBattagliaInterfacciaTest.swift */,
 				C217410DA2BE88F4B1000D93 /* PorzioneVisibileTest.swift */,
@@ -256,6 +261,7 @@
 				7088EBAC70470929FF7BA18A /* SessioniPerInterfacciaTest.swift */,
 				B3FD0402E55F3494E1F28DCF /* SimboliDegliArchetipiTest.swift */,
 				026CC99253672C0BE5244297 /* StabilitaDellaDisposizioneTest.swift */,
+				8FAC923367D6E5FAA3E5B619 /* TestoDinamicoTest.swift */,
 				10A40D60A1907135F70F1FB4 /* ToccoDirettoTest.swift */,
 			);
 			path = ProveOspitate;
@@ -435,6 +441,7 @@
 				72C9006DDA7298DDDD235743 /* LettoreAccessibilita.swift in Sources */,
 				D5DF93E3EFFA96EC3D8BBDE7 /* MappaCampagnaAccessibileTest.swift in Sources */,
 				2A6515987A3A5AE13194DFF1 /* OsservazioniEsplorazioneTest.swift in Sources */,
+				47BD548F691A31A53FD0B380 /* OsservazioniTesterTest.swift in Sources */,
 				F9D782BD8B4FD18B38DF5922 /* PannelloAzioniTest.swift in Sources */,
 				F490E61A6685A9413EE8DE50 /* PassaggioBattagliaInterfacciaTest.swift in Sources */,
 				A39DDBD69C59FAA46714DAE6 /* PorzioneVisibileTest.swift in Sources */,
@@ -443,6 +450,7 @@
 				4F7ECFCC6A61E15D90A39997 /* SessioniPerInterfacciaTest.swift in Sources */,
 				873A5D26551D3035FC2D2BFE /* SimboliDegliArchetipiTest.swift in Sources */,
 				94A9A556DB6F6992ED60E383 /* StabilitaDellaDisposizioneTest.swift in Sources */,
+				4C9FE42BA5064D47AB9D4065 /* TestoDinamicoTest.swift in Sources */,
 				09CFF70CB8EC19E916A3C7BA /* ToccoDirettoTest.swift in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
