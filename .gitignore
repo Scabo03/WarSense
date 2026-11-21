@@ -20,3 +20,6 @@ private_keys/
 
 # Esito runtime della corsa separata delle sessioni complete (non versionato)
 esiti-sessioni-complete/
+
+# Le cartelle di lavoro del pilota della sessione da tester (incarico 28): gli esiti utili si copiano nei prodotti dell'incarico.
+Applicazione/build-interattivo/
