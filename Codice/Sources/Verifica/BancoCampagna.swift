@@ -83,14 +83,14 @@ public struct BancoCampagna: Sendable {
     }
 
     /// Le chiavi degli archetipi noti, per la fabbrica (rifiuto dell'archetipo ignoto).
-    private var archetipiNoti: Set<IdentificatoreDati> { Set(motore.valori.archetipi.keys) }
+    var archetipiNoti: Set<IdentificatoreDati> { Set(motore.valori.archetipi.keys) }
 
     // MARK: - Il passaggio alla battaglia al banco (01 §6, §15, incarico 24)
 
     /// Il modello PROVVISORIO dello scontro al banco (S24e): campo aperto standard su formato
     /// «cento», protezione anti-saturazione, il primo ufficiale. Cornice minima; il banco non tara
     /// il combattimento, che il titolare ha accettato.
-    private var modelloScontro: PonteCampagnaBattaglia.Modello {
+    var modelloScontro: PonteCampagnaBattaglia.Modello {
         PonteCampagnaBattaglia.Modello(formato: "cento", caratteristica: "campo_aperto",
             protezione: .antiSaturazione, fase: nil,
             ufficialeAvversario: motore.valori.ufficiali.keys.sorted().first)
@@ -99,7 +99,7 @@ public struct BancoCampagna: Sendable {
     /// Vero se per un gruppo esiste ALMENO UN comando di campagna valido (incarico 25): presidio,
     /// sosta con raccolta, una marcia verso un vicino, e — secondo la categoria — esplorazione o
     /// imboscata. È il predicato dell'invariante della giocabilità: un gruppo non-agito ordinabile.
-    private func ordinabile(_ gruppo: Gruppo, stato: StatoCampagna) -> Bool {
+    func ordinabile(_ gruppo: Gruppo, stato: StatoCampagna) -> Bool {
         var candidati: [ComandoCampagna] = [.presidio(gruppo: gruppo.id), .sostaConRaccolta(gruppo: gruppo.id)]
         for vicino in stato.griglia.vicini(di: gruppo.posizione) {
             candidati.append(.marcia(gruppo: gruppo.id, a: vicino,
@@ -113,7 +113,7 @@ public struct BancoCampagna: Sendable {
     /// Vero se un gruppo armato AVVERSARIO occupa una casella adiacente a quella del gruppo: la
     /// condotta del banco vi tende un'imboscata, così l'ingresso dell'avversario apre una battaglia
     /// da agguato invece che una ordinaria (incarico 24).
-    private func armatoAvversarioAdiacente(a gruppo: Gruppo, stato: StatoCampagna) -> Bool {
+    func armatoAvversarioAdiacente(a gruppo: Gruppo, stato: StatoCampagna) -> Bool {
         let avversa: Parte = gruppo.parte.avversaria
         for vicino in stato.griglia.vicini(di: gruppo.posizione) {
             if let occupante = stato.occupante(di: vicino, parte: avversa), occupante.categoria.eArmata {
@@ -132,7 +132,7 @@ public struct BancoCampagna: Sendable {
     /// sequenza per l'invariante di determinismo, deriva l'esito e lo PIEGA sulla mappa. Sorveglia
     /// i quattro invarianti del passaggio (conservazione, ritorno, blocco, rigiocatura). Il banco
     /// non solo RENDE POSSIBILE la battaglia: la GENERA e la gioca, e ne conta gli esiti.
-    private func giocaBattaglieInSospeso(_ stato: inout StatoCampagna,
+    func giocaBattaglieInSospeso(_ stato: inout StatoCampagna,
                                          violazioni: inout Set<String>) -> EsitiBattaglie {
         var conteggi = EsitiBattaglie()
         let motoreB = MotoreBattaglia(valori: motore.valori)
@@ -337,7 +337,7 @@ public struct BancoCampagna: Sendable {
 
     /// La condotta deterministica dell'avversario, la stessa della Sessione (RDA-114):
     /// il banco la «pompa» dopo il turno del giocatore, per generare partite intere.
-    private let condotta = CondottaAvversaria()
+    let condotta = CondottaAvversaria()
 
     /// La condotta: per ciascun gruppo in attesa, la prima destinazione valida
     /// nell'ordine di lettura se ne esiste una, altrimenti il presidio; il gruppo
@@ -814,7 +814,7 @@ public struct BancoCampagna: Sendable {
     /// Due gruppi propri adiacenti e NON in marcia, per la riunione, il primo per id.
     /// La riunione lavora su qualunque coppia adiacente, quale che sia lo stato
     /// dell'azione: è così che si esercita la regola «già agito se uno lo era».
-    private func coppiaRiunibile(_ stato: StatoCampagna) -> (IdGruppo, IdGruppo)? {
+    func coppiaRiunibile(_ stato: StatoCampagna) -> (IdGruppo, IdGruppo)? {
         // Solo i gruppi del GIOCATORE: la condotta del banco muove il giocatore, e una
         // riunione impartita per suo conto su gruppi avversari sarebbe invalida.
         let gruppi = stato.gruppi(di: .giocatore).filter { !$0.inMarcia }
@@ -831,7 +831,7 @@ public struct BancoCampagna: Sendable {
     /// nome disponibile: stacca il PRIMO reparto verso quella casella. La casella
     /// libera si prende da `destinazioniValide`, cioè le adiacenti libere e non già
     /// puntate — lo stesso vincolo del distaccamento (01 §5.6.0.2).
-    private func divisionePossibile(_ vista: VistaCampagna,
+    func divisionePossibile(_ vista: VistaCampagna,
                                     _ stato: StatoCampagna) -> (IdGruppo, [Int], Cella)? {
         guard stato.prossimoIndiceNome < valoriCampagna.nomiGruppi.count else { return nil }
         for gruppo in stato.gruppiInAttesa() where gruppo.composizione.count >= 2 {

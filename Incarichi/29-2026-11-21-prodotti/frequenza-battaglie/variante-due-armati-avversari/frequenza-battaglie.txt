@@ -1,0 +1,9 @@
+frequenza.versione_valori=0.13.0
+frequenza.partite_per_cella=200 giornate_massime=730 partite_giocate=1200 su 1200
+formato|condotta|partite|battaglie_ogni_10_giornate|battaglie_per_partita|prima_battaglia_mediana|partite_senza_battaglie|giornate_mediana|giornate_min|giornate_max|fine_avversario_senza_armati|fine_giocatore_senza_armati|fine_limite|ferma|giornate_mediane_fino_alla_fine_naturale
+campagna_grande|competente|200|0.04|2.40|21|33|730|15|731|7|0|161|32|40
+campagna_grande|prudente|200|0.00|0.27|18|147|730|730|730|0|0|200|0|-
+campagna_media|competente|200|0.31|16.74|30|51|730|12|731|0|0|144|56|-
+campagna_media|prudente|200|0.04|3.04|9|0|730|730|730|0|0|200|0|-
+campagna_piccola|competente|200|0.04|1.83|17|18|730|7|730|0|79|121|0|60
+campagna_piccola|prudente|200|0.01|1.00|4|0|730|730|730|0|0|200|0|-
