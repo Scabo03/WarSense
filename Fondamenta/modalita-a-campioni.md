@@ -1,6 +1,8 @@
 # La modalità di battaglia a campioni
 
-Documento di progetto della modalità a campioni — versione 1.1
+Documento di progetto della modalità a campioni — versione 1.2
+
+Novità della versione 1.2 (2026-11-21, incarico 29). Due rimandi alle decisioni del titolare del 21 novembre. La regola sui termini chiusi che fanno da soggetto — genere e numero dichiarati nel vocabolario, frasi intere per ciascun genere — vale anche per i titoli dei campioni ed è scritta nel documento 02 (punto 4.6): riformulati 7.4 e 11.4. Il meteo ha ora una previsione dichiarata con i termini della probabilità (documento 01, punto 12.2.1); se meteo e guasti valgano anche in questa modalità resta aperto e non è deciso: nuovo punto aperto 11.10, e 4.1 lo dichiara.
 
 Novità della versione 1.1 (2026-11-21, incarico 28). Per decisione del titolare meteo e guasti delle macchine restano affidati al caso, come eccezione dichiarata: il caso esiste nello scontro a campioni e, fuori da esso, nel solo perimetro del documento 01, punto 12.2, cioè le variazioni del meteo sul piano di campagna e i guasti delle macchine da guerra (documento 01, versione 3.9). Riscritto 4.1, che diceva il caso confinato allo scontro e regno, campagne e fronti interamente deterministici. Nessun'altra regola della modalità cambia.
 
@@ -44,7 +46,7 @@ Quando i consolidati saranno riallineati, questo documento potrà confluire in e
 
 ## 4. Il caso
 
-4.1 Il caso esiste nello scontro a campioni e, fuori da esso, nel solo perimetro del documento 01, punto 12.2: le variazioni del meteo sul piano di campagna e i guasti delle macchine da guerra, con la probabilità di guasto legata allo stato di manutenzione. È un'eccezione dichiarata, voluta dal titolare (documento 01, punto 12.1, dalla versione 3.9). Per il resto regno, campagne, fronti, avversario e battaglia a sciami restano deterministici.
+4.1 Il caso esiste nello scontro a campioni e, fuori da esso, nel solo perimetro del documento 01, punto 12.2: le variazioni del meteo sul piano di campagna e i guasti delle macchine da guerra, con la probabilità di guasto legata allo stato di manutenzione. È un'eccezione dichiarata, voluta dal titolare (documento 01, punto 12.1, dalla versione 3.9). Per il resto regno, campagne, fronti, avversario e battaglia a sciami restano deterministici. Se quel perimetro — meteo, con la sua previsione (documento 01, punto 12.2.1), e guasti — valga anche in questa modalità, il cui fronte non ha mappa (2.2), non è deciso: è il punto aperto 11.10.
 
 4.2 Ogni scontro ha un seme dichiarato.
 
@@ -102,7 +104,7 @@ Quando i consolidati saranno riallineati, questo documento potrà confluire in e
 
 7.3 Armamento ed equipaggiamento si fissano al reclutamento e non cambiano mai.
 
-7.4 Nessun nome proprio e nessuna storia scritta (00, punto 12.1). Ogni combattente ha un identificativo stabile, unico e mai riusato, più un titolo funzionale di due o tre parole. Il titolo entra nel vocabolario chiuso con il genere dichiarato, e le frasi che lo contengono sono scritte intere (00, punti 9.4 e 14.2).
+7.4 Nessun nome proprio e nessuna storia scritta (00, punto 12.1). Ogni combattente ha un identificativo stabile, unico e mai riusato, più un titolo funzionale di due o tre parole. Il titolo entra nel vocabolario chiuso con il genere e il numero dichiarati, e le frasi che lo contengono sono scritte intere per ciascuno dei quattro generi, secondo la regola del documento 02, punto 4.6 (00, punti 9.4 e 14.2).
 
 7.5 Al posto della storia c'è un registro delle imprese che il gioco produce da sé: scontri combattuti, ferite gravi sopravvissute, avversari abbattuti, pericoli corsi.
 
@@ -146,7 +148,7 @@ Quando i consolidati saranno riallineati, questo documento potrà confluire in e
 
 11.3 I numeri dell'organico e degli infortuni (6.2, 8.4).
 
-11.4 Il termine chiuso dello stato di pericolo mortale (6.5), da fissare nel documento 02 con il genere e le frasi intere.
+11.4 Il termine chiuso dello stato di pericolo mortale (6.5), da fissare nel documento 02; se fa da soggetto di una frase, con il genere e le frasi intere del punto 4.6 di quel documento.
 
 11.5 La scala del critico subito restando in piedi sotto il quaranta per cento della vita: le decisioni del 18–20 novembre fissano soltanto le fasce sopra il quaranta (6.3.2).
 
@@ -157,3 +159,5 @@ Quando i consolidati saranno riallineati, questo documento potrà confluire in e
 11.8 La tensione con il punto 3.3.2 del documento 01, secondo cui la scelta delle protezioni si compie in patria «senza sapere che cosa si incontrerà»: nella modalità a campioni l'armamento si fissa al reclutamento (7.3) e l'informazione sugli avversari è in gran parte certa (3.1).
 
 11.9 L'ordine di lettura dello scontro a due linee, che la carta impone di dichiarare elemento per elemento (00, punto 11.5), e la sua schermata: da progettare secondo il principio 7 esteso (00, punti 7.1–7.4), con gli scorrimenti che percorrono i combattenti di una linea e proseguono nell'altra.
+
+11.10 Se meteo e guasti delle macchine valgano anche nella modalità a campioni. Il caso fuori dallo scontro ha nel documento 01 il perimetro del punto 12.2 — le variazioni del meteo sul piano di campagna, con la previsione del punto 12.2.1, e i guasti delle macchine da guerra —, ma in questa modalità il fronte non ha mappa (2.2) e le voci militari sono combattenti ed eroi (1.3). Il titolare ha lasciato la questione aperta il 2026-11-21: non va decisa di iniziativa.
