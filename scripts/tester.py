@@ -92,8 +92,15 @@ def tocco_magico():
     # Il gesto su un elemento concreto: sull'iPad l'applicazione e la sua finestra non hanno coordinate
     # calcolabili per un tocco a più dita, e per VoiceOver il tocco magico vale ovunque.
     nomi = etichette()
+    if PANNELLO["chiudi"] in nomi and not any(n in nomi for n in ("Registro della campagna", "Fine del turno")):
+        attiva(etichetta=PANNELLO["chiudi"], tipo="pulsante")  # un pannello rimasto aperto copre la mappa
+        nomi = etichette()
     bersaglio = next((n for n in ("Registro della campagna", "Fine del turno", "Chiudi la giornata") if n in nomi), None)
-    c = {"etichetta": bersaglio, "tipo": "pulsante"} if bersaglio else {"contiene": "riga 1, c"}
+    if not bersaglio:
+        # Senza un pulsante visibile il tocco a due dita fa cadere il pilota (coordinate non calcolabili).
+        diario("osservazione_tester", testo="tocco magico non eseguito: nessun bersaglio visibile")
+        return ""
+    c = {"etichetta": bersaglio, "tipo": "pulsante"}
     e = cmd(dict({"azione": "multi_tocco", "tocchi": 2, "dita": 2, "ascolto": 3.0}, **c))
     s = sentito(e)
     diario("tocco_magico", sentito=s)
@@ -113,8 +120,25 @@ def prossimo_nel_rotore(su=False):
 
 # ---------------------------------------------------------------- la battaglia
 
+def evacua():
+    """Dopo la resa (ritirata combattuta, 01 §10.4): ogni proprio reparto che il pannello lascia evacuare
+    esce dal campo; gli altri restano. Le forze evacuate tornano sulla mappa e ripiegano (01 §10.6)."""
+    propri = [re.search(r"riga \d+, cella \d+", n).group(0) for n in etichette()
+              if re.search(r"riga \d+, cella \d+, tuo", n)]
+    for cella in propri[:6]:
+        attiva(contiene=cella + ",")
+        voci = etichette()
+        v = next((v for v in voci if v.startswith("Evacua questa unità")), None)
+        if v:
+            e = attiva(etichetta=v, tipo="pulsante", ascolto=3)
+            diario("evacuazione", cella=cella, sentito=sentito(e))
+        else:
+            attiva(etichetta=PANNELLO["chiudi"], tipo="pulsante")
+
+
 def battaglia():
     diario("battaglia_aperta", sentito=sentito(cmd({"azione": "parla", "ascolto": 3})))
+    ritirata = False
     for turno in range(1, 25):
         nomi = etichette()
         if "Resoconto della battaglia" in nomi:
@@ -134,8 +158,13 @@ def battaglia():
                 break
             attiva(contiene=m.group(0) + ",")
         # 2. Attacco: ogni proprio reparto dal suo pannello ingaggia o tira se può, altrimenti avanza.
+        #    Con «resa» i reparti restano nelle righe arretrate, da cui si evacuano dopo la resa.
         propri = [re.search(r"riga \d+, cella \d+", n).group(0) for n in etichette()
                   if re.search(r"riga \d+, cella \d+, tuo", n)]
+        if "resa" in OPZIONI:
+            propri = []
+            if ritirata:
+                evacua()
         for cella in propri[:4]:
             attiva(contiene=cella + ",")
             voci = etichette()
@@ -154,8 +183,17 @@ def battaglia():
             else:
                 attiva(etichetta=PANNELLO["chiudi"], tipo="pulsante")
         # 3. Resa se la battaglia si allunga, altrimenti fine del turno.
-        soglia_resa = 2 if "resa" in OPZIONI else 14
-        if turno >= soglia_resa and "Dichiara la resa" in etichette():
+        if "resa" in OPZIONI:
+            if not ritirata and turno >= 2 and "Dichiara la resa" in etichette():
+                e = attiva(etichetta="Dichiara la resa", tipo="pulsante", ascolto=3)
+                diario("resa", turno=turno, sentito=sentito(e))
+                if "Resa dichiarata" in sentito(e):
+                    ritirata = True
+                    evacua()
+            if "Resoconto della battaglia" in etichette():
+                break
+            attiva(etichetta="Fine del turno", tipo="pulsante", ascolto=4)
+        elif turno >= 14 and "Dichiara la resa" in etichette():
             e = attiva(etichetta="Dichiara la resa", tipo="pulsante", ascolto=3)
             diario("resa", turno=turno, sentito=sentito(e))
             if "Resoconto della battaglia" in etichette():
