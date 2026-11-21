@@ -6,7 +6,7 @@
 
 **Con il testo più grande, e con l'apparecchio in orizzontale, ogni schermata scorre:** «Fine del turno», «Torna all'inizio» e tutti i comandi dell'avvio si raggiungono sempre, a scorrimenti e al tatto. I titoli lunghi vanno a capo invece di essere tagliati.
 
-**Chiusa una schermata, il fuoco torna sul comando che l'aveva aperta,** per esempio su «Impostazioni» quando chiudi le impostazioni.
+**Chiusa una schermata, il fuoco torna sul comando che l'aveva aperta,** per esempio su «Impostazioni» quando chiudi le impostazioni, o sul comando che aveva aperto lo scontro quando torni dal resoconto, anche con il testo più grande.
 
 **Nelle impostazioni** i segmenti e le leve hanno un bersaglio più alto, che si trova più facilmente al tatto.
 
