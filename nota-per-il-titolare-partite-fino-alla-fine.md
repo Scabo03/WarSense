@@ -28,6 +28,6 @@ La ragione per cui questi blocchi arrivavano fino a te è che nessuna prova gioc
 
 Quando interroghi una casella che non vedi più da qualche giorno, ora senti «osservato» seguito da quanti turni sono passati, per esempio «osservato, tre turni fa». Prima la parola era avvistato, e si poteva scambiare per un nemico visto davvero: non lo era, era soltanto l'età del tuo ultimo sguardo su quella casella. Quando invece vedi davvero un nemico, l'annuncio resta quello di sempre: formazione avversaria avvistata, con la riga e la casella.
 
-## Che cosa provare
+## Le campagne della build precedente
 
-Gioca una campagna e usa almeno una volta il tasto per chiudere la giornata; manda un gruppo lontano finché resta senza provviste e verifica che il suo pannello offra la sosta; ascolta lo stato delle caselle che hai lasciato indietro e verifica che dica «osservato»; perdi una battaglia, scegli dove ripiegare e controlla che la campagna riprenda. Le campagne salvate con la build precedente non si riaprono, e il gioco te lo dice quando provi a riprenderle: comincia una partita nuova.
+Le campagne salvate con la build precedente non si riaprono, e il gioco te lo dice quando provi a riprenderle: comincia una partita nuova. Le verifiche di questa build le ha fatte il collaudo automatico, sul simulatore; ciò che non si è potuto automatizzare è dichiarato nel resoconto dell'incarico, e non è una prova che tocca a te.

@@ -1,0 +1,64 @@
+Prova d'interfaccia test_osservazione_5_il_pannello_del_gruppo_a_testo_massimo (scritta nell'incarico 28 e poi tolta), corsa il 2026-11-21 su WarSense iPhone Air (iOS 27.0), codice del ramo correzioni-esplorazione dopo 9a7408b.
+Uscita di xcodebuild: 138 (nessun fascio di risultati leggibile). Righe «Default interruption handler attempting to dismiss alert»: 2513 (grep -c).
+Estratto del registro, prime righe della prova e prime ripetizioni del gestore delle interruzioni:
+
+    t =      nans Interface orientation changed to Portrait
+    t =     0.00s Start Test at 2026-11-21 13:34:26.845
+    t =     0.02s Set Up
+    t =     0.02s Setting device orientation to Portrait
+    t =     0.05s     Wait for com.apple.springboard to idle
+    t =     0.06s Open com.scabo.warsense
+    t =     0.06s     Launch com.scabo.warsense
+    t =     0.53s         Setting up automation session
+    t =     2.53s         Wait for com.scabo.warsense to idle
+    t =     3.93s Waiting 15.0s for "Nuova campagna, mappa piccola" Button to exist
+    t =     4.99s     Checking `Expect predicate `existsNoRetry == 1` for object "Nuova campagna, mappa piccola" Button`
+    t =     4.99s         Checking existence of `"Nuova campagna, mappa piccola" Button`
+    t =     5.03s Tap "Nuova campagna, mappa piccola" Button
+    t =     5.03s     Wait for com.scabo.warsense to idle
+    t =     5.03s     Find the "Nuova campagna, mappa piccola" Button
+    t =     5.04s     Check for interrupting elements affecting "avvio.nuova_campagna_piccola" Button
+    t =     5.05s     Synthesize event
+    t =     5.40s     Wait for com.scabo.warsense to idle
+    t =     5.40s Waiting 15.0s for Any (First Match) to exist
+    t =     6.48s     Checking `Expect predicate `existsNoRetry == 1` for object Any (First Match)`
+    t =     6.48s         Checking existence of `Any (First Match)`
+    t =     6.50s Tap Any (First Match)
+    t =     6.50s     Wait for com.scabo.warsense to idle
+    t =     6.50s     Find the Any (First Match)
+    t =     6.51s     Check for interrupting elements affecting "riga 4, casella 1, tua Orso, formazione non armata, in attesa, composta da 4 atomi di fanteria leggera" Button
+    t =     6.53s     Synthesize event
+    t =     6.82s     Wait for com.scabo.warsense to idle
+    t =     6.82s Waiting 15.0s for "Chiudi il pannello" Button to exist
+    t =     7.88s     Checking `Expect predicate `existsNoRetry == 1` for object "Chiudi il pannello" Button`
+    t =     7.88s         Checking existence of `"Chiudi il pannello" Button`
+    t =     7.90s Checking existence of `"Marcia: scegli la casella sulla mappa" Button`
+    t =     7.91s Tap "Chiudi il pannello" Button
+    t =     7.91s     Wait for com.scabo.warsense to idle
+    t =     7.91s     Find the "Chiudi il pannello" Button
+    t =     7.92s     Check for interrupting elements affecting "Chiudi il pannello" Button
+    t =     7.94s     Found 1 interrupting element:
+    t =     7.94s         Find the "Azioni per Orso in riga 4, casella 1" Alert
+    t =     7.95s "Azioni per Orso in riga 4, casella 1" Alert from Target Application 'com.scabo.warsense'
+    t =     7.95s     Invoking UI interruption monitors for "Azioni per Orso in riga 4, casella 1" Alert from Target Application 'com.scabo.warsense'
+    t =     7.95s         Find the "Azioni per Orso in riga 4, casella 1" Alert
+    t =     7.96s         Checking existence of `Button (Elements matching predicate 'userTestingAttributes CONTAINS "cancel-button"')`
+    t =     7.97s         Checking existence of `Button (Elements matching predicate 'userTestingAttributes CONTAINS "cancel-button"')`
+    t =     7.98s Default interruption handler attempting to dismiss alert by tapping Button (Elements matching predicate 'userTestingAttributes CONTAINS "cancel-button"').
+    t =     7.98s         Tap Button (Elements matching predicate 'userTestingAttributes CONTAINS "cancel-button"')
+    t =     7.98s             Wait for com.scabo.warsense to idle
+    t =     7.98s             Find the Button (Elements matching predicate 'userTestingAttributes CONTAINS "cancel-button"')
+    t =     7.99s             Check for interrupting elements affecting "Chiudi il pannello" Button
+    t =     8.01s             Found 1 interrupting element:
+    t =     8.01s                 Find the "Azioni per Orso in riga 4, casella 1" Alert
+    t =     8.02s "Azioni per Orso in riga 4, casella 1" Alert from Target Application 'com.scabo.warsense'
+    t =     8.02s             Invoking UI interruption monitors for "Azioni per Orso in riga 4, casella 1" Alert from Target Application 'com.scabo.warsense'
+    t =     8.02s                 Find the "Azioni per Orso in riga 4, casella 1" Alert
+    t =     8.03s                 Checking existence of `Button (Elements matching predicate 'userTestingAttributes CONTAINS "cancel-button"')`
+    t =     8.04s                 Checking existence of `Button (Elements matching predicate 'userTestingAttributes CONTAINS "cancel-button"')`
+    t =     8.05s Default interruption handler attempting to dismiss alert by tapping Button (Elements matching predicate 'userTestingAttributes CONTAINS "cancel-button"').
+    t =     8.05s                 Tap Button (Elements matching predicate 'userTestingAttributes CONTAINS "cancel-button"')
+    t =     8.05s                     Wait for com.scabo.warsense to idle
+    t =     8.05s                     Find the Button (Elements matching predicate 'userTestingAttributes CONTAINS "cancel-button"')
+    t =     8.06s                     Check for interrupting elements affecting "Chiudi il pannello" Button
+    t =     8.08s                     Found 1 interrupting element:

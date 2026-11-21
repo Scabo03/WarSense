@@ -1,0 +1,7 @@
+  misure: saltato (--senza-programma)
+  cifre: saltato (dipende da «misure», che è stato saltato)
+RIFIUTATO: nota-per-il-titolare-zz-prova-del-cancello.md chiede al titolare una prova da fare: «verifica sul tuo iPhone». Il titolare non esegue prove a mano (CLAUDE.md, incarico 28): ogni verifica si fa con le automazioni e i simulatori, e ciò che non si riesce ad automatizzare si dichiara scoperto nel resoconto, con le vie tentate.
+uscita=1
+  cifre: saltato (dipende da «misure», che è stato saltato)
+RIFIUTATO: nota-per-il-titolare-divisione-riunione-rifornimento.md chiede al titolare una prova da fare: «Prova a riunire». Il titolare non esegue prove a mano (CLAUDE.md, incarico 28): ogni verifica si fa con le automazioni e i simulatori, e ciò che non si riesce ad automatizzare si dichiara scoperto nel resoconto, con le vie tentate.
+uscita=1

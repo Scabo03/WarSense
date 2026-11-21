@@ -1,0 +1,58 @@
+Il ramo riferimento-agosto prima della cancellazione (incarico 28).
+Locale e remoto a 62e08280c273678f11d0d71299322954183808fa = 62e08280c273678f11d0d71299322954183808fa; base di fusione con principale f7b29415d0a5a7ef7875acf096f2b761b0ef6c41.
+Commit non fusi (git log principale..origin/riferimento-agosto):
+  62e08280c273678f11d0d71299322954183808fa Ramo temporaneo: collaudo del principale con lo strumentario di agosto (Xcode 26.6) in integrazione continua
+File toccati (git diff --stat principale...origin/riferimento-agosto):
+   .github/workflows/riferimento-agosto.yml | 45 ++++++++++++++++++++++++++++++++
+   1 file changed, 45 insertions(+)
+
+Contenuto del solo file aggiunto, .github/workflows/riferimento-agosto.yml, conservato qui perché il commit non sarà più raggiungibile da un ramo:
+
+# TEMPORANEO (incarico 27, prima parte): il collaudo completo del principale
+# con lo strumentario di AGOSTO (Xcode 26.6, 17F113, lo stesso della build 27),
+# per distinguere ciò che fallisce per lo strumentario nuovo da ciò che falliva
+# già, e per avere l'elenco di riferimento delle avvertenze del compilatore.
+# Vive soltanto sul ramo riferimento-agosto, che si cancella a misura presa.
+name: riferimento-agosto
+on:
+  push:
+    branches: [riferimento-agosto]
+jobs:
+  riferimento:
+    runs-on: macos-26
+    timeout-minutes: 60
+    env:
+      DEVELOPER_DIR: /Applications/Xcode_26.6.app/Contents/Developer
+    steps:
+      - uses: actions/checkout@v5
+        with:
+          fetch-depth: 0
+      - name: Versioni
+        run: sw_vers; xcodebuild -version; swift --version; xcrun simctl list runtimes; python3 --version
+      - name: xcodegen
+        run: brew install xcodegen && xcodegen --version
+      - name: Collaudo completo con lo strumentario di agosto
+        shell: bash
+        run: |
+          set +e
+          ./scripts/collaudo-completo.sh > collaudo.log 2>&1
+          echo "USCITA_COLLAUDO=$?"
+          cat collaudo.log
+          exit 0
+      - name: Esito delle prove sul simulatore
+        if: always()
+        shell: bash
+        run: |
+          R=Applicazione/build/collaudo-risultati.xcresult
+          if [ -d "$R" ]; then
+            xcrun xcresulttool get test-results summary --path "$R" | python3 -c '
+          import json,sys; d=json.load(sys.stdin)
+          print({k:d.get(k) for k in ["result","totalTestCount","passedTests","failedTests","skippedTests"]})
+          for f in d.get("testFailures",[]): print("FALLITA", f.get("targetName"), f.get("testIdentifierString") or f.get("testName"), "|", (f.get("failureText") or "")[:500].replace("\n"," "))
+          for dv in d.get("devicesAndConfigurations",[]): print("apparecchio", dv.get("device",{}).get("deviceName"), dv.get("device",{}).get("osVersion"))'
+          else
+            echo "nessun fascio di risultati"
+          fi
+--- dopo:
+610ed7a11462526a7351fa8c2f50f8b089efe7f0	refs/heads/correzioni-esplorazione
+972aeb81b75b03386730b634ead8e61a84305aa5	refs/heads/principale

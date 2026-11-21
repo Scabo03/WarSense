@@ -2,24 +2,47 @@ import Foundation
 import Motore
 import Dati
 
-/// La DIAGNOSTICA di una chiusura esplicita della giornata (incarico 26): quali gruppi non avevano
-/// agito quando il titolare ha chiuso la giornata, il loro stato, e le azioni loro disponibili. È il
-/// dato che trasforma un blocco che il titolare non sa riprodurre in qualcosa di utilizzabile — se
-/// un gruppo risulta non-agito e senza alcuna azione disponibile, è il blocco, colto sul fatto. La
-/// Presentazione la scrive accanto al salvataggio, sicché viaggia con esso.
+/// La DIAGNOSTICA di una chiusura esplicita della giornata (incarico 26; dall'incarico 28 a due
+/// parti distinte): quali gruppi non avevano agito quando il giocatore ha premuto «Chiudi la
+/// giornata», il loro stato, le azioni loro disponibili e che cosa il tasto ne ha fatto. È il dato
+/// che trasforma un blocco che il titolare non sa riprodurre in qualcosa di utilizzabile — un gruppo
+/// non-agito senza alcuna azione disponibile è il blocco, colto sul fatto. La Presentazione la scrive
+/// accanto al salvataggio, sicché viaggia con esso; l'annuncio al giocatore conta i soli suoi gruppi.
 public struct DiagnosticaChiusura: Sendable, Codable {
     public struct GruppoNonAgito: Sendable, Codable {
         public let numero: Int
         public let nome: String
-        public let parte: String
         public let stato: String
         public let azioniDisponibili: [String]
+        /// L'ordine di restare dato dal tasto («presidio», «sosta_con_raccolta»), «nessuno» se non ne
+        /// esisteva alcuno valido (il blocco), o nulla per un gruppo avversario che ha agito da sé.
+        public var ordineDato: String?
+        /// Per un gruppo avversario: il comando che la sua condotta ha proposto e il Motore ha
+        /// respinto, col motivo (`codice:motivo`). È il blocco dalla parte dell'avversario.
+        public var propostaRespinta: String?
     }
     public let giorno: Int
-    public let gruppiNonAgiti: [GruppoNonAgito]
-    /// Vero se la giornata NON si sarebbe chiusa da sé: c'erano gruppi non-agiti. È il caso in cui
-    /// la diagnostica va conservata; se è falso, il titolare ha chiuso una giornata già chiudibile.
-    public var laGiornataNonSiSarebbeChiusa: Bool { !gruppiNonAgiti.isEmpty }
+    /// I gruppi del GIOCATORE che non avevano agito: il tasto ne ha concluso la giornata con
+    /// l'ordine di restare. È il solo numero che l'annuncio dichiara.
+    public let giocatore: [GruppoNonAgito]
+    /// I gruppi dell'AVVERSARIO che non avevano ancora agito: hanno svolto il loro turno per la via di
+    /// sempre, dopo il tasto. Quelli con `propostaRespinta` sono i gruppi per cui la condotta non ha
+    /// proposto un comando valido, e ai quali lo sblocco del tasto ha dato l'ordine di restare.
+    public let avversario: [GruppoNonAgito]
+    /// Vero se la giornata NON si sarebbe chiusa da sé: c'erano gruppi del giocatore non-agiti, o il
+    /// turno dell'avversario era bloccato. È il caso in cui la diagnostica va conservata.
+    public var laGiornataNonSiSarebbeChiusa: Bool {
+        !giocatore.isEmpty || avversario.contains { $0.propostaRespinta != nil }
+    }
+}
+
+/// L'esito della chiusura esplicita della giornata (incarico 28): la diagnostica e gli eventi che il
+/// giocatore è titolato a conoscere — il turno dell'avversario e la chiusura della giornata —, già
+/// proiettati (01 §5.6.11). Non vi stanno gli annunci dei presidi dati dal tasto ai gruppi del
+/// giocatore: li riassume l'annuncio della chiusura, che li conta.
+public struct EsitoChiusura: Sendable {
+    public let diagnostica: DiagnosticaChiusura
+    public let eventi: [EventoCampagna]
 }
 
 /// L'orchestratore di una campagna (05 §1.7): unico proprietario dello stato
@@ -39,6 +62,9 @@ public actor SessioneCampagna {
         /// Il rifiuto non è silenzioso: porta con sé il proprio motivo del
         /// vocabolario chiuso, che la Presentazione annuncia (00 §9).
         case oltreLaGiornataInCorso
+        /// La chiusura esplicita della giornata è chiesta con una battaglia in sospeso, che non si
+        /// scavalca (01 §6.4): il rifiuto porta il motivo del vocabolario chiuso (02 §6.5).
+        case battagliaInSospeso
     }
 
     private let motore: MotoreCampagna
@@ -133,7 +159,7 @@ public actor SessioneCampagna {
         if parte == .giocatore {
             eventi += try Self.svolgiTurnoAvversario(giornale: giornale, motore: motore,
                                                      condotta: condotta, cartella: cartella,
-                                                     stato: &stato)
+                                                     stato: &stato).eventi
         }
         // La proiezione è l'ultima difesa: alla Presentazione arrivano soltanto gli
         // eventi che il giocatore è titolato a conoscere (01 §5.6.11, RDA-115).
@@ -166,33 +192,91 @@ public actor SessioneCampagna {
                                        condotta: condotta, cartella: cartella, stato: &stato)
     }
 
-    /// La CHIUSURA ESPLICITA della giornata (incarico 26, decisione del titolare): una via d'uscita
-    /// sempre disponibile perché il giocatore non resti bloccato da un difetto in una partita in
-    /// corso. Chiude la giornata quale che sia lo stato dei gruppi, la iscrive nel giornale — sicché
-    /// sopravvive a un riavvio — e ne registra i marcatori. Ritorna la DIAGNOSTICA di ciò che la
-    /// rendeva necessaria: i gruppi che non avevano agito, il loro stato, le azioni loro disponibili.
-    /// La chiusura automatica (01 §5.6.0.6) resta: questo comando si aggiunge, non la sostituisce.
+    /// La CHIUSURA ESPLICITA della giornata (incarico 26, decisione del titolare; corretta
+    /// dall'incarico 28): la via d'uscita sempre disponibile perché il giocatore non resti bloccato da
+    /// un difetto in una partita in corso. Conclude la giornata dei SOLI gruppi del giocatore che non
+    /// hanno agito, ciascuno con l'ordine di restare (`MotoreCampagna.concludiLaGiornataDelGiocatore`),
+    /// e la iscrive nel giornale, sicché sopravvive a un riavvio. Poi l'avversario svolge il suo turno
+    /// per la stessa via di sempre (`svolgiTurnoAvversario`), e la giornata si chiude da sé con il suo
+    /// ultimo comando. Fino alla build 28 il tasto segnava spesa anche la giornata dei gruppi
+    /// avversari, che non muovevano più.
+    ///
+    /// Il BLOCCO DALLA PARTE DELL'AVVERSARIO — la sua condotta propone un comando che il Motore
+    /// respinge, e il suo turno non può proseguire — si scioglie così: il gruppo bloccato riceve
+    /// l'ordine di restare, per la stessa via dei comandi avversari (giornale e Motore), e il turno
+    /// riprende per i gruppi che restano. L'avversario non perde alcuna azione — la spende restando,
+    /// come i gruppi del giocatore — e la diagnostica registra il gruppo e la proposta respinta.
+    ///
+    /// Ritorna la diagnostica delle due parti, distinte, e gli eventi proiettati per il giocatore.
+    /// Una battaglia in sospeso non si scavalca (01 §6.4): il tasto la rifiuta col suo motivo.
     @discardableResult
-    public func chiudiGiornata() throws -> DiagnosticaChiusura {
-        // La diagnostica si raccoglie PRIMA della chiusura, sullo stato che l'ha resa necessaria:
-        // ogni gruppo non-agito, il suo stato dichiarato, e le azioni che gli erano disponibili.
-        let nonAgiti = stato.gruppi.values
-            .filter { !$0.haConclusoLaGiornata }
-            .sorted { $0.id.numero < $1.id.numero }
+    public func chiudiGiornata() throws -> EsitoChiusura {
+        guard stato.battaglieInSospeso.isEmpty else { throw ErroreSessione.battagliaInSospeso }
+        let giorno = stato.giorno
+        // La diagnostica si raccoglie PRIMA della chiusura, sullo stato che l'ha resa necessaria.
+        var giocatore = gruppiNonAgiti(di: .giocatore)
+        var avversario = gruppiNonAgiti(di: .avversario)
+
+        do { try giornale.appendi(.giornataChiusaDalGiocatore(giorno: giorno)) }
+        catch { throw ErroreSessione.scritturaFallita }
+        let (ordini, eventiTasto) = motore.concludiLaGiornataDelGiocatore(&stato)
+        try Self.registraChiusura(eventiTasto, avversarioHaAgito: false,
+                                  giornale: giornale, cartella: cartella, stato: stato)
+        let turno = try Self.svolgiTurnoAvversario(giornale: giornale, motore: motore,
+                                                   condotta: condotta, cartella: cartella,
+                                                   stato: &stato, sblocca: true)
+
+        for (id, ordine) in ordini {
+            if let i = giocatore.firstIndex(where: { $0.numero == id.numero }) {
+                giocatore[i].ordineDato = ordine.map(Self.codice(di:)) ?? "nessuno"
+            }
+        }
+        for sblocco in turno.sblocchi {
+            if let i = avversario.firstIndex(where: { $0.numero == sblocco.gruppo.numero }) {
+                avversario[i].ordineDato = sblocco.ordineDato.map(Self.codice(di:)) ?? "nessuno"
+                avversario[i].propostaRespinta = Self.codice(di: sblocco.proposta)
+                    + ":" + (sblocco.motivo?.rawValue ?? "")
+            }
+        }
+        // Gli annunci dei presidi dati dal tasto ai gruppi del giocatore non si consegnano: li
+        // riassume l'annuncio della chiusura. Restano i fatti che il giocatore non ha deciso.
+        let ordinati = Set(ordini.map(\.gruppo))
+        let eventi = (eventiTasto + turno.eventi).filter {
+            if case .presidioOrdinato(let g, _, _) = $0, ordinati.contains(g) { return false }
+            return true
+        }
+        return EsitoChiusura(diagnostica: DiagnosticaChiusura(giorno: giorno, giocatore: giocatore,
+                                                              avversario: avversario),
+                             eventi: motore.proiettaPerIlGiocatore(eventi, stato: stato))
+    }
+
+    /// I gruppi non-agiti di una parte, col loro stato e le azioni loro disponibili, in ordine di id.
+    private func gruppiNonAgiti(di parte: Parte) -> [DiagnosticaChiusura.GruppoNonAgito] {
+        stato.gruppi.values
+            .filter { $0.parte == parte && !$0.haConclusoLaGiornata }
+            .sorted { $0.id < $1.id }
             .map { g in
                 DiagnosticaChiusura.GruppoNonAgito(
-                    numero: g.id.numero, nome: g.nome, parte: g.parte.rawValue,
-                    stato: g.statoDichiarato.chiaveTesto,
-                    azioniDisponibili: azioniDisponibili(per: g, in: stato))
+                    numero: g.id.numero, nome: g.nome, stato: g.statoDichiarato.chiaveTesto,
+                    azioniDisponibili: azioniDisponibili(per: g, in: stato),
+                    ordineDato: nil, propostaRespinta: nil)
             }
-        let diagnostica = DiagnosticaChiusura(giorno: stato.giorno, gruppiNonAgiti: nonAgiti)
+    }
 
-        do { try giornale.appendi(.giornataChiusaDalGiocatore(giorno: stato.giorno)) }
-        catch { throw ErroreSessione.scritturaFallita }
-        let eventi = motore.chiudiLaGiornataForzata(&stato)
-        try Self.registraChiusura(eventi, avversarioHaAgito: false,
-                                  giornale: giornale, cartella: cartella, stato: stato)
-        return diagnostica
+    /// Il codice stabile di un comando di campagna (05 §12.6), per la diagnostica.
+    static func codice(di comando: ComandoCampagna) -> String {
+        switch comando {
+        case .marcia: return "marcia"
+        case .presidio: return "presidio"
+        case .revocaMarcia: return "revoca_marcia"
+        case .divisione: return "divisione"
+        case .riunione: return "riunione"
+        case .sostaConRaccolta: return "sosta_con_raccolta"
+        case .esplorazione: return "esplorazione"
+        case .imboscata: return "imboscata"
+        case .sabotaggio: return "sabotaggio"
+        case .studioApprofondito: return "studio_approfondito"
+        }
     }
 
     /// Le azioni disponibili a un gruppo non-agito, come codici stabili (05 §12.6): lo stesso
@@ -215,6 +299,22 @@ public actor SessioneCampagna {
         return codici
     }
 
+    /// Un gruppo avversario per cui la condotta ha proposto un comando che il Motore respinge
+    /// (incarico 28): il turno avversario non può proseguire da sé. Con lo sblocco del tasto il gruppo
+    /// riceve l'ordine di restare (`ordineDato`); nulla se non ne esiste alcuno valido.
+    struct SbloccoAvversario {
+        let gruppo: IdGruppo
+        let proposta: ComandoCampagna
+        let motivo: MotivoNonValidoCampagna?
+        let ordineDato: ComandoCampagna?
+    }
+
+    /// Ciò che il turno dell'avversario ha prodotto: gli eventi e gli sblocchi.
+    struct TurnoAvversario {
+        var eventi: [EventoCampagna] = []
+        var sblocchi: [SbloccoAvversario] = []
+    }
+
     /// Muove l'avversario dopo che tutti i gruppi del giocatore hanno agito (01 §5.6.11):
     /// finché nessun gruppo del giocatore attende e un gruppo avversario sì, la condotta
     /// decide un comando per il gruppo di id minore che attende, che si appende al
@@ -226,25 +326,53 @@ public actor SessioneCampagna {
     ///
     /// STATICO perché lo usa anche l'inizializzatore di ripresa, che è nonisolated e non
     /// può chiamare un metodo isolato dell'attore: opera sui parametri, non su `self`.
+    ///
+    /// Il comando proposto dalla condotta si CONVALIDA prima di applicarlo (incarico 28): fino alla
+    /// build 28 si applicava direttamente, e un comando respinto avrebbe fermato l'applicazione sulla
+    /// precondizione di `MotoreCampagna.applica`. Ora un comando respinto FERMA il turno — la giornata
+    /// resta aperta, e il tasto di chiusura ne è la via d'uscita — oppure, con `sblocca` (il solo
+    /// chiamante è il tasto), il gruppo bloccato riceve l'ordine di restare e il turno prosegue.
     @discardableResult
     private static func svolgiTurnoAvversario(giornale: Giornale, motore: MotoreCampagna,
                                               condotta: CondottaAvversaria, cartella: URL,
-                                              stato: inout StatoCampagna) throws -> [EventoCampagna] {
-        var eventi: [EventoCampagna] = []
+                                              stato: inout StatoCampagna,
+                                              sblocca: Bool = false) throws -> TurnoAvversario {
+        var turno = TurnoAvversario()
         while stato.gruppiInAttesa(di: .giocatore).isEmpty,
               stato.battaglieInSospeso.isEmpty, // una battaglia in sospeso ferma anche l'avversario (01 §6.4)
               !stato.gruppiInAttesa(di: .avversario).isEmpty {
             let vista = motore.vistaAvversario(stato: stato)
-            guard let comando = condotta.prossimoComando(vista: vista) else { break }
+            guard let proposto = condotta.prossimoComando(vista: vista) else { break }
+            let passo = decidiPassoAvversario(proposto: proposto, motore: motore, stato: stato,
+                                              sblocca: sblocca)
+            if let sblocco = passo.sblocco { turno.sblocchi.append(sblocco) }
+            guard let comando = passo.comando else { break }
             do { try giornale.appendi(.comandoCampagna(parte: .avversario, comando: comando)) }
             catch { throw ErroreSessione.scritturaFallita }
             let (nuovoStato, ev) = motore.applica(comando, parte: .avversario, stato: stato)
             stato = nuovoStato
-            eventi += ev
+            turno.eventi += ev
             try registraChiusura(ev, avversarioHaAgito: true,
                                  giornale: giornale, cartella: cartella, stato: stato)
         }
-        return eventi
+        return turno
+    }
+
+    /// La decisione di UN PASSO del turno avversario (incarico 28): il comando che la condotta ha
+    /// proposto, se il Motore lo convalida. Se lo respinge, il turno non può proseguire da sé: senza
+    /// lo sblocco nessun comando (il turno si ferma e la giornata resta aperta); con lo sblocco del
+    /// tasto, l'ordine di restare per il gruppo bloccato, e lo sblocco registrato per la diagnostica.
+    /// Se nemmeno un ordine di restare vale — fuori da una battaglia in sospeso non accade —, nessun
+    /// comando, e lo sblocco registrato senza ordine. Funzione pura dello stato.
+    static func decidiPassoAvversario(proposto: ComandoCampagna, motore: MotoreCampagna,
+                                      stato: StatoCampagna, sblocca: Bool)
+        -> (comando: ComandoCampagna?, sblocco: SbloccoAvversario?) {
+        let esito = motore.valida(proposto, parte: .avversario, stato: stato)
+        if esito.eValido { return (proposto, nil) }
+        guard sblocca else { return (nil, nil) }
+        let restare = motore.ordineDiRestare(per: proposto.gruppo, parte: .avversario, stato: stato)
+        return (restare, SbloccoAvversario(gruppo: proposto.gruppo, proposta: proposto,
+                                           motivo: esito.motivo, ordineDato: restare))
     }
 
     /// Scrive i marcatori e scatta l'istantanea quando una serie di eventi ha CHIUSO la
@@ -365,9 +493,15 @@ public actor SessioneCampagna {
     /// proprio ultimo, che il confine sigilla se la giornata si è chiusa (incarico 18).
     /// Prima dell'avversario — dentro il proprio turno — l'ultimo comando è comunque del
     /// giocatore, sicché l'annullamento nella giornata in corso resta quello di prima.
+    ///
+    /// La chiusura esplicita della giornata è un gesto del GIOCATORE (incarico 28): se è l'ultimo,
+    /// l'annullamento la ritira intera — gli ordini di restare dati dal tasto e tutto ciò che è
+    /// seguito —, con lo stesso confine di ogni altro ordine. Se l'avversario ha poi mosso, la
+    /// chiusura è sigillata dal marcatore di risoluzione e l'annullamento è rifiutato col suo motivo.
     private func ultimoOrdine(di parte: Parte) -> Int? {
         for riga in giornale.righe.reversed() {
             if case .comandoCampagna(let p, _) = riga.voce, p == parte { return riga.numero }
+            if parte == .giocatore, case .giornataChiusaDalGiocatore = riga.voce { return riga.numero }
         }
         return nil
     }
@@ -460,9 +594,10 @@ public actor SessioneCampagna {
                 // rileggere i file della battaglia. È così che l'esito sopravvive a un riavvio.
                 _ = motore.applicaEsitoInCampagna(esito, in: &statoCorrente)
             case .giornataChiusaDalGiocatore:
-                // La chiusura esplicita del titolare (incarico 26): rigiocata, chiude la giornata
-                // forzatamente, sicché lo stato dopo un riavvio è quello che il giocatore ha lasciato.
-                _ = motore.chiudiLaGiornataForzata(&statoCorrente)
+                // La chiusura esplicita del giocatore (incarico 26; incarico 28): rigiocata, dà ai SOLI
+                // gruppi del giocatore che non avevano agito l'ordine di restare, come dal vivo. Il
+                // turno dell'avversario che l'ha seguita sta nelle righe successive, come comandi suoi.
+                _ = motore.concludiLaGiornataDelGiocatore(&statoCorrente)
             default:
                 continue
             }

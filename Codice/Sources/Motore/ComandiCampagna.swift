@@ -84,6 +84,19 @@ public enum ComandoCampagna: Hashable, Codable, Sendable {
     /// a confermato la conoscenza della formazione studiata — composizione, carico e direzione
     /// di marcia (01 §5.10.2). Non apre battaglia. Il bersaglio è la formazione co-locata.
     case studioApprofondito(gruppo: IdGruppo)
+
+    /// Il gruppo che il comando riguarda: chi agisce, o — per la revoca e la riunione, che non sono
+    /// azioni — il gruppo cui l'ordine è dato (incarico 28). Serve a chi deve attribuire un comando
+    /// a un gruppo senza rifarne la semantica: la diagnostica della chiusura della giornata e
+    /// l'invariante per cui nessun gesto del giocatore toglie un'azione all'avversario.
+    public var gruppo: IdGruppo {
+        switch self {
+        case .marcia(let g, _, _), .presidio(let g), .revocaMarcia(let g), .divisione(let g, _, _),
+             .riunione(let g, _), .sostaConRaccolta(let g), .esplorazione(let g), .imboscata(let g),
+             .sabotaggio(let g), .studioApprofondito(let g):
+            return g
+        }
+    }
 }
 
 /// I motivi chiusi di non ammissibilità sulla mappa (05 §3.2). Ogni caso

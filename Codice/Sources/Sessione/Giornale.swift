@@ -77,7 +77,15 @@ public struct FondazioneCampagna: Codable, Sendable {
     /// contiene e si ricodifica identico; ma la versione va DICHIARATA perché la regola con cui una
     /// partita in corso si svolge cambia (esiste ora un modo di chiudere la giornata che prima non
     /// c'era). Incompatibile all'indietro, dichiarato e non riaperto in silenzio (00 §15.2).
-    public static let schemaCorrente = 8
+    ///
+    /// Versione 9 dalla correzione del tasto (incarico 28): `giornataChiusaDalGiocatore`, rigiocata,
+    /// dà ai SOLI gruppi del giocatore che non avevano agito l'ordine di restare, e il turno
+    /// dell'avversario che segue sta nel giornale come suoi comandi. Fino alla versione 8 la stessa
+    /// riga segnava spesa la giornata di TUTTI i gruppi, avversario compreso: un giornale 8 con quella
+    /// riga, rigiocato con la regola nuova, lascerebbe in attesa i gruppi avversari e la riga dopo
+    /// — un ordine del giorno successivo — non sarebbe più valida. Incompatibile all'indietro,
+    /// dichiarato e non riaperto in silenzio (00 §15.2).
+    public static let schemaCorrente = 9
 
     public init(versioneSchema: Int, versioneValori: String, versioneTesti: String,
                 seme: UInt64, identificatore: String, scenario: ScenarioCampagna) {
@@ -150,8 +158,11 @@ public enum VoceGiornale: Codable, Sendable {
     case battagliaConclusa(esito: EsitoInCampagna)
     /// La CHIUSURA ESPLICITA della giornata da parte del giocatore (incarico 26, decisione del
     /// titolare che rovescia una regola d'architettura: la giornata si chiudeva solo da sé). È una
-    /// via d'uscita, non un ordine: rigiocata, chiude la giornata forzatamente — i gruppi non-agiti
-    /// spendono la giornata — sicché lo stato dopo un riavvio è quello che il giocatore ha lasciato.
+    /// via d'uscita del giocatore: rigiocata, dà ai SOLI suoi gruppi che non avevano agito l'ordine
+    /// di restare (schema 9, incarico 28; fino allo schema 8 spendeva la giornata di tutti i gruppi,
+    /// avversario compreso), sicché lo stato dopo un riavvio è quello che il giocatore ha lasciato.
+    /// Il turno dell'avversario che la segue sta nelle righe successive, come suoi comandi. Per
+    /// l'annullamento è un gesto del giocatore come un ordine (`SessioneCampagna.ultimoOrdine`).
     /// Aggiunta in coda: i casi preesistenti si ricodificano identici (`CompatibilitaGiornaleTest`).
     case giornataChiusaDalGiocatore(giorno: Int)
 }

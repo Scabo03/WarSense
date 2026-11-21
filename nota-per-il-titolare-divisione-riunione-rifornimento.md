@@ -10,7 +10,7 @@ Attiva una destinazione. Se hai scelto almeno un reparto da tenere e almeno uno 
 
 ## Riunire due gruppi
 
-Attiva un gruppo che ha un tuo gruppo nella casella accanto: nel pannello trovi la voce per riunirlo con quel vicino, chiamato per nome. Attivandola, i due diventano uno solo, e il maggiore dei due conserva il nome e la casella. Riunire non costa la giornata; ma se uno dei due aveva già agito, il gruppo unito si considera avere già agito, per non regalare una mossa. Prova a riunire due gruppi vicini e ascolta quale nome sopravvive.
+Attiva un gruppo che ha un tuo gruppo nella casella accanto: nel pannello trovi la voce per riunirlo con quel vicino, chiamato per nome. Attivandola, i due diventano uno solo, e il maggiore dei due conserva il nome e la casella. Riunire non costa la giornata; ma se uno dei due aveva già agito, il gruppo unito si considera avere già agito, per non regalare una mossa. Il nome che sopravvive è quello del maggiore.
 
 ## Un gruppo in marcia è inchiodato
 

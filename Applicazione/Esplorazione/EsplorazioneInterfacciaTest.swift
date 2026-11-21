@@ -33,7 +33,10 @@ final class EsplorazioneInterfacciaTest: XCTestCase {
     private var rilievi: [[String: Any]] = []
     private var vo: XCUIVoiceOverService { XCUIDevice.shared.voiceOverService }
 
-    override func setUp() {
+    // In modo Swift 6 (incarico 28) le forme sincrone di `setUp` e `tearDown` di XCTest non sono
+    // isolate sull'attore principale, mentre la classe e i servizi di XCUITest lo sono: si usano le
+    // forme asincrone, che XCTest isola sull'attore principale, senza cambiare che cosa fanno.
+    override func setUp() async throws {
         continueAfterFailure = true
         app = XCUIApplication()
         if testo == "grande" {
@@ -44,8 +47,8 @@ final class EsplorazioneInterfacciaTest: XCTestCase {
         XCUIDevice.shared.orientation = orientamento == "orizzontale" ? .landscapeLeft : .portrait
     }
 
-    override func tearDown() {
-        try? vo.disable()
+    override func tearDown() async throws {
+        _ = try? vo.disable()
         if let dati = try? JSONSerialization.data(withJSONObject: rilievi, options: [.prettyPrinted, .sortedKeys]) {
             let allegato = XCTAttachment(data: dati, uniformTypeIdentifier: "public.json")
             allegato.name = "rilievi-\(configurazione)-\(name.replacingOccurrences(of: " ", with: "_"))"

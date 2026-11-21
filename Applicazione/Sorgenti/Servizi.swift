@@ -112,13 +112,22 @@ enum Fuoco {
     enum Movimento: Equatable {
         case schermataAperta
         case richiesto
+        /// Chiusa una schermata, il fuoco torna sul comando che l'aveva aperta, dove il giocatore
+        /// l'aveva lasciato (02 §5.1; incarico 28, osservazione 6 dell'esplorazione dell'incarico 27).
+        case schermataChiusa
     }
     private(set) static var registro: [Movimento] = []
 
     /// Il fuoco si sposta soltanto su richiesta dell'utente o all'apertura di una
     /// schermata nuova. Nessun altro punto del programma pubblica notifiche di fuoco.
+    /// L'elemento verso cui il fuoco è stato portato l'ultima volta: è il contenuto stesso della
+    /// notifica, conservato come il motivo, perché le prove possano dire DOVE il fuoco è andato e non
+    /// solo che si è mosso (incarico 28).
+    private(set) static weak var ultimoBersaglio: AnyObject?
+
     static func sposta(a elemento: Any?, perche movimento: Movimento) {
         registro.append(movimento)
+        ultimoBersaglio = elemento as AnyObject?
         UIAccessibility.post(notification: .screenChanged, argument: elemento)
     }
 

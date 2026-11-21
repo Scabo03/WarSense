@@ -853,19 +853,58 @@ public struct MotoreCampagna: Sendable {
         return eventi
     }
 
-    /// La CHIUSURA ESPLICITA della giornata (incarico 26, decisione del titolare): chiude la
-    /// giornata corrente quale che sia lo stato dei gruppi, marcando come SPESA la giornata di ogni
-    /// gruppo che non l'ha ancora conclusa — la chiusura del titolare vale, per essi, come un ordine
-    /// di restare —, poi lascia proseguire la cascata automatica (`chiudiLaGiornataSeServe`). È una
-    /// via d'uscita per il giocatore, NON una correzione: la chiusura automatica (01 §5.6.0.6) resta
-    /// e vale come prima. Una battaglia in sospeso non si scavalca (01 §6.4): quel blocco si scioglie
-    /// aprendo la battaglia dalla casella, non chiudendo la giornata.
-    public func chiudiLaGiornataForzata(_ stato: inout StatoCampagna) -> [EventoCampagna] {
-        guard !stato.gruppi.isEmpty, stato.battaglieInSospeso.isEmpty else { return [] }
-        for id in stato.gruppi.keys.sorted() where !stato.gruppi[id]!.haConclusoLaGiornata {
-            stato.gruppi[id]!.azioneSpesa = true
+    /// L'ORDINE DI RESTARE per un gruppo che non ha concluso la giornata (incarico 28): «stare fermi è
+    /// a sua volta un'azione ordinabile e non un'omissione» (01 §5.6.0.6). Il presidio, cioè restare
+    /// fermi in guardia (01 §5.6.8.1), oppure — per un gruppo che deve rifornirsi, come fa la condotta
+    /// dell'avversario — la sosta con raccolta, che è l'altro modo di restare (01 §5.6.5); se il primo
+    /// non è valido si prova l'altro. Nulla se nessuno dei due vale: fuori da una battaglia in sospeso
+    /// non accade, perché la sosta con raccolta è valida per ogni gruppo che non ha agito (invariante
+    /// della giocabilità, RDA-137), sicché il nulla è il blocco colto sul fatto. Vale per le due parti.
+    public func ordineDiRestare(per id: IdGruppo, parte: Parte, stato: StatoCampagna) -> ComandoCampagna? {
+        guard let gruppo = stato.gruppi[id] else { return nil }
+        let presidio = ComandoCampagna.presidio(gruppo: id)
+        let sosta = ComandoCampagna.sostaConRaccolta(gruppo: id)
+        for ordine in gruppo.deveRifornirsi ? [sosta, presidio] : [presidio, sosta]
+        where valida(ordine, parte: parte, stato: stato).eValido {
+            return ordine
         }
-        return chiudiLaGiornataSeServe(&stato)
+        return nil
+    }
+
+    /// La CHIUSURA ESPLICITA della giornata da parte del giocatore (incarico 26, decisione del
+    /// titolare; corretta dall'incarico 28). Conclude la giornata dei SOLI gruppi del giocatore che
+    /// non l'hanno conclusa, ciascuno con l'ordine di restare (`ordineDiRestare`), applicato come ogni
+    /// altro ordine. I gruppi dell'AVVERSARIO non si toccano: il loro turno lo svolge poi la Sessione
+    /// per la via di sempre (01 §5.6.11), e la giornata si chiude da sé con il loro ultimo comando —
+    /// o subito, se l'avversario non ha gruppi in attesa. Fino alla build 28 questa funzione segnava
+    /// spesa la giornata di TUTTI i gruppi, avversario compreso, e il tasto gli toglieva il turno.
+    /// Un gruppo del giocatore per cui non esiste alcun ordine di restare — il blocco che l'invariante
+    /// della giocabilità vuole impossibile — conclude la giornata senza ordine: è la via d'uscita che
+    /// resta al giocatore quale che sia il difetto, e la diagnostica della Sessione lo dichiara. Una
+    /// battaglia in sospeso non si scavalca (01 §6.4). Dipende solo dallo stato: rigiocata dal
+    /// giornale dà lo stesso esito. Ritorna, per ciascun gruppo, l'ordine dato (nil: senza ordine).
+    public func concludiLaGiornataDelGiocatore(_ stato: inout StatoCampagna)
+        -> (ordini: [(gruppo: IdGruppo, ordine: ComandoCampagna?)], eventi: [EventoCampagna]) {
+        guard !stato.gruppi.isEmpty, stato.battaglieInSospeso.isEmpty else { return ([], []) }
+        let giorno = stato.giorno
+        var ordini: [(gruppo: IdGruppo, ordine: ComandoCampagna?)] = []
+        var eventi: [EventoCampagna] = []
+        for id in stato.gruppiInAttesa(di: .giocatore).map(\.id).sorted() {
+            // L'ultimo ordine di restare può chiudere la giornata (avversario senza gruppi in attesa):
+            // da lì in poi la giornata è un'altra, e nessun gruppo le appartiene più.
+            guard stato.giorno == giorno, stato.gruppi[id]?.haConclusoLaGiornata == false else { continue }
+            if let ordine = ordineDiRestare(per: id, parte: .giocatore, stato: stato) {
+                let (nuovo, ev) = applica(ordine, parte: .giocatore, stato: stato)
+                stato = nuovo
+                eventi += ev
+                ordini.append((id, ordine))
+            } else {
+                stato.gruppi[id]!.azioneSpesa = true
+                ordini.append((id, nil))
+            }
+        }
+        if stato.giorno == giorno { eventi += chiudiLaGiornataSeServe(&stato) }
+        return (ordini, eventi)
     }
 
     /// Le risoluzioni di fine giornata (01 §5.6.11): un MOMENTO DICHIARATO E ORDINATO,

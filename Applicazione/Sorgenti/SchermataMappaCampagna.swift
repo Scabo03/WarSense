@@ -34,11 +34,11 @@ final class SchermataMappaCampagna: UIViewController {
     private let scorrimentoComandi = UIScrollView()
     /// Altezza minima RICHIESTA della mappa: sufficiente a una riga intera di caselle.
     private static let altezzaMinimaMappa: CGFloat = 120
-    private let pulsanteRegistro = UIButton(type: .system)
-    private let pulsanteChiudiGiornata = UIButton(type: .system)
-    private let pulsanteAnnulla = UIButton(type: .system)
-    private let pulsanteAzzera = UIButton(type: .system)
-    private let pulsanteEsci = UIButton(type: .system)
+    private let pulsanteRegistro = PulsanteMultiriga(type: .system)
+    private let pulsanteChiudiGiornata = PulsanteMultiriga(type: .system)
+    private let pulsanteAnnulla = PulsanteMultiriga(type: .system)
+    private let pulsanteAzzera = PulsanteMultiriga(type: .system)
+    private let pulsanteEsci = PulsanteMultiriga(type: .system)
 
     init(partita: PartitaCampagna) {
         self.partita = partita
@@ -86,6 +86,8 @@ final class SchermataMappaCampagna: UIViewController {
             pulsante.titleLabel?.font = .preferredFont(forTextStyle: .body)
             pulsante.titleLabel?.adjustsFontForContentSizeCategory = true
             pulsante.titleLabel?.numberOfLines = 0
+            pulsante.titleLabel?.lineBreakMode = .byWordWrapping
+            pulsante.titleLabel?.textAlignment = .center
             colonnaComandi.addArrangedSubview(pulsante)
             pulsante.heightAnchor.constraint(greaterThanOrEqualToConstant: 44).isActive = true
         }
@@ -133,8 +135,13 @@ final class SchermataMappaCampagna: UIViewController {
         vistaMappa.accessibilityElements = ordineCaselle.map { elementi[$0]! }
         // Ordine di lettura dichiarato: prima le caselle, poi i comandi globali
         // (02 §2.8), esattamente come in battaglia.
-        view.accessibilityElements = [vistaMappa, pulsanteRegistro, pulsanteChiudiGiornata,
-                                      pulsanteAnnulla, pulsanteAzzera, pulsanteEsci]
+        // I comandi si dichiarano sulla BANDA SCORREVOLE che li contiene (incarico 28): così il
+        // contenitore scorrevole sta sul loro percorso d'accessibilità e VoiceOver li porta in vista
+        // (osservazione 5 dell'esplorazione dell'incarico 27: a testo massimo «Torna all'inizio»
+        // restava sotto il bordo).
+        scorrimentoComandi.accessibilityElements = [pulsanteRegistro, pulsanteChiudiGiornata,
+                                                    pulsanteAnnulla, pulsanteAzzera, pulsanteEsci]
+        view.accessibilityElements = [vistaMappa, scorrimentoComandi]
         montaRotori()
         aggiorna(con: stato)
 
@@ -572,23 +579,33 @@ final class SchermataMappaCampagna: UIViewController {
                                         confermaConRiapertura: "campagna.azzerato_giornata_riaperta") }
     }
 
-    /// La CHIUSURA ESPLICITA della giornata (incarico 26, decisione del titolare): sempre
-    /// disponibile, chiude la giornata quale che sia lo stato dei gruppi. Annuncia — con significato
-    /// di conferma, non interrompente — e NON sposta il fuoco (nessun `Fuoco.sposta`), come annulla e
-    /// azzera. Se la giornata non si sarebbe chiusa da sé (c'erano gruppi non-agiti), il gioco ne ha
-    /// conservato la traccia accanto al salvataggio, e l'annuncio lo dice.
+    /// La CHIUSURA ESPLICITA della giornata (incarico 26, decisione del titolare; incarico 28): sempre
+    /// disponibile. Conclude la giornata dei gruppi del giocatore che non hanno agito, con l'ordine di
+    /// restare; poi l'avversario muove e la giornata si chiude da sé. Annuncia — con significato di
+    /// conferma, non interrompente — quanti gruppi DEL GIOCATORE il tasto ha fatto restare (fino alla
+    /// build 28 contava anche quelli dell'avversario, rivelandone il numero), poi consegna i fatti del
+    /// turno avversario e della chiusura per la via di sempre. NON sposta il fuoco (nessun
+    /// `Fuoco.sposta`), come annulla e azzera. Con una battaglia in sospeso il tasto è rifiutato col
+    /// motivo, come ogni comando bloccato (02 §6.5).
     @objc private func chiudiGiornata() {
         Task {
-            let diagnostica = try? await partita.chiudiGiornata()
-            await ricaricaStato()
-            let testo: String
-            if let d = diagnostica, d.laGiornataNonSiSarebbeChiusa {
-                testo = testi.frase("giornata.chiusa_con_diagnostica", d.gruppiNonAgiti.count).testo
-            } else {
-                testo = testi.frase("giornata.chiusa_conferma").testo
+            do {
+                let esito = try await partita.chiudiGiornata()
+                await ricaricaStato()
+                let propri = esito.diagnostica.giocatore.count
+                let testo = propri > 0
+                    ? testi.frase("giornata.chiusa_con_diagnostica", propri).testo
+                    : testi.frase("giornata.chiusa_conferma").testo
+                partita.ambiente.segnali.annuncia(
+                    TestoLocalizzato(testo: testo, lingua: testi.lingua), significato: .conferma)
+                partita.segnala(esito.eventi)
+            } catch SessioneCampagna.ErroreSessione.battagliaInSospeso {
+                partita.ambiente.segnali.annuncia(TestoLocalizzato(
+                    testo: testi.termine(MotivoNonValidoCampagna.battagliaInSospeso.rawValue).testo,
+                    lingua: testi.lingua))
+            } catch {
+                await ricaricaStato()
             }
-            partita.ambiente.segnali.annuncia(
-                TestoLocalizzato(testo: testo, lingua: testi.lingua), significato: .conferma)
         }
     }
 

@@ -19,6 +19,7 @@ WarSense è un gestionale strategico militare a turni in Swift puro per iOS e iP
 - Contano i cancelli che RIFIUTANO, non le prescrizioni scritte: ogni regola nuova che conta diventa un controllo che rifiuta lo stato sbagliato, e ogni cancello nuovo si vede fallire una volta di proposito, con l'uscita riportata.
 - Si verifica su partite giocate attraverso l'interfaccia, non soltanto sul Motore.
 - Nessuna stringa rivolta al giocatore nel codice (i testi stanno in `Codice/Sources/Contenuti/Testi/`), nessun numero di gioco fuori dai file di dati (`Codice/Sources/Contenuti/Valori/`).
+- Il titolare non esegue prove a mano: ogni verifica si fa con le automazioni e i simulatori. Ciò che non si riesce ad automatizzare si dichiara come scoperto nel resoconto, con le vie tentate, e non si passa al titolare come prova da fare.
 - Riprodurre prima di correggere; misurare prima di tarare.
 - Nessun canale che esista per il solo collaudo.
 - Nessuna prova indebolita per farla passare.
@@ -46,7 +47,3 @@ Chi esamina il lavoro legge il repo remoto.
 - I prodotti delle prove si consegnano come testo, in una cartella dedicata all'incarico: esiti in testo o JSON, trascrizioni, osservazioni e una selezione di schermate PNG, al massimo una ventina di megabyte; mai i fascicoli grezzi dei risultati.
 - In coda al resoconto, separati: ciò che si è fatto senza che fosse chiesto, ciò che era chiesto e non è stato fatto, i tempi per compilazione, collaudo, simulatore, caricamento ed esplorazione.
 - Il messaggio finale nel terminale contiene soltanto: se la build è uscita, il commit finale del principale, i rami spinti, e i percorsi del resoconto e della cartella dei prodotti.
-
-## Contraddizioni segnalate, non risolte
-
-- `forma-dei-resoconti.md` («La regola in vigore») vuole le modifiche descritte nel resoconto «in termini di che cosa è cambiato, dove, e quale invariante o requisito ne risulta coperto»; la forma della consegna qui sopra (incarico 27) vuole per ogni modifica una sola riga con commit e percorso, senza parafrasi. Le due regole non sono state conciliate: la decisione spetta al titolare.

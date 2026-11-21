@@ -2,7 +2,7 @@
 
 Documento di lavoro. Versione 1.1, scrematura completata e modifiche applicate ai documenti consolidati.
 
-Avvertenza del 2026-11-20 (incarico 27). Questo documento è la memoria delle scelte della fase due e resta com'era. Alcune scelte qui registrate sono superate dalle decisioni del titolare del 18–20 novembre 2026: le due modalità di battaglia, lo scambio dei termini campagna e fronte, il caso confinato allo scontro a campioni (che ritira il caso da meteo e guasti, §1.16, §1.17, §6.3), lo stato di conoscenza «osservato» al posto del termine vecchio (§1.8). Prevalgono i documenti consolidati nelle versioni 00 1.3, 01 3.8, 02 2.6, 03 2.5, 05 1.4 e il documento della modalità a campioni (registro delle decisioni, RDA-144–147).
+Avvertenza del 2026-11-20 (incarico 27). Questo documento è la memoria delle scelte della fase due e resta com'era. Alcune scelte qui registrate sono superate dalle decisioni del titolare del 18–20 novembre 2026: le due modalità di battaglia, lo scambio dei termini campagna e fronte, il caso confinato allo scontro a campioni (che ritira il caso da meteo e guasti, §1.16, §1.17, §6.3), lo stato di conoscenza «osservato» al posto del termine vecchio (§1.8). Prevalgono i documenti consolidati nelle versioni 00 1.3, 01 3.8, 02 2.6, 03 2.5, 05 1.4 e il documento della modalità a campioni (registro delle decisioni, RDA-144–147). Il 2026-11-21 (incarico 28) il titolare ha riportato al caso meteo e guasti delle macchine, come eccezione dichiarata accanto allo scontro a campioni (01 3.9 §12.1, §12.2; RDA-152): per quella parte valgono il documento 01 nella versione 3.9, 02 2.7, 03 2.6 e 05 1.5.
 
 ## 0. Che cosa contiene e a che punto siamo
 

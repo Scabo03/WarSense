@@ -1,0 +1,69 @@
+warning: 'codice': found 7 file(s) which are unhandled; explicitly declare them as resources or exclude from the target
+    /Users/lucascabini/Developer/WarSense/Codice/Tests/SessioneTest/CampioniGiornale/campioni.jsonl
+    /Users/lucascabini/Developer/WarSense/Codice/Tests/SessioneTest/RiproduzioneOro/giornale.jsonl
+    /Users/lucascabini/Developer/WarSense/Codice/Tests/SessioneTest/RiproduzioneOro/impronta.txt
+    /Users/lucascabini/Developer/WarSense/Codice/Tests/SessioneTest/RiproduzioneOroRiserve/giornale.jsonl
+    /Users/lucascabini/Developer/WarSense/Codice/Tests/SessioneTest/RiproduzioneOroRiserve/impronta.txt
+    /Users/lucascabini/Developer/WarSense/Codice/Tests/SessioneTest/SalvataggioBuildDistribuita/giornale.jsonl
+    /Users/lucascabini/Developer/WarSense/Codice/Tests/SessioneTest/SalvataggioBuildDistribuita/impronta.txt
+Building for debugging...
+[Provisioning 1 / 21]
+[Planning deferred tasks]
+[2 / 4]
+Build complete! (0,68 s)
+Test Suite 'Selected tests' started at 2026-11-21 12:09:43.960.
+Test Suite 'VerificaTest.xctest' started at 2026-11-21 12:09:43.960.
+Test Suite 'ChiusuraGiornataTest' started at 2026-11-21 12:09:43.960.
+Test Case '-[VerificaTest.ChiusuraGiornataTest test_incarico_28_il_tasto_lascia_muovere_l_avversario]' started.
+/Users/lucascabini/Developer/WarSense/Codice/Tests/VerificaTest/ChiusuraGiornataTest.swift:87: error: -[VerificaTest.ChiusuraGiornataTest test_incarico_28_il_tasto_lascia_muovere_l_avversario] : XCTAssertEqual failed: ("["azione_avversaria_sottratta:gruppo=4", "azione_avversaria_sottratta:gruppo=5"]") is not equal to ("[]") - il tasto ha tolto il turno all'avversario
+/Users/lucascabini/Developer/WarSense/Codice/Tests/VerificaTest/ChiusuraGiornataTest.swift:88: error: -[VerificaTest.ChiusuraGiornataTest test_incarico_28_il_tasto_lascia_muovere_l_avversario] : XCTAssertEqual failed: ("[]") is not equal to ("[gruppo-5, gruppo-4]") - ogni gruppo avversario ha agito col proprio comando
+Test Case '-[VerificaTest.ChiusuraGiornataTest test_incarico_28_il_tasto_lascia_muovere_l_avversario]' failed (0.105 seconds).
+Test Case '-[VerificaTest.ChiusuraGiornataTest test_incarico_28_ripetuto_ogni_giorno_l_avversario_muove_comunque]' started.
+/Users/lucascabini/Developer/WarSense/Codice/Tests/VerificaTest/ChiusuraGiornataTest.swift:111: error: -[VerificaTest.ChiusuraGiornataTest test_incarico_28_ripetuto_ogni_giorno_l_avversario_muove_comunque] : XCTAssertEqual failed: ("["azione_avversaria_sottratta:gruppo=4", "azione_avversaria_sottratta:gruppo=5", "azione_avversaria_sottratta:gruppo=4", "azione_avversaria_sottratta:gruppo=5", "azione_avversaria_sottratta:gruppo=4", "azione_avversaria_sottratta:gruppo=5", "azione_avversaria_sottratta:gruppo=4", "azione_avversaria_sottratta:gruppo=5", "azione_avversaria_sottratta:gruppo=4", "azione_avversaria_sottratta:gruppo=5", "azione_avversaria_sottratta:gruppo=4", "azione_avversaria_sottratta:gruppo=5"]") is not equal to ("[]") - giornate in cui il tasto ha tolto il turno all'avversario
+/Users/lucascabini/Developer/WarSense/Codice/Tests/VerificaTest/ChiusuraGiornataTest.swift:113: error: -[VerificaTest.ChiusuraGiornataTest test_incarico_28_ripetuto_ogni_giorno_l_avversario_muove_comunque] : XCTAssertNotEqual failed: ("[Motore.Cella(riga: 1, colonna: 5), Motore.Cella(riga: 1, colonna: 6)]") is equal to ("[Motore.Cella(riga: 1, colonna: 5), Motore.Cella(riga: 1, colonna: 6)]") - in sei giornate chiuse col tasto l'avversario non si è mai mosso
+Test Case '-[VerificaTest.ChiusuraGiornataTest test_incarico_28_ripetuto_ogni_giorno_l_avversario_muove_comunque]' failed (0.011 seconds).
+Test Suite 'ChiusuraGiornataTest' failed at 2026-11-21 12:09:44.076.
+	 Executed 2 tests, with 4 failures (0 unexpected) in 0.116 (0.116) seconds
+Test Suite 'InvariantiCampagnaTest' started at 2026-11-21 12:09:44.076.
+Test Case '-[VerificaTest.InvariantiCampagnaTest test_incarico_28_nessun_gesto_del_giocatore_toglie_un_azione_all_avversario]' started.
+Test Case '-[VerificaTest.InvariantiCampagnaTest test_incarico_28_nessun_gesto_del_giocatore_toglie_un_azione_all_avversario]' passed (0.006 seconds).
+Test Case '-[VerificaTest.InvariantiCampagnaTest test_incarico_6_ogni_invariante_ha_almeno_un_mutante_che_lo_fa_scattare]' started.
+Test Case '-[VerificaTest.InvariantiCampagnaTest test_incarico_6_ogni_invariante_ha_almeno_un_mutante_che_lo_fa_scattare]' passed (0.007 seconds).
+Test Suite 'InvariantiCampagnaTest' passed at 2026-11-21 12:09:44.089.
+	 Executed 2 tests, with 0 failures (0 unexpected) in 0.013 (0.013) seconds
+Test Suite 'VerificaTest.xctest' failed at 2026-11-21 12:09:44.089.
+	 Executed 4 tests, with 4 failures (0 unexpected) in 0.129 (0.129) seconds
+Test Suite 'Selected tests' failed at 2026-11-21 12:09:44.089.
+	 Executed 4 tests, with 4 failures (0 unexpected) in 0.129 (0.130) seconds
+Test Suite 'Selected tests' started at 2026-11-21 12:09:44.153.
+Test Suite 'SessioneTest.xctest' started at 2026-11-21 12:09:44.153.
+Test Suite 'SessioneTest.xctest' passed at 2026-11-21 12:09:44.153.
+	 Executed 0 tests, with 0 failures (0 unexpected) in 0.000 (0.000) seconds
+Test Suite 'Selected tests' passed at 2026-11-21 12:09:44.153.
+	 Executed 0 tests, with 0 failures (0 unexpected) in 0.000 (0.001) seconds
+Test Suite 'Selected tests' started at 2026-11-21 12:09:44.213.
+Test Suite 'SegnaliTest.xctest' started at 2026-11-21 12:09:44.214.
+Test Suite 'SegnaliTest.xctest' passed at 2026-11-21 12:09:44.214.
+	 Executed 0 tests, with 0 failures (0 unexpected) in 0.000 (0.000) seconds
+Test Suite 'Selected tests' passed at 2026-11-21 12:09:44.214.
+	 Executed 0 tests, with 0 failures (0 unexpected) in 0.000 (0.001) seconds
+Test Suite 'Selected tests' started at 2026-11-21 12:09:44.274.
+Test Suite 'MotoreTest.xctest' started at 2026-11-21 12:09:44.274.
+Test Suite 'MotoreTest.xctest' passed at 2026-11-21 12:09:44.274.
+	 Executed 0 tests, with 0 failures (0 unexpected) in 0.000 (0.000) seconds
+Test Suite 'Selected tests' passed at 2026-11-21 12:09:44.274.
+	 Executed 0 tests, with 0 failures (0 unexpected) in 0.000 (0.001) seconds
+Test Suite 'Selected tests' started at 2026-11-21 12:09:44.335.
+Test Suite 'DatiTest.xctest' started at 2026-11-21 12:09:44.335.
+Test Suite 'DatiTest.xctest' passed at 2026-11-21 12:09:44.335.
+	 Executed 0 tests, with 0 failures (0 unexpected) in 0.000 (0.000) seconds
+Test Suite 'Selected tests' passed at 2026-11-21 12:09:44.335.
+	 Executed 0 tests, with 0 failures (0 unexpected) in 0.000 (0.001) seconds
+Test Suite 'Selected tests' started at 2026-11-21 12:09:44.395.
+Test Suite 'ConfiniTest.xctest' started at 2026-11-21 12:09:44.396.
+Test Suite 'ConfiniTest.xctest' passed at 2026-11-21 12:09:44.396.
+	 Executed 0 tests, with 0 failures (0 unexpected) in 0.000 (0.000) seconds
+Test Suite 'Selected tests' passed at 2026-11-21 12:09:44.396.
+	 Executed 0 tests, with 0 failures (0 unexpected) in 0.000 (0.001) seconds
+Note: Some test targets reported failures:
+  - VerificaTest (XCTest)

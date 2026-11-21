@@ -16,22 +16,26 @@ final class SchermataAvvio: UIViewController {
 
     private var testi: Testi { ambiente.testi }
 
+    /// Il comando che ha aperto la schermata in primo piano, per chiave: alla sua chiusura il fuoco
+    /// torna lì (02 §5.1, osservazione 6 dell'esplorazione dell'incarico 27). Per chiave e non per
+    /// oggetto, perché tornando da uno scontro o da una campagna le voci si ricostruiscono.
+    private var chiaveDiOrigine: String?
+    /// Il contenitore scorrevole della colonna, per portare in vista il comando d'origine.
+    private var scorrimento: UIScrollView?
+
     override func viewDidLoad() {
         super.viewDidLoad()
         view.backgroundColor = .systemBackground
         colonna.axis = .vertical
         colonna.spacing = 16
-        colonna.translatesAutoresizingMaskIntoConstraints = false
-        view.addSubview(colonna)
-        NSLayoutConstraint.activate([
-            colonna.centerYAnchor.constraint(equalTo: view.centerYAnchor),
-            colonna.leadingAnchor.constraint(equalTo: view.leadingAnchor, constant: 24),
-            colonna.trailingAnchor.constraint(equalTo: view.trailingAnchor, constant: -24),
-        ])
+        // A testo massimo o in orizzontale le voci non entrano nello schermo: la colonna scorre
+        // (osservazioni 3 e 7). Quando entrano, sta al centro come prima.
+        scorrimento = ColonnaScorrevole.monta(colonna, in: view, centrata: true)
         let titolo = UILabel()
         titolo.text = testi.frase("avvio.titolo").testo
         titolo.font = .preferredFont(forTextStyle: .largeTitle)
         titolo.adjustsFontForContentSizeCategory = true
+        titolo.numberOfLines = 0
         titolo.accessibilityTraits = .header
         colonna.addArrangedSubview(titolo)
     }
@@ -40,6 +44,39 @@ final class SchermataAvvio: UIViewController {
         super.viewWillAppear(animated)
         ricostruisciVoci()
     }
+
+    /// Il pulsante della voce indicata, se c'è.
+    private func pulsante(perChiave chiave: String) -> UIButton? {
+        colonna.arrangedSubviews.compactMap { $0 as? UIButton }.first { $0.accessibilityIdentifier == chiave }
+    }
+
+    /// Chiusa una schermata aperta da qui, il fuoco torna sul comando che l'aveva aperta, dove il
+    /// giocatore l'aveva lasciato (02 §5.1). Se quel comando non c'è più — «Riprendi lo scontro in
+    /// corso» sparisce quando lo scontro si conclude —, il fuoco va al titolo dell'avvio.
+    ///
+    /// La notifica si emette a chiusura COMPIUTA, un istante dopo: emessa dentro l'attivazione del
+    /// pulsante che chiude, VoiceOver la scavalcava con la propria rifocalizzazione sull'elemento
+    /// sparito (esplorazione ripetuta dell'incarico 28: dopo le impostazioni restava su «Chiudi il
+    /// pannello» o andava al titolo, in cinque chiusure su undici).
+    private func riportaIlFuoco() {
+        let chiave = chiaveDiOrigine
+        chiaveDiOrigine = nil
+        DispatchQueue.main.asyncAfter(deadline: .now() + Self.attesaDelRitorno) { [weak self] in
+            guard let self else { return }
+            let origine = chiave.flatMap { self.pulsante(perChiave: $0) }
+            // A testo massimo la colonna è più alta dello schermo: il comando d'origine si porta
+            // in vista prima, perché VoiceOver non ripieghi sul primo elemento visibile.
+            if let origine, let scorrimento = self.scorrimento {
+                scorrimento.layoutIfNeeded()
+                scorrimento.scrollRectToVisible(origine.convert(origine.bounds, to: scorrimento), animated: false)
+            }
+            Fuoco.sposta(a: origine ?? self.colonna.arrangedSubviews.first, perche: .schermataChiusa)
+        }
+    }
+
+    /// Quanto attendere, chiusa una schermata, prima di riportare il fuoco: tempo d'interfaccia, non
+    /// numero di gioco (05 §0.4), il minimo perché VoiceOver abbia concluso la propria rifocalizzazione.
+    private static let attesaDelRitorno: TimeInterval = 0.4
 
     private func ricostruisciVoci() {
         for vista in colonna.arrangedSubviews.dropFirst() { vista.removeFromSuperview() }
@@ -61,11 +98,10 @@ final class SchermataAvvio: UIViewController {
     }
 
     private func aggiungiPulsante(_ chiave: String, _ azione: Selector) {
-        let pulsante = UIButton(type: .system)
-        pulsante.setTitle(testi.frase(chiave).testo, for: .normal)
-        pulsante.titleLabel?.font = .preferredFont(forTextStyle: .title2)
-        pulsante.titleLabel?.adjustsFontForContentSizeCategory = true
-        pulsante.heightAnchor.constraint(greaterThanOrEqualToConstant: 48).isActive = true
+        // Il titolo va a capo invece di essere tagliato (osservazione 8).
+        let pulsante = PulsanteMultiriga.crea(titolo: testi.frase(chiave).testo, stile: .title2)
+        pulsante.accessibilityIdentifier = chiave
+        pulsante.addAction(UIAction { [weak self] _ in self?.chiaveDiOrigine = chiave }, for: .touchUpInside)
         pulsante.addTarget(self, action: azione, for: .touchUpInside)
         colonna.addArrangedSubview(pulsante)
     }
@@ -95,8 +131,7 @@ final class SchermataAvvio: UIViewController {
         let schermata = SchermataBattaglia(partita: partita)
         schermata.modalPresentationStyle = .fullScreen
         schermata.alTermine = { [weak self] in
-            self?.dismiss(animated: false)
-            Fuoco.sposta(a: nil, perche: .schermataAperta)
+            self?.dismiss(animated: false) { self?.riportaIlFuoco() }
         }
         present(schermata, animated: false)
         Fuoco.azzeraRegistro()
@@ -143,19 +178,22 @@ final class SchermataAvvio: UIViewController {
         let schermata = SchermataMappaCampagna(partita: partita)
         schermata.modalPresentationStyle = .fullScreen
         schermata.alTermine = { [weak self] in
-            self?.dismiss(animated: false)
-            Fuoco.sposta(a: nil, perche: .schermataAperta)
+            self?.dismiss(animated: false) { self?.riportaIlFuoco() }
         }
         present(schermata, animated: false)
         Fuoco.azzeraRegistro()
     }
 
     @objc private func apriImpostazioni() {
-        present(SchermataImpostazioni(ambiente: ambiente), animated: false)
+        let schermata = SchermataImpostazioni(ambiente: ambiente)
+        schermata.alTermine = { [weak self] in self?.riportaIlFuoco() }
+        present(schermata, animated: false)
     }
 
     @objc private func apriApprendimento() {
-        present(SchermataApprendimento(ambiente: ambiente), animated: false)
+        let schermata = SchermataApprendimento(ambiente: ambiente)
+        schermata.alTermine = { [weak self] in self?.riportaIlFuoco() }
+        present(schermata, animated: false)
     }
 }
 
@@ -183,17 +221,13 @@ final class SchermataResoconto: UIViewController {
         let colonna = UIStackView()
         colonna.axis = .vertical
         colonna.spacing = 12
-        colonna.translatesAutoresizingMaskIntoConstraints = false
-        view.addSubview(colonna)
-        NSLayoutConstraint.activate([
-            colonna.centerYAnchor.constraint(equalTo: view.centerYAnchor),
-            colonna.leadingAnchor.constraint(equalTo: view.leadingAnchor, constant: 24),
-            colonna.trailingAnchor.constraint(equalTo: view.trailingAnchor, constant: -24),
-        ])
+        // Sette voci a testo massimo non entrano nello schermo: la colonna scorre.
+        ColonnaScorrevole.monta(colonna, in: view, centrata: true)
         let titolo = UILabel()
         titolo.text = testi.frase("resoconto.titolo").testo
         titolo.font = .preferredFont(forTextStyle: .title1)
         titolo.adjustsFontForContentSizeCategory = true
+        titolo.numberOfLines = 0
         titolo.accessibilityTraits = .header
         colonna.addArrangedSubview(titolo)
         for voce in voci {
@@ -204,10 +238,7 @@ final class SchermataResoconto: UIViewController {
             etichetta.adjustsFontForContentSizeCategory = true
             colonna.addArrangedSubview(etichetta)
         }
-        let chiudi = UIButton(type: .system)
-        chiudi.setTitle(testi.frase("resoconto.torna").testo, for: .normal)
-        chiudi.titleLabel?.font = .preferredFont(forTextStyle: .title3)
-        chiudi.heightAnchor.constraint(greaterThanOrEqualToConstant: 48).isActive = true
+        let chiudi = PulsanteMultiriga.crea(titolo: testi.frase("resoconto.torna").testo, stile: .title3)
         chiudi.addTarget(self, action: #selector(chiudiTutto), for: .touchUpInside)
         colonna.addArrangedSubview(chiudi)
     }
@@ -225,6 +256,9 @@ final class SchermataResoconto: UIViewController {
 @MainActor
 final class SchermataImpostazioni: UIViewController {
     private let ambiente: Ambiente
+    /// Chiamato quando la schermata si è chiusa, per qualunque via: chi l'ha aperta vi riporta il
+    /// fuoco (osservazione 6).
+    var alTermine: (() -> Void)?
     init(ambiente: Ambiente) {
         self.ambiente = ambiente
         super.init(nibName: nil, bundle: nil)
@@ -238,28 +272,27 @@ final class SchermataImpostazioni: UIViewController {
         let colonna = UIStackView()
         colonna.axis = .vertical
         colonna.spacing = 20
-        colonna.translatesAutoresizingMaskIntoConstraints = false
-        view.addSubview(colonna)
-        NSLayoutConstraint.activate([
-            colonna.topAnchor.constraint(equalTo: view.safeAreaLayoutGuide.topAnchor, constant: 24),
-            colonna.leadingAnchor.constraint(equalTo: view.leadingAnchor, constant: 24),
-            colonna.trailingAnchor.constraint(equalTo: view.trailingAnchor, constant: -24),
-        ])
+        // In orizzontale e a testo massimo le voci non entrano nello schermo: la colonna scorre.
+        ColonnaScorrevole.monta(colonna, in: view, centrata: false)
         let titolo = UILabel()
         titolo.text = testi.frase("impostazioni.titolo").testo
         titolo.font = .preferredFont(forTextStyle: .title1)
+        titolo.numberOfLines = 0
         titolo.accessibilityTraits = .header
         colonna.addArrangedSubview(titolo)
 
-        // Verbosità: tre livelli (00 §9.5).
+        // Verbosità: tre livelli (00 §9.5). I segmenti alti almeno 44 punti (02 §8.5,
+        // osservazione 9: erano 32).
         let etichettaVerbosita = UILabel()
         etichettaVerbosita.text = testi.frase("impostazioni.verbosita").testo
+        etichettaVerbosita.numberOfLines = 0
         colonna.addArrangedSubview(etichettaVerbosita)
         let selettore = UISegmentedControl(items: Verbosita.allCases.map {
             testi.frase("impostazioni.verbosita." + $0.rawValue).testo })
         selettore.selectedSegmentIndex = Verbosita.allCases.firstIndex(of: Impostazioni.verbosita) ?? 1
         selettore.addTarget(self, action: #selector(cambiaVerbosita(_:)), for: .valueChanged)
         selettore.accessibilityLabel = etichettaVerbosita.text
+        selettore.heightAnchor.constraint(greaterThanOrEqualToConstant: 44).isActive = true
         colonna.addArrangedSubview(selettore)
 
         colonna.addArrangedSubview(interruttore("impostazioni.suoni", attivo: Impostazioni.suoniAttivi,
@@ -270,27 +303,36 @@ final class SchermataImpostazioni: UIViewController {
         // Intensità tattile su tre passi (02 §14.3).
         let etichettaIntensita = UILabel()
         etichettaIntensita.text = testi.frase("impostazioni.intensita").testo
+        etichettaIntensita.numberOfLines = 0
         colonna.addArrangedSubview(etichettaIntensita)
         let passi = UISegmentedControl(items: (1...3).map(String.init))
         passi.selectedSegmentIndex = Impostazioni.passoIntensita - 1
         passi.addTarget(self, action: #selector(cambiaIntensita(_:)), for: .valueChanged)
         passi.accessibilityLabel = etichettaIntensita.text
+        passi.heightAnchor.constraint(greaterThanOrEqualToConstant: 44).isActive = true
         colonna.addArrangedSubview(passi)
 
-        let chiudi = UIButton(type: .system)
-        chiudi.setTitle(testi.frase("pannello.chiudi").testo, for: .normal)
-        chiudi.heightAnchor.constraint(greaterThanOrEqualToConstant: 48).isActive = true
+        let chiudi = PulsanteMultiriga.crea(titolo: testi.frase("pannello.chiudi").testo, stile: .body)
         chiudi.addTarget(self, action: #selector(chiudiSchermata), for: .touchUpInside)
         colonna.addArrangedSubview(chiudi)
+    }
+
+    override func viewDidDisappear(_ animated: Bool) {
+        super.viewDidDisappear(animated)
+        if isBeingDismissed { alTermine?() }
     }
 
     private func interruttore(_ chiave: String, attivo: Bool, azione: Selector, testi: Testi) -> UIStackView {
         let riga = UIStackView()
         riga.axis = .horizontal
         riga.spacing = 12
+        riga.alignment = .center
         let etichetta = UILabel()
         etichetta.text = testi.frase(chiave).testo
-        let leva = UISwitch()
+        etichetta.numberOfLines = 0
+        // Il bersaglio della leva alto almeno 44 punti (02 §8.5): le leve di iOS 27 sono alte 28.
+        let leva = InterruttoreAmpio()
+        riga.heightAnchor.constraint(greaterThanOrEqualToConstant: InterruttoreAmpio.altezzaMinima).isActive = true
         leva.isOn = attivo
         leva.addTarget(self, action: azione, for: .valueChanged)
         leva.accessibilityLabel = etichetta.text
@@ -315,6 +357,8 @@ final class SchermataImpostazioni: UIViewController {
 @MainActor
 final class SchermataApprendimento: UIViewController {
     private let ambiente: Ambiente
+    /// Chiamato quando la schermata si è chiusa, per qualunque via (osservazione 6).
+    var alTermine: (() -> Void)?
     init(ambiente: Ambiente) {
         self.ambiente = ambiente
         super.init(nibName: nil, bundle: nil)
@@ -347,6 +391,7 @@ final class SchermataApprendimento: UIViewController {
         let titolo = UILabel()
         titolo.text = testi.frase("apprendimento.titolo").testo
         titolo.font = .preferredFont(forTextStyle: .title1)
+        titolo.numberOfLines = 0
         titolo.accessibilityTraits = .header
         colonna.addArrangedSubview(titolo)
         let spiegazione = UILabel()
@@ -367,11 +412,14 @@ final class SchermataApprendimento: UIViewController {
             }, for: .touchUpInside)
             colonna.addArrangedSubview(pulsante)
         }
-        let chiudi = UIButton(type: .system)
-        chiudi.setTitle(testi.frase("pannello.chiudi").testo, for: .normal)
-        chiudi.heightAnchor.constraint(greaterThanOrEqualToConstant: 48).isActive = true
+        let chiudi = PulsanteMultiriga.crea(titolo: testi.frase("pannello.chiudi").testo, stile: .body)
         chiudi.addTarget(self, action: #selector(chiudiSchermata), for: .touchUpInside)
         colonna.addArrangedSubview(chiudi)
+    }
+
+    override func viewDidDisappear(_ animated: Bool) {
+        super.viewDidDisappear(animated)
+        if isBeingDismissed { alTermine?() }
     }
 
     @objc private func chiudiSchermata() { dismiss(animated: false) }

@@ -1,6 +1,8 @@
 # La modalità di battaglia a campioni
 
-Documento di progetto della modalità a campioni — versione 1.0
+Documento di progetto della modalità a campioni — versione 1.1
+
+Novità della versione 1.1 (2026-11-21, incarico 28). Per decisione del titolare meteo e guasti delle macchine restano affidati al caso, come eccezione dichiarata: il caso esiste nello scontro a campioni e, fuori da esso, nel solo perimetro del documento 01, punto 12.2, cioè le variazioni del meteo sul piano di campagna e i guasti delle macchine da guerra (documento 01, versione 3.9). Riscritto 4.1, che diceva il caso confinato allo scontro e regno, campagne e fronti interamente deterministici. Nessun'altra regola della modalità cambia.
 
 Novità della versione 1.0 (2026-11-20, incarico 27). Prima stesura. Raccoglie le decisioni prese dal titolare fra il 18 e il 20 novembre 2026 sulla seconda modalità di battaglia del gioco, la modalità a campioni su due linee, accanto alla modalità a sciami sulla griglia esagonale che i documenti da 01 a 05 descrivono. Il documento non contiene numeri tarati né l'elenco delle classi: i punti aperti sono raccolti nella sezione 11.
 
@@ -42,7 +44,7 @@ Quando i consolidati saranno riallineati, questo documento potrà confluire in e
 
 ## 4. Il caso
 
-4.1 Il caso esiste soltanto dentro lo scontro a campioni (documento 01, punto 12.1, dalla versione 3.8). Regno, campagne, fronti, avversario e battaglia a sciami restano deterministici.
+4.1 Il caso esiste nello scontro a campioni e, fuori da esso, nel solo perimetro del documento 01, punto 12.2: le variazioni del meteo sul piano di campagna e i guasti delle macchine da guerra, con la probabilità di guasto legata allo stato di manutenzione. È un'eccezione dichiarata, voluta dal titolare (documento 01, punto 12.1, dalla versione 3.9). Per il resto regno, campagne, fronti, avversario e battaglia a sciami restano deterministici.
 
 4.2 Ogni scontro ha un seme dichiarato.
 

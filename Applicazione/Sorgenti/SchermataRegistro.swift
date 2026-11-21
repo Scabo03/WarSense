@@ -72,6 +72,7 @@ final class SchermataRegistro: UIViewController {
         let titolo = UILabel()
         titolo.text = testi.frase("registro.titolo").testo
         titolo.font = .preferredFont(forTextStyle: .title1)
+        titolo.numberOfLines = 0 // va a capo invece di essere tagliato (incarico 28, osservazione 8)
         titolo.adjustsFontForContentSizeCategory = true
         titolo.accessibilityTraits = .header
         colonna.addArrangedSubview(titolo)
