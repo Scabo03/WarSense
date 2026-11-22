@@ -298,7 +298,7 @@ final class PassaggioBattagliaInterfacciaTest: XCTestCase {
     /// pieno accesso allo stato: naviga sui fatti, mentre il gioco applica le sue regole). Quando
     /// un armato avversario è adiacente, vi marcia sopra: la compresenza alla risoluzione innesca
     /// la battaglia (01 §6.1). Deterministico: la campagna non estrae mai il caso (RDA-43).
-    private func portaAContatto(_ schermata: SchermataMappaCampagna, maxGiorni: Int = 60) async throws
+    func portaAContatto(_ schermata: SchermataMappaCampagna, maxGiorni: Int = 60) async throws
         -> BattagliaInSospeso {
         func dist(_ a: Cella, _ b: Cella) -> Int { abs(a.riga - b.riga) + abs(a.colonna - b.colonna) }
         let motore = schermata.motorePerProva
@@ -344,7 +344,7 @@ final class PassaggioBattagliaInterfacciaTest: XCTestCase {
     /// Combatte la battaglia fino alla conclusione con un tattico deterministico per il giocatore,
     /// mentre `PartitaCorrente` muove l'avversario da sé (come nel gioco). Fa agire prima
     /// l'avversario se è lui il primo occupante (01 §9.4.1).
-    private func combattiAConclusione(_ partita: PartitaCorrente, ambiente: Ambiente) async throws
+    func combattiAConclusione(_ partita: PartitaCorrente, ambiente: Ambiente) async throws
         -> StatoBattaglia {
         let ufficiale = try XCTUnwrap(
             ambiente.valori.ufficiali.values.sorted { $0.identificatore < $1.identificatore }.first,

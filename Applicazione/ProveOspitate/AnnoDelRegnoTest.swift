@@ -183,4 +183,77 @@ final class AnnoDelRegnoTest: XCTestCase {
 
         print("ANNO-DEL-REGNO-30 fronte=guado conclusione=\(conclusione.modo.rawValue) vincitore=\(conclusione.vincitore?.rawValue ?? "nessuno") giornate=\(conclusione.giorno) battaglie=\(battaglie) vinte=\(esito.battaglieVinte) perse=\(esito.battagliePerse) formazioni_partite=\(formazioniIniziali) rientrate=\(rientrate) leve=\(leve) formazioni_anno_2=\(stato.forze.numeroDiUnita)")
     }
+
+    /// La battaglia di una campagna del regno vive TRE slot sotto: regno, campagna, battaglia
+    /// (RDA-162). Chiusa l'applicazione a battaglia aperta, il regno si riprende identico, la
+    /// campagna è quella, la battaglia si riprende identica dal proprio slot; combattuta, l'esito
+    /// torna nella campagna e sopravvive a un altro riavvio (05 §6.1, §6.3).
+    func test_la_battaglia_di_una_campagna_del_regno_si_riprende_dopo_un_riavvio() async throws {
+        let ambiente = try Ambiente()
+        let patria = SchermataPatria(partita: try await PartitaRegno(nuovo: ambiente))
+        let f = UIWindow(frame: CGRect(x: 0, y: 0, width: 420, height: 912))
+        f.rootViewController = patria
+        f.makeKeyAndVisible()
+        patria.loadViewIfNeeded()
+        finestra = f
+        try await attendi("la patria si carica") { self.lettura(patria).contains("Apri la campagna") }
+        await patria.apriLaCampagnaPerProva(sul: "guado")
+        try await attendi("si entra nel fronte") { patria.presentedViewController is SchermataMappaCampagna }
+        let mappa = try XCTUnwrap(patria.presentedViewController as? SchermataMappaCampagna)
+        try await attendi("la mappa si carica") { !mappa.elementiPerProva.isEmpty }
+        let guida = PassaggioBattagliaInterfacciaTest()
+        let battaglia = try await guida.portaAContatto(mappa)
+
+        // «Spegni» a battaglia appena aperta.
+        var aperta: PartitaCorrente? = try await mappa.partitaPerProva.apriBattaglia(battaglia)
+        let improntaBattaglia = await aperta!.stato.impronta()
+        let improntaCampagna = await mappa.partitaPerProva.stato.impronta()
+        let improntaRegno = await patria.partitaPerProva.stato.impronta()
+        aperta = nil
+        let slotBattaglia = PartitaRegno.cartellaCampagna.appendingPathComponent("battaglie")
+            .appendingPathComponent(battaglia.identificatore)
+        XCTAssertTrue(FileManager.default.fileExists(atPath: slotBattaglia.appendingPathComponent("giornale.jsonl").path),
+                      "la battaglia ha il proprio slot dentro quello della campagna, dentro quello del regno")
+
+        // «Riapri»: regno, campagna e battaglia dai tre slot annidati.
+        let regno = try await PartitaRegno(riprendi: ambiente)
+        let improntaRegnoRipreso = await regno.stato.impronta()
+        XCTAssertEqual(improntaRegnoRipreso, improntaRegno, "il regno si riprende identico")
+        let campagnaRipresa = try await regno.campagnaAperta()
+        let campagna = try XCTUnwrap(campagnaRipresa, "il regno ritrova la campagna aperta")
+        let statoCampagna = await campagna.stato
+        XCTAssertEqual(statoCampagna.impronta(), improntaCampagna, "la campagna si riprende identica")
+        let inSospeso = try XCTUnwrap(statoCampagna.battaglieInSospeso.first, "la battaglia è ancora in sospeso")
+        XCTAssertEqual(inSospeso.identificatore, battaglia.identificatore)
+        let ripresa = try await campagna.apriBattaglia(inSospeso)
+        let improntaRipresa = await ripresa.stato.impronta()
+        XCTAssertEqual(improntaRipresa, improntaBattaglia, "la battaglia si riprende identica dal proprio slot")
+
+        // Combattuta, l'esito torna nella campagna e sopravvive a un altro riavvio.
+        let finale = try await guida.combattiAConclusione(ripresa, ambiente: ambiente)
+        let esito = await campagna.esitoDiRitorno(inSospeso, statoBattaglia: finale)
+        try await campagna.concludiBattaglia(inSospeso, esito: esito)
+        let dopoLaBattaglia = await campagna.stato
+        XCTAssertFalse(FileManager.default.fileExists(atPath: slotBattaglia.path),
+                       "lo slot della battaglia si rimuove quando l'esito è nel giornale della campagna")
+        let regnoDiNuovo = try await PartitaRegno(riprendi: ambiente)
+        let campagnaDiNuovo = try await regnoDiNuovo.campagnaAperta()
+        let ritrovata = try XCTUnwrap(campagnaDiNuovo)
+        let statoDiNuovo = await ritrovata.stato
+        XCTAssertEqual(statoDiNuovo.impronta(), dopoLaBattaglia.impronta(), "l'esito sopravvive al riavvio")
+        XCTAssertTrue(statoDiNuovo.battaglieInSospeso.isEmpty)
+        XCTAssertTrue(statoDiNuovo.registro.contains {
+            if case .battagliaConclusa(let casella, _) = $0.fatto { return casella == battaglia.casella }
+            return false
+        }, "la battaglia conclusa è nel registro della campagna anche dopo il riavvio")
+        var esitoInPatria = "campagna ancora aperta"
+        if statoDiNuovo.conclusione != nil {
+            // La battaglia ha tolto a una parte l'ultimo gruppo armato: alla ripresa l'esito arriva in patria.
+            let riportato = try await regnoDiNuovo.riportaEsitoSeConclusa(ritrovata)
+            let esitoCampagna = try XCTUnwrap(riportato, "la campagna conclusa porta l'esito in patria alla ripresa")
+            XCTAssertEqual(esitoCampagna.battaglieVinte + esitoCampagna.battagliePerse, 1)
+            esitoInPatria = "campagna conclusa: \(esitoCampagna.modo.rawValue)"
+        }
+        print("RIPRESA-BATTAGLIA-DEL-REGNO-30 giorno=\(statoCampagna.giorno) casella=riga \(battaglia.casella.riga) casella \(battaglia.casella.colonna) sconfitto=\(esito.sconfitto.rawValue) dopo=\(esitoInPatria)")
+    }
 }

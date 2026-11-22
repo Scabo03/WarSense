@@ -27,7 +27,7 @@ UDID = sys.argv[2]
 APPARECCHIO = sys.argv[3]
 BLOCCHI = sys.argv[4:] or ["patria", "inverno", "campagna", "orizzontale", "testo"]
 CONTROLLI = CARTELLA / "controlli.jsonl"
-TRONCA = 56  # le pronunce si confrontano sul loro inizio: il servizio le tronca a 64 caratteri
+TRONCA = 62  # le pronunce si confrontano sul loro inizio: il servizio le tronca a 64 caratteri
 
 
 def esiti():
@@ -333,10 +333,17 @@ def blocco_campagna():
 
 # ------------------------------------------------------------------------------------------ l'orizzontale
 def blocco_orizzontale():
-    """La patria con l'apparecchio in orizzontale: VoiceOver la legge nello stesso ordine, in primavera e
-    d'inverno, e una leva si ordina."""
+    """La patria con l'apparecchio in orizzontale: VoiceOver la legge nello stesso ordine.
+
+    Soltanto la LETTURA. In orizzontale il pilota non sa attivare nulla: il doppio tocco sintetico non
+    arriva (già dichiarato dal tester dell'incarico 28: «attivazione, solo in verticale»), e non arrivano
+    nemmeno il doppio tocco in un punto qualsiasi né il comando da tastiera di VoiceOver (Control, Opzione,
+    Spazio): provati a mano nella seconda corsa di questo incarico, senza effetto. L'attivazione in
+    orizzontale è coperta col tocco vero, senza VoiceOver, da `FumoRegnoTest`
+    (test_in_orizzontale_a_testo_massimo_l_inverno_si_percorre_e_la_leva_si_ordina)."""
     avvia_pulito()
     attiva(etichetta="Nuovo regno", tipo="pulsante", ascolto=6)
+    # L'inverno si fa arrivare in verticale, dove l'attivazione arriva; poi si ruota e si legge.
     cmd({"azione": "orientamento", "verso": "orizzontale", "ascolto": 2.5})
     try:
         pronunce = giro("patria-orizzontale")
@@ -345,20 +352,24 @@ def blocco_orizzontale():
                   "Forze"] + FORZE + ["Apri la campagna", "Attendi l'inverno", "Registro della patria", "Torna all'inizio"]
         controlla("orizzontale: VoiceOver legge la patria nello stesso ordine",
                   in_ordine(pronunce, attese) and len(pronunce) == len(attese), attese, pronunce)
-        attiva(etichetta="Attendi l'inverno", tipo="pulsante", ascolto=6)
+    finally:
+        cmd({"azione": "orientamento", "verso": "verticale", "ascolto": 2})
+    attiva(etichetta="Attendi l'inverno", tipo="pulsante", ascolto=6)
+    attiva(contiene="Leva di cavalleria manovrata.", tipo="pulsante", ascolto=4)
+    cmd({"azione": "orientamento", "verso": "orizzontale", "ascolto": 2.5})
+    try:
         pronunce = giro("inverno-orizzontale")
         attese = ["Patria", "Anno 1, inverno, schermata 1 di 4", "Quest'anno nessuna campagna", "Riserve",
-                  "monete di bronzo: 220", "uomini: 26", "metalli: 33", "materiale da costruzione: 33", "animali: 13",
-                  "Forze"] + FORZE + ["Lavori da ordinare", LEGGERA, PESANTE, CAVALLERIA, "Lavori ordinati",
-                  "Nessun lavoro ordinato in questo inverno", "Annulla l'ultima spesa", "Azzera le spese di questa schermata",
-                  "Prosegui alla schermata 2 di 4", "Registro della patria", "Torna all'inizio"]
-        controlla("orizzontale: VoiceOver legge la patria d'inverno nello stesso ordine, fino all'ultimo comando",
+                  "monete di bronzo: 148", "uomini: 20", "metalli: 27", "materiale da costruzione: 33", "animali: 7",
+                  "Forze"] + FORZE + ["Lavori da ordinare",
+                  "Leva di fanteria leggera. Costa: monete di bronzo 30 su 148",
+                  "Leva di fanteria pesante. Costa: monete di bronzo 64 su 148",
+                  "Leva di cavalleria manovrata. Costa: monete di bronzo 72 su 148", "Lavori ordinati",
+                  "Leva di cavalleria manovrata, pronta in primavera", "Annulla l'ultima spesa",
+                  "Azzera le spese di questa schermata", "Prosegui alla schermata 2 di 4", "Registro della patria",
+                  "Torna all'inizio"]
+        controlla("orizzontale: VoiceOver legge la patria d'inverno, con una leva ordinata, fino all'ultimo comando",
                   in_ordine(pronunce, attese) and len(pronunce) == len(attese), attese, pronunce)
-        e = attiva(contiene="Leva di cavalleria manovrata.", tipo="pulsante", ascolto=4)
-        controlla("orizzontale: la leva si ordina",
-                  "Leva di cavalleria manovrata ordinata: pronta in primavera" in sentito(e) and "animali: 7" in albero(),
-                  "Leva di cavalleria manovrata ordinata: pronta in primavera.", sentito(e))
-        schermata("inverno-orizzontale-dopo-la-spesa")
     finally:
         cmd({"azione": "orientamento", "verso": "verticale", "ascolto": 2})
 
@@ -379,8 +390,16 @@ def blocco_testo():
                   "Forze"] + FORZE + ["Lavori da ordinare", LEGGERA, PESANTE, CAVALLERIA, "Lavori ordinati",
                   "Nessun lavoro ordinato in questo inverno", "Annulla l'ultima spesa", "Azzera le spese di questa schermata",
                   "Prosegui alla schermata 2 di 4", "Registro della patria", "Torna all'inizio"]
+        # A testo massimo la colonna è lunga molte pagine, e iOS espone a VoiceOver, dopo l'ultimo elemento,
+        # la propria barra di scorrimento («Vertical scroll bar, N pages»: il simulatore è in inglese). È un
+        # elemento di sistema, non del gioco: lo si registra come osservazione e lo si toglie dal confronto.
+        barre = [p for p in pronunce if "scroll bar" in p]
+        del_gioco = [p for p in pronunce if "scroll bar" not in p]
+        if barre:
+            controlla("osservazione: a testo massimo VoiceOver legge in coda la barra di scorrimento di sistema",
+                      pronunce[-1] == barre[-1] and len(barre) == 1, "al più una, dopo l'ultimo comando", barre)
         controlla("testo massimo: VoiceOver legge la patria d'inverno per intero, fino all'ultimo comando",
-                  in_ordine(pronunce, attese) and len(pronunce) == len(attese), attese, pronunce)
+                  in_ordine(del_gioco, attese) and len(del_gioco) == len(attese), attese, del_gioco)
         e = attiva(contiene="Leva di fanteria leggera.", tipo="pulsante", ascolto=4)
         controlla("testo massimo: la leva si ordina anche a testo massimo",
                   "Leva di fanteria leggera ordinata: pronta in primavera" in sentito(e),
