@@ -629,7 +629,7 @@ final class SchermataMappaCampagna: UIViewController {
     /// La CHIUSURA ESPLICITA della giornata (incarico 26, decisione del titolare; incarico 28): sempre
     /// disponibile. Conclude la giornata dei gruppi del giocatore che non hanno agito, con l'ordine di
     /// restare; poi l'avversario muove e la giornata si chiude da sé. Annuncia — con significato di
-    /// conferma, non interrompente — quanti gruppi DEL GIOCATORE il tasto ha fatto restare (fino alla
+    /// conferma, e dall'incarico 30 interrompendo — quanti gruppi DEL GIOCATORE il tasto ha fatto restare (fino alla
     /// build 28 contava anche quelli dell'avversario, rivelandone il numero), poi consegna i fatti del
     /// turno avversario e della chiusura per la via di sempre. NON sposta il fuoco (nessun
     /// `Fuoco.sposta`), come annulla e azzera. Con una battaglia in sospeso il tasto è rifiutato col
@@ -643,8 +643,14 @@ final class SchermataMappaCampagna: UIViewController {
                 let testo = propri > 0
                     ? testi.frase("giornata.chiusa_con_diagnostica", propri).testo
                     : testi.frase("giornata.chiusa_conferma").testo
+                // INTERROMPENTE (05 §10.7: l'esito chiesto dal giocatore interrompe; incarico 30). Chi
+                // chiude molte giornate di seguito non deve restare indietro con la voce: i fatti
+                // delle giornate passate non ancora pronunciati li supera questa chiusura, e restano
+                // nel registro (00 §6.4). Col tester e VoiceOver, prima, dopo ottanta chiusure la voce
+                // era indietro di sedici giornate.
                 partita.ambiente.segnali.annuncia(
-                    TestoLocalizzato(testo: testo, lingua: testi.lingua), significato: .conferma)
+                    TestoLocalizzato(testo: testo, lingua: testi.lingua), interrompente: true,
+                    significato: .conferma)
                 partita.segnala(esito.eventi)
             } catch SessioneCampagna.ErroreSessione.battagliaInSospeso {
                 partita.ambiente.segnali.annuncia(TestoLocalizzato(

@@ -16,6 +16,15 @@ public struct TraduttoreEventiCampagna: Sendable {
         self.parte = parte
     }
 
+    /// Vero se l'annuncio dell'evento SUPERA quelli ancora in attesa (05 §10.7, §11.6; incarico 30).
+    /// Vale per la sola conclusione della campagna: conclusa la campagna, i fatti del fronte non
+    /// ancora pronunciati riguardano una partita finita, e la dichiarazione di conclusione dice
+    /// com'è andata. Ogni altro evento si accoda.
+    public static func supera(_ evento: EventoCampagna) -> Bool {
+        if case .campagnaConclusa = evento { return true }
+        return false
+    }
+
     /// Il significato di segnale per l'evento, se l'evento ne merita uno.
     ///
     /// La chiusura della giornata NON ha segnale tattile né sonoro proprio: il tetto

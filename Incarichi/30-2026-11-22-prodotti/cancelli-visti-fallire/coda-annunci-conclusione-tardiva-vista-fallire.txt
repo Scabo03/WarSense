@@ -1,0 +1,7 @@
+	 Executed 6 tests, with 4 failures (0 unexpected) in 0.113 (0.114) seconds
+/Users/lucascabini/Developer/WarSense/Codice/Tests/SegnaliTest/CodaAnnunciTest.swift:48: error: -[SegnaliTest.CodaAnnunciTest test_la_conclusione_tardiva_dell_annuncio_interrotto_non_fa_avanzare_la_coda] : XCTAssertNil failed: "fatto di oggi" - la conclusione dell'annuncio interrotto non fa partire il successivo
+/Users/lucascabini/Developer/WarSense/Codice/Tests/SegnaliTest/CodaAnnunciTest.swift:50: error: -[SegnaliTest.CodaAnnunciTest test_la_conclusione_tardiva_dell_annuncio_interrotto_non_fa_avanzare_la_coda] : XCTAssertEqual failed: ("Optional("fatto di oggi")") is not equal to ("Optional("giornata chiusa")") - l'esito chiesto resta l'annuncio in corso
+/Users/lucascabini/Developer/WarSense/Codice/Tests/SegnaliTest/CodaAnnunciTest.swift:51: error: -[SegnaliTest.CodaAnnunciTest test_la_conclusione_tardiva_dell_annuncio_interrotto_non_fa_avanzare_la_coda] : XCTAssertEqual failed: ("nil") is not equal to ("Optional("fatto di oggi")") - conclusa la conferma, il fatto di oggi si pronuncia
+/Users/lucascabini/Developer/WarSense/Codice/Tests/SegnaliTest/CodaAnnunciTest.swift:53: error: -[SegnaliTest.CodaAnnunciTest test_la_conclusione_tardiva_dell_annuncio_interrotto_non_fa_avanzare_la_coda] : XCTAssertTrue failed
+Test Case '-[SegnaliTest.CodaAnnunciTest test_la_conclusione_tardiva_dell_annuncio_interrotto_non_fa_avanzare_la_coda]' failed (0.112 seconds).
+uscita di swift test: 1

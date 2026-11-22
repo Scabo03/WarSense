@@ -32,8 +32,7 @@ public final class PuntoSegnali {
     private let preferenze: @MainActor () -> Preferenze
     private let decisore: DecisoreCanali
     private var motoreAptico: CHHapticEngine?
-    private var codaAnnunci: [NSAttributedString] = []
-    private var annuncioInCorso = false
+    private var coda = CodaAnnunci<NSAttributedString>()
 
     /// Gli annunci che questo punto ha emesso, dal più vecchio.
     ///
@@ -65,8 +64,12 @@ public final class PuntoSegnali {
         preparaMotoreAptico() // mantenuto pronto, mai acceso e spento a ogni evento (00 §5.6)
         NotificationCenter.default.addObserver(
             forName: UIAccessibility.announcementDidFinishNotification,
-            object: nil, queue: .main) { [weak self] _ in
-            MainActor.assumeIsolated { self?.annuncioConcluso() }
+            object: nil, queue: .main) { [weak self] nota in
+            // Il testo dell'annuncio concluso, quando la notifica lo dichiara: serve a riconoscere la
+            // conclusione tardiva di un annuncio interrotto (`CodaAnnunci`).
+            let valore = nota.userInfo?[UIAccessibility.announcementStringValueUserInfoKey]
+            let testo = (valore as? String) ?? (valore as? NSAttributedString)?.string
+            MainActor.assumeIsolated { self?.annuncioConcluso(testo) }
         }
     }
 
@@ -88,7 +91,8 @@ public final class PuntoSegnali {
         let traduttore = TraduttoreEventiCampagna(testi: testi, parte: parte)
         let p = preferenze()
         if let annuncio = traduttore.annuncio(per: evento, verbosita: p.verbosita) {
-            accoda(annuncio, interrompente: false)
+            // La conclusione della campagna supera i fatti del fronte ancora da dire (05 §11.6).
+            accoda(annuncio, interrompente: TraduttoreEventiCampagna.supera(evento))
         }
         guard let significato = traduttore.significato(per: evento) else { return }
         emetti(significato: significato)
@@ -140,26 +144,15 @@ public final class PuntoSegnali {
         let attribuito = NSAttributedString(string: testo.testo, attributes: [
             .accessibilitySpeechLanguage: testo.lingua, // 00 §14.4
         ])
-        if interrompente {
-            codaAnnunci.removeAll()
-            codaAnnunci.append(attribuito)
-            annuncioInCorso = false
-        } else {
-            codaAnnunci.append(attribuito)
+        if let daDire = coda.accoda(attribuito, testo: testo.testo, interrompente: interrompente) {
+            UIAccessibility.post(notification: .announcement, argument: daDire)
         }
-        pronunciaProssimo()
     }
 
-    private func pronunciaProssimo() {
-        guard !annuncioInCorso, !codaAnnunci.isEmpty else { return }
-        let prossimo = codaAnnunci.removeFirst()
-        annuncioInCorso = true
-        UIAccessibility.post(notification: .announcement, argument: prossimo)
-    }
-
-    private func annuncioConcluso() {
-        annuncioInCorso = false
-        pronunciaProssimo()
+    private func annuncioConcluso(_ testo: String?) {
+        if let daDire = coda.concluso(testo: testo) {
+            UIAccessibility.post(notification: .announcement, argument: daDire)
+        }
     }
 
     // MARK: - Suoni (02 §12)
