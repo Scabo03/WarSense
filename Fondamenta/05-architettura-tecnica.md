@@ -1,6 +1,8 @@
 # Documento di architettura tecnica
 
-Documento 05 di 05 — versione 1.6
+Documento 05 di 05 — versione 1.7
+
+Novità della versione 1.7 (2026-11-22, incarico 30). La prima tappa del regno: lo stato è realizzato per strati, e il regno è il terzo, con giornale e slot propri (nuovo 2.12; 6.7.1); la conclusione della campagna nel minimo (2.11); il banco del regno e la sonda dei suoi invarianti (nuovo 12.8); il confine fra la parte comune del regno e la modalità di battaglia fra i controlli dei confini (14.5).
 
 Novità della versione 1.6 (2026-11-21, incarico 29). Tre realizzazioni delle decisioni del titolare del 21 novembre e una regola sul fuoco: le frasi accordate al genere (nuovo 8.7); il testo che segue la dimensione di sistema (nuovo 10.14); il fuoco d'apertura di una schermata portato alla comparsa e non dopo un caricamento asincrono (10.3, lettera f).
 
@@ -100,6 +102,10 @@ Novità della versione 1.1, in conseguenza del limite dei bersagli simultanei di
 
 2.11 Conclusione. Gli esiti di battaglia e di campagna vivono nello stato e sono dichiarati da eventi (A §3.7). I consolidati non definiscono una condizione di fine della partita a livello di regno nella prima versione: il regno è persistente e lo slot resta giocabile finché il giocatore non lo chiude. L'intestazione dello slot prevede comunque il marcatore di slot concluso: lo pone il giocatore chiudendo definitivamente la partita, o lo porrà una futura condizione di fine se il progetto la introdurrà; su uno slot concluso la Sessione rifiuta ogni comando e resta possibile la sola rigiocatura (A §13.2).
 
+2.11.1 La conclusione della campagna, nel minimo (versione 1.7). Una campagna si conclude soltanto se dichiara un calendario, e in due modi: per annientamento, quando al ritorno da una battaglia una parte non ha più gruppi armati, e per l'arrivo dell'inverno, chiusa l'ultima giornata d'autunno, senza vincitore. Conclusa, ogni comando è respinto col proprio motivo chiuso e l'esito sale al regno (A §2.12). La presa del quartier generale, la resa della campagna e le conseguenze territoriali non sono costruite (RDA-164). Le campagne di prova, che non dichiarano un calendario, restano senza conclusione.
+
+2.12 Realizzazione per strati (versione 1.7). Lo stato del punto 2.3 non è un unico valore: è realizzato in tre strati — battaglia, fronte, regno —, ciascuno con il proprio stato come valore, il proprio motore puro, la propria Sessione e il proprio giornale; lo strato superiore riceve l'esito dell'inferiore come riga autosufficiente del proprio giornale, sicché rigiocarlo non rilegge i file dell'altro (RDA-132, RDA-162). Lo stato del regno contiene: il calendario — anno e momento dell'anno, cioè stagione operativa oppure stazione invernale corrente —; le cinque risorse coi saldi; l'entrata dell'anno, base del riporto; le forze, nella forma della modalità di battaglia; i lavori ordinati col momento in cui sono pronti; la campagna dell'anno e il suo esito; il registro della patria; la fase storica. La parte comune del regno non nomina nulla che appartenga a una modalità di battaglia: la forma delle forze, i ganci d'effetto delle voci militari (A §7.7) e il ponte verso la campagna sono della modalità, e la modalità a campioni vi aggiungerà i propri senza toccare il resto (RDA-166).
+
 ---
 
 ## 3. I comandi discreti
@@ -175,6 +181,8 @@ Novità della versione 1.1, in conseguenza del limite dei bersagli simultanei di
 6.6 Versionamento. Il giornale e ogni istantanea dichiarano tre versioni: schema dello stato, valori, testi (00 §15.1). All'apertura, un salvataggio con versione dei valori o dello schema incompatibile viene dichiarato tale e non aperto (00 §15.2), con un annuncio che nomina le versioni attese e trovate. La compatibilità è dichiarata dal manifest dei dati (A §7.2): una versione dei valori è compatibile solo se il manifest la elenca come tale rispetto a quella del salvataggio; in mancanza, incompatibile. La versione dei testi non blocca mai l'apertura.
 
 6.7 Slot e posizioni. Le partite sono slot indipendenti, ciascuno una cartella (giornale, istantanee, intestazione) nella sandbox dell'applicazione. Le partite non stanno nella cartella visibile all'app File; vi stanno i dati e i testi (A §7.1).
+
+6.7.1 Slot annidati (versione 1.7). Lo slot del regno contiene il giornale del regno e, in una sottocartella, lo slot della campagna dell'anno, che a sua volta contiene gli slot delle sue battaglie. Lo slot della campagna si crea prima che il giornale del regno registri l'apertura e si rimuove dopo che ne ha registrato l'esito: un'interruzione fra le due scritture si sana alla ripresa, ricreando la campagna dalla fondazione oppure riportandone l'esito (RDA-162). Il regno non scrive istantanee: il suo giornale conta poche decine di righe per anno (scostamento S28b dal punto 6.2).
 
 6.8 Robustezza. Scritture atomiche (file temporaneo più sostituzione) per le istantanee; verifica di integrità riga per riga alla lettura del giornale, con troncamento all'ultima riga integra; un'istantanea corrotta fa scalare alla precedente. La perdita massima possibile è l'ultimo comando, mai la partita (00 §15.3).
 
@@ -310,6 +318,8 @@ Novità della versione 1.1, in conseguenza del limite dei bersagli simultanei di
 
 12.7 Prestazioni. Il Motore, essendo un valore senza dipendenze, si presta all'esecuzione parallela di simulazioni indipendenti; il programma parallelizza per scenario e per seme. Nessun requisito di prestazione del gioco dipende però dalla Verifica.
 
+12.8 Il banco del regno (versione 1.7). È la famiglia «partita lunga» del punto 12.2 nel suo primo stato: gioca anni interi — la campagna dell'anno con le condotte della misura della frequenza delle battaglie, l'inverno con le leve che le risorse consentono, la primavera — e dopo ogni transizione interroga la sonda degli invarianti del regno (saldi mai negativi, spesa ed entrata conservate, riporto mai oltre la quota, forze che cambiano soltanto al rientro e in primavera, esito coerente con la campagna). Ogni invariante ha il proprio mutante (RDA-169).
+
 ---
 
 ## 13. Le due funzioni future
@@ -330,7 +340,7 @@ Novità della versione 1.1, in conseguenza del limite dei bersagli simultanei di
 
 14.4 Collaudo di accessibilità. Automatico e bloccante: ogni elemento interattivo ha etichetta, tratti e azioni; l'ordine di lettura delle griglie corrisponde alla specifica (02 §2.8); ogni evento ha il modello di annuncio nei tre livelli di verbosità e in ogni lingua; ogni segnale aptico assegnato ha controparte sonora e testuale (00 §5.2); le prove di fuoco di A §10.3 eseguite su interfaccia reale (XCUITest): dopo il piazzamento il fuoco è sulla cella, dopo l'esaurimento del deck il fuoco non si muove, all'arrivo dei rinforzi il fuoco non si muove.
 
-14.5 Collaudo dei confini. Verifica statica delle dipendenze fra bersagli (A §1.3) e assenza di stringhe di testo utente nel codice (00 §14.1): una prova compila l'elenco delle stringhe letterali dei bersagli e fallisce se ne trova fuori dalle liste consentite (chiavi, identificatori).
+14.5 Collaudo dei confini. Verifica statica delle dipendenze fra bersagli (A §1.3) e assenza di stringhe di testo utente nel codice (00 §14.1): una prova compila l'elenco delle stringhe letterali dei bersagli e fallisce se ne trova fuori dalle liste consentite (chiavi, identificatori). Dalla versione 1.7 vi appartiene anche il confine fra la parte comune del regno e la modalità di battaglia (A §2.12): i sorgenti comuni del regno non nominano reparti, gruppi, sciami, formazioni, atomi né archetipi.
 
 14.6 Riproduzioni d'oro. Giornali registrati di partite significative (uno scontro completo, una campagna, un inverno) riapplicati a ogni modifica: l'impronta di stato finale deve coincidere. Almeno una riproduzione è incrociata fra iOS e macOS, a presidio del determinismo fra piattaforme (A §2.2.1). Quando una modifica di regole è voluta, la riproduzione si rigenera con revisione esplicita. È la rete di sicurezza del determinismo nel tempo. Una prova di interfaccia dedicata verifica che dopo un annullamento gli elementi accessibili non siano stati ricreati e il fuoco non si sia mosso (A §10.3, RDA-03).
 

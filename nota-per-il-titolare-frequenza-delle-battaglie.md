@@ -1,5 +1,7 @@
 # Quante battaglie nascono in una campagna, e che cosa si potrebbe cambiare
 
+**Che cosa hai deciso su queste proposte.** La prima è chiusa: agli scenari non si aggiungono gruppi armati avversari, perché le forze nemiche su un fronte le determinerà il regno avversario; non va riproposta. La seconda è realizzata nel minimo per le campagne aperte dal regno, che finiscono con l'inverno o quando una parte resta senza gruppi armati; la presa del quartier generale non c'è ancora. La quarta resta da fare: la battaglia che al banco non si conclude è rimandata a un incarico successivo. Il resto della nota è com'era quando l'ho scritta.
+
 Ho fatto giocare al banco, per ciascuno dei tre formati, duecento partite con un giocatore competente e duecento con uno prudente sul modello del tester, fino a due anni di giornate o alla fine naturale. I numeri, con lo strumento che li ha prodotti, sono nel resoconto dell'incarico; qui il senso. Non ho cambiato nulla nel gioco: la decisione è tua.
 
 **Che cosa succede oggi.** Le battaglie sono rare. Nei primi quattro mesi di gioco, nel caso migliore, ne nasce una ogni due mesi circa: è quello che è successo al tester, e non dipende soltanto dalla sua prudenza. Poi diventano ancora più rare. Chi gioca con prudenza ne trova una all'inizio sulla mappa piccola, un paio sulla media e nessuna sulla grande. Nessuna partita prudente arriva alla fine, e poche delle competenti: per lo più sulla mappa piccola, e lì per lo più perché il giocatore resta senza gruppi armati.

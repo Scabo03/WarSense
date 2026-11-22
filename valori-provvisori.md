@@ -252,3 +252,19 @@ Nessun numero cambia. Cambia una REGOLA della campagna, il tasto «Chiudi la gio
 
 Nessun numero cambia. Cambia l'applicazione di una REGOLA della campagna, le caselle in cui lo sconfitto di una battaglia può ripiegare: da questa versione escludono la meta di una marcia propria in corso, che la validazione della marcia già tratta come occupata (01 §5.6.0.2); fino alla build 29 lo sconfitto poteva ripiegarvi, e all'arrivo della marcia la casella ospitava due gruppi della stessa parte. Per 03 §9.2.1 una campagna salvata prima, riaperta dopo, proseguirebbe diversamente in quel caso: la versione sale da 0.13.0 a **0.14.0**. `versioni_compatibili` = **["0.8.0", "0.9.0", "0.10.0", "0.11.0", "0.12.0", "0.13.0"]**: una campagna della build 29 prosegue diversamente SOLTANTO dove il Motore di prima produceva lo stato vietato, e il suo giornale si rigioca identico perché la riga dell'esito porta le caselle del ritorno; gli scontri di prova non ne sono toccati. Lo schema del giornale di campagna resta 9, quello di battaglia 2; la versione dei testi resta 0.1.1; le impronte dei file dei valori non cambiano.
 
+
+## Il regno: i valori della prima tappa (incarico 30; RDA-165, RDA-166)
+
+Tutti in `Codice/Sources/Contenuti/Valori/regno.json`, tutti PROVVISORI: nessuno viene da una misura di bilanciamento, e tre dipendono da domande poste al titolare (`Proposte/domande-per-il-titolare-sul-regno.md`). Sono scelti perché l'anno si giochi e la scelta d'inverno esista: con l'entrata di un anno senza vittorie si pagano da due a quattro leve, secondo quali si scelgono (due di fanteria pesante esauriscono i metalli; quattro di fanteria leggera gli uomini), e non tutte quelle che si vorrebbero.
+
+- **`giornate_per_stagione` = 30** (tre stagioni operative: 90 giornate; domanda 2). I documenti non dicono quanto duri una stagione. Trenta dà un anno che il banco gioca per intero e che una campagna prudente non esaurisce in battaglie: è il numero da tarare per primo, con la misura del banco del regno (RDA-169).
+- **`quota_riporto` = 0,1**: NON provvisorio, è il dieci per cento di 01 §5.5.1.4 e 03 §4.4.1. Provvisoria è la base su cui si calcola, l'entrata dell'anno (RDA-165).
+- **`dotazione_iniziale`** = denaro 20, uomini 2, metalli 3, materiale 3, animali 1: è ciò che resterebbe di un anno di sola rendita dopo il riporto (un decimo della rendita, troncato), perché il primo anno cominci come cominciano gli altri.
+- **`rendita_annua`** = denaro 200, uomini 24, metalli 30, materiale 30, animali 12 (domanda 1). Il materiale da costruzione oggi non ha voci che lo consumino: arriva e si perde col riporto, finché non esistono le opere (tappa 6).
+- **`premio_battaglia_vinta` = 0,1** e **`premio_campagna_vinta` = 0,5**, coefficienti della rendita (domanda 1): una battaglia vinta vale un decimo della rendita di ciascuna risorsa, la campagna vinta metà.
+- **`base_leva`** = denaro 5, uomini 1, metalli 1, materiale 0, animali 1 per atomo reclutato, e **i pesi delle tre voci**: fanteria leggera 1 / 1 / 0,5 (sei atomi: 30 monete, 6 uomini, 3 metalli); fanteria pesante 1,6 / 1 / 2 (otto atomi: 64, 8, 16); cavalleria manovrata 2,4 / 1 / 1 e animali 1 (sei atomi: 72, 6, 6, 6). L'ordine dei costi segue quello dei reparti nel combattimento (la pesante consuma metalli, la cavalleria animali); le proporzioni non sono tarate. **`costo_minimo` = 1** (00 §13.6).
+- **`forze_iniziali`**: le forze del giocatore nello scenario della campagna media, perché il primo anno su quel fronte sia lo scenario che i tester conoscono (`test_sul_fronte_dell_istmo_il_primo_anno_e_lo_scenario_di_oggi_col_calendario`).
+- **I fronti** sono i tre scenari di campagna esistenti (guado, istmo, pianura lunga) coi loro avversari fissi (RDA-163).
+- **Quattro stazioni invernali**: numero di struttura (01 §5.9.1.1), nel codice (`MomentoDellAnno.stazioniInvernali`), come le duecento righe fra le istantanee.
+
+Il nome della moneta della fase antica non è definito (RDA-167).

@@ -2,6 +2,8 @@
 
 Bozza di lavoro del 2026-11-22 (incarico 30). È una proposta e non una decisione. Non è un documento consolidato, non modifica nessun documento, e nulla di ciò che contiene è costruito.
 
+**Come è stata scritta e che cosa è stato verificato.** La bozza l'ha scritta un sotto-agente della sessione dell'incarico 30, che ha letto il documento 04 nei limiti dichiarati al punto 7.4 e ha ricontrollato per programma che ogni riga citata esista. La sessione l'ha poi riletta per intero e ha verificato: a campione, venti delle citazioni del 04 confrontando la riga del file con ciò che la bozza le fa dire (r. 136, 216, 607, 609, 714, 856, 907, 911, 968, 1190, 1289, 1930, 2062, 2119, 2129, 2587, 3150, 3346, 3651, 3669: tutte concordi); tutti i rinvii al documento della modalità a campioni (punti 1.3, 2.2, 2.3, 3.1, 4.3, 5.2–5.10, 6.1, 6.2, 7.1–7.7, 8.1–8.4, 9.1, 10.5, 11.1–11.10); i rinvii al documento 01 (2.5.1, 2.8.1, 2.8.2.1, 3.2.1, 3.3–3.3.3, 3.4.3, 3.4.5, 4.1.2, 4.3.1, 4.12–4.14, 5.5.1.2–5.5.1.4.1), a `decisioni-fase-2.md` (1.34, PRO-07, ECO-08, ECO-09, ECO-11–ECO-13) e ai valori (`archetipi.json`, campo `elite_fase`). NON verificate una per una le altre citazioni del 04, circa duecento: vale per esse il solo controllo del sotto-agente. Il punto 6.7, sul raccordo col regno costruito, è aggiunto dalla sessione.
+
 ## 1. Che cos'è questo documento
 
 1.1 **Scopo.** Il documento della modalità a campioni (`Fondamenta/modalita-a-campioni.md`, versione 1.2) lascia aperto al punto 11.1 l'elenco delle classi e delle sottoclassi, con armamento ed equipaggiamento. Chiede che l'elenco sia il più possibile coerente con la ricerca storica del documento 04, e che si verifichi su quel documento se la modalità sia «perfino più vicina alla realtà storica», come il titolare ritiene. Questa bozza fa le due cose, per la fase arcaica e per la fase antica, e aggiunge le voci del regno con cui combattenti ed eroi si reclutano e si migliorano.
@@ -480,6 +482,16 @@ Economia militare
 ### 6.6 Ciò che il 04 offrirebbe e che non propongo, perché già escluso
 
 La fornitura degli equipaggiamenti da un magazzino del palazzo, il prestito rotativo per l'animale, i mercenari a denaro, il costo del combattente che oscilla con la congiuntura: sono nel 04 (II T12 r. 936; III T12 r. 2691 e r. 2805–2809; VI.5 r. 3713–3721) e sono già esclusi (`Fondamenta/decisioni-fase-2.md`, voci ECO-12, ECO-13, ECO-11, ECO-08).
+
+### 6.7 Come queste voci entrano nel regno che esiste (aggiunto dalla sessione)
+
+La prima tappa del regno, costruita nell'incarico 30 per la sola modalità a sciami, tiene già separato ciò che è comune da ciò che è della modalità (`Proposte/piano-del-regno.md`, punto 2.4; RDA-166). Per la modalità a campioni ne discende, senza rifare nulla:
+
+- *Le forze.* Il regno conserva oggi formazioni di reparti; nella modalità a campioni conserverà l'organico: per ciascun combattente l'identificativo, il titolo, la sottoclasse, l'arma, la protezione, il mezzo, i miglioramenti con il loro stato di mantenimento, l'infortunio e gli scontri che mancano al rientro; per gli eroi anche il recupero. È un caso in più della stessa forma (`ForzeDelRegno`), non un regno diverso.
+- *I ganci d'effetto.* Una voce del regno dichiara costo, momento in cui è pronta e un gancio: oggi «recluta un reparto». Qui servono tre ganci, uno per ciascuna delle voci dei punti 6.1–6.3: recluta un combattente (con le quattro scelte del punto 6.1), migliora la persona, migliora l'istituzione. Le acquisizioni restano quelle comuni.
+- *Il costo.* La formula del regno è una sola: per ogni risorsa, la misura di ciò che la voce dà, per la base della risorsa, per il peso della voce. Il costo di un combattente si ottiene sommando i pesi dei suoi quattro oggetti — sottoclasse, arma, protezione, mezzo —, risorsa per risorsa: la corazza porta il peso sui metalli, il mezzo sugli animali e sul materiale da costruzione. Il tempo dell'arco non è un costo: è il momento in cui il combattente è pronto. Non serve una tabella dei profili (carta 13.3), e ogni voce dell'elenco dichiara il proprio contributo una volta sola.
+- *Il momento.* Nella prima tappa tutto ciò che si ordina d'inverno è pronto in primavera. L'arciere che «arriva più tardi» (punto 6.1) chiede le durate e gli arrivi differiti, che sono la seconda tappa del piano.
+- *Ciò che la campagna riporta.* Oggi rientrano le formazioni con le perdite subite. Qui rientrerà l'organico con infortuni e recuperi; i caduti non rientrano.
 
 ## 7. Punti aperti e tensioni
 

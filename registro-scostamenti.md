@@ -383,7 +383,7 @@ I documenti prescrivono l'innesco, il blocco, lo schieramento, l'ordine dei turn
 
 **S27a — La designazione comincia dalla posizione anche sul campo di battaglia.** La decisione del titolare nomina la marcia; 02 §3.3 valeva identico per i due piani, e la carta vuole identico il formato degli annunci su ogni superficie (00 §7.1). Applicata alla sola mappa avrebbe violato la carta: la si applica ai due piani (RDA-156). Dichiarato come decisione presa da solo.
 
-**S27b — «domani pioggia probabile» e i termini chiusi.** L'esempio della decisione usa «probabile», che non è fra i termini chiusi della probabilità (02 §4.4: possibilità bassa, possibilità alta), mentre la decisione chiede i termini chiusi. Prevale la regola sull'esempio: «domani pioggia, possibilità alta»; un termine nuovo per decisione (RDA-159).
+**S27b — «domani pioggia probabile» e i termini chiusi.** L'esempio della decisione usa «probabile», che non è fra i termini chiusi della probabilità (02 §4.4: possibilità bassa, possibilità alta), mentre la decisione chiede i termini chiusi. Prevale la regola sull'esempio: «domani pioggia, possibilità alta»; un termine nuovo per decisione (RDA-159). CHIUSO dall'incarico 30: il titolare conferma la scala esistente, senza termini nuovi (RDA-168); la riserva è tolta da 02 §4.4.
 
 **S27c — I termini di stato dopo un soggetto femminile restano invariabili.** «tua fanteria leggera A, impegnato»: «impegnato» è un termine chiuso dello stato di controllo (02 §4.4.5), invariabile per 02 §4.1 e §4.5, e la decisione vuole invariabile il termine; cambiano articoli e accordi della frase, che qui è una voce distinta. Lettura dichiarata (RDA-157).
 
