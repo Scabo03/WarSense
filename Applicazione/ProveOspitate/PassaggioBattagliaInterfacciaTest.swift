@@ -199,7 +199,7 @@ final class PassaggioBattagliaInterfacciaTest: XCTestCase {
     /// `PartitaCorrente` della schermata di battaglia PRESENTATA (i suoi eventi la raggiungono e ne
     /// fanno comparire il resoconto), poi congeda il resoconto come il pulsante «torna» — la stessa
     /// catena `alTermine` del gioco, che riporta l'esito in campagna (incarico 25).
-    private func apriCombattiEtornaDalloSchermo(_ schermata: SchermataMappaCampagna,
+    func apriCombattiEtornaDalloSchermo(_ schermata: SchermataMappaCampagna,
                                                 battaglia: BattagliaInSospeso, ambiente: Ambiente) async throws {
         XCTAssertTrue(schermata.attiva(battaglia.casella))
         try await Task.sleep(nanoseconds: 150_000_000)

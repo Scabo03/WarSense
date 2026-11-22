@@ -11,6 +11,8 @@
 		116EEE5C15D49181561AFDB5 /* DesignazioneBersaglioTest.swift in Sources */ = {isa = PBXBuildFile; fileRef = 589A5B5EA3AF0D6D1EFB3900 /* DesignazioneBersaglioTest.swift */; };
 		14B5803E132A5513A223659C /* EsploratoriAvversarioTest.swift in Sources */ = {isa = PBXBuildFile; fileRef = 70C73D2597EF834F084727EB /* EsploratoriAvversarioTest.swift */; };
 		190E7D5DC3B892BF2DFD277B /* SchermateContorno.swift in Sources */ = {isa = PBXBuildFile; fileRef = 44914552A51BDF0197E99DAF /* SchermateContorno.swift */; };
+		1996CB0694B301073B89C9E5 /* AnnoDelRegnoTest.swift in Sources */ = {isa = PBXBuildFile; fileRef = F9064DDE9EA140B49E4AF2BA /* AnnoDelRegnoTest.swift */; };
+		257142A45053AF1D37BEE4F9 /* FumoRegnoTest.swift in Sources */ = {isa = PBXBuildFile; fileRef = 3AAD9620D5F35C500D1ABA6E /* FumoRegnoTest.swift */; };
 		2A6515987A3A5AE13194DFF1 /* OsservazioniEsplorazioneTest.swift in Sources */ = {isa = PBXBuildFile; fileRef = 9B5A65298E62BF03714DD82F /* OsservazioniEsplorazioneTest.swift */; };
 		2B717BF9114D8E349751F99B /* SondaCanaliTest.swift in Sources */ = {isa = PBXBuildFile; fileRef = 079A9D5EB3AB1D2FBEF55BDA /* SondaCanaliTest.swift */; };
 		2C201369597A009507BC172C /* Verifica in Frameworks */ = {isa = PBXBuildFile; productRef = 63388568CF69F6ECF3CB5E3C /* Verifica */; };
@@ -105,6 +107,7 @@
 		2F77F23D7958A0EE7DC80E0A /* CatenaInterfacciaMotoreTest.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = CatenaInterfacciaMotoreTest.swift; sourceTree = "<group>"; };
 		325B59A8BC855637ABF9B2CB /* PannelloAzioniTest.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = PannelloAzioniTest.swift; sourceTree = "<group>"; };
 		33237A45EB1B4EBEA09B1769 /* SchermataMappaCampagna.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SchermataMappaCampagna.swift; sourceTree = "<group>"; };
+		3AAD9620D5F35C500D1ABA6E /* FumoRegnoTest.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = FumoRegnoTest.swift; sourceTree = "<group>"; };
 		3CAF296EB8CDAA34921D17B6 /* WarSenseTest.xctest */ = {isa = PBXFileReference; includeInIndex = 0; lastKnownFileType = wrapper.cfbundle; path = WarSenseTest.xctest; sourceTree = BUILT_PRODUCTS_DIR; };
 		3EF9E5EB5AC6650CDB0D1660 /* GestiUnLivelloSottoTest.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = GestiUnLivelloSottoTest.swift; sourceTree = "<group>"; };
 		44914552A51BDF0197E99DAF /* SchermateContorno.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SchermateContorno.swift; sourceTree = "<group>"; };
@@ -144,6 +147,7 @@
 		D159331FD8EEFB4F1B728089 /* SchermataRegistro.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SchermataRegistro.swift; sourceTree = "<group>"; };
 		D9AE4948D6C5E7019FBB038E /* SessioneInterattivaTest.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SessioneInterattivaTest.swift; sourceTree = "<group>"; };
 		F5CF5758DBDF15E75D992F76 /* GrigliaAccessibile.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = GrigliaAccessibile.swift; sourceTree = "<group>"; };
+		F9064DDE9EA140B49E4AF2BA /* AnnoDelRegnoTest.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AnnoDelRegnoTest.swift; sourceTree = "<group>"; };
 /* End PBXFileReference section */
 
 /* Begin PBXFrameworksBuildPhase section */
@@ -211,6 +215,7 @@
 				70C73D2597EF834F084727EB /* EsploratoriAvversarioTest.swift */,
 				921003768253D7D483CCC1D8 /* FumoInterfacciaTest.swift */,
 				D02CD1A940C35DBC8B46486B /* FumoMappaCampagnaTest.swift */,
+				3AAD9620D5F35C500D1ABA6E /* FumoRegnoTest.swift */,
 				75B409D97C3092A3CC3CDA17 /* ImpiantoInterfacciaTest.swift */,
 				51A1FEDB5D9071EBFD321E35 /* TaglieEOrientamentiInterfacciaTest.swift */,
 			);
@@ -251,6 +256,7 @@
 		F2E0B78C84777F8B85F27F44 /* ProveOspitate */ = {
 			isa = PBXGroup;
 			children = (
+				F9064DDE9EA140B49E4AF2BA /* AnnoDelRegnoTest.swift */,
 				1C877A8D5733D587BE7B618F /* AnnunciEFuocoTest.swift */,
 				88D7A0731824F60DFDBEED2D /* AnnuncioDiCasellaTest.swift */,
 				2F77F23D7958A0EE7DC80E0A /* CatenaInterfacciaMotoreTest.swift */,
@@ -441,6 +447,7 @@
 			isa = PBXSourcesBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
+				1996CB0694B301073B89C9E5 /* AnnoDelRegnoTest.swift in Sources */,
 				7E69C9F2DB0BBABC72260BBB /* AnnunciEFuocoTest.swift in Sources */,
 				C00890F2F953EE7041175812 /* AnnuncioDiCasellaTest.swift in Sources */,
 				321465D14C83340BB6030A0F /* CatenaInterfacciaMotoreTest.swift in Sources */,
@@ -498,6 +505,7 @@
 				14B5803E132A5513A223659C /* EsploratoriAvversarioTest.swift in Sources */,
 				33BCAD29CAC0333FB4B83594 /* FumoInterfacciaTest.swift in Sources */,
 				C91A79B09526BD853D441712 /* FumoMappaCampagnaTest.swift in Sources */,
+				257142A45053AF1D37BEE4F9 /* FumoRegnoTest.swift in Sources */,
 				4019BE980D8938B2E6B4D120 /* ImpiantoInterfacciaTest.swift in Sources */,
 				97BD99543E0A390799A108E2 /* TaglieEOrientamentiInterfacciaTest.swift in Sources */,
 			);
