@@ -1,0 +1,11 @@
+== 1/2 Sessioni complete di CAMPAGNA per l'interfaccia (144) ==
+  campagna per l'interfaccia (144): VERDE (durata prova 522.7s)
+== 2/2 Sessioni complete HEADLESS: campagna e 32 di BATTAGLIA (Motore) ==
+	 Executed 15 tests, with 0 failures (0 unexpected) in 8.851 (8.851) seconds
+	 Executed 15 tests, with 0 failures (0 unexpected) in 8.851 (8.852) seconds
+	 Executed 0 tests, with 0 failures (0 unexpected) in 0.000 (0.000) seconds
+	 Executed 0 tests, with 0 failures (0 unexpected) in 0.000 (0.001) seconds
+  headless (campagna + 32 battaglia): VERDE
+  esito scritto in esiti-sessioni-complete/esito.json: successo
+== Corsa separata: SUCCESSO ==
+uscita: 0

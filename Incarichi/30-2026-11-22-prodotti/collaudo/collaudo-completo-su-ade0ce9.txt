@@ -1,0 +1,81 @@
+== 0/3 Cancello dei simboli d'archetipo (biiezione archetipi <-> simboli, RDA-97) ==
+== 0b/3 Cancello delle impronte dei Contenuti (RDA-105) ==
+== 0c/3 Cancello: VoiceOver spento sul simulatore delle prove d'interfaccia (incarico 30) ==
+== 1/3 Collaudo del pacchetto (Motore, Dati, Sessione, Segnali, Verifica, Confini) ==
+	 Executed 5 tests, with 0 failures (0 unexpected) in 1.626 (1.627) seconds
+	 Executed 6 tests, with 0 failures (0 unexpected) in 0.188 (0.189) seconds
+	 Executed 11 tests, with 0 failures (0 unexpected) in 31.568 (31.568) seconds
+	 Executed 35 tests, with 0 failures (0 unexpected) in 3.523 (3.525) seconds
+	 Executed 3 tests, with 0 failures (0 unexpected) in 0.451 (0.451) seconds
+	 Executed 8 tests, with 0 failures (0 unexpected) in 5.011 (5.012) seconds
+	 Executed 15 tests, with 0 failures (0 unexpected) in 8.767 (8.768) seconds
+Test Suite 'VerificaTest.xctest' passed at 2026-11-22 23:07:55.399.
+	 Executed 84 tests, with 0 failures (0 unexpected) in 51.142 (51.147) seconds
+Test Suite 'All tests' passed at 2026-11-22 23:07:55.399.
+	 Executed 84 tests, with 0 failures (0 unexpected) in 51.142 (51.148) seconds
+	 Executed 11 tests, with 0 failures (0 unexpected) in 0.115 (0.116) seconds
+	 Executed 3 tests, with 0 failures (0 unexpected) in 0.056 (0.056) seconds
+	 Executed 2 tests, with 0 failures (0 unexpected) in 0.004 (0.004) seconds
+	 Executed 2 tests, with 2 tests skipped and 0 failures (0 unexpected) in 0.001 (0.001) seconds
+	 Executed 3 tests, with 0 failures (0 unexpected) in 0.023 (0.023) seconds
+	 Executed 3 tests, with 0 failures (0 unexpected) in 0.021 (0.021) seconds
+	 Executed 8 tests, with 0 failures (0 unexpected) in 0.085 (0.086) seconds
+	 Executed 10 tests, with 0 failures (0 unexpected) in 0.100 (0.101) seconds
+	 Executed 9 tests, with 0 failures (0 unexpected) in 0.080 (0.080) seconds
+Test Suite 'SessioneTest.xctest' passed at 2026-11-22 23:07:55.982.
+	 Executed 53 tests, with 2 tests skipped and 0 failures (0 unexpected) in 0.502 (0.505) seconds
+Test Suite 'All tests' passed at 2026-11-22 23:07:55.982.
+	 Executed 53 tests, with 2 tests skipped and 0 failures (0 unexpected) in 0.502 (0.505) seconds
+	 Executed 6 tests, with 0 failures (0 unexpected) in 0.001 (0.002) seconds
+	 Executed 3 tests, with 0 failures (0 unexpected) in 0.000 (0.000) seconds
+	 Executed 14 tests, with 0 failures (0 unexpected) in 0.291 (0.292) seconds
+	 Executed 8 tests, with 0 failures (0 unexpected) in 0.159 (0.160) seconds
+	 Executed 11 tests, with 0 failures (0 unexpected) in 0.294 (0.294) seconds
+Test Suite 'SegnaliTest.xctest' passed at 2026-11-22 23:07:56.800.
+	 Executed 42 tests, with 0 failures (0 unexpected) in 0.746 (0.748) seconds
+Test Suite 'All tests' passed at 2026-11-22 23:07:56.800.
+	 Executed 42 tests, with 0 failures (0 unexpected) in 0.746 (0.748) seconds
+	 Executed 12 tests, with 0 failures (0 unexpected) in 0.117 (0.118) seconds
+	 Executed 5 tests, with 0 failures (0 unexpected) in 0.036 (0.036) seconds
+	 Executed 16 tests, with 0 failures (0 unexpected) in 0.125 (0.126) seconds
+	 Executed 3 tests, with 0 failures (0 unexpected) in 0.021 (0.021) seconds
+	 Executed 5 tests, with 0 failures (0 unexpected) in 0.041 (0.042) seconds
+	 Executed 4 tests, with 0 failures (0 unexpected) in 0.028 (0.028) seconds
+	 Executed 13 tests, with 0 failures (0 unexpected) in 0.108 (0.108) seconds
+	 Executed 5 tests, with 0 failures (0 unexpected) in 0.033 (0.033) seconds
+	 Executed 7 tests, with 0 failures (0 unexpected) in 0.050 (0.050) seconds
+	 Executed 11 tests, with 0 failures (0 unexpected) in 0.079 (0.080) seconds
+	 Executed 10 tests, with 0 failures (0 unexpected) in 0.071 (0.072) seconds
+	 Executed 14 tests, with 0 failures (0 unexpected) in 0.091 (0.092) seconds
+	 Executed 11 tests, with 0 failures (0 unexpected) in 0.011 (0.011) seconds
+	 Executed 28 tests, with 0 failures (0 unexpected) in 0.182 (0.183) seconds
+	 Executed 30 tests, with 0 failures (0 unexpected) in 0.214 (0.215) seconds
+	 Executed 14 tests, with 0 failures (0 unexpected) in 0.099 (0.099) seconds
+	 Executed 14 tests, with 0 failures (0 unexpected) in 0.095 (0.095) seconds
+	 Executed 2 tests, with 0 failures (0 unexpected) in 0.014 (0.014) seconds
+Test Suite 'MotoreTest.xctest' passed at 2026-11-22 23:07:58.300.
+	 Executed 204 tests, with 0 failures (0 unexpected) in 1.416 (1.425) seconds
+Test Suite 'All tests' passed at 2026-11-22 23:07:58.300.
+	 Executed 204 tests, with 0 failures (0 unexpected) in 1.416 (1.426) seconds
+	 Executed 2 tests, with 0 failures (0 unexpected) in 0.043 (0.043) seconds
+	 Executed 4 tests, with 0 failures (0 unexpected) in 0.065 (0.065) seconds
+	 Executed 12 tests, with 0 failures (0 unexpected) in 0.048 (0.048) seconds
+	 Executed 7 tests, with 0 failures (0 unexpected) in 0.056 (0.056) seconds
+	 Executed 12 tests, with 0 failures (0 unexpected) in 0.187 (0.188) seconds
+	 Executed 4 tests, with 0 failures (0 unexpected) in 0.006 (0.006) seconds
+	 Executed 3 tests, with 0 failures (0 unexpected) in 0.019 (0.019) seconds
+Test Suite 'DatiTest.xctest' passed at 2026-11-22 23:07:58.795.
+	 Executed 44 tests, with 0 failures (0 unexpected) in 0.423 (0.426) seconds
+Test Suite 'All tests' passed at 2026-11-22 23:07:58.795.
+	 Executed 44 tests, with 0 failures (0 unexpected) in 0.423 (0.427) seconds
+	 Executed 5 tests, with 0 failures (0 unexpected) in 0.112 (0.113) seconds
+Test Suite 'ConfiniTest.xctest' passed at 2026-11-22 23:07:58.975.
+	 Executed 5 tests, with 0 failures (0 unexpected) in 0.112 (0.113) seconds
+Test Suite 'All tests' passed at 2026-11-22 23:07:58.975.
+	 Executed 5 tests, with 0 failures (0 unexpected) in 0.112 (0.113) seconds
+== 2/3 Generazione del progetto applicativo dalla sua sorgente di verità ==
+== 3/3 Prove ospitate e d'interfaccia sul simulatore ==
+== Conteggio delle prove ospitate e d'interfaccia, dall'esecutore ==
+  esecutore (xcresulttool summary): 137 prove eseguite fra ospitate e interfaccia — 137 passate, 0 fallite, 0 saltate; esito Passed
+== Collaudo completo: tutto verde ==
+uscita: 0
