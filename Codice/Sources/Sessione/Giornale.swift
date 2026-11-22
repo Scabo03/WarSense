@@ -105,6 +105,44 @@ public struct FondazioneCampagna: Codable, Sendable {
     }
 }
 
+/// L'atto di fondazione di un REGNO (05 §2.10; incarico 30, RDA-162). Caso a sé, come quello della
+/// campagna: porta la modalità di battaglia scelta all'inizio della partita, che vale per il regno
+/// e per tutte le campagne (01 §1.2), e lo stato con cui il regno è nato, sicché rigiocare il
+/// giornale non dipenda dalle forze iniziali che i file dei valori dichiarano oggi.
+public struct FondazioneRegno: Codable, Sendable {
+    public let versioneSchema: Int
+    public let versioneValori: String
+    public let versioneTesti: String
+    public let seme: UInt64
+    public let identificatore: String
+    /// La modalità di battaglia (01 §1.2): questa versione conosce «sciami».
+    public let modalita: String
+    public let statoIniziale: StatoRegno
+    /// Versione 1: la prima tappa del regno (incarico 30).
+    public static let schemaCorrente = 1
+    /// La sola modalità di battaglia che questa versione costruisce.
+    public static let modalitaASciami = "sciami"
+
+    public init(versioneSchema: Int, versioneValori: String, versioneTesti: String, seme: UInt64,
+                identificatore: String, modalita: String, statoIniziale: StatoRegno) {
+        self.versioneSchema = versioneSchema
+        self.versioneValori = versioneValori
+        self.versioneTesti = versioneTesti
+        self.seme = seme
+        self.identificatore = identificatore
+        self.modalita = modalita
+        self.statoIniziale = statoIniziale
+    }
+
+    enum CodingKeys: String, CodingKey {
+        case versioneSchema = "versione_schema"
+        case versioneValori = "versione_valori"
+        case versioneTesti = "versione_testi"
+        case seme, identificatore, modalita
+        case statoIniziale = "stato_iniziale"
+    }
+}
+
 /// Le voci del giornale (05 §6.1): comandi e marcatori. La codifica è stabile:
 /// i casi si AGGIUNGONO, non si rinominano e non si riordinano.
 ///
@@ -165,6 +203,18 @@ public enum VoceGiornale: Codable, Sendable {
     /// l'annullamento è un gesto del giocatore come un ordine (`SessioneCampagna.ultimoOrdine`).
     /// Aggiunta in coda: i casi preesistenti si ricodificano identici (`CompatibilitaGiornaleTest`).
     case giornataChiusaDalGiocatore(giorno: Int)
+    /// Atto di fondazione di un regno (05 §2.10; incarico 30). Aggiunto in coda, come i casi che
+    /// seguono: i casi preesistenti si ricodificano identici (`CompatibilitaGiornaleTest`).
+    case fondazioneRegno(FondazioneRegno)
+    /// Un comando del regno (05 §3.5).
+    case comandoRegno(comando: ComandoRegno)
+    /// L'ESITO della campagna dell'anno, riportato in patria (incarico 30, RDA-162). È il punto in
+    /// cui il giornale del regno e quello del fronte si TOCCANO, come `battagliaConclusa` per il
+    /// fronte e la battaglia: la campagna vive nel proprio slot, col proprio giornale; qui si
+    /// iscrive il solo esito, dato autosufficiente — modo, vincitore, giornate, battaglie, forze
+    /// che rientrano —, sicché rigiocare il giornale del regno riproduce il regno senza rileggere
+    /// i file della campagna.
+    case campagnaConclusaNelRegno(esito: EsitoCampagna)
 }
 
 /// Una riga del giornale, numerata progressivamente.
@@ -207,6 +257,11 @@ public final class Giornale {
         try nuovo(a: percorso, atto: .fondazioneCampagna(fondazione))
     }
 
+    /// Apre un giornale nuovo, scrivendo l'atto di fondazione del regno.
+    public static func nuovo(a percorso: URL, fondazione: FondazioneRegno) throws -> Giornale {
+        try nuovo(a: percorso, atto: .fondazioneRegno(fondazione))
+    }
+
     private static func nuovo(a percorso: URL, atto: VoceGiornale) throws -> Giornale {
         FileManager.default.createFile(atPath: percorso.path, contents: nil)
         guard let maniglia = try? FileHandle(forWritingTo: percorso) else {
@@ -238,9 +293,9 @@ public final class Giornale {
         if byteValidi < contenuto.count {
             try contenuto.prefix(byteValidi).write(to: percorso, options: .atomic)
         }
-        // La prima riga è sempre un atto di fondazione, di battaglia o di campagna.
+        // La prima riga è sempre un atto di fondazione: di battaglia, di campagna o di regno.
         switch righe.first?.voce {
-        case .fondazione, .fondazioneCampagna: break
+        case .fondazione, .fondazioneCampagna, .fondazioneRegno: break
         default: throw ErroreGiornale.fondazioneMancante
         }
         guard let maniglia = try? FileHandle(forWritingTo: percorso) else {
@@ -264,6 +319,12 @@ public final class Giornale {
     public var fondazioneCampagna: FondazioneCampagna {
         if case .fondazioneCampagna(let f) = righe[0].voce { return f }
         preconditionFailure("giornale.senza.fondazione.campagna")
+    }
+
+    /// L'atto di fondazione del regno, se il giornale è di un regno.
+    public var fondazioneRegno: FondazioneRegno? {
+        if case .fondazioneRegno(let f) = righe[0].voce { return f }
+        return nil
     }
 
     /// Appende e conferma su disco prima di restituire (05 §6.1).

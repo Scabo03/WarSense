@@ -65,6 +65,10 @@ public actor SessioneCampagna {
         /// La chiusura esplicita della giornata è chiesta con una battaglia in sospeso, che non si
         /// scavalca (01 §6.4): il rifiuto porta il motivo del vocabolario chiuso (02 §6.5).
         case battagliaInSospeso
+        /// L'operazione è chiesta su una campagna CONCLUSA (incarico 30, RDA-164): nulla vi avanza
+        /// più, e nemmeno si torna indietro — annullare l'ordine che l'ha conclusa dopo averne
+        /// ascoltato l'esito sarebbe rifare la mossa sapendo com'è andata (05 §6.5).
+        case campagnaConclusa
     }
 
     private let motore: MotoreCampagna
@@ -211,6 +215,7 @@ public actor SessioneCampagna {
     /// Una battaglia in sospeso non si scavalca (01 §6.4): il tasto la rifiuta col suo motivo.
     @discardableResult
     public func chiudiGiornata() throws -> EsitoChiusura {
+        guard stato.conclusione == nil else { throw ErroreSessione.campagnaConclusa }
         guard stato.battaglieInSospeso.isEmpty else { throw ErroreSessione.battagliaInSospeso }
         let giorno = stato.giorno
         // La diagnostica si raccoglie PRIMA della chiusura, sullo stato che l'ha resa necessaria.
@@ -339,6 +344,7 @@ public actor SessioneCampagna {
                                               sblocca: Bool = false) throws -> TurnoAvversario {
         var turno = TurnoAvversario()
         while stato.gruppiInAttesa(di: .giocatore).isEmpty,
+              stato.conclusione == nil, // una campagna conclusa non avanza più (RDA-164)
               stato.battaglieInSospeso.isEmpty, // una battaglia in sospeso ferma anche l'avversario (01 §6.4)
               !stato.gruppiInAttesa(di: .avversario).isEmpty {
             let vista = motore.vistaAvversario(stato: stato)
@@ -388,6 +394,15 @@ public actor SessioneCampagna {
                                          stato: StatoCampagna) throws {
         let giornataChiusa = eventi.contains {
             if case .giornataAperta = $0 { return true } else { return false }
+        }
+        // La CONCLUSIONE della campagna è un confine significativo (05 §6.2): istantanea forzata.
+        // Non scrive marcatori: l'annullamento oltre la conclusione lo rifiuta lo stato stesso.
+        let conclusa = eventi.contains {
+            if case .campagnaConclusa = $0 { return true } else { return false }
+        }
+        if conclusa, !giornataChiusa {
+            try scattaIstantanea(giornale: giornale, stato: stato, cartella: cartella, forzata: true)
+            return
         }
         guard giornataChiusa else {
             try scattaIstantanea(giornale: giornale, stato: stato, cartella: cartella, forzata: false)
@@ -453,6 +468,7 @@ public actor SessioneCampagna {
     /// con il proprio motivo dichiarato (00 §9, principio 9).
     @discardableResult
     public func annulla(parte: Parte) throws -> EsitoAnnullamento {
+        guard stato.conclusione == nil else { throw ErroreSessione.campagnaConclusa }
         guard let ultimo = ultimoOrdine(di: parte) else {
             throw ErroreSessione.operazioneNonDisponibile
         }
@@ -472,6 +488,7 @@ public actor SessioneCampagna {
     /// la giornata annullabile è quella chiusa, e l'azzeramento la riapre vuota.
     @discardableResult
     public func azzera(parte: Parte) throws -> EsitoAnnullamento {
+        guard stato.conclusione == nil else { throw ErroreSessione.campagnaConclusa }
         guard let ultimo = ultimoOrdine(di: parte) else {
             throw ErroreSessione.operazioneNonDisponibile
         }

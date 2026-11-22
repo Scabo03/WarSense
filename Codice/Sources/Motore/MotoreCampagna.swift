@@ -27,6 +27,11 @@ public struct MotoreCampagna: Sendable {
         // ogni altro: nessun comando di campagna scavalca una battaglia in sospeso. L'apertura
         // della battaglia non passa di qui — non è un comando di campagna ma il passaggio di
         // schermata (01 §6.2). Il dirottamento dei superstiti (01 §6.9) non è costruito (S24c).
+        // La campagna CONCLUSA (incarico 30, RDA-164): nulla vi avanza più, e ogni comando è respinto
+        // col medesimo motivo. Precede ogni altro controllo, come il blocco qui sotto.
+        if stato.conclusione != nil {
+            return .nonValido(.campagnaConclusa)
+        }
         if !stato.battaglieInSospeso.isEmpty {
             return .nonValido(.battagliaInSospeso)
         }
@@ -446,7 +451,8 @@ public struct MotoreCampagna: Sendable {
             switch evento {
             case .giornataChiusa, .giornataAperta, .formazioneAvversariaAvvistata,
                  .imboscataScattata, .direzioneDedotta,
-                 .battagliaInnescata, .battagliaConclusa:
+                 .battagliaInnescata, .battagliaConclusa,
+                 .stagioneCambiata, .campagnaConclusa:
                 // Confini di giornata, avvistamenti, scatti d'imboscata (sempre fra parti
                 // opposte, il giocatore è parte) e deduzioni (prodotte solo per lui). Le
                 // battaglie innescate e concluse coinvolgono sempre il giocatore: si consegnano.
@@ -825,13 +831,25 @@ public struct MotoreCampagna: Sendable {
     /// compie entro i propri giorni totali.
     func chiudiLaGiornataSeServe(_ stato: inout StatoCampagna) -> [EventoCampagna] {
         var eventi: [EventoCampagna] = []
+        // L'inverno già arrivato, rimasto in attesa di una battaglia nata dall'ultima risoluzione
+        // dell'anno (incarico 30): conclusa quella, la campagna si conclude e nulla più si apre.
+        if concludiPerInvernoSeServe(&stato, &eventi) { return eventi }
         while !stato.gruppi.isEmpty,
+              stato.conclusione == nil, // una campagna conclusa non avanza più (RDA-164)
               stato.battaglieInSospeso.isEmpty, // una battaglia in sospeso ferma il corso della campagna (01 §6.4)
               stato.gruppi.values.allSatisfy({ $0.haConclusoLaGiornata }) {
             let chiuso = stato.giorno
             eventi.append(.giornataChiusa(giorno: chiuso))
             eventi.append(contentsOf: risolviFineGiornata(&stato))
             stato.giorno += 1
+            // L'INVERNO (01 §5.9, incarico 30): chiusa l'ultima giornata operativa dell'anno la
+            // giornata nuova NON si apre — d'inverno non si conduce campagna. Il giorno oltre
+            // l'ultima giornata è il segno che l'anno operativo è finito; la campagna si conclude
+            // subito, o appena si conclude la battaglia che quell'ultima risoluzione ha innescato.
+            if let calendario = stato.calendario, stato.giorno > calendario.ultimaGiornata {
+                _ = concludiPerInvernoSeServe(&stato, &eventi)
+                break
+            }
             // Le azioni si azzerano; le marce in corso restano e continuano a consumare la
             // giornata (01 §5.16.1). L'ORDINE DI IMBOSCATA si azzera con l'azione (incarico 21):
             // l'imboscata è un'azione che si RINNOVA, non uno stato che dura, sicché un gruppo
@@ -849,8 +867,48 @@ public struct MotoreCampagna: Sendable {
             // una proprietà di ciascuna voce (02 §6.6) e non un fatto a sé. Resta
             // l'annuncio, che il cambiamento di stato rilevante richiede (00 §11.4).
             eventi.append(.giornataAperta(giorno: stato.giorno))
+            // Il CAMBIO DI STAGIONE (01 §5.9, §5.17.1): fatto che il giocatore non ha deciso, entra
+            // nel registro e si annuncia. Soltanto con un calendario.
+            if let calendario = stato.calendario {
+                let nuova = calendario.stagione(del: stato.giorno)
+                if nuova != calendario.stagione(del: chiuso) {
+                    annota(.stagioneCambiata(stagione: nuova), in: &stato)
+                    eventi.append(.stagioneCambiata(stagione: nuova))
+                }
+            }
         }
         return eventi
+    }
+
+    /// La conclusione per l'ARRIVO DELL'INVERNO (01 §5.9; incarico 30, RDA-164): la campagna che
+    /// dichiara un calendario si conclude, senza vincitore, quando l'ultima giornata operativa è
+    /// chiusa e nessuna battaglia resta in sospeso. Vero se ha concluso ora.
+    private func concludiPerInvernoSeServe(_ stato: inout StatoCampagna,
+                                           _ eventi: inout [EventoCampagna]) -> Bool {
+        guard stato.conclusione == nil, let calendario = stato.calendario,
+              stato.giorno > calendario.ultimaGiornata, stato.battaglieInSospeso.isEmpty else { return false }
+        stato.conclusione = ConclusioneCampagna(modo: .inverno, vincitore: nil,
+                                                giorno: calendario.ultimaGiornata)
+        eventi.append(.campagnaConclusa(modo: .inverno, vincitore: nil))
+        return true
+    }
+
+    /// La conclusione per ANNIENTAMENTO (01 §5.14.3.3; incarico 30, RDA-164): al ritorno da una
+    /// battaglia, la campagna che dichiara un calendario si conclude se una delle due parti non ha
+    /// più gruppi armati sul fronte, e vince l'altra. Se non ne ha più nessuna delle due — l'esito
+    /// dell'annientamento simultaneo, che il vantaggio nascosto assegna al giocatore (01 §15.2.5) —
+    /// vince il giocatore, per la stessa regola. Vero se ha concluso ora.
+    private func concludiPerAnnientamentoSeServe(_ stato: inout StatoCampagna,
+                                                 _ eventi: inout [EventoCampagna]) -> Bool {
+        guard stato.conclusione == nil, let calendario = stato.calendario else { return false }
+        let vincitore: Parte
+        if stato.gruppiArmati(di: .avversario) == 0 { vincitore = .giocatore }
+        else if stato.gruppiArmati(di: .giocatore) == 0 { vincitore = .avversario }
+        else { return false }
+        stato.conclusione = ConclusioneCampagna(modo: .annientamento, vincitore: vincitore,
+                                                giorno: min(stato.giorno, calendario.ultimaGiornata))
+        eventi.append(.campagnaConclusa(modo: .annientamento, vincitore: vincitore))
+        return true
     }
 
     /// L'ORDINE DI RESTARE per un gruppo che non ha concluso la giornata (incarico 28): «stare fermi è
@@ -885,7 +943,8 @@ public struct MotoreCampagna: Sendable {
     /// giornale dà lo stesso esito. Ritorna, per ciascun gruppo, l'ordine dato (nil: senza ordine).
     public func concludiLaGiornataDelGiocatore(_ stato: inout StatoCampagna)
         -> (ordini: [(gruppo: IdGruppo, ordine: ComandoCampagna?)], eventi: [EventoCampagna]) {
-        guard !stato.gruppi.isEmpty, stato.battaglieInSospeso.isEmpty else { return ([], []) }
+        guard !stato.gruppi.isEmpty, stato.battaglieInSospeso.isEmpty,
+              stato.conclusione == nil else { return ([], []) }
         let giorno = stato.giorno
         var ordini: [(gruppo: IdGruppo, ordine: ComandoCampagna?)] = []
         var eventi: [EventoCampagna] = []
@@ -1060,6 +1119,9 @@ public struct MotoreCampagna: Sendable {
                                   giocatoreSconfitto: esito.sconfitto == .giocatore), in: &stato)
         var eventi: [EventoCampagna] = [.battagliaConclusa(casella: esito.casella,
                                                            giocatoreSconfitto: esito.sconfitto == .giocatore)]
+        // L'ANNIENTAMENTO (incarico 30, RDA-164): se la battaglia ha tolto a una parte l'ultimo
+        // gruppo armato, la campagna del regno si conclude qui e nulla più avanza.
+        if concludiPerAnnientamentoSeServe(&stato, &eventi) { return eventi }
         // Sbloccata la campagna e speso il combattente, la giornata si chiude da sé se non resta
         // altro da fare (01 §5.6.0.6): i combattenti hanno agito, e se erano gli ultimi in attesa la
         // giornata avanza subito, senza che il giocatore debba dare un ordine di troppo al reduce.

@@ -587,3 +587,121 @@
 "divisione.titolo.femminile" = "Dividi %@";
 "divisione.titolo.maschile_plurale" = "Dividi %@";
 "divisione.titolo.femminile_plurale" = "Dividi %@";
+
+/* ===== Il regno, prima tappa (incarico 30): la patria, l'anno, l'inverno, la leva. ===== */
+"errore.dati.regno_incoerente" = "I valori del regno sono incoerenti in %@ alla voce %@";
+"avvio.nuovo_regno" = "Nuovo regno";
+"avvio.riprendi_regno" = "Riprendi il regno";
+"regno.slot_incompatibile" = "Il regno salvato appartiene a valori di versione %@ e questa versione usa %@: non può essere aperto";
+"regno.slot_schema_incompatibile" = "Il regno salvato è di un formato precedente e non può essere aperto";
+/* I fronti (01 §5.6.9): zone chiamate per punti di riferimento. Ogni nome comincia con «fronte»,
+   sicché le frasi che lo ricevono dopo «sul» e «nel» restano accordate. */
+"fronte.guado" = "fronte del guado";
+"fronte.istmo" = "fronte dell'istmo";
+"fronte.pianura_lunga" = "fronte della pianura lunga";
+/* La campagna del regno: stagioni e conclusione (01 §5.9; RDA-164). */
+"campagna.stagione_cambiata" = "Nuova stagione: %@";
+"registro.stagione_cambiata" = "Giorno %1$d: nuova stagione, %2$@";
+"campagna.conclusa_vittoria" = "Campagna conclusa: l'avversario non ha più gruppi armati. Hai vinto";
+"campagna.conclusa_sconfitta" = "Campagna conclusa: non hai più gruppi armati. Hai perso";
+"campagna.conclusa_inverno" = "È arrivato l'inverno: la campagna è conclusa, senza vincitore";
+"campagna.torna_in_patria" = "Torna in patria";
+/* La dichiarazione di conclusione della campagna (05 §9.3): voci in ordine fisso, una frase ciascuna. */
+"conclusione.titolo" = "Campagna conclusa";
+"conclusione.vittoria" = "Vittoria: l'avversario non ha più gruppi armati sul %@";
+"conclusione.sconfitta" = "Sconfitta: non hai più gruppi armati sul %@";
+"conclusione.inverno" = "L'inverno ha interrotto la campagna sul %@: nessun vincitore";
+"conclusione.battaglie" = "Battaglie vinte: %1$d. Battaglie perse: %2$d";
+"conclusione.nessun_rientro" = "Nessuna formazione rientra in patria";
+"conclusione.premio" = "Premi che si aggiungono alla rendita dell'anno: %@";
+"conclusione.nessun_premio" = "Nessun premio: quest'inverno arriva la sola rendita";
+"conclusione.torna" = "Torna in patria";
+/* La patria (01 §5.6.10): la schermata del regno. */
+"patria.titolo" = "Patria";
+"patria.data_operativa" = "Anno %1$d, %2$@";
+"patria.data_fronte" = "Anno %1$d, %2$@, giorno %3$d di %4$d";
+"patria.data_inverno" = "Anno %1$d, inverno, schermata %2$d di %3$d";
+"patria.campagna_non_aperta" = "Nessuna campagna aperta quest'anno";
+"patria.campagna_aperta" = "Campagna aperta sul %@";
+"patria.campagna_vinta" = "Campagna sul %@ vinta";
+"patria.campagna_perduta" = "Campagna sul %@ perduta";
+"patria.campagna_interrotta" = "Campagna sul %@ interrotta dall'inverno, senza vincitore";
+"patria.nessuna_campagna_condotta" = "Quest'anno nessuna campagna";
+"patria.riserve" = "Riserve";
+"patria.riserva" = "%1$@: %2$d";
+"patria.forze" = "Forze";
+"patria.formazione" = "%1$@: %2$@";
+"patria.nessuna_forza" = "Nessuna formazione";
+"patria.lavori_da_ordinare" = "Lavori da ordinare";
+"patria.lavori_ordinati" = "Lavori ordinati";
+"patria.nessun_lavoro_ordinato" = "Nessun lavoro ordinato in questo inverno";
+"patria.apri_campagna" = "Apri la campagna";
+"patria.scegli_fronte" = "Su quale fronte?";
+"patria.fronte_voce" = "%1$@, mappa %2$d per %3$d";
+"patria.entra_nel_fronte" = "Entra nel %@";
+"patria.attendi_inverno" = "Attendi l'inverno";
+"patria.annulla_spesa" = "Annulla l'ultima spesa";
+"patria.azzera_spese" = "Azzera le spese di questa schermata";
+"patria.prosegui_stazione" = "Prosegui alla schermata %1$d di %2$d";
+"patria.prosegui_primavera" = "Prosegui alla primavera";
+"patria.registro" = "Registro della patria";
+"patria.campagna_non_apribile" = "La campagna non si può aprire";
+/* L'annuncio del costo (01 §5.9.1.5, 02 §8.7): per ciascuna risorsa che la voce consuma, quanto
+   costa su quanto se ne possiede. Il nome della risorsa sta sempre in testa (02 §4.4.1.4). */
+"regno.costo" = "Costa: %@.";
+"regno.costo_voce" = "%1$@ %2$d su %3$d";
+"regno.non_ordinabile" = "Non si può ordinare: %@.";
+"regno.manca.denaro.arcaica" = "mancano monete di bronzo";
+"regno.manca.uomini" = "mancano uomini";
+"regno.manca.metalli" = "mancano metalli";
+"regno.manca.materiale" = "manca materiale da costruzione";
+"regno.manca.animali" = "mancano animali";
+"regno.niente_da_annullare" = "Nessuna spesa da annullare in questa schermata";
+"regno.niente_da_azzerare" = "Nessuna spesa da azzerare in questa schermata";
+"regno.campagna_aperta" = "Campagna aperta sul %@";
+"regno.inverno_cominciato" = "Comincia l'inverno dell'anno %1$d. Entrate: %2$@.";
+"regno.entrata_voce" = "%1$@ %2$d";
+"regno.stazione_aperta" = "Inverno, schermata %1$d di %2$d";
+"regno.primavera_cominciata" = "Comincia la primavera dell'anno %d.";
+"regno.riporto_perduto" = " Il riporto ha tolto: %@.";
+/* Il registro della patria (01 §5.17): ogni voce dichiara l'anno e la stagione cui si riferisce. */
+"registro_patria.titolo" = "Registro della patria";
+"registro_patria.campagna_vinta" = "Anno %1$d, %2$@: campagna sul %3$@ vinta";
+"registro_patria.campagna_perduta" = "Anno %1$d, %2$@: campagna sul %3$@ perduta";
+"registro_patria.campagna_interrotta" = "Anno %1$d, %2$@: campagna sul %3$@ interrotta dall'inverno";
+"registro_patria.inverno_cominciato" = "Anno %1$d, %2$@: comincia l'inverno e arriva l'entrata dell'anno";
+"registro_patria.primavera" = "Anno %1$d, %2$@: comincia la primavera";
+"registro_patria.primavera_con_riporto" = "Anno %1$d, %2$@: comincia la primavera; il riporto ha tolto ciò che eccedeva";
+/* Le frasi che hanno per soggetto una voce del regno (02 §4.6): intere per ciascun genere. Il
+   soggetto è l'argomento 1. */
+"regno.voce_nome.maschile" = "%1$@.";
+"regno.voce_nome.femminile" = "%1$@.";
+"regno.voce_nome.maschile_plurale" = "%1$@.";
+"regno.voce_nome.femminile_plurale" = "%1$@.";
+"regno.voce_effetto.maschile" = "%2$@, pronto in %3$@.";
+"regno.voce_effetto.femminile" = "%2$@, pronta in %3$@.";
+"regno.voce_effetto.maschile_plurale" = "%2$@, pronti in %3$@.";
+"regno.voce_effetto.femminile_plurale" = "%2$@, pronte in %3$@.";
+"regno.lavoro_ordinato.maschile" = "%1$@ ordinato: pronto in %2$@.";
+"regno.lavoro_ordinato.femminile" = "%1$@ ordinata: pronta in %2$@.";
+"regno.lavoro_ordinato.maschile_plurale" = "%1$@ ordinati: pronti in %2$@.";
+"regno.lavoro_ordinato.femminile_plurale" = "%1$@ ordinate: pronte in %2$@.";
+"regno.lavoro_elencato.maschile" = "%1$@, pronto in %2$@";
+"regno.lavoro_elencato.femminile" = "%1$@, pronta in %2$@";
+"regno.lavoro_elencato.maschile_plurale" = "%1$@, pronti in %2$@";
+"regno.lavoro_elencato.femminile_plurale" = "%1$@, pronte in %2$@";
+"regno.spesa_annullata.maschile" = "%1$@: ordine annullato, risorse restituite.";
+"regno.spesa_annullata.femminile" = "%1$@: ordine annullato, risorse restituite.";
+"regno.spesa_annullata.maschile_plurale" = "%1$@: ordine annullato, risorse restituite.";
+"regno.spesa_annullata.femminile_plurale" = "%1$@: ordine annullato, risorse restituite.";
+"regno.lavoro_pronto.maschile" = " %1$@: è pronto.";
+"regno.lavoro_pronto.femminile" = " %1$@: è pronta.";
+"regno.lavoro_pronto.maschile_plurale" = " %1$@: sono pronti.";
+"regno.lavoro_pronto.femminile_plurale" = " %1$@: sono pronte.";
+"registro_patria.lavoro_pronto.maschile" = "Anno %2$d, %3$@: %1$@ è pronto";
+"registro_patria.lavoro_pronto.femminile" = "Anno %2$d, %3$@: %1$@ è pronta";
+"registro_patria.lavoro_pronto.maschile_plurale" = "Anno %2$d, %3$@: %1$@ sono pronti";
+"registro_patria.lavoro_pronto.femminile_plurale" = "Anno %2$d, %3$@: %1$@ sono pronte";
+/* Ciò che separa le voci di un elenco e le frasi di un'etichetta del regno: testo anch'esso. */
+"regno.separatore_elenco" = ", ";
+"regno.separatore_frasi" = " ";

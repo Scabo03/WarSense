@@ -229,3 +229,31 @@
 "genere.gruppo.nome.sciacallo" = "maschile";
 "genere.gruppo.nome.ermellino" = "maschile";
 "genere.gruppo.nome.muflone" = "maschile";
+
+/* La campagna conclusa (incarico 30, RDA-164): ogni comando bloccato dichiara il medesimo motivo. */
+"campagna.conclusa" = "la campagna è conclusa";
+/* Le cinque risorse del bilancio (01 §5.5.1), nell'ordine fisso in cui si annunciano. Il denaro
+   prende il nome della moneta della fase storica (01 §5.5.1.3, 02 §4.4.1.4): nella frase sta sempre
+   nella stessa posizione, e a cambiare con la fase è questa sola voce. */
+"risorsa.denaro.arcaica" = "monete di bronzo";
+"risorsa.uomini" = "uomini";
+"risorsa.metalli" = "metalli";
+"risorsa.materiale" = "materiale da costruzione";
+"risorsa.animali" = "animali";
+/* Motivi di non ammissibilità dei comandi del regno (05 §3.2; incarico 30). */
+"regno.non_valido.fronte_ignoto" = "fronte non disponibile";
+"regno.non_valido.voce_ignota" = "lavoro non disponibile";
+"regno.non_valido.e_inverno" = "è inverno, non si conduce campagna";
+"regno.non_valido.non_e_inverno" = "si ordina soltanto d'inverno";
+"regno.non_valido.campagna_aperta" = "c'è una campagna aperta";
+"regno.non_valido.campagna_gia_condotta" = "la campagna di quest'anno è già conclusa";
+"regno.non_valido.nessuna_forza" = "nessun gruppo armato da mandare";
+"regno.non_valido.risorse_insufficienti" = "risorse insufficienti";
+/* Le voci che si ordinano in patria (01 §5.9.1.3): termini che fanno da soggetto di frase (02 §4.6),
+   con il genere dichiarato. Stanno sempre in testa alla frase, e per questo hanno la maiuscola. */
+"regno.voce.leva_fanteria_leggera" = "Leva di fanteria leggera";
+"regno.voce.leva_fanteria_pesante" = "Leva di fanteria pesante";
+"regno.voce.leva_cavalleria_manovrata" = "Leva di cavalleria manovrata";
+"genere.regno.voce.leva_fanteria_leggera" = "femminile";
+"genere.regno.voce.leva_fanteria_pesante" = "femminile";
+"genere.regno.voce.leva_cavalleria_manovrata" = "femminile";

@@ -95,6 +95,18 @@ public final class PuntoSegnali {
     }
 
     /// I fatti di pura navigazione prodotti dalla Presentazione (00 §11.6, 05 §11.2).
+    /// Un fatto del regno (incarico 30): stessa via degli eventi della battaglia e della campagna,
+    /// perché il punto dei segnali resti uno solo (00 §5.3). La fase storica serve al nome della
+    /// moneta (01 §5.5.1.3).
+    public func segnala(evento: EventoRegno, fase: Fase) {
+        let traduttore = TraduttoreEventiRegno(testi: testi)
+        if let annuncio = traduttore.annuncio(per: evento, fase: fase) {
+            accoda(annuncio, interrompente: false)
+        }
+        guard let significato = traduttore.significato(per: evento) else { return }
+        emetti(significato: significato)
+    }
+
     public func segnalaCambioRiga(conNemici: Bool) {
         emetti(significato: conNemici ? .cambioRigaConNemici : .cambioRiga)
     }

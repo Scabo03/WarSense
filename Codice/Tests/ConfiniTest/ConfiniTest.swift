@@ -101,6 +101,37 @@ final class ConfiniTest: XCTestCase {
         }
     }
 
+    /// IL REGNO È IDENTICO NELLE DUE MODALITÀ DI BATTAGLIA (01 §1.2; documento della modalità a
+    /// campioni, 1.3; incarico 30, RDA-166): lo stato e le regole del regno non nominano nulla che
+    /// appartenga a una modalità. Le forze sono un valore opaco e ciò che una voce militare dà è un
+    /// gancio: reparti, atomi, archetipi, gruppi e formazioni stanno soltanto in `ForzeDelRegno.swift`
+    /// e nel ponte con la campagna. Senza questo cancello la regola sarebbe una prescrizione, e la
+    /// modalità a campioni troverebbe il regno da rifare.
+    static let fileDelRegnoComune = ["Motore/StatoRegno.swift", "Motore/MotoreRegno.swift"]
+    static let paroleDellaModalita = ["Reparto", "Gruppo", "Sciame", "Formazione", "atomi", "archetipo",
+                                      "sciami", "reclutaReparto"]
+
+    func test_01_1_2_il_regno_comune_non_nomina_la_modalita_di_battaglia() throws {
+        let parola = try NSRegularExpression(pattern: "[A-Za-z_][A-Za-z0-9_]*")
+        var esaminati = 0
+        for nome in Self.fileDelRegnoComune {
+            let testo = try String(contentsOf: Self.radiceSorgenti.appendingPathComponent(nome), encoding: .utf8)
+            for (numero, riga) in testo.split(separator: "\n", omittingEmptySubsequences: false).enumerated() {
+                let codice = riga.components(separatedBy: "//")[0]
+                let ns = codice as NSString
+                for corrispondenza in parola.matches(in: codice, range: NSRange(location: 0, length: ns.length)) {
+                    esaminati += 1
+                    let identificatore = ns.substring(with: corrispondenza.range)
+                    for vietata in Self.paroleDellaModalita {
+                        XCTAssertFalse(identificatore.range(of: vietata, options: .caseInsensitive) != nil,
+                                       "il regno comune nomina la modalità di battaglia: «\(identificatore)» in \(nome):\(numero + 1) (01 §1.2, RDA-166)")
+                    }
+                }
+            }
+        }
+        XCTAssertGreaterThan(esaminati, 500, "i file del regno comune sono stati letti")
+    }
+
     /// La virgola mobile è vietata nel Motore (05 §2.2.1, RDA-44).
     func test_05_2_2_1_nessuna_virgola_mobile_nel_motore() throws {
         for file in try fileSwift(di: "Motore") {

@@ -87,6 +87,8 @@ extension FattoRegistrato: CodificabileCanonico {
             casella.codifica(in: &c); c.intero(giocatoreSconfitto ? 1 : 0)
         case .ordineAnnullato, .giornataAzzerata:
             break
+        case .stagioneCambiata(let stagione):
+            c.testo(stagione.rawValue)
         }
     }
 }
@@ -214,6 +216,20 @@ extension StatoCampagna {
                 c.testo(b.imboscante?.rawValue ?? "")
                 c.intero(Int64(b.giorno))
             }
+        }
+        // Il calendario e la conclusione (incarico 30): due campagne con calendari diversi, o una
+        // conclusa e una no, non sono lo stesso stato. OMESSI quando nulli — le campagne di prova e
+        // gli scenari di verifica — così che le partite precedenti diano la stessa impronta al byte.
+        if let calendario {
+            c.testo("calendario")
+            c.intero(Int64(calendario.anno))
+            c.intero(Int64(calendario.giornatePerStagione))
+        }
+        if let conclusione {
+            c.testo("conclusione")
+            c.testo(conclusione.modo.rawValue)
+            c.testo(conclusione.vincitore?.rawValue ?? "")
+            c.intero(Int64(conclusione.giorno))
         }
         return SHA256.improntaEsadecimale(c.byte)
     }

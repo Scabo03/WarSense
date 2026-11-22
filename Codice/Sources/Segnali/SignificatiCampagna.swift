@@ -78,6 +78,10 @@ public struct TraduttoreEventiCampagna: Sendable {
         // ma NON aggiunge un significato tattile: il tetto è chiuso (02 §11.5) e il ritorno alla
         // mappa avviene per scelta del giocatore, non ruba il fuoco.
         case .battagliaConclusa: return nil
+        // Il cambio di stagione e la conclusione della campagna (incarico 30) si annunciano a parole
+        // e NON aggiungono un significato tattile: il tetto è chiuso (02 §11.5). La conclusione è
+        // seguita dalla dichiarazione di conclusione, che è una schermata a sé (05 §9.3).
+        case .stagioneCambiata, .campagnaConclusa: return nil
         }
     }
 
@@ -195,6 +199,25 @@ public struct TraduttoreEventiCampagna: Sendable {
             return testi.frase(giocatoreSconfitto ? "campagna.battaglia_persa"
                                                    : "campagna.battaglia_vinta",
                                verbosita: verbosita, casella.riga, casella.colonna)
+        case .stagioneCambiata(let stagione):
+            // Il termine della stagione è del vocabolario chiuso (02 §4.4.5) e sta in coda alla
+            // frase, dove non chiede alcun accordo.
+            return testi.frase("campagna.stagione_cambiata", verbosita: verbosita,
+                               testi.termine(stagione.chiaveTesto).testo)
+        case .campagnaConclusa(let modo, let vincitore):
+            return testi.frase(Self.chiaveDellaConclusione(modo: modo, vincitore: vincitore, parte: parte),
+                               verbosita: verbosita)
+        }
+    }
+
+    /// La chiave della frase che dichiara come una campagna si è conclusa, dal punto di vista di chi
+    /// ascolta (incarico 30, RDA-164): una frase intera per ciascun esito, mai composta.
+    public static func chiaveDellaConclusione(modo: ConclusioneCampagna.Modo, vincitore: Parte?,
+                                              parte: Parte) -> String {
+        switch modo {
+        case .inverno: return "campagna.conclusa_inverno"
+        case .annientamento:
+            return vincitore == parte ? "campagna.conclusa_vittoria" : "campagna.conclusa_sconfitta"
         }
     }
 
@@ -234,6 +257,8 @@ public struct TraduttoreEventiCampagna: Sendable {
             return testi.frase(chiave, voce.giorno, casella.riga, casella.colonna)
         case .ordineAnnullato, .giornataAzzerata:
             return testi.frase(chiave, voce.giorno)
+        case .stagioneCambiata(let stagione):
+            return testi.frase(chiave, voce.giorno, testi.termine(stagione.chiaveTesto).testo)
         }
     }
 }

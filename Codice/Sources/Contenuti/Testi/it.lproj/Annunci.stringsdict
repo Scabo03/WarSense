@@ -298,4 +298,72 @@
       <key>other</key><string>Revoca la marcia di %1$@. Perdi %2$d giorni e il gruppo resta senza azione oggi.</string>
     </dict>
   </dict>
+  <key>campagna.stato_data</key>
+  <dict>
+    <key>NSStringLocalizedFormatKey</key><string>Anno %1$d, %2$@, %3$#@giornate@. </string>
+    <key>giornate</key>
+    <dict>
+      <key>NSStringFormatSpecTypeKey</key><string>NSStringPluralRuleType</string>
+      <key>NSStringFormatValueTypeKey</key><string>d</string>
+      <key>zero</key><string>ultima giornata prima dell'inverno</string>
+      <key>one</key><string>manca %3$d giornata all'inverno</string>
+      <key>other</key><string>mancano %3$d giornate all'inverno</string>
+    </dict>
+  </dict>
+  <key>conclusione.giornate</key>
+  <dict>
+    <key>NSStringLocalizedFormatKey</key><string>Durata: %#@giornate@</string>
+    <key>giornate</key>
+    <dict>
+      <key>NSStringFormatSpecTypeKey</key><string>NSStringPluralRuleType</string>
+      <key>NSStringFormatValueTypeKey</key><string>d</string>
+      <key>one</key><string>%d giornata</string>
+      <key>other</key><string>%d giornate</string>
+    </dict>
+  </dict>
+  <key>conclusione.rientro</key>
+  <dict>
+    <key>NSStringLocalizedFormatKey</key><string>Rientrano in patria: %#@formazioni@</string>
+    <key>formazioni</key>
+    <dict>
+      <key>NSStringFormatSpecTypeKey</key><string>NSStringPluralRuleType</string>
+      <key>NSStringFormatValueTypeKey</key><string>d</string>
+      <key>one</key><string>%d formazione</string>
+      <key>other</key><string>%d formazioni</string>
+    </dict>
+  </dict>
+  <key>regno.effetto.recluta_reparto</key>
+  <dict>
+    <key>NSStringLocalizedFormatKey</key><string>%#@atomi@</string>
+    <key>atomi</key>
+    <dict>
+      <key>NSStringFormatSpecTypeKey</key><string>NSStringPluralRuleType</string>
+      <key>NSStringFormatValueTypeKey</key><string>d</string>
+      <key>one</key><string>%d atomo</string>
+      <key>other</key><string>%d atomi</string>
+    </dict>
+  </dict>
+  <key>regno.spese_azzerate</key>
+  <dict>
+    <key>NSStringLocalizedFormatKey</key><string>Spese della schermata azzerate: %#@ordini@</string>
+    <key>ordini</key>
+    <dict>
+      <key>NSStringFormatSpecTypeKey</key><string>NSStringPluralRuleType</string>
+      <key>NSStringFormatValueTypeKey</key><string>d</string>
+      <key>one</key><string>%d ordine ritirato</string>
+      <key>other</key><string>%d ordini ritirati</string>
+    </dict>
+  </dict>
+  <key>regno.stato_lavori</key>
+  <dict>
+    <key>NSStringLocalizedFormatKey</key><string>. %#@lavori@</string>
+    <key>lavori</key>
+    <dict>
+      <key>NSStringFormatSpecTypeKey</key><string>NSStringPluralRuleType</string>
+      <key>NSStringFormatValueTypeKey</key><string>d</string>
+      <key>zero</key><string>Nessun lavoro ordinato</string>
+      <key>one</key><string>%d lavoro ordinato</string>
+      <key>other</key><string>%d lavori ordinati</string>
+    </dict>
+  </dict>
 </dict></plist>

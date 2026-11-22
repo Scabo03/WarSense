@@ -54,6 +54,13 @@ final class CompatibilitaGiornaleTest: XCTestCase {
         case fondazione, comando, inizioTurno, fondazioneCampagna
         case comandoCampagna, aperturaGiornata, annullamentoCampagna, risoluzioneGiornata
         case battagliaConclusa, giornataChiusaDalGiocatore
+        case fondazioneRegno, comandoRegno, campagnaConclusaNelRegno
+    }
+
+    /// Specchio di `ComandoRegno` (incarico 30): il giornale del regno è anch'esso formato di
+    /// salvataggio, e i suoi comandi hanno la stessa catena.
+    enum SpecieDiComandoRegno: String, CaseIterable {
+        case apriCampagna, attendiInverno, ordina, prosegui
     }
 
     /// Specchio di `ComandoBattaglia`.
@@ -83,6 +90,9 @@ final class CompatibilitaGiornaleTest: XCTestCase {
         case .risoluzioneGiornata: return .risoluzioneGiornata
         case .battagliaConclusa: return .battagliaConclusa
         case .giornataChiusaDalGiocatore: return .giornataChiusaDalGiocatore
+        case .fondazioneRegno: return .fondazioneRegno
+        case .comandoRegno: return .comandoRegno
+        case .campagnaConclusaNelRegno: return .campagnaConclusaNelRegno
         }
     }
 
@@ -101,6 +111,28 @@ final class CompatibilitaGiornaleTest: XCTestCase {
         case .risoluzioneGiornata: return .risoluzioneGiornata(giorno: 1)
         case .battagliaConclusa: return .battagliaConclusa(esito: Self.esitoInCampagnaDiProva)
         case .giornataChiusaDalGiocatore: return .giornataChiusaDalGiocatore(giorno: 1)
+        case .fondazioneRegno: return .fondazioneRegno(Self.fondazioneRegnoDiProva)
+        case .comandoRegno: return .comandoRegno(comando: .prosegui)
+        case .campagnaConclusaNelRegno: return .campagnaConclusaNelRegno(esito: Self.esitoCampagnaDiProva)
+        }
+    }
+
+    /// Totale ed esaustiva: aggiungere un caso a `ComandoRegno` NON COMPILA.
+    private func specie(di comando: ComandoRegno) -> SpecieDiComandoRegno {
+        switch comando {
+        case .apriCampagna: return .apriCampagna
+        case .attendiInverno: return .attendiInverno
+        case .ordina: return .ordina
+        case .prosegui: return .prosegui
+        }
+    }
+
+    private func esemplare(di specie: SpecieDiComandoRegno) -> ComandoRegno {
+        switch specie {
+        case .apriCampagna: return .apriCampagna(fronte: "guado")
+        case .attendiInverno: return .attendiInverno
+        case .ordina: return .ordina(voce: "leva_fanteria_leggera")
+        case .prosegui: return .prosegui
         }
     }
 
@@ -194,6 +226,37 @@ final class CompatibilitaGiornaleTest: XCTestCase {
                                    gruppiGiocatore: [.init(riga: 4, colonna: 2,
                                        composizione: [.init(archetipo: "fanteria_leggera", atomi: 6)])]))
 
+    static let forzeDiProva = ForzeDelRegno.sciami([
+        FormazioneDelRegno(categoria: .armato,
+                           composizione: [Reparto(archetipo: "fanteria_leggera", atomi: 6)]),
+        FormazioneDelRegno(categoria: .ricognizione(competenza: 5),
+                           composizione: [Reparto(archetipo: "fanteria_leggera", atomi: 3)]),
+    ])
+
+    static let esitoCampagnaDiProva = EsitoCampagna(
+        fronte: "guado", anno: 1, modo: .annientamento, vincitore: .giocatore, giornate: 12,
+        battaglieVinte: 1, battagliePerse: 0, superstiti: forzeDiProva)
+
+    static let fondazioneRegnoDiProva = FondazioneRegno(
+        versioneSchema: FondazioneRegno.schemaCorrente, versioneValori: "0.0.0",
+        versioneTesti: "0.0.0", seme: 1, identificatore: "specie",
+        modalita: FondazioneRegno.modalitaASciami,
+        statoIniziale: StatoRegno(
+            anno: 1, momento: .inverno(stazione: 2), fase: .arcaica,
+            riserve: Riserve(["denaro": 20, "uomini": 2, "metalli": 3, "materiale": 3, "animali": 1]),
+            entrataDellAnno: Riserve(["denaro": 200, "uomini": 24, "metalli": 30, "materiale": 30, "animali": 12]),
+            forze: forzeDiProva, campagna: .conclusa(esitoCampagnaDiProva),
+            lavori: [LavoroOrdinato(voce: "leva_fanteria_leggera",
+                                    costo: Riserve(["denaro": 30, "uomini": 6, "metalli": 3]),
+                                    stazione: 1,
+                                    effetto: .reclutaReparto(archetipo: "fanteria_leggera", atomi: 6),
+                                    pronto: .primavera)],
+            registro: [VoceRegistroPatria(numero: 0, anno: 1, stagione: .estate,
+                                          fatto: .campagnaConclusa(fronte: "guado", modo: .annientamento,
+                                                                   vincitore: .giocatore)),
+                       VoceRegistroPatria(numero: 1, anno: 1, stagione: .inverno, fatto: .invernoCominciato)],
+            prossimoNumeroVoce: 2))
+
     // MARK: - La prova
 
     func test_00_15_i_campioni_committati_si_decodificano_e_ricodificano_identici() throws {
@@ -205,6 +268,7 @@ final class CompatibilitaGiornaleTest: XCTestCase {
                                     "almeno un campione per ogni caso di voce")
         var casiComando = Set<String>()
         var casiComandoCampagna = Set<String>()
+        var casiComandoRegno = Set<String>()
         var casiVoce = Set<String>()
         for riga in righe {
             let dati = Data(riga.utf8)
@@ -224,6 +288,9 @@ final class CompatibilitaGiornaleTest: XCTestCase {
             if case .comandoCampagna(_, let comando) = voce.voce {
                 casiComandoCampagna.insert(specie(di: comando).rawValue)
             }
+            if case .comandoRegno(let comando) = voce.voce {
+                casiComandoRegno.insert(specie(di: comando).rawValue)
+            }
             casiVoce.formUnion(try chiaviDiPrimoLivelloDellaVoce(dati))
         }
 
@@ -236,6 +303,8 @@ final class CompatibilitaGiornaleTest: XCTestCase {
                        "casi di comando di battaglia senza campione committato")
         XCTAssertEqual(casiComandoCampagna, Set(SpecieDiComandoCampagna.allCases.map(\.rawValue)),
                        "casi di comando di campagna senza campione committato")
+        XCTAssertEqual(casiComandoRegno, Set(SpecieDiComandoRegno.allCases.map(\.rawValue)),
+                       "casi di comando del regno senza campione committato")
     }
 
     /// Lo specchio deve rispecchiare: `specie(di: esemplare(di: s))` è `s` per
@@ -256,6 +325,9 @@ final class CompatibilitaGiornaleTest: XCTestCase {
             XCTAssertEqual(specie(di: esemplare(di: specieAttesa)), specieAttesa)
         }
         for specieAttesa in SpecieDiComandoCampagna.allCases {
+            XCTAssertEqual(specie(di: esemplare(di: specieAttesa)), specieAttesa)
+        }
+        for specieAttesa in SpecieDiComandoRegno.allCases {
             XCTAssertEqual(specie(di: esemplare(di: specieAttesa)), specieAttesa)
         }
     }

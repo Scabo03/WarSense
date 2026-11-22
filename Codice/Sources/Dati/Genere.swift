@@ -17,6 +17,9 @@ public enum Genere: String, CaseIterable, Sendable {
 public enum CategoriaSoggetto: String, CaseIterable, Sendable {
     case unita
     case gruppo = "gruppo.nome"
+    /// Le voci che si ordinano in patria (01 §5.9.1.3; incarico 30): «Leva di fanteria leggera
+    /// ordinata», «Addestramento ordinato». Sono comuni alle due modalità di battaglia.
+    case voceDelRegno = "regno.voce"
 
     /// Il prefisso delle chiavi della categoria nel vocabolario.
     public var prefisso: String { rawValue + "." }

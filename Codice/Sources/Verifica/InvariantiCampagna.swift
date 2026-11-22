@@ -875,6 +875,10 @@ public struct SondaInvariantiCampagna: Sendable {
                 break
             case .ordineAnnullato, .giornataAzzerata:
                 break
+            case .stagioneCambiata:
+                // Il cambio di stagione riguarda il fronte intero e non rivela nulla dell'avversario
+                // (01 §5.17.1; incarico 30).
+                break
             }
         }
         return violazioni

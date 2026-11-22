@@ -43,6 +43,27 @@ final class RigenerazioneOroTest: XCTestCase {
                                         valori: valori)
     }
 
+    /// L'oro del REGNO (incarico 30; 05 §14.6: «un inverno»): si rigenera a parte, con la propria
+    /// variabile RIGENERA_ORO_REGNO, perché rigenerarlo non tocchi gli ori della battaglia.
+    func test_rigenerazione_esplicita_dell_oro_del_regno() async throws {
+        try XCTSkipUnless(ProcessInfo.processInfo.environment["RIGENERA_ORO_REGNO"] != nil,
+                          "rigenerazione solo su richiesta esplicita (05 §14.6)")
+        let valori = try CaricatoreValori.carica(da: Contenuti.valoriDiFabbrica)
+        let cartella = FileManager.default.temporaryDirectory
+            .appendingPathComponent("rigenera-oro-regno-\(UUID().uuidString)")
+        addTeardownBlock { try? FileManager.default.removeItem(at: cartella) }
+        let regno = try await SessioneRegnoTest.giocaCopione(in: cartella, valori: valori)
+        let impronta = await regno.impronta()
+        let fixture = SessioneRegnoTest.cartellaFixture
+        try FileManager.default.createDirectory(at: fixture, withIntermediateDirectories: true)
+        let destinazione = fixture.appendingPathComponent("giornale.jsonl")
+        try? FileManager.default.removeItem(at: destinazione)
+        try FileManager.default.copyItem(at: cartella.appendingPathComponent(SessioneRegno.nomeGiornale),
+                                         to: destinazione)
+        try (impronta + "\n").write(to: fixture.appendingPathComponent("impronta.txt"),
+                                    atomically: true, encoding: .utf8)
+    }
+
     private func scriviPrefissoInCorso(golden: URL, fixture: URL, valori: ValoriDiGioco) async throws {
         let righe = try String(contentsOf: golden.appendingPathComponent("giornale.jsonl"), encoding: .utf8)
             .split(separator: "\n").map(String.init)

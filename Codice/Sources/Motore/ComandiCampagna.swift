@@ -169,6 +169,11 @@ public enum MotivoNonValidoCampagna: String, Codable, Hashable, Sendable, CaseIt
     /// così che il giocatore non debba ricostruirlo per tentativi (02 §6.5). Non blocca l'apertura
     /// della battaglia, che non è un comando di campagna ma il passaggio all'altra schermata.
     case battagliaInSospeso = "campagna.battaglia_in_sospeso"
+    /// Nuovo della campagna (incarico 30): la campagna è CONCLUSA — una parte è rimasta senza gruppi
+    /// armati, oppure è arrivato l'inverno (RDA-164) — e nulla vi avanza più. È il MEDESIMO motivo
+    /// per ogni comando, come per la battaglia in sospeso (02 §6.5). Accade soltanto nella campagna
+    /// che dichiara un calendario, cioè quella aperta dal regno.
+    case campagnaConclusa = "campagna.conclusa"
 }
 
 /// L'esito DETERMINISTICO di un'esplorazione (01 §5.4): la riuscita discende dalla
@@ -284,4 +289,11 @@ public enum EventoCampagna: Hashable, Codable, Sendable {
     /// Una BATTAGLIA nata dalla campagna si è CONCLUSA (01 §15, incarico 24): il risultato è tornato
     /// sulla mappa. `giocatoreSconfitto` dice se a soccombere è stato il giocatore. Sempre consegnato.
     case battagliaConclusa(casella: Cella, giocatoreSconfitto: Bool)
+    /// La STAGIONE è cambiata all'apertura della giornata (01 §5.9, §5.17.1; incarico 30). Soltanto
+    /// nella campagna che dichiara un calendario. Fatto non deciso dal giocatore: sempre consegnato.
+    case stagioneCambiata(stagione: Stagione)
+    /// La CAMPAGNA si è CONCLUSA (incarico 30, RDA-164): per annientamento, con il vincitore, oppure
+    /// per l'arrivo dell'inverno, senza vincitore. Da qui in poi ogni comando è respinto, e l'esito
+    /// passa al regno. Sempre consegnato: riguarda il giocatore per definizione.
+    case campagnaConclusa(modo: ConclusioneCampagna.Modo, vincitore: Parte?)
 }

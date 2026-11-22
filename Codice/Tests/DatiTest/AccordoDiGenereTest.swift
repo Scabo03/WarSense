@@ -139,14 +139,17 @@ final class AccordoDiGenereTest: XCTestCase {
     func test_il_codice_inserisce_i_soggetti_soltanto_nelle_forme_accordate() throws {
         let chiavi = try chiaviDegliAnnunci()
         let accordate = Set(frasiAccordate(chiavi).keys)
-        let letterale = try NSRegularExpression(pattern: #""(unita|gruppo\.nome)\."#)
+        // Le chiavi di OGNI categoria di soggetti, non un elenco scritto a mano: una categoria nuova
+        // — le voci del regno, dall'incarico 30 — è sorvegliata da sé.
+        let prefissi = CategoriaSoggetto.allCases.map { NSRegularExpression.escapedPattern(for: $0.rawValue) }
+        let letterale = try NSRegularExpression(pattern: "\"(" + prefissi.joined(separator: "|") + ")\\.")
         let conSoggetto = try NSRegularExpression(pattern: #"frase\(\s*("([^"]+)"|[^,]+?)\s*,\s*soggetto:"#)
         var difetti: [String] = []
         var chiamate = 0
         for (file, testo) in try sorgenti() {
             let tutto = NSRange(testo.startIndex..., in: testo)
             if !Self.lettoriDeiSoggetti.contains(file), letterale.firstMatch(in: testo, range: tutto) != nil {
-                difetti.append("\(file): legge un termine soggetto senza Testi.soggetto (chiave «unita.…» o «gruppo.nome.…» nel codice)")
+                difetti.append("\(file): legge un termine soggetto senza Testi.soggetto (una chiave di \(CategoriaSoggetto.allCases.map(\.rawValue)) nel codice)")
             }
             if testo.contains("nomeIsolato("), !Self.usciteIsolateAmmesse.contains(file),
                !Self.lettoriDeiSoggetti.contains(file) {

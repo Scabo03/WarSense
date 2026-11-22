@@ -97,15 +97,23 @@ public struct ScenarioCampagna: Hashable, Codable, Sendable {
     /// Le strutture di rifornimento FERME (01 §5.2.2.6): stessa natura dei dati minimi,
     /// per provare la zona, mai le opere. Anch'esse omesse dalla codifica se vuote.
     public let struttureDiRifornimento: [Cella]
+    /// Il CALENDARIO che il regno dichiara alla campagna dell'anno (01 §5.9, incarico 30): con esso
+    /// la campagna ha stagioni e si conclude — per annientamento o per l'arrivo dell'inverno
+    /// (RDA-164). Nullo negli scenari delle campagne di prova e di verifica, e allora OMESSO dalla
+    /// codifica, sicché quegli scenari restano identici al byte e i campioni del giornale non si
+    /// muovono (00 §15, RDA-113).
+    public let calendario: CalendarioDiCampagna?
 
     public init(mappa: IdentificatoreDati, gruppiGiocatore: [GruppoIniziale],
                 gruppiAvversario: [GruppoIniziale] = [],
-                forzeNemiche: [Cella] = [], struttureDiRifornimento: [Cella] = []) {
+                forzeNemiche: [Cella] = [], struttureDiRifornimento: [Cella] = [],
+                calendario: CalendarioDiCampagna? = nil) {
         self.mappa = mappa
         self.gruppiGiocatore = gruppiGiocatore
         self.gruppiAvversario = gruppiAvversario
         self.forzeNemiche = forzeNemiche
         self.struttureDiRifornimento = struttureDiRifornimento
+        self.calendario = calendario
     }
 
     enum CodingKeys: String, CodingKey {
@@ -114,6 +122,7 @@ public struct ScenarioCampagna: Hashable, Codable, Sendable {
         case gruppiAvversario = "gruppi_avversario"
         case forzeNemiche = "forze_nemiche"
         case struttureDiRifornimento = "strutture_di_rifornimento"
+        case calendario
     }
 
     public init(from decoder: Decoder) throws {
@@ -124,6 +133,7 @@ public struct ScenarioCampagna: Hashable, Codable, Sendable {
         gruppiAvversario = try c.decodeIfPresent([GruppoIniziale].self, forKey: .gruppiAvversario) ?? []
         forzeNemiche = try c.decodeIfPresent([Cella].self, forKey: .forzeNemiche) ?? []
         struttureDiRifornimento = try c.decodeIfPresent([Cella].self, forKey: .struttureDiRifornimento) ?? []
+        calendario = try c.decodeIfPresent(CalendarioDiCampagna.self, forKey: .calendario)
     }
 
     public func encode(to encoder: Encoder) throws {
@@ -137,6 +147,7 @@ public struct ScenarioCampagna: Hashable, Codable, Sendable {
         if !struttureDiRifornimento.isEmpty {
             try c.encode(struttureDiRifornimento, forKey: .struttureDiRifornimento)
         }
+        try c.encodeIfPresent(calendario, forKey: .calendario)
     }
 }
 
@@ -172,6 +183,9 @@ public enum FabbricaCampagna {
         /// soglia o con una competenza, un gruppo armato con dati da altra categoria. Lo
         /// stato impossibile è respinto qui, non solo sorvegliato.
         case datiCategoriaIncoerenti(Cella)
+        /// Un calendario senza giornate o con un anno non positivo (incarico 30): la campagna non
+        /// avrebbe una stagione in cui svolgersi.
+        case calendarioIncoerente
     }
 
     /// Traduce i campi dichiarativi della categoria (01 §5.2) nel tipo con valore
@@ -290,11 +304,20 @@ public enum FabbricaCampagna {
         // giornata non è un fatto da annotare, perché il giorno è una proprietà di
         // ciascuna voce (02 §6.6) e un elemento che dichiarasse soltanto l'inizio
         // di una giornata occuperebbe una posizione senza portare informazione.
+        // Il calendario, quando lo scenario lo dichiara (incarico 30): almeno una giornata per
+        // stagione e un anno positivo, o la campagna nascerebbe già oltre la propria fine.
+        if let calendario = scenario.calendario {
+            guard calendario.anno >= 1, calendario.giornatePerStagione >= 1 else {
+                throw ErroreScenario.calendarioIncoerente
+            }
+        }
+
         return StatoCampagna(mappa: mappa, giorno: 1, gruppi: gruppi,
                              prossimoIdGruppo: prossimoId,
                              prossimoIndiceNome: prossimoNome,
                              registro: [], prossimoNumeroVoce: 0,
                              forzeNemiche: Set(scenario.forzeNemiche),
-                             struttureDiRifornimento: Set(scenario.struttureDiRifornimento))
+                             struttureDiRifornimento: Set(scenario.struttureDiRifornimento),
+                             calendario: scenario.calendario)
     }
 }

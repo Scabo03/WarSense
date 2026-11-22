@@ -481,6 +481,10 @@ public enum FattoRegistrato: Hashable, Codable, Sendable {
     /// il luogo e se a soccombere è stato il giocatore, così che chi torna sulla mappa sappia
     /// com'è andata anche riaprendo la campagna. Del solo giocatore, che è sempre parte.
     case battagliaConclusa(casella: Cella, giocatoreSconfitto: Bool)
+    /// La STAGIONE è cambiata (01 §5.9, §5.17.1: «il cambio di stagione» è fra i fatti che il
+    /// giocatore non ha deciso). Accade soltanto nella campagna che dichiara un calendario, cioè
+    /// quella aperta dal regno (incarico 30). Non ha luogo: riguarda il fronte intero.
+    case stagioneCambiata(stagione: Stagione)
 
     /// Un esemplare per ciascun caso, in ordine fisso. Serve al collaudo per
     /// pretendere che OGNI fatto abbia la propria frase compiuta: con i valori
@@ -504,6 +508,7 @@ public enum FattoRegistrato: Hashable, Codable, Sendable {
         .direzioneDedotta(casella: Cella(riga: 1, colonna: 1)),
         .battagliaInnescata(casella: Cella(riga: 1, colonna: 1)),
         .battagliaConclusa(casella: Cella(riga: 1, colonna: 1), giocatoreSconfitto: false),
+        .stagioneCambiata(stagione: .estate),
     ]
 
     /// La chiave del testo che compone la frase della voce (00 §14.1): il fatto
@@ -527,6 +532,7 @@ public enum FattoRegistrato: Hashable, Codable, Sendable {
         case .battagliaInnescata: return "registro.battaglia_innescata"
         case .battagliaConclusa(_, let giocatoreSconfitto):
             return giocatoreSconfitto ? "registro.battaglia_persa" : "registro.battaglia_vinta"
+        case .stagioneCambiata: return "registro.stagione_cambiata"
         }
     }
 
@@ -549,7 +555,7 @@ public enum FattoRegistrato: Hashable, Codable, Sendable {
         case .direzioneDedotta(let casella): return casella
         case .battagliaInnescata(let casella): return casella
         case .battagliaConclusa(let casella, _): return casella
-        case .ordineAnnullato, .giornataAzzerata: return nil
+        case .ordineAnnullato, .giornataAzzerata, .stagioneCambiata: return nil
         }
     }
 }
@@ -683,6 +689,78 @@ public struct EsitoInCampagna: Hashable, Codable, Sendable {
     }
 }
 
+/// Il CALENDARIO che il regno dichiara alla campagna dell'anno (01 §5.9, §5.6.9.1; incarico 30). Il
+/// fronte conserva il proprio calendario in giornate; il calendario dice in quale anno cadono e quante
+/// ne conta ciascuna stagione operativa, sicché la campagna sa da sé quando cambia la stagione e
+/// quando arriva l'inverno, in cui non si conduce campagna. Le campagne di prova dell'avvio non ne
+/// dichiarano alcuno e restano senza stagioni né conclusione, com'erano.
+public struct CalendarioDiCampagna: Hashable, Codable, Sendable {
+    public let anno: Int
+    public let giornatePerStagione: Int
+
+    public init(anno: Int, giornatePerStagione: Int) {
+        self.anno = anno; self.giornatePerStagione = giornatePerStagione
+    }
+
+    enum CodingKeys: String, CodingKey {
+        case anno
+        case giornatePerStagione = "giornate_per_stagione"
+    }
+
+    /// L'ultima giornata operativa dell'anno: chiusa quella, arriva l'inverno.
+    public var ultimaGiornata: Int { giornatePerStagione * Stagione.operative.count }
+
+    /// La stagione in cui cade una giornata della campagna. Oltre l'ultima giornata operativa è
+    /// inverno, che non ha giornate (01 §5.9.1.2).
+    public func stagione(del giorno: Int) -> Stagione {
+        guard giorno >= 1, giorno <= ultimaGiornata else { return .inverno }
+        return Stagione.operative[(giorno - 1) / giornatePerStagione]
+    }
+
+    /// La data di una giornata della campagna (01 §5.6.10.2).
+    public func data(del giorno: Int) -> DataDiCampagna {
+        DataDiCampagna(anno: anno, stagione: stagione(del: giorno), giorno: giorno,
+                       giornateOperative: ultimaGiornata)
+    }
+}
+
+/// La data di una giornata (01 §5.6.10.2): l'anno, la stagione, e il giorno sul numero di giornate
+/// operative dell'anno. Il giorno è quello del fronte, lo stesso che il registro e gli annunci
+/// dichiarano: una sola numerazione, e la stagione ne discende.
+public struct DataDiCampagna: Hashable, Sendable {
+    public let anno: Int
+    public let stagione: Stagione
+    public let giorno: Int
+    public let giornateOperative: Int
+    public init(anno: Int, stagione: Stagione, giorno: Int, giornateOperative: Int) {
+        self.anno = anno; self.stagione = stagione
+        self.giorno = giorno; self.giornateOperative = giornateOperative
+    }
+}
+
+/// La CONCLUSIONE di una campagna, nel minimo indispensabile a far arrivare un esito al regno
+/// (incarico 30, RDA-164). I documenti prescrivono tre vie — la presa del quartier generale, la
+/// resa e l'annientamento (01 §5.14.3.2, §5.14.3.3) —; qui ne esistono due: l'annientamento, quando
+/// una parte resta senza gruppi armati, e l'arrivo dell'inverno, che ferma le operazioni (01 §5.9).
+/// La presa del quartier generale e la resa NON sono costruite.
+public struct ConclusioneCampagna: Hashable, Codable, Sendable {
+    public enum Modo: String, Codable, Hashable, Sendable, CaseIterable {
+        /// Una parte non ha più gruppi armati sul fronte: vince l'altra.
+        case annientamento
+        /// È arrivato l'inverno: nessun vincitore, le forze rientrano (01 §5.9).
+        case inverno
+    }
+    public let modo: Modo
+    /// Chi ha vinto; nessuno se l'inverno ha interrotto la campagna.
+    public let vincitore: Parte?
+    /// L'ultima giornata giocata.
+    public let giorno: Int
+
+    public init(modo: Modo, vincitore: Parte?, giorno: Int) {
+        self.modo = modo; self.vincitore = vincitore; self.giorno = giorno
+    }
+}
+
 /// Lo stato completo di una campagna (05 §2.6). Un valore, interamente Codable,
 /// senza alcun riferimento a schermate o annunci (00 §3.2).
 public struct StatoCampagna: Hashable, Codable, Sendable {
@@ -766,6 +844,15 @@ public struct StatoCampagna: Hashable, Codable, Sendable {
     /// partite che non arrivano a uno scontro; entra nell'impronta, perché due partite in cui una
     /// battaglia è in sospeso o no non sono lo stesso stato.
     public var battaglieInSospeso: [BattagliaInSospeso]
+    /// Il CALENDARIO della campagna (01 §5.9, incarico 30): lo dichiara il regno alla campagna
+    /// dell'anno. Nullo nelle campagne di prova dell'avvio e negli scenari di verifica, che restano
+    /// senza stagioni e senza conclusione; facoltativo, sicché le istantanee scritte prima si
+    /// rileggono identiche e, dove è nullo, si riscrivono identiche al byte.
+    public var calendario: CalendarioDiCampagna?
+    /// La CONCLUSIONE della campagna (incarico 30, RDA-164): nulla finché è in corso. Conclusa la
+    /// campagna ogni comando è respinto col medesimo motivo e nulla più avanza. Si pone soltanto
+    /// nella campagna che dichiara un calendario.
+    public var conclusione: ConclusioneCampagna?
 
     public init(mappa: MappaCampagna, giorno: Int, gruppi: [IdGruppo: Gruppo],
                 prossimoIdGruppo: Int, prossimoIndiceNome: Int,
@@ -777,7 +864,9 @@ public struct StatoCampagna: Hashable, Codable, Sendable {
                 studiati: [Parte: Set<IdGruppo>] = [:],
                 imboscateInSospeso: [ImboscataInSospeso] = [],
                 imboscateScoperte: [Parte: Set<Cella>] = [:],
-                battaglieInSospeso: [BattagliaInSospeso] = []) {
+                battaglieInSospeso: [BattagliaInSospeso] = [],
+                calendario: CalendarioDiCampagna? = nil,
+                conclusione: ConclusioneCampagna? = nil) {
         self.mappa = mappa; self.giorno = giorno; self.gruppi = gruppi
         self.prossimoIdGruppo = prossimoIdGruppo
         self.prossimoIndiceNome = prossimoIndiceNome
@@ -790,6 +879,16 @@ public struct StatoCampagna: Hashable, Codable, Sendable {
         self.imboscateInSospeso = imboscateInSospeso
         self.imboscateScoperte = imboscateScoperte
         self.battaglieInSospeso = battaglieInSospeso
+        self.calendario = calendario
+        self.conclusione = conclusione
+    }
+
+    /// La data della giornata in corso, se la campagna dichiara un calendario (01 §5.6.10.2).
+    public var data: DataDiCampagna? { calendario?.data(del: giorno) }
+
+    /// Quanti gruppi ARMATI ha una parte sul fronte: senza, non può più combattere (RDA-164).
+    public func gruppiArmati(di parte: Parte) -> Int {
+        gruppi.values.filter { $0.parte == parte && $0.categoria.eArmata }.count
     }
 
     /// La battaglia in sospeso in una casella, se ve n'è una (01 §6.2): il comando di
