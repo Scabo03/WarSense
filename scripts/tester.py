@@ -30,7 +30,9 @@ FORMATO = sys.argv[2]
 GIORNATE = int(sys.argv[3]) if len(sys.argv) > 3 else 30
 # Opzioni (dal quinto argomento in poi): «resa» = in battaglia si dichiara la resa appena è
 # disponibile (lo sconfitto sopravvive e ripiega: il percorso del ripiegamento); «tutti» = ogni gruppo
-# armato marcia verso nord quando può, per cercare il contatto (altrimenti uno su due).
+# armato marcia verso nord quando può, per cercare il contatto (altrimenti uno su due); «contatto»
+# (incarico 30) = ogni gruppo armato marcia verso la formazione armata avversaria che la mappa mostra,
+# scegliendo fra le caselle raggiungibili la più vicina a quella, ed entrandovi quando è raggiungibile.
 OPZIONI = set(sys.argv[5:])
 DIARIO = CARTELLA / f"diario-{FORMATO}.jsonl"
 # Il possessivo che dichiara una formazione propria, nelle quattro forme accordate (02 §4.6).
@@ -280,6 +282,32 @@ def giornata(numero):
                     break
         attiva(contiene=f"riga {r}, casella {c},")
         voci = etichette()
+        if "contatto" in OPZIONI and armato(s) and PANNELLO["marcia"] in voci:
+            # La formazione ARMATA avversaria è quella che la mappa chiama «formazione avversaria»
+            # (le altre due categorie hanno il proprio nome): vi si marcia sopra, o il più vicino possibile.
+            bersagli = [(int(a), int(b)) for a, b in
+                        re.findall(r"riga (\d+), casella (\d+), (?:[^\n]*?, )?formazione avversaria", "\n".join(tutte))]
+            if bersagli:
+                attiva(etichetta=PANNELLO["marcia"], tipo="pulsante")
+                mete = []
+                for n in etichette():
+                    m2 = re.match(r"riga (\d+), casella (\d+), .*raggiungibile in (\d+) giorn", n)
+                    if m2:
+                        rr, cc, gg = int(m2.group(1)), int(m2.group(2)), int(m2.group(3))
+                        distanza = min(abs(rr - br) + abs(cc - bc) for br, bc in bersagli)
+                        mete.append((distanza, gg, rr, cc))
+                if mete:
+                    distanza, giorni, rr, cc = min(mete)
+                    esito = sentito(attiva(contiene=f"riga {rr}, casella {cc},", ascolto=2.5))
+                    diario("marcia", da=f"riga {r}, casella {c}", verso=f"riga {rr}, casella {cc}",
+                           distanza_dal_nemico=distanza, sentito=esito)
+                    ordinati += 1
+                    if "comincia il giorno" in esito:
+                        break
+                    continue
+                attiva(contiene=f"riga {r}, casella {c},")  # nessuna meta: si toglie la designazione
+                attiva(contiene=f"riga {r}, casella {c},")
+                voci = etichette()
         if PANNELLO["apri"] in voci:
             # La battaglia in sospeso si apre dal pannello del gruppo che vi è coinvolto: l'informazione
             # di stato la dichiara, ma il servizio VoiceOver delle prove tronca le pronunce a 64 caratteri.

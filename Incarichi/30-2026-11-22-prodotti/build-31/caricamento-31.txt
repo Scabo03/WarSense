@@ -1,0 +1,57 @@
+== Controllo preventivo: il ramo principale è spinto sul remoto ==
+  principale locale e origin/principale coincidono: si procede
+== Controllo preventivo: la versione non torna mai indietro ==
+versione da caricare: 1.1.0; più alta già presente: 1.1.0 — si procede
+== Numero di build: massimo su tutto l'account più uno ==
+massimo: 30 -> nuovo: 31
+== Controllo preventivo: i documenti consegnati ==
+  lunghezza: note-di-rilascio.txt, 3970 caratteri su 4000
+  freschezza: documento ade0ce9, codice ade0ce9
+  vocabolario: 65 nomi citati, tutti esposti dal codice
+  cifre: nessun numero non dichiarato nel corpo
+  prove a mano: nessuna prova chiesta al titolare
+  freschezza: documento ade0ce9, codice ade0ce9
+i documenti consegnati reggono a tutti i controlli: si procede
+== Controllo preventivo: registro delle build e App Store Connect ==
+registro e App Store Connect concordano: 30 build, la più alta è la 30
+== Controllo preventivo: freschezza della corsa separata delle sessioni complete ==
+corsa separata delle sessioni complete: esito «successo», girata su ade0ce9, codice a ade0ce9 (data 2026-11-22T22:06:38Z)
+== Collaudo COMPLETO prima del caricamento (pacchetto, ospitate, interfaccia) ==
+== 0/3 Cancello dei simboli d'archetipo (biiezione archetipi <-> simboli, RDA-97) ==
+== 0b/3 Cancello delle impronte dei Contenuti (RDA-105) ==
+== 0c/3 Cancello: VoiceOver spento sul simulatore delle prove d'interfaccia (incarico 30) ==
+== 1/3 Collaudo del pacchetto (Motore, Dati, Sessione, Segnali, Verifica, Confini) ==
+Test Suite 'VerificaTest.xctest' passed at 2026-11-22 23:27:53.860.
+Test Suite 'SessioneTest.xctest' passed at 2026-11-22 23:27:54.489.
+Test Case '-[SegnaliTest.TraduttoreCampagnaTest test_02_4_ogni_termine_del_vocabolario_di_campagna_esiste_nei_testi]' started.
+Test Case '-[SegnaliTest.TraduttoreCampagnaTest test_02_4_ogni_termine_del_vocabolario_di_campagna_esiste_nei_testi]' passed (0.023 seconds).
+Test Case '-[SegnaliTest.TraduttoreEventiTest test_00_9_4_il_vocabolario_chiuso_entra_nell_annuncio_senza_varianti]' started.
+Test Case '-[SegnaliTest.TraduttoreEventiTest test_00_9_4_il_vocabolario_chiuso_entra_nell_annuncio_senza_varianti]' passed (0.020 seconds).
+Test Case '-[SegnaliTest.TraduttoreRegnoTest test_02_4_ogni_termine_del_regno_esiste_nel_vocabolario]' started.
+Test Case '-[SegnaliTest.TraduttoreRegnoTest test_02_4_ogni_termine_del_regno_esiste_nel_vocabolario]' passed (0.024 seconds).
+Test Suite 'SegnaliTest.xctest' passed at 2026-11-22 23:27:55.355.
+Test Case '-[MotoreTest.RegoleCampagnaTest test_01_5_16_1_il_gruppo_dichiara_il_proprio_stato_con_il_vocabolario_ridotto]' started.
+Test Case '-[MotoreTest.RegoleCampagnaTest test_01_5_16_1_il_gruppo_dichiara_il_proprio_stato_con_il_vocabolario_ridotto]' passed (0.007 seconds).
+Test Suite 'MotoreTest.xctest' passed at 2026-11-22 23:27:56.922.
+Test Suite 'DatiTest.xctest' passed at 2026-11-22 23:27:57.452.
+Test Suite 'ConfiniTest.xctest' passed at 2026-11-22 23:27:57.642.
+== 2/3 Generazione del progetto applicativo dalla sua sorgente di verità ==
+== 3/3 Prove ospitate e d'interfaccia sul simulatore ==
+== Conteggio delle prove ospitate e d'interfaccia, dall'esecutore ==
+  esecutore (xcresulttool summary): 137 prove eseguite fra ospitate e interfaccia — 137 passate, 0 fallite, 0 saltate; esito Passed
+    per bersaglio: WarSenseTest = 120
+    per bersaglio: WarSenseUITest = 17
+== Collaudo completo: tutto verde ==
+== Generazione del progetto e archivio ==
+== Esportazione firmata ==
+== Caricamento su TestFlight ==
+UPLOAD SUCCEEDED with no errors
+Delivery UUID: dd0c6e91-d5f9-4bf9-9b63-66f932ed4a39
+Transferred 1956866 bytes in 3.789 seconds (516.46KB/s, 4.132Mbps)
+No errors uploading archive at '/Users/lucascabini/Developer/WarSense/Applicazione/build/esportazione/WarSense.ipa'.
+== Nota di rilascio (attende l'elaborazione della build) ==
+nota allegata alla build 31
+== Registrazione della build nel registro ==
+build 31 registrata in build-caricate.md
+== Fatto: build 31 caricata ==
+uscita: 0
