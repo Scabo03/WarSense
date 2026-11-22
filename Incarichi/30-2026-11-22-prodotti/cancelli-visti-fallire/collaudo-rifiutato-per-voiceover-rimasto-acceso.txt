@@ -1,0 +1,12 @@
+== 0/3 Cancello dei simboli d'archetipo (biiezione archetipi <-> simboli, RDA-97) ==
+Simboli d'archetipo: biiezione verificata su 9 archetipi (cavalleria_manovrata, cavalleria_ricognizione, fanteria_leggera, fanteria_pesante, guardia_elite, macchina_assedio, macchina_tiro, piattaforma_trainata, tiratori)
+== 0b/3 Cancello delle impronte dei Contenuti (RDA-105) ==
+Impronte dei Contenuti coerenti col manifest.
+== 0c/3 Cancello: VoiceOver spento sul simulatore delle prove d'interfaccia (incarico 30) ==
+simulatore imposto dall'ambiente: 87AB2F55-5E5C-4A25-B2FE-7D8975F1E8CA
+RIFIUTATO: VoiceOver è acceso sul simulatore 87AB2F55-5E5C-4A25-B2FE-7D8975F1E8CA.
+  Con VoiceOver acceso il tocco delle prove d'interfaccia mette a fuoco e non attiva: fallirebbero tutte.
+  Lo ha lasciato acceso una sessione del pilota finita senza spegnerlo. Rimedio: dare al pilota
+  {"azione": "vo_spegni"} prima di {"azione": "fine"}, oppure riavviare il pilota e uscirne:
+  dall'incarico 30 lo spegne da sé all'uscita.
+uscita: 1

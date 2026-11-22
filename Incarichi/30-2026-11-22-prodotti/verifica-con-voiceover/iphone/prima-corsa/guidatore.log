@@ -1,0 +1,38 @@
+== blocco patria (iphone) ==
+NO  avvio: «Nuovo regno» è la prima voce dopo il titolo — ['WarSense', 'WarSense', 'Riprendi il regno', 'Riprendi il regno']
+ok  patria: il fuoco d'apertura va al titolo — Nuovo regno Pulsante || Patria Intestazione || Patria Intestazione
+ok  patria: VoiceOver la legge in ordine — data, campagna, riserve voce per voce, forze, comandi — ['Patria Intestazione', 'Anno 1, primavera', "Nessuna campagna aperta quest'anno", 'Riserve Intestazione', 'monete di bronzo: 20', 'uomini: 2', 'metalli: 3', 'materiale da costruzione: 3', 'animali: 1', 'Forze Intestazione', 'gruppo armato: 6 atomi di fanteria
+ok  patria: il tocco magico dice la data e la campagna dell'anno — Anno 1, primavera. Nessuna campagna aperta quest'anno || Anno 1, primavera. Nessuna campagna aperta quest'anno
+== blocco inverno (iphone) ==
+ok  inverno: l'arrivo si annuncia con l'entrata dell'anno — Attendi l'inverno Pulsante || Comincia l'inverno dell'anno 1. Entrate: monete di bronzo 200, u || Anno 1, inverno, schermata 1 di 4 || Anno 1, inverno, schermata 1 di 4
+ok  inverno: è una schermata nuova, il fuoco va in testa alla data — Anno 1, inverno, schermata 1 di 4
+ok  inverno: il bilancio nasce dalla rendita — le riserve dopo l'entrata — ['monete di bronzo: 220', 'uomini: 26', 'metalli: 33', 'materiale da costruzione: 33', 'animali: 13']
+ok  inverno: ogni voce dice quanto costa su quanto se ne possiede, per le sole risorse che consuma — ['Leva di fanteria leggera. Costa: monete di bronzo 30 su 220, uomini 6 su 26, metalli 3 su 33. 6 atomi, pronta in primavera.', 'Leva di fanteria leggera. Costa: monete di bronzo 30 su 220, uomini 6 su 26, metalli 3 su 33. 6 atomi, pronta in primavera.', 'Leva
+ok  inverno: VoiceOver legge la schermata in ordine, fino all'ultimo comando — ['Patria Intestazione', 'Anno 1, inverno, schermata 1 di 4', "Quest'anno nessuna campagna", 'Riserve Intestazione', 'monete di bronzo: 220', 'uomini: 26', 'metalli: 33', 'materiale da costruzione: 33', 'animali: 13', 'Forze Intestazione', 'gruppo armato: 6 ato
+ok  spesa: l'ordine si annuncia con quando sarà pronto — Leva di fanteria pesante ordinata: pronta in primavera. || Leva di fanteria pesante ordinata: pronta in primavera.
+ok  spesa: il fuoco resta sulla voce appena ordinata — Leva di fanteria pesante ordinata: pronta in primavera.
+ok  spesa: la riserva scende e la voce dichiara il costo sulla riserva nuova — ['monete di bronzo: 156', 'metalli: 17', 'Leva di fanteria pesante. Costa: monete di bronzo 64 su 156, uomini 8 su 18, metalli 16 su 17. 8 atomi, pronta in primavera.', 'Leva di fanteria pesante. Costa: monete di bronzo 64 su 156, uomini 8 su 18, metalli 16 su
+ok  spesa: il lavoro ordinato entra in elenco — ['Leva di fanteria pesante, pronta in primavera']
+ok  impossibilità: la voce la dichiara prontamente, con la risorsa che manca — ['Leva di fanteria pesante. Non si può ordinare: mancano metalli. Costa: monete di bronzo 64 su 92, uomini 8 su 10, metalli 16 su 1. 8 atomi, pronta in primavera.', 'Leva di fanteria pesante. Non si può ordinare: mancano metalli. Costa: monete di bronzo 64 su 
+ok  impossibilità: ordinandola si sente il motivo, e nulla cambia — Non si può ordinare: mancano metalli. || Non si può ordinare: mancano metalli.
+ok  annullamento: ritira l'ultima spesa e lo dice — Annulla l'ultima spesa Pulsante || Leva di fanteria pesante: ordine annullato, risorse restituite. || Leva di fanteria pesante: ordine annullato, risorse restituite.
+ok  azzeramento: ritira tutte le spese della schermata e dice quante — Spese della schermata azzerate: 1 ordine ritirato || Spese della schermata azzerate: 1 ordine ritirato
+ok  annullamento a vuoto: lo dice invece di confermare — Nessuna spesa da annullare in questa schermata || Nessuna spesa da annullare in questa schermata
+ok  azzeramento a vuoto: lo dice invece di confermare — Nessuna spesa da azzerare in questa schermata || Nessuna spesa da azzerare in questa schermata
+ok  stazione 2: si annuncia, e la schermata ha le stesse voci — Inverno, schermata 2 di 4 || Inverno, schermata 2 di 4
+ok  stazione 3: si annuncia, e la schermata ha le stesse voci — Inverno, schermata 3 di 4 || Inverno, schermata 3 di 4
+ok  stazione 4: si annuncia, e la schermata ha le stesse voci — Inverno, schermata 4 di 4 || Inverno, schermata 4 di 4
+NO  primavera: si annuncia con ciò che il riporto ha tolto e i lavori pronti — Comincia la primavera dell'anno 2. Il riporto ha tolto: monete d || Anno 2, primavera || Anno 2, primavera
+ok  primavera: è una schermata nuova, il fuoco va in testa alla data — Anno 2, primavera
+ok  primavera: avanza un decimo dell'entrata, e le reclute sono una formazione nuova — ['monete di bronzo: 20', 'uomini: 2', 'gruppo armato: 6 atomi di fanteria leggera', 'gruppo armato: 18 atomi di fanteria leggera, 8 atomi di fanteria pesante', 'gruppo armato: 24 atomi di fanteria pesante, 12 atomi di cavalleria manovrata', 'gruppo armato: 6 a
+ok  registro della patria: i fatti dal più recente, ciascuno con l'anno e la stagione — ['Registro della patria Intestazione', 'Anno 2, primavera: Leva di fanteria leggera è pronta', 'Anno 2, primavera: comincia la primavera; il riporto ha tolto ci', "Anno 1, inverno: comincia l'inverno e arriva l'entrata dell'anno", 'Chiudi il registro Pulsante'
+== blocco campagna (iphone) ==
+ok  campagna: la scelta del fronte, una voce per fronte con la mappa — ['Su quale fronte?', 'Su quale fronte?', 'fronte del guado, mappa 4 per 4', "fronte dell'istmo, mappa 6 per 6", 'fronte della pianura lunga, mappa 10 per 10']
+ok  campagna: si entra nella mappa del fronte con le forze del regno — ['riga 2, casella 2, tua Lince, in attesa, composta da 6 atomi di fanteria leggera, acqua, strada battuta', 'riga 3, casella 2, tuo Cervo, formazione non armata, in attesa, composta da 4 atomi di fanteria leggera, strada battuta', 'riga 4, casella 1, tuo Orso,
+ok  campagna: l'informazione di stato comincia dalla data, con quanto manca all'inverno — Anno 2, primavera, mancano 89 giornate all'inverno. Giorno 1. Ne || Anno 2, primavera, mancano 89 giornate all'inverno. Giorno 1. Ne
+ok  campagna: la giornata si chiude — Chiudi la giornata Pulsante || Giornata chiusa. 6 gruppi non avevano agito e restano fermi: ne  || Giornata chiusa. 6 gruppi non avevano agito e restano fermi: ne 
+ok  campagna: tornati in patria, la data è quella del fronte e il comando è «Entra nel fronte» — ['Anno 2, primavera, giorno 2 di 90', 'Campagna aperta sul fronte del guado', 'Entra nel fronte del guado', 'Entra nel fronte del guado']
+ok  campagna: il fuoco torna sul comando da cui si era entrati — Entra nel fronte del guado Pulsante
+NO  ripresa: l'avvio offre «Riprendi il regno» in testa — ['WarSense', 'WarSense', 'Riprendi il regno', 'Riprendi il regno']
+ok  ripresa: il regno ritrova la campagna aperta allo stesso giorno — ['Anno 2, primavera, giorno 2 di 90', 'Campagna aperta sul fronte del guado', 'Entra nel fronte del guado', 'Entra nel fronte del guado']
+controlli: 34, ok 31, NO 3; durata 332 s

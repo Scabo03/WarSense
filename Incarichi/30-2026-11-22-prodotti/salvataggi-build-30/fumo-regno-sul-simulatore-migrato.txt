@@ -1,0 +1,3 @@
+Test Case '-[WarSenseUITest.FumoRegnoTest test_dalla_patria_all_inverno_alla_primavera_e_alla_campagna]' passed (34.985 seconds).
+Test Case '-[WarSenseUITest.FumoRegnoTest test_in_orizzontale_a_testo_massimo_l_inverno_si_percorre_e_la_leva_si_ordina]' passed (15.506 seconds).
+** TEST SUCCEEDED **

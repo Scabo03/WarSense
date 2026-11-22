@@ -1,4 +1,4 @@
-Questa build porta la prima parte del regno: un anno intero che si gioca dalla patria, con la campagna, l'inverno e la primavera. Scontri e campagne di prova restano come erano.
+Questa build porta la prima parte del regno: un anno intero che si gioca dalla patria, con la campagna, l'inverno e la primavera. Gli scontri e le campagne di prova restano come erano.
 
 IL REGNO. Dalla schermata iniziale, «Nuovo regno» apre la patria. In alto c'è la data: anno e stagione. Poi le riserve, una voce per risorsa: monete di bronzo, uomini, metalli, materiale da costruzione, animali. Poi le forze, una voce per formazione, e i comandi. Il tocco magico dice la data e lo stato della campagna dell'anno. «Riprendi il regno» riapre quello in corso.
 

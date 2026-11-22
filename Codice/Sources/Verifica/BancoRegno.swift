@@ -392,9 +392,13 @@ public enum BancoRegnoDaRigaDiComando {
         guard !valori.isEmpty else { return "-" }
         let ordinati = valori.sorted()
         let n = ordinati.count
-        if n % 2 == 1 { return "\(ordinati[n / 2])" }
-        let somma = ordinati[n / 2 - 1] + ordinati[n / 2]
-        return somma % 2 == 0 ? "\(somma / 2)" : "\(somma / 2),5"
+        let centrale = ordinati[n / 2]
+        if n % 2 == 1 { return String(centrale) }
+        // Le stringhe letterali del pacchetto non contengono spazi (00 §14.1, ConfiniTest): i
+        // valori si calcolano prima e si scrivono dopo.
+        let somma = ordinati[n / 2 - 1] + centrale
+        let meta = String(somma / 2)
+        return somma % 2 == 0 ? meta : meta + ",5"
     }
 
     public static func esegui(cartellaValori: URL, partite: Int, anni: Int) throws -> Rapporto {
@@ -426,10 +430,12 @@ public enum BancoRegnoDaRigaDiComando {
 
         var righe: [String] = []
         righe.append("regno.versione_valori=\(valori.versioneEffettiva)")
+        let anniPrevisti = compiti.count * anni
+        let numeroErrori = raccolta.tuttiGliErrori().count
         righe.append(["regno.partite_per_condotta=\(partite)", "anni_per_partita=\(anni)",
                       "giornate_operative=\(valoriRegno.giornateOperative)",
-                      "anni_giocati=\(giocati.count)", "anni_previsti=\(compiti.count * anni)",
-                      "errori=\(raccolta.tuttiGliErrori().count)"].joined(separator: ","))
+                      "anni_giocati=\(giocati.count)", "anni_previsti=\(anniPrevisti)",
+                      "errori=\(numeroErrori)"].joined(separator: ","))
         for errore in raccolta.tuttiGliErrori() { righe.append("regno.errore=" + errore) }
         righe.append("condotta|fronte|anni|vinte|perse|interrotte_dall_inverno|ferme|battaglie_ogni_10_giornate|giornate_mediana|battaglie_per_anno_x100|atomi_partiti_mediana|atomi_rientrati_mediana|atomi_reclutati_mediana|anni_con_violazioni|anni_con_proposte_avversarie_respinte")
         for condotta in MisuraFrequenzaBattaglie.Condotta.allCases {
@@ -439,19 +445,22 @@ public enum BancoRegnoDaRigaDiComando {
                 guard !gruppo.isEmpty else { continue }
                 let giornate = gruppo.reduce(0) { $0 + $1.giornate }
                 let battaglie = gruppo.reduce(0) { $0 + $1.battaglie }
+                let vinte = gruppo.filter { $0.vincitore == Parte.giocatore.rawValue }.count
+                let perse = gruppo.filter { $0.vincitore == Parte.avversario.rawValue }.count
+                let interrotte = gruppo.filter { $0.conclusione == ConclusioneCampagna.Modo.inverno.rawValue }.count
+                let ferme = gruppo.filter { $0.conclusione == "ferma" }.count
+                let conViolazioni = gruppo.filter { !$0.violazioni.isEmpty }.count
+                let conRespinte = gruppo.filter { $0.proposteAvversarieRespinte > 0 }.count
+                let battagliePerCentoAnni = battaglie * 100 / gruppo.count
                 righe.append([
-                    condotta.rawValue, fronte, "\(gruppo.count)",
-                    "\(gruppo.filter { $0.vincitore == Parte.giocatore.rawValue }.count)",
-                    "\(gruppo.filter { $0.vincitore == Parte.avversario.rawValue }.count)",
-                    "\(gruppo.filter { $0.conclusione == ConclusioneCampagna.Modo.inverno.rawValue }.count)",
-                    "\(gruppo.filter { $0.conclusione == "ferma" }.count)",
+                    condotta.rawValue, fronte, String(gruppo.count),
+                    String(vinte), String(perse), String(interrotte), String(ferme),
                     giornate == 0 ? "-" : String(format: "%.3f", Double(battaglie) * 10 / Double(giornate)),
                     mediana(gruppo.map(\.giornate)),
-                    "\(battaglie * 100 / gruppo.count)",
+                    String(battagliePerCentoAnni),
                     mediana(gruppo.map(\.atomiPartiti)), mediana(gruppo.map(\.atomiRientrati)),
                     mediana(gruppo.map(\.atomiReclutati)),
-                    "\(gruppo.filter { !$0.violazioni.isEmpty }.count)",
-                    "\(gruppo.filter { $0.proposteAvversarieRespinte > 0 }.count)",
+                    String(conViolazioni), String(conRespinte),
                 ].joined(separator: "|"))
             }
         }

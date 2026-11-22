@@ -1,0 +1,16 @@
+# I cancelli della prima tappa del regno, visti rifiutare (incarico 30)
+
+Ciascun cancello nuovo, o esteso a ciò che è nuovo, è stato visto rifiutare una volta di proposito. Il guasto è stato costruito sui file veri, la prova eseguita, l'uscita salvata qui, e il file ripristinato da una copia (`git status` pulito dopo ciascuno).
+
+| file | cancello | guasto costruito | che cosa rifiuta |
+|---|---|---|---|
+| `confine-della-modalita-visto-fallire.txt` | `ConfiniTest.test_01_1_2_il_regno_comune_non_nomina_la_modalita_di_battaglia` | in `Motore/MotoreRegno.swift` una funzione che conta gli atomi di un elenco di reparti | il motore comune del regno che nomina una parola della modalità a sciami (RDA-166) |
+| `campioni-del-giornale-visto-fallire.txt` | `CompatibilitaGiornaleTest.test_00_15_i_campioni_committati_si_decodificano_e_ricodificano_identici` | tolta da `CampioniGiornale/campioni.jsonl` la riga campione `campagnaConclusaNelRegno` | una specie di riga del giornale senza il proprio campione committato |
+| `accordo-di-genere-visto-fallire.txt` | `AccordoDiGenereTest` (tre prove su quattro in errore) | tolti il genere di `regno.voce.leva_fanteria_leggera` e la forma femminile di `regno.lavoro_ordinato` | un termine soggetto della categoria nuova senza genere; una frase accordata senza una forma; in più il cancello delle impronte, che vede il file dei testi cambiato |
+| `caricatore-del-regno-visto-rifiutare.txt` | `CaricatoreRegno.carica`, eseguito da `StrumentoVerifica --valori <copia guasta> --regno 1 --anni 1` | quattro copie di `regno.json`: un gancio ignoto, la quota del riporto a 1,5, una risorsa tolta dalla rendita, nessuna formazione armata fra le forze iniziali | i valori del regno incoerenti, ciascuno con la chiave d'errore e la voce |
+| `sonda-del-regno-tredici-mutanti.txt` | `BancoRegnoTest` (verde: è la prova a costruire i tredici stati guasti) | uno stato guasto per ciascuno dei tredici invarianti | «SONDA-REGNO invarianti=13 mutanti_riferiti=13» |
+| `voiceover-acceso-rifiutato.txt` | `scripts/controlla-voiceover-spento.sh` (passo 0c del collaudo completo) | nessuno: eseguito sul simulatore su cui il tester stava giocando con VoiceOver | il simulatore con VoiceOver acceso (RDA-171) |
+| `collaudo-rifiutato-per-voiceover-rimasto-acceso.txt` | lo stesso cancello, dentro `scripts/collaudo-completo.sh` | nessuno, e non voluto: il collaudo completo lanciato sul quarto iPhone di WarSense | VoiceOver vi era rimasto acceso da una sessione di un incarico precedente; rifiutato in 2 secondi, spento facendo entrare e uscire il pilota aggiornato, collaudo ripartito |
+| `prove-d-interfaccia-rosse-con-voiceover-acceso.txt` | — | — | il fallimento che ha fatto nascere il cancello: `FumoRegnoTest` rossa dopo una sessione del pilota finita senza spegnere VoiceOver; verde appena spento |
+
+Il cancello dell'accordo di genere aveva già morso una volta durante il lavoro, senza che lo volessi: il primo collaudo completo si è fermato in 53 secondi su `SchermataPatria.swift`, dove due chiamate a `frase(` senza una virgola fra loro facevano leggere all'espressione regolare del cancello una chiave non letterale. Ho cambiato il mio codice e non il cancello.

@@ -1,0 +1,9 @@
+# I salvataggi della build 30 si riaprono con la build 31: la prova dal vivo (incarico 30)
+
+Simulatore «WarSense iPhone Air · 2» (iOS 27.0, 76DF33B6…), app disinstallata prima di cominciare. Canale: il pilota dell'incarico 28 con VoiceOver acceso; guidatore `migrazione.py` (questa cartella).
+
+1. **Prima.** L'app e il pilota compilati dal commit della build 30 (`402a9b1`, esportato con `git archive` in una cartella di lavoro: nell'app non c'è `regno.json`). Una campagna piccola con un ordine dato e due giornate chiuse («Giorno 3»), uno scontro di prova con una riserva piazzata. Di ciascuno si registra ciò che la schermata espone: `stato-con-la-build-30.json` (16 caselle, 100 celle, l'informazione di stato). App chiusa con le due partite in corso.
+2. **Dopo.** Il pilota compilato dal codice dell'incarico 30 installa l'app nuova sopra la vecchia; i dati restano. L'avvio offre «Nuovo regno» e le due riprese; la campagna ripresa espone le stesse 16 caselle e la stessa informazione di stato, e chiusa la giornata comincia il giorno 4; lo scontro ripreso espone le stesse 100 celle.
+3. **Poi**, sullo stesso apparecchio, «Nuovo regno» apre la patria: a mano col pilota (`pilota-build-31/nuovo-regno-sul-simulatore-migrato-esiti.jsonl`: «Patria Intestazione», poi l'albero con le riserve) e con `FumoRegnoTest` (`fumo-regno-sul-simulatore-migrato.txt`: due prove verdi). L'installazione che viene dalla build 30 riceve i valori del regno nella propria copia in Documenti (`Documents/Valori/regno.json` presente dopo il primo avvio dell'app nuova: visto elencando la cartella dei dati dell'app con `xcrun simctl get_app_container`).
+
+Esiti: `controlli.jsonl` (8 controlli, 8 «ok»), `prima.log`, `dopo.log`; i passi del pilota in `pilota-build-30/` e `pilota-build-31/`; quattro schermate. Durate (stampate dal guidatore): 126 s e 82 s.

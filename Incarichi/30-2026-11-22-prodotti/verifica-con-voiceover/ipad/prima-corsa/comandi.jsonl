@@ -1,0 +1,54 @@
+{"azione": "termina", "ascolto": 0.3, "n": 1}
+{"azione": "avvia", "ascolto": 2, "n": 2}
+{"azione": "vo_accendi", "ascolto": 1, "n": 3}
+{"azione": "albero", "ascolto": 0.2, "n": 4}
+{"azione": "attiva", "ascolto": 6, "etichetta": "Nuovo regno", "tipo": "pulsante", "n": 5}
+{"azione": "giro", "ascolto": 0.5, "con_schermata": true, "nome": "ipad-patria-primavera", "n": 6}
+{"azione": "multi_tocco", "tocchi": 2, "dita": 2, "etichetta": "Registro della patria", "tipo": "pulsante", "ascolto": 4, "n": 7}
+{"azione": "albero", "ascolto": 0.2, "n": 8}
+{"azione": "attiva", "ascolto": 7, "etichetta": "Attendi l'inverno", "tipo": "pulsante", "n": 9}
+{"azione": "albero", "ascolto": 0.2, "n": 10}
+{"azione": "giro", "ascolto": 0.5, "con_schermata": true, "nome": "ipad-inverno-prima-schermata", "n": 11}
+{"azione": "attiva", "ascolto": 4, "contiene": "Leva di fanteria pesante.", "tipo": "pulsante", "n": 12}
+{"azione": "albero", "ascolto": 0.2, "n": 13}
+{"azione": "attiva", "ascolto": 3, "contiene": "Leva di fanteria pesante.", "tipo": "pulsante", "n": 14}
+{"azione": "albero", "ascolto": 0.2, "n": 15}
+{"azione": "attiva", "ascolto": 4, "contiene": "Leva di fanteria pesante.", "tipo": "pulsante", "n": 16}
+{"azione": "albero", "ascolto": 0.2, "n": 17}
+{"azione": "attiva", "ascolto": 4, "etichetta": "Annulla l'ultima spesa", "tipo": "pulsante", "n": 18}
+{"azione": "albero", "ascolto": 0.2, "n": 19}
+{"azione": "attiva", "ascolto": 4, "etichetta": "Azzera le spese di questa schermata", "tipo": "pulsante", "n": 20}
+{"azione": "albero", "ascolto": 0.2, "n": 21}
+{"azione": "attiva", "ascolto": 4, "etichetta": "Annulla l'ultima spesa", "tipo": "pulsante", "n": 22}
+{"azione": "attiva", "ascolto": 4, "etichetta": "Azzera le spese di questa schermata", "tipo": "pulsante", "n": 23}
+{"azione": "attiva", "ascolto": 3, "contiene": "Leva di fanteria leggera.", "tipo": "pulsante", "n": 24}
+{"azione": "albero", "ascolto": 0.2, "n": 25}
+{"azione": "attiva", "ascolto": 4, "etichetta": "Prosegui alla schermata 2 di 4", "tipo": "pulsante", "n": 26}
+{"azione": "albero", "ascolto": 0.2, "n": 27}
+{"azione": "attiva", "ascolto": 4, "etichetta": "Prosegui alla schermata 3 di 4", "tipo": "pulsante", "n": 28}
+{"azione": "albero", "ascolto": 0.2, "n": 29}
+{"azione": "attiva", "ascolto": 4, "etichetta": "Prosegui alla schermata 4 di 4", "tipo": "pulsante", "n": 30}
+{"azione": "albero", "ascolto": 0.2, "n": 31}
+{"azione": "schermata", "nome": "ipad-inverno-quarta-schermata", "ascolto": 0.3, "n": 32}
+{"azione": "attiva", "ascolto": 8, "etichetta": "Prosegui alla primavera", "tipo": "pulsante", "n": 33}
+{"azione": "albero", "ascolto": 0.2, "n": 34}
+{"azione": "schermata", "nome": "ipad-patria-seconda-primavera", "ascolto": 0.3, "n": 35}
+{"azione": "attiva", "ascolto": 4, "etichetta": "Registro della patria", "tipo": "pulsante", "n": 36}
+{"azione": "giro", "ascolto": 0.5, "con_schermata": true, "nome": "ipad-registro-della-patria", "n": 37}
+{"azione": "attiva", "ascolto": 3, "etichetta": "Chiudi il registro", "tipo": "pulsante", "n": 38}
+{"azione": "albero", "ascolto": 0.2, "n": 39}
+{"azione": "attiva", "ascolto": 3, "etichetta": "Apri la campagna", "tipo": "pulsante", "n": 40}
+{"azione": "albero", "ascolto": 0.2, "n": 41}
+{"azione": "attiva", "ascolto": 8, "etichetta": "fronte del guado, mappa 4 per 4", "tipo": "pulsante", "n": 42}
+{"azione": "albero", "ascolto": 0.2, "n": 43}
+{"azione": "multi_tocco", "tocchi": 2, "dita": 2, "etichetta": "Registro della campagna", "tipo": "pulsante", "ascolto": 4, "n": 44}
+{"azione": "schermata", "nome": "ipad-mappa-del-fronte", "ascolto": 0.3, "n": 45}
+{"azione": "attiva", "ascolto": 6, "etichetta": "Chiudi la giornata", "tipo": "pulsante", "n": 46}
+{"azione": "attiva", "ascolto": 5, "etichetta": "Torna in patria", "tipo": "pulsante", "n": 47}
+{"azione": "albero", "ascolto": 0.2, "n": 48}
+{"azione": "schermata", "nome": "ipad-patria-con-campagna-aperta", "ascolto": 0.3, "n": 49}
+{"azione": "termina", "ascolto": 0.3, "n": 50}
+{"azione": "avvia", "ascolto": 2, "n": 51}
+{"azione": "albero", "ascolto": 0.2, "n": 52}
+{"azione": "attiva", "ascolto": 6, "etichetta": "Riprendi il regno", "tipo": "pulsante", "n": 53}
+{"azione": "albero", "ascolto": 0.2, "n": 54}
