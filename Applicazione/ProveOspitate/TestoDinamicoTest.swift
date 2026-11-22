@@ -182,6 +182,40 @@ final class TestoDinamicoTest: XCTestCase {
         XCTAssertEqual(difetti, [], difetti.joined(separator: "\n"))
     }
 
+    /// La patria (incarico 30), nei suoi due aspetti: la parte operativa dell'anno e l'inverno, con le
+    /// voci da ordinare, che sono i testi più lunghi della schermata.
+    func test_02_10_4_patria_in_primavera_e_d_inverno() async throws {
+        let ambiente = try Ambiente()
+        var difetti = try await confronta("patria in primavera", {
+            SchermataPatria(partita: try await PartitaRegno(nuovo: ambiente))
+        }, pronta: { s in
+            let patria = try XCTUnwrap(s as? SchermataPatria)
+            try await self.attendi { patria.corpoPerProva.arrangedSubviews.count > 5 }
+        })
+        difetti += try await confronta("patria d'inverno", {
+            SchermataPatria(partita: try await PartitaRegno(nuovo: ambiente))
+        }, pronta: { s in
+            let patria = try XCTUnwrap(s as? SchermataPatria)
+            try await self.attendi { patria.corpoPerProva.arrangedSubviews.count > 5 }
+            await patria.eseguiPerProva(.attendiInverno)
+            await patria.eseguiPerProva(.ordina(voce: "leva_fanteria_leggera"))
+        })
+        XCTAssertEqual(difetti, [], difetti.joined(separator: "\n"))
+    }
+
+    /// La dichiarazione di conclusione della campagna (05 §9.3; incarico 30).
+    func test_02_10_4_dichiarazione_di_conclusione_della_campagna() async throws {
+        let ambiente = try Ambiente()
+        let voci = ["L'inverno ha interrotto la campagna sul fronte della pianura lunga: nessun vincitore",
+                    "Durata: 90 giornate", "Battaglie vinte: 0. Battaglie perse: 0",
+                    "Rientrano in patria: 5 formazioni", "Nessun premio: quest'inverno arriva la sola rendita"]
+        let difetti = try await confronta("dichiarazione di conclusione", {
+            SchermataResoconto(voci: voci, testi: ambiente.testi, chiaveTitolo: "conclusione.titolo",
+                               chiaveCongedo: "conclusione.torna")
+        })
+        XCTAssertEqual(difetti, [], difetti.joined(separator: "\n"))
+    }
+
     func test_02_10_4_divisione() async throws {
         let ambiente = try Ambiente()
         let partita = try await PartitaCampagna(nuova: ambiente, taglia: .piccola)

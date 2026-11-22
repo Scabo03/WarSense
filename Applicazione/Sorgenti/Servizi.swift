@@ -45,6 +45,8 @@ final class Ambiente {
     let valori: ValoriDiGioco
     /// I valori del piano di campagna: formati, mappe, nomi dei gruppi (05 §7.6).
     let valoriCampagna: ValoriCampagna
+    /// I valori del regno: calendario, risorse, voci, fronti (01 §5.5, §5.9; incarico 30).
+    let valoriRegno: ValoriRegno
     let testi: Testi
     let segnali: PuntoSegnali
     /// Vero se il caricamento da Documenti è fallito e si è tornati alla fabbrica.
@@ -72,6 +74,20 @@ final class Ambiente {
             campagnaCaricata = try CaricatoreCampagna.carica(da: Contenuti.valoriDiFabbrica)
             ripiego = true
         }
+        // I valori del regno seguono la stessa disciplina, e si verificano contro gli archetipi
+        // della stessa copia: mai dati misti (05 §7.1).
+        var regnoCaricato: ValoriRegno
+        do {
+            regnoCaricato = try CaricatoreRegno.carica(da: ripiego ? Contenuti.valoriDiFabbrica
+                                                                   : Ambiente.cartellaValori,
+                                                       archetipiNoti: Set(valoriCaricati.archetipi.keys))
+        } catch {
+            valoriCaricati = try CaricatoreValori.carica(da: Contenuti.valoriDiFabbrica)
+            campagnaCaricata = try CaricatoreCampagna.carica(da: Contenuti.valoriDiFabbrica)
+            regnoCaricato = try CaricatoreRegno.carica(da: Contenuti.valoriDiFabbrica,
+                                                       archetipiNoti: Set(valoriCaricati.archetipi.keys))
+            ripiego = true
+        }
         var testiCaricati: Testi
         do { testiCaricati = try Testi.carica(albero: Ambiente.cartellaTesti, lingua: "it") }
         catch {
@@ -82,6 +98,7 @@ final class Ambiente {
             da: ripiego ? Contenuti.valoriDiFabbrica : Ambiente.cartellaValori)
         self.valori = valoriCaricati
         self.valoriCampagna = campagnaCaricata
+        self.valoriRegno = regnoCaricato
         self.testi = testiCaricati
         self.ripiegoSuFabbrica = ripiego
         self.segnali = PuntoSegnali(testi: testiCaricati, definizioni: definizioni,

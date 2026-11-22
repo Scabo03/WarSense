@@ -17,6 +17,24 @@ final class PartitaCampagna {
     let ambiente: Ambiente
     let motore: MotoreCampagna
     private let sessione: SessioneCampagna
+    /// Lo slot su disco di questa campagna: quello delle campagne di prova, oppure lo slot annidato
+    /// della campagna dell'anno dentro il regno (incarico 30, RDA-162).
+    let cartella: URL
+
+    /// Dove si torna uscendo dalla mappa (02 §6.7: il gesto di fuga risale di un livello): all'avvio,
+    /// per le campagne di prova, oppure in patria, per la campagna che il regno ha aperta.
+    enum Ritorno {
+        case inizio
+        case patria
+        /// La chiave del testo del comando di ritorno.
+        var chiaveTesto: String {
+            switch self {
+            case .inizio: return "resoconto.torna"
+            case .patria: return "campagna.torna_in_patria"
+            }
+        }
+    }
+    let ritorno: Ritorno
 
     /// Le tre campagne di prova, una per formato di mappa (01 §5.1).
     enum Taglia: String, CaseIterable {
@@ -34,22 +52,20 @@ final class PartitaCampagna {
             atPath: cartellaCampagna.appendingPathComponent("giornale.jsonl").path)
     }
 
-    /// Lo slot su disco di una battaglia nata dalla campagna (incarico 24): una sottocartella
-    /// dedicata sotto lo slot di campagna, nominata dall'identificatore deterministico della
-    /// battaglia in sospeso. Distinta dallo slot dello scontro di prova del menu, sicché le due
-    /// non si toccano; distinta per identificatore, sicché due battaglie non si sovrappongono.
-    static func cartellaBattaglia(_ identificatore: String) -> URL {
-        cartellaCampagna.appendingPathComponent("battaglie").appendingPathComponent(identificatore)
+    static func scenario(_ taglia: Taglia) throws -> ScenarioCampagna {
+        try scenario(chiave: taglia.rawValue)
     }
 
-    static func scenario(_ taglia: Taglia) throws -> ScenarioCampagna {
+    /// Lo scenario con la chiave data, dal file degli scenari di campagna: è anche ciò che dà a un
+    /// fronte del regno la mappa e le forze avversarie (`regno.json`, voce `fronti`).
+    static func scenario(chiave: String) throws -> ScenarioCampagna {
         let nome = "scenari-campagna.json"
         let url = Ambiente.cartellaValori.appendingPathComponent(nome)
         let dati = try (try? Data(contentsOf: url))
             ?? Data(contentsOf: Contenuti.valoriDiFabbrica.appendingPathComponent(nome))
         let tutti = try JSONDecoder().decode([String: ScenarioCampagna].self, from: dati)
-        guard let scenario = tutti[taglia.rawValue] else {
-            throw FabbricaCampagna.ErroreScenario.mappaIgnota(taglia.rawValue)
+        guard let scenario = tutti[chiave] else {
+            throw FabbricaCampagna.ErroreScenario.mappaIgnota(chiave)
         }
         return scenario
     }
@@ -69,6 +85,8 @@ final class PartitaCampagna {
         self.ambiente = ambiente
         self.motore = MotoreCampagna(valori: ambiente.valori,
                                      valoriCampagna: ambiente.valoriCampagna)
+        self.cartella = Self.cartellaCampagna
+        self.ritorno = .inizio
         try? FileManager.default.removeItem(at: Self.cartellaCampagna)
         var generatore = SystemRandomNumberGenerator()
         self.sessione = try await SessioneCampagna(
@@ -89,9 +107,22 @@ final class PartitaCampagna {
         self.ambiente = ambiente
         self.motore = MotoreCampagna(valori: ambiente.valori,
                                      valoriCampagna: ambiente.valoriCampagna)
+        self.cartella = Self.cartellaCampagna
+        self.ritorno = .inizio
         self.sessione = try await SessioneCampagna(riprendi: Self.cartellaCampagna,
                                                    valori: ambiente.valori,
                                                    valoriCampagna: ambiente.valoriCampagna)
+    }
+
+    /// La campagna dell'anno che il REGNO ha aperta (incarico 30): la Sessione è già nata o ripresa
+    /// nello slot annidato, e uscendo dalla mappa si torna in patria.
+    init(delRegno ambiente: Ambiente, sessione: SessioneCampagna, cartella: URL) {
+        self.ambiente = ambiente
+        self.motore = MotoreCampagna(valori: ambiente.valori,
+                                     valoriCampagna: ambiente.valoriCampagna)
+        self.sessione = sessione
+        self.cartella = cartella
+        self.ritorno = .patria
     }
 
     // MARK: - Letture
@@ -142,7 +173,7 @@ final class PartitaCampagna {
         let scenario = PonteCampagnaBattaglia.scenario(da: battaglia, stato: await stato,
                                                        modello: try modelloScontro())
         return try await PartitaCorrente(daCampagna: ambiente, scenario: scenario,
-                                         cartella: Self.cartellaBattaglia(battaglia.identificatore),
+                                         cartella: cartellaDellaBattaglia(battaglia.identificatore),
                                          identificatore: battaglia.identificatore)
     }
 
@@ -169,7 +200,12 @@ final class PartitaCampagna {
             evento: .battagliaConclusa(casella: esito.casella,
                                        giocatoreSconfitto: esito.sconfitto == .giocatore),
             per: .giocatore)
-        try? FileManager.default.removeItem(at: Self.cartellaBattaglia(battaglia.identificatore))
+        try? FileManager.default.removeItem(at: cartellaDellaBattaglia(battaglia.identificatore))
+    }
+
+    /// Lo slot della battaglia dentro lo slot di QUESTA campagna.
+    func cartellaDellaBattaglia(_ identificatore: String) -> URL {
+        cartella.appendingPathComponent("battaglie").appendingPathComponent(identificatore)
     }
 
     // MARK: - Chiusura esplicita della giornata (incarico 26)
@@ -203,7 +239,8 @@ final class PartitaCampagna {
         let codificatore = JSONEncoder()
         codificatore.outputFormatting = [.sortedKeys, .prettyPrinted, .withoutEscapingSlashes]
         guard let dati = try? codificatore.encode(diagnostica) else { return }
-        try? dati.write(to: Self.urlDiagnostica(giorno: diagnostica.giorno), options: .atomic)
+        try? dati.write(to: cartella.appendingPathComponent("diagnostica-giornata-\(diagnostica.giorno).json"),
+                        options: .atomic)
     }
 
     @discardableResult

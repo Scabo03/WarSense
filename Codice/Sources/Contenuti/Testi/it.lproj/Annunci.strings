@@ -627,6 +627,8 @@
 "patria.campagna_perduta" = "Campagna sul %@ perduta";
 "patria.campagna_interrotta" = "Campagna sul %@ interrotta dall'inverno, senza vincitore";
 "patria.nessuna_campagna_condotta" = "Quest'anno nessuna campagna";
+/* L'informazione di stato del regno (02 §6.5): la data, poi la campagna dell'anno. */
+"patria.stato" = "%1$@. %2$@";
 "patria.riserve" = "Riserve";
 "patria.riserva" = "%1$@: %2$d";
 "patria.forze" = "Forze";

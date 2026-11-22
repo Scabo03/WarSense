@@ -24,6 +24,11 @@ final class SchermataMappaCampagna: UIViewController {
     private var designazione: CostruttoreAnnunciCampagna.Designazione = .nessuna
     private var ultimaRigaDelFuoco: Int?
     var alTermine: (() -> Void)?
+    /// Chiamato UNA volta quando la campagna si conclude (incarico 30, RDA-164): chi ha aperto la
+    /// mappa — la patria — porta l'esito al regno e mostra la dichiarazione di conclusione. Le
+    /// campagne di prova non dichiarano un calendario e non si concludono mai.
+    var allaConclusione: (() -> Void)?
+    private var conclusioneNotificata = false
 
     private let scorrimento = UIScrollView()
     private let vistaMappa = VistaMappa()
@@ -167,6 +172,16 @@ final class SchermataMappaCampagna: UIViewController {
         let stato = await partita.stato
         statoCorrente = stato
         aggiorna(con: stato)
+        notificaLaConclusioneSeServe(stato)
+    }
+
+    /// Se la campagna si è conclusa lo dice, una volta sola, a chi ha aperto la mappa. Un istante
+    /// dopo, perché l'annuncio della conclusione — già in coda ai segnali — non sia scavalcato dal
+    /// cambio di schermata dentro la stessa attivazione.
+    private func notificaLaConclusioneSeServe(_ stato: StatoCampagna) {
+        guard stato.conclusione != nil, !conclusioneNotificata, allaConclusione != nil else { return }
+        conclusioneNotificata = true
+        DispatchQueue.main.async { [weak self] in self?.allaConclusione?() }
     }
 
     /// Aggiorna etichette e valori degli elementi ESISTENTI: mai ricreare,
@@ -183,7 +198,7 @@ final class SchermataMappaCampagna: UIViewController {
         pulsanteChiudiGiornata.setTitle(testi.frase("giornata.chiudi").testo, for: .normal)
         pulsanteAnnulla.setTitle(testi.frase("pulsante.annulla").testo, for: .normal)
         pulsanteAzzera.setTitle(testi.frase("pulsante.azzera").testo, for: .normal)
-        pulsanteEsci.setTitle(testi.frase("resoconto.torna").testo, for: .normal)
+        pulsanteEsci.setTitle(testi.frase(partita.ritorno.chiaveTesto).testo, for: .normal)
 
         vistaMappa.coloreCasella = { [weak self] casella in
             guard let self, let costruttore = self.costruttore else { return nil }
@@ -635,6 +650,8 @@ final class SchermataMappaCampagna: UIViewController {
                 partita.ambiente.segnali.annuncia(TestoLocalizzato(
                     testo: testi.termine(MotivoNonValidoCampagna.battagliaInSospeso.rawValue).testo,
                     lingua: testi.lingua))
+            } catch SessioneCampagna.ErroreSessione.campagnaConclusa {
+                annunciaLaCampagnaConclusa()
             } catch {
                 await ricaricaStato()
             }
@@ -658,6 +675,9 @@ final class SchermataMappaCampagna: UIViewController {
             partita.ambiente.segnali.annuncia(
                 TestoLocalizzato(testo: testo, lingua: testi.lingua),
                 significato: .annullamento)
+        } catch SessioneCampagna.ErroreSessione.campagnaConclusa {
+            // Oltre la conclusione non si torna: il motivo è quello di ogni comando (RDA-164).
+            annunciaLaCampagnaConclusa()
         } catch SessioneCampagna.ErroreSessione.oltreLaGiornataInCorso {
             // Il rifiuto al confine non è silenzioso e ha un motivo PROPRIO, distinto
             // da «niente da annullare»: c'è qualcosa da annullare, ed è fuori portata
@@ -672,6 +692,14 @@ final class SchermataMappaCampagna: UIViewController {
     }
 
     @objc private func esci() { alTermine?() }
+
+    /// Il motivo di ogni comando respinto su una campagna conclusa (02 §6.5: il medesimo, perché
+    /// il giocatore non debba ricostruirlo per tentativi).
+    private func annunciaLaCampagnaConclusa() {
+        partita.ambiente.segnali.annuncia(TestoLocalizzato(
+            testo: testi.termine(MotivoNonValidoCampagna.campagnaConclusa.rawValue).testo,
+            lingua: testi.lingua))
+    }
 
     @objc private func apriRegistro() {
         guard let costruttore else { return }

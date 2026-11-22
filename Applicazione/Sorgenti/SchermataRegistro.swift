@@ -33,12 +33,19 @@ final class SchermataRegistro: UIViewController {
 
     private let voci: [Voce]
     private let testi: Testi
+    /// La chiave del titolo: il registro della campagna, oppure quello della patria (01 §5.17).
+    private let chiaveTitolo: String
+    /// Falso per il registro della patria, i cui fatti non hanno un luogo sulla mappa: le voci non
+    /// portano allora il suggerimento sul luogo, che sarebbe fuori posto.
+    private let conLuoghi: Bool
     /// Chiamata quando il giocatore attiva una voce che ha un luogo.
     var alSalto: ((Cella) -> Void)?
 
-    init(voci: [Voce], testi: Testi) {
+    init(voci: [Voce], testi: Testi, chiaveTitolo: String = "registro.titolo", conLuoghi: Bool = true) {
         self.voci = voci
         self.testi = testi
+        self.chiaveTitolo = chiaveTitolo
+        self.conLuoghi = conLuoghi
         super.init(nibName: nil, bundle: nil)
     }
     required init?(coder: NSCoder) { nil }
@@ -70,7 +77,7 @@ final class SchermataRegistro: UIViewController {
         ])
 
         let titolo = UILabel()
-        titolo.text = testi.frase("registro.titolo").testo
+        titolo.text = testi.frase(chiaveTitolo).testo
         titolo.font = .preferredFont(forTextStyle: .title1)
         titolo.numberOfLines = 0 // va a capo invece di essere tagliato (incarico 28, osservazione 8)
         titolo.adjustsFontForContentSizeCategory = true
@@ -112,7 +119,7 @@ final class SchermataRegistro: UIViewController {
                 etichetta.isAccessibilityElement = true
                 etichetta.accessibilityLabel = voce.frase
                 etichetta.accessibilityTraits = [.staticText]
-                etichetta.accessibilityHint = testi.frase("registro.senza_luogo").testo
+                if conLuoghi { etichetta.accessibilityHint = testi.frase("registro.senza_luogo").testo }
                 etichetta.heightAnchor.constraint(greaterThanOrEqualToConstant: 44).isActive = true
                 vociVisibili.append(etichetta)
                 colonna.addArrangedSubview(etichetta)

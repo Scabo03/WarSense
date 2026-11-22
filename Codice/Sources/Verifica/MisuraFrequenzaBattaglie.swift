@@ -42,6 +42,10 @@ public struct MisuraFrequenzaBattaglie: Sendable {
         case limite
         /// La partita non avanza più (nessuna giornata nuova entro il tetto di passi): un difetto.
         case ferma
+        /// La campagna si è CONCLUSA da sé (incarico 30, RDA-164): accade soltanto con uno scenario
+        /// che dichiara un calendario, cioè nella campagna che il regno apre; il modo e il vincitore
+        /// stanno nello stato finale. Gli scenari del gioco misurati dall'incarico 29 non la incontrano.
+        case conclusa = "campagna_conclusa"
     }
 
     /// Una partita misurata: la riga dei dati grezzi.
@@ -68,6 +72,15 @@ public struct MisuraFrequenzaBattaglie: Sendable {
         public let violazioni: [String]
         /// Il giorno della partita (contato da 1) in cui la sonda ha visto la prima violazione.
         public let giornoPrimaViolazione: Int?
+        /// Quante volte la condotta dell'AVVERSARIO ha proposto un comando che il Motore respinge
+        /// (incarico 30). La Sessione convalida la proposta e, se è respinta, il turno avversario si
+        /// ferma finché il giocatore non chiude la giornata, che dà al gruppo l'ordine di restare
+        /// (incarico 28): lo strumento fa lo stesso — convalida, e al gruppo bloccato dà l'ordine di
+        /// restare — e lo conta. Nullo quando non accade mai, e allora OMESSO dalla riga, sicché i
+        /// dati grezzi delle misure in cui non accade restano identici a quelli dell'incarico 29.
+        public let proposteAvversarieRespinte: Int?
+        /// La prima proposta respinta: giorno, comando e motivo, come chiavi coi loro valori.
+        public let primaPropostaRespinta: String?
         enum CodingKeys: String, CodingKey {
             case formato, condotta, seme, giornate, battaglie, vinte, perse, fine
             case giornateDelleBattaglie = "giornate_delle_battaglie"
@@ -78,6 +91,8 @@ public struct MisuraFrequenzaBattaglie: Sendable {
             case motivoFerma = "motivo_ferma"
             case violazioni
             case giornoPrimaViolazione = "giorno_prima_violazione"
+            case proposteAvversarieRespinte = "proposte_avversarie_respinte"
+            case primaPropostaRespinta = "prima_proposta_respinta"
         }
     }
 
@@ -134,6 +149,8 @@ public struct MisuraFrequenzaBattaglie: Sendable {
         let tettoPassiPerGiornata = 400
         var violazioni = Set<String>()
         var giornoPrimaViolazione: Int?
+        var proposteRespinte = 0
+        var primaPropostaRespinta: String?
         /// La sonda degli invarianti dello stato, dopo ogni cambiamento dello stato.
         func sorveglia() {
             let viste = sonda.controlla(stato: stato).map(SondaInvariantiCampagna.codice(di:))
@@ -172,7 +189,9 @@ public struct MisuraFrequenzaBattaglie: Sendable {
                 if let motivo = giocaLeBattaglie() { fine = .ferma; motivoFerma = motivo; break }
                 continue
             }
-            if fermaAllaFineNaturale {
+            // La campagna del regno si conclude da sé, per annientamento o per l'inverno (RDA-164).
+            if stato.conclusione != nil { fine = .conclusa; break }
+            if fermaAllaFineNaturale, stato.calendario == nil {
                 if armati(.giocatore, stato) == 0 { fine = .giocatoreSenzaArmati; break }
                 if armati(.avversario, stato) == 0 { fine = .avversarioSenzaArmati; break }
             }
@@ -205,13 +224,33 @@ public struct MisuraFrequenzaBattaglie: Sendable {
             // Il turno dell'avversario, come al banco (01 §5.6.11): quando il giocatore ha concluso.
             var passiAvversario = 0
             while stato.gruppiInAttesa(di: .giocatore).isEmpty, stato.battaglieInSospeso.isEmpty,
+                  stato.conclusione == nil, // una campagna conclusa non avanza più (RDA-164), come nella Sessione
                   !stato.gruppiInAttesa(di: .avversario).isEmpty {
                 passiAvversario += 1
                 if passiAvversario > 2000 {
                     fine = .ferma; motivoFerma = "avversario_oltre_il_tetto:giorno=\(stato.giorno)"; break partita
                 }
-                guard let comandoAvversario = banco.condotta.prossimoComando(
+                guard let proposto = banco.condotta.prossimoComando(
                     vista: motore.vistaAvversario(stato: stato)) else { break }
+                // La proposta si CONVALIDA, come nella Sessione (incarico 28): fino all'incarico 29 lo
+                // strumento la applicava direttamente, e sugli scenari del gioco non era mai respinta.
+                // Respinta, il gruppo riceve l'ordine di restare — ciò che fa il tasto «Chiudi la
+                // giornata» al gruppo avversario bloccato — e il caso si conta.
+                var comandoAvversario = proposto
+                let convalida = motore.valida(proposto, parte: .avversario, stato: stato)
+                if !convalida.eValido {
+                    proposteRespinte += 1
+                    if primaPropostaRespinta == nil {
+                        primaPropostaRespinta = "giorno=\(stato.giorno):comando=\(proposto):esito=\(convalida)"
+                    }
+                    guard let restare = motore.ordineDiRestare(per: proposto.gruppo, parte: .avversario,
+                                                               stato: stato) else {
+                        fine = .ferma
+                        motivoFerma = "avversario_senza_ordine_valido:giorno=\(stato.giorno):comando=\(proposto)"
+                        break partita
+                    }
+                    comandoAvversario = restare
+                }
                 stato = motore.applica(comandoAvversario, parte: .avversario, stato: stato).0
                 sorveglia()
             }
@@ -230,7 +269,9 @@ public struct MisuraFrequenzaBattaglie: Sendable {
                        vinte: vinte, perse: perse, daImboscata: daImboscata, fine: fine,
                        armatiGiocatore: armati(.giocatore, stato), armatiAvversario: armati(.avversario, stato),
                        motivoFerma: motivoFerma, violazioni: violazioni.sorted(),
-                       giornoPrimaViolazione: giornoPrimaViolazione),
+                       giornoPrimaViolazione: giornoPrimaViolazione,
+                       proposteAvversarieRespinte: proposteRespinte == 0 ? nil : proposteRespinte,
+                       primaPropostaRespinta: primaPropostaRespinta),
                 stato)
     }
 

@@ -15,6 +15,7 @@
 		2B717BF9114D8E349751F99B /* SondaCanaliTest.swift in Sources */ = {isa = PBXBuildFile; fileRef = 079A9D5EB3AB1D2FBEF55BDA /* SondaCanaliTest.swift */; };
 		2C201369597A009507BC172C /* Verifica in Frameworks */ = {isa = PBXBuildFile; productRef = 63388568CF69F6ECF3CB5E3C /* Verifica */; };
 		321465D14C83340BB6030A0F /* CatenaInterfacciaMotoreTest.swift in Sources */ = {isa = PBXBuildFile; fileRef = 2F77F23D7958A0EE7DC80E0A /* CatenaInterfacciaMotoreTest.swift */; };
+		32A637DA09130E41A83D2C6B /* SchermataPatria.swift in Sources */ = {isa = PBXBuildFile; fileRef = 2C78FC482FE53A8A9269547F /* SchermataPatria.swift */; };
 		33BCAD29CAC0333FB4B83594 /* FumoInterfacciaTest.swift in Sources */ = {isa = PBXBuildFile; fileRef = 921003768253D7D483CCC1D8 /* FumoInterfacciaTest.swift */; };
 		35D13AF917D421DA151C322C /* PartitaCampagna.swift in Sources */ = {isa = PBXBuildFile; fileRef = D05C93D40ACCC919E14E0F90 /* PartitaCampagna.swift */; };
 		363082D02975925B7A44772B /* GestiUnLivelloSottoTest.swift in Sources */ = {isa = PBXBuildFile; fileRef = 3EF9E5EB5AC6650CDB0D1660 /* GestiUnLivelloSottoTest.swift */; };
@@ -30,6 +31,7 @@
 		78DBF35F0D2BCE57B8D29F25 /* CostruttoreAnnunciCampagna.swift in Sources */ = {isa = PBXBuildFile; fileRef = C50CAE1A5AEB350F4FEDAB36 /* CostruttoreAnnunciCampagna.swift */; };
 		7A5079BF5C38019EE9CE070D /* Segnali in Frameworks */ = {isa = PBXBuildFile; productRef = 1F88D1E30799930786B4DDD2 /* Segnali */; };
 		7E69C9F2DB0BBABC72260BBB /* AnnunciEFuocoTest.swift in Sources */ = {isa = PBXBuildFile; fileRef = 1C877A8D5733D587BE7B618F /* AnnunciEFuocoTest.swift */; };
+		863515A22D57B0506B147DA9 /* PartitaRegno.swift in Sources */ = {isa = PBXBuildFile; fileRef = 161DCCDB96327251763C4304 /* PartitaRegno.swift */; };
 		873A5D26551D3035FC2D2BFE /* SimboliDegliArchetipiTest.swift in Sources */ = {isa = PBXBuildFile; fileRef = B3FD0402E55F3494E1F28DCF /* SimboliDegliArchetipiTest.swift */; };
 		873D9C045E99E55A19A8AC00 /* Servizi.swift in Sources */ = {isa = PBXBuildFile; fileRef = 47D2EC331332BE96EB5D410B /* Servizi.swift */; };
 		8C28A2B62F03F542DD08122D /* Contenuti in Frameworks */ = {isa = PBXBuildFile; productRef = 4EA3C58AA15BA2930E7F7E45 /* Contenuti */; };
@@ -42,6 +44,7 @@
 		A39DDBD69C59FAA46714DAE6 /* PorzioneVisibileTest.swift in Sources */ = {isa = PBXBuildFile; fileRef = C217410DA2BE88F4B1000D93 /* PorzioneVisibileTest.swift */; };
 		A80A0935009DFE78F5115046 /* Sessione in Frameworks */ = {isa = PBXBuildFile; productRef = A916C71FC8064696BB93E31D /* Sessione */; };
 		AAAF5011876C2223ECD3B289 /* EsploratoriAvversarioInterfacciaTest.swift in Sources */ = {isa = PBXBuildFile; fileRef = 52406D8EA4A880585D67DA47 /* EsploratoriAvversarioInterfacciaTest.swift */; };
+		B56DAB36DB5AD79348E76D63 /* PatriaTest.swift in Sources */ = {isa = PBXBuildFile; fileRef = 961CF04CB72468D3929BA643 /* PatriaTest.swift */; };
 		BE4EC8B2E7DE3588E5B9CFFB /* AppDelegate.swift in Sources */ = {isa = PBXBuildFile; fileRef = 780DA0404CFBE7DD9B420A68 /* AppDelegate.swift */; };
 		C00890F2F953EE7041175812 /* AnnuncioDiCasellaTest.swift in Sources */ = {isa = PBXBuildFile; fileRef = 88D7A0731824F60DFDBEED2D /* AnnuncioDiCasellaTest.swift */; };
 		C91A79B09526BD853D441712 /* FumoMappaCampagnaTest.swift in Sources */ = {isa = PBXBuildFile; fileRef = D02CD1A940C35DBC8B46486B /* FumoMappaCampagnaTest.swift */; };
@@ -90,6 +93,7 @@
 		03ACD38B8C2F68821502F3C4 /* RaggiungibilitaTest.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = RaggiungibilitaTest.swift; sourceTree = "<group>"; };
 		079A9D5EB3AB1D2FBEF55BDA /* SondaCanaliTest.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SondaCanaliTest.swift; sourceTree = "<group>"; };
 		10A40D60A1907135F70F1FB4 /* ToccoDirettoTest.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ToccoDirettoTest.swift; sourceTree = "<group>"; };
+		161DCCDB96327251763C4304 /* PartitaRegno.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = PartitaRegno.swift; sourceTree = "<group>"; };
 		1BE339E6703B78CDC77E5B87 /* RegistroVisibileTest.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = RegistroVisibileTest.swift; sourceTree = "<group>"; };
 		1C877A8D5733D587BE7B618F /* AnnunciEFuocoTest.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AnnunciEFuocoTest.swift; sourceTree = "<group>"; };
 		1D9A4053BF022DBABE96D5E9 /* Immagini.xcassets */ = {isa = PBXFileReference; lastKnownFileType = folder.assetcatalog; path = Immagini.xcassets; sourceTree = "<group>"; };
@@ -97,6 +101,7 @@
 		20FCEB4CE0D4D3CD0648E660 /* WarSense.app */ = {isa = PBXFileReference; includeInIndex = 0; lastKnownFileType = wrapper.application; path = WarSense.app; sourceTree = BUILT_PRODUCTS_DIR; };
 		27D480588F693D19D9E50AC7 /* LettoreAccessibilita.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = LettoreAccessibilita.swift; sourceTree = "<group>"; };
 		2C1F0D6D91DB97F16EA042A1 /* SceneDelegate.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SceneDelegate.swift; sourceTree = "<group>"; };
+		2C78FC482FE53A8A9269547F /* SchermataPatria.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SchermataPatria.swift; sourceTree = "<group>"; };
 		2F77F23D7958A0EE7DC80E0A /* CatenaInterfacciaMotoreTest.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = CatenaInterfacciaMotoreTest.swift; sourceTree = "<group>"; };
 		325B59A8BC855637ABF9B2CB /* PannelloAzioniTest.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = PannelloAzioniTest.swift; sourceTree = "<group>"; };
 		33237A45EB1B4EBEA09B1769 /* SchermataMappaCampagna.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SchermataMappaCampagna.swift; sourceTree = "<group>"; };
@@ -121,6 +126,7 @@
 		8FAC923367D6E5FAA3E5B619 /* TestoDinamicoTest.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = TestoDinamicoTest.swift; sourceTree = "<group>"; };
 		921003768253D7D483CCC1D8 /* FumoInterfacciaTest.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = FumoInterfacciaTest.swift; sourceTree = "<group>"; };
 		95889945EEE20611E0341AC7 /* WarSenseUITest.xctest */ = {isa = PBXFileReference; includeInIndex = 0; lastKnownFileType = wrapper.cfbundle; path = WarSenseUITest.xctest; sourceTree = BUILT_PRODUCTS_DIR; };
+		961CF04CB72468D3929BA643 /* PatriaTest.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = PatriaTest.swift; sourceTree = "<group>"; };
 		9B5A65298E62BF03714DD82F /* OsservazioniEsplorazioneTest.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = OsservazioniEsplorazioneTest.swift; sourceTree = "<group>"; };
 		9D136B104384C6AF309293B3 /* VistaACaselle.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = VistaACaselle.swift; sourceTree = "<group>"; };
 		9EF7773BD1ED816307203E97 /* PartitaCorrente.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = PartitaCorrente.swift; sourceTree = "<group>"; };
@@ -183,10 +189,12 @@
 				B7792DA00B9CCC289C68A7E6 /* Info.plist */,
 				D05C93D40ACCC919E14E0F90 /* PartitaCampagna.swift */,
 				9EF7773BD1ED816307203E97 /* PartitaCorrente.swift */,
+				161DCCDB96327251763C4304 /* PartitaRegno.swift */,
 				2C1F0D6D91DB97F16EA042A1 /* SceneDelegate.swift */,
 				849A458FA8292F265DF9BE68 /* SchermataBattaglia.swift */,
 				6FCD9653D2440473853AF041 /* SchermataDivisione.swift */,
 				33237A45EB1B4EBEA09B1769 /* SchermataMappaCampagna.swift */,
+				2C78FC482FE53A8A9269547F /* SchermataPatria.swift */,
 				D159331FD8EEFB4F1B728089 /* SchermataRegistro.swift */,
 				44914552A51BDF0197E99DAF /* SchermateContorno.swift */,
 				47D2EC331332BE96EB5D410B /* Servizi.swift */,
@@ -255,6 +263,7 @@
 				A169EFE841A32EA35429F504 /* OsservazioniTesterTest.swift */,
 				325B59A8BC855637ABF9B2CB /* PannelloAzioniTest.swift */,
 				57DF274D15CDC79502145A2C /* PassaggioBattagliaInterfacciaTest.swift */,
+				961CF04CB72468D3929BA643 /* PatriaTest.swift */,
 				C217410DA2BE88F4B1000D93 /* PorzioneVisibileTest.swift */,
 				03ACD38B8C2F68821502F3C4 /* RaggiungibilitaTest.swift */,
 				1BE339E6703B78CDC77E5B87 /* RegistroVisibileTest.swift */,
@@ -444,6 +453,7 @@
 				47BD548F691A31A53FD0B380 /* OsservazioniTesterTest.swift in Sources */,
 				F9D782BD8B4FD18B38DF5922 /* PannelloAzioniTest.swift in Sources */,
 				F490E61A6685A9413EE8DE50 /* PassaggioBattagliaInterfacciaTest.swift in Sources */,
+				B56DAB36DB5AD79348E76D63 /* PatriaTest.swift in Sources */,
 				A39DDBD69C59FAA46714DAE6 /* PorzioneVisibileTest.swift in Sources */,
 				F153F7238148016D1A99A85F /* RaggiungibilitaTest.swift in Sources */,
 				45C1B6E90486F2F6078B2B8B /* RegistroVisibileTest.swift in Sources */,
@@ -466,10 +476,12 @@
 				910699A922C8982CE07BAEE1 /* Impaginazione.swift in Sources */,
 				35D13AF917D421DA151C322C /* PartitaCampagna.swift in Sources */,
 				9834F71661D44043584E4993 /* PartitaCorrente.swift in Sources */,
+				863515A22D57B0506B147DA9 /* PartitaRegno.swift in Sources */,
 				3A719F3F9A3306DF020170F4 /* SceneDelegate.swift in Sources */,
 				5F9166348949834153CEF7FA /* SchermataBattaglia.swift in Sources */,
 				E92E862F8FAE7463EED1209F /* SchermataDivisione.swift in Sources */,
 				939EB534A7DF2E8F28165724 /* SchermataMappaCampagna.swift in Sources */,
+				32A637DA09130E41A83D2C6B /* SchermataPatria.swift in Sources */,
 				FC1C2BFD8B30FA33CFF6F12C /* SchermataRegistro.swift in Sources */,
 				190E7D5DC3B892BF2DFD277B /* SchermateContorno.swift in Sources */,
 				873D9C045E99E55A19A8AC00 /* Servizi.swift in Sources */,

@@ -280,6 +280,12 @@ public struct VistaCampagna: Sendable {
         /// Le caselle delle battaglie in sospeso (01 §6.3, 02 §6.5.1.3, incarico 24): lo stato le
         /// dichiara «e dove», in coda al formato chiuso. Vuoto quando nessuna è in sospeso.
         public let battaglieInSospeso: [Cella]
+        /// La data della giornata, se la campagna dichiara un calendario (01 §5.9, §5.16; 02
+        /// §6.5.1.3: «giorno e stagione»; incarico 30). Nulla nelle campagne di prova.
+        public let data: DataDiCampagna?
+        /// Le giornate operative che restano DOPO quella in corso prima dell'inverno: zero
+        /// nell'ultima giornata d'autunno. Nullo senza calendario.
+        public let giornateAllInverno: Int?
     }
 
     public var informazioneDiStato: InformazioneDiStato {
@@ -303,7 +309,9 @@ public struct VistaCampagna: Sendable {
                                        motore.statoDiRifornimento(di: $0, stato: stato)?.eDiPrivazione == true
                                    }.count,
                                    gruppiTotali: miei.count,
-                                   battaglieInSospeso: stato.battaglieInSospeso.map(\.casella))
+                                   battaglieInSospeso: stato.battaglieInSospeso.map(\.casella),
+                                   data: stato.data,
+                                   giornateAllInverno: stato.calendario.map { max(0, $0.ultimaGiornata - stato.giorno) })
     }
 
     /// Il secondo strato: il salto diretto al prossimo gruppo che non ha ancora

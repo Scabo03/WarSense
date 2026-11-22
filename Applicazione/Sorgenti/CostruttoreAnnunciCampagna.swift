@@ -291,6 +291,13 @@ struct CostruttoreAnnunciCampagna {
             frase = testi.frase("campagna.stato", info.giorno,
                                 info.gruppiCheHannoAgito, info.gruppiTotali).testo
         }
+        // La DATA, nella campagna che dichiara un calendario (01 §5.16; 02 §6.5.1.3: «giorno e
+        // stagione»; incarico 30): l'anno, la stagione e quanto manca all'inverno, in TESTA, prima
+        // del giorno. Il giorno resta quello del fronte, lo stesso del registro e degli annunci.
+        if let data = info.data, let mancano = info.giornateAllInverno {
+            frase = testi.frase("campagna.stato_data", data.anno,
+                                testi.termine(data.stagione.chiaveTesto).testo, mancano).testo + frase
+        }
         // I gruppi senza rifornimento sono una categoria a sé (01 §5.16): si dichiarano
         // in coda quando ce ne sono, e la condizione assente non si nomina (02 §8.7.1).
         if info.gruppiSenzaRifornimento > 0 {

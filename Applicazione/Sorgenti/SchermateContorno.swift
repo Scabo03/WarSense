@@ -80,6 +80,12 @@ final class SchermataAvvio: UIViewController {
 
     private func ricostruisciVoci() {
         for vista in colonna.arrangedSubviews.dropFirst() { vista.removeFromSuperview() }
+        // Il regno è il gioco (incarico 30): le sue voci stanno in testa. Vive in uno slot proprio,
+        // e le voci di prova che seguono — lo scontro e le tre campagne — restano dov'erano.
+        if PartitaRegno.esisteRegnoInCorso() {
+            aggiungiPulsante("avvio.riprendi_regno", #selector(riprendiRegno))
+        }
+        aggiungiPulsante("avvio.nuovo_regno", #selector(nuovoRegno))
         if PartitaCorrente.esisteScontroInCorso() {
             aggiungiPulsante("avvio.riprendi", #selector(riprendi))
         }
@@ -184,6 +190,45 @@ final class SchermataAvvio: UIViewController {
         Fuoco.azzeraRegistro()
     }
 
+    @objc private func nuovoRegno() {
+        Task {
+            do { try await presentaPatria(PartitaRegno(nuovo: ambiente)) }
+            catch { }
+        }
+    }
+
+    @objc private func riprendiRegno() {
+        Task {
+            do { try await presentaPatria(PartitaRegno(riprendi: ambiente)) }
+            catch let errore as SessioneRegno.ErroreSessione {
+                // Un salvataggio incompatibile si dichiara e non si apre (00 §15.2), con le due
+                // incompatibilità distinte, come per la campagna.
+                switch errore {
+                case .salvataggioIncompatibile(let attesa, let trovata):
+                    ambiente.segnali.annuncia(TestoLocalizzato(
+                        testo: testi.frase("regno.slot_incompatibile", trovata, attesa).testo,
+                        lingua: testi.lingua), interrompente: true)
+                case .schemaIncompatibile:
+                    ambiente.segnali.annuncia(TestoLocalizzato(
+                        testo: testi.frase("regno.slot_schema_incompatibile").testo,
+                        lingua: testi.lingua), interrompente: true)
+                default:
+                    break
+                }
+            } catch { }
+        }
+    }
+
+    private func presentaPatria(_ partita: PartitaRegno) {
+        let schermata = SchermataPatria(partita: partita)
+        schermata.modalPresentationStyle = .fullScreen
+        schermata.alTermine = { [weak self] in
+            self?.dismiss(animated: false) { self?.riportaIlFuoco() }
+        }
+        present(schermata, animated: false)
+        Fuoco.azzeraRegistro()
+    }
+
     @objc private func apriImpostazioni() {
         let schermata = SchermataImpostazioni(ambiente: ambiente)
         schermata.alTermine = { [weak self] in self?.riportaIlFuoco() }
@@ -206,11 +251,19 @@ import Sessione
 final class SchermataResoconto: UIViewController {
     private let voci: [String]
     private let testi: Testi
+    /// Le chiavi del titolo e del comando di congedo: quelle del resoconto di battaglia, oppure
+    /// quelle della dichiarazione di conclusione della campagna (05 §9.3; incarico 30), che ha la
+    /// stessa forma — voci in ordine fisso, una frase ciascuna — e torna in patria.
+    private let chiaveTitolo: String
+    private let chiaveCongedo: String
     var alTermine: (() -> Void)?
 
-    init(voci: [String], testi: Testi) {
+    init(voci: [String], testi: Testi, chiaveTitolo: String = "resoconto.titolo",
+         chiaveCongedo: String = "resoconto.torna") {
         self.voci = voci
         self.testi = testi
+        self.chiaveTitolo = chiaveTitolo
+        self.chiaveCongedo = chiaveCongedo
         super.init(nibName: nil, bundle: nil)
     }
     required init?(coder: NSCoder) { nil }
@@ -224,7 +277,7 @@ final class SchermataResoconto: UIViewController {
         // Sette voci a testo massimo non entrano nello schermo: la colonna scorre.
         ColonnaScorrevole.monta(colonna, in: view, centrata: true)
         let titolo = UILabel()
-        titolo.text = testi.frase("resoconto.titolo").testo
+        titolo.text = testi.frase(chiaveTitolo).testo
         titolo.font = .preferredFont(forTextStyle: .title1)
         titolo.adjustsFontForContentSizeCategory = true
         titolo.numberOfLines = 0
@@ -238,7 +291,8 @@ final class SchermataResoconto: UIViewController {
             etichetta.adjustsFontForContentSizeCategory = true
             colonna.addArrangedSubview(etichetta)
         }
-        let chiudi = PulsanteMultiriga.crea(titolo: testi.frase("resoconto.torna").testo, stile: .title3)
+        let chiudi = PulsanteMultiriga.crea(titolo: testi.frase(chiaveCongedo).testo, stile: .title3)
+        chiudi.accessibilityIdentifier = chiaveCongedo
         chiudi.addTarget(self, action: #selector(chiudiTutto), for: .touchUpInside)
         colonna.addArrangedSubview(chiudi)
     }

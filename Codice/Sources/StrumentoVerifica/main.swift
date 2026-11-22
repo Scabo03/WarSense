@@ -13,6 +13,10 @@ import Verifica
 //     la misura della frequenza delle battaglie (incarico 29): <partite> partite intere per formato e per
 //     condotta del giocatore, sugli scenari del gioco; scrive i dati grezzi (una riga JSON per partita)
 //     e il riepilogo per formato e condotta.
+//   swift run -c release StrumentoVerifica --regno <partite> [--anni <n>] [--uscita <cartella>]
+//     il banco del regno (incarico 30): <partite> partite di <n> anni per condotta del giocatore, con la
+//     campagna dell'anno giocata fino alla sua conclusione e l'inverno; scrive i dati grezzi (una riga
+//     JSON per anno) e il riepilogo per condotta e per fronte.
 
 var cartellaValori = Ambiente.valoriDiFabbrica
 var cartellaScenari = Ambiente.scenariDiFabbrica
@@ -21,6 +25,8 @@ var cartellaUscita: URL?
 var fumo = false
 var partiteFrequenza: Int?
 var giornateMassime = 365
+var partiteRegno: Int?
+var anniRegno = 5
 
 var argomenti = Array(CommandLine.arguments.dropFirst())
 while let argomento = argomenti.first {
@@ -54,6 +60,14 @@ while let argomento = argomenti.first {
         guard let valore = argomenti.first, let n = Int(valore) else { break }
         argomenti.removeFirst()
         giornateMassime = n
+    case "--regno":
+        guard let valore = argomenti.first, let n = Int(valore) else { break }
+        argomenti.removeFirst()
+        partiteRegno = n
+    case "--anni":
+        guard let valore = argomenti.first, let n = Int(valore) else { break }
+        argomenti.removeFirst()
+        anniRegno = n
     default:
         FileHandle.standardError.write(Data(("verifica.argomento_ignoto=" + argomento + "\n").utf8))
         exit(2)
@@ -69,6 +83,25 @@ if let partite = partiteFrequenza {
             try rapporto.grezzi.write(to: cartellaUscita.appendingPathComponent("frequenza-battaglie.jsonl"),
                                       atomically: true, encoding: .utf8)
             try rapporto.testo.write(to: cartellaUscita.appendingPathComponent("frequenza-battaglie.txt"),
+                                     atomically: true, encoding: .utf8)
+        }
+        print(rapporto.testo)
+        exit(0)
+    } catch {
+        FileHandle.standardError.write(Data(("verifica.errore=\(error)\n").utf8))
+        exit(1)
+    }
+}
+
+if let partite = partiteRegno {
+    do {
+        let rapporto = try BancoRegnoDaRigaDiComando.esegui(cartellaValori: cartellaValori,
+                                                            partite: partite, anni: anniRegno)
+        if let cartellaUscita {
+            try FileManager.default.createDirectory(at: cartellaUscita, withIntermediateDirectories: true)
+            try rapporto.grezzi.write(to: cartellaUscita.appendingPathComponent("banco-del-regno.jsonl"),
+                                      atomically: true, encoding: .utf8)
+            try rapporto.testo.write(to: cartellaUscita.appendingPathComponent("banco-del-regno.txt"),
                                      atomically: true, encoding: .utf8)
         }
         print(rapporto.testo)
