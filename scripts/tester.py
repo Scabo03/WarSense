@@ -10,6 +10,14 @@ sull'elemento (attivazione, solo in verticale), doppio tocco a due dita (tocco m
 
 Uso: python3 scripts/tester.py <cartella del pilota> <formato: piccola|media|grande> [giornate massime]
 Scrive il diario in <cartella>/diario-<formato>.jsonl e stampa un riassunto.
+
+Con «regno» come quarto argomento (incarico 30) il tester gioca UN ANNO DEL REGNO: dall'avvio apre un
+regno nuovo, legge la patria, apre la campagna sul fronte del formato scelto, la gioca — le prime
+<giornate> giornate muovendo i gruppi, le altre chiudendole col comando, e combattendo ogni battaglia
+che nasce — finché la campagna si conclude; ascolta la dichiarazione di conclusione, torna in patria,
+passa l'inverno ordinando le leve che può pagare, annulla una spesa, percorre le quattro schermate e
+arriva alla primavera, dove apre la campagna dell'anno nuovo e conta le proprie formazioni sulla mappa.
+  python3 scripts/tester.py <cartella> <formato> <giornate giocate muovendo i gruppi> regno [opzioni]
 """
 import json
 import pathlib
@@ -27,6 +35,9 @@ OPZIONI = set(sys.argv[5:])
 DIARIO = CARTELLA / f"diario-{FORMATO}.jsonl"
 # Il possessivo che dichiara una formazione propria, nelle quattro forme accordate (02 §4.6).
 PROPRIO = re.compile(r"\btu(o|a|oi|e) ")
+
+# I fronti del regno, per formato di mappa (incarico 30): la voce con cui si sceglie comincia così.
+FRONTE = {"piccola": "fronte del guado", "media": "fronte dell'istmo", "grande": "fronte della pianura lunga"}
 
 PANNELLO = {
     "marcia": "Marcia: scegli la casella sulla mappa", "presidio": "Presidia: resta fermo in guardia",
@@ -210,6 +221,11 @@ def battaglia():
     attiva(etichetta="Torna all'inizio", tipo="pulsante", ascolto=3)
     # Il ripiegamento, se lo sconfitto ha più caselle: la prima voce del pannello.
     voci = etichette()
+    if "Campagna conclusa" in voci:
+        # La battaglia ha concluso la campagna del regno (incarico 30): al posto della mappa c'è la
+        # dichiarazione di conclusione, che il chiamante ascolta.
+        diario("ritorno_in_campagna", stato="campagna conclusa: dichiarazione di conclusione")
+        return
     if "Scegli dove ripiegare" in voci:
         caselle = [v for v in voci if v.startswith("In riga ")]
         diario("ripiegamento_proposto", caselle=caselle)
@@ -291,7 +307,97 @@ def giornata(numero):
     return f"ordinati {ordinati}"
 
 
+# ---------------------------------------------------------------- il regno (incarico 30)
+
+def anno_del_regno():
+    """Un anno del regno, dall'avvio alla seconda primavera, con VoiceOver acceso."""
+    e = attiva(etichetta="Nuovo regno", tipo="pulsante", ascolto=5)
+    diario("patria", fuoco=e.get("dopo"), pronunce=cmd({"azione": "giro", "ascolto": 0.5}).get("pronunce"))
+    attiva(etichetta="Apri la campagna", tipo="pulsante", ascolto=3)
+    e = attiva(prefisso=FRONTE[FORMATO], tipo="pulsante", ascolto=6)
+    diario("campagna_aperta", fronte=FRONTE[FORMATO], sentito=sentito(e), stato=tocco_magico())
+
+    def conclusa():
+        return "Campagna conclusa" in etichette()
+
+    # 1. Le prime giornate muovendo i gruppi, come nelle campagne di prova.
+    giorno = 0
+    for g in range(1, GIORNATE + 1):
+        if conclusa():
+            break
+        giorno = g
+        diario("fine_giornata", numero=g, esito=giornata(g))
+    # 2. Le altre chiuse col comando, finché la campagna si conclude; ogni battaglia si combatte.
+    battaglie = 0
+    for _ in range(140):
+        if conclusa():
+            break
+        giorno += 1
+        e = attiva(etichetta="Chiudi la giornata", tipo="pulsante", ascolto=3)
+        s = sentito(e)
+        diario("giornata_chiusa", numero=giorno, sentito=s, errore=e.get("errore"))
+        if "battaglia in sospeso" in s or "Battaglia" in s or e.get("errore"):
+            esito = giornata(giorno)
+            diario("fine_giornata", numero=giorno, esito=esito)
+            if esito == "battaglia":
+                battaglie += 1
+    if not conclusa():
+        diario("osservazione_tester", testo="la campagna non si è conclusa nelle giornate giocate", giornate=giorno)
+        return
+    # 3. La dichiarazione di conclusione.
+    dichiarazione = cmd({"azione": "giro", "ascolto": 0.5, "con_schermata": True, "nome": f"{FORMATO}-conclusione"})
+    diario("dichiarazione_di_conclusione", pronunce=dichiarazione.get("pronunce"), giornate=giorno, battaglie=battaglie)
+    e = attiva(etichetta="Torna in patria", tipo="pulsante", ascolto=4)
+    diario("ritorno_in_patria", fuoco=e.get("dopo"), etichette=[n for n in etichette() if not n.startswith("gruppo")][:14])
+    # 4. L'inverno: le leve che si possono pagare, una per volta, sentendo l'annuncio di ciascuna.
+    e = attiva(etichetta="Attendi l'inverno", tipo="pulsante", ascolto=6)
+    diario("inverno", sentito=sentito(e), fuoco=e.get("dopo"),
+           riserve=[n for n in etichette() if re.match(r"^(monete di bronzo|uomini|metalli|materiale da costruzione|animali): \d+$", n)])
+    leve = 0
+    for _ in range(12):
+        ordinabili = [n for n in etichette() if n.startswith("Leva di") and "Costa:" in n
+                      and "Non si può ordinare" not in n]
+        if not ordinabili:
+            break
+        nome = ordinabili[leve % len(ordinabili)].split(".")[0] + "."
+        e = attiva(contiene=nome, tipo="pulsante", ascolto=3.5)
+        s = sentito(e)
+        diario("leva", voce=nome, sentito=s)
+        if "ordinata" not in s:
+            diario("osservazione_tester", testo="leva non confermata", sentito=s)
+            break
+        leve += 1
+    impedite = [n for n in etichette() if n.startswith("Leva di") and "Non si può ordinare" in n]
+    diario("voci_impedite", voci=impedite)
+    if impedite:
+        e = attiva(contiene=impedite[0].split(".")[0] + ".", tipo="pulsante", ascolto=3.5)
+        diario("leva_impedita", sentito=sentito(e))
+    e = attiva(etichetta="Annulla l'ultima spesa", tipo="pulsante", ascolto=3.5)
+    diario("annullamento", sentito=sentito(e))
+    lavori = [n for n in etichette() if n.startswith("Leva di") and "Costa" not in n]
+    diario("lavori_ordinati", voci=lavori)
+    for stazione in (2, 3, 4):
+        e = attiva(etichetta=f"Prosegui alla schermata {stazione} di 4", tipo="pulsante", ascolto=3.5)
+        diario("stazione", numero=stazione, sentito=sentito(e))
+    e = attiva(etichetta="Prosegui alla primavera", tipo="pulsante", ascolto=7)
+    nomi = etichette()
+    diario("primavera", sentito=sentito(e), fuoco=e.get("dopo"),
+           riserve=[n for n in nomi if re.match(r"^(monete di bronzo|uomini|metalli|materiale da costruzione|animali): \d+$", n)],
+           forze=[n for n in nomi if n.startswith("gruppo armato") or n.startswith("formazione")])
+    cmd({"azione": "schermata", "nome": f"{FORMATO}-seconda-primavera", "ascolto": 0.3})
+    # 5. La campagna dell'anno nuovo: le formazioni del regno, reclute comprese, sono sulla mappa.
+    attiva(etichetta="Apri la campagna", tipo="pulsante", ascolto=3)
+    attiva(prefisso=FRONTE[FORMATO], tipo="pulsante", ascolto=6)
+    proprie = [n for n in etichette() if re.search(r"riga \d+, casella \d+", n) and PROPRIO.search(n)]
+    diario("seconda_campagna", formazioni_sulla_mappa=len(proprie), etichette=proprie, stato=tocco_magico())
+
+
 def main():
+    if len(sys.argv) > 4 and sys.argv[4] == "regno":
+        anno_del_regno()
+        diario("fine", stato="anno del regno")
+        print(f"diario: {DIARIO}")
+        return
     if len(sys.argv) > 4 and sys.argv[4] == "riprendi":
         attiva(etichetta="Riprendi la campagna in corso", tipo="pulsante", ascolto=4)
     else:

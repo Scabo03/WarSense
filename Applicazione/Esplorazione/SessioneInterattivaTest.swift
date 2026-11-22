@@ -25,6 +25,13 @@ final class SessioneInterattivaTest: XCTestCase {
         cartella = URL(fileURLWithPath: percorso)
     }
 
+    /// All'uscita VoiceOver si spegne SEMPRE (incarico 30). Lasciato acceso resta acceso anche a
+    /// pilota uscito, e sul medesimo simulatore le prove d'interfaccia falliscono poi tutte: col
+    /// lettore acceso il tocco semplice mette a fuoco e non attiva. Visto con `FumoRegnoTest`.
+    override func tearDown() async throws {
+        if vo.isEnabled { try? vo.disable() }
+    }
+
     // MARK: - Il canale dei file
 
     private var fileComandi: URL { cartella.appendingPathComponent("comandi.jsonl") }

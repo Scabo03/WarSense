@@ -1,0 +1,5 @@
+ok  build 30: l'avvio non conosce il regno — ['Nuovo scontro di prova', 'Nuovo scontro di prova', 'Nuova campagna, mappa piccola', 'Nuova campagna, mappa piccola', 'Nuova campagna, mappa media', 'Nuova campagna, mappa media', 'Nuova campagna, mappa grande', 'Nuova campagna, mappa grande']
+ok  build 30: la campagna è al terzo giorno — ['Giorno 3. Nessun gruppo ha ancora agito, sono 4']
+ok  build 30: nello scontro una riserva è piazzata — ['riga 8, cella 1, tua fanteria leggera A, occupata']
+registrato: 16 caselle della campagna, 100 celle dello scontro
+prima: controlli 3, ok 3, NO 0; durata 126 s

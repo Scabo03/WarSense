@@ -1,0 +1,3 @@
+Test Case '-[ConfiniTest.ConfiniTest test_01_1_2_il_regno_comune_non_nomina_la_modalita_di_battaglia]' started.
+/Users/lucascabini/Developer/WarSense/Codice/Tests/ConfiniTest/ConfiniTest.swift:126: error: -[ConfiniTest.ConfiniTest test_01_1_2_il_regno_comune_non_nomina_la_modalita_di_battaglia] : XCTAssertFalse failed - il regno comune nomina la modalità di battaglia: «contaAtomi» in Motore/MotoreRegno.swift:87 (01 §1.2, RDA-166)
+uscita di swift test: 1

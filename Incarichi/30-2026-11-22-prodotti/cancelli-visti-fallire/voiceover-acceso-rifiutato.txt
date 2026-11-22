@@ -1,0 +1,6 @@
+RIFIUTATO: VoiceOver è acceso sul simulatore C86CB490-B9AE-48E8-BC1B-FDD2C52274B4.
+  Con VoiceOver acceso il tocco delle prove d'interfaccia mette a fuoco e non attiva: fallirebbero tutte.
+  Lo ha lasciato acceso una sessione del pilota finita senza spegnerlo. Rimedio: dare al pilota
+  {"azione": "vo_spegni"} prima di {"azione": "fine"}, oppure riavviare il pilota e uscirne:
+  dall'incarico 30 lo spegne da sé all'uscita.
+uscita: 1

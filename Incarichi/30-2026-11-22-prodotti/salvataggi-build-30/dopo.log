@@ -1,0 +1,6 @@
+ok  build 31: l'avvio offre il regno e le due riprese — ['Nuovo regno', 'Nuovo regno', 'Riprendi lo scontro in corso', 'Riprendi lo scontro in corso', 'Riprendi la campagna in corso', 'Riprendi la campagna in corso']
+ok  build 31: la campagna della build 30 si riapre, e la mappa espone esattamente ciò che esponeva — 16 caselle; diverse: []; sentito: Mappa Guado, 4 righe per 4 caselle. Il tuo quartier generale è i || Giorno 3. Nessun gruppo ha ancora agito, sono 4 || Giorno 3. Nessun gruppo ha ancora agito, sono 4
+ok  build 31: l'informazione di stato è la stessa — ['Giorno 3. Nessun gruppo ha ancora agito, sono 4']
+ok  build 31: la campagna riaperta prosegue — la giornata si chiude e comincia il quarto giorno — ['Giorno 4. Nessun gruppo ha ancora agito, sono 4', 'Chiudi la giornata Pulsante || Giornata chiusa. 4 gruppi non avevano agito e restano fermi: ne  || Giornata chiusa. 4 gruppi non avevano agito e restano fermi: ne ']
+ok  build 31: lo scontro della build 30 si riapre, e la griglia espone esattamente ciò che esponeva — 100 celle; diverse: []; sentito: Riprendi lo scontro in corso Pulsante || Battaglia su WarSense, 10 righe per 10 celle. Il campo è campo a || Riserve da schierare Intestazione Usa il rotore per accedere a T || Riserve da schierare Intestazione Usa il rotore per accedere a T
+dopo: controlli 5, ok 5, NO 0; durata 82 s

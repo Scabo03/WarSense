@@ -1,0 +1,11 @@
+regno.versione_valori=0.14.0
+regno.partite_per_condotta=200,anni_per_partita=5,giornate_operative=90,anni_giocati=1786,anni_previsti=2000,errori=0
+condotta|fronte|anni|vinte|perse|interrotte_dall_inverno|ferme|battaglie_ogni_10_giornate|giornate_mediana|battaglie_per_anno_x100|atomi_partiti_mediana|atomi_rientrati_mediana|atomi_reclutati_mediana|anni_con_violazioni|anni_con_proposte_avversarie_respinte
+competente|guado|284|104|0|105|75|0.395|56|220|107|67|26|0|0
+competente|istmo|246|0|0|232|14|0.121|90|106|92,5|87,5|26|0|0
+competente|pianura_lunga|265|11|0|247|7|0.073|90|64|101|101|26|0|0
+competente|tutti|795|115|0|584|96|0.174|90|132|101|85|26|0|0
+prudente|guado|330|0|0|317|13|0.087|90|75|101|75|20|0|0
+prudente|istmo|331|0|0|331|0|0.250|90|225|95|95|26|0|0
+prudente|pianura_lunga|330|0|0|327|3|0.088|90|79|121|101|26|0|0
+prudente|tutti|991|0|0|975|16|0.143|90|126|101|95|26|0|0

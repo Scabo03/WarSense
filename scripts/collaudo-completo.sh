@@ -29,6 +29,13 @@ echo "== 0b/3 Cancello delle impronte dei Contenuti (RDA-105) =="
 # fallimento dichiara la causa e il comando in una riga sola, in due secondi.
 python3 "$RADICE/scripts/rigenera-impronte.py" --verifica
 
+echo "== 0c/3 Cancello: VoiceOver spento sul simulatore delle prove d'interfaccia (incarico 30) =="
+# Rifiuta in pochi secondi, prima dei minuti del collaudo, un simulatore su cui una sessione del
+# pilota ha lasciato VoiceOver acceso: le prove d'interfaccia vi fallirebbero tutte, e il fallimento
+# sembrerebbe un difetto dell'app. Il simulatore è quello RISERVATO a WarSense (incarico 27).
+UDID=$("$RADICE/scripts/simulatore-warsense.sh" iphone)
+"$RADICE/scripts/controlla-voiceover-spento.sh" "$UDID"
+
 echo "== 1/3 Collaudo del pacchetto (Motore, Dati, Sessione, Segnali, Verifica, Confini) =="
 # Nessuna pipe: con `set -o pipefail` il fallimento si propaga comunque, ma senza
 # pipe l'uscita del collaudo arriva intera a chi legge.
@@ -41,11 +48,10 @@ echo "== 2/3 Generazione del progetto applicativo dalla sua sorgente di verità 
 ( cd "$RADICE/Applicazione" && xcodegen generate )
 
 echo "== 3/3 Prove ospitate e d'interfaccia sul simulatore =="
-# Il simulatore è quello RISERVATO a WarSense (incarico 27): l'iPhone dedicato,
-# creato da sé se manca, sul runtime iOS più recente. Fino all'incarico 26 si
-# prendeva «il primo iPhone disponibile», che poteva essere lo stesso usato da un
-# altro progetto. `WARSENSE_SIMULATORE` permette ancora di imporne uno.
-UDID=$("$RADICE/scripts/simulatore-warsense.sh" iphone)
+# Il simulatore è quello RISERVATO a WarSense (incarico 27), scelto al passo 0c:
+# l'iPhone dedicato, creato da sé se manca, sul runtime iOS più recente. Fino
+# all'incarico 26 si prendeva «il primo iPhone disponibile», che poteva essere lo
+# stesso usato da un altro progetto. `WARSENSE_SIMULATORE` permette ancora di imporne uno.
 DESTINAZIONE="id=$UDID"
 
 # Il fascio di risultati serve al conteggio delle prove dall'ESECUTORE (sessione

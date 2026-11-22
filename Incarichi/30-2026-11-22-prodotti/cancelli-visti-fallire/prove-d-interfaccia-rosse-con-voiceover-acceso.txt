@@ -1,0 +1,10 @@
+/Users/lucascabini/Developer/WarSense/Applicazione/ProveInterfaccia/FumoRegnoTest.swift:28: error: -[WarSenseUITest.FumoRegnoTest test_dalla_patria_all_inverno_alla_primavera_e_alla_campagna] : XCTAssertTrue failed - si apre la patria
+/Users/lucascabini/Developer/WarSense/Applicazione/ProveInterfaccia/FumoRegnoTest.swift:29: error: -[WarSenseUITest.FumoRegnoTest test_dalla_patria_all_inverno_alla_primavera_e_alla_campagna] : XCTAssertTrue failed
+/Users/lucascabini/Developer/WarSense/Applicazione/ProveInterfaccia/FumoRegnoTest.swift:30: error: -[WarSenseUITest.FumoRegnoTest test_dalla_patria_all_inverno_alla_primavera_e_alla_campagna] : XCTAssertTrue failed - il riquadro delle riserve, voce per voce
+/Users/lucascabini/Developer/WarSense/Applicazione/ProveInterfaccia/FumoRegnoTest.swift:31: error: -[WarSenseUITest.FumoRegnoTest test_dalla_patria_all_inverno_alla_primavera_e_alla_campagna] : XCTAssertTrue failed - le forze del regno
+/Users/lucascabini/Developer/WarSense/Applicazione/ProveInterfaccia/FumoRegnoTest.swift:32: error: -[WarSenseUITest.FumoRegnoTest test_dalla_patria_all_inverno_alla_primavera_e_alla_campagna] : XCTAssertTrue failed
+/Users/lucascabini/Developer/WarSense/Applicazione/ProveInterfaccia/FumoRegnoTest.swift:35: error: -[WarSenseUITest.FumoRegnoTest test_dalla_patria_all_inverno_alla_primavera_e_alla_campagna] : Failed to tap "Attendi l'inverno" Button: No matches found for Elements matching predicate '"Attendi l'inverno" IN identifiers' from input {(
+Test Case '-[WarSenseUITest.FumoRegnoTest test_dalla_patria_all_inverno_alla_primavera_e_alla_campagna]' failed (27.427 seconds).
+/Users/lucascabini/Developer/WarSense/Applicazione/ProveInterfaccia/FumoRegnoTest.swift:102: error: -[WarSenseUITest.FumoRegnoTest test_in_orizzontale_a_testo_massimo_l_inverno_si_percorre_e_la_leva_si_ordina] : XCTAssertTrue failed - il comando dell'inverno esiste
+Test Case '-[WarSenseUITest.FumoRegnoTest test_in_orizzontale_a_testo_massimo_l_inverno_si_percorre_e_la_leva_si_ordina]' failed (20.799 seconds).
+** TEST FAILED **

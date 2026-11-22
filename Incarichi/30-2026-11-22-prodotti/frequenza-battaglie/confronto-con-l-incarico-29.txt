@@ -1,0 +1,10 @@
+Misura ripetuta il 2026-11-22 sul codice dell'incarico 30 (commit di lavoro 3826c45 più le modifiche di collaudo; il Motore e la Verifica sono quelli del commit finale).
+Comando: cd Codice && swift build -c release --product StrumentoVerifica && .build/release/StrumentoVerifica --frequenza-battaglie 200 --giornate-massime 730 --uscita <cartella>
+Durata: 8 s (date +%s).
+
+SHA-256 dei dati grezzi (shasum -a 256), 1200 righe (wc -l):
+d2e2002b608282802aec36269b40aa4f0c08df5bfb03bb99173da79ae5fca567  incarico 30:  frequenza-battaglie.jsonl
+d2e2002b608282802aec36269b40aa4f0c08df5bfb03bb99173da79ae5fca567  incarico 29:  frequenza-battaglie.jsonl
+
+cmp fra i due file: nessuna differenza (uscita 0). diff fra i due riepiloghi frequenza-battaglie.txt: nessuna differenza.
+I dati grezzi non sono ricopiati qui: sono quelli di Incarichi/29-2026-11-21-prodotti/frequenza-battaglie/base/frequenza-battaglie.jsonl.

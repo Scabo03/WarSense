@@ -8,7 +8,12 @@ l'esito in <cartella>/controlli.jsonl. Le pronunce restituite dal servizio Voice
 troncano a 64 caratteri: i confronti sulle pronunce valgono sul loro inizio, quelli sull'albero sul testo intero.
 
 Uso: python3 percorsi-regno.py <cartella del pilota> <udid> <apparecchio: iphone|ipad> [blocchi...]
-Blocchi: patria, inverno, campagna, testo (predefiniti: tutti, in quest'ordine).
+Blocchi: patria, inverno, campagna, orizzontale, testo (predefiniti: tutti, in quest'ordine).
+
+Che cosa dicono i campi del pilota: «fuoco» è ciò che VoiceOver dice toccando l'elemento, prima del doppio
+tocco; «ascoltate» le pronunce nuove nella finestra d'ascolto dopo l'azione; «dopo» l'ultima cosa detta.
+Dove va il fuoco dopo un'azione lo si legge o dall'ultima pronuncia (VoiceOver legge l'elemento su cui si
+posa) o spostandolo avanti e indietro (la rilettura).
 """
 import json
 import pathlib
@@ -20,7 +25,7 @@ import time
 CARTELLA = pathlib.Path(sys.argv[1])
 UDID = sys.argv[2]
 APPARECCHIO = sys.argv[3]
-BLOCCHI = sys.argv[4:] or ["patria", "inverno", "campagna", "testo"]
+BLOCCHI = sys.argv[4:] or ["patria", "inverno", "campagna", "orizzontale", "testo"]
 CONTROLLI = CARTELLA / "controlli.jsonl"
 TRONCA = 56  # le pronunce si confrontano sul loro inizio: il servizio le tronca a 64 caratteri
 
@@ -58,6 +63,16 @@ def sentito(e):
 
 def albero():
     return [re.sub(r" \[.*$", "", r) for r in cmd({"azione": "albero", "ascolto": 0.2}).get("albero", [])]
+
+
+def senza_doppi(nomi):
+    """L'albero riporta ogni pulsante due volte (il pulsante e la sua scritta) e il titolo dopo l'elemento
+    dell'applicazione: per confrontare un ORDINE si tolgono le ripetizioni consecutive."""
+    out = []
+    for n in nomi:
+        if not out or out[-1] != n:
+            out.append(n)
+    return out
 
 
 def controlla(nome, esito, atteso, trovato, **altro):
@@ -114,9 +129,10 @@ CAVALLERIA = "Leva di cavalleria manovrata. Costa: monete di bronzo 72 su 220, u
 # ------------------------------------------------------------------------------------------ la patria
 def blocco_patria():
     avvia_pulito()
-    nomi = albero()
-    controlla("avvio: «Nuovo regno» è la prima voce dopo il titolo", nomi[:2] == ["WarSense", "Nuovo regno"]
-              or (nomi[:1] == ["WarSense"] and "Nuovo regno" in nomi[:3]), ["WarSense", "(Riprendi il regno)", "Nuovo regno"], nomi[:4])
+    nomi = senza_doppi(albero())
+    controlla("avvio: il regno è la prima voce dopo il titolo — «Riprendi il regno» se ce n'è uno, poi «Nuovo regno»",
+              nomi[:2] == ["WarSense", "Nuovo regno"] or nomi[:3] == ["WarSense", "Riprendi il regno", "Nuovo regno"],
+              ["WarSense", "(Riprendi il regno)", "Nuovo regno"], nomi[:4])
     e = attiva(etichetta="Nuovo regno", tipo="pulsante", ascolto=6)
     controlla("patria: il fuoco d'apertura va al titolo", e.get("dopo", "").startswith("Patria"),
               "Patria, intestazione", sentito(e))
@@ -168,9 +184,16 @@ def blocco_inverno():
     controlla("spesa: l'ordine si annuncia con quando sarà pronto",
               "Leva di fanteria pesante ordinata: pronta in primavera" in s,
               "Leva di fanteria pesante ordinata: pronta in primavera.", s)
-    controlla("spesa: il fuoco resta sulla voce appena ordinata",
-              e.get("dopo", "").startswith("Leva di fanteria pesante.") or "Leva di fanteria pesante ordinata" in e.get("dopo", ""),
-              "Leva di fanteria pesante. Costa: … (la voce stessa, aggiornata)", e.get("dopo"))
+    # Dove sta il fuoco dopo la spesa: lo si sposta avanti (la voce che segue) e indietro (la voce ordinata,
+    # che si rilegge col costo sulla riserva nuova). Se la spesa avesse portato il fuoco in testa, avanti
+    # leggerebbe la riga della campagna.
+    avanti = cmd({"azione": "avanti", "ascolto": 0.8}).get("pronunce", [""])[0]
+    indietro = cmd({"azione": "indietro", "ascolto": 1.2}).get("pronunce", [""])[0]
+    controlla("spesa: il fuoco resta sulla voce appena ordinata, che si rilegge col costo sulla riserva nuova",
+              avanti.startswith("Leva di cavalleria manovrata.")
+              and indietro.startswith("Leva di fanteria pesante. Costa: monete di bronzo 64 su 156"),
+              ["Leva di cavalleria manovrata. … (avanti)", "Leva di fanteria pesante. Costa: monete di bronzo 64 su 156 … (indietro)"],
+              [avanti, indietro])
     nomi = albero()
     controlla("spesa: la riserva scende e la voce dichiara il costo sulla riserva nuova",
               "monete di bronzo: 156" in nomi and "metalli: 17" in nomi
@@ -230,7 +253,7 @@ def blocco_inverno():
     e = attiva(etichetta="Prosegui alla primavera", tipo="pulsante", ascolto=8)
     s = sentito(e)
     controlla("primavera: si annuncia con ciò che il riporto ha tolto e i lavori pronti",
-              "Comincia la primavera dell'anno 2. Il riporto ha tolto: monete di" in s,
+              "Comincia la primavera dell'anno 2. Il riporto ha tolto:" in s,
               "Comincia la primavera dell'anno 2. Il riporto ha tolto: monete di bronzo 170, … Leva di fanteria leggera: è pronta.", s)
     controlla("primavera: è una schermata nuova, il fuoco va in testa alla data",
               e.get("dopo", "").startswith("Anno 2, primavera"), "Anno 2, primavera", e.get("dopo"))
@@ -297,7 +320,7 @@ def blocco_campagna():
     # Chiusa e riaperta l'app, il regno si riprende con la campagna aperta allo stesso giorno.
     cmd({"azione": "termina", "ascolto": 0.3})
     cmd({"azione": "avvia", "ascolto": 2})
-    nomi = albero()
+    nomi = senza_doppi(albero())
     controlla("ripresa: l'avvio offre «Riprendi il regno» in testa", nomi[:3] == ["WarSense", "Riprendi il regno", "Nuovo regno"],
               ["WarSense", "Riprendi il regno", "Nuovo regno"], nomi[:4])
     attiva(etichetta="Riprendi il regno", tipo="pulsante", ascolto=6)
@@ -306,6 +329,38 @@ def blocco_campagna():
               f"Anno {anno}, primavera, giorno 2 di 90" in nomi and "Entra nel fronte del guado" in nomi,
               [f"Anno {anno}, primavera, giorno 2 di 90", "Entra nel fronte del guado"],
               [n for n in nomi if n.startswith("Anno") or "fronte" in n])
+
+
+# ------------------------------------------------------------------------------------------ l'orizzontale
+def blocco_orizzontale():
+    """La patria con l'apparecchio in orizzontale: VoiceOver la legge nello stesso ordine, in primavera e
+    d'inverno, e una leva si ordina."""
+    avvia_pulito()
+    attiva(etichetta="Nuovo regno", tipo="pulsante", ascolto=6)
+    cmd({"azione": "orientamento", "verso": "orizzontale", "ascolto": 2.5})
+    try:
+        pronunce = giro("patria-orizzontale")
+        attese = ["Patria", "Anno 1, primavera", "Nessuna campagna aperta quest'anno", "Riserve",
+                  "monete di bronzo: 20", "uomini: 2", "metalli: 3", "materiale da costruzione: 3", "animali: 1",
+                  "Forze"] + FORZE + ["Apri la campagna", "Attendi l'inverno", "Registro della patria", "Torna all'inizio"]
+        controlla("orizzontale: VoiceOver legge la patria nello stesso ordine",
+                  in_ordine(pronunce, attese) and len(pronunce) == len(attese), attese, pronunce)
+        attiva(etichetta="Attendi l'inverno", tipo="pulsante", ascolto=6)
+        pronunce = giro("inverno-orizzontale")
+        attese = ["Patria", "Anno 1, inverno, schermata 1 di 4", "Quest'anno nessuna campagna", "Riserve",
+                  "monete di bronzo: 220", "uomini: 26", "metalli: 33", "materiale da costruzione: 33", "animali: 13",
+                  "Forze"] + FORZE + ["Lavori da ordinare", LEGGERA, PESANTE, CAVALLERIA, "Lavori ordinati",
+                  "Nessun lavoro ordinato in questo inverno", "Annulla l'ultima spesa", "Azzera le spese di questa schermata",
+                  "Prosegui alla schermata 2 di 4", "Registro della patria", "Torna all'inizio"]
+        controlla("orizzontale: VoiceOver legge la patria d'inverno nello stesso ordine, fino all'ultimo comando",
+                  in_ordine(pronunce, attese) and len(pronunce) == len(attese), attese, pronunce)
+        e = attiva(contiene="Leva di cavalleria manovrata.", tipo="pulsante", ascolto=4)
+        controlla("orizzontale: la leva si ordina",
+                  "Leva di cavalleria manovrata ordinata: pronta in primavera" in sentito(e) and "animali: 7" in albero(),
+                  "Leva di cavalleria manovrata ordinata: pronta in primavera.", sentito(e))
+        schermata("inverno-orizzontale-dopo-la-spesa")
+    finally:
+        cmd({"azione": "orientamento", "verso": "verticale", "ascolto": 2})
 
 
 # ------------------------------------------------------------------------------------------ il testo massimo
@@ -339,7 +394,8 @@ def main():
     t0 = time.time()
     for blocco in BLOCCHI:
         print(f"== blocco {blocco} ({APPARECCHIO}) ==", flush=True)
-        {"patria": blocco_patria, "inverno": blocco_inverno, "campagna": blocco_campagna, "testo": blocco_testo}[blocco]()
+        {"patria": blocco_patria, "inverno": blocco_inverno, "campagna": blocco_campagna,
+         "orizzontale": blocco_orizzontale, "testo": blocco_testo}[blocco]()
     righe = [json.loads(r) for r in CONTROLLI.read_text(encoding="utf-8").splitlines()] if CONTROLLI.exists() else []
     print(f"controlli: {len(righe)}, ok {sum(1 for r in righe if r['esito'] == 'ok')}, NO {sum(1 for r in righe if r['esito'] != 'ok')}; "
           f"durata {time.time() - t0:.0f} s")

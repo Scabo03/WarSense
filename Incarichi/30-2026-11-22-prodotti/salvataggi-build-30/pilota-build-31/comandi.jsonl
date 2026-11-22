@@ -1,0 +1,15 @@
+{"azione": "avvia", "ascolto": 3, "n": 1}
+{"azione": "vo_accendi", "ascolto": 1, "n": 2}
+{"azione": "albero", "ascolto": 0.2, "n": 3}
+{"azione": "attiva", "ascolto": 6, "etichetta": "Riprendi la campagna in corso", "tipo": "pulsante", "n": 4}
+{"azione": "albero", "ascolto": 0.2, "n": 5}
+{"azione": "multi_tocco", "tocchi": 2, "dita": 2, "etichetta": "Registro della campagna", "tipo": "pulsante", "ascolto": 4, "n": 6}
+{"azione": "schermata", "nome": "campagna-riaperta-con-la-build-31", "ascolto": 0.3, "n": 7}
+{"azione": "attiva", "ascolto": 5, "etichetta": "Chiudi la giornata", "tipo": "pulsante", "n": 8}
+{"azione": "multi_tocco", "tocchi": 2, "dita": 2, "etichetta": "Registro della campagna", "tipo": "pulsante", "ascolto": 4, "n": 9}
+{"azione": "attiva", "ascolto": 4, "etichetta": "Torna all'inizio", "tipo": "pulsante", "n": 10}
+{"azione": "attiva", "ascolto": 8, "etichetta": "Riprendi lo scontro in corso", "tipo": "pulsante", "n": 11}
+{"azione": "albero", "ascolto": 0.2, "n": 12}
+{"azione": "schermata", "nome": "scontro-riaperto-con-la-build-31", "ascolto": 0.3, "n": 13}
+{"azione": "termina", "ascolto": 0.3, "n": 14}
+{"azione": "fine", "n": 9999}

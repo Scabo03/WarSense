@@ -1,0 +1,10 @@
+	 Executed 5 tests, with 0 failures (0 unexpected) in 1.528 (1.528) seconds
+	 Executed 5 tests, with 0 failures (0 unexpected) in 1.528 (1.529) seconds
+BANCO-REGNO anni=17 conclusi=16 fermi=1 con_leve=16 con_violazioni=0
+SONDA-REGNO invarianti=13 mutanti_riferiti=13
+Test Case '-[VerificaTest.BancoRegnoTest test_00_3_1_lo_stesso_seme_da_gli_stessi_anni]' passed (0.190 seconds).
+Test Case '-[VerificaTest.BancoRegnoTest test_il_banco_gioca_anni_interi_coi_valori_di_fabbrica_senza_violare_alcun_invariante]' passed (1.313 seconds).
+Test Case '-[VerificaTest.BancoRegnoTest test_la_campagna_con_calendario_si_conclude_da_se_nello_strumento_di_misura]' passed (0.012 seconds).
+Test Case '-[VerificaTest.BancoRegnoTest test_ogni_invariante_violato_di_proposito_e_riferito_col_suo_codice]' passed (0.007 seconds).
+Test Case '-[VerificaTest.BancoRegnoTest test_sulle_transizioni_del_motore_la_sonda_tace]' passed (0.007 seconds).
+uscita di swift test: 0

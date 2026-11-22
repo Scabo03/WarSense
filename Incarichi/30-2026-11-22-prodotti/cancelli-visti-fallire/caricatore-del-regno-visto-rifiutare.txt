@@ -1,0 +1,12 @@
+== caso: gancio_ignoto
+verifica.errore=ErroreDati:chiave=errore.dati.file_malformato:file=regno.json
+uscita: 1
+== caso: quota_oltre_uno
+verifica.errore=ErroreDati:chiave=errore.dati.regno_incoerente:file=regno.json:voce=quota_riporto
+uscita: 1
+== caso: risorsa_mancante
+verifica.errore=ErroreDati:chiave=errore.dati.regno_incoerente:file=regno.json:voce=rendita_annua
+uscita: 1
+== caso: nessuna_formazione_armata
+verifica.errore=ErroreDati:chiave=errore.dati.regno_incoerente:file=regno.json:voce=forze_iniziali
+uscita: 1

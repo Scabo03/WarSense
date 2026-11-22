@@ -1,0 +1,10 @@
+/Users/lucascabini/Developer/WarSense/Codice/Sources/Dati/Testi.swift:71: error: -[DatiTest.AccordoDiGenereTest test_le_frasi_si_risolvono_nella_forma_del_genere] : failed: caught error: "errore.testi.impronta_discorde:file=it.lproj/Annunci.strings:rigenera=scripts/rigenera-impronte.py"
+Test Case '-[DatiTest.AccordoDiGenereTest test_le_frasi_si_risolvono_nella_forma_del_genere]' failed (0.047 seconds).
+/Users/lucascabini/Developer/WarSense/Codice/Tests/DatiTest/AccordoDiGenereTest.swift:99: error: -[DatiTest.AccordoDiGenereTest test_ogni_frase_accordata_ha_la_forma_per_ciascun_genere] : XCTAssertEqual failed: ("["«regno.lavoro_ordinato»: manca la forma per il genere femminile (regno.lavoro_ordinato.femminile)"]") is not equal to ("[]") - frasi accordate incomplete:
+Test Case '-[DatiTest.AccordoDiGenereTest test_ogni_frase_accordata_ha_la_forma_per_ciascun_genere]' failed (0.003 seconds).
+/Users/lucascabini/Developer/WarSense/Codice/Tests/DatiTest/AccordoDiGenereTest.swift:60: error: -[DatiTest.AccordoDiGenereTest test_ogni_termine_soggetto_dichiara_genere_e_numero] : XCTAssertEqual failed: ("["«regno.voce.leva_fanteria_leggera» non dichiara il genere (genere.regno.voce.leva_fanteria_leggera)"]") is not equal to ("[]") - termini soggetto senza genere:
+Test Case '-[DatiTest.AccordoDiGenereTest test_ogni_termine_soggetto_dichiara_genere_e_numero]' failed (0.001 seconds).
+	 Executed 4 tests, with 3 failures (1 unexpected) in 0.086 (0.086) seconds
+	 Executed 4 tests, with 3 failures (1 unexpected) in 0.086 (0.086) seconds
+	 Executed 4 tests, with 3 failures (1 unexpected) in 0.086 (0.087) seconds
+uscita di swift test: 1

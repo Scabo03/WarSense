@@ -396,3 +396,29 @@ I documenti prescrivono l'innesco, il blocco, lo schieramento, l'ordine dei turn
 **S27g — La condotta competente della misura dà il primo ordine valido della sequenza del banco.** Con lo sfasamento una regola del banco può dare un ordine che il Motore respinge (il sabotaggio a un gruppo che deve rifornirsi); il banco, sui suoi scenari, non incontra mai il caso. La misura passa alla regola successiva (RDA-160).
 
 **S27h — La condotta prudente non riproduce la resa del tester in battaglia.** Le battaglie si combattono col tattico del banco per entrambe le condotte (RDA-160).
+
+## S28 — La prima tappa del regno: dove l'incarico, i documenti e la costruzione non coincidono (incarico 30)
+
+**S28a — Il regno non sta in uno `StatoPartita` unico.** A §2.3 descrive un solo valore con regno, mondo, fronti, battaglia e inverno, e A §1.7 una Sessione per slot che ne è l'unica proprietaria. Il regno è costruito come terzo strato, con stato, Sessione e giornale propri e la campagna dell'anno in uno slot annidato, come già battaglia e fronte (RDA-132, RDA-162). Il documento 05 lo recepisce nella versione 1.7 (2.12, 6.7.1). Decisione presa da solo, tecnica.
+
+**S28b — Il regno non scrive istantanee.** A §6.2 le prescrive anche alle stazioni invernali. Il giornale del regno conta poche decine di righe per anno e lo stato si ricostruisce dalla fondazione; A §6.2 stesso dichiara che servono soltanto alla velocità (RDA-162). Da riprendere se il giornale di un regno lungo rallentasse la ripresa: non misurato.
+
+**S28c — La patria non è la schermata da cui si parte all'avvio.** 01 §5.6.10 e 02 §6.5.4 vogliono la patria come schermata di partenza. All'avvio resta la schermata di sempre, che offre in testa «Riprendi il regno», se c'è, e «Nuovo regno», e sotto gli scontri e le campagne di prova che i tester usano: toglierli non era chiesto, e una patria all'avvio presuppone che il regno sia l'unica partita. Dalla patria il gesto di fuga e il comando in fondo tornano all'avvio.
+
+**S28d — Non esiste la schermata delle campagne.** 01 §5.6.10.1 e 02 §6.5.4.1 la pongono fra la patria e il fronte. Con una campagna per anno su un solo fronte la patria apre direttamente la mappa, scegliendo il fronte da un pannello; dalla mappa si torna in patria. La schermata intermedia arriverà coi fronti contemporanei (il mondo, fuori dal piano del regno).
+
+**S28e — Le quattro schermate dell'inverno senza linguette e senza notizie.** 01 §5.9.1.1 le vuole separate da apporti informativi progressivi e 01 §5.9.1.3 ripartite in linguette per durata. Nella prima tappa esiste una sola durata (ciò che si ordina è pronto in primavera) e gli avversari non hanno un inverno: le quattro schermate sono identiche, contengono tutte le voci, e fra l'una e l'altra non arriva nulla. Le linguette sono della tappa 2, le notizie della tappa 3 (`Proposte/piano-del-regno.md`).
+
+**S28f — La conclusione della campagna è il minimo che l'incarico chiede, non quella dei documenti.** 01 §5.14.2 e §5.14.3.2–5.14.3.3 presuppongono la presa del quartier generale, la resa e l'annientamento; esiste il solo annientamento, inteso come «nessun gruppo armato» (S26b), più l'arrivo dell'inverno, che i documenti non trattano come conclusione con un esito (RDA-164; domanda 3 per il titolare). L'annientamento simultaneo assegna la campagna al giocatore seguendo il verdetto della battaglia che lo produce (01 §15.2.5), ma la regola di campagna non è letta dal file dei vantaggi nascosti come quella dello scontro: sta nel Motore, ed è da portare nel file quando la conclusione sarà quella definitiva.
+
+**S28g — «Un bilancio che nasce dagli esiti»: gli esiti aggiungono, non fondano.** L'incarico indica come esempio un bilancio che nasce dagli esiti. 01 §1.3.1 vuole che la ricchezza arrivi da un canale astratto che non si gestisce, e 01 §2.6 che le vittorie alimentino le risorse: il bilancio è rendita più premi delle vittorie, sicché anche chi perde o non combatte ha un inverno da giocare (RDA-165). Quanto pesi l'una e quanto gli altri è la domanda 1.
+
+**S28h — Il riporto si calcola sull'entrata dell'anno.** 01 §5.5.1.4 dice «di ciascuna risorsa può avanzare al massimo il dieci per cento» senza dire di che cosa. Letto come dieci per cento dell'entrata dell'anno, per analogia col riporto di volume (RDA-14, RDA-165). Lo stesso punto dice che quanto avanza si può spendere in patria nel corso dell'anno per le voci brevi: quelle voci sono la tappa 4, e oggi ciò che avanza resta fermo fino all'inverno.
+
+**S28i — Le voci del registro della patria non portano a un luogo.** 01 §5.17 e 02 §6.6 vogliono che ogni voce dichiari il giorno e consenta di saltare al luogo del fatto. Le voci della patria dichiarano anno e stagione e non hanno luogo: i fatti della patria non stanno su una mappa.
+
+**S28l — Le forze partono tutte e i nomi dei gruppi si riassegnano.** 01 §4.7–4.11 (assetti, totali, resti, riordino) e A §2.4 descrivono un regno che conserva totali per archetipo e sceglie che cosa assegnare a una campagna. Nella prima tappa il regno conserva le formazioni com'erano al rientro e le manda tutte; i nomi propri dei gruppi (01 §5.6.0.4) non sopravvivono da un anno all'altro (RDA-166). Tappa 2.
+
+**S28m — Le forze avversarie rinascono ogni primavera.** 01 §5.9 e §14.7 vogliono che l'inverno valga per gli avversari. Finché il regno avversario non esiste, il fronte ripropone ogni anno le forze avversarie del suo scenario, qualunque cosa sia accaduta l'anno prima (RDA-163, RDA-166). Tappa 3.
+
+**S28n — Il nome della moneta della fase antica non esiste.** 01 §5.5.1.3 vuole un materiale per fase. È definito il solo termine della fase arcaica, perché il regno della prima tappa non cambia fase (RDA-167). Tappa 5.

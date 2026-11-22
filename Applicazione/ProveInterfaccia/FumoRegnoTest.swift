@@ -7,6 +7,10 @@ import XCTest
 /// geometria, che le prove ospitate già coprono (`PatriaTest`, `AnnoDelRegnoTest`).
 final class FumoRegnoTest: XCTestCase {
 
+    override func tearDownWithError() throws {
+        XCUIDevice.shared.orientation = .portrait
+    }
+
     private func elemento(_ app: XCUIApplication, cheComincia prefisso: String) -> XCUIElement {
         app.descendants(matching: .any).matching(NSPredicate(format: "label BEGINSWITH %@", prefisso)).firstMatch
     }
@@ -74,5 +78,45 @@ final class FumoRegnoTest: XCTestCase {
                       "la patria dichiara la campagna aperta")
         XCTAssertTrue(app.staticTexts["Anno 2, primavera, giorno 1 di 90"].waitForExistence(timeout: 5),
                       "con la campagna aperta la data è quella del fronte")
+    }
+
+    /// In ORIZZONTALE e a TESTO MASSIMO, col tocco vero: la patria d'inverno si percorre fino
+    /// all'ultimo comando, una leva si ordina, la schermata successiva si apre e si torna all'inizio.
+    /// Il tocco di XCUITest porta in vista l'elemento con l'azione di scorrimento d'accessibilità,
+    /// come VoiceOver: dove non ci riuscisse la prova fallirebbe con «Failed to scroll to visible».
+    /// Il pilota con VoiceOver legge la patria in orizzontale ma non vi sa attivare nulla (il doppio
+    /// tocco sintetico arriva soltanto in verticale): questa prova copre l'attivazione col dito.
+    @MainActor
+    func test_in_orizzontale_a_testo_massimo_l_inverno_si_percorre_e_la_leva_si_ordina() throws {
+        continueAfterFailure = false
+        XCUIDevice.shared.orientation = .landscapeLeft
+        let app = XCUIApplication()
+        app.launchArguments += ["-UIPreferredContentSizeCategoryName",
+                                "UICTContentSizeCategoryAccessibilityXXXL"]
+        app.launch()
+
+        let nuovo = app.buttons["Nuovo regno"]
+        XCTAssertTrue(nuovo.waitForExistence(timeout: 15), "l'avvio espone l'ingresso al regno")
+        nuovo.tap()
+        let inverno = app.buttons["Attendi l'inverno"]
+        XCTAssertTrue(inverno.waitForExistence(timeout: 10), "il comando dell'inverno esiste")
+        inverno.tap()
+        XCTAssertTrue(app.staticTexts["Anno 1, inverno, schermata 1 di 4"].waitForExistence(timeout: 5))
+
+        let leva = elemento(app, cheComincia: "Leva di cavalleria manovrata. Costa: monete di bronzo 72 su 220")
+        XCTAssertTrue(leva.waitForExistence(timeout: 5), "la voce esiste con il costo sulla riserva")
+        leva.tap()
+        XCTAssertTrue(app.staticTexts["animali: 7"].waitForExistence(timeout: 5), "la spesa si vede nella riserva")
+
+        let prosegui = app.buttons["Prosegui alla schermata 2 di 4"]
+        XCTAssertTrue(prosegui.waitForExistence(timeout: 5))
+        prosegui.tap()
+        XCTAssertTrue(app.staticTexts["Anno 1, inverno, schermata 2 di 4"].waitForExistence(timeout: 5))
+
+        let torna = app.buttons["Torna all'inizio"]
+        XCTAssertTrue(torna.waitForExistence(timeout: 5), "l'ultimo comando della colonna esiste")
+        torna.tap()
+        XCTAssertTrue(app.buttons["Riprendi il regno"].waitForExistence(timeout: 10),
+                      "tornati all'inizio, il regno in corso si può riprendere")
     }
 }

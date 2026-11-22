@@ -1,0 +1,6 @@
+/Users/lucascabini/Developer/WarSense/Codice/Tests/SessioneTest/CompatibilitaGiornaleTest.swift:300: error: -[SessioneTest.CompatibilitaGiornaleTest test_00_15_i_campioni_committati_si_decodificano_e_ricodificano_identici] : XCTAssertEqual failed: ("["annullamentoCampagna", "fondazioneRegno", "aperturaGiornata", "comando", "inizioTurno", "risoluzioneGiornata", "battagliaConclusa", "comandoRegno", "comandoCampagna", "giornataChiusaDalGiocatore", "fondazioneCampagna", "fondazione"]") is not equal to ("["fondazione", "battagliaConclusa", "comandoCampagna", "giornataChiusaDalGiocatore", "comando", "fondazioneRegno", "aperturaGiornata", "campagnaConclusaNelRegno", "fondazioneCampagna", "risoluzioneGiornata", "annullamentoCampagna", "inizioTurno", "comandoRegno"]") - un caso di VoceGiornale è privo di campione, oppure è stato rinominato o spostato: i salvataggi esistenti non si riaprono (00 §1
+Test Case '-[SessioneTest.CompatibilitaGiornaleTest test_00_15_i_campioni_committati_si_decodificano_e_ricodificano_identici]' failed (0.095 seconds).
+	 Executed 2 tests, with 1 failure (0 unexpected) in 0.096 (0.096) seconds
+	 Executed 2 tests, with 1 failure (0 unexpected) in 0.096 (0.096) seconds
+	 Executed 2 tests, with 1 failure (0 unexpected) in 0.096 (0.097) seconds
+uscita di swift test: 1
