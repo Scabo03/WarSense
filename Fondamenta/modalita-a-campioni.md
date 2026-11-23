@@ -1,6 +1,8 @@
 # La modalità di battaglia a campioni
 
-Documento di progetto della modalità a campioni — versione 1.2
+Documento di progetto della modalità a campioni — versione 1.3
+
+Novità della versione 1.3 (2026-11-23, incarico 31). Tre decisioni del titolare del 23 novembre sulle tre aggiunte che la proposta delle classi dei campioni (`Proposte/classi-dei-campioni.md`) segnava come da decidere. PRIMA, accettata: due coefficienti propri di questa modalità, l'incursione e la tenuta di linea (nuovo punto 7.8). SECONDA, accettata: un armamento doppio, lancia e arco, per la sola guardia versatile (nuovo punto 7.3.1); se chi lo porta conti come tiratore agli effetti della reazione la decisione non lo dice, ed è il nuovo punto aperto 11.11. TERZA, respinta la proposta di far coincidere il tipo di protezione con il peso: il tipo di protezione resta un attributo a sé, separato dal peso, come nella modalità a sciami (nuovi punti 5.6.3 e 7.2.1; voce nuova fra le cose scartate, 9.3; nuovo punto aperto 11.12 sui termini con cui dichiararli). Il punto 11.1 registra che la proposta delle classi esiste, è stata rivista di conseguenza e resta una proposta finché la modalità non si costruisce. Nessun numero è tarato e l'elenco delle classi non entra in questo documento. Registro delle decisioni architetturali, RDA-174.
 
 Novità della versione 1.2 (2026-11-21, incarico 29). Due rimandi alle decisioni del titolare del 21 novembre. La regola sui termini chiusi che fanno da soggetto — genere e numero dichiarati nel vocabolario, frasi intere per ciascun genere — vale anche per i titoli dei campioni ed è scritta nel documento 02 (punto 4.6): riformulati 7.4 e 11.4. Il meteo ha ora una previsione dichiarata con i termini della probabilità (documento 01, punto 12.2.1); se meteo e guasti valgano anche in questa modalità resta aperto e non è deciso: nuovo punto aperto 11.10, e 4.1 lo dichiara.
 
@@ -70,6 +72,8 @@ Quando i consolidati saranno riallineati, questo documento potrà confluire in e
 
 5.6.2 Se uno dei due fiancheggiatori è caduto reagisce solo il superstite; se sono caduti entrambi, o hanno entrambi reazione zero, il varco è libero.
 
+5.6.3 Il peso entra nella reazione e non dice da che cosa il combattente è coperto: quello lo dice il tipo di protezione, che è un attributo a sé (7.2.1).
+
 5.7 Prima della conferma il gioco dichiara il pedaggio vero e completo, e rende riconoscibile un difensore a reazione zero (00, principio 9).
 
 5.8 Il tiro raggiunge soltanto la prima linea finché il varco è difeso, e passa alla seconda attraverso un varco indifeso. Le munizioni sono illimitate.
@@ -102,7 +106,11 @@ Quando i consolidati saranno riallineati, questo documento potrà confluire in e
 
 7.2 Resta l'accoppiamento fra offesa e protezione dei punti 3.3.1 e 3.3.2 del documento 01.
 
+7.2.1 Il tipo di protezione resta un attributo a sé, separato dal peso, come nella modalità a sciami, dove è un tratto del reparto e non discende dall'archetipo (documento 01, punti 3.3 e 3.3.2). Il peso decide la reazione (5.6); il tipo di protezione decide l'accoppiamento con l'offesa (7.2). Nessuno dei due si ricava dall'altro: un combattente pesante può essere protetto dall'una o dall'altra offesa, e così uno leggero. Decisione del titolare del 23 novembre 2026, che respinge la proposta di far coincidere il tipo di protezione con il peso (9.3).
+
 7.3 Armamento ed equipaggiamento si fissano al reclutamento e non cambiano mai.
+
+7.3.1 Armamento doppio. Esiste un armamento doppio, lancia e arco, per la sola guardia versatile, cioè per la variante della guardia che porta il tratto di versatilità e capacità di tiro (documento 01, punto 3.3). Come la proposta delle classi lo descrive, chi lo porta ha due attacchi e ne usa uno per turno: la lancia da vicino, l'arco da lontano. È un armamento solo, fissato al reclutamento come ogni altro (7.3). Decisione del titolare del 23 novembre 2026. La decisione non dice se chi lo porta sia un tiratore agli effetti della reazione (5.6): è il punto aperto 11.11. Il nome della sottoclasse, come il resto dell'elenco, resta una proposta (11.1).
 
 7.4 Nessun nome proprio e nessuna storia scritta (00, punto 12.1). Ogni combattente ha un identificativo stabile, unico e mai riusato, più un titolo funzionale di due o tre parole. Il titolo entra nel vocabolario chiuso con il genere e il numero dichiarati, e le frasi che lo contengono sono scritte intere per ciascuno dei quattro generi, secondo la regola del documento 02, punto 4.6 (00, punti 9.4 e 14.2).
 
@@ -111,6 +119,8 @@ Quando i consolidati saranno riallineati, questo documento potrà confluire in e
 7.6 Un veterano che muore lascia qualcosa, per esempio un titolo o una reputazione che si eredita.
 
 7.7 Gli eroi sono campioni speciali: pochi e unici, combattono nelle stesse linee, si ottengono in modo speciale, per esempio sconfiggendo un comandante nemico di rilievo. Sono più forti o hanno una capacità propria, e dopo l'impiego hanno un tempo di recupero contato in scontri.
+
+7.8 Incursione e tenuta di linea. Ai coefficienti di classe, arma ed equipaggiamento (7.1) se ne aggiungono due, propri di questa modalità. L'incursione è quanto rende in più un colpo portato attraverso un varco (5.4): traduce nelle due linee ciò che il documento 01 dice della cavalleria, che non rompe di fronte ma si infila nei varchi (punto 3.2.1). Agisce sul colpo di chi attraversa e non sul pedaggio, che resta quello del punto 5.5 e non subisce altri modificatori (5.6). La tenuta di linea è una protezione in più finché i vicini di prima linea sono in piedi, che cade quando cadono: traduce nelle due linee la protezione come relazione fra vicini. Decisione del titolare del 23 novembre 2026. Quali voci li portino, e in quale misura, non è di questa versione: le voci stanno nella proposta delle classi (11.1), la misura si tara con il programma di verifica. I due coefficienti sono di questa sola modalità: nella modalità a sciami nulla cambia, e la protezione come relazione vi resta fra i fattori esclusi (`decisioni-fase-2.md`, voce PRO-02).
 
 ## 8. Il regno nella modalità a campioni
 
@@ -128,6 +138,8 @@ Quando i consolidati saranno riallineati, questo documento potrà confluire in e
 
 9.2 Nella modalità a sciami è scartata anche una rassegna delle costruzioni del regno, perché l'informazione arriva dove serve, all'apertura dello scontro. La voce è registrata qui perché è stata decisa insieme alle altre; vale per la modalità a sciami.
 
+9.3 Nella modalità a campioni è scartato anche far coincidere il tipo di protezione con il peso, cioè leggere nel peso da che cosa un combattente è coperto: lo proponeva la prima stesura della proposta delle classi, e il titolare lo ha respinto il 23 novembre 2026. Il tipo di protezione resta un attributo a sé (7.2.1).
+
 ## 10. Note per la taratura
 
 10.1 Il tasso di morte si misura facendo giocare a una delle due parti un tattico deliberatamente indebolito, perché il giocatore che conta è quello che sbaglia.
@@ -142,7 +154,7 @@ Quando i consolidati saranno riallineati, questo documento potrà confluire in e
 
 ## 11. Punti aperti, non di questa versione
 
-11.1 L'elenco delle classi e delle sottoclassi lo proporrà Code in una sessione successiva, il più possibile coerente con la ricerca storica del documento 04. Il titolare suggerisce per esempio l'eroe sul carro come alto nobile della fase arcaica, e le élite della modalità a sciami come combattenti normali della modalità a due linee. Il titolare ritiene questa modalità perfino più vicina alla realtà storica: va verificato, sul documento 04.
+11.1 L'elenco delle classi e delle sottoclassi, con armamento ed equipaggiamento, il più possibile coerente con la ricerca storica del documento 04. La proposta esiste: `Proposte/classi-dei-campioni.md`, scritta nell'incarico 30 e rivista il 23 novembre 2026 dopo le decisioni dei punti 7.2.1, 7.3.1 e 7.8. Resta una proposta finché la modalità non si costruisce: del suo elenco nulla è deciso, salvo quei tre punti. Il titolare suggerisce per esempio l'eroe sul carro come alto nobile della fase arcaica, e le élite della modalità a sciami come combattenti normali della modalità a due linee. Il titolare ritiene questa modalità perfino più vicina alla realtà storica: la proposta porta i due suggerimenti e l'esito della verifica sul documento 04 (sua sezione 2).
 
 11.2 I fatti che entrano nel registro delle imprese (7.5).
 
@@ -161,3 +173,7 @@ Quando i consolidati saranno riallineati, questo documento potrà confluire in e
 11.9 L'ordine di lettura dello scontro a due linee, che la carta impone di dichiarare elemento per elemento (00, punto 11.5), e la sua schermata: da progettare secondo il principio 7 esteso (00, punti 7.1–7.4), con gli scorrimenti che percorrono i combattenti di una linea e proseguono nell'altra.
 
 11.10 Se meteo e guasti delle macchine valgano anche nella modalità a campioni. Il caso fuori dallo scontro ha nel documento 01 il perimetro del punto 12.2 — le variazioni del meteo sul piano di campagna, con la previsione del punto 12.2.1, e i guasti delle macchine da guerra —, ma in questa modalità il fronte non ha mappa (2.2) e le voci militari sono combattenti ed eroi (1.3). Il titolare ha lasciato la questione aperta il 2026-11-21: non va decisa di iniziativa.
+
+11.11 Chi sia un tiratore, agli effetti della reazione zero del punto 5.6, quando un combattente tira e combatte da vicino con lo stesso armamento. La decisione del 23 novembre ammette l'armamento doppio di lancia e arco (7.3.1) e non lo dice. La proposta delle classi lo legge così: è tiratore chi ha soltanto un'arma da tiro, e chi porta lancia e arco reagisce secondo il peso; la lettura opposta, che chiunque tiri abbia reazione zero, resta sostenibile. Non va deciso di iniziativa.
+
+11.12 Se e con quali termini chiusi il gioco dichiari il peso di un combattente e il suo tipo di protezione (5.6.3, 7.2.1), da fissare nel documento 02. Nella modalità a sciami il tipo di protezione non ha un termine proprio: il gioco dichiara soltanto se l'offesa è efficace o poco efficace contro il bersaglio designato (documento 02, punto 4.4.1.3).
