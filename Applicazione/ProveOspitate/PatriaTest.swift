@@ -456,6 +456,43 @@ final class PatriaTest: XCTestCase {
         XCTAssertFalse(FileManager.default.fileExists(atPath: PartitaRegno.cartellaCampagna.path))
     }
 
+    // MARK: - Il regno salvato con la build 31 (00 §15.2; incarico 31)
+
+    /// Un regno salvato con la build 31 non si riapre — lo schema del suo giornale è passato da 1 a
+    /// 2 —, e l'avvio lo DICE: prima della correzione «Riprendi il regno» non faceva nulla, in
+    /// silenzio, e il file veniva troncato. La fixture è il giornale d'oro del regno com'era alla
+    /// build 31 (`Codice/Tests/SessioneTest/SalvataggioRegnoBuild31/giornale.jsonl`).
+    func test_incarico_31_un_regno_della_build_31_non_si_riapre_e_l_avvio_lo_dichiara() async throws {
+        let fixture = URL(fileURLWithPath: #filePath).deletingLastPathComponent().deletingLastPathComponent()
+            .deletingLastPathComponent().appendingPathComponent("Codice/Tests/SessioneTest/SalvataggioRegnoBuild31/giornale.jsonl")
+        let salvato = try Data(contentsOf: fixture)
+        try? FileManager.default.removeItem(at: PartitaRegno.cartellaRegno)
+        try FileManager.default.createDirectory(at: PartitaRegno.cartellaRegno, withIntermediateDirectories: true)
+        let giornale = PartitaRegno.cartellaRegno.appendingPathComponent(SessioneRegno.nomeGiornale)
+        try salvato.write(to: giornale)
+        addTeardownBlock { try? FileManager.default.removeItem(at: PartitaRegno.cartellaRegno) }
+
+        let ambiente = try Ambiente()
+        let avvio = SchermataAvvio(ambiente: ambiente)
+        monta(avvio)
+        avvio.viewWillAppear(false)
+        XCTAssertEqual(Array(lettura(avvio).prefix(3)), ["WarSense", "Riprendi il regno", "Nuovo regno"])
+        ambiente.segnali.azzeraAnnunciPronunciati()
+        try premi("Riprendi il regno", in: avvio)
+        try await attendi("l'incompatibilità si dichiara") { !ambiente.segnali.annunciPronunciati.isEmpty }
+        XCTAssertEqual(ambiente.segnali.annunciPronunciati.map(\.testo),
+                       ["Il regno salvato è di un formato precedente e non può essere aperto"])
+        XCTAssertNil(avvio.presentedViewController, "il regno incompatibile non si apre")
+        XCTAssertEqual(try Data(contentsOf: giornale), salvato, "il giornale rifiutato resta com'era")
+
+        // «Nuovo regno» resta la via: ne comincia uno, al posto di quello che non si può aprire.
+        try premi("Nuovo regno", in: avvio)
+        try await attendi("si apre la patria") { avvio.presentedViewController is SchermataPatria }
+        let patria = try XCTUnwrap(avvio.presentedViewController as? SchermataPatria)
+        try await attendi("la patria nuova si carica") { self.lettura(patria).contains("Anno 1, primavera") }
+        XCTAssertEqual(Giornale.schemaDelRegno(a: giornale), 2, "il regno nuovo ha lo schema di oggi")
+    }
+
     // MARK: - L'avvio
 
     func test_l_avvio_offre_il_regno_in_testa_e_la_ripresa_quando_ce_n_e_uno() async throws {

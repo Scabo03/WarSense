@@ -57,7 +57,14 @@ public actor SessioneRegno {
     public init(riprendi cartella: URL, valori: ValoriRegno, versioneValori: String,
                 versioniCompatibili: [String]) throws {
         self.motore = MotoreRegno(valori: valori)
-        self.giornale = try Giornale.apri(a: cartella.appendingPathComponent(Self.nomeGiornale))
+        // Lo schema si legge dall'intestazione PRIMA di aprire il giornale (incarico 31): un regno
+        // di uno schema precedente non si decodifica più nella forma di oggi, e aprirlo lo
+        // tratterebbe da file corrotto. Lo si dichiara incompatibile e lo si lascia com'è (00 §15.2).
+        let percorso = cartella.appendingPathComponent(Self.nomeGiornale)
+        if let trovato = Giornale.schemaDelRegno(a: percorso), trovato != FondazioneRegno.schemaCorrente {
+            throw ErroreSessione.schemaIncompatibile(atteso: FondazioneRegno.schemaCorrente, trovato: trovato)
+        }
+        self.giornale = try Giornale.apri(a: percorso)
         guard let fondazione = giornale.fondazioneRegno else {
             throw ErroreSessione.giornaleCorrotto(riga: 0)
         }

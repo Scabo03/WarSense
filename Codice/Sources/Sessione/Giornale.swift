@@ -281,6 +281,36 @@ public final class Giornale {
         return giornale
     }
 
+    /// La versione dello SCHEMA con cui è stato scritto un giornale del regno, letta dalla sola
+    /// intestazione del suo atto di fondazione, senza decodificare il resto (incarico 31). Serve a
+    /// chi riprende un regno per dichiarare incompatibile un giornale di uno schema precedente
+    /// PRIMA di aprirlo: da uno schema all'altro la forma dello stato iscritto nella fondazione può
+    /// cambiare — è cambiata dall'1 al 2, con le forze che conservano le formazioni col loro nome —,
+    /// e allora la riga non si decodifica più; `apri` la prenderebbe per una riga corrotta e
+    /// troncherebbe il file, e chi riprende riceverebbe un errore muto al posto della dichiarazione
+    /// che 00 §15.2 vuole. Nulla se il file non c'è o la sua prima riga non è l'atto di fondazione
+    /// di un regno.
+    public static func schemaDelRegno(a percorso: URL) -> Int? {
+        struct Intestazione: Decodable {
+            struct Voce: Decodable {
+                struct Atto: Decodable {
+                    struct Fondazione: Decodable {
+                        let versioneSchema: Int
+                        enum CodingKeys: String, CodingKey { case versioneSchema = "versione_schema" }
+                    }
+                    let fondazione: Fondazione
+                    enum CodingKeys: String, CodingKey { case fondazione = "_0" }
+                }
+                let fondazioneRegno: Atto
+            }
+            let voce: Voce
+        }
+        guard let contenuto = try? Data(contentsOf: percorso) else { return nil }
+        let primaRiga = contenuto.prefix { $0 != 0x0A }
+        return (try? decodificatore.decode(Intestazione.self, from: Data(primaRiga)))?
+            .voce.fondazioneRegno.fondazione.versioneSchema
+    }
+
     /// Apre un giornale esistente, troncando alla ultima riga integra se serve (05 §6.8).
     public static func apri(a percorso: URL) throws -> Giornale {
         let contenuto = (try? Data(contentsOf: percorso)) ?? Data()
