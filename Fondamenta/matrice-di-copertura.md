@@ -2,7 +2,7 @@
 
 Documento di lavoro della fase di architettura — versione 1.0
 
-Avvertenza del 2026-11-20 (incarico 27). La matrice si riferisce a versioni superate dei documenti (01 3.2, 02 2.1, 03 2.0) e non registra le decisioni del titolare del 18–20 novembre 2026: le due modalità di battaglia, lo scambio dei termini campagna e fronte, il caso confinato allo scontro a campioni, lo stato di conoscenza «osservato». Le righe che vi dipendono (01 §5.6.9–5.6.10, 5.7.1, 5.9.2, 5.9.3, 5.9.1.7, 12.1–12.5; 02 §4.2, 4.4, 6.5–6.7, 7.3, 7.4; 03 §4.6, 4.8.1, 4.8.4, 4.9.2, 4.11.1, 9.4) vanno lette con i documenti consolidati correnti; il suo aggiornamento appartiene al riallineamento dei consolidati. Il 2026-11-21 (incarico 28) il titolare ha riportato al caso meteo e guasti delle macchine, come eccezione dichiarata accanto allo scontro a campioni (01 3.9 §12.1, §12.2; RDA-152): per quella parte valgono il documento 01 nella versione 3.9, 02 2.7, 03 2.6 e 05 1.5. Non registra nemmeno i punti nuovi dell'incarico 29 (2026-11-21): 02 §3.3 riscritto, §4.6, §6.5.2.1, §9.2.2, §10.4; 01 §12.2.1; 05 §8.7, §10.3 lettera f, §10.14; documento della modalità a campioni 11.10.
+Avvertenza del 2026-11-20 (incarico 27). La matrice si riferisce a versioni superate dei documenti (01 3.2, 02 2.1, 03 2.0) e non registra le decisioni del titolare del 18–20 novembre 2026: le due modalità di battaglia, lo scambio dei termini campagna e fronte, il caso confinato allo scontro a campioni, lo stato di conoscenza «osservato». Le righe che vi dipendono (01 §5.6.9–5.6.10, 5.7.1, 5.9.2, 5.9.3, 5.9.1.7, 12.1–12.5; 02 §4.2, 4.4, 6.5–6.7, 7.3, 7.4; 03 §4.6, 4.8.1, 4.8.4, 4.9.2, 4.11.1, 9.4) vanno lette con i documenti consolidati correnti; il suo aggiornamento appartiene al riallineamento dei consolidati. Il 2026-11-21 (incarico 28) il titolare ha riportato al caso meteo e guasti delle macchine, come eccezione dichiarata accanto allo scontro a campioni (01 3.9 §12.1, §12.2; RDA-152): per quella parte valgono il documento 01 nella versione 3.9, 02 2.7, 03 2.6 e 05 1.5. Non registra nemmeno i punti nuovi dell'incarico 29 (2026-11-21): 02 §3.3 riscritto, §4.6, §6.5.2.1, §9.2.2, §10.4; 01 §12.2.1; 05 §8.7, §10.3 lettera f, §10.14; documento della modalità a campioni 11.10. Il 2026-11-23 (incarico 31) sono state invece AGGIUNTE, nelle tabelle dei documenti 01 e 03, le righe dei punti nuovi nati dalle decisioni del titolare di quel giorno sul regno (01 3.11: §4.14.1.1, §4.14.1.2, §5.5.1.6, §5.5.1.6.1, §5.6.5.2, §5.9.5, §5.18–5.18.2, §16.8; 03 2.8: §4.3.3, §4.4.6, §4.11.2, §6.3.1; RDA-173): ciascuna porta la versione in cui il punto è nato, rinvia al documento 05 nella versione 1.7, e va riletta con la versione del 05 che recepisce la seconda tappa del regno.
 
 ## 0. Che cosa contiene e come si usa
 
@@ -176,6 +176,8 @@ La matrice si legge per documento; l'ordine delle righe segue la numerazione dei
 | 01 §4.13 | Miglioramenti: addestramenti mirati d'inverno | A §3.5 (addestra o migliora), A §2.4 |
 | 01 §4.14 | Miglioramenti deperibili; mantenimento economico | A §2.4 (stato di mantenimento), A §3.5 (mantieni miglioramento) |
 | 01 §4.14.1 | Mantenimento unico freno all'accumulo: taratura consapevole | A §12.4 (metrica 03 §6.3) |
+| 01 §4.14.1.1 | Quota annua di ogni reparto, prelevata dal gioco a inizio inverno e dichiarata nella prima schermata; denaro insufficiente dichiarato, e sciolti per primi i reparti reclutati per ultimi (versione 3.11) | A §2.4 (stato di mantenimento), A §2.12 (saldi del regno), A §3.7 (fatti dichiarati da eventi), A §12.4 (metrica 03 §6.3, §6.3.1); RDA-173 |
+| 01 §4.14.1.2 | Mantenimento dei miglioramenti come voce a parte: non pagato, il miglioramento si perde e il reparto resta (versione 3.11) | A §2.4 (stato di mantenimento), A §3.5 (mantieni miglioramento); RDA-173 |
 | 01 §5.1 | Mappa quadrata, tre formati, adiacenza ortogonale | A §7.6, A §2.6 |
 | 01 §5.1.1 | Assedi senza formato dedicato: piazzaforte su casella | A §7.6 (città e piazzeforti) |
 | 01 §5.1.2 | Caselle boscose, acqua diffusa, mappa interamente percorribile | A §7.6 (terreno, boschi, acqua) |
@@ -204,6 +206,8 @@ La matrice si legge per documento; l'ordine delle righe segue la numerazione dei
 | 01 §5.5.1.4 | Riporto massimo dieci per cento, spendibile in voci brevi | A §2.4 più 03 §9 (quota) |
 | 01 §5.5.1.4.1 | Tre sole voci acquistabili fuori dall'inverno | A §3.5 (spesa breve fuori inverno) |
 | 01 §5.5.1.5 | Il surplus va trasformato o svanisce | Nessuna provvidenza architetturale necessaria — conseguenza della regola 5.5.1.4 |
+| 01 §5.5.1.6 | Entrata dell'anno: rendita fissa più premio per battaglia vinta e premio per campagna vinta; chi perde non paga (versione 3.11) | A §2.12 (entrata dell'anno nello stato del regno), 03 §9.4 (regno.json); RDA-165, RDA-173 |
+| 01 §5.5.1.6.1 | Con l'esito territoriale la campagna vinta alza la rendita degli anni seguenti (versione 3.11) | Nessuna provvidenza architetturale ancora: dipende dall'esito territoriale della campagna (A §2.5, A §9.3), non costruito; RDA-173 |
 | 01 §5.5.2 | Installazioni = opere permanenti; capacità come funzioni del regno | A §2.4, A §2.5, A §7.5 (opere.json) |
 | 01 §5.5.3 | Rete stradale con logica; strade fuori mappa | A §7.6, A §7.8 (validazione città-strada) |
 | 01 §5.6 | Turno = giornata; un'azione per gruppo | A §3.8, A §2.6.2 |
@@ -230,6 +234,7 @@ La matrice si legge per documento; l'ordine delle righe segue la numerazione dei
 | 01 §5.6.4.5 | Marcia forzata espone alle imboscate; vantaggio fisso | A §12.4 (metrica 03 §6.6) |
 | 01 §5.6.5 | Autonomia in giorni; sosta con raccolta automatica | A §2.6.2 (provviste residue), A §3.3 (sosta con raccolta) |
 | 01 §5.6.5.1 | Catena via ordinaria, sosta conseguenza dell'interruzione | Nessuna provvidenza architetturale necessaria — chiarimento del rapporto fra regole |
+| 01 §5.6.5.2 | Scorte e derrate allungano l'autonomia dei gruppi che partono dal quartier generale (versione 3.11) | A §3.5 (spesa breve fuori inverno), A §2.6.2 (provviste residue in giorni); non costruito, RDA-173 |
 | 01 §5.6.6 | Questione della via ordinaria risolta | Nessuna provvidenza architetturale necessaria — nota di risoluzione |
 | 01 §5.6.7 | Animali seguono automaticamente la logica delle razioni | Nessuna provvidenza architetturale necessaria — semplificazione dichiarata, nessuna meccanica separata |
 | 01 §5.6.8 | Perimetro della giornata risolto altrove | Nessuna provvidenza architetturale necessaria — punto di riepilogo |
@@ -260,6 +265,7 @@ La matrice si legge per documento; l'ordine delle righe segue la numerazione dei
 | 01 §5.9.2 | Stagioni intermedie: solo probabilità meteo diverse | A §7.5 (meteo.json per stagione) |
 | 01 §5.9.3 | Il meteo resta nel perimetro del caso | A §4.2 |
 | 01 §5.9.4 | Geografia e meteo influenzano la battaglia solo via caratteristica | A §2.7 (caratteristica unica del campo) |
+| 01 §5.9.5 | Trenta giornate per stagione operativa, novanta l'anno (versione 3.11) | A §2.12 (calendario del regno), A §2.11.1, 03 §4.11.2; RDA-173 |
 | 01 §5.10 | Contro formazioni non armate: sabotaggio o studio | A §3.3 (sabotaggio, studio approfondito) |
 | 01 §5.10.2 | Sabotaggio e studio: risoluzioni deterministiche chiuse | A §3.3, A §4.2 (caso confinato) |
 | 01 §5.10.1 | Esploratori osservano movimenti e deducono itinerari | A §2.6.1 (sorgenti di conoscenza) |
@@ -295,6 +301,9 @@ La matrice si legge per documento; l'ordine delle righe segue la numerazione dei
 | 01 §5.16.2 | Gruppo con scatto residuo: annuncio motivato | A §10.6, A §10.7 |
 | 01 §5.17 | Registro cronologico per campagna e per patria | A §2.6 (registri), A §10.13 |
 | 01 §5.17.1 | Nel registro solo i fatti non decisi dal giocatore | A §3.7 (annotazione dei soli fatti non decisi) |
+| 01 §5.18 | Vie di conclusione della campagna raccolte: quartier generale, resa, annientamento, inverno (versione 3.11) | A §2.11, A §2.11.1, A §9.3 (dichiarazione di conclusione); RDA-164 |
+| 01 §5.18.1 | La campagna interrotta dall'inverno si chiude senza vincitore e senza conseguenze territoriali (versione 3.11) | A §2.11.1; RDA-164, RDA-173 |
+| 01 §5.18.2 | Resa della campagna: richiamo ammesso senza rifornimento tagliato né contatto; campagna perduta, superstiti tutti in patria (versione 3.11) | A §2.11.1 (non costruita); RDA-173 |
 | 01 §6.1 | La compresenza non obbliga a combattere | A §3.3 (imposizione come comando esplicito) |
 | 01 §6.1.1 | Basta la volontà di uno per imporre lo scontro | A §3.3 (imposizione, accettazione) |
 | 01 §6.1.2 | Rifiutare richiede vedere arrivare; chi è lento accetta | Nessuna provvidenza architetturale necessaria — conseguenza voluta delle regole esistenti |
@@ -447,6 +456,7 @@ La matrice si legge per documento; l'ordine delle righe segue la numerazione dei
 | 01 §16.4 | Grandezze da tarare con le simulazioni | A §12.3, A §12.4 |
 | 01 §16.5 | Elenco degli impianti mantenuti per scelta | Nessuna provvidenza architetturale necessaria — riepilogo di costi dichiarati |
 | 01 §16.6 | Nessuna differenza fra battaglia in marcia e schierata | Nessuna provvidenza architetturale necessaria — costo dichiarato e accettato |
+| 01 §16.8 | Ciò che le decisioni del 23 novembre 2026 lasciano da precisare (versione 3.11) | Nessuna provvidenza architetturale necessaria — elenco di punti aperti, da chiudere prima di costruire |
 
 ### Documento 02 — Accessibilità (versione 2.1)
 
@@ -609,11 +619,13 @@ La matrice si legge per documento; l'ordine delle righe segue la numerazione dei
 | 03 §4.2.3 | Entità dei malus e quota rimossa dal riposo | A §7.5, A §2.6.2 |
 | 03 §4.3.1 | Malus da mancanza provviste più marcati della marcia | A §7.5, A §7.8 |
 | 03 §4.3.2 | Differenze di autonomia per volume di formazione | A §7.5, A §2.6.2 |
+| 03 §4.3.3 | Giorni di viveri in più per scorte e derrate (versione 2.8) | A §7.5, A §2.6.2; non costruito (01 §5.6.5.2) |
 | 03 §4.4.1 | Riporto risorse fissato al dieci per cento | Nessuna provvidenza architetturale necessaria — decisione di progetto già fissata; contenitore da A §7.5 |
 | 03 §4.4.2 | Progressione dei materiali monetari per fase | A §7.5 (fasi.json) |
 | 03 §4.4.3 | Costo dell'addestramento, decisione di progetto | Nessuna provvidenza architetturale necessaria — grandezza da tarare; contenitore da A §7.5, misura da A §12 |
 | 03 §4.4.4 | Durate dei lavori invernali e linguette | A §7.5 (opere.json) |
 | 03 §4.4.5 | Costi in risorse delle opere permanenti | A §7.5 (opere.json) |
+| 03 §4.4.6 | Entrata dell'anno: rendita e premi delle vittorie (versione 2.8) | 03 §9.4 (regno.json), A §2.12 |
 | 03 §4.5.1 | Guarnigione minima della fortezza e malus | A §7.5 (opere.json) |
 | 03 §4.5.2 | Vantaggi in combattimento delle opere da campo | A §7.5 (opere.json), A §7.7 |
 | 03 §4.5.3 | Peso delle torri sull'apporto informativo invernale | A §7.5 (opere.json), A §12.4 |
@@ -630,6 +642,7 @@ La matrice si legge per documento; l'ordine delle righe segue la numerazione dei
 | 03 §4.9.2 | Passi di degrado manutenzione e probabilità di guasto | A §7.5, A §4.2 |
 | 03 §4.10.1 | Soglia in turni della sortita e termini imminenza | A §7.5, A §4.4 |
 | 03 §4.11.1 | Probabilità meteo per stagione ed effetti sulla marcia | A §7.5 (meteo.json), A §4.2 |
+| 03 §4.11.2 | Giornate per stagione operativa fissate a trenta (versione 2.8) | 03 §9.4 (regno.json), A §2.12 |
 | 03 §5.1 | Penalità di avanzamento per archetipo con formula unica | A §7.5 (archetipi.json), A §7.4 |
 | 03 §5.2 | Capacità di volume per turno, primo turno maggiorato | A §7.5 (formato-battaglia.json) |
 | 03 §5.3 | Costo aggiuntivo dello spostamento di due celle | A §7.5, A §3.4 |
@@ -646,6 +659,7 @@ La matrice si legge per documento; l'ordine delle righe segue la numerazione dei
 | 03 §6.1 | Soglia minima di turni prima della resa | A §12.4, A §12.2 (scontro singolo) |
 | 03 §6.2 | Margine di convenienza della ritirata combattuta | A §12.4, A §12.2 (scontro singolo) |
 | 03 §6.3 | Costo di mantenimento come freno all'accumulo | A §12.4, A §12.2 (partita lunga) |
+| 03 §6.3.1 | Quota annua di mantenimento dei reparti (versione 2.8) | A §12.4, A §12.2 (partita lunga), A §12.8 (banco del regno) |
 | 03 §6.4 | Ampiezza della fascia in cui il tiro uccide | A §12.4, A §12.2 (scontro singolo) |
 | 03 §6.5 | Carattere degli ufficiali e frequenza degli scontri | A §12.4, A §12.2, A §7.5 (ufficiali.json) |
 | 03 §6.6 | Rapporto volume-profondità e peso della sorpresa | A §12.4, A §12.2 |

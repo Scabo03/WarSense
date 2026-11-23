@@ -1,6 +1,6 @@
 # Il regno: piano di costruzione per tappe
 
-Documento di lavoro dell'incarico 30 (2026-11-22). Non è un consolidato: registra come si intende costruire ciò che i consolidati già prescrivono, in quale ordine e con quali dipendenze. Le scelte di gioco che i documenti non risolvono stanno, separate, in `Proposte/domande-per-il-titolare-sul-regno.md`; le decisioni tecniche prese per la prima tappa stanno nel registro delle decisioni architetturali (RDA-162 e seguenti).
+Documento di lavoro dell'incarico 30 (2026-11-22). Non è un consolidato: registra come si intende costruire ciò che i consolidati già prescrivono, in quale ordine e con quali dipendenze. Le scelte di gioco che i documenti non risolvevano stanno, separate, in `Proposte/domande-per-il-titolare-sul-regno.md`, e il titolare le ha decise tutte il 23 novembre 2026 (RDA-173); le decisioni tecniche prese per la prima tappa stanno nel registro delle decisioni architetturali (RDA-162 e seguenti).
 
 Convenzioni di rinvio: quelle del documento 05 (01 §n, 02 §n, 03 §n, A §n per il documento 05, MC §n per `modalita-a-campioni.md`, RDA-nn).
 
@@ -25,7 +25,7 @@ Convenzioni di rinvio: quelle del documento 05 (01 §n, 02 §n, 03 §n, A §n pe
 | conclusione della campagna | 01 §5.14.2, §5.14.3.2–5.14.3.4; A §2.11, §9.3 |
 | ordine di costruzione | A §15.6 (fase E, il regno e l'inverno: «un anno intero giocabile»), §15.7 (fase F, il mondo) |
 
-Ciò che i documenti NON dicono, e che il piano tratta come domanda o come valore provvisorio: quanto valga la rendita e quanto l'esito (domanda 1); quante giornate duri una stagione (domanda 2); come si chiuda la campagna che l'inverno interrompe (domanda 3); la resa della campagna (domanda 4); il mantenimento dei reparti ordinari e che cosa accade a chi non si mantiene (domanda 5); che cosa facciano scorte e derrate (domanda 6).
+Ciò che i documenti NON dicevano il 22 novembre, e che il piano trattava come domanda o come valore provvisorio, il titolare l'ha deciso il 23 novembre 2026 (RDA-173; documento 01, versione 3.11): la rendita fissa e i premi delle vittorie, con la rendita accresciuta quando la campagna avrà un esito territoriale (domanda 1: 01 §5.5.1.6, §5.5.1.6.1); trenta giornate per stagione (domanda 2: 01 §5.9.5); la campagna che l'inverno interrompe, chiusa senza vincitore (domanda 3: 01 §5.18.1); la resa della campagna, ammessa soltanto se nessun gruppo ha il rifornimento tagliato o è a contatto con il nemico (domanda 4: 01 §5.18.2); la quota annua di ogni reparto, i miglioramenti come voci a parte e lo scioglimento dei reparti reclutati per ultimi se il denaro non basta (domanda 5: 01 §4.14.1.1, §4.14.1.2); scorte e derrate che allungano l'autonomia (domanda 6: 01 §5.6.5.2). Ciò che le decisioni lasciano da precisare prima di costruire è in 01 §16.8.
 
 ## 2. Il modello: uno strato sopra la campagna
 
@@ -42,7 +42,7 @@ Ciò che i documenti NON dicono, e che il piano tratta come domanda o come valor
 
 Ne discende la regola di costruzione: nessuna funzione del Motore del regno fuori dai ganci militari nomina archetipi, atomi, reparti o gruppi. Un controllo del collaudo la fa rispettare (cancello 3 della prima tappa).
 
-2.5 **Il calendario.** L'anno conta tre stagioni operative di uguale numero di giornate e l'inverno, che non ha giornate ma quattro stazioni (01 §5.9, §5.9.1.2). Il numero di giornate per stagione è un valore del file `regno.json`, provvisorio (domanda 2). Il fronte conserva il proprio calendario in giornate (01 §5.6.9.1): la campagna dell'anno nasce con il calendario che il regno le dichiara e si ferma da sé chiusa l'ultima giornata d'autunno.
+2.5 **Il calendario.** L'anno conta tre stagioni operative di uguale numero di giornate e l'inverno, che non ha giornate ma quattro stazioni (01 §5.9, §5.9.1.2). Il numero di giornate per stagione è un valore del file `regno.json`: trenta, deciso dal titolare il 23 novembre 2026 (01 §5.9.5). Il fronte conserva il proprio calendario in giornate (01 §5.6.9.1): la campagna dell'anno nasce con il calendario che il regno le dichiara e si ferma da sé chiusa l'ultima giornata d'autunno.
 
 ## 3. Le tappe
 
@@ -60,7 +60,7 @@ Ogni tappa ha un perimetro chiuso, consegna qualcosa che si gioca attraverso l'i
 
 **Che cosa non contiene, dichiarato.** Le notizie fra una stazione e l'altra (tappa 3); le linguette per durata, perché esiste una sola durata (tappa 2); il mantenimento (tappa 2); gli avversari come regno: ogni primavera il fronte ripropone le forze avversarie del suo scenario (tappa 3); la scelta di quali forze mandare e di come comporle in patria: partono tutte, composte come sono tornate (tappa 2); più campagne o più fronti nello stesso anno (il mondo).
 
-**Domande da cui dipende la forma definitiva** (costruita su valori provvisori e sulla lettura minima dei documenti): 1, 2, 3.
+**Domande da cui dipendeva la forma definitiva:** 1, 2 e 3, decise dal titolare il 23 novembre 2026 nel senso in cui la tappa era stata costruita (01 §5.5.1.6, §5.9.5, §5.18.1). I numeri dell'entrata restano tarabili nei file.
 
 ### Tappa 2 — Addestrare, migliorare, mantenere; le durate
 
@@ -70,7 +70,7 @@ Ogni tappa ha un perimetro chiuso, consegna qualcosa che si gioca attraverso l'i
 
 **Verifica.** Come la tappa 1, più una prova d'interfaccia sull'arrivo a campagna aperta e sul reparto migliorato in battaglia.
 
-**Dipendenze.** Tappa 1. **Domande:** 5 (mantenimento dei reparti ordinari). Tocca i valori dei reparti in battaglia: la versione dei valori sale (03 §9.2.1).
+**Dipendenze.** Tappa 1. **Domande:** la 5 è decisa (23 novembre 2026; 01 §4.14.1.1, §4.14.1.2): ogni reparto ha una quota annua piccola, che il gioco preleva da sé all'inizio dell'inverno e dichiara nella prima schermata; i miglioramenti sono voci a parte, e chi non li paga li perde ma il reparto resta; se il denaro non basta, il gioco lo dichiara e scioglie per primi i reparti reclutati per ultimi. Tocca i valori dei reparti in battaglia: la versione dei valori sale (03 §9.2.1).
 
 ### Tappa 3 — L'inverno degli avversari
 
@@ -88,7 +88,7 @@ Ogni tappa ha un perimetro chiuso, consegna qualcosa che si gioca attraverso l'i
 
 **Che cosa si gioca.** Una macchina che si logora marciando, la possibilità di guasto annunciata, la riparazione ordinata dalla patria a campagna aperta.
 
-**Dipendenze.** Tappa 1 (riporto); tappa 2 (arrivi differiti). Introduce il caso fuori dallo scontro: il seme della partita entra nello stato. **Domande:** 6 (scorte e derrate). Punto aperto MC §11.10 per la modalità a campioni: non va deciso di iniziativa.
+**Dipendenze.** Tappa 1 (riporto); tappa 2 (arrivi differiti). Introduce il caso fuori dallo scontro: il seme della partita entra nello stato. **Domande:** la 6 è decisa (23 novembre 2026; 01 §5.6.5.2): scorte e derrate allungano l'autonomia, cioè i gruppi che partono dal quartier generale portano più giorni di viveri; di quanti giorni e per quanto valga un acquisto resta da precisare (01 §16.8). Punto aperto MC §11.10 per la modalità a campioni: non va deciso di iniziativa.
 
 ### Tappa 5 — Le acquisizioni e il passaggio di fase
 
@@ -106,7 +106,7 @@ Ogni tappa ha un perimetro chiuso, consegna qualcosa che si gioca attraverso l'i
 
 ### Fuori dal regno, per memoria
 
-- **Il completamento della campagna**: presa del quartier generale, resa, e le correzioni emerse dall'incarico 29 (battaglie che al banco non si concludono, squilibrio delle vittorie fra le mappe, virgola delle azioni d'ingaggio). Un incarico successivo.
+- **Il completamento della campagna**: presa del quartier generale; resa della campagna, che il titolare ha definito il 23 novembre 2026 (01 §5.18.2: richiamo dell'esercito ammesso soltanto se nessun gruppo ha il rifornimento tagliato o è a contatto con il nemico, campagna perduta, superstiti che tornano tutti) e che si costruisce qui; e le correzioni emerse dall'incarico 29 (battaglie che al banco non si concludono, squilibrio delle vittorie fra le mappe, virgola delle azioni d'ingaggio). Un incarico successivo.
 - **Il mondo** (A §15.7): più campagne e più fronti con lo scarto massimo, la schermata delle campagne, il regno lontano e la sua specializzazione, il mutamento del mondo al passaggio di fase. Quando esisterà, le tre campagne di prova dell'avvio spariscono: la campagna si aprirà soltanto dalla patria.
 - **Le voci militari della modalità a campioni**: `Proposte/classi-dei-campioni.md` ne è la proposta; si costruiscono con la modalità.
 
@@ -116,7 +116,7 @@ Realizzata nella tappa 1 soltanto quanto basta a far arrivare un esito al regno 
 
 **Che cosa c'è.** Una campagna aperta dal regno si conclude in due modi: (a) per annientamento, quando al ritorno da una battaglia una delle due parti non ha più gruppi armati sul fronte: vince l'altra; (b) per l'arrivo dell'inverno, chiusa l'ultima giornata d'autunno: senza vincitore, le forze rientrano. Conclusa la campagna, ogni comando è respinto con il medesimo motivo; l'esito — modo, vincitore, giornate, battaglie vinte e perse, superstiti — passa al regno.
 
-**Che cosa manca rispetto ai documenti.** La presa del quartier generale, che è la conclusione ordinaria (01 §5.14.3.2); la resa della campagna (01 §5.14.3.3 la nomina, nessun punto la definisce: domanda 4); le conseguenze territoriali della conclusione (01 §5.14.2, A §9.3: possesso del territorio, opere ordinabili, fortezza che passa di mano, 01 §5.14.3.4); la sorte delle opere da campo, che non esistono ancora (01 §5.14.1.2); un vincitore per la campagna che l'inverno interrompe, se il titolare lo vorrà (domanda 3). Le tre campagne di prova dell'avvio restano senza conclusione, com'erano: la regola vale soltanto per la campagna che dichiara un calendario.
+**Che cosa manca rispetto ai documenti.** La presa del quartier generale, che è la conclusione ordinaria (01 §5.14.3.2); la resa della campagna, che il titolare ha definito il 23 novembre 2026 (01 §5.18.2) e che non è costruita; le conseguenze territoriali della conclusione (01 §5.14.2, A §9.3: possesso del territorio, opere ordinabili, fortezza che passa di mano, 01 §5.14.3.4); la sorte delle opere da campo, che non esistono ancora (01 §5.14.1.2). Non manca più un vincitore per la campagna che l'inverno interrompe: il titolare ha deciso che non c'è (01 §5.18.1). Le tre campagne di prova dell'avvio restano senza conclusione, com'erano: la regola vale soltanto per la campagna che dichiara un calendario.
 
 ## 5. Le decisioni tecniche della prima tappa
 

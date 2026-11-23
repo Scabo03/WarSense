@@ -1,6 +1,8 @@
 # Documento dei dati
 
-Documento 03 di 05 — versione 2.7
+Documento 03 di 05 — versione 2.8
+
+Novità della versione 2.8 (2026-11-23, incarico 31). Per le decisioni del titolare del 23 novembre sul regno (documento 01, versione 3.11) nessun valore dei file cambia, e quattro grandezze entrano nel registro o cessano di essere provvisorie. Le giornate di ciascuna stagione operativa sono fissate a trenta, novanta l'anno (nuovo punto 4.11.2). L'entrata dell'anno ha la struttura decisa dal titolare — rendita fissa, premio per ogni battaglia vinta, premio più grande per la campagna vinta, nulla da pagare per chi perde — e i suoi numeri restano tarabili; quando la campagna avrà un esito territoriale, al premio della campagna vinta subentrerà un aumento della rendita (nuovo punto 4.4.6). Alla grandezza critica 6.3 si affianca la quota annua di mantenimento dei reparti (nuovo punto 6.3.1). Scorte e derrate danno giorni di viveri in più ai gruppi che partono dal quartier generale (nuovo punto 4.3.3). Aggiornati i rinvii della voce `regno.json` nel punto 9.4.
 
 Novità della versione 2.7 (2026-11-22, incarico 30). Nessun valore dei punti esistenti cambia. All'elenco dei file del punto 9.4 si aggiunge `regno.json`, il primo file dei valori del regno: vi stanno la quota di riporto del punto 4.4.1 e, come valori provvisori in attesa delle decisioni del titolare, il calendario dell'anno, l'entrata e i costi delle leve (`valori-provvisori.md`).
 
@@ -88,6 +90,8 @@ Le voci sono divise per provenienza del valore: quelle che derivano dalla docume
 
 4.3.2 Eventuali differenze di autonomia fra formazioni di volume diverso. Fonte: documento 01, punto 5.6.5.
 
+4.3.3 Giorni di viveri in più portati dai gruppi che partono dal quartier generale per effetto di scorte e derrate, e costo della voce che li dà (aggiunto nella versione 2.8; decisione del titolare del 2026-11-23). Vincolo: l'effetto è sulla sola autonomia e non tocca i malus del punto 4.3.1. Da determinare, insieme a quanto valga un acquisto; non ancora costruito. Fonte: documento 01, punti 5.6.5.2 e 5.5.1.4.1.
+
 ### 4.4 Risorse e bilancio
 
 4.4.1 Quota di riporto delle risorse, fissata al dieci per cento di ciascuna. Decisione di progetto. Fonte: documento 01, punto 5.5.1.4.
@@ -99,6 +103,8 @@ Le voci sono divise per provenienza del valore: quelle che derivano dalla docume
 4.4.4 Durate dei lavori invernali, che determinano la ripartizione delle voci fra le linguette ordinate per durata e il momento di completamento dichiarato al giocatore. Fonte: documento 01, punti 5.9.1.3 e 5.9.1.4.
 
 4.4.5 Costi in risorse delle opere permanenti, distinti per tipo di opera. Fonte: documento 01, punti da 5.14.2 a 5.14.8.
+
+4.4.6 Entrata dell'anno (aggiunto nella versione 2.8; decisione del titolare del 2026-11-23). Tre grandezze, nel file dei valori del regno: la rendita annua di ciascuna delle cinque risorse; il premio per ogni battaglia vinta; il premio per la campagna vinta. I due premi sono oggi coefficienti della rendita, secondo il criterio 1.2. Vincoli: la rendita è la stessa comunque sia andata la guerra; il premio per la campagna vinta è maggiore del premio per una battaglia vinta; nessuna grandezza toglie risorse a chi perde. La struttura è decisa; i numeri restano tarabili e non vengono ancora da alcuna misura (`valori-provvisori.md`). Quando la campagna avrà un esito territoriale, al premio per la campagna vinta subentrerà un aumento della rendita degli anni seguenti: la sua misura è da determinare, e non è ancora costruito. Fonte: documento 01, punti 5.5.1.6 e 5.5.1.6.1.
 
 ### 4.5 Opere e postazioni
 
@@ -145,6 +151,8 @@ Le voci sono divise per provenienza del valore: quelle che derivano dalla docume
 ### 4.11 Meteo e stagioni
 
 4.11.1 Probabilità degli eventi meteorologici per ciascuna stagione operativa ed effetto di ciascun evento sul costo in giorni della marcia, entro le forbici e per causa dichiarata. Nella prima versione le stagioni intermedie differiscono soltanto per queste probabilità. Fonte: documento 01, punti 5.9.2, 5.9.3 e 12.2.
+
+4.11.2 Giornate di ciascuna stagione operativa, fissate a trenta: novanta giornate operative l'anno, mentre l'inverno non ha giornate (aggiunto nella versione 2.8). Decisione del titolare del 2026-11-23: non è più un valore provvisorio. Il numero resta nel file dei valori del regno, come ogni valore. Fonte: documento 01, punto 5.9.5.
 
 ## 5. Valori del campo di battaglia
 
@@ -203,6 +211,8 @@ Le voci di questa sezione non si determinano a tavolino. Il programma di verific
 6.2 Margine di convenienza della ritirata combattuta, cioè il rapporto fra soglia di riga, soglia minima di turni e volume disponibile. Fonte: documento 01, punto 10.9.
 
 6.3 Costo di mantenimento dei miglioramenti, che è l'unico freno automatico all'accumulo di forze. Fonte: documento 01, punto 4.14.1.
+
+6.3.1 Quota annua di mantenimento dei reparti (aggiunto nella versione 2.8; decisione del titolare del 2026-11-23). Ogni reparto, anche privo di miglioramenti, paga una quota annua in denaro, che il gioco preleva all'inizio dell'inverno; il mantenimento di ciascun miglioramento è una grandezza distinta, perché è una voce a parte. Vincoli di direzione: la quota è piccola, così che il bilancio invernale resti quasi interamente disponibile per nuovi investimenti (documento 01, punto 4.14); la somma delle quote cresce con l'esercito, così che tenere in piedi reparti inutilizzati abbia un prezzo (documento 01, punto 4.14.1). Forma con il punto 6.3 la grandezza del freno all'accumulo, e si tara con le simulazioni di partita lunga, misurando anche quanto spesso il denaro non basta e il gioco scioglie reparti. Fonte: documento 01, punti 4.14.1.1 e 4.14.1.2.
 
 6.4 Taratura della gittata utile unica dei reparti da tiro (ridefinita nella versione 2.1: l'ampiezza della fascia fra le due gittate ha perso oggetto con 01 §3.4.1 versione 3.3). La gittata unica e la resa vanno tarate perché il tiro non domini distanze eccessive, conservando lo spirito del vincolo storico originario. Fonte: documento 01, punto 3.4.1.
 
@@ -270,7 +280,7 @@ Sezione aggiunta nella versione 2.0. La struttura è definita dal documento di a
 
 9.3 Forma delle voci. Ogni grandezza è una base di fase, un coefficiente riferito alla base, oppure un intervallo con regola di variazione, cioè l'elenco delle cause dichiarate che spostano il valore e del passo di ciascuna. Le tabelle a doppia entrata sono vietate e la validazione le respinge. Fonte: carta, principio 13.
 
-9.4 Elenco dei file dei valori e corrispondenza con questo documento. fasi.json: basi di fase e progressione monetaria (4.4.2). archetipi.json: i parametri del punto 3.4 del documento 01 come coefficienti, comprese soglie di disingaggio (5.8), dotazioni (5.7), sensibilità alla stanchezza (4.9.1), coefficienti di penalità di avanzamento (5.1). assetti.json: taglie e composizioni (documento 01, punto 4.7). acquisizioni.json: ambiti, ordinamenti, costi, durate, effetti tipizzati (4.7.4). terreni-e-strade.json: costi in giorni e pesi di partenza e arrivo (4.1). meteo.json: probabilità per stagione ed effetti (4.11). opere.json: costi, durate e effetti delle opere permanenti e da campo (4.4.5, 4.5). caratteristiche-campo.json: modificatori (5.12). ufficiali.json: parametri di carattere (6.5). regni.json: differenze di partenza, fissate una volta sola (3.1). regno.json (versione 2.7): ciò che vale per l'anno di un regno — giornate per stagione, quota di riporto (4.4.1), rendita e premi delle vittorie, basi di costo per risorsa, voci invernali coi loro pesi e il gancio d'effetto, fronti —, più la dotazione e le forze con cui il regno del giocatore comincia, che passeranno a regni.json quando i regni saranno più d'uno. vantaggi-nascosti.json: i vantaggi della sezione 7, letti anche dal programma di verifica. minimi.json: i minimi obbligatori della sezione 8. formato-battaglia.json: capacità di volume, riporto, zone e soglie per formato (5.2, 5.10, 5.13). nomi-gruppi.json: la lista chiusa dei nomi propri dei gruppi (documento 01, punto 5.6.0.4). mappe/: un file per mappa, raggruppate per campagna, almeno cinque per campagna, nella sola modalità a sciami (documento 01, punto 5.6.9). aptica.json: i pattern tattili con nomi parlanti (carta, principio 5.5). suoni.json: segnali sonori, ambienti e temi per fase.
+9.4 Elenco dei file dei valori e corrispondenza con questo documento. fasi.json: basi di fase e progressione monetaria (4.4.2). archetipi.json: i parametri del punto 3.4 del documento 01 come coefficienti, comprese soglie di disingaggio (5.8), dotazioni (5.7), sensibilità alla stanchezza (4.9.1), coefficienti di penalità di avanzamento (5.1). assetti.json: taglie e composizioni (documento 01, punto 4.7). acquisizioni.json: ambiti, ordinamenti, costi, durate, effetti tipizzati (4.7.4). terreni-e-strade.json: costi in giorni e pesi di partenza e arrivo (4.1). meteo.json: probabilità per stagione ed effetti (4.11). opere.json: costi, durate e effetti delle opere permanenti e da campo (4.4.5, 4.5). caratteristiche-campo.json: modificatori (5.12). ufficiali.json: parametri di carattere (6.5). regni.json: differenze di partenza, fissate una volta sola (3.1). regno.json (versione 2.7): ciò che vale per l'anno di un regno — giornate per stagione (4.11.2), quota di riporto (4.4.1), rendita e premi delle vittorie (4.4.6), basi di costo per risorsa, voci invernali coi loro pesi e il gancio d'effetto, fronti —, più la dotazione e le forze con cui il regno del giocatore comincia, che passeranno a regni.json quando i regni saranno più d'uno. vantaggi-nascosti.json: i vantaggi della sezione 7, letti anche dal programma di verifica. minimi.json: i minimi obbligatori della sezione 8. formato-battaglia.json: capacità di volume, riporto, zone e soglie per formato (5.2, 5.10, 5.13). nomi-gruppi.json: la lista chiusa dei nomi propri dei gruppi (documento 01, punto 5.6.0.4). mappe/: un file per mappa, raggruppate per campagna, almeno cinque per campagna, nella sola modalità a sciami (documento 01, punto 5.6.9). aptica.json: i pattern tattili con nomi parlanti (carta, principio 5.5). suoni.json: segnali sonori, ambienti e temi per fase.
 
 9.5 Testi. L'albero Testi contiene un pacchetto di localizzazione per lingua, nel formato di sistema che gestisce i plurali, più il file del vocabolario chiuso con chiavi stabili per insieme e per termine, e il proprio manifest con la versione e, dalla versione 2.1 di questo documento, con le impronte dei file: sono le impronte a far rinfrescare la copia in Documenti quando i testi cambiano, sicché la versione resta ferma finché il titolare non ne ordina il cambio. Ogni annuncio è una frase intera con segnaposto e dichiara la propria lingua. La versione dei testi non blocca mai l'apertura dei salvataggi. Fonte: carta, principio 14; documento 02, sezioni 4 e 15.
 
