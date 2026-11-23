@@ -1,0 +1,50 @@
+Il caricatore dei valori del regno, visto rifiutare (incarico 31): `StrumentoVerifica --valori <copia guasta> --regno 1 --anni 1`
+su copie della cartella dei valori di fabbrica, ciascuna con un solo guasto.
+
+== durata-zero: la leva di fanteria leggera con durata 0
+   uscita del processo: 1
+   verifica.errore=ErroreDati:chiave=errore.dati.regno_incoerente:file=regno.json:voce=leva_fanteria_leggera
+
+== durata-oltre-la-massima: la leva di cavalleria con durata 14 (la massima è 13: ordinata alla quarta schermata maturerebbe oltre l'inverno successivo)
+   uscita del processo: 1
+   verifica.errore=ErroreDati:chiave=errore.dati.regno_incoerente:file=regno.json:voce=leva_cavalleria_manovrata
+
+== miglioramento-che-dura-due-stazioni: l'addestramento mirato con durata 2 (maturerebbe a campagna aperta)
+   uscita del processo: 1
+   verifica.errore=ErroreDati:chiave=errore.dati.regno_incoerente:file=regno.json:voce=addestramento_mirato
+
+== miglioramento-ignoto: l'addestramento mirato che dà un miglioramento che `miglioramenti.json` non conosce
+   uscita del processo: 1
+   verifica.errore=ErroreDati:chiave=errore.dati.regno_incoerente:file=regno.json:voce=addestramento_mirato
+
+== miglioramento-senza-mantenimento: tolta la voce che mantiene l'addestramento mirato (il miglioramento sarebbe permanente)
+   uscita del processo: 1
+   verifica.errore=ErroreDati:chiave=errore.dati.regno_incoerente:file=regno.json:voce=miglioramenti
+
+== linguette-non-decrescenti: le soglie delle linguette in ordine crescente
+   uscita del processo: 1
+   verifica.errore=ErroreDati:chiave=errore.dati.regno_incoerente:file=regno.json:voce=linguette
+
+== linguette-senza-la-soglia-uno: l'ultima linguetta con soglia 2 (una voce di durata 1 non cadrebbe in alcuna linguetta)
+   uscita del processo: 1
+   verifica.errore=ErroreDati:chiave=errore.dati.regno_incoerente:file=regno.json:voce=linguette
+
+== mantenimento-con-minimo-zero: il minimo della quota di mantenimento a 0
+   uscita del processo: 1
+   verifica.errore=ErroreDati:chiave=errore.dati.regno_incoerente:file=regno.json:voce=mantenimento
+
+== stazioni-per-stagione-zero: `stazioni_per_stagione` a 0
+   uscita del processo: 1
+   verifica.errore=ErroreDati:chiave=errore.dati.regno_incoerente:file=regno.json:voce=stazioni_per_stagione
+   (alla prima esecuzione il rifiuto nominava `leva_fanteria_leggera`: il controllo delle voci, che
+   dipende da questo numero per la durata massima, veniva prima. Il rifiuto era giusto e il nome no;
+   il controllo è stato spostato in testa e la riga qui sopra è dell'esecuzione ripetuta.)
+
+== coefficiente-del-miglioramento-sotto-uno: in `miglioramenti.json` il coefficiente della capacità offensiva a 0,9
+   uscita del processo: 1
+   verifica.errore=ErroreDati:chiave=errore.dati.miglioramento_incoerente:file=miglioramenti.json:voce=addestramento_mirato
+
+== fabbrica intatta (per confronto)
+   uscita del processo: 0
+   regno.versione_valori=0.15.0
+   regno.partite_per_condotta=1,anni_per_partita=1,giornate_operative=90,anni_giocati=2,anni_previsti=2,errori=0

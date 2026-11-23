@@ -374,6 +374,10 @@ public enum CaricatoreRegno {
         let risorse = Set(Risorsa.allCases.map(\.rawValue))
         // Il calendario: almeno una giornata per stagione, o l'anno non avrebbe campagna (01 §5.9).
         guard valori.giornatePerStagione >= 1 else { throw rifiuto("giornate_per_stagione") }
+        // Il calendario dei lavori: una stagione vale almeno una stazione. Si controlla prima delle
+        // voci, perché da questo numero discende la durata massima che una voce può avere: più
+        // avanti il rifiuto nominerebbe una voce innocente al posto del valore sbagliato.
+        guard valori.stazioniPerStagione >= 1 else { throw rifiuto("stazioni_per_stagione") }
         // La quota di riporto è una proporzione dell'entrata: fra zero e uno (01 §5.5.1.4).
         guard valori.quotaRiporto >= .zero, valori.quotaRiporto <= .uno else { throw rifiuto("quota_riporto") }
         // Dotazione e rendita dichiarano TUTTE e cinque le risorse, mai negative: una risorsa
@@ -427,8 +431,6 @@ public enum CaricatoreRegno {
         let mantenuti = Set(valori.voci.compactMap { voce -> IdentificatoreDati? in
             if case .mantieniMiglioramento(let m) = voce.effetto { return m } else { return nil } })
         guard dati == mantenuti else { throw rifiuto("miglioramenti") }
-        // Il calendario dei lavori: una stagione vale almeno una stazione.
-        guard valori.stazioniPerStagione >= 1 else { throw rifiuto("stazioni_per_stagione") }
         // Le linguette: almeno una, identificatori unici, soglie decrescenti, e l'ultima a uno,
         // sicché ogni voce cada in una linguetta (01 §5.9.1.3: ciascuna schermata contiene tutto).
         guard !valori.linguette.isEmpty,
