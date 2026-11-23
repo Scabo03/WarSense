@@ -37,6 +37,10 @@ extension Sciame: CodificabileCanonico {
         c.intero(atomiIniziali); c.intero(serbatoio)
         c.intero(Int64(munizioni)); posizione.codifica(in: &c)
         c.vero(azioneSpesa); c.vero(rinforzo)
+        // Il miglioramento e l'anno di leva (incarico 31): soltanto quando ci sono, col loro
+        // marcatore, sicché gli sciami ordinari diano la stessa impronta di prima (RDA-113).
+        if let miglioramento { c.testo("miglioramento"); c.testo(miglioramento) }
+        if let leva { c.testo("leva"); c.intero(Int64(leva)) }
     }
 }
 
@@ -60,6 +64,8 @@ extension StatoBattaglia {
             for e in elementi {
                 c.testo(e.archetipo); c.testo(e.protezione.rawValue)
                 c.intero(e.atomi); c.intero(Int64(e.esemplari))
+                if let miglioramento = e.miglioramento { c.testo("miglioramento"); c.testo(miglioramento) }
+                if let leva = e.leva { c.testo("leva"); c.intero(Int64(leva)) }
             }
             c.opzionale(selezione[parte]) { cc, v in cc.intero(Int64(v)) }
             c.intero(turniGiocati[parte] ?? 0)

@@ -154,10 +154,9 @@ struct CostruttoreAnnunciCampagna {
             // termine nuovo. La categoria sta già in alto, nella voce dell'occupante; qui il
             // dettaglio di che cosa la compone, uniti in elenco. Riguarda le proprie truppe:
             // il giocatore deve poter sapere che cosa muove.
-            let parti = reparti.map { reparto in
-                testi.frase("divisione.reparto", soggetto: testi.soggetto(.unita, reparto.archetipo),
-                            reparto.atomi).testo
-            }
+            // Il reparto che porta un miglioramento lo dichiara (01 §4.13; incarico 31): la frase
+            // è la stessa della patria, che ne è l'autore.
+            let parti = reparti.map { TraduttoreEventiRegno(testi: testi).reparto($0) }
             return testi.frase("casella.composizione", parti.joined(separator: ", ")).testo
         case .zonaDiRifornimento:
             // La zona riusa il termine chiuso «in zona di rifornimento» (02 §4.4.5):

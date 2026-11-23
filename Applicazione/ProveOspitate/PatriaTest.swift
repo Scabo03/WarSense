@@ -101,11 +101,11 @@ final class PatriaTest: XCTestCase {
             "Riserve",
             "monete di bronzo: 20", "uomini: 2", "metalli: 3", "materiale da costruzione: 3", "animali: 1",
             "Forze",
-            "gruppo armato: 6 atomi di fanteria leggera",
-            "gruppo armato: 18 atomi di fanteria leggera, 8 atomi di fanteria pesante",
-            "gruppo armato: 24 atomi di fanteria pesante, 12 atomi di cavalleria manovrata",
-            "formazione di ricognizione: 3 atomi di fanteria leggera",
-            "formazione non armata: 4 atomi di fanteria leggera",
+            "Corvo, gruppo armato: 6 atomi di fanteria leggera. Parte per il fronte",
+            "Lupo, gruppo armato: 18 atomi di fanteria leggera, 8 atomi di fanteria pesante. Parte per il fronte",
+            "Falco, gruppo armato: 24 atomi di fanteria pesante, 12 atomi di cavalleria manovrata. Parte per il fronte",
+            "Orso, formazione di ricognizione: 3 atomi di fanteria leggera. Parte per il fronte",
+            "Cervo, formazione non armata: 4 atomi di fanteria leggera. Parte per il fronte",
             "Apri la campagna",
             "Attendi l'inverno",
             "Registro della patria",
@@ -141,17 +141,27 @@ final class PatriaTest: XCTestCase {
             "Anno 1, inverno, schermata 1 di 4",
             "Quest'anno nessuna campagna",
             "Riserve",
-            "monete di bronzo: 220", "uomini: 26", "metalli: 33", "materiale da costruzione: 33", "animali: 13",
+            "monete di bronzo: 193", "uomini: 26", "metalli: 33", "materiale da costruzione: 33", "animali: 13",
+            // Il mantenimento che il gioco ha prelevato da sé, dichiarato nella prima schermata
+            // (01 §4.14.1.1): 27 monete per i 75 atomi dei sette reparti, a 0,4 per atomo troncato.
+            "Mantenimento dell'esercito, prelevato all'inizio dell'inverno: monete di bronzo 27",
             "Forze",
-            "gruppo armato: 6 atomi di fanteria leggera",
-            "gruppo armato: 18 atomi di fanteria leggera, 8 atomi di fanteria pesante",
-            "gruppo armato: 24 atomi di fanteria pesante, 12 atomi di cavalleria manovrata",
-            "formazione di ricognizione: 3 atomi di fanteria leggera",
-            "formazione non armata: 4 atomi di fanteria leggera",
+            "Corvo, gruppo armato: 6 atomi di fanteria leggera. Parte per il fronte",
+            "Lupo, gruppo armato: 18 atomi di fanteria leggera, 8 atomi di fanteria pesante. Parte per il fronte",
+            "Falco, gruppo armato: 24 atomi di fanteria pesante, 12 atomi di cavalleria manovrata. Parte per il fronte",
+            "Orso, formazione di ricognizione: 3 atomi di fanteria leggera. Parte per il fronte",
+            "Cervo, formazione non armata: 4 atomi di fanteria leggera. Parte per il fronte",
             "Lavori da ordinare",
-            "Leva di fanteria leggera. Costa: monete di bronzo 30 su 220, uomini 6 su 26, metalli 3 su 33. 6 atomi, pronta in primavera.",
-            "Leva di fanteria pesante. Costa: monete di bronzo 64 su 220, uomini 8 su 26, metalli 16 su 33. 8 atomi, pronta in primavera.",
-            "Leva di cavalleria manovrata. Costa: monete di bronzo 72 su 220, uomini 6 su 26, metalli 6 su 33, animali 6 su 13. 6 atomi, pronta in primavera.",
+            // Le linguette, dalla più lunga alla più breve (01 §5.9.1.3); ogni voce dichiara quando
+            // sarà pronta, non quanto dura (01 §5.9.1.4).
+            "Lavori lunghi",
+            "Leva di cavalleria manovrata. Costa: monete di bronzo 72 su 193, uomini 6 su 26, metalli 6 su 33, animali 6 su 13. 6 atomi, pronta in estate.",
+            "Lavori di media durata",
+            "Leva di fanteria pesante. Costa: monete di bronzo 64 su 193, uomini 8 su 26, metalli 16 su 33. 8 atomi, pronta in primavera.",
+            "Lavori brevi",
+            "Leva di fanteria leggera. Costa: monete di bronzo 30 su 193, uomini 6 su 26, metalli 3 su 33. 6 atomi, pronta in primavera.",
+            "Addestramento mirato. Si sceglie il reparto. Accresce la capacità offensiva del reparto, pronto in primavera.",
+            "Mantenimento dell'addestramento mirato. Nessun reparto disponibile. Conserva il miglioramento del reparto per un altro anno, pronto in primavera.",
             "Lavori ordinati",
             "Nessun lavoro ordinato in questo inverno",
             "Annulla l'ultima spesa",
@@ -162,14 +172,14 @@ final class PatriaTest: XCTestCase {
         ])
         XCTAssertEqual(ambiente.segnali.annunciPronunciati.map(\.testo), [
             "Comincia l'inverno dell'anno 1. Entrate: monete di bronzo 200, uomini 24, metalli 30, "
-            + "materiale da costruzione 30, animali 12."])
+            + "materiale da costruzione 30, animali 12. Mantenimento dell'esercito: monete di bronzo 27."])
         // L'inverno è una schermata nuova: il fuoco va in testa, alla data.
         XCTAssertEqual(Fuoco.registro, [.schermataAperta])
         XCTAssertEqual(LettoreAccessibilita.etichetta(di: try XCTUnwrap(Fuoco.ultimoBersaglio as? NSObject)),
                        "Anno 1, inverno, schermata 1 di 4")
 
         // Una spesa: gli elementi restano gli stessi, si aggiornano sul posto, e il fuoco non si muove.
-        let pesante = "Leva di fanteria pesante. Costa: monete di bronzo 64 su 220, uomini 8 su 26, metalli 16 su 33. 8 atomi, pronta in primavera."
+        let pesante = "Leva di fanteria pesante. Costa: monete di bronzo 64 su 193, uomini 8 su 26, metalli 16 su 33. 8 atomi, pronta in primavera."
         let pulsantePrima = try elemento(pesante, in: schermata)
         let riservaPrima = try elemento("metalli: 33", in: schermata)
         Fuoco.azzeraRegistro()
@@ -178,7 +188,7 @@ final class PatriaTest: XCTestCase {
         try await attendi("la spesa si vede") { self.lettura(schermata).contains("metalli: 17") }
         XCTAssertEqual(Fuoco.registro, [], "aggiornato un valore in una schermata di gestione, il fuoco non si muove (00 §11.3)")
         XCTAssertTrue(try elemento("metalli: 17", in: schermata) === riservaPrima, "l'elemento è lo stesso, aggiornato sul posto")
-        let pesanteDopo = "Leva di fanteria pesante. Costa: monete di bronzo 64 su 156, uomini 8 su 18, metalli 16 su 17. 8 atomi, pronta in primavera."
+        let pesanteDopo = "Leva di fanteria pesante. Costa: monete di bronzo 64 su 129, uomini 8 su 18, metalli 16 su 17. 8 atomi, pronta in primavera."
         XCTAssertTrue(try elemento(pesanteDopo, in: schermata) === pulsantePrima)
         XCTAssertTrue(lettura(schermata).contains("Leva di fanteria pesante, pronta in primavera"))
         XCTAssertFalse(lettura(schermata).contains("Nessun lavoro ordinato in questo inverno"))
@@ -189,7 +199,7 @@ final class PatriaTest: XCTestCase {
         try premi(pesanteDopo, in: schermata)
         try await attendi("la seconda spesa si vede") { self.lettura(schermata).contains("metalli: 1") }
         let impedita = "Leva di fanteria pesante. Non si può ordinare: mancano metalli. "
-            + "Costa: monete di bronzo 64 su 92, uomini 8 su 10, metalli 16 su 1. 8 atomi, pronta in primavera."
+            + "Costa: monete di bronzo 64 su 65, uomini 8 su 10, metalli 16 su 1. 8 atomi, pronta in primavera."
         XCTAssertTrue(lettura(schermata).contains(impedita), "\(lettura(schermata))")
         ambiente.segnali.azzeraAnnunciPronunciati()
         try premi(impedita, in: schermata)
@@ -222,9 +232,35 @@ final class PatriaTest: XCTestCase {
         let (schermata, ambiente) = try await patria()
         try premi("Attendi l'inverno", in: schermata)
         try await attendi("arriva l'inverno") { self.lettura(schermata).contains("Prosegui alla schermata 2 di 4") }
-        try premi("Leva di fanteria leggera. Costa: monete di bronzo 30 su 220, uomini 6 su 26, metalli 3 su 33. 6 atomi, pronta in primavera.", in: schermata)
+        try premi("Leva di fanteria leggera. Costa: monete di bronzo 30 su 193, uomini 6 su 26, metalli 3 su 33. 6 atomi, pronta in primavera.", in: schermata)
         try await attendi("la leva si vede") { self.lettura(schermata).contains("uomini: 20") }
-        let vociDellaPrima = lettura(schermata).filter { $0.hasPrefix("Leva di") && $0.contains("Costa:") }
+        /// Le voci da ordinare, per nome e nell'ordine in cui si leggono; e, per le tre leve, la
+        /// stagione in cui la voce dichiara che sarà pronta.
+        func voci() -> [String] {
+            lettura(schermata).filter { $0.contains("pronta in ") || $0.contains("pronto in ") }
+                .filter { !$0.contains(", pronta in") || $0.contains("Costa:") }
+                .filter { $0.contains(". ") }
+                .map { String($0.prefix(while: { $0 != "." })) }
+        }
+        func pronta(_ leva: String) throws -> String {
+            let voce = try XCTUnwrap(lettura(schermata).first { $0.hasPrefix(leva + ". ") }, leva)
+            return String(try XCTUnwrap(voce.components(separatedBy: "pronta in ").last).dropLast())
+        }
+        let vociDellaPrima = voci()
+        XCTAssertEqual(vociDellaPrima, ["Leva di cavalleria manovrata", "Leva di fanteria pesante",
+                                        "Leva di fanteria leggera", "Addestramento mirato",
+                                        "Mantenimento dell'addestramento mirato"])
+        // Con la mantenimento prelevato soltanto nella prima schermata.
+        XCTAssertTrue(lettura(schermata).contains { $0.hasPrefix("Mantenimento dell'esercito, prelevato") })
+        // Quando sarà pronto ciò che si ordina, schermata per schermata (01 §5.9.1.3, §5.9.1.4): chi
+        // ordina tardi una cosa lunga la riceve a campagna aperta.
+        let attese: [Int: [String]] = [1: ["estate", "primavera", "primavera"], 2: ["estate", "estate", "primavera"],
+                                       3: ["estate", "estate", "primavera"], 4: ["autunno", "estate", "estate"]]
+        func stagioniDichiarate() throws -> [String] {
+            [try pronta("Leva di cavalleria manovrata"), try pronta("Leva di fanteria pesante"),
+             try pronta("Leva di fanteria leggera")]
+        }
+        XCTAssertEqual(try stagioniDichiarate(), attese[1])
 
         for stazione in 2...4 {
             ambiente.segnali.azzeraAnnunciPronunciati()
@@ -234,8 +270,12 @@ final class PatriaTest: XCTestCase {
                 self.lettura(schermata).contains("Anno 1, inverno, schermata \(stazione) di 4")
             }
             XCTAssertEqual(ambiente.segnali.annunciPronunciati.map(\.testo), ["Inverno, schermata \(stazione) di 4"])
-            // La struttura non cambia da una schermata all'altra (01 §5.9.1.3): le stesse voci, tutte.
-            XCTAssertEqual(lettura(schermata).filter { $0.hasPrefix("Leva di") && $0.contains("Costa:") }, vociDellaPrima)
+            // La struttura non cambia da una schermata all'altra (01 §5.9.1.3): le stesse voci, tutte,
+            // nello stesso ordine; cambia soltanto, con la schermata, quando ciascuna sarà pronta.
+            XCTAssertEqual(voci(), vociDellaPrima)
+            XCTAssertEqual(try stagioniDichiarate(), attese[stazione], "schermata \(stazione)")
+            XCTAssertFalse(lettura(schermata).contains { $0.hasPrefix("Mantenimento dell'esercito, prelevato") },
+                           "il mantenimento lo dichiara la prima schermata soltanto")
             XCTAssertTrue(lettura(schermata).contains("Leva di fanteria leggera, pronta in primavera"),
                           "il lavoro ordinato resta in elenco per tutto l'inverno")
             // Il fuoco: la schermata è la stessa finché il momento dell'anno non cambia.
@@ -248,14 +288,20 @@ final class PatriaTest: XCTestCase {
         try premi("Prosegui alla primavera", in: schermata)
         try await attendi("comincia la primavera") { self.lettura(schermata).contains("Anno 2, primavera") }
         XCTAssertEqual(ambiente.segnali.annunciPronunciati.map(\.testo), [
-            "Comincia la primavera dell'anno 2. Il riporto ha tolto: monete di bronzo 170, uomini 18, metalli 27, "
-            + "materiale da costruzione 30, animali 12. Leva di fanteria leggera: è pronta."])
+            "Comincia la primavera dell'anno 2. Il riporto ha tolto: monete di bronzo 143, uomini 18, metalli 27, "
+            + "materiale da costruzione 30, animali 12. Lince nasce dalle reclute dell'inverno, con 6 atomi di "
+            + "fanteria leggera, ed entra sul fronte in primavera, al quartier generale."])
         let letta = lettura(schermata)
         XCTAssertTrue(letta.contains("monete di bronzo: 20"), "avanza un decimo dell'entrata dell'anno (01 §5.5.1.4): \(letta)")
         XCTAssertTrue(letta.contains("uomini: 2"))
-        XCTAssertEqual(letta.filter { $0.hasPrefix("gruppo armato") }.last, "gruppo armato: 6 atomi di fanteria leggera",
-                       "le reclute sono una formazione nuova, in coda")
-        XCTAssertEqual(letta.filter { $0.hasPrefix("gruppo armato") }.count, 4)
+        // Le reclute sono una formazione nuova, in coda, col proprio nome; dichiara dove e come
+        // entra (incarico 31). Le altre conservano il nome che avevano.
+        XCTAssertEqual(letta.filter { $0.contains(", gruppo armato") }, [
+            "Corvo, gruppo armato: 6 atomi di fanteria leggera. Parte per il fronte",
+            "Lupo, gruppo armato: 18 atomi di fanteria leggera, 8 atomi di fanteria pesante. Parte per il fronte",
+            "Falco, gruppo armato: 24 atomi di fanteria pesante, 12 atomi di cavalleria manovrata. Parte per il fronte",
+            "Lince, gruppo armato, reclute dell'inverno: 6 atomi di fanteria leggera. Entra sul fronte in primavera, al quartier generale",
+        ])
         XCTAssertTrue(letta.contains("Apri la campagna"))
         XCTAssertEqual(Fuoco.registro, [.schermataAperta], "la primavera è una schermata nuova")
 
@@ -265,8 +311,9 @@ final class PatriaTest: XCTestCase {
         registro.loadViewIfNeeded()
         XCTAssertEqual(lettura(registro), [
             "Registro della patria",
-            "Anno 2, primavera: Leva di fanteria leggera è pronta",
+            "Anno 2, primavera: Lince nasce dalle reclute dell'inverno, con 6 atomi di fanteria leggera, ed entra sul fronte in primavera, al quartier generale",
             "Anno 2, primavera: comincia la primavera; il riporto ha tolto ciò che eccedeva",
+            "Anno 1, inverno: prelevato il mantenimento dell'esercito, monete di bronzo 27",
             "Anno 1, inverno: comincia l'inverno e arriva l'entrata dell'anno",
             "Chiudi il registro",
         ])
@@ -294,6 +341,9 @@ final class PatriaTest: XCTestCase {
         let stato = try XCTUnwrap(mappa.statoPerProva)
         XCTAssertEqual(stato.calendario, CalendarioDiCampagna(anno: 1, giornatePerStagione: 30))
         XCTAssertEqual(stato.gruppi(di: .giocatore).count, 5, "partono tutte le formazioni del regno")
+        // Sul fronte ogni gruppo porta il nome che la formazione ha in patria (incarico 31).
+        XCTAssertEqual(stato.gruppiOrdinati.filter { $0.parte == .giocatore }.map(\.nome),
+                       ["corvo", "lupo", "falco", "orso", "cervo"])
         XCTAssertTrue(ambiente.segnali.annunciPronunciati.map(\.testo).contains("Campagna aperta sul fronte dell'istmo"))
         // Il comando d'uscita dice dove porta, e l'informazione di stato dichiara la data.
         XCTAssertTrue(lettura(mappa).contains("Torna in patria"))
@@ -375,11 +425,12 @@ final class PatriaTest: XCTestCase {
         // L'inverno: il bilancio nasce dall'esito — qui, senza vittorie, la sola rendita.
         try premi("Attendi l'inverno", in: schermata)
         try await attendi("arriva l'inverno") { self.lettura(schermata).contains("Anno 1, inverno, schermata 1 di 4") }
-        XCTAssertTrue(lettura(schermata).contains("monete di bronzo: 220"))
+        XCTAssertTrue(lettura(schermata).contains("monete di bronzo: 193"), "la rendita meno il mantenimento")
         try premi("Registro della patria", in: schermata)
         let registro = try XCTUnwrap(schermata.presentedViewController as? SchermataRegistro)
         registro.loadViewIfNeeded()
-        XCTAssertEqual(Array(lettura(registro).dropFirst().prefix(2)), [
+        XCTAssertEqual(Array(lettura(registro).dropFirst().prefix(3)), [
+            "Anno 1, inverno: prelevato il mantenimento dell'esercito, monete di bronzo 27",
             "Anno 1, inverno: comincia l'inverno e arriva l'entrata dell'anno",
             "Anno 1, autunno: campagna sul fronte della pianura lunga interrotta dall'inverno",
         ])

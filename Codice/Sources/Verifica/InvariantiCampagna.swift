@@ -852,7 +852,8 @@ public struct SondaInvariantiCampagna: Sendable {
             case .marciaRevocata(let g, _),
                  .rifornimentoInterrotto(let g, _), .sostaDiRifornimento(let g, _),
                  .rifornimentoRipreso(let g, _),
-                 .esploratoriPerduti(let g, _), .esploratoriNotati(let g, _):
+                 .esploratoriPerduti(let g, _), .esploratoriNotati(let g, _),
+                 .arrivoDallaPatria(let g, _):
                 // Fatti che portano il nome di una formazione: devono riguardare un gruppo del
                 // giocatore. Gli esploratori dell'AVVERSARIO che si perdono o si fanno notare
                 // restano nel suo perimetro e non entrano nel registro del giocatore.

@@ -34,6 +34,11 @@ final class SchermataPatria: UIViewController {
     private let corpo = UIStackView()
     private var etichetteRiserve: [Risorsa: UILabel] = [:]
     private var pulsantiVoci: [(voce: VoceDelRegno, pulsante: PulsanteMultiriga)] = []
+    /// Le righe delle forze, una per formazione, nell'ordine in cui il regno le conserva: comandi
+    /// in primavera, quando si sceglie chi parte, testo negli altri momenti (incarico 31).
+    private var righeForze: [(unita: IdentificatoreDati, vista: UIView)] = []
+    /// Ciò che la prima schermata dell'inverno dichiara del mantenimento (01 §4.14.1.1).
+    private let pilaMantenimento = UIStackView()
     private let pilaLavori = UIStackView()
     private var pulsanteProsegui: PulsanteMultiriga?
     /// Ciò che il corpo mostra: quando cambia, il corpo si ricostruisce e il fuoco torna in testa.
@@ -72,6 +77,8 @@ final class SchermataPatria: UIViewController {
         colonna.addArrangedSubview(corpo)
         pilaLavori.axis = .vertical
         pilaLavori.spacing = 6
+        pilaMantenimento.axis = .vertical
+        pilaMantenimento.spacing = 6
         Task { await carica() }
     }
 
@@ -197,6 +204,7 @@ final class SchermataPatria: UIViewController {
         for vista in corpo.arrangedSubviews { vista.removeFromSuperview() }
         etichetteRiserve = [:]
         pulsantiVoci = []
+        righeForze = []
         pulsanteProsegui = nil
 
         // Il riquadro delle riserve: navigabile voce per voce, in valore assoluto (01 §5.9.1.5,
@@ -207,15 +215,38 @@ final class SchermataPatria: UIViewController {
             etichetteRiserve[risorsa] = etichetta
             corpo.addArrangedSubview(etichetta)
         }
+        // Il mantenimento che il gioco ha prelevato da sé: lo dichiara la prima schermata
+        // dell'inverno, subito dopo le riserve da cui è uscito (01 §4.14.1.1).
+        if quale == .inverno { corpo.addArrangedSubview(pilaMantenimento) }
 
-        // Le forze: cambiano soltanto quando cambia il momento dell'anno — tornano dal fronte,
-        // ricevono le reclute in primavera —, sicché si scrivono qui e non si aggiornano sul posto.
+        // Le forze: una riga per formazione, col nome che resta lo stesso da un anno all'altro
+        // (01 §5.6.0.4). In primavera, prima di aprire la campagna, ogni riga è un comando: lo si
+        // attiva per tenere la formazione in patria o rimandarla al fronte, e la riga dice sempre
+        // dove va. Negli altri momenti è testo. Il numero delle righe cambia soltanto quando
+        // cambia il momento dell'anno; fra un cambio e l'altro i testi si aggiornano sul posto.
         corpo.addArrangedSubview(intestazione("patria.forze"))
-        let forze = etichetteDelleForze(stato.forze)
-        for testo in forze.isEmpty ? [testi.frase("patria.nessuna_forza").testo] : forze {
+        let forze = traduttore.forze(stato.forze)
+        if forze.isEmpty {
             let etichetta = TestoDinamico.applica(UILabel(), stile: .body)
-            etichetta.text = testo
+            etichetta.text = testi.frase("patria.nessuna_forza").testo
             corpo.addArrangedSubview(etichetta)
+        }
+        for riga in forze {
+            if quale == .daAprire {
+                let pulsante = PulsanteMultiriga.crea(titolo: "", stile: .body, allineamento: .natural)
+                pulsante.accessibilityIdentifier = "formazione." + riga.unita
+                pulsante.accessibilityHint = testi.frase("patria.destina_suggerimento").testo
+                let unita = riga.unita
+                pulsante.addAction(UIAction { [weak self] _ in self?.cambiaDestinazione(di: unita) },
+                                   for: .touchUpInside)
+                righeForze.append((riga.unita, pulsante))
+                corpo.addArrangedSubview(pulsante)
+            } else {
+                let etichetta = TestoDinamico.applica(UILabel(), stile: .body)
+                etichetta.accessibilityIdentifier = "formazione." + riga.unita
+                righeForze.append((riga.unita, etichetta))
+                corpo.addArrangedSubview(etichetta)
+            }
         }
 
         switch quale {
@@ -233,14 +264,29 @@ final class SchermataPatria: UIViewController {
             corpo.addArrangedSubview(comando("patria.attendi_inverno", #selector(attendiLInverno)))
         case .inverno:
             // Ciascuna delle quattro schermate contiene sempre tutte le voci, nella stessa forma
-            // (01 §5.9.1.3, 02 §8.7.3): il giocatore ne impara una e la ritrova quattro volte.
+            // (01 §5.9.1.3, 02 §8.7.3): il giocatore ne impara una e la ritrova quattro volte. Le
+            // voci sono ripartite in LINGUETTE ordinate per durata, le più lunghe per prime: ogni
+            // linguetta è un'intestazione, che il rotore delle intestazioni raggiunge, seguita dalle
+            // sue voci — tutte nella stessa colonna, perché nulla sparisca dietro una scheda.
             corpo.addArrangedSubview(intestazione("patria.lavori_da_ordinare"))
-            for voce in partita.valori.voci {
-                let pulsante = PulsanteMultiriga.crea(titolo: "", stile: .body, allineamento: .natural)
-                pulsante.accessibilityIdentifier = "voce." + voce.identificatore
-                pulsante.addAction(UIAction { [weak self] _ in self?.ordina(voce) }, for: .touchUpInside)
-                pulsantiVoci.append((voce, pulsante))
-                corpo.addArrangedSubview(pulsante)
+            for linguetta in partita.valori.linguette {
+                let voci = partita.valori.voci(in: linguetta)
+                guard !voci.isEmpty else { continue }
+                let titolo = TestoDinamico.applica(UILabel(), stile: .title3)
+                titolo.text = traduttore.linguetta(linguetta.identificatore)
+                titolo.accessibilityTraits = .header
+                titolo.accessibilityIdentifier = "linguetta." + linguetta.identificatore
+                corpo.addArrangedSubview(titolo)
+                for voce in voci {
+                    let pulsante = PulsanteMultiriga.crea(titolo: "", stile: .body, allineamento: .natural)
+                    pulsante.accessibilityIdentifier = "voce." + voce.identificatore
+                    pulsante.addAction(UIAction { [weak self, weak pulsante] _ in
+                        if voce.effetto.richiedeBersaglio { self?.scegliIlBersaglio(di: voce, da: pulsante) }
+                        else { self?.ordina(voce) }
+                    }, for: .touchUpInside)
+                    pulsantiVoci.append((voce, pulsante))
+                    corpo.addArrangedSubview(pulsante)
+                }
             }
             corpo.addArrangedSubview(intestazione("patria.lavori_ordinati"))
             corpo.addArrangedSubview(pilaLavori)
@@ -258,26 +304,54 @@ final class SchermataPatria: UIViewController {
         corpo.addArrangedSubview(comando("resoconto.torna", #selector(esci)))
     }
 
-    /// Aggiorna sul posto ciò che cambia dentro lo stesso momento dell'anno: le riserve, il costo
-    /// delle voci sulla riserva, l'elenco dei lavori ordinati, il comando per proseguire.
+    /// Aggiorna sul posto ciò che cambia dentro lo stesso momento dell'anno: le riserve, le righe
+    /// delle forze, il costo delle voci sulla riserva, l'elenco dei lavori ordinati, il comando per
+    /// proseguire, e ciò che la prima schermata dell'inverno dichiara del mantenimento.
     private func aggiornaIlCorpo(_ stato: StatoRegno) {
         for (risorsa, etichetta) in etichetteRiserve {
             etichetta.text = testi.frase("patria.riserva", traduttore.termine(risorsa, fase: stato.fase),
                                          stato.riserve[risorsa]).testo
         }
+        // D'inverno ogni reparto dice anche lo stato del proprio miglioramento (01 §4.14).
+        let forze = traduttore.forze(stato.forze, lavori: stato.momento.eInverno ? stato.lavori : nil)
+        for (riga, elemento) in zip(forze, righeForze) where riga.unita == elemento.unita {
+            if let pulsante = elemento.vista as? PulsanteMultiriga {
+                pulsante.setTitle(riga.testo, for: .normal)
+                pulsante.accessibilityLabel = riga.testo
+                pulsante.invalidateIntrinsicContentSize()
+            } else if let etichetta = elemento.vista as? UILabel {
+                etichetta.text = riga.testo
+            }
+        }
         for (voce, pulsante) in pulsantiVoci {
-            let testo = traduttore.etichetta(dellaVoce: voce, costo: partita.costo(di: voce),
-                                             riserve: stato.riserve,
-                                             pronta: partita.prontoIn(voce, stato: stato),
+            let pronta = partita.prontoIn(voce, stato: stato)
+            let testo: String
+            if voce.effetto.richiedeBersaglio {
+                testo = traduttore.etichetta(dellaVoceConBersaglio: voce,
+                                             bersagli: partita.bersagli(di: voce, stato: stato).count,
+                                             pronta: pronta, verbosita: Impostazioni.verbosita)
+            } else {
+                testo = traduttore.etichetta(dellaVoce: voce, costo: partita.costo(di: voce, stato: stato) ?? .vuote,
+                                             riserve: stato.riserve, pronta: pronta,
                                              fase: stato.fase, verbosita: Impostazioni.verbosita)
+            }
             pulsante.setTitle(testo, for: .normal)
             pulsante.accessibilityLabel = testo
             pulsante.invalidateIntrinsicContentSize()
         }
         if let stazione = stato.momento.stazione {
+            for vista in pilaMantenimento.arrangedSubviews { vista.removeFromSuperview() }
+            if stazione == 1 {
+                for riga in traduttore.dichiarazioneDelMantenimento(prelevato: stato.mantenimento,
+                                                                    sciolti: stato.sciolti, fase: stato.fase) {
+                    let etichetta = TestoDinamico.applica(UILabel(), stile: .body)
+                    etichetta.text = riga
+                    pilaMantenimento.addArrangedSubview(etichetta)
+                }
+            }
             for vista in pilaLavori.arrangedSubviews { vista.removeFromSuperview() }
             let righe = stato.lavori.isEmpty ? [testi.frase("patria.nessun_lavoro_ordinato").testo]
-                                             : stato.lavori.map { traduttore.lavoroElencato($0) }
+                                             : stato.lavori.map { traduttore.lavoroElencato($0, forze: stato.forze) }
             for riga in righe {
                 let etichetta = TestoDinamico.applica(UILabel(), stile: .body)
                 etichetta.text = riga
@@ -288,22 +362,6 @@ final class SchermataPatria: UIViewController {
                 : testi.frase("patria.prosegui_primavera").testo
             pulsanteProsegui?.setTitle(titoloProsegui, for: .normal)
             pulsanteProsegui?.invalidateIntrinsicContentSize()
-        }
-    }
-
-    /// Le forze in parole. È la sola parte della schermata che dipende dalla modalità di battaglia
-    /// (01 §1.2): nella modalità a sciami, una riga per formazione con la categoria e i reparti.
-    private func etichetteDelleForze(_ forze: ForzeDelRegno) -> [String] {
-        switch forze {
-        case .sciami(let formazioni):
-            return formazioni.map { formazione in
-                let reparti = formazione.composizione.map {
-                    testi.frase("divisione.reparto", soggetto: testi.soggetto(.unita, $0.archetipo), $0.atomi).testo
-                }
-                return testi.frase("patria.formazione",
-                                   testi.termine(formazione.categoria.chiaveCategoria).testo,
-                                   reparti.joined(separator: testi.frase("regno.separatore_elenco").testo)).testo
-            }
         }
     }
 
@@ -342,7 +400,49 @@ final class SchermataPatria: UIViewController {
 
     @objc private func attendiLInverno() { Task { await esegui(.attendiInverno) } }
     @objc private func proseguiNellInverno() { Task { await esegui(.prosegui) } }
-    private func ordina(_ voce: VoceDelRegno) { Task { await esegui(.ordina(voce: voce.identificatore)) } }
+    private func ordina(_ voce: VoceDelRegno, bersaglio: BersaglioMilitare? = nil) {
+        Task { await esegui(.ordina(voce: voce.identificatore, bersaglio: bersaglio)) }
+    }
+
+    /// La scelta di chi parte (incarico 31): attivando la riga di una formazione la si tiene in
+    /// patria, o la si rimanda al fronte. La riga si aggiorna sul posto e il fuoco non si sposta.
+    private func cambiaDestinazione(di unita: IdentificatoreDati) {
+        guard let alFronte = stato?.forze.destinataAlFronte(unita) else { return }
+        Task { await esegui(.destina(unita: unita, alFronte: !alFronte)) }
+    }
+
+    /// Le voci che si ordinano SU un reparto esistente (01 §4.13, §4.14): si sceglie il reparto da
+    /// un elenco in cui ciascuna scelta dichiara il proprio costo sulla riserva, e l'impossibilità
+    /// se c'è (02 §8.7). Scelto il reparto il lavoro è ordinato; il fuoco torna sulla voce da cui si
+    /// era partiti.
+    private func scegliIlBersaglio(di voce: VoceDelRegno, da origine: UIView?) {
+        guard let stato else { return }
+        let bersagli = partita.bersagli(di: voce, stato: stato)
+        guard !bersagli.isEmpty else {
+            annuncia(testi.frase("patria.nessun_bersaglio").testo)
+            return
+        }
+        let voci = bersagli.map { bersaglio in
+            traduttore.etichetta(delBersaglio: bersaglio, forze: stato.forze,
+                                 costo: partita.costo(di: voce, bersaglio: bersaglio, stato: stato) ?? .vuote,
+                                 riserve: stato.riserve, fase: stato.fase)
+        }
+        let schermata = SchermataScelta(
+            titolo: testi.frase("regno.voce_nome", soggetto: traduttore.voce(voce.identificatore)).testo,
+            domanda: testi.frase("patria.scegli_bersaglio").testo, voci: voci,
+            congedo: testi.frase("pannello.chiudi").testo)
+        schermata.modalPresentationStyle = .fullScreen
+        schermata.allaScelta = { [weak self] indice in
+            Fuoco.sposta(a: origine, perche: .schermataChiusa)
+            self?.ordina(voce, bersaglio: bersagli[indice])
+        }
+        schermata.alCongedo = { Fuoco.sposta(a: origine, perche: .schermataChiusa) }
+        sceltaAperta = schermata
+        present(schermata, animated: false)
+        Fuoco.sposta(a: nil, perche: .schermataAperta)
+    }
+    /// La scelta del reparto in corso, se ce n'è una: attrezzo per le prove ospitate.
+    private weak var sceltaAperta: SchermataScelta?
 
     @objc private func annullaSpesa() {
         Task {
@@ -465,7 +565,7 @@ final class SchermataPatria: UIViewController {
         guard let stato else { return }
         let schermata = SchermataRegistro(
             voci: stato.registroDalPiuRecente.map {
-                SchermataRegistro.Voce(frase: traduttore.voceDiRegistro($0).testo, luogo: nil) },
+                SchermataRegistro.Voce(frase: traduttore.voceDiRegistro($0, fase: stato.fase).testo, luogo: nil) },
             testi: testi, chiaveTitolo: "registro_patria.titolo", conLuoghi: false)
         schermata.modalPresentationStyle = .fullScreen
         present(schermata, animated: false)
@@ -501,4 +601,13 @@ final class SchermataPatria: UIViewController {
     var campagnaPerProva: PartitaCampagna? { campagna }
     var colonnaPerProva: UIStackView { colonna }
     var corpoPerProva: UIStackView { corpo }
+    var sceltaPerProva: SchermataScelta? { sceltaAperta }
+    func cambiaDestinazionePerProva(di unita: IdentificatoreDati) async {
+        guard let alFronte = stato?.forze.destinataAlFronte(unita) else { return }
+        await esegui(.destina(unita: unita, alFronte: !alFronte))
+    }
+    func scegliIlBersaglioPerProva(di voce: VoceDelRegno) { scegliIlBersaglio(di: voce, da: nil) }
+    func ordinaPerProva(_ voce: VoceDelRegno, bersaglio: BersaglioMilitare?) async {
+        await esegui(.ordina(voce: voce.identificatore, bersaglio: bersaglio))
+    }
 }

@@ -91,6 +91,10 @@ public struct TraduttoreEventiCampagna: Sendable {
         // e NON aggiungono un significato tattile: il tetto è chiuso (02 §11.5). La conclusione è
         // seguita dalla dichiarazione di conclusione, che è una schermata a sé (05 §9.3).
         case .stagioneCambiata, .campagnaConclusa: return nil
+        // L'arrivo di una formazione dalla patria (incarico 31) si annuncia a parole ed entra nel
+        // registro; non aggiunge un significato tattile, perché il tetto è chiuso (02 §11.5) e il
+        // segnale dei rinforzi appartiene al deck della battaglia (02 §5.4).
+        case .arrivoDallaPatria: return nil
         }
     }
 
@@ -216,6 +220,11 @@ public struct TraduttoreEventiCampagna: Sendable {
         case .campagnaConclusa(let modo, let vincitore):
             return testi.frase(Self.chiaveDellaConclusione(modo: modo, vincitore: vincitore, parte: parte),
                                verbosita: verbosita)
+        case .arrivoDallaPatria(_, let chiave, let casella):
+            // Chi arriva e dove è entrato (01 §5.2.1): il nome è il soggetto, il luogo consente
+            // di portarvi il fuoco dal registro.
+            return testi.frase("campagna.arrivo_dalla_patria", soggetto: soggetto(chiave),
+                               verbosita: verbosita, casella.riga, casella.colonna)
         }
     }
 
@@ -268,6 +277,8 @@ public struct TraduttoreEventiCampagna: Sendable {
             return testi.frase(chiave, voce.giorno)
         case .stagioneCambiata(let stagione):
             return testi.frase(chiave, voce.giorno, testi.termine(stagione.chiaveTesto).testo)
+        case .arrivoDallaPatria(let gruppo, let casella):
+            return testi.frase(chiave, soggetto: soggetto(gruppo), voce.giorno, casella.riga, casella.colonna)
         }
     }
 }

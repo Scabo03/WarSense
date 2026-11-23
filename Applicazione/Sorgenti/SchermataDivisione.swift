@@ -1,6 +1,7 @@
 import UIKit
 import Dati
 import Motore
+import Segnali
 
 /// La schermata di divisione di un gruppo (01 §5.6.0.2, 02 §10.3). È l'operazione
 /// più complessa della mappa, e va praticata ascoltando: NESSUNA tabella a caselle.
@@ -122,8 +123,7 @@ final class SchermataDivisione: UIViewController {
     /// da staccare — tutto in una riga sola (02 §10.3).
     private func etichettaReparto(_ indice: Int) -> String {
         let reparto = gruppo.composizione[indice]
-        let base = testi.frase("divisione.reparto", soggetto: testi.soggetto(.unita, reparto.archetipo),
-                               reparto.atomi).testo
+        let base = TraduttoreEventiRegno(testi: testi).reparto(reparto)
         let stato = staccati.contains(indice)
             ? testi.frase("divisione.da_staccare").testo
             : testi.frase("divisione.da_tenere").testo

@@ -87,6 +87,7 @@ public enum CaricatoreValori {
         let combattimento = try leggi(ParametriCombattimento.self, "combattimento.json")
         let ufficialiElenco = try leggi([DefinizioneUfficiale].self, "ufficiali.json")
         let vantaggi = try leggi(VantaggiNascosti.self, "vantaggi-nascosti.json")
+        let miglioramentiElenco = try leggi([DefinizioneMiglioramento].self, "miglioramenti.json")
 
         var archetipi: [IdentificatoreDati: DefinizioneArchetipo] = [:]
         for a in archetipiElenco {
@@ -103,6 +104,20 @@ public enum CaricatoreValori {
         for u in ufficialiElenco { ufficiali[u.identificatore] = u }
         guard !ufficiali.isEmpty else {
             throw ErroreDati(chiave: "errore.dati.elenco_vuoto", file: "ufficiali.json")
+        }
+        // I miglioramenti (01 §4.13): chiavi uniche, coefficiente mai sotto uno — un addestramento
+        // che togliesse capacità sarebbe un valore sbagliato, non un miglioramento.
+        var miglioramenti: [IdentificatoreDati: DefinizioneMiglioramento] = [:]
+        for m in miglioramentiElenco {
+            guard miglioramenti[m.identificatore] == nil else {
+                throw ErroreDati(chiave: "errore.dati.identificatore_duplicato", file: "miglioramenti.json",
+                                 voce: m.identificatore)
+            }
+            guard m.capacitaOffensiva >= .uno else {
+                throw ErroreDati(chiave: "errore.dati.miglioramento_incoerente", file: "miglioramenti.json",
+                                 voce: m.identificatore)
+            }
+            miglioramenti[m.identificatore] = m
         }
 
         try validaContenuti(archetipi: archetipi, protezioni: protezioni, formati: formati,
@@ -127,7 +142,8 @@ public enum CaricatoreValori {
                              minimi: minimi,
                              combattimento: combattimento,
                              ufficiali: ufficiali,
-                             vantaggi: vantaggi)
+                             vantaggi: vantaggi,
+                             miglioramenti: miglioramenti)
     }
 
     /// Validazione dei contenuti (05 §7.8), oltre la forma: completezza e coerenza.

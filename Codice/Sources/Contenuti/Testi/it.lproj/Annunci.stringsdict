@@ -332,6 +332,50 @@
       <key>other</key><string>%d formazioni</string>
     </dict>
   </dict>
+  <key>regno.reparto_migliorato.maschile</key>
+  <dict>
+    <key>NSStringLocalizedFormatKey</key><string>%2$#@atomi@ di %1$@ con %3$@</string>
+    <key>atomi</key>
+    <dict>
+      <key>NSStringFormatSpecTypeKey</key><string>NSStringPluralRuleType</string>
+      <key>NSStringFormatValueTypeKey</key><string>d</string>
+      <key>one</key><string>%2$d atomo</string>
+      <key>other</key><string>%2$d atomi</string>
+    </dict>
+  </dict>
+  <key>regno.reparto_migliorato.femminile</key>
+  <dict>
+    <key>NSStringLocalizedFormatKey</key><string>%2$#@atomi@ di %1$@ con %3$@</string>
+    <key>atomi</key>
+    <dict>
+      <key>NSStringFormatSpecTypeKey</key><string>NSStringPluralRuleType</string>
+      <key>NSStringFormatValueTypeKey</key><string>d</string>
+      <key>one</key><string>%2$d atomo</string>
+      <key>other</key><string>%2$d atomi</string>
+    </dict>
+  </dict>
+  <key>regno.reparto_migliorato.maschile_plurale</key>
+  <dict>
+    <key>NSStringLocalizedFormatKey</key><string>%2$#@atomi@ di %1$@ con %3$@</string>
+    <key>atomi</key>
+    <dict>
+      <key>NSStringFormatSpecTypeKey</key><string>NSStringPluralRuleType</string>
+      <key>NSStringFormatValueTypeKey</key><string>d</string>
+      <key>one</key><string>%2$d atomo</string>
+      <key>other</key><string>%2$d atomi</string>
+    </dict>
+  </dict>
+  <key>regno.reparto_migliorato.femminile_plurale</key>
+  <dict>
+    <key>NSStringLocalizedFormatKey</key><string>%2$#@atomi@ di %1$@ con %3$@</string>
+    <key>atomi</key>
+    <dict>
+      <key>NSStringFormatSpecTypeKey</key><string>NSStringPluralRuleType</string>
+      <key>NSStringFormatValueTypeKey</key><string>d</string>
+      <key>one</key><string>%2$d atomo</string>
+      <key>other</key><string>%2$d atomi</string>
+    </dict>
+  </dict>
   <key>regno.effetto.recluta_reparto</key>
   <dict>
     <key>NSStringLocalizedFormatKey</key><string>%#@atomi@</string>

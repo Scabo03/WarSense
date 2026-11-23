@@ -10,8 +10,55 @@ public struct ScenarioCampagna: Hashable, Codable, Sendable {
     public struct RepartoIniziale: Hashable, Codable, Sendable {
         public let archetipo: IdentificatoreDati
         public let atomi: Int
-        public init(archetipo: IdentificatoreDati, atomi: Int) {
+        /// Il miglioramento e l'anno di leva che il reparto porta con sé dal regno (incarico 31):
+        /// nulli negli scenari delle campagne di prova, e allora omessi dalla codifica.
+        public let miglioramento: IdentificatoreDati?
+        public let leva: Int?
+        public init(archetipo: IdentificatoreDati, atomi: Int,
+                    miglioramento: IdentificatoreDati? = nil, leva: Int? = nil) {
             self.archetipo = archetipo; self.atomi = atomi
+            self.miglioramento = miglioramento; self.leva = leva
+        }
+        /// Il reparto di un gruppo nella forma dichiarativa dello scenario.
+        public init(_ reparto: Reparto) {
+            self.init(archetipo: reparto.archetipo, atomi: reparto.atomi,
+                      miglioramento: reparto.miglioramento, leva: reparto.leva)
+        }
+    }
+
+    /// Un ARRIVO DALLA PATRIA (01 §5.2.1, §5.17.1; incarico 31): una formazione che il regno manda al
+    /// fronte e che raggiunge il quartier generale all'apertura della giornata dichiarata — la prima,
+    /// per le reclute pronte in primavera; la prima dell'estate o dell'autunno, per quelle che
+    /// maturano a campagna aperta. Non ha casella: la riceve quando arriva. Porta il proprio nome,
+    /// che il regno le ha dato e che conserva (01 §5.6.0.4).
+    public struct ArrivoProgrammato: Hashable, Codable, Sendable {
+        public let giorno: Int
+        public let nome: IdentificatoreDati
+        public let composizione: [RepartoIniziale]
+        public let categoria: String
+        public let competenza: Int?
+        public let carico: Int?
+        public let sogliaProtezione: Int?
+
+        public init(giorno: Int, nome: IdentificatoreDati, composizione: [RepartoIniziale],
+                    categoria: String = "armato", competenza: Int? = nil,
+                    carico: Int? = nil, sogliaProtezione: Int? = nil) {
+            self.giorno = giorno; self.nome = nome; self.composizione = composizione
+            self.categoria = categoria; self.competenza = competenza
+            self.carico = carico; self.sogliaProtezione = sogliaProtezione
+        }
+
+        enum CodingKeys: String, CodingKey {
+            case giorno, nome, composizione, categoria, competenza, carico
+            case sogliaProtezione = "soglia_protezione"
+        }
+
+        /// La stessa dichiarazione nella forma di un gruppo iniziale, per tradurne la categoria con
+        /// le medesime verifiche (`FabbricaCampagna.categoria`).
+        func comeGruppo(in casella: Cella) -> GruppoIniziale {
+            GruppoIniziale(riga: casella.riga, colonna: casella.colonna, composizione: composizione,
+                           categoria: categoria, competenza: competenza, carico: carico,
+                           sogliaProtezione: sogliaProtezione, nome: nome)
         }
     }
 
@@ -36,19 +83,27 @@ public struct ScenarioCampagna: Hashable, Codable, Sendable {
         /// La soglia di protezione della formazione non armata (01 §5.10.2), richiesta se e
         /// solo se categoria = «non_armata».
         public let sogliaProtezione: Int?
+        /// Il NOME che il gruppo porta già (01 §5.6.0.4; incarico 31): lo dichiara il regno, che
+        /// conserva le formazioni con il loro nome da un anno all'altro. Nullo negli scenari delle
+        /// campagne di prova — il nome lo assegna allora la fabbrica, dalla lista chiusa — e in
+        /// quel caso omesso dalla codifica.
+        public let nome: IdentificatoreDati?
 
         public init(riga: Int, colonna: Int, composizione: [RepartoIniziale],
                     categoria: String = "armato", competenza: Int? = nil,
-                    carico: Int? = nil, sogliaProtezione: Int? = nil) {
+                    carico: Int? = nil, sogliaProtezione: Int? = nil,
+                    nome: IdentificatoreDati? = nil) {
             self.riga = riga; self.colonna = colonna; self.composizione = composizione
             self.categoria = categoria; self.competenza = competenza
             self.carico = carico; self.sogliaProtezione = sogliaProtezione
+            self.nome = nome
         }
         public var casella: Cella { Cella(riga: riga, colonna: colonna) }
 
         enum CodingKeys: String, CodingKey {
             case riga, colonna, composizione, categoria, competenza, carico
             case sogliaProtezione = "soglia_protezione"
+            case nome
         }
 
         public init(from decoder: Decoder) throws {
@@ -61,6 +116,7 @@ public struct ScenarioCampagna: Hashable, Codable, Sendable {
             competenza = try c.decodeIfPresent(Int.self, forKey: .competenza)
             carico = try c.decodeIfPresent(Int.self, forKey: .carico)
             sogliaProtezione = try c.decodeIfPresent(Int.self, forKey: .sogliaProtezione)
+            nome = try c.decodeIfPresent(IdentificatoreDati.self, forKey: .nome)
         }
 
         public func encode(to encoder: Encoder) throws {
@@ -75,6 +131,7 @@ public struct ScenarioCampagna: Hashable, Codable, Sendable {
             try c.encodeIfPresent(competenza, forKey: .competenza)
             try c.encodeIfPresent(carico, forKey: .carico)
             try c.encodeIfPresent(sogliaProtezione, forKey: .sogliaProtezione)
+            try c.encodeIfPresent(nome, forKey: .nome)
         }
     }
 
@@ -103,17 +160,28 @@ public struct ScenarioCampagna: Hashable, Codable, Sendable {
     /// codifica, sicché quegli scenari restano identici al byte e i campioni del giornale non si
     /// muovono (00 §15, RDA-113).
     public let calendario: CalendarioDiCampagna?
+    /// I NOMI che questa campagna non può assegnare (01 §5.6.0.4; incarico 31): quelli delle
+    /// formazioni che il regno tiene in patria o che arriveranno dopo l'inverno. Un distaccamento
+    /// nato sul fronte torna in patria col proprio nome, che perciò non deve coincidere con quello
+    /// di una formazione rimasta a casa. Vuoto negli scenari di prova, e allora omesso.
+    public let nomiRiservati: [IdentificatoreDati]
+    /// Gli ARRIVI DALLA PATRIA che il regno ha programmato (01 §5.2.1; incarico 31). Vuoto negli
+    /// scenari di prova, e allora omesso dalla codifica.
+    public let arrivi: [ArrivoProgrammato]
 
     public init(mappa: IdentificatoreDati, gruppiGiocatore: [GruppoIniziale],
                 gruppiAvversario: [GruppoIniziale] = [],
                 forzeNemiche: [Cella] = [], struttureDiRifornimento: [Cella] = [],
-                calendario: CalendarioDiCampagna? = nil) {
+                calendario: CalendarioDiCampagna? = nil,
+                nomiRiservati: [IdentificatoreDati] = [], arrivi: [ArrivoProgrammato] = []) {
         self.mappa = mappa
         self.gruppiGiocatore = gruppiGiocatore
         self.gruppiAvversario = gruppiAvversario
         self.forzeNemiche = forzeNemiche
         self.struttureDiRifornimento = struttureDiRifornimento
         self.calendario = calendario
+        self.nomiRiservati = nomiRiservati
+        self.arrivi = arrivi
     }
 
     enum CodingKeys: String, CodingKey {
@@ -123,6 +191,8 @@ public struct ScenarioCampagna: Hashable, Codable, Sendable {
         case forzeNemiche = "forze_nemiche"
         case struttureDiRifornimento = "strutture_di_rifornimento"
         case calendario
+        case nomiRiservati = "nomi_riservati"
+        case arrivi
     }
 
     public init(from decoder: Decoder) throws {
@@ -134,6 +204,8 @@ public struct ScenarioCampagna: Hashable, Codable, Sendable {
         forzeNemiche = try c.decodeIfPresent([Cella].self, forKey: .forzeNemiche) ?? []
         struttureDiRifornimento = try c.decodeIfPresent([Cella].self, forKey: .struttureDiRifornimento) ?? []
         calendario = try c.decodeIfPresent(CalendarioDiCampagna.self, forKey: .calendario)
+        nomiRiservati = try c.decodeIfPresent([IdentificatoreDati].self, forKey: .nomiRiservati) ?? []
+        arrivi = try c.decodeIfPresent([ArrivoProgrammato].self, forKey: .arrivi) ?? []
     }
 
     public func encode(to encoder: Encoder) throws {
@@ -148,6 +220,8 @@ public struct ScenarioCampagna: Hashable, Codable, Sendable {
             try c.encode(struttureDiRifornimento, forKey: .struttureDiRifornimento)
         }
         try c.encodeIfPresent(calendario, forKey: .calendario)
+        if !nomiRiservati.isEmpty { try c.encode(nomiRiservati, forKey: .nomiRiservati) }
+        if !arrivi.isEmpty { try c.encode(arrivi, forKey: .arrivi) }
     }
 }
 
@@ -186,6 +260,11 @@ public enum FabbricaCampagna {
         /// Un calendario senza giornate o con un anno non positivo (incarico 30): la campagna non
         /// avrebbe una stagione in cui svolgersi.
         case calendarioIncoerente
+        /// Due formazioni dichiarano lo stesso nome, fra gruppi iniziali e arrivi (incarico 31): i
+        /// nomi sono unici dentro una campagna (01 §5.6.0.4).
+        case nomeDuplicato(IdentificatoreDati)
+        /// Un arrivo dalla patria con una giornata non positiva o senza composizione (incarico 31).
+        case arrivoIncoerente(IdentificatoreDati)
     }
 
     /// Traduce i campi dichiarativi della categoria (01 §5.2) nel tipo con valore
@@ -237,10 +316,23 @@ public enum FabbricaCampagna {
         // avversari possono mancare (scenario senza condotta): allora nessuno si muove
         // dopo il giocatore, e la campagna resta quella di prima dell'avversario.
         guard !scenario.gruppiGiocatore.isEmpty else { throw ErroreScenario.nessunGruppo }
-        let richiestiNomi = scenario.gruppiGiocatore.count + scenario.gruppiAvversario.count
-        guard richiestiNomi <= valori.nomiGruppi.count else {
-            throw ErroreScenario.nomiInsufficienti(richiesti: richiestiNomi,
-                                                   disponibili: valori.nomiGruppi.count)
+
+        // I NOMI (01 §5.6.0.4; incarico 31). Un gruppo che dichiara il proprio nome lo conserva: è
+        // la formazione del regno, che lo porta da un anno all'altro. Gli altri — i gruppi delle
+        // campagne di prova, l'avversario — prendono in ordine i nomi della lista chiusa che nessuno
+        // tiene per sé: né un gruppo iniziale, né un arrivo, né una formazione rimasta in patria.
+        // Senza nomi dichiarati né riservati la lista si scorre dall'inizio, com'era.
+        let dichiarati = scenario.gruppiGiocatore.compactMap(\.nome)
+            + scenario.gruppiAvversario.compactMap(\.nome) + scenario.arrivi.map(\.nome)
+        var visti = Set<IdentificatoreDati>()
+        for nome in dichiarati {
+            guard visti.insert(nome).inserted else { throw ErroreScenario.nomeDuplicato(nome) }
+        }
+        let riservati = visti.union(scenario.nomiRiservati)
+        let senzaNome = (scenario.gruppiGiocatore + scenario.gruppiAvversario).filter { $0.nome == nil }.count
+        let liberi = valori.nomiGruppi.filter { !riservati.contains($0) }.count
+        guard senzaNome <= liberi else {
+            throw ErroreScenario.nomiInsufficienti(richiesti: senzaNome, disponibili: liberi)
         }
 
         var gruppi: [IdGruppo: Gruppo] = [:]
@@ -278,14 +370,22 @@ public enum FabbricaCampagna {
                     guard archetipiNoti.contains(reparto.archetipo) else {
                         throw ErroreScenario.archetipoIgnoto(reparto.archetipo)
                     }
-                    composizione.append(Reparto(archetipo: reparto.archetipo, atomi: reparto.atomi))
+                    composizione.append(Reparto(archetipo: reparto.archetipo, atomi: reparto.atomi,
+                                                miglioramento: reparto.miglioramento, leva: reparto.leva))
                 }
                 let id = IdGruppo(prossimoId)
-                gruppi[id] = Gruppo(id: id, parte: parte, nome: valori.nomiGruppi[prossimoNome],
+                let nome: IdentificatoreDati
+                if let dichiarato = iniziale.nome {
+                    nome = dichiarato
+                } else {
+                    while riservati.contains(valori.nomiGruppi[prossimoNome]) { prossimoNome += 1 }
+                    nome = valori.nomiGruppi[prossimoNome]
+                    prossimoNome += 1
+                }
+                gruppi[id] = Gruppo(id: id, parte: parte, nome: nome,
                                     posizione: casella, composizione: composizione,
                                     categoria: try categoria(di: iniziale), azioneSpesa: false)
                 prossimoId += 1
-                prossimoNome += 1
             }
         }
         try creaGruppi(scenario.gruppiGiocatore, parte: .giocatore)
@@ -312,12 +412,47 @@ public enum FabbricaCampagna {
             }
         }
 
-        return StatoCampagna(mappa: mappa, giorno: 1, gruppi: gruppi,
-                             prossimoIdGruppo: prossimoId,
-                             prossimoIndiceNome: prossimoNome,
-                             registro: [], prossimoNumeroVoce: 0,
-                             forzeNemiche: Set(scenario.forzeNemiche),
-                             struttureDiRifornimento: Set(scenario.struttureDiRifornimento),
-                             calendario: scenario.calendario)
+        // Gli ARRIVI DALLA PATRIA (01 §5.2.1; incarico 31): verificati come i gruppi — giornata
+        // positiva, composizione non vuota, reparti con atomi positivi e archetipi noti, categoria
+        // coerente — e tenuti in attesa nell'ordine in cui arriveranno, a parità di giornata in
+        // quello in cui il regno li dichiara.
+        var arrivi: [ArrivoInAttesa] = []
+        for dichiarato in scenario.arrivi {
+            guard dichiarato.giorno >= 1, !dichiarato.composizione.isEmpty else {
+                throw ErroreScenario.arrivoIncoerente(dichiarato.nome)
+            }
+            var composizione: [Reparto] = []
+            for reparto in dichiarato.composizione {
+                guard reparto.atomi > 0 else { throw ErroreScenario.arrivoIncoerente(dichiarato.nome) }
+                guard archetipiNoti.contains(reparto.archetipo) else {
+                    throw ErroreScenario.archetipoIgnoto(reparto.archetipo)
+                }
+                composizione.append(Reparto(archetipo: reparto.archetipo, atomi: reparto.atomi,
+                                            miglioramento: reparto.miglioramento, leva: reparto.leva))
+            }
+            let quartierGenerale = mappa.quartierGenerale(di: .giocatore)
+            arrivi.append(ArrivoInAttesa(giorno: dichiarato.giorno, nome: dichiarato.nome,
+                                         composizione: composizione,
+                                         categoria: try categoria(di: dichiarato.comeGruppo(in: quartierGenerale))))
+        }
+        let inOrdine = arrivi.enumerated()
+            .sorted { $0.element.giorno == $1.element.giorno ? $0.offset < $1.offset
+                                                               : $0.element.giorno < $1.element.giorno }
+            .map(\.element)
+
+        var stato = StatoCampagna(mappa: mappa, giorno: 1, gruppi: gruppi,
+                                  prossimoIdGruppo: prossimoId,
+                                  prossimoIndiceNome: prossimoNome,
+                                  registro: [], prossimoNumeroVoce: 0,
+                                  forzeNemiche: Set(scenario.forzeNemiche),
+                                  struttureDiRifornimento: Set(scenario.struttureDiRifornimento),
+                                  calendario: scenario.calendario,
+                                  nomiRiservati: riservati.isEmpty ? nil : valori.nomiGruppi.filter { riservati.contains($0) }
+                                      + riservati.filter { !valori.nomiGruppi.contains($0) }.sorted(),
+                                  arriviInAttesa: scenario.arrivi.isEmpty ? nil : inOrdine)
+        // Le reclute pronte in primavera entrano con la prima giornata: gli arrivi della giornata
+        // d'apertura si consegnano qui, e il registro nasce già con la loro voce.
+        _ = MotoreCampagna.consegnaGliArrivi(&stato)
+        return stato
     }
 }

@@ -218,8 +218,17 @@ public actor SessioneRegno {
     public var fondazione: FondazioneRegno? { giornale.fondazioneRegno }
     public var valori: ValoriRegno { motore.valori }
 
-    /// Il costo di una voce, com'è adesso (05 §9.4: la Presentazione non calcola mai un dato di gioco).
-    public func costo(di voce: VoceDelRegno) -> Riserve { motore.costo(di: voce) }
+    /// Il costo di una voce, com'è adesso (05 §9.4: la Presentazione non calcola mai un dato di
+    /// gioco): con la misura che la voce porta con sé, o con quella del bersaglio. Nullo se la voce
+    /// chiede un bersaglio e quello indicato non esiste.
+    public func costo(di voce: VoceDelRegno, bersaglio: BersaglioMilitare? = nil) -> Riserve? {
+        motore.costo(di: voce, bersaglio: bersaglio, stato: stato)
+    }
+
+    /// Gli elementi delle forze su cui una voce si può ancora ordinare in questo inverno.
+    public func bersagli(di voce: VoceDelRegno) -> [BersaglioMilitare] {
+        motore.bersagli(di: voce, stato: stato)
+    }
 
     // MARK: - Ricostruzione (05 §6.3)
 

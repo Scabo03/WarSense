@@ -119,7 +119,16 @@ public struct FondazioneRegno: Codable, Sendable {
     public let modalita: String
     public let statoIniziale: StatoRegno
     /// Versione 1: la prima tappa del regno (incarico 30).
-    public static let schemaCorrente = 1
+    ///
+    /// Versione 2 dalla seconda tappa (incarico 31): le forze del regno conservano le formazioni col
+    /// loro nome, con la destinazione e la stagione d'arrivo, e i reparti portano l'anno di leva e
+    /// il miglioramento; il comando che ordina un lavoro porta il bersaglio; all'inizio
+    /// dell'inverno il gioco preleva il mantenimento, e i lavori hanno durate diverse. Un giornale
+    /// di versione 1 non si decodifica più nella forma nuova delle forze, e se anche lo si
+    /// traducesse, rigiocato con queste regole darebbe un regno diverso — riserve più basse per il
+    /// mantenimento, reclute che arrivano in un'altra stagione —: lo si DICHIARA incompatibile
+    /// invece di riaprirlo con una storia alterata (00 §15.2).
+    public static let schemaCorrente = 2
     /// La sola modalità di battaglia che questa versione costruisce.
     public static let modalitaASciami = "sciami"
 

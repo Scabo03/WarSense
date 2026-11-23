@@ -10,6 +10,18 @@ import Dati
 /// campagne con lo stesso schieramento e cronache diverse non sono la stessa
 /// partita; le qualificazioni della mappa vi entrano ordinate per casella, perché
 /// il loro ordine non è un fatto di gioco.
+extension Reparto: CodificabileCanonico {
+    /// L'archetipo e gli atomi; il miglioramento e l'anno di leva soltanto quando ci sono
+    /// (incarico 31), con il loro marcatore, sicché i reparti ordinari — tutti quelli scritti
+    /// prima — diano la stessa impronta al byte (RDA-113).
+    public func codifica(in c: inout CodificatoreCanonico) {
+        c.testo(archetipo)
+        c.intero(Int64(atomi))
+        if let miglioramento { c.testo("miglioramento"); c.testo(miglioramento) }
+        if let leva { c.testo("leva"); c.intero(Int64(leva)) }
+    }
+}
+
 extension Gruppo: CodificabileCanonico {
     public func codifica(in c: inout CodificatoreCanonico) {
         c.intero(id.numero)
@@ -23,10 +35,7 @@ extension Gruppo: CodificabileCanonico {
         // è funzione pura della composizione e degli archetipi, e non aggiunge
         // informazione all'impronta.
         c.intero(Int64(composizione.count))
-        for reparto in composizione {
-            c.testo(reparto.archetipo)
-            c.intero(Int64(reparto.atomi))
-        }
+        for reparto in composizione { reparto.codifica(in: &c) }
         c.vero(azioneSpesa)
         // La marcia lunga in corso entra nell'impronta: due gruppi con la stessa
         // posizione e azione ma marce diverse — o uno in marcia e uno no — non sono
@@ -89,6 +98,8 @@ extension FattoRegistrato: CodificabileCanonico {
             break
         case .stagioneCambiata(let stagione):
             c.testo(stagione.rawValue)
+        case .arrivoDallaPatria(let gruppo, let casella):
+            c.testo(gruppo); casella.codifica(in: &c)
         }
     }
 }
@@ -230,6 +241,30 @@ extension StatoCampagna {
             c.testo(conclusione.modo.rawValue)
             c.testo(conclusione.vincitore?.rawValue ?? "")
             c.intero(Int64(conclusione.giorno))
+        }
+        // I nomi riservati e gli arrivi dalla patria (incarico 31): due campagne che differiscono
+        // per i nomi che possono ancora assegnare, o per ciò che deve ancora arrivare, non sono lo
+        // stesso stato. OMESSI quando nulli, come sopra.
+        if let nomiRiservati {
+            c.testo("nomi_riservati")
+            c.intero(Int64(nomiRiservati.count))
+            for nome in nomiRiservati { c.testo(nome) }
+        }
+        if let arriviInAttesa {
+            c.testo("arrivi_in_attesa")
+            c.intero(Int64(arriviInAttesa.count))
+            for arrivo in arriviInAttesa {
+                c.intero(Int64(arrivo.giorno)); c.testo(arrivo.nome)
+                c.intero(Int64(arrivo.composizione.count))
+                for reparto in arrivo.composizione { reparto.codifica(in: &c) }
+                switch arrivo.categoria {
+                case .armato: c.testo("armato")
+                case .ricognizione(let competenza):
+                    c.testo("ricognizione"); c.intero(Int64(competenza))
+                case .nonArmata(let carico, let sogliaProtezione):
+                    c.testo("non_armata"); c.intero(Int64(carico)); c.intero(Int64(sogliaProtezione))
+                }
+            }
         }
         return SHA256.improntaEsadecimale(c.byte)
     }

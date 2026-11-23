@@ -80,12 +80,14 @@ final class Ambiente {
         do {
             regnoCaricato = try CaricatoreRegno.carica(da: ripiego ? Contenuti.valoriDiFabbrica
                                                                    : Ambiente.cartellaValori,
-                                                       archetipiNoti: Set(valoriCaricati.archetipi.keys))
+                                                       archetipiNoti: Set(valoriCaricati.archetipi.keys),
+                                                       miglioramentiNoti: Set(valoriCaricati.miglioramenti.keys))
         } catch {
             valoriCaricati = try CaricatoreValori.carica(da: Contenuti.valoriDiFabbrica)
             campagnaCaricata = try CaricatoreCampagna.carica(da: Contenuti.valoriDiFabbrica)
             regnoCaricato = try CaricatoreRegno.carica(da: Contenuti.valoriDiFabbrica,
-                                                       archetipiNoti: Set(valoriCaricati.archetipi.keys))
+                                                       archetipiNoti: Set(valoriCaricati.archetipi.keys),
+                                                       miglioramentiNoti: Set(valoriCaricati.miglioramenti.keys))
             ripiego = true
         }
         var testiCaricati: Testi

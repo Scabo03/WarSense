@@ -48,7 +48,8 @@ public enum PonteCampagnaBattaglia {
             (stato.gruppi[id]?.composizione ?? []).map { reparto in
                 ScenarioBattaglia.ElementoScenario(archetipo: reparto.archetipo,
                                                    protezione: modello.protezione,
-                                                   atomi: Int64(reparto.atomi), esemplari: 1)
+                                                   atomi: Int64(reparto.atomi), esemplari: 1,
+                                                   miglioramento: reparto.miglioramento, leva: reparto.leva)
             }
         }
         return ScenarioBattaglia(
@@ -72,20 +73,38 @@ public enum PonteCampagnaBattaglia {
         guard let esito = battaglia.esito else {
             preconditionFailure("ponte.esito.su.battaglia.non.conclusa")
         }
+        // I superstiti si raggruppano per ARCHETIPO e — dall'incarico 31 — per miglioramento e per
+        // anno di leva: il reparto migliorato resta migliorato, e quello reclutato per ultimo resta
+        // tale, perché in patria il mantenimento li distingue (01 §4.13–4.14.1.1). Senza
+        // miglioramenti né leve, cioè in ogni campagna di prova, il raggruppamento è quello di
+        // sempre: un reparto per archetipo, nell'ordine delle chiavi.
+        struct Specie: Hashable {
+            let archetipo: IdentificatoreDati
+            let miglioramento: IdentificatoreDati?
+            let leva: Int?
+        }
         func composizione(di parte: Parte) -> [Reparto] {
-            var perArchetipo: [IdentificatoreDati: Int] = [:]
+            var perSpecie: [Specie: Int] = [:]
             for sciame in battaglia.sciami.values where sciame.parte == parte {
                 let pv = valori.archetipi[sciame.archetipo]?.puntiVitaPerAtomo ?? 1
                 let atomi = sciame.atomiPresenti(puntiVitaPerAtomo: pv,
                                                  minimo: valori.minimi.atomiMinimiSciameVivo)
-                perArchetipo[sciame.archetipo, default: 0] += Int(atomi)
+                perSpecie[Specie(archetipo: sciame.archetipo, miglioramento: sciame.miglioramento,
+                                 leva: sciame.leva), default: 0] += Int(atomi)
             }
             for elemento in battaglia.deck[parte] ?? [] where elemento.esemplari > 0 {
-                perArchetipo[elemento.archetipo, default: 0] += Int(elemento.atomi) * elemento.esemplari
+                perSpecie[Specie(archetipo: elemento.archetipo, miglioramento: elemento.miglioramento,
+                                 leva: elemento.leva), default: 0] += Int(elemento.atomi) * elemento.esemplari
             }
-            return perArchetipo.keys.sorted().compactMap { archetipo in
-                let atomi = perArchetipo[archetipo]!
-                return atomi > 0 ? Reparto(archetipo: archetipo, atomi: atomi) : nil
+            let ordinate = perSpecie.keys.sorted { a, b in
+                if a.archetipo != b.archetipo { return a.archetipo < b.archetipo }
+                if a.miglioramento != b.miglioramento { return (a.miglioramento ?? "") < (b.miglioramento ?? "") }
+                return (a.leva ?? -1) < (b.leva ?? -1)
+            }
+            return ordinate.compactMap { specie in
+                let atomi = perSpecie[specie]!
+                return atomi > 0 ? Reparto(archetipo: specie.archetipo, atomi: atomi,
+                                           miglioramento: specie.miglioramento, leva: specie.leva) : nil
             }
         }
         let compGiocatore = composizione(di: .giocatore)

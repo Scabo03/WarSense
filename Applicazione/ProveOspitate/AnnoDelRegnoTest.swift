@@ -140,8 +140,10 @@ final class AnnoDelRegnoTest: XCTestCase {
         var leve = 0
         while leve < 40 {
             var ordinata = false
-            for voce in ambiente.valoriRegno.voci {
-                guard await patria.partitaPerProva.anteprima(.ordina(voce: voce.identificatore)).eValido else { continue }
+            // Le leve: le voci che non chiedono un reparto su cui agire (le altre le percorre
+            // `SecondaTappaDelRegnoTest`).
+            for voce in ambiente.valoriRegno.voci where !voce.effetto.richiedeBersaglio {
+                guard await patria.partitaPerProva.anteprima(.ordina(voce: voce.identificatore, bersaglio: nil)).eValido else { continue }
                 let pulsante = try XCTUnwrap(patria.corpoPerProva.arrangedSubviews
                     .first { $0.accessibilityIdentifier == "voce." + voce.identificatore } as? UIControl)
                 let prima = await patria.partitaPerProva.stato.lavori.count
@@ -162,11 +164,20 @@ final class AnnoDelRegnoTest: XCTestCase {
                 self.lettura(patria).contains("Anno 1, inverno, schermata \(stazione) di 4")
             }
         }
+        // Le leve maturano in stagioni diverse secondo la durata (01 §5.9.1.4): le reclute formano
+        // una formazione nuova per ciascuna stagione, con un reparto per leva (incarico 31).
+        let stagioni = Set(await patria.partitaPerProva.stato.lavori.map(\.pronto))
+        let nomiPrima = await patria.partitaPerProva.stato.forze.formazioni.map(\.nome)
         try premi("Prosegui alla primavera", in: patria)
         try await attendi("comincia la primavera") { self.lettura(patria).contains("Anno 2, primavera") }
         stato = await patria.partitaPerProva.stato
-        XCTAssertEqual(stato.forze.numeroDiUnita, rientrate + 1, "le reclute sono una formazione nuova")
-        XCTAssertEqual(stato.forze.formazioni.last?.composizione.count, leve, "un reparto per leva")
+        XCTAssertEqual(stato.forze.formazioni.count, rientrate + stagioni.count,
+                       "le reclute sono una formazione nuova per ciascuna stagione in cui maturano")
+        let nuove = stato.forze.formazioni.suffix(stagioni.count)
+        XCTAssertEqual(nuove.reduce(0) { $0 + $1.composizione.count }, leve, "un reparto per leva")
+        XCTAssertEqual(Set(nuove.compactMap(\.arrivo)), stagioni, "ciascuna dichiara la stagione in cui entra")
+        XCTAssertEqual(Array(stato.forze.formazioni.map(\.nome).prefix(nomiPrima.count)), nomiPrima,
+                       "le formazioni che c'erano conservano il nome e il posto")
 
         // 4. La campagna del secondo anno porta al fronte anche le reclute.
         await patria.apriLaCampagnaPerProva(sul: "istmo")
@@ -174,14 +185,19 @@ final class AnnoDelRegnoTest: XCTestCase {
         let seconda = try XCTUnwrap(patria.presentedViewController as? SchermataMappaCampagna)
         try await attendi("la mappa del secondo anno si carica") { !seconda.elementiPerProva.isEmpty }
         XCTAssertEqual(seconda.statoPerProva?.calendario?.anno, 2)
-        XCTAssertEqual(seconda.statoPerProva?.gruppi(di: .giocatore).count, stato.forze.numeroDiUnita)
+        // Sul fronte, dalla prima giornata: chi c'era e le reclute pronte in primavera, ciascuno col
+        // nome che ha in patria; le reclute che maturano più tardi sono arrivi in attesa.
+        let subito = stato.forze.formazioni.filter { $0.arrivo == nil || $0.arrivo == .primavera }.map(\.nome)
+        let dopo = stato.forze.formazioni.filter { $0.arrivo == .estate || $0.arrivo == .autunno }.map(\.nome)
+        XCTAssertEqual(Set(seconda.statoPerProva?.gruppi(di: .giocatore).map(\.nome) ?? []), Set(subito))
+        XCTAssertEqual(seconda.statoPerProva?.arriviInAttesa?.map(\.nome) ?? [], dopo)
 
         // 5. La ripresa dal giornale dà lo stesso regno.
         let impronta = await patria.partitaPerProva.stato.impronta()
         let ripreso = await (try PartitaRegno(riprendi: ambiente)).stato
         XCTAssertEqual(ripreso.impronta(), impronta)
 
-        print("ANNO-DEL-REGNO-30 fronte=guado conclusione=\(conclusione.modo.rawValue) vincitore=\(conclusione.vincitore?.rawValue ?? "nessuno") giornate=\(conclusione.giorno) battaglie=\(battaglie) vinte=\(esito.battaglieVinte) perse=\(esito.battagliePerse) formazioni_partite=\(formazioniIniziali) rientrate=\(rientrate) leve=\(leve) formazioni_anno_2=\(stato.forze.numeroDiUnita)")
+        print("ANNO-DEL-REGNO-30 fronte=guado conclusione=\(conclusione.modo.rawValue) vincitore=\(conclusione.vincitore?.rawValue ?? "nessuno") giornate=\(conclusione.giorno) battaglie=\(battaglie) vinte=\(esito.battaglieVinte) perse=\(esito.battagliePerse) formazioni_partite=\(formazioniIniziali) rientrate=\(rientrate) leve=\(leve) formazioni_anno_2=\(stato.forze.formazioni.count)")
     }
 
     /// La battaglia di una campagna del regno vive TRE slot sotto: regno, campagna, battaglia

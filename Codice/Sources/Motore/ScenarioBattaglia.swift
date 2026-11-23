@@ -9,9 +9,15 @@ public struct ScenarioBattaglia: Hashable, Codable, Sendable {
         public let protezione: TipoProtezione
         public let atomi: Int64
         public let esemplari: Int
-        public init(archetipo: IdentificatoreDati, protezione: TipoProtezione, atomi: Int64, esemplari: Int) {
+        /// Il miglioramento e l'anno di leva del reparto di campagna da cui l'elemento viene
+        /// (01 §4.13; incarico 31): nulli negli scontri di prova, e allora omessi dalla codifica.
+        public let miglioramento: IdentificatoreDati?
+        public let leva: Int?
+        public init(archetipo: IdentificatoreDati, protezione: TipoProtezione, atomi: Int64, esemplari: Int,
+                    miglioramento: IdentificatoreDati? = nil, leva: Int? = nil) {
             self.archetipo = archetipo; self.protezione = protezione
             self.atomi = atomi; self.esemplari = esemplari
+            self.miglioramento = miglioramento; self.leva = leva
         }
     }
 
@@ -53,6 +59,8 @@ public enum FabbricaBattaglia {
         case caratteristicaIgnota(IdentificatoreDati)
         case archetipoIgnoto(IdentificatoreDati)
         case ostacoloFuoriGriglia(Cella)
+        /// Un elemento dichiara un miglioramento che i valori non conoscono (incarico 31).
+        case miglioramentoIgnoto(IdentificatoreDati)
     }
 
     /// Crea lo stato iniziale e gli eventi di apertura del primo turno.
@@ -74,8 +82,12 @@ public enum FabbricaBattaglia {
                 guard valori.archetipi[voce.archetipo] != nil else {
                     throw ErroreScenario.archetipoIgnoto(voce.archetipo)
                 }
+                if let miglioramento = voce.miglioramento, valori.miglioramenti[miglioramento] == nil {
+                    throw ErroreScenario.miglioramentoIgnoto(miglioramento)
+                }
                 return ElementoDeck(archetipo: voce.archetipo, protezione: voce.protezione,
-                                    atomi: voce.atomi, esemplari: voce.esemplari)
+                                    atomi: voce.atomi, esemplari: voce.esemplari,
+                                    miglioramento: voce.miglioramento, leva: voce.leva)
             }
         }
         let deckG = try elementi(scenario.deckGiocatore)

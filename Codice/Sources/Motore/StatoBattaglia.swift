@@ -30,14 +30,24 @@ public struct Sciame: Hashable, Codable, Sendable {
     public var azioneSpesa: Bool
     /// Vero se giunto come rinforzo (01 §11.6). Sempre falso nella fase A.
     public var rinforzo: Bool
+    /// Il MIGLIORAMENTO che il reparto porta (01 §4.13; incarico 31): l'addestramento mirato ricevuto
+    /// in patria, che ne accresce la capacità offensiva (`MotoreBattaglia.danno`). Nullo per il
+    /// reparto ordinario — tutti quelli degli scontri di prova e delle campagne di prova —, e allora
+    /// omesso dalla codifica.
+    public let miglioramento: IdentificatoreDati?
+    /// L'anno di leva del reparto di campagna da cui lo sciame viene (incarico 31): non ha alcun
+    /// effetto in battaglia; lo si porta perché i superstiti tornino al reparto che erano.
+    public let leva: Int?
 
     public init(id: IdSciame, parte: Parte, archetipo: IdentificatoreDati,
                 protezione: TipoProtezione, lettera: Int, atomiIniziali: Int64, serbatoio: Int64,
-                munizioni: Int, posizione: Cella, azioneSpesa: Bool, rinforzo: Bool) {
+                munizioni: Int, posizione: Cella, azioneSpesa: Bool, rinforzo: Bool,
+                miglioramento: IdentificatoreDati? = nil, leva: Int? = nil) {
         self.id = id; self.parte = parte; self.archetipo = archetipo
         self.protezione = protezione; self.lettera = lettera; self.atomiIniziali = atomiIniziali
         self.serbatoio = serbatoio; self.munizioni = munizioni
         self.posizione = posizione; self.azioneSpesa = azioneSpesa; self.rinforzo = rinforzo
+        self.miglioramento = miglioramento; self.leva = leva
     }
 
     /// Atomi presenti: divisione con troncamento e minimo di uno finché vivo (01 §4.3).
@@ -53,6 +63,17 @@ public struct ElementoDeck: Hashable, Codable, Sendable {
     public let protezione: TipoProtezione
     public let atomi: Int64
     public var esemplari: Int
+    /// Il miglioramento e l'anno di leva del reparto (incarico 31): nulli per gli elementi
+    /// ordinari, e allora omessi dalla codifica.
+    public let miglioramento: IdentificatoreDati?
+    public let leva: Int?
+
+    public init(archetipo: IdentificatoreDati, protezione: TipoProtezione, atomi: Int64, esemplari: Int,
+                miglioramento: IdentificatoreDati? = nil, leva: Int? = nil) {
+        self.archetipo = archetipo; self.protezione = protezione
+        self.atomi = atomi; self.esemplari = esemplari
+        self.miglioramento = miglioramento; self.leva = leva
+    }
 }
 
 /// Un contatto di mischia in corso (01 §9.7), con le consistenze d'ingresso (01 §9.8).

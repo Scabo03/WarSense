@@ -76,7 +76,7 @@ public enum MomentoDellAnno: Hashable, Codable, Sendable {
     case inverno(stazione: Int)
 
     /// Le stazioni dell'inverno: quattro, numero di struttura e non di gioco (01 §5.9.1.1, 05 §0.4).
-    public static let stazioniInvernali = 4
+    public static let stazioniInvernali = Stagione.stazioniInvernali
 
     public var eInverno: Bool { if case .inverno = self { return true } else { return false } }
     public var stazione: Int? { if case .inverno(let s) = self { return s } else { return nil } }
@@ -124,18 +124,20 @@ public enum CampagnaDellAnno: Hashable, Codable, Sendable {
 }
 
 /// Un lavoro ordinato in patria e non ancora pronto (01 §5.9.1.4, 05 §2.4): la voce, ciò che è
-/// costato, la stazione in cui è stato ordinato, ciò che darà e la stagione in cui sarà pronto.
+/// costato, la stazione in cui è stato ordinato, ciò che darà, la stagione in cui sarà pronto e —
+/// per le voci che agiscono su qualcosa che esiste già (01 §4.13) — su che cosa.
 public struct LavoroOrdinato: Hashable, Codable, Sendable {
     public let voce: IdentificatoreDati
     public let costo: Riserve
     public let stazione: Int
     public let effetto: EffettoMilitare
     public let pronto: Stagione
+    public let bersaglio: BersaglioMilitare?
 
     public init(voce: IdentificatoreDati, costo: Riserve, stazione: Int, effetto: EffettoMilitare,
-                pronto: Stagione) {
+                pronto: Stagione, bersaglio: BersaglioMilitare? = nil) {
         self.voce = voce; self.costo = costo; self.stazione = stazione
-        self.effetto = effetto; self.pronto = pronto
+        self.effetto = effetto; self.pronto = pronto; self.bersaglio = bersaglio
     }
 }
 
@@ -146,11 +148,19 @@ public enum FattoDiPatria: Hashable, Codable, Sendable {
     case campagnaConclusa(fronte: IdentificatoreDati, modo: ConclusioneCampagna.Modo, vincitore: Parte?)
     /// È cominciato l'inverno.
     case invernoCominciato
-    /// Un lavoro ordinato è pronto (01 §5.17.1: «il completamento di un'opera in patria entra nel
-    /// registro della patria»).
-    case lavoroPronto(voce: IdentificatoreDati)
+    /// Un miglioramento ordinato nell'inverno è compiuto (01 §5.17.1: «il completamento di un'opera
+    /// in patria entra nel registro della patria»): chi lo ha ricevuto.
+    case miglioramentoDato(ElementoDelleForze)
     /// È cominciata la primavera; `eccedenzaPerduta` dice se il riporto ha tolto qualcosa (01 §5.5.1.4).
     case primaveraCominciata(eccedenzaPerduta: Bool)
+    /// Il gioco ha prelevato da sé la quota annua di mantenimento delle forze (01 §4.14.1.1).
+    case mantenimentoPrelevato(quota: Riserve)
+    /// Il denaro non è bastato al mantenimento, e un elemento delle forze è stato sciolto (01 §4.14.1.1).
+    case elementoSciolto(ElementoDelleForze)
+    /// Le reclute di un inverno sono entrate nelle forze, e dove (01 §4.12; incarico 31).
+    case recluteEntrate(IngressoNelleForze)
+    /// Un miglioramento non mantenuto si è perduto (01 §4.14).
+    case miglioramentoPerduto(ElementoDelleForze)
 
     /// Un esemplare per ciascun caso, perché il collaudo pretenda una frase per ogni fatto.
     public static let casiDiRiferimento: [FattoDiPatria] = [
@@ -158,9 +168,16 @@ public enum FattoDiPatria: Hashable, Codable, Sendable {
         .campagnaConclusa(fronte: "guado", modo: .annientamento, vincitore: .avversario),
         .campagnaConclusa(fronte: "guado", modo: .inverno, vincitore: nil),
         .invernoCominciato,
-        .lavoroPronto(voce: "leva_fanteria_leggera"),
+        .miglioramentoDato(Esemplari.migliorato),
         .primaveraCominciata(eccedenzaPerduta: false),
         .primaveraCominciata(eccedenzaPerduta: true),
+        .mantenimentoPrelevato(quota: Riserve(["denaro": 30])),
+        .elementoSciolto(Esemplari.sciolto),
+        .recluteEntrate(Esemplari.ingresso(.primavera, confluite: false)),
+        .recluteEntrate(Esemplari.ingresso(.estate, confluite: false)),
+        .recluteEntrate(Esemplari.ingresso(.inverno, confluite: false)),
+        .recluteEntrate(Esemplari.ingresso(.primavera, confluite: true)),
+        .miglioramentoPerduto(Esemplari.migliorato),
     ]
 }
 
@@ -195,14 +212,21 @@ public struct StatoRegno: Hashable, Codable, Sendable {
     /// Il registro della patria, in ordine di accadimento (01 §5.17).
     public var registro: [VoceRegistroPatria]
     public var prossimoNumeroVoce: Int
+    /// Ciò che il mantenimento delle forze ha prelevato all'inizio di questo inverno (01 §4.14.1.1):
+    /// è ciò che la prima schermata dichiara. Vuoto fuori dall'inverno.
+    public var mantenimento: Riserve
+    /// Ciò che il mantenimento ha sciolto all'inizio di questo inverno, perché il denaro non bastava.
+    public var sciolti: [ElementoDelleForze]
 
     public init(anno: Int, momento: MomentoDellAnno, fase: Fase, riserve: Riserve,
                 entrataDellAnno: Riserve = .vuote, forze: ForzeDelRegno,
                 campagna: CampagnaDellAnno = .nonAperta, lavori: [LavoroOrdinato] = [],
-                registro: [VoceRegistroPatria] = [], prossimoNumeroVoce: Int = 0) {
+                registro: [VoceRegistroPatria] = [], prossimoNumeroVoce: Int = 0,
+                mantenimento: Riserve = .vuote, sciolti: [ElementoDelleForze] = []) {
         self.anno = anno; self.momento = momento; self.fase = fase; self.riserve = riserve
         self.entrataDellAnno = entrataDellAnno; self.forze = forze; self.campagna = campagna
         self.lavori = lavori; self.registro = registro; self.prossimoNumeroVoce = prossimoNumeroVoce
+        self.mantenimento = mantenimento; self.sciolti = sciolti
     }
 
     /// La stagione in cui il regno si trova quando non ha una campagna aperta che lo dica: l'inverno
@@ -226,8 +250,12 @@ public enum ComandoRegno: Hashable, Codable, Sendable {
     case apriCampagna(fronte: IdentificatoreDati)
     /// Lascia passare ciò che resta dell'anno: comincia l'inverno, e con esso il bilancio (01 §5.9).
     case attendiInverno
-    /// Ordina un lavoro (05 §3.5): nella prima tappa una leva.
-    case ordina(voce: IdentificatoreDati)
+    /// Ordina un lavoro (05 §3.5): una leva, oppure — con il bersaglio — l'addestramento mirato o il
+    /// mantenimento del miglioramento di un elemento delle forze che esiste già (01 §4.13, §4.14).
+    case ordina(voce: IdentificatoreDati, bersaglio: BersaglioMilitare?)
+    /// Destina un'unità delle forze al fronte, oppure la tiene in patria (incarico 31): vale per la
+    /// campagna dell'anno e resta finché il giocatore non la cambia.
+    case destina(unita: IdentificatoreDati, alFronte: Bool)
     /// Prosegue alla stazione invernale successiva; dalla quarta, alla primavera (05 §3.5: le
     /// quattro schermate avanzano soltanto per questo comando esplicito).
     case prosegui
@@ -250,6 +278,16 @@ public enum MotivoNonValidoRegno: Hashable, Sendable {
     case nessunaForza
     /// Le riserve non bastano: le risorse che mancano, nell'ordine fisso.
     case risorseInsufficienti([Risorsa])
+    /// Le forze non hanno un'unità con quel nome.
+    case unitaIgnota
+    /// La voce si ordina su un elemento delle forze, e il comando non lo indica, o ne indica uno
+    /// che non esiste; oppure la voce non ne vuole e il comando lo indica.
+    case bersaglioMancante
+    /// L'elemento indicato non può ricevere la voce: porta già un miglioramento, o non porta quello
+    /// che si vuole mantenere.
+    case bersaglioNonAmmesso
+    /// La stessa voce è già stata ordinata in questo inverno sullo stesso elemento.
+    case giaOrdinato
 
     /// La chiave del termine chiuso che dichiara il motivo. Per le risorse insufficienti la frase
     /// nomina ciascuna risorsa che manca, e la compone chi annuncia.
@@ -263,6 +301,10 @@ public enum MotivoNonValidoRegno: Hashable, Sendable {
         case .campagnaGiaCondotta: return "regno.non_valido.campagna_gia_condotta"
         case .nessunaForza: return "regno.non_valido.nessuna_forza"
         case .risorseInsufficienti: return "regno.non_valido.risorse_insufficienti"
+        case .unitaIgnota: return "regno.non_valido.unita_ignota"
+        case .bersaglioMancante: return "regno.non_valido.bersaglio_mancante"
+        case .bersaglioNonAmmesso: return "regno.non_valido.bersaglio_non_ammesso"
+        case .giaOrdinato: return "regno.non_valido.gia_ordinato"
         }
     }
 
@@ -270,6 +312,7 @@ public enum MotivoNonValidoRegno: Hashable, Sendable {
     public static let casiDiRiferimento: [MotivoNonValidoRegno] = [
         .fronteIgnoto, .voceIgnota, .eInverno, .nonEInverno, .campagnaAperta,
         .campagnaGiaCondotta, .nessunaForza, .risorseInsufficienti([.uomini]),
+        .unitaIgnota, .bersaglioMancante, .bersaglioNonAmmesso, .giaOrdinato,
     ]
 }
 
@@ -291,12 +334,17 @@ public enum EventoRegno: Hashable, Codable, Sendable {
     case campagnaAperta(fronte: IdentificatoreDati)
     /// La campagna dell'anno si è conclusa e l'esito è arrivato in patria.
     case campagnaConclusa(esito: EsitoCampagna)
-    /// È cominciato l'inverno: l'entrata dell'anno si è aggiunta alle riserve.
-    case invernoCominciato(anno: Int, entrata: Riserve)
+    /// È cominciato l'inverno: l'entrata dell'anno si è aggiunta alle riserve, e il mantenimento
+    /// delle forze ne ha prelevato la propria quota; se il denaro non bastava, ciò che è stato sciolto.
+    case invernoCominciato(anno: Int, entrata: Riserve, mantenimento: Riserve, sciolti: [ElementoDelleForze])
     /// Un lavoro è stato ordinato e pagato.
-    case lavoroOrdinato(voce: IdentificatoreDati, costo: Riserve, pronto: Stagione)
+    case lavoroOrdinato(voce: IdentificatoreDati, costo: Riserve, pronto: Stagione, bersaglio: BersaglioMilitare?)
     /// Si è aperta una stazione invernale successiva alla prima.
     case stazioneAperta(stazione: Int)
-    /// È cominciata la primavera dell'anno nuovo: ciò che il riporto ha tolto e i lavori pronti.
-    case primaveraCominciata(anno: Int, perduto: Riserve, lavoriPronti: [IdentificatoreDati])
+    /// È cominciata la primavera dell'anno nuovo: ciò che il riporto ha tolto, le reclute entrate
+    /// nelle forze, ciò che ha ricevuto un miglioramento, ciò che lo ha perduto.
+    case primaveraCominciata(anno: Int, perduto: Riserve, ingressi: [IngressoNelleForze],
+                             migliorati: [ElementoDelleForze], miglioramentiPerduti: [ElementoDelleForze])
+    /// Un'unità delle forze è stata destinata al fronte, oppure tenuta in patria.
+    case unitaDestinata(unita: IdentificatoreDati, alFronte: Bool)
 }

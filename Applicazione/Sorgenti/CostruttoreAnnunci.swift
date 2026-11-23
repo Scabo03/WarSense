@@ -191,6 +191,11 @@ struct CostruttoreAnnunci {
             testi.frase("deck.volume", Int(volume)).testo,
             testi.frase("deck.esemplari", elemento.esemplari).testo,
         ]
+        // Il reparto che in patria ha ricevuto un miglioramento lo dichiara sulla propria tessera
+        // (01 §4.13; incarico 31): è con questa informazione che si decide dove piazzarlo.
+        if let miglioramento = elemento.miglioramento {
+            parti.append(testi.termine("miglioramento." + miglioramento).testo)
+        }
         if comeSelezionato || stato.selezione[.giocatore] == indice {
             // «selezionato» si accorda al nome dell'archetipo che la tessera porta come etichetta (02 §4.6).
             parti.append(testi.frase("deck.selezionato",

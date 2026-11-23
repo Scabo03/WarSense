@@ -102,9 +102,9 @@ public final class PuntoSegnali {
     /// Un fatto del regno (incarico 30): stessa via degli eventi della battaglia e della campagna,
     /// perché il punto dei segnali resti uno solo (00 §5.3). La fase storica serve al nome della
     /// moneta (01 §5.5.1.3).
-    public func segnala(evento: EventoRegno, fase: Fase) {
+    public func segnala(evento: EventoRegno, fase: Fase, forze: ForzeDelRegno? = nil) {
         let traduttore = TraduttoreEventiRegno(testi: testi)
-        if let annuncio = traduttore.annuncio(per: evento, fase: fase) {
+        if let annuncio = traduttore.annuncio(per: evento, fase: fase, forze: forze) {
             accoda(annuncio, interrompente: false)
         }
         guard let significato = traduttore.significato(per: evento) else { return }

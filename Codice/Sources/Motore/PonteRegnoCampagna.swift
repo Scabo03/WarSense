@@ -21,17 +21,26 @@ public enum PonteRegnoCampagna {
         case formatoIgnoto(IdentificatoreDati)
     }
 
-    /// Lo scenario della campagna dell'anno su un fronte. Le formazioni del regno partono tutte,
-    /// nell'ordine in cui il regno le conserva: le prime occupano le caselle che lo scenario del
-    /// fronte assegna ai gruppi del giocatore, nell'ordine dello scenario; le altre le caselle
-    /// libere più vicine al proprio quartier generale, a parità di distanza nell'ordine di lettura
-    /// (01 §5.2.1: il quartier generale è il punto di arrivo delle truppe inviate dalla patria).
-    /// Se le formazioni sono più dei nomi o delle caselle disponibili, le formazioni armate in
-    /// eccesso confluiscono nell'armata che le precede: nessuna forza resta in patria.
+    /// Lo scenario della campagna dell'anno su un fronte (incarico 31). Partono le formazioni che il
+    /// giocatore non tiene in patria, ciascuna col proprio NOME, nell'ordine in cui il regno le
+    /// conserva: quelle che ci sono già occupano le caselle che lo scenario del fronte assegna ai
+    /// gruppi del giocatore, nell'ordine dello scenario, e poi le caselle libere più vicine al
+    /// proprio quartier generale, a parità di distanza nell'ordine di lettura. Le reclute
+    /// dell'ultimo inverno entrano come ARRIVI DALLA PATRIA (01 §5.2.1): quelle pronte in primavera
+    /// con la prima giornata, quelle pronte in estate e in autunno con la prima giornata di quella
+    /// stagione, a campagna aperta. Le formazioni tenute in patria, e quelle che maturano soltanto
+    /// con l'inverno successivo, non partono: il loro nome è riservato, perché nessun gruppo nato
+    /// sul fronte lo prenda.
+    ///
+    /// Se le formazioni che partono subito sono più dei nomi o delle caselle disponibili, le armate
+    /// in eccesso confluiscono nell'armata che le precede.
     public static func scenario(delFronte base: ScenarioCampagna, forze: ForzeDelRegno,
                                 calendario: CalendarioDiCampagna,
                                 valori: ValoriCampagna) throws -> ScenarioCampagna {
-        guard case .sciami(var formazioni) = forze else { throw Errore.forzeDiAltraModalita }
+        guard case .sciami(let tutte, _) = forze else { throw Errore.forzeDiAltraModalita }
+        var formazioni = tutte.filter { $0.parteConLaCampagna && $0.arrivo == nil }
+        let inArrivo = tutte.filter { $0.parteConLaCampagna && $0.arrivo != nil }
+        let restano = tutte.filter { !$0.parteConLaCampagna }
         guard formazioni.contains(where: { $0.categoria.eArmata }) else {
             throw Errore.nessunaFormazioneArmata
         }
@@ -45,11 +54,16 @@ public enum PonteRegnoCampagna {
         let mappa = MappaCampagna(definizione: definizione, formato: formato)
         let griglia = mappa.griglia
 
-        // Il tetto: i nomi della lista chiusa che restano dopo quelli dell'avversario (01 §5.6.0.4)
-        // e le caselle della mappa. Oltre, le armate in eccesso confluiscono nella precedente.
-        let tetto = max(1, min(valori.nomiGruppi.count - base.gruppiAvversario.count,
-                               griglia.tutteLeCaselle.count))
-        while formazioni.count > tetto {
+        // Il tetto: le caselle della mappa, e i nomi della lista chiusa che restano all'avversario
+        // dopo quelli che il regno tiene per sé (01 §5.6.0.4). Oltre il tetto delle caselle le
+        // armate in eccesso confluiscono nella precedente; se all'avversario non restassero nomi,
+        // confluiscono finché ne restano.
+        func nomiLiberi() -> Int {
+            let inUso = Set(formazioni.map(\.nome)).union(inArrivo.map(\.nome)).union(restano.map(\.nome))
+            return valori.nomiGruppi.filter { !inUso.contains($0) }.count
+        }
+        while formazioni.count + inArrivo.count > griglia.tutteLeCaselle.count
+                || nomiLiberi() < base.gruppiAvversario.count {
             guard let ultima = formazioni.lastIndex(where: { $0.categoria.eArmata }),
                   let precedente = formazioni[..<ultima].lastIndex(where: { $0.categoria.eArmata })
             else { break }
@@ -64,47 +78,69 @@ public enum PonteRegnoCampagna {
         for casella in base.gruppiGiocatore.map(\.casella) where !caselle.contains(casella) {
             caselle.append(casella)
         }
-        let restanti = griglia.tutteLeCaselle
+        let libere = griglia.tutteLeCaselle
             .filter { !caselle.contains($0) }
             .sorted {
                 let da = griglia.distanza(quartierGenerale, $0), db = griglia.distanza(quartierGenerale, $1)
                 return da == db ? $0 < $1 : da < db
             }
-        caselle += restanti
+        caselle += libere
+
+        func dichiarata(_ categoria: CategoriaFormazione) -> (String, Int?, Int?, Int?) {
+            switch categoria {
+            case .armato: return ("armato", nil, nil, nil)
+            case .ricognizione(let competenza): return ("ricognizione", competenza, nil, nil)
+            case .nonArmata(let carico, let sogliaProtezione): return ("non_armata", nil, carico, sogliaProtezione)
+            }
+        }
 
         var gruppi: [ScenarioCampagna.GruppoIniziale] = []
         for (indice, formazione) in formazioni.enumerated() where indice < caselle.count {
             let casella = caselle[indice]
-            let composizione = formazione.composizione.map {
-                ScenarioCampagna.RepartoIniziale(archetipo: $0.archetipo, atomi: $0.atomi)
-            }
-            switch formazione.categoria {
-            case .armato:
-                gruppi.append(.init(riga: casella.riga, colonna: casella.colonna, composizione: composizione))
-            case .ricognizione(let competenza):
-                gruppi.append(.init(riga: casella.riga, colonna: casella.colonna, composizione: composizione,
-                                    categoria: "ricognizione", competenza: competenza))
-            case .nonArmata(let carico, let sogliaProtezione):
-                gruppi.append(.init(riga: casella.riga, colonna: casella.colonna, composizione: composizione,
-                                    categoria: "non_armata", carico: carico, sogliaProtezione: sogliaProtezione))
-            }
+            let (categoria, competenza, carico, soglia) = dichiarata(formazione.categoria)
+            gruppi.append(.init(riga: casella.riga, colonna: casella.colonna,
+                                composizione: formazione.composizione.map(ScenarioCampagna.RepartoIniziale.init),
+                                categoria: categoria, competenza: competenza, carico: carico,
+                                sogliaProtezione: soglia, nome: formazione.nome))
         }
+
+        // Gli arrivi: la prima giornata della stagione in cui la formazione è pronta.
+        var arrivi: [ScenarioCampagna.ArrivoProgrammato] = []
+        for formazione in inArrivo {
+            guard let stagione = formazione.arrivo,
+                  let posizione = Stagione.operative.firstIndex(of: stagione) else { continue }
+            let (categoria, competenza, carico, soglia) = dichiarata(formazione.categoria)
+            arrivi.append(.init(giorno: posizione * calendario.giornatePerStagione + 1, nome: formazione.nome,
+                                composizione: formazione.composizione.map(ScenarioCampagna.RepartoIniziale.init),
+                                categoria: categoria, competenza: competenza, carico: carico,
+                                sogliaProtezione: soglia))
+        }
+
         return ScenarioCampagna(mappa: base.mappa, gruppiGiocatore: gruppi,
                                 gruppiAvversario: base.gruppiAvversario,
                                 forzeNemiche: base.forzeNemiche,
                                 struttureDiRifornimento: base.struttureDiRifornimento,
-                                calendario: calendario)
+                                calendario: calendario,
+                                nomiRiservati: restano.map(\.nome),
+                                arrivi: arrivi)
     }
 
     /// L'esito che una campagna CONCLUSA porta al regno; nulla se la campagna non è conclusa o non
     /// dichiara un calendario. I superstiti sono i gruppi del giocatore com'erano alla conclusione,
-    /// nell'ordine dei loro identificatori: tornano come formazioni, senza casella e senza nome. Le
-    /// battaglie vinte e perse si contano sul registro, che le annota tutte (01 §5.17.1).
+    /// nell'ordine dei loro identificatori: tornano come formazioni, col NOME che portavano sul
+    /// fronte (incarico 31). Con loro tornano gli arrivi dalla patria che la campagna non ha fatto
+    /// in tempo a ricevere, ancora in arrivo: non erano mai partiti. Le battaglie vinte e perse si
+    /// contano sul registro, che le annota tutte (01 §5.17.1).
     public static func esito(da stato: StatoCampagna, fronte: IdentificatoreDati) -> EsitoCampagna? {
         guard let conclusione = stato.conclusione, let calendario = stato.calendario else { return nil }
-        let superstiti = stato.gruppiOrdinati
+        var superstiti = stato.gruppiOrdinati
             .filter { $0.parte == .giocatore }
-            .map { FormazioneDelRegno(categoria: $0.categoria, composizione: $0.composizione) }
+            .map { FormazioneDelRegno(nome: $0.nome, categoria: $0.categoria, composizione: $0.composizione) }
+        for arrivo in stato.arriviInAttesa ?? [] {
+            superstiti.append(FormazioneDelRegno(nome: arrivo.nome, categoria: arrivo.categoria,
+                                                 composizione: arrivo.composizione,
+                                                 arrivo: calendario.stagione(del: arrivo.giorno)))
+        }
         var vinte = 0, perse = 0
         for voce in stato.registro {
             if case .battagliaConclusa(_, let giocatoreSconfitto) = voce.fatto {
@@ -114,6 +150,6 @@ public enum PonteRegnoCampagna {
         return EsitoCampagna(fronte: fronte, anno: calendario.anno, modo: conclusione.modo,
                              vincitore: conclusione.vincitore, giornate: conclusione.giorno,
                              battaglieVinte: vinte, battagliePerse: perse,
-                             superstiti: .sciami(superstiti))
+                             superstiti: .sciami(formazioni: superstiti, prossimoNome: 0))
     }
 }

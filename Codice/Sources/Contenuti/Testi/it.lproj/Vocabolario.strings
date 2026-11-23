@@ -249,11 +249,21 @@
 "regno.non_valido.campagna_gia_condotta" = "la campagna di quest'anno è già conclusa";
 "regno.non_valido.nessuna_forza" = "nessun gruppo armato da mandare";
 "regno.non_valido.risorse_insufficienti" = "risorse insufficienti";
+"regno.non_valido.unita_ignota" = "formazione non trovata";
+"regno.non_valido.bersaglio_mancante" = "va scelto il reparto";
+"regno.non_valido.bersaglio_non_ammesso" = "il reparto non può ricevere questo lavoro";
+"regno.non_valido.gia_ordinato" = "per questo reparto c'è già un lavoro ordinato in questo inverno";
+/* I miglioramenti dei reparti (01 §4.13): nelle frasi stanno in coda, senza articolo né accordo. */
+"miglioramento.addestramento_mirato" = "addestramento mirato";
 /* Le voci che si ordinano in patria (01 §5.9.1.3): termini che fanno da soggetto di frase (02 §4.6),
    con il genere dichiarato. Stanno sempre in testa alla frase, e per questo hanno la maiuscola. */
 "regno.voce.leva_fanteria_leggera" = "Leva di fanteria leggera";
 "regno.voce.leva_fanteria_pesante" = "Leva di fanteria pesante";
 "regno.voce.leva_cavalleria_manovrata" = "Leva di cavalleria manovrata";
+"regno.voce.addestramento_mirato" = "Addestramento mirato";
+"regno.voce.mantenimento_addestramento" = "Mantenimento dell'addestramento mirato";
 "genere.regno.voce.leva_fanteria_leggera" = "femminile";
 "genere.regno.voce.leva_fanteria_pesante" = "femminile";
 "genere.regno.voce.leva_cavalleria_manovrata" = "femminile";
+"genere.regno.voce.addestramento_mirato" = "maschile";
+"genere.regno.voce.mantenimento_addestramento" = "maschile";

@@ -130,7 +130,7 @@ public struct MotoreCampagna: Sendable {
             }
             // Il distaccamento ha bisogno di un nome dalla lista chiusa (01 §5.6.0.4).
             // Esaurita la lista, la divisione è rifiutata (S16).
-            guard stato.prossimoIndiceNome < valoriCampagna.nomiGruppi.count else {
+            guard prossimoNomeLibero(stato) != nil else {
                 return .nonValido(.nomiEsauriti)
             }
             return .valido
@@ -452,10 +452,11 @@ public struct MotoreCampagna: Sendable {
             case .giornataChiusa, .giornataAperta, .formazioneAvversariaAvvistata,
                  .imboscataScattata, .direzioneDedotta,
                  .battagliaInnescata, .battagliaConclusa,
-                 .stagioneCambiata, .campagnaConclusa:
+                 .stagioneCambiata, .campagnaConclusa, .arrivoDallaPatria:
                 // Confini di giornata, avvistamenti, scatti d'imboscata (sempre fra parti
                 // opposte, il giocatore è parte) e deduzioni (prodotte solo per lui). Le
                 // battaglie innescate e concluse coinvolgono sempre il giocatore: si consegnano.
+                // Gli arrivi dalla patria sono soltanto suoi (incarico 31).
                 return true
             case .marciaOrdinata(let g, _, _, _, _), .presidioOrdinato(let g, _, _),
                  .marciaRevocata(let g, _, _, _), .marciaCompiuta(let g, _, _, _),
@@ -614,12 +615,13 @@ public struct MotoreCampagna: Sendable {
             // riusano). Nasce nella casella adiacente AVENDO GIÀ AGITO, perché il
             // collocamento è uno spostamento (01 §5.6.0.2); mai in marcia.
             let idNuovo = IdGruppo(nuovo.prossimoIdGruppo)
-            let nomeNuovo = valoriCampagna.nomiGruppi[nuovo.prossimoIndiceNome]
+            let libero = prossimoNomeLibero(nuovo)!
+            let nomeNuovo = libero.nome
             nuovo.gruppi[idNuovo] = Gruppo(id: idNuovo, parte: parte, nome: nomeNuovo,
                                            posizione: destinazione, composizione: distacco,
                                            azioneSpesa: true, marcia: nil)
             nuovo.prossimoIdGruppo += 1
-            nuovo.prossimoIndiceNome += 1
+            nuovo.prossimoIndiceNome = libero.indice + 1
             // Fatto DECISO dal giocatore: l'evento annuncia, il registro non annota.
             eventi.append(.gruppoDiviso(gruppo: idGruppo, nome: origine.nome,
                                         distaccamento: idNuovo, nomeDistaccamento: nomeNuovo,
@@ -876,7 +878,78 @@ public struct MotoreCampagna: Sendable {
                     eventi.append(.stagioneCambiata(stagione: nuova))
                 }
             }
+            // Gli ARRIVI DALLA PATRIA di questa giornata (01 §5.2.1; incarico 31): raggiungono il
+            // quartier generale all'apertura, dopo il cambio di stagione che li porta. Un gruppo
+            // appena arrivato attende una decisione, e la giornata non si chiude da sé.
+            eventi.append(contentsOf: Self.consegnaGliArrivi(&stato))
         }
+        return eventi
+    }
+
+    // MARK: - I nomi e gli arrivi dalla patria (01 §5.6.0.4, §5.2.1; incarico 31)
+
+    /// Il prossimo nome della lista chiusa che questa campagna può assegnare a un gruppo che nasce
+    /// sul fronte (01 §5.6.0.4): il primo, dall'indice corrente in avanti, che il regno non tenga
+    /// per una propria formazione. L'indice avanza soltanto, sicché un nome non si riusa dentro la
+    /// campagna. Nulla se la lista è esaurita.
+    public func prossimoNomeLibero(_ stato: StatoCampagna) -> (indice: Int, nome: IdentificatoreDati)? {
+        let riservati = Set(stato.nomiRiservati ?? [])
+        var indice = stato.prossimoIndiceNome
+        while indice < valoriCampagna.nomiGruppi.count {
+            let nome = valoriCampagna.nomiGruppi[indice]
+            if !riservati.contains(nome) { return (indice, nome) }
+            indice += 1
+        }
+        return nil
+    }
+
+    /// La CASELLA in cui entra una formazione che arriva dalla patria (01 §5.2.1: il quartier
+    /// generale è «il punto di arrivo di truppe e asset militari inviati dalla patria»): il proprio
+    /// quartier generale, oppure — se è occupato — la casella libera più vicina, a parità di
+    /// distanza nell'ordine di lettura. Libera vuol dire senza alcuna formazione, propria o
+    /// avversaria, senza forze nemiche ferme e non meta di una marcia propria: chi arriva non
+    /// entra in contatto e non occupa un posto prenotato. Nulla se la mappa non ha una casella libera.
+    public static func casellaDiArrivo(_ stato: StatoCampagna) -> Cella? {
+        let quartierGenerale = stato.mappa.quartierGenerale(di: .giocatore)
+        var occupate = Set(stato.gruppi.values.map(\.posizione)).union(stato.forzeNemiche)
+        for gruppo in stato.gruppi.values where gruppo.parte == .giocatore {
+            if let meta = gruppo.marcia?.destinazione { occupate.insert(meta) }
+        }
+        let griglia = stato.griglia
+        return griglia.tutteLeCaselle
+            .filter { !occupate.contains($0) }
+            .min {
+                let da = griglia.distanza(quartierGenerale, $0), db = griglia.distanza(quartierGenerale, $1)
+                return da == db ? $0 < $1 : da < db
+            }
+    }
+
+    /// Consegna gli ARRIVI DALLA PATRIA della giornata in corso (01 §5.2.1, §5.17.1; incarico 31):
+    /// ciascuno diventa un gruppo del giocatore nella casella d'arrivo, con il nome che il regno gli
+    /// ha dato, in attesa di una decisione; il fatto entra nel registro — il giocatore non l'ha
+    /// deciso adesso — e si annuncia. Un arrivo per cui non c'è una casella libera attende la
+    /// giornata successiva. Funzione dello stato soltanto: la usa la fabbrica per la prima
+    /// giornata e l'apertura di ogni giornata successiva.
+    static func consegnaGliArrivi(_ stato: inout StatoCampagna) -> [EventoCampagna] {
+        guard let attesa = stato.arriviInAttesa, !attesa.isEmpty else { return [] }
+        var eventi: [EventoCampagna] = []
+        var restano: [ArrivoInAttesa] = []
+        for arrivo in attesa {
+            guard arrivo.giorno <= stato.giorno, let casella = casellaDiArrivo(stato) else {
+                restano.append(arrivo)
+                continue
+            }
+            let id = IdGruppo(stato.prossimoIdGruppo)
+            stato.gruppi[id] = Gruppo(id: id, parte: .giocatore, nome: arrivo.nome, posizione: casella,
+                                      composizione: arrivo.composizione, categoria: arrivo.categoria,
+                                      azioneSpesa: false)
+            stato.prossimoIdGruppo += 1
+            stato.registro.append(VoceRegistro(numero: stato.prossimoNumeroVoce, giorno: stato.giorno,
+                                               fatto: .arrivoDallaPatria(gruppo: arrivo.nome, casella: casella)))
+            stato.prossimoNumeroVoce += 1
+            eventi.append(.arrivoDallaPatria(gruppo: id, nome: arrivo.nome, casella: casella))
+        }
+        stato.arriviInAttesa = restano
         return eventi
     }
 

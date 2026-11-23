@@ -264,6 +264,25 @@ public struct VantaggiNascosti: Codable, Hashable, Sendable {
 }
 
 /// L'insieme dei valori caricati e validati che il Motore riceve (05 §1.2).
+/// Un MIGLIORAMENTO di reparto (01 §4.13; incarico 31): l'addestramento mirato che in patria si dà a
+/// un reparto già esistente e che in battaglia ne accresce le prestazioni. Il coefficiente agisce
+/// sulla capacità offensiva del reparto che lo porta; la formula sta nel Motore (00 §13.3).
+public struct DefinizioneMiglioramento: Codable, Hashable, Sendable {
+    public let identificatore: IdentificatoreDati
+    /// Il coefficiente della capacità offensiva del reparto migliorato: mai sotto uno, perché un
+    /// miglioramento non peggiora.
+    public let capacitaOffensiva: Scalato
+
+    public init(identificatore: IdentificatoreDati, capacitaOffensiva: Scalato) {
+        self.identificatore = identificatore; self.capacitaOffensiva = capacitaOffensiva
+    }
+
+    enum CodingKeys: String, CodingKey {
+        case identificatore
+        case capacitaOffensiva = "capacita_offensiva"
+    }
+}
+
 public struct ValoriDiGioco: Sendable {
     public let versione: String
     /// Versione effettiva registrata nei salvataggi: base, o base più suffisso locale (RDA-45).
@@ -279,4 +298,6 @@ public struct ValoriDiGioco: Sendable {
     public let combattimento: ParametriCombattimento
     public let ufficiali: [IdentificatoreDati: DefinizioneUfficiale]
     public let vantaggi: VantaggiNascosti
+    /// I miglioramenti di reparto che il regno può dare (01 §4.13; incarico 31), per chiave.
+    public let miglioramenti: [IdentificatoreDati: DefinizioneMiglioramento]
 }

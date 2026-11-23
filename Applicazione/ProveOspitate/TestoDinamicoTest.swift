@@ -198,7 +198,7 @@ final class TestoDinamicoTest: XCTestCase {
             let patria = try XCTUnwrap(s as? SchermataPatria)
             try await self.attendi { patria.corpoPerProva.arrangedSubviews.count > 5 }
             await patria.eseguiPerProva(.attendiInverno)
-            await patria.eseguiPerProva(.ordina(voce: "leva_fanteria_leggera"))
+            await patria.eseguiPerProva(.ordina(voce: "leva_fanteria_leggera", bersaglio: nil))
         })
         XCTAssertEqual(difetti, [], difetti.joined(separator: "\n"))
     }

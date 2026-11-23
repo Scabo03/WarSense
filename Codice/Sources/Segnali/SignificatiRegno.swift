@@ -5,8 +5,8 @@ import Motore
 /// La traduzione dei fatti del regno in significato e annuncio (05 §10.7; incarico 30), gemella dei
 /// traduttori della battaglia e della campagna: stessa struttura, stesse regole, perché il giocatore
 /// impari un modo solo (00 §7.1). È anche l'UNICO autore delle frasi del regno — annunci, voci del
-/// registro della patria, costi, impedimenti —, sicché la schermata della patria e i segnali non
-/// possano dire cose diverse dello stesso fatto. Parte neutra e collaudabile: nessun canale di
+/// registro della patria, costi, impedimenti, forze —, sicché la schermata della patria e i segnali
+/// non possano dire cose diverse dello stesso fatto. Parte neutra e collaudabile: nessun canale di
 /// piattaforma.
 public struct TraduttoreEventiRegno: Sendable {
     let testi: Testi
@@ -45,6 +45,149 @@ public struct TraduttoreEventiRegno: Sendable {
     /// Una voce del regno come soggetto di frase, con il suo genere (02 §4.6).
     public func voce(_ identificatore: IdentificatoreDati) -> Soggetto {
         testi.soggetto(.voceDelRegno, identificatore)
+    }
+
+    /// Il termine chiuso di un miglioramento (01 §4.13): nelle frasi sta in coda, dove non chiede
+    /// né articolo né accordo.
+    public func miglioramento(_ identificatore: IdentificatoreDati) -> String {
+        testi.termine(Self.chiave(delMiglioramento: identificatore)).testo
+    }
+
+    public static func chiave(delMiglioramento identificatore: IdentificatoreDati) -> String {
+        "miglioramento." + identificatore
+    }
+
+    /// Il titolo di una linguetta dell'inverno (01 §5.9.1.3).
+    public func linguetta(_ identificatore: IdentificatoreDati) -> String {
+        testi.frase(Self.chiave(dellaLinguetta: identificatore)).testo
+    }
+
+    public static func chiave(dellaLinguetta identificatore: IdentificatoreDati) -> String {
+        "patria.linguetta." + identificatore
+    }
+
+    // MARK: - Le forze (01 §5.6.0, §5.6.0.4; incarico 31): la sola parte che dipende dalla modalità
+
+    /// Un reparto in parole: «6 atomi di fanteria leggera», e se porta un miglioramento «8 atomi di
+    /// fanteria pesante con addestramento mirato». L'archetipo è il soggetto della frase, con il suo
+    /// genere (02 §4.6).
+    public func reparto(_ reparto: Reparto, conMiglioramento: Bool = true) -> String {
+        let unita = testi.soggetto(.unita, reparto.archetipo)
+        if conMiglioramento, let chiave = reparto.miglioramento {
+            return testi.frase("regno.reparto_migliorato", soggetto: unita, reparto.atomi,
+                               miglioramento(chiave)).testo
+        }
+        return testi.frase("divisione.reparto", soggetto: unita, reparto.atomi).testo
+    }
+
+    /// I reparti di una composizione, in fila.
+    public func composizione(_ reparti: [Reparto]) -> String {
+        reparti.map { reparto($0) }.joined(separator: separatoreDiElenco)
+    }
+
+    /// Un reparto di una formazione d'INVERNO, con ciò che il giocatore deve sapere per decidere
+    /// (01 §4.14): se il miglioramento che porta va ancora mantenuto, se è già stato mantenuto, o se
+    /// un addestramento è in corso. `lavori` sono quelli ordinati in questo inverno.
+    func repartoDInverno(_ reparto: Reparto, bersaglio: BersaglioMilitare, lavori: [LavoroOrdinato]) -> String {
+        let base = self.reparto(reparto)
+        guard let lavoro = lavori.first(where: { $0.bersaglio == bersaglio }) else {
+            return reparto.miglioramento == nil ? base
+                                                : testi.frase("regno.miglioramento_da_mantenere", base).testo
+        }
+        switch lavoro.effetto.specie {
+        case .migliora(let chiave):
+            return testi.frase("regno.miglioramento_in_corso", base, miglioramento(chiave)).testo
+        case .mantiene:
+            return testi.frase("regno.miglioramento_mantenuto", base).testo
+        case .recluta:
+            return base
+        }
+    }
+
+    /// La riga di una formazione in patria (incarico 31): il nome — che è il soggetto, e che il
+    /// giocatore ritrova uguale da un anno all'altro —, la categoria, i reparti, e DOVE VA: se parte
+    /// per il fronte o resta in patria; per le reclute dell'inverno, dove e quando entrano.
+    /// `lavori`, d'inverno, aggiungono a ciascun reparto lo stato del suo miglioramento.
+    public func formazione(_ formazione: FormazioneDelRegno, lavori: [LavoroOrdinato]? = nil) -> String {
+        let nome = testi.soggetto(.gruppo, formazione.nome)
+        let categoria = testi.termine(formazione.categoria.chiaveCategoria).testo
+        let reparti: String
+        if let lavori {
+            reparti = formazione.composizione.enumerated().map { indice, reparto in
+                repartoDInverno(reparto, bersaglio: BersaglioMilitare(unita: formazione.nome, elemento: indice),
+                                lavori: lavori)
+            }.joined(separator: separatoreDiElenco)
+        } else {
+            reparti = composizione(formazione.composizione)
+        }
+        guard let arrivo = formazione.arrivo else {
+            return formazione.inPatria
+                ? testi.frase("patria.formazione_in_patria", soggetto: nome, categoria, reparti).testo
+                : testi.frase("patria.formazione_al_fronte", soggetto: nome, categoria, reparti).testo
+        }
+        let stagione = testi.termine(arrivo.chiaveTesto).testo
+        if arrivo == .inverno {
+            return testi.frase("patria.reclute_con_l_inverno", soggetto: nome, categoria, reparti).testo
+        }
+        if formazione.inPatria {
+            return testi.frase("patria.reclute_in_patria", soggetto: nome, categoria, reparti, stagione).testo
+        }
+        return arrivo == .primavera
+            ? testi.frase("patria.reclute_in_primavera", soggetto: nome, categoria, reparti).testo
+            : testi.frase("patria.reclute_a_campagna_aperta", soggetto: nome, categoria, reparti, stagione).testo
+    }
+
+    /// Le forze in parole, una riga per unità: è ciò che la patria elenca.
+    public func forze(_ forze: ForzeDelRegno, lavori: [LavoroOrdinato]? = nil) -> [(unita: IdentificatoreDati, testo: String)] {
+        switch forze {
+        case .sciami(let formazioni, _):
+            return formazioni.map { ($0.nome, formazione($0, lavori: lavori)) }
+        }
+    }
+
+    /// La frase che dichiara l'ingresso delle reclute di un inverno (01 §4.12; incarico 31): quale
+    /// formazione formano, con che cosa, e dove e quando entra.
+    public func ingresso(_ ingresso: IngressoNelleForze) -> String {
+        let nome = testi.soggetto(.gruppo, ingresso.unita)
+        let reparti = composizione(ingresso.composizione)
+        if ingresso.confluite {
+            return testi.frase("regno.reclute_confluite", soggetto: nome, reparti).testo
+        }
+        switch ingresso.arrivo {
+        case .primavera:
+            return testi.frase("regno.reclute_in_primavera", soggetto: nome, reparti).testo
+        case .estate, .autunno:
+            return testi.frase("regno.reclute_a_campagna_aperta", soggetto: nome, reparti,
+                               testi.termine(ingresso.arrivo.chiaveTesto).testo).testo
+        case .inverno:
+            return testi.frase("regno.reclute_con_l_inverno", soggetto: nome, reparti).testo
+        }
+    }
+
+    /// La frase di ciò che il mantenimento ha sciolto (01 §4.14.1.1).
+    public func sciolto(_ elemento: ElementoDelleForze) -> String {
+        testi.frase("regno.reparto_sciolto", soggetto: testi.soggetto(.gruppo, elemento.unita),
+                    reparto(elemento.reparto)).testo
+    }
+
+    /// La frase di un miglioramento compiuto (01 §4.13).
+    public func migliorato(_ elemento: ElementoDelleForze) -> String {
+        testi.frase("regno.miglioramento_dato", soggetto: testi.soggetto(.gruppo, elemento.unita),
+                    reparto(elemento.reparto)).testo
+    }
+
+    /// La frase di un miglioramento perduto perché non mantenuto (01 §4.14): il reparto resta.
+    public func miglioramentoPerduto(_ elemento: ElementoDelleForze) -> String {
+        testi.frase("regno.miglioramento_perduto", soggetto: testi.soggetto(.gruppo, elemento.unita),
+                    reparto(elemento.reparto, conMiglioramento: false),
+                    elemento.reparto.miglioramento.map { miglioramento($0) } ?? "").testo
+    }
+
+    /// Il bersaglio di una voce in parole: «8 atomi di fanteria pesante di Lupo». Nullo se non esiste.
+    public func bersaglio(_ bersaglio: BersaglioMilitare, forze: ForzeDelRegno) -> String? {
+        guard let reparto = forze.reparto(bersaglio) else { return nil }
+        return testi.frase("regno.bersaglio_descritto", soggetto: testi.soggetto(.gruppo, bersaglio.unita),
+                           self.reparto(reparto)).testo
     }
 
     // MARK: - Risorse, costi, impedimenti (01 §5.9.1.5, 02 §8.7)
@@ -86,12 +229,16 @@ public struct TraduttoreEventiRegno: Sendable {
         return testi.termine(motivo.chiaveTesto)
     }
 
-    /// Ciò che una voce militare dà, in parole (05 §7.7): è la sola frase del regno che dipende
+    /// Ciò che una voce militare dà, in parole (05 §7.7): è la sola frase delle voci che dipende
     /// dalla modalità di battaglia.
     public func effetto(_ effetto: EffettoMilitare) -> String {
         switch effetto {
         case .reclutaReparto(_, let atomi):
             return testi.frase("regno.effetto.recluta_reparto", atomi).testo
+        case .miglioraReparto:
+            return testi.frase("regno.effetto.migliora_reparto").testo
+        case .mantieniMiglioramento:
+            return testi.frase("regno.effetto.mantieni_miglioramento").testo
         }
     }
 
@@ -113,15 +260,65 @@ public struct TraduttoreEventiRegno: Sendable {
         return parti.joined(separator: separatoreDiFrasi)
     }
 
-    /// La riga di un lavoro già ordinato: «Leva di fanteria leggera, pronta in primavera».
-    public func lavoroElencato(_ lavoro: LavoroOrdinato) -> String {
-        testi.frase("regno.lavoro_elencato", soggetto: voce(lavoro.voce),
-                    testi.termine(lavoro.pronto.chiaveTesto).testo).testo
+    /// L'etichetta di una voce che si ordina SU un reparto esistente (01 §4.13, §4.14), nell'elenco
+    /// dell'inverno: il nome; che il reparto si sceglie, oppure che non ce n'è alcuno; ciò che dà e
+    /// quando sarà pronta. Il costo dipende dal reparto e lo dichiara ciascuna scelta.
+    public func etichetta(dellaVoceConBersaglio voce: VoceDelRegno, bersagli: Int, pronta: Stagione,
+                          verbosita: Verbosita) -> String {
+        let soggetto = self.voce(voce.identificatore)
+        var parti = [testi.frase("regno.voce_nome", soggetto: soggetto).testo]
+        parti.append(testi.frase(bersagli == 0 ? "regno.voce_senza_bersagli" : "regno.voce_con_bersaglio").testo)
+        if verbosita != .sintetico {
+            parti.append(testi.frase("regno.voce_effetto", soggetto: soggetto, effetto(voce.effetto),
+                                     testi.termine(pronta.chiaveTesto).testo).testo)
+        }
+        return parti.joined(separator: separatoreDiFrasi)
+    }
+
+    /// L'etichetta di una scelta nell'elenco dei reparti su cui ordinare una voce: la formazione e
+    /// il reparto; l'impossibilità, se c'è; il costo sulla riserva (02 §8.7).
+    public func etichetta(delBersaglio bersaglio: BersaglioMilitare, forze: ForzeDelRegno, costo: Riserve,
+                          riserve: Riserve, fase: Fase) -> String {
+        var parti: [String] = []
+        if let reparto = forze.reparto(bersaglio) {
+            parti.append(testi.frase("regno.bersaglio", soggetto: testi.soggetto(.gruppo, bersaglio.unita),
+                                     self.reparto(reparto)).testo)
+        }
+        let mancanti = riserve.mancanti(per: costo)
+        if !mancanti.isEmpty { parti.append(impedimento(mancanti, fase: fase)) }
+        parti.append(self.costo(costo, su: riserve, fase: fase))
+        return parti.joined(separator: separatoreDiFrasi)
+    }
+
+    /// La riga di un lavoro già ordinato: «Leva di fanteria leggera, pronta in primavera»; per le
+    /// voci con un bersaglio, anche su che cosa.
+    public func lavoroElencato(_ lavoro: LavoroOrdinato, forze: ForzeDelRegno) -> String {
+        let stagione = testi.termine(lavoro.pronto.chiaveTesto).testo
+        if let bersaglio = lavoro.bersaglio, let descritto = self.bersaglio(bersaglio, forze: forze) {
+            return testi.frase("regno.lavoro_elencato_su", soggetto: voce(lavoro.voce), stagione, descritto).testo
+        }
+        return testi.frase("regno.lavoro_elencato", soggetto: voce(lavoro.voce), stagione).testo
     }
 
     /// La conferma dell'annullamento di una spesa.
     public func spesaAnnullata(_ lavoro: LavoroOrdinato) -> TestoLocalizzato {
         testi.frase("regno.spesa_annullata", soggetto: voce(lavoro.voce))
+    }
+
+    /// Ciò che la PRIMA schermata dell'inverno dichiara del mantenimento (01 §4.14.1.1): quanto il
+    /// gioco ha prelevato da sé e, se il denaro non è bastato, che cosa ha sciolto. Vuoto se non
+    /// c'era nulla da mantenere.
+    public func dichiarazioneDelMantenimento(prelevato: Riserve, sciolti: [ElementoDelleForze],
+                                             fase: Fase) -> [String] {
+        var righe: [String] = []
+        if !prelevato.sonoVuote {
+            righe.append(testi.frase("patria.mantenimento", elenco(prelevato, fase: fase)).testo)
+        }
+        if !sciolti.isEmpty {
+            righe.append(testi.frase("patria.mantenimento_insufficiente").testo)
+            righe += sciolti.map { testi.frase("regno.frase_in_elenco", sciolto($0)).testo }
+        }
+        return righe
     }
 
     // MARK: - Eventi (05 §3.7)
@@ -131,37 +328,53 @@ public struct TraduttoreEventiRegno: Sendable {
     /// calendario si annunciano a parole e non ne aggiungono.
     public func significato(per evento: EventoRegno) -> SignificatoSegnale? {
         switch evento {
-        case .campagnaAperta, .lavoroOrdinato: return .conferma
+        case .campagnaAperta, .lavoroOrdinato, .unitaDestinata: return .conferma
         case .campagnaConclusa, .invernoCominciato, .stazioneAperta, .primaveraCominciata: return nil
         }
     }
 
     /// L'annuncio per l'evento, già nella lingua dichiarata. Nulla per la conclusione della
-    /// campagna, che ha la propria schermata (05 §9.3).
-    public func annuncio(per evento: EventoRegno, fase: Fase) -> TestoLocalizzato? {
+    /// campagna, che ha la propria schermata (05 §9.3). `forze` sono quelle del regno dopo
+    /// l'evento: servono a nominare il bersaglio di una voce.
+    public func annuncio(per evento: EventoRegno, fase: Fase, forze: ForzeDelRegno? = nil) -> TestoLocalizzato? {
         switch evento {
         case .campagnaAperta(let fronte):
             return testi.frase("regno.campagna_aperta", self.fronte(fronte))
         case .campagnaConclusa:
             return nil
-        case .invernoCominciato(let anno, let entrata):
-            return testi.frase("regno.inverno_cominciato", anno, elenco(entrata, fase: fase))
-        case .lavoroOrdinato(let voce, _, let pronto):
-            return testi.frase("regno.lavoro_ordinato", soggetto: self.voce(voce),
-                               testi.termine(pronto.chiaveTesto).testo)
+        case .invernoCominciato(let anno, let entrata, let mantenimento, let sciolti):
+            // Una frase per fatto, in fila: l'inverno con l'entrata; il mantenimento che il gioco
+            // ha prelevato da sé; e, se il denaro non è bastato, ciò che è stato sciolto.
+            var testo = testi.frase("regno.inverno_cominciato", anno, elenco(entrata, fase: fase)).testo
+            if !mantenimento.sonoVuote {
+                testo += testi.frase("regno.mantenimento_prelevato", elenco(mantenimento, fase: fase)).testo
+            }
+            if !sciolti.isEmpty { testo += testi.frase("regno.mantenimento_insufficiente").testo }
+            for elemento in sciolti { testo += testi.frase("regno.frase_in_fila", sciolto(elemento)).testo }
+            return TestoLocalizzato(testo: testo, lingua: testi.lingua)
+        case .lavoroOrdinato(let voce, _, let pronto, let bersaglio):
+            let stagione = testi.termine(pronto.chiaveTesto).testo
+            if let bersaglio, let forze, let descritto = self.bersaglio(bersaglio, forze: forze) {
+                return testi.frase("regno.lavoro_ordinato_su", soggetto: self.voce(voce), stagione, descritto)
+            }
+            return testi.frase("regno.lavoro_ordinato", soggetto: self.voce(voce), stagione)
         case .stazioneAperta(let stazione):
             return testi.frase("regno.stazione_aperta", stazione, MomentoDellAnno.stazioniInvernali)
-        case .primaveraCominciata(let anno, let perduto, let lavoriPronti):
+        case .primaveraCominciata(let anno, let perduto, let ingressi, let migliorati, let perduti):
             // Una frase per fatto, in fila: la primavera, ciò che il riporto ha tolto se ha tolto
-            // qualcosa (la condizione assente non si nomina, 02 §8.7.1), i lavori pronti.
+            // qualcosa (la condizione assente non si nomina, 02 §8.7.1), le reclute con il luogo e
+            // il momento in cui entrano, i miglioramenti compiuti, quelli perduti.
             var testo = testi.frase("regno.primavera_cominciata", anno).testo
             if !perduto.sonoVuote {
                 testo += testi.frase("regno.riporto_perduto", elenco(perduto, fase: fase)).testo
             }
-            for voce in lavoriPronti {
-                testo += testi.frase("regno.lavoro_pronto", soggetto: self.voce(voce)).testo
-            }
+            for ingresso in ingressi { testo += testi.frase("regno.frase_in_fila", self.ingresso(ingresso)).testo }
+            for elemento in migliorati { testo += testi.frase("regno.frase_in_fila", migliorato(elemento)).testo }
+            for elemento in perduti { testo += testi.frase("regno.frase_in_fila", miglioramentoPerduto(elemento)).testo }
             return TestoLocalizzato(testo: testo, lingua: testi.lingua)
+        case .unitaDestinata(let unita, let alFronte):
+            return testi.frase(alFronte ? "regno.unita_al_fronte" : "regno.unita_in_patria",
+                               soggetto: testi.soggetto(.gruppo, unita))
         }
     }
 
@@ -169,8 +382,13 @@ public struct TraduttoreEventiRegno: Sendable {
 
     /// La frase di una voce del registro della patria: compiuta, con l'anno e la stagione cui si
     /// riferisce, una frase intera per ciascun fatto (00 §14.2).
-    public func voceDiRegistro(_ voce: VoceRegistroPatria) -> TestoLocalizzato {
+    public func voceDiRegistro(_ voce: VoceRegistroPatria, fase: Fase) -> TestoLocalizzato {
         let stagione = testi.termine(voce.stagione.chiaveTesto).testo
+        /// I fatti delle forze hanno già la propria frase, la stessa dell'annuncio: il registro vi
+        /// premette l'anno e la stagione.
+        func datato(_ frase: String) -> TestoLocalizzato {
+            testi.frase("registro_patria.fatto", voce.anno, stagione, frase)
+        }
         switch voce.fatto {
         case .campagnaConclusa(let fronte, let modo, let vincitore):
             let chiave: String
@@ -183,13 +401,21 @@ public struct TraduttoreEventiRegno: Sendable {
             return testi.frase(chiave, voce.anno, stagione, self.fronte(fronte))
         case .invernoCominciato:
             return testi.frase("registro_patria.inverno_cominciato", voce.anno, stagione)
-        case .lavoroPronto(let identificatore):
-            return testi.frase("registro_patria.lavoro_pronto", soggetto: self.voce(identificatore),
-                               voce.anno, stagione)
         case .primaveraCominciata(let eccedenzaPerduta):
             return testi.frase(eccedenzaPerduta ? "registro_patria.primavera_con_riporto"
                                                 : "registro_patria.primavera",
                                voce.anno, stagione)
+        case .mantenimentoPrelevato(let quota):
+            return testi.frase("registro_patria.mantenimento_prelevato", voce.anno, stagione,
+                               elenco(quota, fase: fase))
+        case .elementoSciolto(let elemento):
+            return datato(sciolto(elemento))
+        case .recluteEntrate(let ingresso):
+            return datato(self.ingresso(ingresso))
+        case .miglioramentoDato(let elemento):
+            return datato(migliorato(elemento))
+        case .miglioramentoPerduto(let elemento):
+            return datato(miglioramentoPerduto(elemento))
         }
     }
 

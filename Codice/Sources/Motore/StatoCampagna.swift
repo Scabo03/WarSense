@@ -60,9 +60,33 @@ public struct Reparto: Hashable, Codable, Sendable {
     /// Il numero di atomi del reparto. Sempre positivo: un reparto senza atomi non
     /// esiste, e la fabbrica lo respinge (invariante «nessun gruppo vuoto»).
     public let atomi: Int
+    /// Il MIGLIORAMENTO che il reparto porta (01 §4.13; incarico 31): la chiave di un addestramento
+    /// mirato ricevuto in patria, che in battaglia ne accresce le prestazioni. Nullo per il reparto
+    /// ordinario, e allora OMESSO dalla codifica, sicché scenari, esiti e giornali scritti prima
+    /// restano identici al byte (RDA-113).
+    public let miglioramento: IdentificatoreDati?
+    /// L'ANNO DI LEVA (incarico 31): l'anno del regno in cui il reparto è stato reclutato. Serve al
+    /// regno, che quando il denaro non basta al mantenimento scioglie per primi i reparti reclutati
+    /// per ultimi (01 §4.14.1.1); sul fronte e in battaglia non ha alcun effetto, lo si porta
+    /// soltanto. Nullo per i reparti delle campagne di prova e per quelli con cui il regno comincia
+    /// — i più anziani —, e allora omesso dalla codifica.
+    public let leva: Int?
 
-    public init(archetipo: IdentificatoreDati, atomi: Int) {
+    public init(archetipo: IdentificatoreDati, atomi: Int,
+                miglioramento: IdentificatoreDati? = nil, leva: Int? = nil) {
         self.archetipo = archetipo; self.atomi = atomi
+        self.miglioramento = miglioramento; self.leva = leva
+    }
+
+    /// Lo stesso reparto con un altro numero di atomi: ciò che lo distingue — archetipo,
+    /// miglioramento, anno di leva — resta.
+    public func con(atomi: Int) -> Reparto {
+        Reparto(archetipo: archetipo, atomi: atomi, miglioramento: miglioramento, leva: leva)
+    }
+
+    /// Lo stesso reparto con un altro miglioramento, o senza.
+    public func con(miglioramento: IdentificatoreDati?) -> Reparto {
+        Reparto(archetipo: archetipo, atomi: atomi, miglioramento: miglioramento, leva: leva)
     }
 }
 
@@ -485,6 +509,12 @@ public enum FattoRegistrato: Hashable, Codable, Sendable {
     /// giocatore non ha deciso). Accade soltanto nella campagna che dichiara un calendario, cioè
     /// quella aperta dal regno (incarico 30). Non ha luogo: riguarda il fronte intero.
     case stagioneCambiata(stagione: Stagione)
+    /// Una formazione è ARRIVATA DALLA PATRIA (01 §5.2.1, §5.17.1: «l'arrivo di truppe e
+    /// rifornimenti dalla patria» è fra i fatti che il giocatore non ha deciso; incarico 31): le
+    /// reclute pronte in primavera all'apertura della campagna, quelle che maturano in estate o in
+    /// autunno a campagna aperta. Porta il nome della formazione e la casella in cui è entrata — il
+    /// quartier generale, o la casella libera più vicina.
+    case arrivoDallaPatria(gruppo: IdentificatoreDati, casella: Cella)
 
     /// Un esemplare per ciascun caso, in ordine fisso. Serve al collaudo per
     /// pretendere che OGNI fatto abbia la propria frase compiuta: con i valori
@@ -509,6 +539,7 @@ public enum FattoRegistrato: Hashable, Codable, Sendable {
         .battagliaInnescata(casella: Cella(riga: 1, colonna: 1)),
         .battagliaConclusa(casella: Cella(riga: 1, colonna: 1), giocatoreSconfitto: false),
         .stagioneCambiata(stagione: .estate),
+        .arrivoDallaPatria(gruppo: "corvo", casella: Cella(riga: 1, colonna: 1)),
     ]
 
     /// La chiave del testo che compone la frase della voce (00 §14.1): il fatto
@@ -533,6 +564,7 @@ public enum FattoRegistrato: Hashable, Codable, Sendable {
         case .battagliaConclusa(_, let giocatoreSconfitto):
             return giocatoreSconfitto ? "registro.battaglia_persa" : "registro.battaglia_vinta"
         case .stagioneCambiata: return "registro.stagione_cambiata"
+        case .arrivoDallaPatria: return "registro.arrivo_dalla_patria"
         }
     }
 
@@ -555,6 +587,7 @@ public enum FattoRegistrato: Hashable, Codable, Sendable {
         case .direzioneDedotta(let casella): return casella
         case .battagliaInnescata(let casella): return casella
         case .battagliaConclusa(let casella, _): return casella
+        case .arrivoDallaPatria(_, let casella): return casella
         case .ordineAnnullato, .giornataAzzerata, .stagioneCambiata: return nil
         }
     }
@@ -686,6 +719,23 @@ public struct EsitoInCampagna: Hashable, Codable, Sendable {
                         modo: modo, gruppoGiocatore: gruppoGiocatore, gruppoAvversario: gruppoAvversario,
                         composizioneGiocatore: composizioneGiocatore, composizioneAvversario: composizioneAvversario,
                         posizioneGiocatore: cella, posizioneAvversario: posizioneAvversario)
+    }
+}
+
+/// Un ARRIVO DALLA PATRIA non ancora giunto (01 §5.2.1; incarico 31): la formazione che il regno ha
+/// programmato per una giornata futura della campagna. Finché attende non è un gruppo: non occupa
+/// caselle, non agisce, non conta fra i gruppi armati del fronte. All'apertura della giornata
+/// dichiarata diventa un gruppo al quartier generale (`MotoreCampagna.consegnaGliArrivi`).
+public struct ArrivoInAttesa: Hashable, Codable, Sendable {
+    public let giorno: Int
+    public let nome: IdentificatoreDati
+    public let composizione: [Reparto]
+    public let categoria: CategoriaFormazione
+
+    public init(giorno: Int, nome: IdentificatoreDati, composizione: [Reparto],
+                categoria: CategoriaFormazione) {
+        self.giorno = giorno; self.nome = nome
+        self.composizione = composizione; self.categoria = categoria
     }
 }
 
@@ -853,6 +903,15 @@ public struct StatoCampagna: Hashable, Codable, Sendable {
     /// campagna ogni comando è respinto col medesimo motivo e nulla più avanza. Si pone soltanto
     /// nella campagna che dichiara un calendario.
     public var conclusione: ConclusioneCampagna?
+    /// I NOMI che questa campagna non assegna (01 §5.6.0.4; incarico 31): quelli che il regno
+    /// tiene per le proprie formazioni — al fronte, in patria o in arrivo. Un gruppo che nasce sul
+    /// fronte, avversario o distaccamento, prende il primo nome della lista chiusa che non sia
+    /// fra questi (`MotoreCampagna.prossimoNomeLibero`). Nullo nelle campagne di prova, dove la
+    /// lista si scorre in ordine com'era; facoltativo, come il calendario, per le istantanee.
+    public var nomiRiservati: [IdentificatoreDati]?
+    /// Gli ARRIVI DALLA PATRIA non ancora giunti (incarico 31), nell'ordine in cui arriveranno.
+    /// Nullo nelle campagne che non ne dichiarano; vuoto quando sono giunti tutti.
+    public var arriviInAttesa: [ArrivoInAttesa]?
 
     public init(mappa: MappaCampagna, giorno: Int, gruppi: [IdGruppo: Gruppo],
                 prossimoIdGruppo: Int, prossimoIndiceNome: Int,
@@ -866,7 +925,9 @@ public struct StatoCampagna: Hashable, Codable, Sendable {
                 imboscateScoperte: [Parte: Set<Cella>] = [:],
                 battaglieInSospeso: [BattagliaInSospeso] = [],
                 calendario: CalendarioDiCampagna? = nil,
-                conclusione: ConclusioneCampagna? = nil) {
+                conclusione: ConclusioneCampagna? = nil,
+                nomiRiservati: [IdentificatoreDati]? = nil,
+                arriviInAttesa: [ArrivoInAttesa]? = nil) {
         self.mappa = mappa; self.giorno = giorno; self.gruppi = gruppi
         self.prossimoIdGruppo = prossimoIdGruppo
         self.prossimoIndiceNome = prossimoIndiceNome
@@ -881,6 +942,8 @@ public struct StatoCampagna: Hashable, Codable, Sendable {
         self.battaglieInSospeso = battaglieInSospeso
         self.calendario = calendario
         self.conclusione = conclusione
+        self.nomiRiservati = nomiRiservati
+        self.arriviInAttesa = arriviInAttesa
     }
 
     /// La data della giornata in corso, se la campagna dichiara un calendario (01 §5.6.10.2).

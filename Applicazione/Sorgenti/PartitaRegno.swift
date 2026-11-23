@@ -76,8 +76,10 @@ final class PartitaRegno {
     }
 
     private func segnala(_ eventi: [EventoRegno]) async {
-        let fase = await sessione.stato.fase
-        for evento in eventi { ambiente.segnali.segnala(evento: evento, fase: fase) }
+        let stato = await sessione.stato
+        for evento in eventi {
+            ambiente.segnali.segnala(evento: evento, fase: stato.fase, forze: stato.forze)
+        }
     }
 
     @discardableResult
@@ -160,9 +162,16 @@ final class PartitaRegno {
     /// I premi che l'esito aggiunge alla rendita dell'anno: li calcola il Motore (05 §9.4).
     func premi(per esito: EsitoCampagna) -> Riserve { motore.premi(per: esito) }
 
-    /// Il costo di una voce e la stagione in cui sarà pronta, com'è adesso.
-    func costo(di voce: VoceDelRegno) -> Riserve { motore.costo(di: voce) }
+    /// Il costo di una voce e la stagione in cui sarà pronta, com'è adesso: li calcola il Motore
+    /// (05 §9.4). Per le voci che si ordinano su un reparto il costo è quello del reparto indicato.
+    func costo(di voce: VoceDelRegno, bersaglio: BersaglioMilitare? = nil, stato: StatoRegno) -> Riserve? {
+        motore.costo(di: voce, bersaglio: bersaglio, stato: stato)
+    }
     func prontoIn(_ voce: VoceDelRegno, stato: StatoRegno) -> Stagione {
         motore.prontoIn(voce: voce, stato: stato)
+    }
+    /// I reparti su cui una voce si può ancora ordinare in questo inverno.
+    func bersagli(di voce: VoceDelRegno, stato: StatoRegno) -> [BersaglioMilitare] {
+        motore.bersagli(di: voce, stato: stato)
     }
 }

@@ -67,7 +67,14 @@ public struct MotoreBattaglia: Sendable {
         let a = archetipo(attaccante.archetipo)
         let atomi = attaccante.atomiPresenti(puntiVitaPerAtomo: a.puntiVitaPerAtomo,
                                              minimo: valori.minimi.atomiMinimiSciameVivo)
-        let base = a.capacitaOffensivaPerAtomo * atomi
+        // Il MIGLIORAMENTO (01 §4.13; incarico 31): il reparto che ha ricevuto in patria un
+        // addestramento mirato porta in battaglia una capacità offensiva accresciuta del
+        // coefficiente che i valori dichiarano. Il reparto ordinario non ne porta alcuno, e per
+        // lui la formula è quella di sempre.
+        var base = a.capacitaOffensivaPerAtomo * atomi
+        if let chiave = attaccante.miglioramento, let miglioramento = valori.miglioramenti[chiave] {
+            base = miglioramento.capacitaOffensiva.applicato(a: base)
+        }
         let eff = efficacia(offesa: offesa, protezione: valori.protezioni[bersaglio.protezione]!)
         let modificato = (eff * coefficiente * modificatore(.coefficienteDanno, stato)).applicato(a: base)
         return max(valori.minimi.dannoMinimo, modificato)
@@ -391,7 +398,8 @@ public struct MotoreBattaglia: Sendable {
                                 serbatoio: elemento.atomi * a.puntiVitaPerAtomo,
                                 munizioni: a.dotazioneMunizioni, posizione: cella,
                                 azioneSpesa: true, // 01 §8.1.2
-                                rinforzo: false)
+                                rinforzo: false,
+                                miglioramento: elemento.miglioramento, leva: elemento.leva)
             stato.sciami[id] = sciame
             stato.forzeImpegnate[parte, default: 0] += sciame.serbatoio // base delle perdite (01 §10.2)
             stato.bilancio[parte]!.spesa += costiDichiarati.volume

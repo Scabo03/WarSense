@@ -590,6 +590,7 @@
 
 /* ===== Il regno, prima tappa (incarico 30): la patria, l'anno, l'inverno, la leva. ===== */
 "errore.dati.regno_incoerente" = "I valori del regno sono incoerenti in %@ alla voce %@";
+"errore.dati.miglioramento_incoerente" = "Miglioramento incoerente in %@ alla voce %@";
 "avvio.nuovo_regno" = "Nuovo regno";
 "avvio.riprendi_regno" = "Riprendi il regno";
 "regno.slot_incompatibile" = "Il regno salvato appartiene a valori di versione %@ e questa versione usa %@: non può essere aperto";
@@ -606,6 +607,20 @@
 "campagna.conclusa_sconfitta" = "Campagna conclusa: non hai più gruppi armati. Hai perso";
 "campagna.conclusa_inverno" = "È arrivato l'inverno: la campagna è conclusa, senza vincitore";
 "campagna.torna_in_patria" = "Torna in patria";
+/* L'arrivo di una formazione dalla patria (01 §5.2.1, §5.17.1; incarico 31): chi arriva e dove è
+   entrato. Il nome della formazione è il soggetto (02 §4.6). */
+"campagna.arrivo_dalla_patria.maschile" = "%1$@ è arrivato dalla patria in riga %2$d, casella %3$d";
+"campagna.arrivo_dalla_patria.femminile" = "%1$@ è arrivata dalla patria in riga %2$d, casella %3$d";
+"campagna.arrivo_dalla_patria.maschile_plurale" = "%1$@ sono arrivati dalla patria in riga %2$d, casella %3$d";
+"campagna.arrivo_dalla_patria.femminile_plurale" = "%1$@ sono arrivate dalla patria in riga %2$d, casella %3$d";
+"campagna.arrivo_dalla_patria.maschile.sintetico" = "%1$@ dalla patria in riga %2$d, casella %3$d";
+"campagna.arrivo_dalla_patria.femminile.sintetico" = "%1$@ dalla patria in riga %2$d, casella %3$d";
+"campagna.arrivo_dalla_patria.maschile_plurale.sintetico" = "%1$@ dalla patria in riga %2$d, casella %3$d";
+"campagna.arrivo_dalla_patria.femminile_plurale.sintetico" = "%1$@ dalla patria in riga %2$d, casella %3$d";
+"registro.arrivo_dalla_patria.maschile" = "Giorno %2$d: %1$@ è arrivato dalla patria in riga %3$d, casella %4$d";
+"registro.arrivo_dalla_patria.femminile" = "Giorno %2$d: %1$@ è arrivata dalla patria in riga %3$d, casella %4$d";
+"registro.arrivo_dalla_patria.maschile_plurale" = "Giorno %2$d: %1$@ sono arrivati dalla patria in riga %3$d, casella %4$d";
+"registro.arrivo_dalla_patria.femminile_plurale" = "Giorno %2$d: %1$@ sono arrivate dalla patria in riga %3$d, casella %4$d";
 /* La dichiarazione di conclusione della campagna (05 §9.3): voci in ordine fisso, una frase ciascuna. */
 "conclusione.titolo" = "Campagna conclusa";
 "conclusione.vittoria" = "Vittoria: l'avversario non ha più gruppi armati sul %@";
@@ -632,9 +647,46 @@
 "patria.riserve" = "Riserve";
 "patria.riserva" = "%1$@: %2$d";
 "patria.forze" = "Forze";
-"patria.formazione" = "%1$@: %2$@";
+/* Le forze in patria (incarico 31): una riga per formazione. Il nome è il soggetto (02 §4.6) e resta
+   lo stesso da un anno all'altro; seguono la categoria, i reparti, e dove va. Per le reclute
+   dell'inverno la riga dichiara dove e quando entrano. */
+"patria.formazione_al_fronte.maschile" = "%1$@, %2$@: %3$@. Parte per il fronte";
+"patria.formazione_al_fronte.femminile" = "%1$@, %2$@: %3$@. Parte per il fronte";
+"patria.formazione_al_fronte.maschile_plurale" = "%1$@, %2$@: %3$@. Partono per il fronte";
+"patria.formazione_al_fronte.femminile_plurale" = "%1$@, %2$@: %3$@. Partono per il fronte";
+"patria.formazione_in_patria.maschile" = "%1$@, %2$@: %3$@. Resta in patria";
+"patria.formazione_in_patria.femminile" = "%1$@, %2$@: %3$@. Resta in patria";
+"patria.formazione_in_patria.maschile_plurale" = "%1$@, %2$@: %3$@. Restano in patria";
+"patria.formazione_in_patria.femminile_plurale" = "%1$@, %2$@: %3$@. Restano in patria";
+"patria.reclute_in_primavera.maschile" = "%1$@, %2$@, reclute dell'inverno: %3$@. Entra sul fronte in primavera, al quartier generale";
+"patria.reclute_in_primavera.femminile" = "%1$@, %2$@, reclute dell'inverno: %3$@. Entra sul fronte in primavera, al quartier generale";
+"patria.reclute_in_primavera.maschile_plurale" = "%1$@, %2$@, reclute dell'inverno: %3$@. Entrano sul fronte in primavera, al quartier generale";
+"patria.reclute_in_primavera.femminile_plurale" = "%1$@, %2$@, reclute dell'inverno: %3$@. Entrano sul fronte in primavera, al quartier generale";
+"patria.reclute_a_campagna_aperta.maschile" = "%1$@, %2$@, reclute dell'inverno: %3$@. Raggiunge il quartier generale in %4$@, a campagna aperta";
+"patria.reclute_a_campagna_aperta.femminile" = "%1$@, %2$@, reclute dell'inverno: %3$@. Raggiunge il quartier generale in %4$@, a campagna aperta";
+"patria.reclute_a_campagna_aperta.maschile_plurale" = "%1$@, %2$@, reclute dell'inverno: %3$@. Raggiungono il quartier generale in %4$@, a campagna aperta";
+"patria.reclute_a_campagna_aperta.femminile_plurale" = "%1$@, %2$@, reclute dell'inverno: %3$@. Raggiungono il quartier generale in %4$@, a campagna aperta";
+"patria.reclute_con_l_inverno.maschile" = "%1$@, %2$@, reclute dell'inverno: %3$@. Arriva in patria con l'inverno";
+"patria.reclute_con_l_inverno.femminile" = "%1$@, %2$@, reclute dell'inverno: %3$@. Arriva in patria con l'inverno";
+"patria.reclute_con_l_inverno.maschile_plurale" = "%1$@, %2$@, reclute dell'inverno: %3$@. Arrivano in patria con l'inverno";
+"patria.reclute_con_l_inverno.femminile_plurale" = "%1$@, %2$@, reclute dell'inverno: %3$@. Arrivano in patria con l'inverno";
+"patria.reclute_in_patria.maschile" = "%1$@, %2$@, reclute dell'inverno: %3$@. Arriva in %4$@ e resta in patria";
+"patria.reclute_in_patria.femminile" = "%1$@, %2$@, reclute dell'inverno: %3$@. Arriva in %4$@ e resta in patria";
+"patria.reclute_in_patria.maschile_plurale" = "%1$@, %2$@, reclute dell'inverno: %3$@. Arrivano in %4$@ e restano in patria";
+"patria.reclute_in_patria.femminile_plurale" = "%1$@, %2$@, reclute dell'inverno: %3$@. Arrivano in %4$@ e restano in patria";
 "patria.nessuna_forza" = "Nessuna formazione";
 "patria.lavori_da_ordinare" = "Lavori da ordinare";
+/* Le linguette dell'inverno (01 §5.9.1.3): le voci ripartite per durata, le più lunghe per prime. */
+"patria.linguetta.lunghi" = "Lavori lunghi";
+"patria.linguetta.medi" = "Lavori di media durata";
+"patria.linguetta.brevi" = "Lavori brevi";
+/* Il mantenimento dell'esercito, che il gioco preleva da sé e dichiara nella prima schermata
+   dell'inverno (01 §4.14.1.1). */
+"patria.mantenimento" = "Mantenimento dell'esercito, prelevato all'inizio dell'inverno: %@";
+"patria.mantenimento_insufficiente" = "Il denaro non è bastato al mantenimento: sciolti per primi i reparti reclutati per ultimi";
+"patria.scegli_bersaglio" = "Per quale reparto?";
+"patria.destina_suggerimento" = "Attiva per scegliere se parte per il fronte o resta in patria";
+"patria.nessun_bersaglio" = "Nessun reparto disponibile";
 "patria.lavori_ordinati" = "Lavori ordinati";
 "patria.nessun_lavoro_ordinato" = "Nessun lavoro ordinato in questo inverno";
 "patria.apri_campagna" = "Apri la campagna";
@@ -662,6 +714,11 @@
 "regno.niente_da_azzerare" = "Nessuna spesa da azzerare in questa schermata";
 "regno.campagna_aperta" = "Campagna aperta sul %@";
 "regno.inverno_cominciato" = "Comincia l'inverno dell'anno %1$d. Entrate: %2$@.";
+"regno.mantenimento_prelevato" = " Mantenimento dell'esercito: %@.";
+"regno.mantenimento_insufficiente" = " Il denaro non basta al mantenimento.";
+/* Una frase in fila dopo le altre di un annuncio, e una frase come voce di un elenco. */
+"regno.frase_in_fila" = " %@.";
+"regno.frase_in_elenco" = "%@";
 "regno.entrata_voce" = "%1$@ %2$d";
 "regno.stazione_aperta" = "Inverno, schermata %1$d di %2$d";
 "regno.primavera_cominciata" = "Comincia la primavera dell'anno %d.";
@@ -674,6 +731,9 @@
 "registro_patria.inverno_cominciato" = "Anno %1$d, %2$@: comincia l'inverno e arriva l'entrata dell'anno";
 "registro_patria.primavera" = "Anno %1$d, %2$@: comincia la primavera";
 "registro_patria.primavera_con_riporto" = "Anno %1$d, %2$@: comincia la primavera; il riporto ha tolto ciò che eccedeva";
+"registro_patria.mantenimento_prelevato" = "Anno %1$d, %2$@: prelevato il mantenimento dell'esercito, %3$@";
+/* I fatti delle forze hanno la stessa frase dell'annuncio, e il registro vi premette anno e stagione. */
+"registro_patria.fatto" = "Anno %1$d, %2$@: %3$@";
 /* Le frasi che hanno per soggetto una voce del regno (02 §4.6): intere per ciascun genere. Il
    soggetto è l'argomento 1. */
 "regno.voce_nome.maschile" = "%1$@.";
@@ -696,14 +756,71 @@
 "regno.spesa_annullata.femminile" = "%1$@: ordine annullato, risorse restituite.";
 "regno.spesa_annullata.maschile_plurale" = "%1$@: ordine annullato, risorse restituite.";
 "regno.spesa_annullata.femminile_plurale" = "%1$@: ordine annullato, risorse restituite.";
-"regno.lavoro_pronto.maschile" = " %1$@: è pronto.";
-"regno.lavoro_pronto.femminile" = " %1$@: è pronta.";
-"regno.lavoro_pronto.maschile_plurale" = " %1$@: sono pronti.";
-"regno.lavoro_pronto.femminile_plurale" = " %1$@: sono pronte.";
-"registro_patria.lavoro_pronto.maschile" = "Anno %2$d, %3$@: %1$@ è pronto";
-"registro_patria.lavoro_pronto.femminile" = "Anno %2$d, %3$@: %1$@ è pronta";
-"registro_patria.lavoro_pronto.maschile_plurale" = "Anno %2$d, %3$@: %1$@ sono pronti";
-"registro_patria.lavoro_pronto.femminile_plurale" = "Anno %2$d, %3$@: %1$@ sono pronte";
+/* Le voci che si ordinano su un reparto esistente (01 §4.13, §4.14; incarico 31). */
+"regno.voce_con_bersaglio" = "Si sceglie il reparto.";
+"regno.voce_senza_bersagli" = "Nessun reparto disponibile.";
+"regno.effetto.migliora_reparto" = "Accresce la capacità offensiva del reparto";
+"regno.effetto.mantieni_miglioramento" = "Conserva il miglioramento del reparto per un altro anno";
+"regno.lavoro_ordinato_su.maschile" = "%1$@ ordinato per %3$@: pronto in %2$@.";
+"regno.lavoro_ordinato_su.femminile" = "%1$@ ordinata per %3$@: pronta in %2$@.";
+"regno.lavoro_ordinato_su.maschile_plurale" = "%1$@ ordinati per %3$@: pronti in %2$@.";
+"regno.lavoro_ordinato_su.femminile_plurale" = "%1$@ ordinate per %3$@: pronte in %2$@.";
+"regno.lavoro_elencato_su.maschile" = "%1$@ per %3$@, pronto in %2$@";
+"regno.lavoro_elencato_su.femminile" = "%1$@ per %3$@, pronta in %2$@";
+"regno.lavoro_elencato_su.maschile_plurale" = "%1$@ per %3$@, pronti in %2$@";
+"regno.lavoro_elencato_su.femminile_plurale" = "%1$@ per %3$@, pronte in %2$@";
+/* Il reparto di una formazione, come bersaglio di una voce: il nome della formazione è il soggetto. */
+"regno.bersaglio.maschile" = "%1$@: %2$@.";
+"regno.bersaglio.femminile" = "%1$@: %2$@.";
+"regno.bersaglio.maschile_plurale" = "%1$@: %2$@.";
+"regno.bersaglio.femminile_plurale" = "%1$@: %2$@.";
+"regno.bersaglio_descritto.maschile" = "%2$@ di %1$@";
+"regno.bersaglio_descritto.femminile" = "%2$@ di %1$@";
+"regno.bersaglio_descritto.maschile_plurale" = "%2$@ di %1$@";
+"regno.bersaglio_descritto.femminile_plurale" = "%2$@ di %1$@";
+/* Lo stato del miglioramento di un reparto, d'inverno (01 §4.14): in coda al reparto, senza accordi. */
+"regno.miglioramento_da_mantenere" = "%@, da mantenere entro l'inverno";
+"regno.miglioramento_mantenuto" = "%@, mantenimento pagato";
+"regno.miglioramento_in_corso" = "%1$@, %2$@ in corso";
+/* I fatti delle forze (incarico 31): la formazione è il soggetto e sta in testa, sicché la frase
+   regge da sola e dopo l'anno e la stagione del registro. Senza punto finale: lo mette chi la usa. */
+"regno.reclute_in_primavera.maschile" = "%1$@ nasce dalle reclute dell'inverno, con %2$@, ed entra sul fronte in primavera, al quartier generale";
+"regno.reclute_in_primavera.femminile" = "%1$@ nasce dalle reclute dell'inverno, con %2$@, ed entra sul fronte in primavera, al quartier generale";
+"regno.reclute_in_primavera.maschile_plurale" = "%1$@ nascono dalle reclute dell'inverno, con %2$@, ed entrano sul fronte in primavera, al quartier generale";
+"regno.reclute_in_primavera.femminile_plurale" = "%1$@ nascono dalle reclute dell'inverno, con %2$@, ed entrano sul fronte in primavera, al quartier generale";
+"regno.reclute_a_campagna_aperta.maschile" = "%1$@ nasce dalle reclute dell'inverno, con %2$@, e raggiunge il quartier generale in %3$@, a campagna aperta";
+"regno.reclute_a_campagna_aperta.femminile" = "%1$@ nasce dalle reclute dell'inverno, con %2$@, e raggiunge il quartier generale in %3$@, a campagna aperta";
+"regno.reclute_a_campagna_aperta.maschile_plurale" = "%1$@ nascono dalle reclute dell'inverno, con %2$@, e raggiungono il quartier generale in %3$@, a campagna aperta";
+"regno.reclute_a_campagna_aperta.femminile_plurale" = "%1$@ nascono dalle reclute dell'inverno, con %2$@, e raggiungono il quartier generale in %3$@, a campagna aperta";
+"regno.reclute_con_l_inverno.maschile" = "%1$@ nasce dalle reclute dell'inverno, con %2$@, e arriva in patria con l'inverno";
+"regno.reclute_con_l_inverno.femminile" = "%1$@ nasce dalle reclute dell'inverno, con %2$@, e arriva in patria con l'inverno";
+"regno.reclute_con_l_inverno.maschile_plurale" = "%1$@ nascono dalle reclute dell'inverno, con %2$@, e arrivano in patria con l'inverno";
+"regno.reclute_con_l_inverno.femminile_plurale" = "%1$@ nascono dalle reclute dell'inverno, con %2$@, e arrivano in patria con l'inverno";
+"regno.reclute_confluite.maschile" = "%1$@ riceve le reclute dell'inverno: %2$@";
+"regno.reclute_confluite.femminile" = "%1$@ riceve le reclute dell'inverno: %2$@";
+"regno.reclute_confluite.maschile_plurale" = "%1$@ ricevono le reclute dell'inverno: %2$@";
+"regno.reclute_confluite.femminile_plurale" = "%1$@ ricevono le reclute dell'inverno: %2$@";
+"regno.reparto_sciolto.maschile" = "%1$@ perde %2$@: reparto sciolto, il denaro non è bastato al mantenimento";
+"regno.reparto_sciolto.femminile" = "%1$@ perde %2$@: reparto sciolto, il denaro non è bastato al mantenimento";
+"regno.reparto_sciolto.maschile_plurale" = "%1$@ perdono %2$@: reparto sciolto, il denaro non è bastato al mantenimento";
+"regno.reparto_sciolto.femminile_plurale" = "%1$@ perdono %2$@: reparto sciolto, il denaro non è bastato al mantenimento";
+"regno.miglioramento_dato.maschile" = "%1$@ ha ora %2$@";
+"regno.miglioramento_dato.femminile" = "%1$@ ha ora %2$@";
+"regno.miglioramento_dato.maschile_plurale" = "%1$@ hanno ora %2$@";
+"regno.miglioramento_dato.femminile_plurale" = "%1$@ hanno ora %2$@";
+"regno.miglioramento_perduto.maschile" = "%1$@ ha %2$@ senza più %3$@, per mancato mantenimento";
+"regno.miglioramento_perduto.femminile" = "%1$@ ha %2$@ senza più %3$@, per mancato mantenimento";
+"regno.miglioramento_perduto.maschile_plurale" = "%1$@ hanno %2$@ senza più %3$@, per mancato mantenimento";
+"regno.miglioramento_perduto.femminile_plurale" = "%1$@ hanno %2$@ senza più %3$@, per mancato mantenimento";
+/* La scelta di chi parte (incarico 31). */
+"regno.unita_al_fronte.maschile" = "%1$@ parte per il fronte.";
+"regno.unita_al_fronte.femminile" = "%1$@ parte per il fronte.";
+"regno.unita_al_fronte.maschile_plurale" = "%1$@ partono per il fronte.";
+"regno.unita_al_fronte.femminile_plurale" = "%1$@ partono per il fronte.";
+"regno.unita_in_patria.maschile" = "%1$@ resta in patria.";
+"regno.unita_in_patria.femminile" = "%1$@ resta in patria.";
+"regno.unita_in_patria.maschile_plurale" = "%1$@ restano in patria.";
+"regno.unita_in_patria.femminile_plurale" = "%1$@ restano in patria.";
 /* Ciò che separa le voci di un elenco e le frasi di un'etichetta del regno: testo anch'esso. */
 "regno.separatore_elenco" = ", ";
 "regno.separatore_frasi" = " ";

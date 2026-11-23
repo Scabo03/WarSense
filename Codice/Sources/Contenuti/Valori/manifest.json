@@ -12,10 +12,11 @@
   "formati-mappa.json": "3adc8adb22315fba1f4610622e8f6e9ee03e891311f024774a99a19bfdbea4e7",
   "formato-battaglia.json": "d5877cc487278512568a7efec9e76f3195542b3ecb0d23be9f6dc49939a5f290",
   "marcia-campagna.json": "f3bb5baf1410d9e032e47c85138565a6455862cfe63e93419c5d9a1c15b86e0a",
+  "miglioramenti.json": "bc517c03777da0697c75890a6b8fc8570ac788a95a541cc6a4ac367732ff17da",
   "minimi.json": "d67b738ee9136f09d98382d60c3bd661751943c5caacb5dc1b60e12811df353c",
   "nomi-gruppi.json": "8047ad69f0dd50db80821e9140e5f95e49745ef7aada4fa91b002ffd6b481ae3",
   "offese-e-protezioni.json": "bb48b76b1c6f93837850dda262114c4cc4ce9ead5a3c4b463dee75ef65bcc35f",
-  "regno.json": "b472e29ad76b54b917d51f1898aa2c20213822edd303e3928e3adca06d3ba93f",
+  "regno.json": "d8f41d13e3003f87c93f033c8a427a421bc4ba5a259a85e9ea8b56bc3b203504",
   "ricognizione-campagna.json": "0cc8fc6636a594893c6454542a5d912f4072f2350bfd1f6b66a23f8eac1b657e",
   "scenari-campagna.json": "bc174993598a67b899803d2a956328946bd46590ac096478a41523c4830d563b",
   "scenari.json": "c7617df35ae7dd7b5f27a45c0cd970451e22ee311f614badc0a2d69267341d2a",
@@ -23,13 +24,14 @@
   "ufficiali.json": "39447ca2b767d7b0a443f69257b67c8c71a3954c3725a3aa2169157c42f595c3",
   "vantaggi-nascosti.json": "65c7d952ce06cd5c9a8b594be77b0cfb3171045d77b6007673299c6b36d253f8"
  },
- "versione": "0.14.0",
+ "versione": "0.15.0",
  "versioni_compatibili": [
   "0.8.0",
   "0.9.0",
   "0.10.0",
   "0.11.0",
   "0.12.0",
-  "0.13.0"
+  "0.13.0",
+  "0.14.0"
  ]
 }

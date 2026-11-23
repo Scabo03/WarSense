@@ -296,4 +296,8 @@ public enum EventoCampagna: Hashable, Codable, Sendable {
     /// per l'arrivo dell'inverno, senza vincitore. Da qui in poi ogni comando è respinto, e l'esito
     /// passa al regno. Sempre consegnato: riguarda il giocatore per definizione.
     case campagnaConclusa(modo: ConclusioneCampagna.Modo, vincitore: Parte?)
+    /// Una formazione è ARRIVATA DALLA PATRIA al quartier generale, o nella casella libera più
+    /// vicina (01 §5.2.1, §5.17.1; incarico 31). Fatto che il giocatore non ha deciso adesso: entra
+    /// nel registro e si annuncia.
+    case arrivoDallaPatria(gruppo: IdGruppo, nome: IdentificatoreDati, casella: Cella)
 }
