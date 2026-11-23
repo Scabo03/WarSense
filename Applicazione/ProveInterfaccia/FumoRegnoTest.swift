@@ -28,29 +28,60 @@ final class FumoRegnoTest: XCTestCase {
         XCTAssertTrue(app.staticTexts["Patria"].waitForExistence(timeout: 10), "si apre la patria")
         XCTAssertTrue(app.staticTexts["Anno 1, primavera"].waitForExistence(timeout: 5))
         XCTAssertTrue(app.staticTexts["monete di bronzo: 20"].exists, "il riquadro delle riserve, voce per voce")
-        XCTAssertTrue(elemento(app, cheComincia: "gruppo armato: ").exists, "le forze del regno")
+        XCTAssertTrue(elemento(app, cheComincia: "Corvo, gruppo armato: ").exists,
+                      "le forze del regno, ciascuna col suo nome")
         XCTAssertTrue(app.buttons["Apri la campagna"].exists)
+
+        // Chi parte si sceglie col dito (incarico 31): toccata, la formazione resta in patria; toccata
+        // di nuovo, riparte. La riga dice sempre dove va.
+        let cervo = elemento(app, cheComincia: "Cervo, formazione non armata: ")
+        XCTAssertTrue(cervo.exists)
+        XCTAssertTrue(cervo.label.hasSuffix("Parte per il fronte"), cervo.label)
+        cervo.tap()
+        XCTAssertTrue(elemento(app, cheComincia: "Cervo, formazione non armata: 4 atomi di fanteria leggera. Resta in patria")
+            .waitForExistence(timeout: 5), "la formazione toccata resta in patria")
+        elemento(app, cheComincia: "Cervo, formazione non armata: ").tap()
+        XCTAssertTrue(elemento(app, cheComincia: "Cervo, formazione non armata: 4 atomi di fanteria leggera. Parte per il fronte")
+            .waitForExistence(timeout: 5), "toccata di nuovo, riparte")
 
         // L'inverno arriva col suo comando, e il bilancio nasce.
         app.buttons["Attendi l'inverno"].tap()
         XCTAssertTrue(app.staticTexts["Anno 1, inverno, schermata 1 di 4"].waitForExistence(timeout: 5))
-        XCTAssertTrue(app.staticTexts["monete di bronzo: 220"].waitForExistence(timeout: 5),
-                      "l'entrata dell'anno si aggiunge alle riserve")
+        XCTAssertTrue(app.staticTexts["monete di bronzo: 193"].waitForExistence(timeout: 5),
+                      "l'entrata dell'anno si aggiunge alle riserve, e il mantenimento ne esce")
+        XCTAssertTrue(app.staticTexts["Mantenimento dell'esercito, prelevato all'inizio dell'inverno: monete di bronzo 27"].exists,
+                      "la prima schermata dichiara il mantenimento (01 §4.14.1.1)")
+        // Le linguette, per durata: le più lunghe per prime (01 §5.9.1.3).
+        for linguetta in ["Lavori lunghi", "Lavori di media durata", "Lavori brevi"] {
+            XCTAssertTrue(app.staticTexts[linguetta].exists, linguetta)
+        }
 
         // Una leva: il costo è dichiarato sulla riserva, e ordinandola la riserva scende.
-        let leva = elemento(app, cheComincia: "Leva di fanteria leggera. Costa: monete di bronzo 30 su 220")
+        let leva = elemento(app, cheComincia: "Leva di fanteria leggera. Costa: monete di bronzo 30 su 193")
         XCTAssertTrue(leva.waitForExistence(timeout: 5), "la voce dichiara quanto costa su quanto se ne possiede")
         leva.tap()
-        XCTAssertTrue(app.staticTexts["monete di bronzo: 190"].waitForExistence(timeout: 5),
+        XCTAssertTrue(app.staticTexts["monete di bronzo: 163"].waitForExistence(timeout: 5),
                       "la spesa si vede nella riserva")
         XCTAssertTrue(app.staticTexts["Leva di fanteria leggera, pronta in primavera"].waitForExistence(timeout: 5),
                       "il lavoro ordinato entra in elenco")
 
         // L'annullamento restituisce le risorse; poi la leva si riordina.
         app.buttons["Annulla l'ultima spesa"].tap()
-        XCTAssertTrue(app.staticTexts["monete di bronzo: 220"].waitForExistence(timeout: 5))
-        elemento(app, cheComincia: "Leva di fanteria leggera. Costa: monete di bronzo 30 su 220").tap()
-        XCTAssertTrue(app.staticTexts["monete di bronzo: 190"].waitForExistence(timeout: 5))
+        XCTAssertTrue(app.staticTexts["monete di bronzo: 193"].waitForExistence(timeout: 5))
+        elemento(app, cheComincia: "Leva di fanteria leggera. Costa: monete di bronzo 30 su 193").tap()
+        XCTAssertTrue(app.staticTexts["monete di bronzo: 163"].waitForExistence(timeout: 5))
+
+        // L'addestramento mirato si ordina su un reparto scelto da un elenco (01 §4.13): ogni
+        // scelta dichiara il proprio costo sulla riserva.
+        elemento(app, cheComincia: "Addestramento mirato. Si sceglie il reparto.").tap()
+        XCTAssertTrue(app.staticTexts["Per quale reparto?"].waitForExistence(timeout: 5), "si apre la scelta del reparto")
+        let reparto = elemento(app, cheComincia: "Lupo: 8 atomi di fanteria pesante. Costa: monete di bronzo 32 su 163")
+        XCTAssertTrue(reparto.waitForExistence(timeout: 5), "la scelta dichiara il costo sulla riserva")
+        reparto.tap()
+        XCTAssertTrue(app.staticTexts["monete di bronzo: 131"].waitForExistence(timeout: 5),
+                      "scelto il reparto, il lavoro è ordinato e pagato")
+        XCTAssertTrue(app.staticTexts["Addestramento mirato per 8 atomi di fanteria pesante di Lupo, pronto in primavera"]
+            .waitForExistence(timeout: 5))
 
         // Le quattro schermate, poi la primavera con le reclute.
         for stazione in 2...4 {
@@ -63,6 +94,10 @@ final class FumoRegnoTest: XCTestCase {
         XCTAssertTrue(app.staticTexts["Anno 2, primavera"].waitForExistence(timeout: 5), "comincia la primavera")
         XCTAssertTrue(app.staticTexts["monete di bronzo: 20"].waitForExistence(timeout: 5),
                       "avanza un decimo dell'entrata dell'anno")
+        // Le formazioni hanno i nomi di prima; le reclute ne hanno uno nuovo e dicono dove entrano; il
+        // reparto addestrato lo dichiara.
+        XCTAssertTrue(elemento(app, cheComincia: "Lince, gruppo armato, reclute dell'inverno: 6 atomi di fanteria leggera. Entra sul fronte in primavera").exists)
+        XCTAssertTrue(elemento(app, cheComincia: "Lupo, gruppo armato: 18 atomi di fanteria leggera, 8 atomi di fanteria pesante con addestramento mirato").exists)
 
         // La campagna dell'anno si apre scegliendo il fronte, e dalla mappa si torna in patria.
         app.buttons["Apri la campagna"].tap()
@@ -103,10 +138,19 @@ final class FumoRegnoTest: XCTestCase {
         inverno.tap()
         XCTAssertTrue(app.staticTexts["Anno 1, inverno, schermata 1 di 4"].waitForExistence(timeout: 5))
 
-        let leva = elemento(app, cheComincia: "Leva di cavalleria manovrata. Costa: monete di bronzo 72 su 220")
+        let leva = elemento(app, cheComincia: "Leva di cavalleria manovrata. Costa: monete di bronzo 72 su 193")
         XCTAssertTrue(leva.waitForExistence(timeout: 5), "la voce esiste con il costo sulla riserva")
         leva.tap()
         XCTAssertTrue(app.staticTexts["animali: 7"].waitForExistence(timeout: 5), "la spesa si vede nella riserva")
+
+        // La scelta del reparto, in orizzontale e a testo massimo: si apre, la scelta si tocca, si torna.
+        elemento(app, cheComincia: "Addestramento mirato. Si sceglie il reparto.").tap()
+        XCTAssertTrue(app.staticTexts["Per quale reparto?"].waitForExistence(timeout: 5))
+        let reparto = elemento(app, cheComincia: "Cervo: 4 atomi di fanteria leggera. Costa: monete di bronzo 16 su 121")
+        XCTAssertTrue(reparto.waitForExistence(timeout: 5), "l'ultima scelta dell'elenco esiste")
+        reparto.tap()
+        XCTAssertTrue(app.staticTexts["monete di bronzo: 105"].waitForExistence(timeout: 5),
+                      "la scelta in fondo all'elenco si raggiunge e si ordina")
 
         let prosegui = app.buttons["Prosegui alla schermata 2 di 4"]
         XCTAssertTrue(prosegui.waitForExistence(timeout: 5))

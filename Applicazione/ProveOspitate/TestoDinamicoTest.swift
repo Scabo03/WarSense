@@ -199,6 +199,17 @@ final class TestoDinamicoTest: XCTestCase {
             try await self.attendi { patria.corpoPerProva.arrangedSubviews.count > 5 }
             await patria.eseguiPerProva(.attendiInverno)
             await patria.eseguiPerProva(.ordina(voce: "leva_fanteria_leggera", bersaglio: nil))
+            // Un addestramento in corso allunga la riga della formazione e l'elenco dei lavori
+            // (incarico 31): sono i testi più lunghi della seconda tappa.
+            await patria.eseguiPerProva(.ordina(voce: "addestramento_mirato",
+                                                bersaglio: BersaglioMilitare(unita: "lupo", elemento: 1)))
+        })
+        // La scelta del reparto (incarico 31): ogni voce porta il reparto e il costo sulla riserva.
+        difetti += try await confronta("scelta del reparto", {
+            SchermataScelta(titolo: "Mantenimento dell'addestramento mirato.", domanda: "Per quale reparto?",
+                            voci: ["Lupo: 8 atomi di fanteria pesante con addestramento mirato. Non si può ordinare: mancano monete di bronzo. Costa: monete di bronzo 8 su 3.",
+                                   "Falco: 24 atomi di fanteria pesante. Costa: monete di bronzo 96 su 193."],
+                            congedo: "Chiudi il pannello")
         })
         XCTAssertEqual(difetti, [], difetti.joined(separator: "\n"))
     }
