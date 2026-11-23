@@ -1,0 +1,11 @@
+ok  app nuova: l'avvio offre il regno e le tre riprese — ['Riprendi il regno', 'Riprendi il regno', 'Nuovo regno', 'Nuovo regno', 'Riprendi lo scontro in corso', 'Riprendi lo scontro in corso', 'Riprendi la campagna in corso', 'Riprendi la campagna in corso']
+ok  app nuova: «Riprendi il regno» dichiara che il regno è di un formato precedente — Il regno salvato è di un formato precedente e non può essere ape || Il regno salvato è di un formato precedente e non può essere ape
+ok  app nuova: il regno incompatibile non si apre — si resta all'avvio — ['Riprendi il regno', 'Riprendi il regno', 'Nuovo regno', 'Nuovo regno']
+ok  app nuova: il giornale del regno rifiutato resta byte per byte com'era — {'esiste': True, 'byte': 1305, 'sha256': 'e992b1592237408bad340dbd4e9459be8525d718ecdc676625057ef20c8525ab', 'righe': 3, 'schema': 1}
+ok  app nuova: la campagna della build 31 si riapre, e la mappa espone esattamente ciò che esponeva — 16 caselle; diverse: []; sentito: Riprendi la campagna in corso Pulsante || Mappa Guado, 4 righe per 4 caselle. Il tuo quartier generale è i || Giorno 3. Nessun gruppo ha ancora agito, sono 4 || Giorno 3. Nessun gruppo ha ancora agito, sono 4
+ok  app nuova: l'informazione di stato è la stessa — ['Giorno 3. Nessun gruppo ha ancora agito, sono 4']
+ok  app nuova: la campagna riaperta prosegue — la giornata si chiude e comincia il quarto giorno — ['Giorno 4. Nessun gruppo ha ancora agito, sono 4', 'Chiudi la giornata Pulsante || Giornata chiusa. 4 gruppi non avevano agito e restano fermi: ne  || Giornata chiusa. 4 gruppi non avevano agito e restano fermi: ne ']
+ok  app nuova: lo scontro della build 31 si riapre, e la griglia espone esattamente ciò che esponeva — 100 celle; diverse: []; sentito: Riprendi lo scontro in corso Pulsante || Battaglia su WarSense, 10 righe per 10 celle. Il campo è campo a || Riserve da schierare Intestazione Usa il rotore per accedere a T || Riserve da schierare Intestazione Usa il rotore per accedere a T
+NO  app nuova: «Nuovo regno» apre la patria, con le formazioni che portano il loro nome — []
+NO  app nuova: il regno nuovo ha il giornale di schema 2 — {'esiste': True, 'byte': 1305, 'sha256': 'e992b1592237408bad340dbd4e9459be8525d718ecdc676625057ef20c8525ab', 'righe': 3, 'schema': 1}
+dopo: controlli 10, ok 8, NO 2; durata 112 s

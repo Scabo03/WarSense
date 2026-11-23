@@ -1,0 +1,7 @@
+ok  build 31: l'avvio offre il regno — ['Nuovo regno', 'Nuovo regno', 'Nuovo scontro di prova', 'Nuovo scontro di prova', 'Nuova campagna, mappa piccola', 'Nuova campagna, mappa piccola', 'Nuova campa
+ok  build 31: il regno è al primo inverno con una leva ordinata — ['Anno 1, inverno, schermata 1 di 4', 'Leva di fanteria leggera, pronta in primavera', 'Leva di fanteria leggera ordinata: pronta in p
+ok  build 31: la campagna è al terzo giorno — ['Giorno 3. Nessun gruppo ha ancora agito, sono 4']
+ok  build 31: nello scontro una riserva è piazzata — ['riga 8, cella 1, tua fanteria leggera A, occupata']
+ok  build 31: il giornale del regno è sul disco, di schema 1 — {'esiste': True, 'byte': 1306, 'sha256': 'a2abb2edd36ca93217bad0545d574411b270e41ea1fbbcdbd36810007517a116', 'righe': 3, 'schema': 1}
+registrato: 16 caselle della campagna, 100 celle dello scontro
+prima: controlli 5, ok 5, NO 0; durata 171 s

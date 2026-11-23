@@ -1,0 +1,29 @@
+{"azione": "termina", "ascolto": 0.3, "n": 1}
+{"azione": "avvia", "ascolto": 2, "n": 2}
+{"azione": "vo_accendi", "ascolto": 1, "n": 3}
+{"azione": "albero", "ascolto": 0.2, "n": 4}
+{"azione": "attiva", "ascolto": 5, "etichetta": "Nuovo regno", "tipo": "pulsante", "n": 5}
+{"azione": "attiva", "ascolto": 6, "etichetta": "Attendi l'inverno", "tipo": "pulsante", "n": 6}
+{"azione": "attiva", "ascolto": 4, "contiene": "Leva di fanteria leggera. Costa", "n": 7}
+{"azione": "albero", "ascolto": 0.2, "n": 8}
+{"azione": "schermata", "nome": "regno-con-la-build-31", "ascolto": 0.3, "n": 9}
+{"azione": "attiva", "ascolto": 4, "etichetta": "Torna all'inizio", "tipo": "pulsante", "n": 10}
+{"azione": "attiva", "ascolto": 6, "etichetta": "Nuova campagna, mappa piccola", "tipo": "pulsante", "n": 11}
+{"azione": "albero", "ascolto": 0.2, "n": 12}
+{"azione": "attiva", "ascolto": 2.5, "contiene": "riga 4, casella 1,", "n": 13}
+{"azione": "attiva", "ascolto": 3, "etichetta": "Presidia: resta fermo in guardia", "tipo": "pulsante", "n": 14}
+{"azione": "attiva", "ascolto": 5, "etichetta": "Chiudi la giornata", "tipo": "pulsante", "n": 15}
+{"azione": "attiva", "ascolto": 5, "etichetta": "Chiudi la giornata", "tipo": "pulsante", "n": 16}
+{"azione": "albero", "ascolto": 0.2, "n": 17}
+{"azione": "multi_tocco", "tocchi": 2, "dita": 2, "etichetta": "Registro della campagna", "tipo": "pulsante", "ascolto": 4, "n": 18}
+{"azione": "schermata", "nome": "campagna-con-la-build-31", "ascolto": 0.3, "n": 19}
+{"azione": "attiva", "ascolto": 4, "etichetta": "Torna all'inizio", "tipo": "pulsante", "n": 20}
+{"azione": "attiva", "ascolto": 8, "etichetta": "Nuovo scontro di prova", "tipo": "pulsante", "n": 21}
+{"azione": "attiva", "ascolto": 2.5, "etichetta": "fanteria leggera", "n": 22}
+{"azione": "albero", "ascolto": 0.2, "n": 23}
+{"azione": "attiva", "ascolto": 3, "contiene": "riga 8, cella 1,", "n": 24}
+{"azione": "albero", "ascolto": 0.2, "n": 25}
+{"azione": "schermata", "nome": "scontro-con-la-build-31", "ascolto": 0.3, "n": 26}
+{"azione": "termina", "ascolto": 0.3, "n": 27}
+{"azione": "vo_spegni", "n": 28}
+{"azione": "fine", "n": 29}
