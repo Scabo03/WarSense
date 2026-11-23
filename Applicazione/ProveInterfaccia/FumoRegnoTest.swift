@@ -75,10 +75,10 @@ final class FumoRegnoTest: XCTestCase {
         // scelta dichiara il proprio costo sulla riserva.
         elemento(app, cheComincia: "Addestramento mirato. Si sceglie il reparto.").tap()
         XCTAssertTrue(app.staticTexts["Per quale reparto?"].waitForExistence(timeout: 5), "si apre la scelta del reparto")
-        let reparto = elemento(app, cheComincia: "Lupo: 8 atomi di fanteria pesante. Costa: monete di bronzo 32 su 163")
+        let reparto = elemento(app, cheComincia: "Lupo: 8 atomi di fanteria pesante. Costa: monete di bronzo 100 su 163")
         XCTAssertTrue(reparto.waitForExistence(timeout: 5), "la scelta dichiara il costo sulla riserva")
         reparto.tap()
-        XCTAssertTrue(app.staticTexts["monete di bronzo: 131"].waitForExistence(timeout: 5),
+        XCTAssertTrue(app.staticTexts["monete di bronzo: 63"].waitForExistence(timeout: 5),
                       "scelto il reparto, il lavoro è ordinato e pagato")
         XCTAssertTrue(app.staticTexts["Addestramento mirato per 8 atomi di fanteria pesante di Lupo, pronto in primavera"]
             .waitForExistence(timeout: 5))
@@ -146,10 +146,10 @@ final class FumoRegnoTest: XCTestCase {
         // La scelta del reparto, in orizzontale e a testo massimo: si apre, la scelta si tocca, si torna.
         elemento(app, cheComincia: "Addestramento mirato. Si sceglie il reparto.").tap()
         XCTAssertTrue(app.staticTexts["Per quale reparto?"].waitForExistence(timeout: 5))
-        let reparto = elemento(app, cheComincia: "Cervo: 4 atomi di fanteria leggera. Costa: monete di bronzo 16 su 121")
+        let reparto = elemento(app, cheComincia: "Cervo: 4 atomi di fanteria leggera. Costa: monete di bronzo 50 su 121")
         XCTAssertTrue(reparto.waitForExistence(timeout: 5), "l'ultima scelta dell'elenco esiste")
         reparto.tap()
-        XCTAssertTrue(app.staticTexts["monete di bronzo: 105"].waitForExistence(timeout: 5),
+        XCTAssertTrue(app.staticTexts["monete di bronzo: 71"].waitForExistence(timeout: 5),
                       "la scelta in fondo all'elenco si raggiunge e si ordina")
 
         let prosegui = app.buttons["Prosegui alla schermata 2 di 4"]

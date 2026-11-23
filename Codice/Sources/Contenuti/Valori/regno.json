@@ -36,7 +36,7 @@
   },
   {
    "identificatore": "addestramento_mirato",
-   "pesi": { "denaro": 0.8 },
+   "pesi": { "denaro": 2.5 },
    "durata": 1,
    "effetto": { "gancio": "migliora_reparto", "miglioramento": "addestramento_mirato" }
   },

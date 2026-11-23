@@ -293,19 +293,33 @@ final class SecondaTappaDelRegnoTest: XCTestCase {
         XCTAssertEqual(lettura(scelta), [
             "Addestramento mirato.",
             "Per quale reparto?",
-            "Corvo: 6 atomi di fanteria leggera. Costa: monete di bronzo 24 su 193.",
-            "Lupo: 18 atomi di fanteria leggera. Costa: monete di bronzo 72 su 193.",
-            "Lupo: 8 atomi di fanteria pesante. Costa: monete di bronzo 32 su 193.",
-            "Falco: 24 atomi di fanteria pesante. Costa: monete di bronzo 96 su 193.",
-            "Falco: 12 atomi di cavalleria manovrata. Costa: monete di bronzo 48 su 193.",
-            "Orso: 3 atomi di fanteria leggera. Costa: monete di bronzo 12 su 193.",
-            "Cervo: 4 atomi di fanteria leggera. Costa: monete di bronzo 16 su 193.",
+            // Dodici monete e mezza per atomo, troncate (03 §4.4.3.1): più di qualunque leva. Le
+            // scelte che il denaro non copre lo dicono prontamente (02 §8.7.1).
+            "Corvo: 6 atomi di fanteria leggera. Costa: monete di bronzo 75 su 193.",
+            "Lupo: 18 atomi di fanteria leggera. Non si può ordinare: mancano monete di bronzo. Costa: monete di bronzo 225 su 193.",
+            "Lupo: 8 atomi di fanteria pesante. Costa: monete di bronzo 100 su 193.",
+            "Falco: 24 atomi di fanteria pesante. Non si può ordinare: mancano monete di bronzo. Costa: monete di bronzo 300 su 193.",
+            "Falco: 12 atomi di cavalleria manovrata. Costa: monete di bronzo 150 su 193.",
+            "Orso: 3 atomi di fanteria leggera. Costa: monete di bronzo 37 su 193.",
+            "Cervo: 4 atomi di fanteria leggera. Costa: monete di bronzo 50 su 193.",
             "Chiudi il pannello",
         ])
         // Il gesto di fuga esce senza ordinare nulla.
         XCTAssertTrue(scelta.accessibilityPerformEscape())
         try await attendi("la scelta si chiude") { schermata.presentedViewController == nil }
         XCTAssertTrue(lettura(schermata).contains("Nessun lavoro ordinato in questo inverno"))
+
+        // Una scelta che il denaro non copre si può toccare, e il gioco dice che cosa manca.
+        try premi("Addestramento mirato.", in: schermata)
+        try await attendi("si riapre la scelta") { schermata.presentedViewController is SchermataScelta }
+        scelta = try XCTUnwrap(schermata.presentedViewController as? SchermataScelta)
+        scelta.loadViewIfNeeded()
+        ambiente.segnali.azzeraAnnunciPronunciati()
+        try premi("Falco: 24 atomi di fanteria pesante.", in: scelta)
+        try await attendi("il rifiuto si annuncia") { !ambiente.segnali.annunciPronunciati.isEmpty }
+        XCTAssertEqual(ambiente.segnali.annunciPronunciati.map(\.testo), ["Non si può ordinare: mancano monete di bronzo."])
+        XCTAssertTrue(lettura(schermata).contains("Nessun lavoro ordinato in questo inverno"), "un comando respinto non cambia nulla")
+        XCTAssertTrue(lettura(schermata).contains("monete di bronzo: 193"))
 
         // Scelto il reparto, il lavoro è ordinato: l'annuncio dice per chi e quando sarà pronto.
         ambiente.segnali.azzeraAnnunciPronunciati()
@@ -319,7 +333,7 @@ final class SecondaTappaDelRegnoTest: XCTestCase {
         }
         XCTAssertEqual(ambiente.segnali.annunciPronunciati.map(\.testo),
                        ["Addestramento mirato ordinato per 8 atomi di fanteria pesante di Lupo: pronto in primavera."])
-        XCTAssertTrue(lettura(schermata).contains("monete di bronzo: 161"))
+        XCTAssertTrue(lettura(schermata).contains("monete di bronzo: 93"))
         XCTAssertEqual(riga("Lupo", in: schermata),
                        "Lupo, gruppo armato: 18 atomi di fanteria leggera, 8 atomi di fanteria pesante, addestramento mirato in corso. Parte per il fronte")
         // Lo stesso reparto non si addestra due volte nello stesso inverno: non è più fra le scelte.
@@ -458,14 +472,15 @@ final class SecondaTappaDelRegnoTest: XCTestCase {
 
     func test_incarico_31_il_reparto_migliorato_si_dichiara_sulla_mappa_e_sulla_tessera_del_deck_in_battaglia() async throws {
         let (schermata, ambiente) = try await patria()
-        // Primo inverno, senza campagna: l'addestramento mirato alla fanteria pesante di Falco.
+        // Primo inverno, senza campagna: l'addestramento mirato alla cavalleria di Falco (150 monete:
+        // i ventiquattro atomi di fanteria pesante ne costerebbero 300, più di ciò che c'è).
         try premi("Attendi l'inverno", in: schermata)
         try await attendi("arriva l'inverno") { self.lettura(schermata).contains("Anno 1, inverno, schermata 1 di 4") }
         try premi("Addestramento mirato.", in: schermata)
         try await attendi("si apre la scelta del reparto") { schermata.presentedViewController is SchermataScelta }
         let scelta = try XCTUnwrap(schermata.presentedViewController as? SchermataScelta)
         scelta.loadViewIfNeeded()
-        try premi("Falco: 24 atomi di fanteria pesante.", in: scelta)
+        try premi("Falco: 12 atomi di cavalleria manovrata.", in: scelta)
         try await attendi("il lavoro è ordinato") { self.riga("Falco", in: schermata).contains("addestramento mirato in corso") }
         try await finoAllaPrimavera(schermata, anno: 1)
         // Parte Falco soltanto fra gli armati, perché la prima battaglia sia sua.
@@ -478,11 +493,11 @@ final class SecondaTappaDelRegnoTest: XCTestCase {
         let mappa = try XCTUnwrap(schermata.presentedViewController as? SchermataMappaCampagna)
         try await attendi("la mappa si carica") { !mappa.elementiPerProva.isEmpty }
         let falco = try XCTUnwrap(mappa.statoPerProva?.gruppi(di: .giocatore).first { $0.nome == "falco" })
-        XCTAssertEqual(falco.composizione.map(\.miglioramento), ["addestramento_mirato", nil])
+        XCTAssertEqual(falco.composizione.map(\.miglioramento), [nil, "addestramento_mirato"])
         // Sulla mappa la casella di Falco dichiara il reparto migliorato.
         let annuncio = LettoreAccessibilita.etichetta(di: try XCTUnwrap(mappa.elementiPerProva[falco.posizione]))
             + " " + (try XCTUnwrap(mappa.elementiPerProva[falco.posizione]).accessibilityValue ?? "")
-        XCTAssertTrue(annuncio.contains("24 atomi di fanteria pesante con addestramento mirato"), annuncio)
+        XCTAssertTrue(annuncio.contains("12 atomi di cavalleria manovrata con addestramento mirato"), annuncio)
 
         // Si marcia verso l'armato avversario più vicino finché una battaglia non è in sospeso.
         let motore = mappa.motorePerProva
@@ -528,9 +543,9 @@ final class SecondaTappaDelRegnoTest: XCTestCase {
         }
         let migliorate = tessere.filter { $0.1.contains("addestramento mirato") }
         XCTAssertEqual(migliorate.count, 1, "una sola tessera porta il miglioramento: \(tessere)")
-        XCTAssertTrue(migliorate.first?.0.lowercased().contains("fanteria pesante") ?? false, "\(tessere)")
+        XCTAssertTrue(migliorate.first?.0.lowercased().contains("cavalleria manovrata") ?? false, "\(tessere)")
         let statoBattaglia = await campo.partitaPerProva.stato
-        XCTAssertEqual(statoBattaglia.deck[.giocatore]?.map(\.miglioramento), ["addestramento_mirato", nil])
+        XCTAssertEqual(statoBattaglia.deck[.giocatore]?.map(\.miglioramento), [nil, "addestramento_mirato"])
 
         // Combattuta la battaglia, i superstiti di quel reparto restano migliorati.
         _ = try await PassaggioBattagliaInterfacciaTest().combattiAConclusione(campo.partitaPerProva, ambiente: ambiente)
@@ -543,9 +558,11 @@ final class SecondaTappaDelRegnoTest: XCTestCase {
         }
         await mappa.ricaricaStatoPerProva()
         if let tornato = mappa.statoPerProva?.gruppi[battaglia.gruppoGiocatore] {
-            let pesante = tornato.composizione.filter { $0.archetipo == "fanteria_pesante" }
-            XCTAssertTrue(pesante.allSatisfy { $0.miglioramento == "addestramento_mirato" },
-                          "i superstiti della fanteria pesante conservano l'addestramento: \(tornato.composizione)")
+            let cavalleria = tornato.composizione.filter { $0.archetipo == "cavalleria_manovrata" }
+            XCTAssertTrue(cavalleria.allSatisfy { $0.miglioramento == "addestramento_mirato" },
+                          "i superstiti della cavalleria conservano l'addestramento: \(tornato.composizione)")
+            XCTAssertTrue(tornato.composizione.filter { $0.archetipo != "cavalleria_manovrata" }
+                .allSatisfy { $0.miglioramento == nil }, "e gli altri reparti non lo acquistano: \(tornato.composizione)")
         }
         print("REPARTO-MIGLIORATO-31 giorno=\(mappa.statoPerProva?.giorno ?? 0) tessere=\(tessere.map { $0.0 + " | " + $0.1 })")
     }
