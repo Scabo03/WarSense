@@ -17,6 +17,9 @@ import Verifica
 //     il banco del regno (incarico 30): <partite> partite di <n> anni per condotta del giocatore, con la
 //     campagna dell'anno giocata fino alla sua conclusione e l'inverno; scrive i dati grezzi (una riga
 //     JSON per anno) e il riepilogo per condotta e per fronte.
+//   … --frequenza-battaglie e --regno con --tattico-pari
+//     il tattico che al banco gioca per il giocatore non si arrende a metà delle perdite, come non si
+//     arrende quello dell'avversario (incarico 32).
 //   swift run -c release StrumentoVerifica --duelli [--uscita <cartella>]
 //     lo squilibrio fra le mappe (incarico 32): i duelli fra le composizioni degli scenari e le loro
 //     varianti, nei due ordini d'azione e con gli eserciti scambiati; una riga JSON per duello e la tabella.
@@ -30,6 +33,7 @@ var partiteFrequenza: Int?
 var giornateMassime = 365
 var partiteRegno: Int?
 var duelli = false
+var tatticoPari = false
 var anniRegno = 5
 
 var argomenti = Array(CommandLine.arguments.dropFirst())
@@ -70,6 +74,8 @@ while let argomento = argomenti.first {
         partiteRegno = n
     case "--duelli":
         duelli = true
+    case "--tattico-pari":
+        tatticoPari = true
     case "--anni":
         guard let valore = argomenti.first, let n = Int(valore) else { break }
         argomenti.removeFirst()
@@ -83,7 +89,7 @@ while let argomento = argomenti.first {
 if let partite = partiteFrequenza {
     do {
         let rapporto = try FrequenzaBattaglieDaRigaDiComando.esegui(
-            cartellaValori: cartellaValori, partite: partite, giornateMassime: giornateMassime)
+            cartellaValori: cartellaValori, partite: partite, giornateMassime: giornateMassime, tatticoPari: tatticoPari)
         if let cartellaUscita {
             try FileManager.default.createDirectory(at: cartellaUscita, withIntermediateDirectories: true)
             try rapporto.grezzi.write(to: cartellaUscita.appendingPathComponent("frequenza-battaglie.jsonl"),
@@ -102,7 +108,7 @@ if let partite = partiteFrequenza {
 if let partite = partiteRegno {
     do {
         let rapporto = try BancoRegnoDaRigaDiComando.esegui(cartellaValori: cartellaValori,
-                                                            partite: partite, anni: anniRegno)
+                                                            partite: partite, anni: anniRegno, tatticoPari: tatticoPari)
         if let cartellaUscita {
             try FileManager.default.createDirectory(at: cartellaUscita, withIntermediateDirectories: true)
             try rapporto.grezzi.write(to: cartellaUscita.appendingPathComponent("banco-del-regno.jsonl"),

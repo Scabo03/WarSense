@@ -480,14 +480,14 @@ final class CaricamentoRegnoTest: XCTestCase {
         }
     }
 
-    /// REGOLA H, la versione: i valori sono alla 0.15.0, e la 0.14.0 — quella della build 31 — sta
-    /// fra le compatibili, perché le battaglie e le campagne salvate con quella si riaprano.
-    func test_incarico_31_la_versione_dei_valori_e_0_15_0_con_la_0_14_0_fra_le_compatibili() throws {
+    /// REGOLA H, la versione: la 0.14.0 — quella della build 31 — sta fra le compatibili, perché le
+    /// battaglie e le campagne salvate con quella si riaprano. La versione corrente la pretende
+    /// `SalvataggiBuild32Test` (incarico 32).
+    func test_incarico_31_la_versione_0_14_0_e_fra_le_compatibili() throws {
         let valori = try CaricatoreValori.carica(da: Contenuti.valoriDiFabbrica)
-        XCTAssertEqual(valori.versione, "0.15.0")
-        XCTAssertEqual(valori.versioneEffettiva, "0.15.0", "la fabbrica coincide con le proprie impronte")
+        XCTAssertEqual(valori.versioneEffettiva, valori.versione, "la fabbrica coincide con le proprie impronte")
         XCTAssertTrue(valori.versioniCompatibili.contains("0.14.0"))
-        XCTAssertFalse(valori.versioniCompatibili.contains("0.15.0"),
+        XCTAssertFalse(valori.versioniCompatibili.contains(valori.versione),
                        "la versione corrente non si dichiara compatibile con sé stessa")
     }
 

@@ -412,9 +412,9 @@ public struct BancoRegno: Sendable {
     let sonda = SondaInvariantiRegno()
 
     public init(valoriRegno: ValoriRegno, motoreCampagna: MotoreCampagna, valoriCampagna: ValoriCampagna,
-                scenari: [String: ScenarioCampagna]) {
+                scenari: [String: ScenarioCampagna], tatticoPari: Bool = false) {
         motoreRegno = MotoreRegno(valori: valoriRegno)
-        misura = MisuraFrequenzaBattaglie(motore: motoreCampagna, valoriCampagna: valoriCampagna)
+        misura = MisuraFrequenzaBattaglie(motore: motoreCampagna, valoriCampagna: valoriCampagna, tatticoPari: tatticoPari)
         self.valoriCampagna = valoriCampagna
         self.scenari = scenari
     }
@@ -632,7 +632,7 @@ public enum BancoRegnoDaRigaDiComando {
         return somma % 2 == 0 ? meta : meta + ",5"
     }
 
-    public static func esegui(cartellaValori: URL, partite: Int, anni: Int) throws -> Rapporto {
+    public static func esegui(cartellaValori: URL, partite: Int, anni: Int, tatticoPari: Bool = false) throws -> Rapporto {
         let valori = try CaricatoreValori.carica(da: cartellaValori)
         let valoriCampagna = try CaricatoreCampagna.carica(da: cartellaValori)
         let valoriRegno = try CaricatoreRegno.carica(da: cartellaValori, archetipiNoti: Set(valori.archetipi.keys),
@@ -641,7 +641,7 @@ public enum BancoRegnoDaRigaDiComando {
         let scenari = try JSONDecoder().decode([String: ScenarioCampagna].self, from: dati)
         let banco = BancoRegno(valoriRegno: valoriRegno,
                                motoreCampagna: MotoreCampagna(valori: valori, valoriCampagna: valoriCampagna),
-                               valoriCampagna: valoriCampagna, scenari: scenari)
+                               valoriCampagna: valoriCampagna, scenari: scenari, tatticoPari: tatticoPari)
         struct Compito: Sendable { let condotta: MisuraFrequenzaBattaglie.Condotta; let seme: UInt64 }
         var tutti: [Compito] = []
         for condotta in MisuraFrequenzaBattaglie.Condotta.allCases {

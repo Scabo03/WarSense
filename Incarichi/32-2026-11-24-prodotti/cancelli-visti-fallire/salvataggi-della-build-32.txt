@@ -1,0 +1,74 @@
+== l'istantanea che non conosce gli evacuati si usa comunque
+   sorgente: Codice/Sources/Sessione/SessioneBattaglia.swift
+   tolto:  let istantanea = try? JSONDecoder().decode(Istantanea.self, from: dati), istantanea.stato.conosceGliEvacuati {
+   messo:  let istantanea = try? JSONDecoder().decode(Istantanea.self, from: dati) {
+   prove:  swift test --filter SalvataggiBuild32Test (uscita 1)
+Test Case '-[SessioneTest.SalvataggiBuild32Test test_incarico_32_i_valori_sono_alla_0_16_0_con_la_0_15_0_fra_le_compatibili]' passed (0.011 seconds).
+Test Case '-[SessioneTest.SalvataggiBuild32Test test_incarico_32_il_copione_di_campagna_giocato_oggi_da_il_giornale_della_build_32]' passed (0.019 seconds).
+Test Case '-[SessioneTest.SalvataggiBuild32Test test_incarico_32_senza_la_0_15_0_fra_le_compatibili_le_partite_della_build_32_sarebbero_rifiutate]' passed (0.026 seconds).
+Test Case '-[SessioneTest.SalvataggiBuild32Test test_incarico_32_un_regno_della_build_32_si_riapre_e_la_prossima_campagna_ha_le_regole_nuove]' passed (0.111 seconds).
+Test Case '-[SessioneTest.SalvataggiBuild32Test test_incarico_32_una_campagna_di_prova_della_build_32_si_riapre_com_era_e_continua]' passed (0.016 seconds).
+Test Case '-[SessioneTest.SalvataggiBuild32Test test_incarico_32_uno_scontro_che_la_build_32_chiudeva_al_primo_comando_torna_da_giocare]' passed (0.010 seconds).
+Test Case '-[SessioneTest.SalvataggiBuild32Test test_incarico_32_uno_scontro_in_corso_della_build_32_si_riapre_com_era]' passed (0.011 seconds).
+/Users/lucascabini/Developer/WarSense/Codice/Tests/SessioneTest/SalvataggiBuild32Test.swift:204: error: -[SessioneTest.SalvataggiBuild32Test test_incarico_32_uno_scontro_lasciato_in_ritirata_conserva_chi_era_gia_uscito] : XCTAssertEqual failed: ("nil") is not equal to ("Optional([sciame-1])") - istantanee true
+/Users/lucascabini/Developer/WarSense/Codice/Tests/SessioneTest/SalvataggiBuild32Test.swift:205: error: -[SessioneTest.SalvataggiBuild32Test test_incarico_32_uno_scontro_lasciato_in_ritirata_conserva_chi_era_gia_uscito] : XCTAssertEqual failed: ("nil") is not equal to ("Optional(6)")
+/Users/lucascabini/Developer/WarSense/Codice/Tests/SessioneTest/SalvataggiBuild32Test.swift:206: error: -[SessioneTest.SalvataggiBuild32Test test_incarico_32_uno_scontro_lasciato_in_ritirata_conserva_chi_era_gia_uscito] : XCTAssertTrue failed
+Test Case '-[SessioneTest.SalvataggiBuild32Test test_incarico_32_uno_scontro_lasciato_in_ritirata_conserva_chi_era_gia_uscito]' failed (0.105 seconds).
+	 Executed 8 tests, with 3 failures (0 unexpected) in 0.309 (0.310) seconds
+
+== anche la campagna nata prima usa la casella d'arrivo nuova
+   sorgente: Codice/Sources/Motore/MotoreCampagna.swift
+   tolto:  guard stato.regole == nil else {
+   messo:  guard false else {
+   prove:  swift test --filter SalvataggiBuild32Test (uscita 1)
+Test Case '-[SessioneTest.SalvataggiBuild32Test test_incarico_32_i_valori_sono_alla_0_16_0_con_la_0_15_0_fra_le_compatibili]' passed (0.013 seconds).
+Test Case '-[SessioneTest.SalvataggiBuild32Test test_incarico_32_il_copione_di_campagna_giocato_oggi_da_il_giornale_della_build_32]' passed (0.021 seconds).
+Test Case '-[SessioneTest.SalvataggiBuild32Test test_incarico_32_senza_la_0_15_0_fra_le_compatibili_le_partite_della_build_32_sarebbero_rifiutate]' passed (0.035 seconds).
+/Users/lucascabini/Developer/WarSense/Codice/Tests/SessioneTest/SalvataggiBuild32Test.swift:147: error: -[SessioneTest.SalvataggiBuild32Test test_incarico_32_un_regno_della_build_32_si_riapre_e_la_prossima_campagna_ha_le_regole_nuove] : XCTAssertEqual failed: ("b5dc4f61aa9c66103e9f6a736b3b29a1942c30672a46f5586efb9fa951679ee8") is not equal to ("4eee1d82e4f7267a53652ae6694b58b4eac169d774ff8a808647405447cc1ed4") - istantanee false: la campagna in corso, con gli arrivi calcolati alla riapplicazione
+Test Case '-[SessioneTest.SalvataggiBuild32Test test_incarico_32_un_regno_della_build_32_si_riapre_e_la_prossima_campagna_ha_le_regole_nuove]' failed (0.204 seconds).
+Test Case '-[SessioneTest.SalvataggiBuild32Test test_incarico_32_una_campagna_di_prova_della_build_32_si_riapre_com_era_e_continua]' passed (0.017 seconds).
+Test Case '-[SessioneTest.SalvataggiBuild32Test test_incarico_32_uno_scontro_che_la_build_32_chiudeva_al_primo_comando_torna_da_giocare]' passed (0.014 seconds).
+Test Case '-[SessioneTest.SalvataggiBuild32Test test_incarico_32_uno_scontro_in_corso_della_build_32_si_riapre_com_era]' passed (0.012 seconds).
+Test Case '-[SessioneTest.SalvataggiBuild32Test test_incarico_32_uno_scontro_lasciato_in_ritirata_conserva_chi_era_gia_uscito]' passed (0.013 seconds).
+	 Executed 8 tests, with 1 failure (0 unexpected) in 0.329 (0.329) seconds
+	 Executed 8 tests, with 1 failure (0 unexpected) in 0.329 (0.330) seconds
+
+== la 0.15.0 fuori dalle versioni compatibili
+   sorgente: Codice/Sources/Contenuti/Valori/manifest.json
+   tolto:  "0.14.0", "0.15.0"
+   messo:  "0.14.0"
+   prove:  swift test --filter SalvataggiBuild32Test (uscita 1)
+/Users/lucascabini/Developer/WarSense/Codice/Tests/SessioneTest/SalvataggiBuild32Test.swift:73: error: -[SessioneTest.SalvataggiBuild32Test test_incarico_32_i_valori_sono_alla_0_16_0_con_la_0_15_0_fra_le_compatibili] : XCTAssertTrue failed
+Test Case '-[SessioneTest.SalvataggiBuild32Test test_incarico_32_i_valori_sono_alla_0_16_0_con_la_0_15_0_fra_le_compatibili]' failed (0.097 seconds).
+Test Case '-[SessioneTest.SalvataggiBuild32Test test_incarico_32_il_copione_di_campagna_giocato_oggi_da_il_giornale_della_build_32]' passed (0.019 seconds).
+Test Case '-[SessioneTest.SalvataggiBuild32Test test_incarico_32_senza_la_0_15_0_fra_le_compatibili_le_partite_della_build_32_sarebbero_rifiutate]' passed (0.027 seconds).
+/Users/lucascabini/Developer/WarSense/Codice/Sources/Sessione/SessioneRegno.swift:79: error: -[SessioneTest.SalvataggiBuild32Test test_incarico_32_un_regno_della_build_32_si_riapre_e_la_prossima_campagna_ha_le_regole_nuove] : failed: caught error: "salvataggioIncompatibile(attesa: "0.16.0", trovata: "0.15.0")"
+Test Case '-[SessioneTest.SalvataggiBuild32Test test_incarico_32_un_regno_della_build_32_si_riapre_e_la_prossima_campagna_ha_le_regole_nuove]' failed (0.011 seconds).
+/Users/lucascabini/Developer/WarSense/Codice/Sources/Sessione/SessioneCampagna.swift:130: error: -[SessioneTest.SalvataggiBuild32Test test_incarico_32_una_campagna_di_prova_della_build_32_si_riapre_com_era_e_continua] : failed: caught error: "salvataggioIncompatibile(attesa: "0.16.0", trovata: "0.15.0")"
+Test Case '-[SessioneTest.SalvataggiBuild32Test test_incarico_32_una_campagna_di_prova_della_build_32_si_riapre_com_era_e_continua]' failed (0.009 seconds).
+/Users/lucascabini/Developer/WarSense/Codice/Sources/Sessione/SessioneBattaglia.swift:72: error: -[SessioneTest.SalvataggiBuild32Test test_incarico_32_uno_scontro_che_la_build_32_chiudeva_al_primo_comando_torna_da_giocare] : failed: caught error: "salvataggioIncompatibile(attesa: "0.16.0", trovata: "0.15.0")"
+Test Case '-[SessioneTest.SalvataggiBuild32Test test_incarico_32_uno_scontro_che_la_build_32_chiudeva_al_primo_comando_torna_da_giocare]' failed (0.009 seconds).
+/Users/lucascabini/Developer/WarSense/Codice/Sources/Sessione/SessioneBattaglia.swift:72: error: -[SessioneTest.SalvataggiBuild32Test test_incarico_32_uno_scontro_in_corso_della_build_32_si_riapre_com_era] : failed: caught error: "salvataggioIncompatibile(attesa: "0.16.0", trovata: "0.15.0")"
+Test Case '-[SessioneTest.SalvataggiBuild32Test test_incarico_32_uno_scontro_in_corso_della_build_32_si_riapre_com_era]' failed (0.009 seconds).
+/Users/lucascabini/Developer/WarSense/Codice/Sources/Sessione/SessioneBattaglia.swift:72: error: -[SessioneTest.SalvataggiBuild32Test test_incarico_32_uno_scontro_lasciato_in_ritirata_conserva_chi_era_gia_uscito] : failed: caught error: "salvataggioIncompatibile(attesa: "0.16.0", trovata: "0.15.0")"
+Test Case '-[SessioneTest.SalvataggiBuild32Test test_incarico_32_uno_scontro_lasciato_in_ritirata_conserva_chi_era_gia_uscito]' failed (0.008 seconds).
+	 Executed 8 tests, with 6 failures (5 unexpected) in 0.187 (0.188) seconds
+
+== il budget del primo turno com'era nella build 32: lo scontro resta chiuso
+   sorgente: Codice/Sources/Motore/MotoreBattaglia.swift
+   tolto:  return stato.parteDiTurno == parte ? max(regime, stato.bilancio[parte]?.disponibile ?? 0) : regime
+   messo:  return regime
+   prove:  swift test --filter SalvataggiBuild32Test (uscita 1)
+Test Case '-[SessioneTest.SalvataggiBuild32Test test_incarico_32_i_valori_sono_alla_0_16_0_con_la_0_15_0_fra_le_compatibili]' passed (0.010 seconds).
+Test Case '-[SessioneTest.SalvataggiBuild32Test test_incarico_32_il_copione_di_campagna_giocato_oggi_da_il_giornale_della_build_32]' passed (0.019 seconds).
+Test Case '-[SessioneTest.SalvataggiBuild32Test test_incarico_32_senza_la_0_15_0_fra_le_compatibili_le_partite_della_build_32_sarebbero_rifiutate]' passed (0.027 seconds).
+Test Case '-[SessioneTest.SalvataggiBuild32Test test_incarico_32_un_regno_della_build_32_si_riapre_e_la_prossima_campagna_ha_le_regole_nuove]' passed (0.117 seconds).
+Test Case '-[SessioneTest.SalvataggiBuild32Test test_incarico_32_una_campagna_di_prova_della_build_32_si_riapre_com_era_e_continua]' passed (0.016 seconds).
+/Users/lucascabini/Developer/WarSense/Codice/Tests/SessioneTest/SalvataggiBuild32Test.swift:222: error: -[SessioneTest.SalvataggiBuild32Test test_incarico_32_uno_scontro_che_la_build_32_chiudeva_al_primo_comando_torna_da_giocare] : XCTAssertNil failed: "EsitoBattaglia(sconfitto: Dati.Parte.giocatore, modo: Motore.EsitoBattaglia.Modo.annientamento, turni: 1)"
+/Users/lucascabini/Developer/WarSense/Codice/Tests/SessioneTest/SalvataggiBuild32Test.swift:223: error: -[SessioneTest.SalvataggiBuild32Test test_incarico_32_uno_scontro_che_la_build_32_chiudeva_al_primo_comando_torna_da_giocare] : XCTAssertNotEqual failed: ("40e149614512641172319c5009ddd4ae97f6060c4226bb5f61f16977df60a08f") is equal to ("40e149614512641172319c5009ddd4ae97f6060c4226bb5f61f16977df60a08f") - allora era concluso
+/Users/lucascabini/Developer/WarSense/Codice/Tests/SessioneTest/SalvataggiBuild32Test.swift:226: error: -[SessioneTest.SalvataggiBuild32Test test_incarico_32_uno_scontro_che_la_build_32_chiudeva_al_primo_comando_torna_da_giocare] : XCTUnwrap failed: expected non-nil value of type "Cella"
+Test Case '-[SessioneTest.SalvataggiBuild32Test test_incarico_32_uno_scontro_che_la_build_32_chiudeva_al_primo_comando_torna_da_giocare]' failed (0.100 seconds).
+Test Case '-[SessioneTest.SalvataggiBuild32Test test_incarico_32_uno_scontro_in_corso_della_build_32_si_riapre_com_era]' passed (0.012 seconds).
+Test Case '-[SessioneTest.SalvataggiBuild32Test test_incarico_32_uno_scontro_lasciato_in_ritirata_conserva_chi_era_gia_uscito]' passed (0.011 seconds).
+	 Executed 8 tests, with 3 failures (0 unexpected) in 0.312 (0.313) seconds
+

@@ -250,7 +250,9 @@ public actor SessioneBattaglia {
     }
 
     /// L'istantanea valida più recente non oltre il limite, o lo stato di fabbrica.
-    /// Un'istantanea corrotta fa scalare alla precedente (05 §6.8).
+    /// Un'istantanea corrotta fa scalare alla precedente (05 §6.8). Anche quella scattata dalla build
+    /// 32 dopo un'evacuazione: sa chi è uscito e non com'era, e tornerebbe in campagna nessuno (01
+    /// §10.6; incarico 32); la riapplicazione del giornale lo ricostruisce.
     private static func istantaneaMigliore(in cartella: URL, nonOltre limite: Int,
                                            scenario: ScenarioBattaglia,
                                            valori: ValoriDiGioco) throws -> (StatoBattaglia, Int) {
@@ -259,7 +261,8 @@ public actor SessioneBattaglia {
             .sorted { $0.0 > $1.0 }
         for (indice, url) in candidate {
             if let dati = try? Data(contentsOf: url),
-               let istantanea = try? JSONDecoder().decode(Istantanea.self, from: dati) {
+               let istantanea = try? JSONDecoder().decode(Istantanea.self, from: dati),
+               istantanea.stato.conosceGliEvacuati {
                 return (istantanea.stato, indice)
             }
         }

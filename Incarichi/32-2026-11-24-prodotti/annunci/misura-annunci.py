@@ -138,10 +138,31 @@ def abbina(pubblicati, tratti):
     return fuori
 
 
+def quiete(limite=60):
+    """Attende che la coda degli annunci sia vuota: ogni annuncio pubblicato è stato concluso, e da un secondo e
+    mezzo non ne esce un altro. Senza, un passo misurerebbe gli annunci del precedente."""
+    fine = time.time() + limite
+    while time.time() < fine:
+        pubblicati, conclusi, ultimo = 0, 0, 0.0
+        for istante, riga in registro(da_capo=True):
+            if riga.startswith("AVVIO"):
+                pubblicati, conclusi = 0, 0
+            elif riga.startswith("PUBBLICA"):
+                pubblicati += 1
+                ultimo = istante
+            elif riga.startswith("CONCLUSO"):
+                conclusi += 1
+                ultimo = istante
+        if conclusi >= pubblicati and time.time() - ultimo > 1.5:
+            return
+        time.sleep(0.5)
+
+
 def misura(passo, comandi, sposta, nota=None):
     """Esegue i comandi e misura gli annunci che il gioco pubblica dopo l'ULTIMO. I precedenti preparano."""
     for c in comandi[:-1]:
         cmd(c)
+    quiete()
     registro()
     prima = time.time()
     e = cmd(comandi[-1])
@@ -251,7 +272,7 @@ def blocco_regno():
 
 def blocco_mappa():
     """Sulla campagna aperta dal regno nel blocco precedente, oppure su una nuova."""
-    if "Torna in patria" not in albero():
+    if "Chiudi la giornata" not in albero():
         valori_di_fabbrica()
         avvia()
         cmd(puls("Nuovo regno", 4))
@@ -292,10 +313,12 @@ def blocco_scontro():
     misura("elemento del deck selezionato", [att(3, prefisso="fanteria leggera")], False)
     misura("piazzamento confermato", [att(8, prefisso="riga 10, cella 4")], False)
     misura("turno chiuso, il turno dell'avversario", [puls("Fine del turno", 40)], False)
+    cmd(att(2, prefisso="fanteria leggera"))  # l'elemento del mazzo resta selezionato: lo si deseleziona
     misura("movimento: destinazione da scegliere", [att(3, prefisso="riga 10, cella 4"), puls("Scegli la destinazione sulla griglia", 14)], True)
     misura("movimento compiuto sulla cella", [att(8, prefisso="riga 9, cella 4")], False)
     for _ in range(3):
         cmd(puls("Fine del turno", 6))
+        quiete()
         if "Resoconto della battaglia" in albero():
             break
     misura("resa dichiarata", [puls("Dichiara la resa", 10)], False)

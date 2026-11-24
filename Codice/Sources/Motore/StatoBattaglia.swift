@@ -181,6 +181,10 @@ public struct StatoBattaglia: Hashable, Codable, Sendable {
     /// facoltativo per le istantanee scritte prima.
     public var sciamiEvacuati: [Sciame]? = nil
 
+    /// Falso soltanto per un'istantanea scritta prima della build 33 dopo un'evacuazione: elenca chi è
+    /// uscito dal campo e non conserva com'era.
+    public var conosceGliEvacuati: Bool { sciamiEvacuati != nil || evacuati.values.allSatisfy(\.isEmpty) }
+
     // Perdite cumulative per la soglia della resa (01 §10.2).
     public var perditeSubite: [Parte: Int64]
     /// Forze effettivamente impiegate sul campo: la somma dei punti vita con cui

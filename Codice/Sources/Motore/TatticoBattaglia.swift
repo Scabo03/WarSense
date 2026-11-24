@@ -70,12 +70,14 @@ public struct TatticoBattaglia: Sendable {
     }
 
     /// LO STALLO (01 §10.7.1; incarico 32): le due parti non possono più incontrarsi, per quanto
-    /// avanzino. È l'avversario a uscirne, ritirandosi: la sconfitta è una decisione e non un calcolo (01
-    /// §15.2.4), e una battaglia in cui nessuno può raggiungere l'altro non può restare aperta. Accade a
-    /// due schieramenti troppo ingombranti per avanzare, come i due gruppi di ventiquattro fanti pesanti
-    /// e dodici cavalieri degli scenari.
+    /// avanzino, oppure nessuna delle due può più avvicinarsi all'altra. È l'avversario a uscirne,
+    /// ritirandosi: la sconfitta è una decisione e non un calcolo (01 §15.2.4), e una battaglia in cui
+    /// nessuno può raggiungere l'altro non può restare aperta. Accade a due schieramenti troppo
+    /// ingombranti per avanzare, come i due gruppi di ventiquattro fanti pesanti e dodici cavalieri degli
+    /// scenari.
     private func convieneUscireDalloStallo(stato: StatoBattaglia) -> Bool {
-        parte == .avversario && stato.resaDichiarataDa == nil && motore.nonPossonoPiuIncontrarsi(stato)
+        parte == .avversario && stato.resaDichiarataDa == nil
+            && (motore.nonPossonoPiuIncontrarsi(stato) || motore.nessunoPuoAvvicinarsi(stato))
     }
 
     private func comandoDiRitirata(stato: StatoBattaglia) -> ComandoBattaglia? {
@@ -174,11 +176,15 @@ public struct TatticoBattaglia: Sendable {
                         let db = stato.griglia.distanza(b, vicino.posizione)
                         return da != db ? da < db : a < b
                     }
-                if let passo = passi.first,
-                   stato.griglia.distanza(passo, vicino.posizione)
-                        < stato.griglia.distanza(sciame.posizione, vicino.posizione),
-                   motore.valida(.muovi(sciame: sciame.id, percorso: [passo]),
-                                 parte: parte, stato: stato).eValido {
+                // Il primo passo che avvicina e che il volume basta a pagare (incarico 32). Fino alla
+                // build 32 si provava soltanto il più vicino di tutti, e chi non poteva pagarlo — una
+                // riga più avanti — restava fermo anche quando un altro passo, di lato, lo portava a
+                // contatto: la battaglia non finiva.
+                for passo in passi
+                where stato.griglia.distanza(passo, vicino.posizione)
+                        < stato.griglia.distanza(sciame.posizione, vicino.posizione)
+                    && motore.valida(.muovi(sciame: sciame.id, percorso: [passo]),
+                                     parte: parte, stato: stato).eValido {
                     return .muovi(sciame: sciame.id, percorso: [passo])
                 }
             }

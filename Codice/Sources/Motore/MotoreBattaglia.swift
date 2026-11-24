@@ -808,6 +808,43 @@ public struct MotoreBattaglia: Sendable {
             && suoi.allSatisfy { lontani($0.avanzamento, mio, oltre: max(1, $0.gittata)) }
     }
 
+    /// Vero se nessuna delle due parti può più AVVICINARSI all'altra né colpirla (01 §10.7.1; incarico
+    /// 32): nessun contatto e nessun divieto d'ingaggio in corso, che passa; e per ciascuna, col volume di
+    /// un turno pieno e le azioni di tutti i reparti, nessun piazzamento, nessun ingaggio, nessun tiro e
+    /// nessun passo che porti un reparto più vicino al nemico che gli è più vicino. È l'altra forma dello
+    /// stallo: una colonna fermata da un proprio reparto che non può andare oltre. Funzione dello stato.
+    public func nessunoPuoAvvicinarsi(_ stato: StatoBattaglia) -> Bool {
+        guard stato.esito == nil, stato.contatti.isEmpty,
+              !stato.divietoIngaggio.values.contains(where: { $0 >= stato.giro }),
+              Parte.allCases.allSatisfy({ (stato.turniGiocati[$0] ?? 0) > 1 }) else { return false }
+        let f = formato(stato)
+        return Parte.allCases.allSatisfy { parte in
+            var pieno = stato
+            pieno.parteDiTurno = parte
+            pieno.resaDichiarataDa = nil
+            pieno.bilancio[parte] = BilancioVolume(baseTurno: f.budgetVolumeBase,
+                                                   riportoEntrante: f.quotaRiporto.applicato(a: f.budgetVolumeBase),
+                                                   spesa: 0)
+            for id in pieno.sciami.keys { pieno.sciami[id]!.azioneSpesa = false }
+            func valido(_ comando: ComandoBattaglia) -> Bool { valida(comando, parte: parte, stato: pieno).eValido }
+            for (indice, elemento) in (pieno.deck[parte] ?? []).enumerated() where elemento.esemplari > 0 {
+                pieno.selezione[parte] = indice
+                if pieno.griglia.tutteLeCelle.contains(where: { valido(.piazza(cella: $0)) }) { return false }
+            }
+            let nemici = pieno.sciamiOrdinati.filter { $0.parte != parte }
+            return pieno.sciamiOrdinati.filter { $0.parte == parte }.allSatisfy { sciame in
+                guard let vicino = nemici.map({ pieno.griglia.distanza(sciame.posizione, $0.posizione) }).min() else { return true }
+                let siAvvicina = pieno.griglia.vicini(di: sciame.posizione).contains { passo in
+                    nemici.contains { pieno.griglia.distanza(passo, $0.posizione) < vicino }
+                        && valido(.muovi(sciame: sciame.id, percorso: [passo]))
+                }
+                return !siAvvicina && !nemici.contains {
+                    valido(.ingaggia(sciame: sciame.id, bersaglio: $0.id)) || valido(.tira(sciame: sciame.id, bersaglio: $0.id))
+                }
+            }
+        }
+    }
+
     /// Una parte ha una riserva schierabile se un suo elemento del deck con esemplari da
     /// giocare può ancora entrare in campo, cioè il volume di un suo sciame — con lo sconto
     /// dell'imboscante, finché ne gode (01 §9.3.2) — sta nel budget massimo residuo (01 §8.6),

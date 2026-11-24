@@ -1,0 +1,63 @@
+== l'avversario non esce mai dallo stallo
+   sorgente: Codice/Sources/Motore/TatticoBattaglia.swift
+   tolto:  parte == .avversario && stato.resaDichiarataDa == nil && (motore.nonPossonoPiuIncontrarsi(stato) || motore.nessunoPuoAvvicinarsi(stato))
+   messo:  false
+   prove:  swift test --filter StalloDellaBattagliaTest (uscita 1)
+Test Case '-[MotoreTest.StalloDellaBattagliaTest test_01_10_7_1_chi_puo_ancora_fare_un_passo_verso_il_nemico_non_e_in_stallo]' passed (0.009 seconds).
+/Users/lucascabini/Developer/WarSense/Codice/Tests/MotoreTest/StalloDellaBattagliaTest.swift:89: error: -[MotoreTest.StalloDellaBattagliaTest test_01_10_7_1_due_schieramenti_che_non_possono_incontrarsi_si_concludono_con_la_ritirata_dell_avversario] : XCTUnwrap failed: expected non-nil value of type "EsitoBattaglia" - giocatore: la battaglia si conclude
+Test Case '-[MotoreTest.StalloDellaBattagliaTest test_01_10_7_1_due_schieramenti_che_non_possono_incontrarsi_si_concludono_con_la_ritirata_dell_avversario]' failed (0.129 seconds).
+Test Case '-[MotoreTest.StalloDellaBattagliaTest test_01_10_7_1_due_schieramenti_che_possono_incontrarsi_non_sono_in_stallo]' passed (0.008 seconds).
+/Users/lucascabini/Developer/WarSense/Codice/Tests/MotoreTest/StalloDellaBattagliaTest.swift:140: error: -[MotoreTest.StalloDellaBattagliaTest test_01_10_7_1_quando_nessuno_puo_piu_avvicinarsi_l_avversario_si_ritira] : XCTUnwrap failed: expected non-nil value of type "EsitoBattaglia" - la battaglia si conclude
+Test Case '-[MotoreTest.StalloDellaBattagliaTest test_01_10_7_1_quando_nessuno_puo_piu_avvicinarsi_l_avversario_si_ritira]' failed (0.031 seconds).
+Test Case '-[MotoreTest.StalloDellaBattagliaTest test_01_14_2_il_tattico_prende_il_passo_che_puo_pagare_e_non_soltanto_il_piu_vicino]' passed (0.007 seconds).
+/Users/lucascabini/Developer/WarSense/Codice/Tests/MotoreTest/StalloDellaBattagliaTest.swift:125: error: -[MotoreTest.StalloDellaBattagliaTest test_01_15_2_4_il_tattico_del_giocatore_non_si_arrende_per_uno_stallo] : XCTAssertEqual failed: ("fineTurno") is not equal to ("dichiaraResa")
+Test Case '-[MotoreTest.StalloDellaBattagliaTest test_01_15_2_4_il_tattico_del_giocatore_non_si_arrende_per_uno_stallo]' failed (0.007 seconds).
+	 Executed 6 tests, with 3 failures (0 unexpected) in 0.192 (0.193) seconds
+
+== l'avversario esce dallo stallo dei due schieramenti, non da quello della colonna fermata
+   sorgente: Codice/Sources/Motore/TatticoBattaglia.swift
+   tolto:  && (motore.nonPossonoPiuIncontrarsi(stato) || motore.nessunoPuoAvvicinarsi(stato))
+   messo:  && motore.nonPossonoPiuIncontrarsi(stato)
+   prove:  swift test --filter StalloDellaBattagliaTest (uscita 1)
+Test Case '-[MotoreTest.StalloDellaBattagliaTest test_01_10_7_1_chi_puo_ancora_fare_un_passo_verso_il_nemico_non_e_in_stallo]' passed (0.010 seconds).
+Test Case '-[MotoreTest.StalloDellaBattagliaTest test_01_10_7_1_due_schieramenti_che_non_possono_incontrarsi_si_concludono_con_la_ritirata_dell_avversario]' passed (0.008 seconds).
+Test Case '-[MotoreTest.StalloDellaBattagliaTest test_01_10_7_1_due_schieramenti_che_possono_incontrarsi_non_sono_in_stallo]' passed (0.009 seconds).
+/Users/lucascabini/Developer/WarSense/Codice/Tests/MotoreTest/StalloDellaBattagliaTest.swift:140: error: -[MotoreTest.StalloDellaBattagliaTest test_01_10_7_1_quando_nessuno_puo_piu_avvicinarsi_l_avversario_si_ritira] : XCTUnwrap failed: expected non-nil value of type "EsitoBattaglia" - la battaglia si conclude
+Test Case '-[MotoreTest.StalloDellaBattagliaTest test_01_10_7_1_quando_nessuno_puo_piu_avvicinarsi_l_avversario_si_ritira]' failed (0.140 seconds).
+Test Case '-[MotoreTest.StalloDellaBattagliaTest test_01_14_2_il_tattico_prende_il_passo_che_puo_pagare_e_non_soltanto_il_piu_vicino]' passed (0.007 seconds).
+Test Case '-[MotoreTest.StalloDellaBattagliaTest test_01_15_2_4_il_tattico_del_giocatore_non_si_arrende_per_uno_stallo]' passed (0.007 seconds).
+	 Executed 6 tests, with 1 failure (0 unexpected) in 0.181 (0.181) seconds
+	 Executed 6 tests, with 1 failure (0 unexpected) in 0.181 (0.182) seconds
+
+== anche il tattico del giocatore esce dallo stallo
+   sorgente: Codice/Sources/Motore/TatticoBattaglia.swift
+   tolto:  parte == .avversario && stato.resaDichiarataDa == nil && (motore
+   messo:  stato.resaDichiarataDa == nil && (motore
+   prove:  swift test --filter StalloDellaBattagliaTest (uscita 1)
+Test Case '-[MotoreTest.StalloDellaBattagliaTest test_01_10_7_1_chi_puo_ancora_fare_un_passo_verso_il_nemico_non_e_in_stallo]' passed (0.010 seconds).
+/Users/lucascabini/Developer/WarSense/Codice/Tests/MotoreTest/StalloDellaBattagliaTest.swift:90: error: -[MotoreTest.StalloDellaBattagliaTest test_01_10_7_1_due_schieramenti_che_non_possono_incontrarsi_si_concludono_con_la_ritirata_dell_avversario] : XCTAssertEqual failed: ("giocatore") is not equal to ("avversario") - giocatore
+/Users/lucascabini/Developer/WarSense/Codice/Tests/MotoreTest/StalloDellaBattagliaTest.swift:94: error: -[MotoreTest.StalloDellaBattagliaTest test_01_10_7_1_due_schieramenti_che_non_possono_incontrarsi_si_concludono_con_la_ritirata_dell_avversario] : XCTAssertEqual failed: ("nil") is not equal to ("Optional(1)") - giocatore: il reparto schierato esce
+Test Case '-[MotoreTest.StalloDellaBattagliaTest test_01_10_7_1_due_schieramenti_che_non_possono_incontrarsi_si_concludono_con_la_ritirata_dell_avversario]' failed (0.114 seconds).
+Test Case '-[MotoreTest.StalloDellaBattagliaTest test_01_10_7_1_due_schieramenti_che_possono_incontrarsi_non_sono_in_stallo]' passed (0.010 seconds).
+Test Case '-[MotoreTest.StalloDellaBattagliaTest test_01_10_7_1_quando_nessuno_puo_piu_avvicinarsi_l_avversario_si_ritira]' passed (0.009 seconds).
+Test Case '-[MotoreTest.StalloDellaBattagliaTest test_01_14_2_il_tattico_prende_il_passo_che_puo_pagare_e_non_soltanto_il_piu_vicino]' passed (0.007 seconds).
+/Users/lucascabini/Developer/WarSense/Codice/Tests/MotoreTest/StalloDellaBattagliaTest.swift:122: error: -[MotoreTest.StalloDellaBattagliaTest test_01_15_2_4_il_tattico_del_giocatore_non_si_arrende_per_uno_stallo] : XCTAssertEqual failed: ("dichiaraResa") is not equal to ("fineTurno")
+Test Case '-[MotoreTest.StalloDellaBattagliaTest test_01_15_2_4_il_tattico_del_giocatore_non_si_arrende_per_uno_stallo]' failed (0.007 seconds).
+	 Executed 6 tests, with 3 failures (0 unexpected) in 0.157 (0.158) seconds
+	 Executed 6 tests, with 3 failures (0 unexpected) in 0.157 (0.159) seconds
+
+== il tattico prova soltanto il passo piu' vicino (codice della build 32)
+   sorgente: Codice/Sources/Motore/TatticoBattaglia.swift
+   tolto:  for passo in passi where
+   messo:  for passo in passi.prefix(1) where
+   prove:  swift test --filter StalloDellaBattagliaTest (uscita 1)
+Test Case '-[MotoreTest.StalloDellaBattagliaTest test_01_10_7_1_chi_puo_ancora_fare_un_passo_verso_il_nemico_non_e_in_stallo]' passed (0.009 seconds).
+Test Case '-[MotoreTest.StalloDellaBattagliaTest test_01_10_7_1_due_schieramenti_che_non_possono_incontrarsi_si_concludono_con_la_ritirata_dell_avversario]' passed (0.008 seconds).
+Test Case '-[MotoreTest.StalloDellaBattagliaTest test_01_10_7_1_due_schieramenti_che_possono_incontrarsi_non_sono_in_stallo]' passed (0.008 seconds).
+Test Case '-[MotoreTest.StalloDellaBattagliaTest test_01_10_7_1_quando_nessuno_puo_piu_avvicinarsi_l_avversario_si_ritira]' passed (0.009 seconds).
+/Users/lucascabini/Developer/WarSense/Codice/Tests/MotoreTest/StalloDellaBattagliaTest.swift:184: error: -[MotoreTest.StalloDellaBattagliaTest test_01_14_2_il_tattico_prende_il_passo_che_puo_pagare_e_non_soltanto_il_piu_vicino] : XCTAssertEqual failed: ("fineTurno") is not equal to ("muovi(sciame: sciame-1, percorso: [Motore.Cella(riga: 2, colonna: 5)])")
+Test Case '-[MotoreTest.StalloDellaBattagliaTest test_01_14_2_il_tattico_prende_il_passo_che_puo_pagare_e_non_soltanto_il_piu_vicino]' failed (0.097 seconds).
+Test Case '-[MotoreTest.StalloDellaBattagliaTest test_01_15_2_4_il_tattico_del_giocatore_non_si_arrende_per_uno_stallo]' passed (0.007 seconds).
+	 Executed 6 tests, with 1 failure (0 unexpected) in 0.137 (0.138) seconds
+	 Executed 6 tests, with 1 failure (0 unexpected) in 0.137 (0.139) seconds
+

@@ -79,7 +79,7 @@ public struct MisuraSquilibrio: Sendable {
         let scenario = PonteCampagnaBattaglia.scenario(da: battaglia, stato: stato, modello: banco.modelloScontro)
         var sb = try FabbricaBattaglia.crea(scenario: scenario, valori: misura.motore.valori).0
         let tattici: [Parte: TatticoBattaglia] = [
-            .giocatore: TatticoBattaglia(motore: motoreB, ufficiale: ufficiale, parte: .giocatore),
+            .giocatore: TatticoBattaglia(motore: motoreB, ufficiale: misura.ufficialeDelGiocatore(ufficiale), parte: .giocatore),
             .avversario: TatticoBattaglia(motore: motoreB, ufficiale: ufficiale, parte: .avversario)]
         var attivita: [Parte: Attivita] = [.giocatore: Attivita(), .avversario: Attivita()]
         var inCampo: [IdSciame: Parte] = [:]
@@ -136,24 +136,47 @@ public struct MisuraSquilibrio: Sendable {
     }
 }
 
-/// I duelli come li esegue lo strumento da riga di comando.
+/// I duelli come li esegue lo strumento da riga di comando: gli eserciti degli scenari del gioco — gli stessi
+/// per il giocatore e per l'avversario —, con i tattici del banco e con quello del giocatore che non si
+/// arrende; e le composizioni PROPOSTE al titolare al posto di quella che non può avanzare, contro le altre.
 public enum DuelliDaRigaDiComando {
     public struct Rapporto: Sendable {
         public let testo: String
         public let grezzi: String
     }
 
-    /// Gli eserciti degli scenari del gioco: sono le stesse per il giocatore e per l'avversario.
-    static let corvo = MisuraSquilibrio.Esercito("corvo_6L", [("fanteria_leggera", 6)])
-    static let lupo = MisuraSquilibrio.Esercito("lupo_18L_8P", [("fanteria_leggera", 18), ("fanteria_pesante", 8)])
-    static let falco = MisuraSquilibrio.Esercito("falco_24P_12C", [("fanteria_pesante", 24), ("cavalleria_manovrata", 12)])
+    static let corvo = MisuraSquilibrio.Esercito("6L", [("fanteria_leggera", 6)])
+    static let lupo = MisuraSquilibrio.Esercito("18L+8P", [("fanteria_leggera", 18), ("fanteria_pesante", 8)])
+    static let falco = MisuraSquilibrio.Esercito("24P+12C", [("fanteria_pesante", 24), ("cavalleria_manovrata", 12)])
+    /// Le proposte: la metà del gruppo pesante, la stessa forza in reparti che possono avanzare, e due mezzi.
+    static let proposte = [
+        MisuraSquilibrio.Esercito("12P+6C", [("fanteria_pesante", 12), ("cavalleria_manovrata", 6)]),
+        MisuraSquilibrio.Esercito("10P+5C", [("fanteria_pesante", 10), ("cavalleria_manovrata", 5)]),
+        MisuraSquilibrio.Esercito("12P+12P+6C+6C", [("fanteria_pesante", 12), ("fanteria_pesante", 12),
+                                                  ("cavalleria_manovrata", 6), ("cavalleria_manovrata", 6)]),
+        MisuraSquilibrio.Esercito("16P+8C", [("fanteria_pesante", 16), ("cavalleria_manovrata", 8)]),
+    ]
 
     public static func esegui(cartellaValori: URL) throws -> Rapporto {
         let valori = try CaricatoreValori.carica(da: cartellaValori)
         let valoriCampagna = try CaricatoreCampagna.carica(da: cartellaValori)
-        let misura = MisuraSquilibrio(misura: MisuraFrequenzaBattaglie(
-            motore: MotoreCampagna(valori: valori, valoriCampagna: valoriCampagna), valoriCampagna: valoriCampagna))
-        var duelli = try misura.matrice(serie: "scenari", [corvo, lupo, falco])
+        let motore = MotoreCampagna(valori: valori, valoriCampagna: valoriCampagna)
+        var duelli: [MisuraSquilibrio.Duello] = []
+        for (suffisso, pari) in [("", false), ("_tattico_pari", true)] {
+            let misura = MisuraSquilibrio(misura: MisuraFrequenzaBattaglie(motore: motore, valoriCampagna: valoriCampagna,
+                                                                          tatticoPari: pari))
+            duelli += try misura.matrice(serie: "scenari" + suffisso, [corvo, lupo, falco])
+            for proposta in proposte {
+                for altro in [corvo, lupo, falco, proposta] {
+                    for primo in Parte.allCases {
+                        duelli.append(try misura.duello(serie: "proposte" + suffisso, giocatore: altro, avversario: proposta, primo: primo))
+                        if altro != proposta {
+                            duelli.append(try misura.duello(serie: "proposte" + suffisso, giocatore: proposta, avversario: altro, primo: primo))
+                        }
+                    }
+                }
+            }
+        }
         let codificatore = JSONEncoder()
         codificatore.outputFormatting = [.sortedKeys]
         let grezzi = try duelli.map { String(decoding: try codificatore.encode($0), as: UTF8.self) }.joined(separator: "\n")

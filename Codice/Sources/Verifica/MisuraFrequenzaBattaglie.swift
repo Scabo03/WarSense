@@ -105,10 +105,25 @@ public struct MisuraFrequenzaBattaglie: Sendable {
     let banco: BancoCampagna
     var motore: MotoreCampagna { banco.motore }
     let sonda = SondaInvariantiCampagna()
+    /// Vero se il tattico che al banco gioca per il GIOCATORE non si arrende a metà delle perdite, come non
+    /// si arrende quello dell'avversario (incarico 32). Al banco i due tattici hanno lo stesso ufficiale,
+    /// ma quello dell'avversario ha la propensione alla ritirata ridotta dal vantaggio nascosto (01 §13.2),
+    /// che al giocatore vero giova e a quello del banco nuoce: a parità di eserciti si arrende sempre lui.
+    /// Falso, le battaglie sono quelle degli incarichi 29 e 31.
+    let tatticoPari: Bool
 
-    public init(motore: MotoreCampagna, valoriCampagna: ValoriCampagna) {
+    public init(motore: MotoreCampagna, valoriCampagna: ValoriCampagna, tatticoPari: Bool = false) {
         banco = BancoCampagna(motore: motore, valoriCampagna: valoriCampagna,
                               scenari: ScenariCampagna.vuoti)
+        self.tatticoPari = tatticoPari
+    }
+
+    /// L'ufficiale del tattico che gioca per il giocatore.
+    func ufficialeDelGiocatore(_ ufficiale: DefinizioneUfficiale) -> DefinizioneUfficiale {
+        guard tatticoPari, var campi = (try? JSONSerialization.jsonObject(with: JSONEncoder().encode(ufficiale))) as? [String: Any]
+        else { return ufficiale }
+        campi["propensione_ritirata"] = 0
+        return (try? JSONDecoder().decode(DefinizioneUfficiale.self, from: JSONSerialization.data(withJSONObject: campi))) ?? ufficiale
     }
 
     /// Un generatore deterministico col seme (SplitMix64), proprio dello strumento: il Motore non ne usa.
@@ -324,7 +339,7 @@ public struct MisuraFrequenzaBattaglie: Sendable {
         let iniziale = sb
         var ultimi: [(Parte, ComandoBattaglia)] = []
         let tattici: [Parte: TatticoBattaglia] = [
-            .giocatore: TatticoBattaglia(motore: motoreB, ufficiale: ufficiale, parte: .giocatore),
+            .giocatore: TatticoBattaglia(motore: motoreB, ufficiale: ufficialeDelGiocatore(ufficiale), parte: .giocatore),
             .avversario: TatticoBattaglia(motore: motoreB, ufficiale: ufficiale, parte: .avversario)]
         var passi = 0
         while sb.esito == nil, sb.giro <= Self.tettoGiri, passi < Self.tettoPassi {
@@ -493,13 +508,14 @@ public enum FrequenzaBattaglieDaRigaDiComando {
 
     public static let formati = ["campagna_piccola", "campagna_media", "campagna_grande"]
 
-    public static func esegui(cartellaValori: URL, partite: Int, giornateMassime: Int) throws -> Rapporto {
+    public static func esegui(cartellaValori: URL, partite: Int, giornateMassime: Int,
+                              tatticoPari: Bool = false) throws -> Rapporto {
         let valori = try CaricatoreValori.carica(da: cartellaValori)
         let valoriCampagna = try CaricatoreCampagna.carica(da: cartellaValori)
         let dati = try Data(contentsOf: cartellaValori.appendingPathComponent("scenari-campagna.json"))
         let scenari = try JSONDecoder().decode([String: ScenarioCampagna].self, from: dati)
         let misura = MisuraFrequenzaBattaglie(motore: MotoreCampagna(valori: valori, valoriCampagna: valoriCampagna),
-                                              valoriCampagna: valoriCampagna)
+                                              valoriCampagna: valoriCampagna, tatticoPari: tatticoPari)
         struct Compito: Sendable { let formato: String; let condotta: MisuraFrequenzaBattaglie.Condotta; let seme: UInt64 }
         var tutti: [Compito] = []
         for formato in formati {
