@@ -241,7 +241,7 @@ def subita():
     attiva(4, contiene="l'avversario occupa il tuo quartier generale")
     controlla("attivata la voce del registro si torna sulla mappa, sulla casella", "Chiudi la giornata" in albero())
     s = stato()
-    controlla("lo stato lo dice in coda", any("L'avversario occupa il tuo quartier generale, sarà preso fra 3 giornate" in p for p in sentito(s)), sentito=sentito(s))
+    controlla("lo stato lo dice in coda", any("Il tuo quartier generale è occupato, sarà preso fra 3 giornate" in p for p in sentito(s)), sentito=sentito(s))
     for giornate in ("2 giornate", "1 giornata"):
         e = chiudi_giornata()
         controlla(f"si sente che mancano {giornate}", detto(e, f"Il tuo quartier generale è ancora occupato: sarà preso fra {giornate}"), sentito=sentito(e))

@@ -590,7 +590,11 @@ final class SchermataPatria: UIViewController {
             voci: traduttore.dichiarazioneDiConclusione(esito, premi: partita.premi(per: esito), fase: fase),
             testi: testi, chiaveTitolo: "conclusione.titolo", chiaveCongedo: "conclusione.torna")
         schermata.modalPresentationStyle = .fullScreen
-        schermata.alTermine = { [weak self] in self?.portaIlFuocoInTesta() }
+        // Congedata la dichiarazione il sistema riporta il fuoco da sé, e lo porterebbe sul comando che sta
+        // dove stava «Torna in patria» (l'iPhone, una volta su sei): lo si attende, come al ritorno all'avvio.
+        schermata.alTermine = { [weak self] in
+            DispatchQueue.main.asyncAfter(deadline: .now() + Fuoco.attesaDelSistema) { self?.portaIlFuocoInTesta() }
+        }
         present(schermata, animated: false)
     }
 
