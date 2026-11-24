@@ -54,7 +54,7 @@ final class CompatibilitaGiornaleTest: XCTestCase {
         case fondazione, comando, inizioTurno, fondazioneCampagna
         case comandoCampagna, aperturaGiornata, annullamentoCampagna, risoluzioneGiornata
         case battagliaConclusa, giornataChiusaDalGiocatore
-        case fondazioneRegno, comandoRegno, campagnaConclusaNelRegno
+        case fondazioneRegno, comandoRegno, campagnaConclusaNelRegno, richiamoDellEsercito
     }
 
     /// Specchio di `ComandoRegno` (incarico 30): il giornale del regno è anch'esso formato di
@@ -94,6 +94,7 @@ final class CompatibilitaGiornaleTest: XCTestCase {
         case .fondazioneRegno: return .fondazioneRegno
         case .comandoRegno: return .comandoRegno
         case .campagnaConclusaNelRegno: return .campagnaConclusaNelRegno
+        case .richiamoDellEsercito: return .richiamoDellEsercito
         }
     }
 
@@ -115,6 +116,7 @@ final class CompatibilitaGiornaleTest: XCTestCase {
         case .fondazioneRegno: return .fondazioneRegno(Self.fondazioneRegnoDiProva)
         case .comandoRegno: return .comandoRegno(comando: .prosegui)
         case .campagnaConclusaNelRegno: return .campagnaConclusaNelRegno(esito: Self.esitoCampagnaDiProva)
+        case .richiamoDellEsercito: return .richiamoDellEsercito(giorno: 1)
         }
     }
 
@@ -249,6 +251,20 @@ final class CompatibilitaGiornaleTest: XCTestCase {
         fronte: "guado", anno: 1, modo: .annientamento, vincitore: .giocatore, giornate: 12,
         battaglieVinte: 1, battagliePerse: 0, superstiti: forzeDiProva)
 
+    /// Gli esiti dei modi nuovi dell'incarico 32, ciascuno col proprio campione: la loro codifica si fissa
+    /// qui, perché un giornale del regno li porta per sempre.
+    static let esitiDeiModiNuovi = [ConclusioneCampagna.Modo.presa, .richiamo].map { modo in
+        EsitoCampagna(fronte: "guado", anno: 1, modo: modo, vincitore: .avversario, giornate: 12,
+                      battaglieVinte: 1, battagliePerse: 0, superstiti: forzeDiProva)
+    }
+
+    /// I fatti della patria del campione della fondazione: un esemplare per ciascun caso. I modi nuovi di
+    /// conclusione hanno il proprio campione qui sopra, e il campione della fondazione resta com'era.
+    static let fattiDelCampione = FattoDiPatria.casiDiRiferimento.filter {
+        if case .campagnaConclusa(_, let modo, _) = $0 { return modo == .annientamento || modo == .inverno }
+        return true
+    }
+
     /// Il prelievo del mantenimento com'è nello stato: il solo denaro.
     static let mantenimentoDiProva = Riserve(["denaro": 5])
 
@@ -275,10 +291,10 @@ final class CompatibilitaGiornaleTest: XCTestCase {
                                     pronto: .primavera, bersaglio: BersaglioMilitare(unita: "corvo", elemento: 1))],
             // Un esemplare per ciascun fatto della patria: il campione ne fissa la codifica, e la
             // prova pretende che nessun caso di `FattoDiPatria` ne resti fuori.
-            registro: FattoDiPatria.casiDiRiferimento.enumerated().map { indice, fatto in
+            registro: fattiDelCampione.enumerated().map { indice, fatto in
                 VoceRegistroPatria(numero: indice, anno: 1, stagione: .inverno, fatto: fatto)
             },
-            prossimoNumeroVoce: FattoDiPatria.casiDiRiferimento.count,
+            prossimoNumeroVoce: fattiDelCampione.count,
             mantenimento: mantenimentoDiProva, sciolti: [Esemplari.sciolto]))
 
     // MARK: - La prova
@@ -359,7 +375,7 @@ final class CompatibilitaGiornaleTest: XCTestCase {
         XCTAssertEqual(fondazioniDelRegno.map(\.versioneSchema), [FondazioneRegno.schemaCorrente])
         XCTAssertEqual(fondazioniDelRegno.first?.statoIniziale, Self.fondazioneRegnoDiProva.statoIniziale,
                        "il campione della fondazione del regno non è l'esemplare di questa prova: va rigenerato")
-        XCTAssertEqual(esitiNelRegno, [Self.esitoCampagnaDiProva],
+        XCTAssertEqual(esitiNelRegno, [Self.esitoCampagnaDiProva] + Self.esitiDeiModiNuovi,
                        "il campione dell'esito della campagna nel regno non è l'esemplare di questa prova")
         // E l'esemplare porta ogni caso dei fatti della patria e ogni gancio d'effetto.
         let fattiNelCampione = Set(try (fondazioniDelRegno.first?.statoIniziale.registro ?? []).map {

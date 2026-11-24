@@ -49,6 +49,88 @@ final class TraduttoreCampagnaTest: XCTestCase {
         }
     }
 
+    /// La presa del quartier generale (02 §8.2.2; incarico 32): ciascun passo, detto a chi occupa e a chi è
+    /// occupato, per esteso e nel livello sintetico, col numero delle giornate accordato.
+    func test_02_8_2_2_l_occupazione_di_un_quartier_generale_si_annuncia_alle_due_parti() throws {
+        let casella = Cella(riga: 4, colonna: 2)
+        func detto(_ evento: EventoCampagna, _ verbosita: Verbosita = .normale) -> String {
+            traduttore.annuncio(per: evento, verbosita: verbosita)?.testo ?? ""
+        }
+        // Il difensore.
+        XCTAssertEqual(detto(.quartierGeneraleOccupato(casella: casella, occupante: .avversario, mancano: 3)),
+                       "L'avversario occupa il tuo quartier generale, in riga 4, casella 2: se non lo scacci sarà preso fra 3 giornate")
+        XCTAssertEqual(detto(.quartierGeneraleOccupato(casella: casella, occupante: .avversario, mancano: 1)),
+                       "L'avversario occupa il tuo quartier generale, in riga 4, casella 2: se non lo scacci sarà preso fra 1 giornata")
+        XCTAssertEqual(detto(.occupazioneProsegue(casella: casella, occupante: .avversario, mancano: 2)),
+                       "Il tuo quartier generale è ancora occupato: sarà preso fra 2 giornate")
+        XCTAssertEqual(detto(.occupazioneProsegue(casella: casella, occupante: .avversario, mancano: 1)),
+                       "Il tuo quartier generale è ancora occupato: sarà preso fra 1 giornata")
+        XCTAssertEqual(detto(.occupazioneInterrotta(casella: casella, occupante: .avversario)),
+                       "L'avversario non occupa più il tuo quartier generale: il conteggio si azzera")
+        XCTAssertEqual(detto(.quartierGeneralePreso(casella: casella, occupante: .avversario)),
+                       "Il tuo quartier generale in riga 4, casella 2 è caduto: te ne resta un altro")
+        // L'attaccante.
+        XCTAssertEqual(detto(.quartierGeneraleOccupato(casella: casella, occupante: .giocatore, mancano: 3)),
+                       "Occupi il quartier generale avversario, in riga 4, casella 2: se lo tieni sarà preso fra 3 giornate")
+        XCTAssertEqual(detto(.occupazioneProsegue(casella: casella, occupante: .giocatore, mancano: 1)),
+                       "Tieni il quartier generale avversario: sarà preso fra 1 giornata")
+        XCTAssertEqual(detto(.occupazioneInterrotta(casella: casella, occupante: .giocatore)),
+                       "Non occupi più il quartier generale avversario: il conteggio si azzera")
+        XCTAssertEqual(detto(.quartierGeneralePreso(casella: casella, occupante: .giocatore)),
+                       "Il quartier generale avversario in riga 4, casella 2 è caduto: ne resta un altro")
+        // Il livello sintetico tiene il fatto e le giornate.
+        XCTAssertEqual(detto(.quartierGeneraleOccupato(casella: casella, occupante: .avversario, mancano: 3), .sintetico),
+                       "Tuo quartier generale occupato, 3 giornate alla presa")
+        XCTAssertEqual(detto(.occupazioneProsegue(casella: casella, occupante: .giocatore, mancano: 1), .sintetico),
+                       "Quartier generale avversario occupato, 1 giornata alla presa")
+        // Nessuno aggiunge un segnale tattile, e nessuno cambia schermata.
+        for evento in [EventoCampagna.quartierGeneraleOccupato(casella: casella, occupante: .avversario, mancano: 3),
+                       .occupazioneProsegue(casella: casella, occupante: .avversario, mancano: 2),
+                       .occupazioneInterrotta(casella: casella, occupante: .avversario),
+                       .quartierGeneralePreso(casella: casella, occupante: .avversario)] {
+            XCTAssertNil(traduttore.significato(per: evento))
+            XCTAssertFalse(TraduttoreEventiCampagna.cambiaSchermata(evento))
+            for verbosita in Verbosita.allCases { XCTAssertFalse(detto(evento, verbosita).contains(Testi.segnaposto)) }
+        }
+        // La conclusione dice la caduta, o il richiamo.
+        XCTAssertEqual(detto(.campagnaConclusa(modo: .presa, vincitore: .giocatore)),
+                       "Campagna conclusa: il quartier generale avversario è caduto. Hai vinto")
+        XCTAssertEqual(detto(.campagnaConclusa(modo: .presa, vincitore: .avversario)),
+                       "Campagna conclusa: il tuo quartier generale è caduto. Hai perso")
+        XCTAssertEqual(detto(.campagnaConclusa(modo: .richiamo, vincitore: .avversario)),
+                       "Campagna conclusa: hai richiamato l'esercito in patria. Conta come perduta")
+        // Il registro.
+        func voce(_ fatto: FattoRegistrato) -> String {
+            traduttore.voceDiRegistro(VoceRegistro(numero: 1, giorno: 12, fatto: fatto)).testo
+        }
+        XCTAssertEqual(voce(.quartierGeneraleOccupato(casella: casella)),
+                       "Giorno 12: l'avversario occupa il tuo quartier generale in riga 4, casella 2")
+        XCTAssertEqual(voce(.quartierGeneraleLiberato(casella: casella)),
+                       "Giorno 12: l'avversario non occupa più il tuo quartier generale in riga 4, casella 2")
+        XCTAssertEqual(voce(.quartierGeneralePreso(casella: casella, dalGiocatore: true)),
+                       "Giorno 12: preso il quartier generale avversario in riga 4, casella 2")
+        XCTAssertEqual(voce(.quartierGeneralePreso(casella: casella, dalGiocatore: false)),
+                       "Giorno 12: il tuo quartier generale in riga 4, casella 2 è caduto")
+    }
+
+    /// Perché l'esercito non si può richiamare (01 §5.18.2, 02 §6.5.5): il motivo, col gruppo e il luogo, nel
+    /// genere e nel numero del nome.
+    func test_02_6_5_5_il_richiamo_impedito_dice_il_perche() throws {
+        let casella = Cella(riga: 2, colonna: 3)
+        func detto(_ impedimento: ImpedimentoDelRichiamo) -> String { traduttore.impedimento(impedimento).testo }
+        XCTAssertEqual(detto(.battagliaInSospeso(casella: casella)), "c'è una battaglia in sospeso in riga 2, casella 3")
+        XCTAssertEqual(detto(.rifornimentoTagliato(gruppo: "lupo", casella: casella)),
+                       "Lupo ha il rifornimento tagliato in riga 2, casella 3")
+        XCTAssertEqual(detto(.aContatto(gruppo: "aquila", casella: casella)),
+                       "Aquila è a contatto con l'avversario in riga 2, casella 3")
+        XCTAssertEqual(detto(.campagnaConclusa), "la campagna è conclusa")
+        let valori = try CaricatoreCampagna.carica(da: Contenuti.valoriDiFabbrica)
+        for nome in valori.nomiGruppi {
+            XCTAssertFalse(detto(.rifornimentoTagliato(gruppo: nome, casella: casella)).contains(Testi.segnaposto), nome)
+            XCTAssertFalse(detto(.aContatto(gruppo: nome, casella: casella)).contains(Testi.segnaposto), nome)
+        }
+    }
+
     func test_00_14_2_l_annuncio_e_una_frase_intera_con_i_segnaposto_riempiti() throws {
         let arrivo = traduttore.annuncio(
             per: .marciaCompiuta(gruppo: IdGruppo(1), nome: "corvo",

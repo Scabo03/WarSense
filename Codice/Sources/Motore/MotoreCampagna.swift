@@ -363,6 +363,10 @@ public struct MotoreCampagna: Sendable {
         // mai «vuoto» né «confermato», ma «avvistato» (notizia non più certa) o meno. Vale
         // simmetricamente per le due parti. La scoperta (imboscateScoperte) leva l'occultamento.
         let avversa: Parte = parte == .giocatore ? .avversario : .giocatore
+        // CHI POSSIEDE UN QUARTIER GENERALE SA SEMPRE CHE È OCCUPATO (01 §5.18.3.3, incarico 32), anche
+        // se nessuna sua formazione lo osserva e anche se l'occupante vi sta appostato: non deve
+        // scoprire la caduta quando è già avvenuta.
+        if stato.quartierGeneraleOccupato(su: cella, da: avversa) { return .confermato }
         let appostatoNascosto = stato.occupante(di: cella, parte: avversa)?.ordineImboscata == true
             && stato.imboscateScoperte[parte]?.contains(cella) != true
         if appostatoNascosto {
@@ -429,12 +433,32 @@ public struct MotoreCampagna: Sendable {
             let confermata = g.ordineImboscata
                 ? stato.imboscateScoperte[.avversario]?.contains(g.posizione) == true
                 : osservata(g.posizione, da: .avversario, stato: stato)
-            if confermata { note.insert(g.posizione) }
+            // Il proprio quartier generale occupato lo sa sempre (01 §5.18.3.3), come il giocatore.
+            if confermata || stato.quartierGeneraleOccupato(su: g.posizione, da: .giocatore) {
+                note.insert(g.posizione)
+            }
         }
         return VistaAvversario(mappa: stato.mappa, marcia: valoriCampagna.marcia,
                                condotta: valoriCampagna.condotta,
                                gruppiPropri: propri, volumi: volumi,
-                               formazioniGiocatoreNote: note)
+                               formazioniGiocatoreNote: note, presa: presaNota(stato, note: note))
+    }
+
+    /// Ciò che l'avversario sa della presa dei quartieri generali (01 §5.18.3): il proprio occupato, e il
+    /// conteggio della propria occupazione. Nulla se la campagna non dichiara la regola.
+    private func presaNota(_ stato: StatoCampagna, note: Set<Cella>) -> VistaAvversario.Presa? {
+        guard let regole = stato.regole else { return nil }
+        // Chiusure che mancano alla caduta: quelle della regola meno le giornate già contate, e una in più
+        // se chi vi sta non ha ancora cominciato a occuparla, perché comincerà alla prossima chiusura.
+        func mancano(_ casella: Cella, _ occupante: Parte) -> Int? {
+            guard stato.quartierGeneraleOccupato(su: casella, da: occupante) else { return nil }
+            guard let occupazione = stato.occupazione(di: casella) else { return regole.giornatePerLaPresa + 1 }
+            return regole.giornatePerLaPresa - occupazione.giornate
+        }
+        return VistaAvversario.Presa(
+            mancanoAlGiocatore: mancano(stato.mappa.quartierGenerale(di: .avversario), .giocatore),
+            mancanoAllAvversario: mancano(stato.mappa.quartierGenerale(di: .giocatore), .avversario),
+            armateNote: note.filter { stato.occupante(di: $0, parte: .giocatore)?.categoria.eArmata == true })
     }
 
     /// Proietta una sequenza di eventi PER IL GIOCATORE (01 §5.6.11): passano gli eventi
@@ -452,11 +476,14 @@ public struct MotoreCampagna: Sendable {
             case .giornataChiusa, .giornataAperta, .formazioneAvversariaAvvistata,
                  .imboscataScattata, .direzioneDedotta,
                  .battagliaInnescata, .battagliaConclusa,
-                 .stagioneCambiata, .campagnaConclusa, .arrivoDallaPatria:
+                 .stagioneCambiata, .campagnaConclusa, .arrivoDallaPatria,
+                 .quartierGeneraleOccupato, .occupazioneProsegue, .occupazioneInterrotta,
+                 .quartierGeneralePreso:
                 // Confini di giornata, avvistamenti, scatti d'imboscata (sempre fra parti
                 // opposte, il giocatore è parte) e deduzioni (prodotte solo per lui). Le
                 // battaglie innescate e concluse coinvolgono sempre il giocatore: si consegnano.
-                // Gli arrivi dalla patria sono soltanto suoi (incarico 31).
+                // Gli arrivi dalla patria sono soltanto suoi (incarico 31). L'occupazione di un quartier
+                // generale riguarda sempre entrambe le parti (01 §5.18.3.3).
                 return true
             case .marciaOrdinata(let g, _, _, _, _), .presidioOrdinato(let g, _, _),
                  .marciaRevocata(let g, _, _, _), .marciaCompiuta(let g, _, _, _),
@@ -647,6 +674,8 @@ public struct MotoreCampagna: Sendable {
             nuovo.gruppi[maggiore.id]!.azioneSpesa = a.azioneSpesa || b.azioneSpesa
             eventi.append(.gruppiRiuniti(risultante: maggiore.id, nome: maggiore.nome,
                                          assorbito: assorbito.id, casella: maggiore.posizione))
+            // Se il gruppo confluito altrove occupava un quartier generale, l'ha lasciato (01 §5.18.3.2).
+            eventi.append(contentsOf: interrompiLeOccupazioniLasciate(&nuovo))
 
         case .sostaConRaccolta(let idGruppo):
             let gruppo = nuovo.gruppi[idGruppo]!
@@ -843,6 +872,8 @@ public struct MotoreCampagna: Sendable {
             let chiuso = stato.giorno
             eventi.append(.giornataChiusa(giorno: chiuso))
             eventi.append(contentsOf: risolviFineGiornata(&stato))
+            // Preso l'ultimo quartier generale la campagna è conclusa (01 §5.18.3.4): nulla più si apre.
+            if stato.conclusione != nil { break }
             stato.giorno += 1
             // L'INVERNO (01 §5.9, incarico 30): chiusa l'ultima giornata operativa dell'anno la
             // giornata nuova NON si apre — d'inverno non si conduce campagna. Il giorno oltre
@@ -959,6 +990,15 @@ public struct MotoreCampagna: Sendable {
         return eventi
     }
 
+    /// La campagna si CONCLUDE (01 §5.18): il modo, chi ha vinto, l'ultima giornata. Nessuna occupazione
+    /// di un quartier generale prosegue oltre la campagna (incarico 32).
+    static func concludi(_ stato: inout StatoCampagna, modo: ConclusioneCampagna.Modo, vincitore: Parte?,
+                         giorno: Int) -> EventoCampagna {
+        stato.conclusione = ConclusioneCampagna(modo: modo, vincitore: vincitore, giorno: giorno)
+        if stato.occupazioni != nil { stato.occupazioni = [] }
+        return .campagnaConclusa(modo: modo, vincitore: vincitore)
+    }
+
     /// La conclusione per l'ARRIVO DELL'INVERNO (01 §5.9; incarico 30, RDA-164): la campagna che
     /// dichiara un calendario si conclude, senza vincitore, quando l'ultima giornata operativa è
     /// chiusa e nessuna battaglia resta in sospeso. Vero se ha concluso ora.
@@ -966,9 +1006,7 @@ public struct MotoreCampagna: Sendable {
                                            _ eventi: inout [EventoCampagna]) -> Bool {
         guard stato.conclusione == nil, let calendario = stato.calendario,
               stato.giorno > calendario.ultimaGiornata, stato.battaglieInSospeso.isEmpty else { return false }
-        stato.conclusione = ConclusioneCampagna(modo: .inverno, vincitore: nil,
-                                                giorno: calendario.ultimaGiornata)
-        eventi.append(.campagnaConclusa(modo: .inverno, vincitore: nil))
+        eventi.append(Self.concludi(&stato, modo: .inverno, vincitore: nil, giorno: calendario.ultimaGiornata))
         return true
     }
 
@@ -984,9 +1022,8 @@ public struct MotoreCampagna: Sendable {
         if stato.gruppiArmati(di: .avversario) == 0 { vincitore = .giocatore }
         else if stato.gruppiArmati(di: .giocatore) == 0 { vincitore = .avversario }
         else { return false }
-        stato.conclusione = ConclusioneCampagna(modo: .annientamento, vincitore: vincitore,
-                                                giorno: min(stato.giorno, calendario.ultimaGiornata))
-        eventi.append(.campagnaConclusa(modo: .annientamento, vincitore: vincitore))
+        eventi.append(Self.concludi(&stato, modo: .annientamento, vincitore: vincitore,
+                                    giorno: min(stato.giorno, calendario.ultimaGiornata)))
         return true
     }
 
@@ -1065,6 +1102,10 @@ public struct MotoreCampagna: Sendable {
         })
         eventi.append(contentsOf: scattaLeImboscate(&stato, arrivati: arrivati))
         eventi.append(contentsOf: innescaLeBattaglie(&stato, arrivati: arrivati))
+        // L'occupazione dei quartieri generali (01 §5.18.3): sulle posizioni raggiunte, dopo gli scontri
+        // che vi nascono. Se l'ultimo cade, gli altri passi non hanno più oggetto.
+        eventi.append(contentsOf: contaLeOccupazioni(&stato))
+        if stato.conclusione != nil { return eventi }
         eventi.append(contentsOf: valutaITagliDiRifornimento(&stato))
         // Passo successivo (unità futura): completaLeCostruzioni(&stato)
         eventi.append(contentsOf: deduciGliItinerari(&stato))
@@ -1201,6 +1242,9 @@ public struct MotoreCampagna: Sendable {
         // L'ANNIENTAMENTO (incarico 30, RDA-164): se la battaglia ha tolto a una parte l'ultimo
         // gruppo armato, la campagna del regno si conclude qui e nulla più avanza.
         if concludiPerAnnientamentoSeServe(&stato, &eventi) { return eventi }
+        // L'occupazione dei quartieri generali (01 §5.18.3.2): chi ha perduto la battaglia nata su quello
+        // che occupava vede azzerarsi il conteggio, chi l'ha vinta contro il difensore la comincia.
+        eventi.append(contentsOf: rivediLeOccupazioni(dopo: esito, &stato))
         // Sbloccata la campagna e speso il combattente, la giornata si chiude da sé se non resta
         // altro da fare (01 §5.6.0.6): i combattenti hanno agito, e se erano gli ultimi in attesa la
         // giornata avanza subito, senza che il giocatore debba dare un ordine di troppo al reduce.

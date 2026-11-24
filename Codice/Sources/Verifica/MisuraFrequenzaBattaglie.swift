@@ -12,7 +12,7 @@ import Motore
 /// Non tara nulla e non contiene regole proprie: ogni esito viene dal Motore, l'avversario muove con la
 /// sua condotta deterministica (`CondottaAvversaria`, la stessa della Sessione) e le battaglie si
 /// combattono come al banco (`BancoCampagna.giocaBattaglieInSospeso`: modello di scontro provvisorio,
-/// due tattici deterministici). Ciò che lo strumento aggiunge è la CONDOTTA DEL GIOCATORE, in due modi:
+/// due tattici deterministici). Ciò che lo strumento aggiunge è la CONDOTTA DEL GIOCATORE, in tre modi:
 ///
 /// - `competente`: la condotta del banco (`BancoCampagna.corri`), riprodotta regola per regola. Per
 ///   ottenere partite diverse — senza, ogni formato darebbe una partita sola, perché nella campagna non
@@ -25,12 +25,15 @@ import Motore
 ///   (il tester ne muoveva uno su due: qui con probabilità un mezzo, estratta col seme della partita);
 ///   altrimenti esplora se può, presidia se può, sosta con raccolta. In battaglia combatte il tattico del
 ///   banco: la resa del tester dopo il quattordicesimo turno non è riprodotta.
+/// - `mirata` (incarico 32): chi conosce la regola della presa del quartier generale (01 §5.18.3) e gioca
+///   per quella (`CondottaMirata.swift`). Le altre due non la guardano, e restano com'erano perché le
+///   misure degli incarichi 29 e 31 si confrontino.
 ///
 /// Il seme varia SOLTANTO le scelte del giocatore: non tocca il Motore, che resta deterministico.
 public struct MisuraFrequenzaBattaglie: Sendable {
 
     public enum Condotta: String, CaseIterable, Sendable, Codable {
-        case competente, prudente
+        case competente, prudente, mirata
     }
 
     public enum Fine: String, Sendable, Codable {
@@ -155,9 +158,15 @@ public struct MisuraFrequenzaBattaglie: Sendable {
         var proposteRespinte = 0
         var primaPropostaRespinta: String?
         var diagnosi: DiagnosiBattaglia?
-        /// La sonda degli invarianti dello stato, dopo ogni cambiamento dello stato.
+        /// La sonda degli invarianti dello stato, dopo ogni cambiamento dello stato; e il conteggio delle
+        /// occupazioni dei quartieri generali fra uno stato e il successivo (incarico 32).
+        var precedente = stato
         func sorveglia() {
-            let viste = sonda.controlla(stato: stato).map(SondaInvariantiCampagna.codice(di:))
+            let chiuse = stato.giorno - precedente.giorno + (stato.conclusione != nil && precedente.conclusione == nil ? 1 : 0)
+            let viste = (sonda.controlla(stato: stato)
+                + sonda.controllaConteggioDellOccupazione(prima: precedente, dopo: stato, giornateChiuse: chiuse))
+                .map(SondaInvariantiCampagna.codice(di:))
+            precedente = stato
             guard !viste.isEmpty else { return }
             if giornoPrimaViolazione == nil { giornoPrimaViolazione = stato.giorno - giornoIniziale + 1 }
             violazioni.formUnion(viste)
@@ -214,6 +223,8 @@ public struct MisuraFrequenzaBattaglie: Sendable {
                                              giornoUltimaRiunione: &giornoUltimaRiunione)
             case .prudente:
                 comando = condottaPrudente(stato: stato, vista: vista, generatore: &generatore)
+            case .mirata:
+                comando = condottaMirata(stato: stato, vista: vista, seme: seme, generatore: &generatore)
             }
             if let comando {
                 if motore.valida(comando, parte: .giocatore, stato: stato).eValido {

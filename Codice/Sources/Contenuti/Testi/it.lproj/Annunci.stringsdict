@@ -410,4 +410,125 @@
       <key>other</key><string>%d lavori ordinati</string>
     </dict>
   </dict>
+  <key>campagna.qg_proprio_occupato</key>
+  <dict>
+    <key>NSStringLocalizedFormatKey</key><string>%3$#@giornate@</string>
+    <key>giornate</key>
+    <dict>
+      <key>NSStringFormatSpecTypeKey</key><string>NSStringPluralRuleType</string>
+      <key>NSStringFormatValueTypeKey</key><string>d</string>
+      <key>one</key><string>L'avversario occupa il tuo quartier generale, in riga %1$d, casella %2$d: se non lo scacci sarà preso fra %3$d giornata</string>
+      <key>other</key><string>L'avversario occupa il tuo quartier generale, in riga %1$d, casella %2$d: se non lo scacci sarà preso fra %3$d giornate</string>
+    </dict>
+  </dict>
+  <key>campagna.qg_proprio_occupato.sintetico</key>
+  <dict>
+    <key>NSStringLocalizedFormatKey</key><string>%3$#@giornate@</string>
+    <key>giornate</key>
+    <dict>
+      <key>NSStringFormatSpecTypeKey</key><string>NSStringPluralRuleType</string>
+      <key>NSStringFormatValueTypeKey</key><string>d</string>
+      <key>one</key><string>Tuo quartier generale occupato, %3$d giornata alla presa</string>
+      <key>other</key><string>Tuo quartier generale occupato, %3$d giornate alla presa</string>
+    </dict>
+  </dict>
+  <key>campagna.qg_proprio_tenuto</key>
+  <dict>
+    <key>NSStringLocalizedFormatKey</key><string>%1$#@giornate@</string>
+    <key>giornate</key>
+    <dict>
+      <key>NSStringFormatSpecTypeKey</key><string>NSStringPluralRuleType</string>
+      <key>NSStringFormatValueTypeKey</key><string>d</string>
+      <key>one</key><string>Il tuo quartier generale è ancora occupato: sarà preso fra %1$d giornata</string>
+      <key>other</key><string>Il tuo quartier generale è ancora occupato: sarà preso fra %1$d giornate</string>
+    </dict>
+  </dict>
+  <key>campagna.qg_proprio_tenuto.sintetico</key>
+  <dict>
+    <key>NSStringLocalizedFormatKey</key><string>%1$#@giornate@</string>
+    <key>giornate</key>
+    <dict>
+      <key>NSStringFormatSpecTypeKey</key><string>NSStringPluralRuleType</string>
+      <key>NSStringFormatValueTypeKey</key><string>d</string>
+      <key>one</key><string>Tuo quartier generale occupato, %1$d giornata alla presa</string>
+      <key>other</key><string>Tuo quartier generale occupato, %1$d giornate alla presa</string>
+    </dict>
+  </dict>
+  <key>campagna.qg_avversario_occupato</key>
+  <dict>
+    <key>NSStringLocalizedFormatKey</key><string>%3$#@giornate@</string>
+    <key>giornate</key>
+    <dict>
+      <key>NSStringFormatSpecTypeKey</key><string>NSStringPluralRuleType</string>
+      <key>NSStringFormatValueTypeKey</key><string>d</string>
+      <key>one</key><string>Occupi il quartier generale avversario, in riga %1$d, casella %2$d: se lo tieni sarà preso fra %3$d giornata</string>
+      <key>other</key><string>Occupi il quartier generale avversario, in riga %1$d, casella %2$d: se lo tieni sarà preso fra %3$d giornate</string>
+    </dict>
+  </dict>
+  <key>campagna.qg_avversario_occupato.sintetico</key>
+  <dict>
+    <key>NSStringLocalizedFormatKey</key><string>%3$#@giornate@</string>
+    <key>giornate</key>
+    <dict>
+      <key>NSStringFormatSpecTypeKey</key><string>NSStringPluralRuleType</string>
+      <key>NSStringFormatValueTypeKey</key><string>d</string>
+      <key>one</key><string>Quartier generale avversario occupato, %3$d giornata alla presa</string>
+      <key>other</key><string>Quartier generale avversario occupato, %3$d giornate alla presa</string>
+    </dict>
+  </dict>
+  <key>campagna.qg_avversario_tenuto</key>
+  <dict>
+    <key>NSStringLocalizedFormatKey</key><string>%1$#@giornate@</string>
+    <key>giornate</key>
+    <dict>
+      <key>NSStringFormatSpecTypeKey</key><string>NSStringPluralRuleType</string>
+      <key>NSStringFormatValueTypeKey</key><string>d</string>
+      <key>one</key><string>Tieni il quartier generale avversario: sarà preso fra %1$d giornata</string>
+      <key>other</key><string>Tieni il quartier generale avversario: sarà preso fra %1$d giornate</string>
+    </dict>
+  </dict>
+  <key>campagna.qg_avversario_tenuto.sintetico</key>
+  <dict>
+    <key>NSStringLocalizedFormatKey</key><string>%1$#@giornate@</string>
+    <key>giornate</key>
+    <dict>
+      <key>NSStringFormatSpecTypeKey</key><string>NSStringPluralRuleType</string>
+      <key>NSStringFormatValueTypeKey</key><string>d</string>
+      <key>one</key><string>Quartier generale avversario occupato, %1$d giornata alla presa</string>
+      <key>other</key><string>Quartier generale avversario occupato, %1$d giornate alla presa</string>
+    </dict>
+  </dict>
+  <key>campagna.stato_qg_proprio_occupato</key>
+  <dict>
+    <key>NSStringLocalizedFormatKey</key><string>%1$#@giornate@</string>
+    <key>giornate</key>
+    <dict>
+      <key>NSStringFormatSpecTypeKey</key><string>NSStringPluralRuleType</string>
+      <key>NSStringFormatValueTypeKey</key><string>d</string>
+      <key>one</key><string>. Il tuo quartier generale è occupato, sarà preso fra %1$d giornata</string>
+      <key>other</key><string>. Il tuo quartier generale è occupato, sarà preso fra %1$d giornate</string>
+    </dict>
+  </dict>
+  <key>campagna.stato_qg_avversario_occupato</key>
+  <dict>
+    <key>NSStringLocalizedFormatKey</key><string>%1$#@giornate@</string>
+    <key>giornate</key>
+    <dict>
+      <key>NSStringFormatSpecTypeKey</key><string>NSStringPluralRuleType</string>
+      <key>NSStringFormatValueTypeKey</key><string>d</string>
+      <key>one</key><string>. Occupi il quartier generale avversario, sarà preso fra %1$d giornata</string>
+      <key>other</key><string>. Occupi il quartier generale avversario, sarà preso fra %1$d giornate</string>
+    </dict>
+  </dict>
+  <key>casella.occupazione</key>
+  <dict>
+    <key>NSStringLocalizedFormatKey</key><string>%1$#@giornate@</string>
+    <key>giornate</key>
+    <dict>
+      <key>NSStringFormatSpecTypeKey</key><string>NSStringPluralRuleType</string>
+      <key>NSStringFormatValueTypeKey</key><string>d</string>
+      <key>one</key><string>occupato, sarà preso fra %1$d giornata</string>
+      <key>other</key><string>occupato, sarà preso fra %1$d giornate</string>
+    </dict>
+  </dict>
 </dict></plist>

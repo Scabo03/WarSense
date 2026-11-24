@@ -515,6 +515,14 @@ public enum FattoRegistrato: Hashable, Codable, Sendable {
     /// autunno a campagna aperta. Porta il nome della formazione e la casella in cui è entrata — il
     /// quartier generale, o la casella libera più vicina.
     case arrivoDallaPatria(gruppo: IdentificatoreDati, casella: Cella)
+    /// L'avversario OCCUPA un quartier generale del giocatore (01 §5.18.3; incarico 32): se non viene
+    /// scacciato lo prende. Fatto che il giocatore non ha deciso, col luogo.
+    case quartierGeneraleOccupato(casella: Cella)
+    /// L'avversario non occupa più un quartier generale del giocatore: il conteggio si è azzerato.
+    case quartierGeneraleLiberato(casella: Cella)
+    /// Un quartier generale è CADUTO e la campagna continua, perché a chi lo possedeva ne resta un
+    /// altro (01 §5.14.3.2).
+    case quartierGeneralePreso(casella: Cella, dalGiocatore: Bool)
 
     /// Un esemplare per ciascun caso, in ordine fisso. Serve al collaudo per
     /// pretendere che OGNI fatto abbia la propria frase compiuta: con i valori
@@ -540,6 +548,10 @@ public enum FattoRegistrato: Hashable, Codable, Sendable {
         .battagliaConclusa(casella: Cella(riga: 1, colonna: 1), giocatoreSconfitto: false),
         .stagioneCambiata(stagione: .estate),
         .arrivoDallaPatria(gruppo: "corvo", casella: Cella(riga: 1, colonna: 1)),
+        .quartierGeneraleOccupato(casella: Cella(riga: 1, colonna: 1)),
+        .quartierGeneraleLiberato(casella: Cella(riga: 1, colonna: 1)),
+        .quartierGeneralePreso(casella: Cella(riga: 1, colonna: 1), dalGiocatore: true),
+        .quartierGeneralePreso(casella: Cella(riga: 1, colonna: 1), dalGiocatore: false),
     ]
 
     /// La chiave del testo che compone la frase della voce (00 §14.1): il fatto
@@ -565,6 +577,10 @@ public enum FattoRegistrato: Hashable, Codable, Sendable {
             return giocatoreSconfitto ? "registro.battaglia_persa" : "registro.battaglia_vinta"
         case .stagioneCambiata: return "registro.stagione_cambiata"
         case .arrivoDallaPatria: return "registro.arrivo_dalla_patria"
+        case .quartierGeneraleOccupato: return "registro.quartier_generale_occupato"
+        case .quartierGeneraleLiberato: return "registro.quartier_generale_liberato"
+        case .quartierGeneralePreso(_, let dalGiocatore):
+            return dalGiocatore ? "registro.quartier_generale_preso" : "registro.quartier_generale_perduto"
         }
     }
 
@@ -588,6 +604,9 @@ public enum FattoRegistrato: Hashable, Codable, Sendable {
         case .battagliaInnescata(let casella): return casella
         case .battagliaConclusa(let casella, _): return casella
         case .arrivoDallaPatria(_, let casella): return casella
+        case .quartierGeneraleOccupato(let casella): return casella
+        case .quartierGeneraleLiberato(let casella): return casella
+        case .quartierGeneralePreso(let casella, _): return casella
         case .ordineAnnullato, .giornataAzzerata, .stagioneCambiata: return nil
         }
     }
@@ -788,20 +807,22 @@ public struct DataDiCampagna: Hashable, Sendable {
     }
 }
 
-/// La CONCLUSIONE di una campagna, nel minimo indispensabile a far arrivare un esito al regno
-/// (incarico 30, RDA-164). I documenti prescrivono tre vie — la presa del quartier generale, la
-/// resa e l'annientamento (01 §5.14.3.2, §5.14.3.3) —; qui ne esistono due: l'annientamento, quando
-/// una parte resta senza gruppi armati, e l'arrivo dell'inverno, che ferma le operazioni (01 §5.9).
-/// La presa del quartier generale e la resa NON sono costruite.
+/// La CONCLUSIONE di una campagna (01 §5.18; incarico 30, RDA-164; completata dall'incarico 32): per
+/// annientamento, quando una parte resta senza gruppi armati; per l'arrivo dell'inverno, che ferma le
+/// operazioni (01 §5.9); per la presa del quartier generale; per il richiamo dell'esercito in patria.
 public struct ConclusioneCampagna: Hashable, Codable, Sendable {
     public enum Modo: String, Codable, Hashable, Sendable, CaseIterable {
         /// Una parte non ha più gruppi armati sul fronte: vince l'altra.
         case annientamento
         /// È arrivato l'inverno: nessun vincitore, le forze rientrano (01 §5.9).
         case inverno
+        /// L'ultimo quartier generale di una parte è caduto: vince chi l'ha preso (01 §5.18.3).
+        case presa
+        /// Il giocatore ha richiamato l'esercito in patria: conta come perduta (01 §5.18.2).
+        case richiamo
     }
     public let modo: Modo
-    /// Chi ha vinto; nessuno se l'inverno ha interrotto la campagna.
+    /// Chi ha vinto; nessuno se l'inverno ha interrotto la campagna. Richiamato l'esercito, l'avversario.
     public let vincitore: Parte?
     /// L'ultima giornata giocata.
     public let giorno: Int
@@ -916,6 +937,15 @@ public struct StatoCampagna: Hashable, Codable, Sendable {
     /// Le REGOLE con cui la campagna è nata (incarico 32). Nulle nelle campagne che non ne dichiarano;
     /// facoltative, come il calendario, per le istantanee scritte prima.
     public var regole: RegoleDiCampagna?
+    /// Le OCCUPAZIONI dei quartieri generali in corso (01 §5.18.3; incarico 32). Nulle finché non ne
+    /// comincia una; facoltative, come il calendario, per le istantanee.
+    public var occupazioni: [OccupazioneDelQuartierGenerale]?
+    /// I quartieri generali PRESI, nell'ordine in cui sono caduti (01 §5.18.3.4). Con un quartier
+    /// generale per parte la campagna finisce con la prima caduta.
+    public var quartieriGeneraliPresi: [Cella]?
+    /// Le FORTEZZE, che valgono come quartieri generali (01 §5.14.3): nulle in gioco, dove le opere non
+    /// esistono ancora.
+    public var fortezze: [Fortezza]?
 
     public init(mappa: MappaCampagna, giorno: Int, gruppi: [IdGruppo: Gruppo],
                 prossimoIdGruppo: Int, prossimoIndiceNome: Int,
@@ -932,7 +962,9 @@ public struct StatoCampagna: Hashable, Codable, Sendable {
                 conclusione: ConclusioneCampagna? = nil,
                 nomiRiservati: [IdentificatoreDati]? = nil,
                 arriviInAttesa: [ArrivoInAttesa]? = nil,
-                regole: RegoleDiCampagna? = nil) {
+                regole: RegoleDiCampagna? = nil,
+                occupazioni: [OccupazioneDelQuartierGenerale]? = nil,
+                quartieriGeneraliPresi: [Cella]? = nil, fortezze: [Fortezza]? = nil) {
         self.mappa = mappa; self.giorno = giorno; self.gruppi = gruppi
         self.prossimoIdGruppo = prossimoIdGruppo
         self.prossimoIndiceNome = prossimoIndiceNome
@@ -950,6 +982,9 @@ public struct StatoCampagna: Hashable, Codable, Sendable {
         self.nomiRiservati = nomiRiservati
         self.arriviInAttesa = arriviInAttesa
         self.regole = regole
+        self.occupazioni = occupazioni
+        self.quartieriGeneraliPresi = quartieriGeneraliPresi
+        self.fortezze = fortezze
     }
 
     /// La data della giornata in corso, se la campagna dichiara un calendario (01 §5.6.10.2).

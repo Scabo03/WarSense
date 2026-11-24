@@ -186,13 +186,16 @@ public struct ScenarioCampagna: Hashable, Codable, Sendable {
     /// Le REGOLE con cui la campagna nasce (01 §5.18.3; incarico 32). Nulle negli scenari di prova e di
     /// verifica che non ne dichiarano e nelle campagne nate prima della build 33, e allora omesse.
     public let regole: RegoleDiCampagna?
+    /// Le FORTEZZE che valgono come secondi quartieri generali (01 §5.14.3): dati minimi di verifica,
+    /// vuoti in gioco e allora omessi.
+    public let fortezze: [Fortezza]
 
     public init(mappa: IdentificatoreDati, gruppiGiocatore: [GruppoIniziale],
                 gruppiAvversario: [GruppoIniziale] = [],
                 forzeNemiche: [Cella] = [], struttureDiRifornimento: [Cella] = [],
                 calendario: CalendarioDiCampagna? = nil,
                 nomiRiservati: [IdentificatoreDati] = [], arrivi: [ArrivoProgrammato] = [],
-                regole: RegoleDiCampagna? = nil) {
+                regole: RegoleDiCampagna? = nil, fortezze: [Fortezza] = []) {
         self.mappa = mappa
         self.gruppiGiocatore = gruppiGiocatore
         self.gruppiAvversario = gruppiAvversario
@@ -202,6 +205,7 @@ public struct ScenarioCampagna: Hashable, Codable, Sendable {
         self.nomiRiservati = nomiRiservati
         self.arrivi = arrivi
         self.regole = regole
+        self.fortezze = fortezze
     }
 
     enum CodingKeys: String, CodingKey {
@@ -212,7 +216,7 @@ public struct ScenarioCampagna: Hashable, Codable, Sendable {
         case struttureDiRifornimento = "strutture_di_rifornimento"
         case calendario
         case nomiRiservati = "nomi_riservati"
-        case arrivi, regole
+        case arrivi, regole, fortezze
     }
 
     public init(from decoder: Decoder) throws {
@@ -227,6 +231,7 @@ public struct ScenarioCampagna: Hashable, Codable, Sendable {
         nomiRiservati = try c.decodeIfPresent([IdentificatoreDati].self, forKey: .nomiRiservati) ?? []
         arrivi = try c.decodeIfPresent([ArrivoProgrammato].self, forKey: .arrivi) ?? []
         regole = try c.decodeIfPresent(RegoleDiCampagna.self, forKey: .regole)
+        fortezze = try c.decodeIfPresent([Fortezza].self, forKey: .fortezze) ?? []
     }
 
     public func encode(to encoder: Encoder) throws {
@@ -244,6 +249,7 @@ public struct ScenarioCampagna: Hashable, Codable, Sendable {
         if !nomiRiservati.isEmpty { try c.encode(nomiRiservati, forKey: .nomiRiservati) }
         if !arrivi.isEmpty { try c.encode(arrivi, forKey: .arrivi) }
         try c.encodeIfPresent(regole, forKey: .regole)
+        if !fortezze.isEmpty { try c.encode(fortezze, forKey: .fortezze) }
     }
 }
 
@@ -433,7 +439,7 @@ public enum FabbricaCampagna {
         // Le forze nemiche e le strutture: dati minimi per provare taglio e zona, che
         // devono comunque stare dentro la griglia. Nessun'altra regola le governa —
         // non hanno condotta, non si muovono, non sono opere (incarico 16).
-        for cella in scenario.forzeNemiche + scenario.struttureDiRifornimento {
+        for cella in scenario.forzeNemiche + scenario.struttureDiRifornimento + scenario.fortezze.map(\.casella) {
             guard mappa.griglia.contiene(cella) else {
                 throw ErroreScenario.rifornimentoFuoriMappa(cella)
             }
@@ -500,7 +506,8 @@ public enum FabbricaCampagna {
                                   nomiRiservati: tenuti.isEmpty ? nil : valori.nomiGruppi.filter { tenuti.contains($0) }
                                       + tenuti.filter { !valori.nomiGruppi.contains($0) }.sorted(),
                                   arriviInAttesa: scenario.arrivi.isEmpty ? nil : inOrdine,
-                                  regole: scenario.regole)
+                                  regole: scenario.regole,
+                                  fortezze: scenario.fortezze.isEmpty ? nil : scenario.fortezze)
         // Le reclute pronte in primavera entrano con la prima giornata: gli arrivi della giornata
         // d'apertura si consegnano qui, e il registro nasce già con la loro voce.
         _ = MotoreCampagna.consegnaGliArrivi(&stato)

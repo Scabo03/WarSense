@@ -37,8 +37,8 @@
 "battaglia.spostamento" = "Spostato in riga %d, cella %d: costa %d, restano %d";
 "battaglia.mischia_complessiva" = "Esito delle mischie, %d contatti: ";
 "battaglia.mischia_complessiva.sintetico" = "Mischie, %d: ";
-"battaglia.mischia_voce" = "riga %d cella %d, %@, %@";
-"battaglia.mischia_voce_stallo" = "riga %d cella %d, %@";
+"battaglia.mischia_voce" = "riga %d, cella %d, %@, %@";
+"battaglia.mischia_voce_stallo" = "riga %d, cella %d, %@";
 "battaglia.mischia_separatore" = "; ";
 "battaglia.resa_propria" = "Resa dichiarata: comincia la tua ritirata combattuta";
 "battaglia.resa_avversaria" = "L'avversario si ritira";
@@ -127,6 +127,9 @@
 "resoconto.munizioni" = "Scariche residue dei tuoi tiratori: %d";
 "resoconto.riserve" = "Riserve mai schierate: %d";
 "resoconto.torna" = "Torna all'inizio";
+/* Il congedo del resoconto di una battaglia di campagna (incarico 32): dice dove porta, cioè sulla mappa.
+   Fino alla build 32 diceva «Torna all'inizio» e riportava sulla mappa. */
+"resoconto.torna_sulla_mappa" = "Torna sulla mappa";
 "impostazioni.titolo" = "Impostazioni";
 "impostazioni.verbosita" = "Verbosità degli annunci";
 "impostazioni.verbosita.sintetico" = "Sintetico";
@@ -404,14 +407,14 @@
 "pannello.tira_su_accerchiato.femminile" = "Tira su %@ %@ avversaria, %@, %@, %@";
 "pannello.tira_su_accerchiato.maschile_plurale" = "Tira su %@ %@ avversari, %@, %@, %@";
 "pannello.tira_su_accerchiato.femminile_plurale" = "Tira su %@ %@ avversarie, %@, %@, %@";
-"pannello.ingaggia.maschile" = "Ingaggia %@ %@ avversario in riga %d cella %d, %@, %@";
-"pannello.ingaggia.femminile" = "Ingaggia %@ %@ avversaria in riga %d cella %d, %@, %@";
-"pannello.ingaggia.maschile_plurale" = "Ingaggia %@ %@ avversari in riga %d cella %d, %@, %@";
-"pannello.ingaggia.femminile_plurale" = "Ingaggia %@ %@ avversarie in riga %d cella %d, %@, %@";
-"pannello.ingaggia_accerchiato.maschile" = "Ingaggia %@ %@ avversario in riga %d cella %d, %@, %@, %@";
-"pannello.ingaggia_accerchiato.femminile" = "Ingaggia %@ %@ avversaria in riga %d cella %d, %@, %@, %@";
-"pannello.ingaggia_accerchiato.maschile_plurale" = "Ingaggia %@ %@ avversari in riga %d cella %d, %@, %@, %@";
-"pannello.ingaggia_accerchiato.femminile_plurale" = "Ingaggia %@ %@ avversarie in riga %d cella %d, %@, %@, %@";
+"pannello.ingaggia.maschile" = "Ingaggia %@ %@ avversario in riga %d, cella %d, %@, %@";
+"pannello.ingaggia.femminile" = "Ingaggia %@ %@ avversaria in riga %d, cella %d, %@, %@";
+"pannello.ingaggia.maschile_plurale" = "Ingaggia %@ %@ avversari in riga %d, cella %d, %@, %@";
+"pannello.ingaggia.femminile_plurale" = "Ingaggia %@ %@ avversarie in riga %d, cella %d, %@, %@";
+"pannello.ingaggia_accerchiato.maschile" = "Ingaggia %@ %@ avversario in riga %d, cella %d, %@, %@, %@";
+"pannello.ingaggia_accerchiato.femminile" = "Ingaggia %@ %@ avversaria in riga %d, cella %d, %@, %@, %@";
+"pannello.ingaggia_accerchiato.maschile_plurale" = "Ingaggia %@ %@ avversari in riga %d, cella %d, %@, %@, %@";
+"pannello.ingaggia_accerchiato.femminile_plurale" = "Ingaggia %@ %@ avversarie in riga %d, cella %d, %@, %@, %@";
 "deck.selezionato.maschile" = "selezionato";
 "deck.selezionato.femminile" = "selezionata";
 "deck.selezionato.maschile_plurale" = "selezionati";
@@ -607,6 +610,40 @@
 "campagna.conclusa_vittoria" = "Campagna conclusa: l'avversario non ha più gruppi armati. Hai vinto";
 "campagna.conclusa_sconfitta" = "Campagna conclusa: non hai più gruppi armati. Hai perso";
 "campagna.conclusa_inverno" = "È arrivato l'inverno: la campagna è conclusa, senza vincitore";
+/* La presa del quartier generale e il richiamo dell'esercito (01 §5.18.2, §5.18.3; incarico 32): la
+   campagna che vi si conclude. Le frasi con le giornate che mancano stanno nel .stringsdict. */
+"campagna.conclusa_presa_vittoria" = "Campagna conclusa: il quartier generale avversario è caduto. Hai vinto";
+"campagna.conclusa_presa_sconfitta" = "Campagna conclusa: il tuo quartier generale è caduto. Hai perso";
+"campagna.conclusa_richiamo" = "Campagna conclusa: hai richiamato l'esercito in patria. Conta come perduta";
+"campagna.qg_proprio_liberato" = "L'avversario non occupa più il tuo quartier generale: il conteggio si azzera";
+"campagna.qg_proprio_liberato.sintetico" = "Tuo quartier generale non più occupato";
+"campagna.qg_avversario_lasciato" = "Non occupi più il quartier generale avversario: il conteggio si azzera";
+"campagna.qg_avversario_lasciato.sintetico" = "Quartier generale avversario non più occupato";
+"campagna.qg_proprio_caduto" = "Il tuo quartier generale in riga %1$d, casella %2$d è caduto: te ne resta un altro";
+"campagna.qg_proprio_caduto.sintetico" = "Tuo quartier generale caduto in riga %1$d, casella %2$d";
+"campagna.qg_avversario_caduto" = "Il quartier generale avversario in riga %1$d, casella %2$d è caduto: ne resta un altro";
+"campagna.qg_avversario_caduto.sintetico" = "Quartier generale avversario caduto in riga %1$d, casella %2$d";
+"registro.quartier_generale_occupato" = "Giorno %1$d: l'avversario occupa il tuo quartier generale in riga %2$d, casella %3$d";
+"registro.quartier_generale_liberato" = "Giorno %1$d: l'avversario non occupa più il tuo quartier generale in riga %2$d, casella %3$d";
+"registro.quartier_generale_preso" = "Giorno %1$d: preso il quartier generale avversario in riga %2$d, casella %3$d";
+"registro.quartier_generale_perduto" = "Giorno %1$d: il tuo quartier generale in riga %2$d, casella %3$d è caduto";
+/* Il richiamo dell'esercito (01 §5.18.2): il comando, il pannello che chiede conferma, e perché non si
+   può dare adesso (02 §6.5). */
+"campagna.richiama" = "Richiama l'esercito in patria";
+"campagna.richiama_impedito" = "Richiama l'esercito in patria, adesso non si può: %@";
+"campagna.richiamo_impedito" = "L'esercito non si può richiamare: %@";
+"campagna.richiamo_titolo" = "Richiamare l'esercito in patria?";
+"campagna.richiamo_conseguenza" = "La campagna si conclude e conta come perduta. I superstiti tornano tutti in patria";
+"campagna.richiamo_conferma" = "Conferma il richiamo";
+"richiamo.battaglia_in_sospeso" = "%1$@ in riga %2$d, casella %3$d";
+"richiamo.rifornimento_tagliato.maschile" = "%1$@ ha il rifornimento tagliato in riga %2$d, casella %3$d";
+"richiamo.rifornimento_tagliato.femminile" = "%1$@ ha il rifornimento tagliato in riga %2$d, casella %3$d";
+"richiamo.rifornimento_tagliato.maschile_plurale" = "%1$@ hanno il rifornimento tagliato in riga %2$d, casella %3$d";
+"richiamo.rifornimento_tagliato.femminile_plurale" = "%1$@ hanno il rifornimento tagliato in riga %2$d, casella %3$d";
+"richiamo.a_contatto.maschile" = "%1$@ è a contatto con l'avversario in riga %2$d, casella %3$d";
+"richiamo.a_contatto.femminile" = "%1$@ è a contatto con l'avversario in riga %2$d, casella %3$d";
+"richiamo.a_contatto.maschile_plurale" = "%1$@ sono a contatto con l'avversario in riga %2$d, casella %3$d";
+"richiamo.a_contatto.femminile_plurale" = "%1$@ sono a contatto con l'avversario in riga %2$d, casella %3$d";
 "campagna.torna_in_patria" = "Torna in patria";
 /* L'arrivo di una formazione dalla patria (01 §5.2.1, §5.17.1; incarico 31): chi arriva e dove è
    entrato. Il nome della formazione è il soggetto (02 §4.6). */
@@ -627,6 +664,9 @@
 "conclusione.vittoria" = "Vittoria: l'avversario non ha più gruppi armati sul %@";
 "conclusione.sconfitta" = "Sconfitta: non hai più gruppi armati sul %@";
 "conclusione.inverno" = "L'inverno ha interrotto la campagna sul %@: nessun vincitore";
+"conclusione.presa_vittoria" = "Vittoria: il quartier generale avversario sul %@ è caduto";
+"conclusione.presa_sconfitta" = "Sconfitta: il tuo quartier generale sul %@ è caduto";
+"conclusione.richiamo" = "Hai richiamato l'esercito dal %@: la campagna conta come perduta";
 "conclusione.battaglie" = "Battaglie vinte: %1$d. Battaglie perse: %2$d";
 "conclusione.nessun_rientro" = "Nessuna formazione rientra in patria";
 "conclusione.premio" = "Premi che si aggiungono alla rendita dell'anno: %@";
@@ -642,6 +682,7 @@
 "patria.campagna_vinta" = "Campagna sul %@ vinta";
 "patria.campagna_perduta" = "Campagna sul %@ perduta";
 "patria.campagna_interrotta" = "Campagna sul %@ interrotta dall'inverno, senza vincitore";
+"patria.campagna_richiamata" = "Campagna sul %@ perduta: esercito richiamato in patria";
 "patria.nessuna_campagna_condotta" = "Quest'anno nessuna campagna";
 /* L'informazione di stato del regno (02 §6.5): la data, poi la campagna dell'anno. */
 "patria.stato" = "%1$@. %2$@";
@@ -739,6 +780,9 @@
 "registro_patria.campagna_vinta" = "Anno %1$d, %2$@: campagna sul %3$@ vinta";
 "registro_patria.campagna_perduta" = "Anno %1$d, %2$@: campagna sul %3$@ perduta";
 "registro_patria.campagna_interrotta" = "Anno %1$d, %2$@: campagna sul %3$@ interrotta dall'inverno";
+"registro_patria.campagna_presa_vinta" = "Anno %1$d, %2$@: campagna sul %3$@ vinta, preso il quartier generale avversario";
+"registro_patria.campagna_presa_perduta" = "Anno %1$d, %2$@: campagna sul %3$@ perduta, caduto il tuo quartier generale";
+"registro_patria.campagna_richiamata" = "Anno %1$d, %2$@: campagna sul %3$@ perduta, esercito richiamato in patria";
 "registro_patria.inverno_cominciato" = "Anno %1$d, %2$@: comincia l'inverno e arriva l'entrata dell'anno";
 "registro_patria.primavera" = "Anno %1$d, %2$@: comincia la primavera";
 "registro_patria.primavera_con_riporto" = "Anno %1$d, %2$@: comincia la primavera; il riporto ha tolto ciò che eccedeva";

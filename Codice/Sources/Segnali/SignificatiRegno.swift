@@ -432,6 +432,10 @@ public struct TraduttoreEventiRegno: Sendable {
             case .annientamento:
                 chiave = vincitore == .giocatore ? "registro_patria.campagna_vinta"
                                                  : "registro_patria.campagna_perduta"
+            case .presa:
+                chiave = vincitore == .giocatore ? "registro_patria.campagna_presa_vinta"
+                                                 : "registro_patria.campagna_presa_perduta"
+            case .richiamo: chiave = "registro_patria.campagna_richiamata"
             }
             return testi.frase(chiave, voce.anno, stagione, self.fronte(fronte))
         case .invernoCominciato:
@@ -467,6 +471,10 @@ public struct TraduttoreEventiRegno: Sendable {
             voci.append(testi.frase("conclusione.inverno", nome).testo)
         case .annientamento:
             voci.append(testi.frase(esito.vinta ? "conclusione.vittoria" : "conclusione.sconfitta", nome).testo)
+        case .presa:
+            voci.append(testi.frase(esito.vinta ? "conclusione.presa_vittoria" : "conclusione.presa_sconfitta", nome).testo)
+        case .richiamo:
+            voci.append(testi.frase("conclusione.richiamo", nome).testo)
         }
         voci.append(testi.frase("conclusione.giornate", esito.giornate).testo)
         voci.append(testi.frase("conclusione.battaglie", esito.battaglieVinte, esito.battagliePerse).testo)

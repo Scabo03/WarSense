@@ -164,6 +164,12 @@ final class PartitaCampagna {
         ambiente.segnali.segnala(eventi: eventi, per: .giocatore)
     }
 
+    /// Il richiamo dell'esercito in patria (01 §5.18.2; incarico 32): conclude la campagna. I fatti li
+    /// consegna il chiamante con `segnala`, quando la schermata è pronta a riceverli.
+    func richiamaLEsercito() async throws -> [EventoCampagna] {
+        try await sessione.richiamaLEsercito()
+    }
+
     // MARK: - Passaggio alla battaglia e ritorno (01 §6, §15, incarico 24)
 
     /// Il modello PROVVISORIO dello scontro da campagna (S24e): il campo, il terreno, la

@@ -166,6 +166,8 @@ struct CostruttoreAnnunciCampagna {
             return testi.termine(parte == .giocatore
                                  ? "casella.quartier_generale"
                                  : "casella.quartier_generale_avversario").testo
+        case .occupazione(let mancano):
+            return testi.frase("casella.occupazione", mancano).testo
         case .terreno(let terreno):
             return testi.termine("terreno." + terreno.rawValue).testo
         case .strada(let strada):
@@ -225,6 +227,9 @@ struct CostruttoreAnnunciCampagna {
             return nil
         case .zonaDiRifornimento: return "R"
         case .quartierGenerale(let parte): return parte == .giocatore ? "Q" : "q"
+        // Chi guarda legge accanto al quartier generale la stessa cosa che si sente: quante giornate
+        // mancano perché sia preso.
+        case .occupazione(let mancano): return String(mancano)
         case .terreno(let terreno):
             switch terreno {
             case .bosco: return "B"
@@ -310,6 +315,14 @@ struct CostruttoreAnnunciCampagna {
             frase += testi.frase("campagna.stato_battaglia_in_sospeso",
                                  casella.riga, casella.colonna).testo
         }
+        // I quartieri generali occupati, in coda (02 §6.5.1.4; incarico 32): prima il proprio, che è la
+        // cosa più grave che possa accadere, poi quello avversario. La condizione assente non si nomina.
+        if let mancano = info.presaSubita {
+            frase += testi.frase("campagna.stato_qg_proprio_occupato", mancano).testo
+        }
+        if let mancano = info.presaInCorso {
+            frase += testi.frase("campagna.stato_qg_avversario_occupato", mancano).testo
+        }
         return frase
     }
 
@@ -321,6 +334,20 @@ struct CostruttoreAnnunciCampagna {
                            testi.frase("mappa." + stato.mappa.identificatore).testo,
                            stato.griglia.righe, stato.griglia.colonne,
                            qg.riga, qg.colonna).testo
+    }
+
+    // MARK: - Il richiamo dell'esercito (01 §5.18.2, 02 §6.5.5; incarico 32)
+
+    /// L'etichetta del comando di richiamo: quando non si può dare adesso dichiara il perché, col gruppo
+    /// che lo impedisce e dov'è.
+    func etichettaDelRichiamo() -> String {
+        guard let impedimento = vista.impedimentoDelRichiamo else { return testi.frase("campagna.richiama").testo }
+        return testi.frase("campagna.richiama_impedito", motivo(impedimento)).testo
+    }
+
+    /// Il motivo, a parole.
+    func motivo(_ impedimento: ImpedimentoDelRichiamo) -> String {
+        TraduttoreEventiCampagna(testi: testi, parte: .giocatore).impedimento(impedimento).testo
     }
 
     // MARK: - Registro (01 §5.17, 02 §6.6)

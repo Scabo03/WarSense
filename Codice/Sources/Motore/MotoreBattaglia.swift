@@ -340,8 +340,12 @@ public struct MotoreBattaglia: Sendable {
             guard let sciame = stato.sciami[id], sciame.parte == parte else { return .nonValido(.bersaglioNonValido) }
             guard !stato.impegnato(id) else { return .nonValido(.impegnato) } // 01 §10.4.1
             // Il costo del ritiro usa la formula unica sulla riga di partenza (01 §8.7, §10.4).
-            let c = costo(archetipo: sciame.archetipo, atomi: sciame.atomiIniziali,
-                          cella: sciame.posizione, parte: parte, stato: stato)
+            // Non supera mai il volume di base di un turno (01 §10.4.2; incarico 32): un reparto troppo
+            // ingombrante esce spendendolo tutto. Senza, chi si è ritirato con un reparto che costa più di
+            // ogni turno non potrebbe uscirne mai, e la battaglia non finirebbe.
+            let c = min(costo(archetipo: sciame.archetipo, atomi: sciame.atomiIniziali,
+                              cella: sciame.posizione, parte: parte, stato: stato),
+                        formato(stato).budgetVolumeBase)
             guard c <= bilancio.disponibile else { return .nonValido(.volumeInsufficiente) }
             return .valido(CostiDichiarati(volume: c, residuoDopo: bilancio.disponibile - c))
 
@@ -485,6 +489,8 @@ public struct MotoreBattaglia: Sendable {
             let costiDichiarati = valida(comando, parte: parte, stato: stato).costi!
             stato.bilancio[parte]!.spesa += costiDichiarati.volume
             stato.evacuati[parte, default: []].append(id)
+            // Salva integralmente (01 §10.4): torna in campagna con ciò che ha adesso (01 §10.6).
+            stato.sciamiEvacuati = (stato.sciamiEvacuati ?? []) + [stato.sciami[id]!]
             stato.sciami[id] = nil
             eventi.append(.unitaEvacuata(parte: parte, sciame: id, costo: costiDichiarati.volume))
 
@@ -731,18 +737,81 @@ public struct MotoreBattaglia: Sendable {
 
     /// Il massimo che una parte potrà mai spendere in un piazzamento, da qui in avanti:
     /// il budget di base più il tetto del riporto (01 §9.3.3), o il budget del primo turno
-    /// (01 §9.3.2) se quel turno le resta ancora da giocare. Serve a riconoscere una riserva
-    /// che non entrerà mai in campo perché anche un solo suo sciame eccede ogni budget possibile.
+    /// (01 §9.3.1) se quel turno le resta ancora da giocare, o ciò che gliene RESTA se lo sta
+    /// giocando adesso. Serve a riconoscere una riserva che non entrerà mai in campo perché anche
+    /// un solo suo sciame eccede ogni budget possibile.
+    ///
+    /// Fino alla build 32 il primo turno contava soltanto finché non era cominciato (`turniGiocati`
+    /// sale quando il turno si apre): una parte i cui reparti stanno tutti fra il budget ordinario e
+    /// quello del primo turno era annientata al suo primo comando, prima di poterli schierare
+    /// (incarico 32, la causa dello squilibrio fra le mappe).
     private func budgetMassimoResiduo(di parte: Parte, _ stato: StatoBattaglia) -> Int64 {
         let f = formato(stato)
         let regime = f.budgetVolumeBase + f.quotaRiporto.applicato(a: f.budgetVolumeBase)
-        guard (stato.turniGiocati[parte] ?? 0) == 0 else { return regime }
-        return max(regime, f.coefficientePrimoTurno.applicato(a: f.budgetVolumeBase))
+        if (stato.turniGiocati[parte] ?? 0) == 0 {
+            return max(regime, f.coefficientePrimoTurno.applicato(a: f.budgetVolumeBase))
+        }
+        return stato.parteDiTurno == parte ? max(regime, stato.bilancio[parte]?.disponibile ?? 0) : regime
+    }
+
+    /// Vero se le due parti NON POSSONO PIÙ INCONTRARSI (01 §10.7.1; incarico 32): nessun contatto in
+    /// corso, e fra le righe che ciascuna può ancora raggiungere col volume di un turno pieno ne resta
+    /// almeno una in mezzo, e nessun tiro la supera. È lo stallo di due schieramenti troppo ingombranti
+    /// per avanzare: i reparti possono al più spostarsi di lato, e la battaglia non avrebbe fine. Il
+    /// costo cresce con la profondità, sicché le righe raggiungibili si contano una per una finché il
+    /// volume basta. Vale dal secondo turno di ciascuno, perché il primo ha il budget maggiorato.
+    /// Funzione dello stato soltanto.
+    public func nonPossonoPiuIncontrarsi(_ stato: StatoBattaglia) -> Bool {
+        guard stato.esito == nil, stato.contatti.isEmpty,
+              Parte.allCases.allSatisfy({ (stato.turniGiocati[$0] ?? 0) > 1 }) else { return false }
+        let f = formato(stato)
+        let regime = f.budgetVolumeBase + f.quotaRiporto.applicato(a: f.budgetVolumeBase)
+        let ultimo = stato.griglia.righe - 1
+
+        /// L'avanzamento più alto che un reparto può raggiungere partendo da quello indicato.
+        func raggiunge(_ id: IdentificatoreDati, atomi: Int64, parte: Parte, da corrente: Int) -> Int {
+            var avanzamento = corrente
+            while avanzamento < ultimo {
+                let riga = parte == .giocatore ? stato.griglia.righe - (avanzamento + 1) : 1 + (avanzamento + 1)
+                let grezzo = costo(archetipo: id, atomi: atomi, cella: Cella(riga: riga, colonna: 1), parte: parte, stato: stato)
+                let c = max(valori.minimi.costoPiazzamentoMinimo,
+                            modificatore(.coefficienteCostoMovimento, stato).applicato(a: grezzo))
+                guard c <= regime else { break }
+                avanzamento += 1
+            }
+            return avanzamento
+        }
+        /// I reparti di una parte, in campo o ancora schierabili: quanto avanti arrivano e quanto tirano.
+        func reparti(di parte: Parte) -> [(avanzamento: Int, gittata: Int)] {
+            func tiro(_ id: IdentificatoreDati, munizioni: Int) -> Int {
+                let a = archetipo(id)
+                return a.offesaTiro != nil && munizioni > 0 ? gittataEffettiva(a.gittata, stato: stato) : 0
+            }
+            var esito = stato.sciami.values.filter { $0.parte == parte }.map { sciame in
+                (avanzamento: raggiunge(sciame.archetipo, atomi: sciame.atomiIniziali, parte: parte,
+                                        da: stato.griglia.avanzamento(di: sciame.posizione, per: parte)),
+                 gittata: tiro(sciame.archetipo, munizioni: sciame.munizioni))
+            }
+            for elemento in stato.deck[parte] ?? [] where elemento.esemplari > 0 {
+                let a = archetipo(elemento.archetipo)
+                guard elemento.atomi * a.volumePerAtomo <= regime else { continue }
+                esito.append((avanzamento: raggiunge(elemento.archetipo, atomi: elemento.atomi, parte: parte, da: 0),
+                              gittata: tiro(elemento.archetipo, munizioni: a.dotazioneMunizioni)))
+            }
+            return esito
+        }
+        let miei = reparti(di: .giocatore), suoi = reparti(di: .avversario)
+        guard let mio = miei.map(\.avanzamento).max(), let suo = suoi.map(\.avanzamento).max() else { return false }
+        func lontani(_ avanzamento: Int, _ altro: Int, oltre distanza: Int) -> Bool { ultimo - avanzamento - altro > distanza }
+        return lontani(mio, suo, oltre: 1)
+            && miei.allSatisfy { lontani($0.avanzamento, suo, oltre: max(1, $0.gittata)) }
+            && suoi.allSatisfy { lontani($0.avanzamento, mio, oltre: max(1, $0.gittata)) }
     }
 
     /// Una parte ha una riserva schierabile se un suo elemento del deck con esemplari da
-    /// giocare può ancora entrare in campo, cioè il volume di un suo sciame sta nel budget
-    /// massimo residuo (01 §8.6). Una riserva troppo grande per il budget non tiene «viva» la
+    /// giocare può ancora entrare in campo, cioè il volume di un suo sciame — con lo sconto
+    /// dell'imboscante, finché ne gode (01 §9.3.2) — sta nel budget massimo residuo (01 §8.6),
+    /// che è il meno che un piazzamento possa costare. Una riserva troppo grande per il budget non tiene «viva» la
     /// parte all'infinito: senza sciami in campo e senza riserve schierabili la battaglia si
     /// conclude per annientamento (01 §15.2.3), una delle vie previste, in un numero finito di
     /// turni. È il rimedio alla battaglia sbilanciata che non si concludeva: la parte in campo
@@ -753,7 +822,7 @@ public struct MotoreBattaglia: Sendable {
         return deck.contains { elemento in
             guard elemento.esemplari > 0 else { return false }
             let volumeSciame = elemento.atomi * archetipo(elemento.archetipo).volumePerAtomo
-            return volumeSciame <= tetto
+            return conScontoSePertinente(volumeSciame, parte: parte, stato: stato) <= tetto
         }
     }
 

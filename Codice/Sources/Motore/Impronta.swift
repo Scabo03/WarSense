@@ -78,6 +78,14 @@ extension StatoBattaglia {
             for id in ev { c.intero(id.numero) }
             c.intero(Int64(prossimaLettera[parte] ?? 1))
         }
+        // Ciò che è stato evacuato, per intero (incarico 32): due battaglie in cui gli stessi reparti
+        // sono usciti con atomi diversi non sono lo stesso stato. OMESSO quando non c'è, sicché le
+        // battaglie senza evacuazioni diano l'impronta di prima.
+        if let sciamiEvacuati, !sciamiEvacuati.isEmpty {
+            c.testo("evacuati")
+            c.intero(Int64(sciamiEvacuati.count))
+            for sciame in sciamiEvacuati { sciame.codifica(in: &c) }
+        }
         c.intero(prossimoIdSciame)
         c.testo(parteDiTurno.rawValue)
         c.intero(giro)

@@ -103,6 +103,10 @@ public struct TraduttoreEventiCampagna: Sendable {
         // registro; non aggiunge un significato tattile, perché il tetto è chiuso (02 §11.5) e il
         // segnale dei rinforzi appartiene al deck della battaglia (02 §5.4).
         case .arrivoDallaPatria: return nil
+        // L'occupazione di un quartier generale (incarico 32) si annuncia a parole, all'attaccante e al
+        // difensore; il tetto dei significati tattili è chiuso (02 §11.5).
+        case .quartierGeneraleOccupato, .occupazioneProsegue, .occupazioneInterrotta,
+             .quartierGeneralePreso: return nil
         }
     }
 
@@ -233,6 +237,38 @@ public struct TraduttoreEventiCampagna: Sendable {
             // di portarvi il fuoco dal registro.
             return testi.frase("campagna.arrivo_dalla_patria", soggetto: soggetto(chiave),
                                verbosita: verbosita, casella.riga, casella.colonna)
+        // L'occupazione di un quartier generale (02 §8.2.2; incarico 32): una frase intera per ciascuna
+        // delle due parti, chi occupa e chi è occupato, con le giornate che mancano.
+        case .quartierGeneraleOccupato(let casella, let occupante, let mancano):
+            return testi.frase(occupante == parte ? "campagna.qg_avversario_occupato" : "campagna.qg_proprio_occupato",
+                               verbosita: verbosita, casella.riga, casella.colonna, mancano)
+        case .occupazioneProsegue(_, let occupante, let mancano):
+            return testi.frase(occupante == parte ? "campagna.qg_avversario_tenuto" : "campagna.qg_proprio_tenuto",
+                               verbosita: verbosita, mancano)
+        case .occupazioneInterrotta(_, let occupante):
+            return testi.frase(occupante == parte ? "campagna.qg_avversario_lasciato" : "campagna.qg_proprio_liberato",
+                               verbosita: verbosita)
+        case .quartierGeneralePreso(let casella, let occupante):
+            return testi.frase(occupante == parte ? "campagna.qg_avversario_caduto" : "campagna.qg_proprio_caduto",
+                               verbosita: verbosita, casella.riga, casella.colonna)
+        }
+    }
+
+    /// Perché l'esercito non si può richiamare in patria (01 §5.18.2, 02 §6.5; incarico 32): il motivo,
+    /// col gruppo che lo impedisce e dov'è, perché non si debba ricostruirlo per tentativi.
+    public func impedimento(_ impedimento: ImpedimentoDelRichiamo) -> TestoLocalizzato {
+        switch impedimento {
+        case .senzaPatria, .campagnaConclusa:
+            return testi.termine(MotivoNonValidoCampagna.campagnaConclusa.rawValue)
+        case .battagliaInSospeso(let casella):
+            return testi.frase("richiamo.battaglia_in_sospeso",
+                               testi.termine(MotivoNonValidoCampagna.battagliaInSospeso.rawValue).testo,
+                               casella.riga, casella.colonna)
+        case .rifornimentoTagliato(let gruppo, let casella):
+            return testi.frase("richiamo.rifornimento_tagliato", soggetto: soggetto(gruppo),
+                               casella.riga, casella.colonna)
+        case .aContatto(let gruppo, let casella):
+            return testi.frase("richiamo.a_contatto", soggetto: soggetto(gruppo), casella.riga, casella.colonna)
         }
     }
 
@@ -244,6 +280,9 @@ public struct TraduttoreEventiCampagna: Sendable {
         case .inverno: return "campagna.conclusa_inverno"
         case .annientamento:
             return vincitore == parte ? "campagna.conclusa_vittoria" : "campagna.conclusa_sconfitta"
+        case .presa:
+            return vincitore == parte ? "campagna.conclusa_presa_vittoria" : "campagna.conclusa_presa_sconfitta"
+        case .richiamo: return "campagna.conclusa_richiamo"
         }
     }
 
@@ -274,7 +313,10 @@ public struct TraduttoreEventiCampagna: Sendable {
              .imboscataScoperta(let casella),
              .direzioneDedotta(let casella),
              .battagliaInnescata(let casella),
-             .battagliaConclusa(let casella, _):
+             .battagliaConclusa(let casella, _),
+             .quartierGeneraleOccupato(let casella),
+             .quartierGeneraleLiberato(let casella),
+             .quartierGeneralePreso(let casella, _):
             // Senza nome della formazione (02 §6.4.1): il giorno e il luogo, attivabile per
             // portarvi il fuoco (02 §6.6). Il sabotaggio, lo studio, lo scatto, la SCOPERTA
             // dell'imboscata, la deduzione, l'innesco e la conclusione di una battaglia dichiarano

@@ -72,7 +72,8 @@ final class MisuraFrequenzaBattaglieTest: XCTestCase {
     func test_le_partite_misurate_sono_coerenti() throws {
         let rapporto = try FrequenzaBattaglieDaRigaDiComando.esegui(
             cartellaValori: Contenuti.valoriDiFabbrica, partite: 2, giornateMassime: 40)
-        XCTAssertEqual(rapporto.partite.count, 2 * 2 * FrequenzaBattaglieDaRigaDiComando.formati.count)
+        XCTAssertEqual(rapporto.partite.count, 2 * MisuraFrequenzaBattaglie.Condotta.allCases.count
+                       * FrequenzaBattaglieDaRigaDiComando.formati.count)
         for p in rapporto.partite {
             XCTAssertNotEqual(p.fine, .ferma, "\(p.formato)/\(p.condotta)/\(p.seme): la partita si è fermata")
             XCTAssertEqual(p.violazioni, [], "\(p.formato)/\(p.condotta)/\(p.seme): invarianti violati")

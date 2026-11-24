@@ -259,6 +259,28 @@ final class TraduttoreRegnoTest: XCTestCase {
         let campagna = TraduttoreEventiCampagna(testi: testi, parte: .giocatore)
         XCTAssertEqual(campagna.annuncio(per: .stagioneCambiata(stagione: .estate), verbosita: .normale)?.testo,
                        "Nuova stagione: estate")
+        // La presa del quartier generale e il richiamo, in patria (incarico 32): nella dichiarazione di
+        // conclusione e nel registro.
+        func esito(_ modo: ConclusioneCampagna.Modo, _ vincitore: Parte) -> EsitoCampagna {
+            EsitoCampagna(fronte: "guado", anno: 2, modo: modo, vincitore: vincitore, giornate: 20, battaglieVinte: 1,
+                          battagliePerse: 2, superstiti: .sciami(formazioni: [], prossimoNome: 0))
+        }
+        func prima(_ e: EsitoCampagna) -> String { traduttore.dichiarazioneDiConclusione(e, premi: .vuote, fase: .arcaica)[0] }
+        XCTAssertEqual(prima(esito(.presa, .giocatore)), "Vittoria: il quartier generale avversario sul fronte del guado è caduto")
+        XCTAssertEqual(prima(esito(.presa, .avversario)), "Sconfitta: il tuo quartier generale sul fronte del guado è caduto")
+        XCTAssertEqual(prima(esito(.richiamo, .avversario)),
+                       "Hai richiamato l'esercito dal fronte del guado: la campagna conta come perduta")
+        func registrata(_ modo: ConclusioneCampagna.Modo, _ vincitore: Parte) -> String {
+            traduttore.voceDiRegistro(VoceRegistroPatria(numero: 1, anno: 2, stagione: .estate,
+                                                         fatto: .campagnaConclusa(fronte: "guado", modo: modo, vincitore: vincitore)),
+                                      fase: .arcaica).testo
+        }
+        XCTAssertEqual(registrata(.presa, .giocatore),
+                       "Anno 2, estate: campagna sul fronte del guado vinta, preso il quartier generale avversario")
+        XCTAssertEqual(registrata(.presa, .avversario),
+                       "Anno 2, estate: campagna sul fronte del guado perduta, caduto il tuo quartier generale")
+        XCTAssertEqual(registrata(.richiamo, .avversario),
+                       "Anno 2, estate: campagna sul fronte del guado perduta, esercito richiamato in patria")
         XCTAssertEqual(campagna.annuncio(per: .campagnaConclusa(modo: .inverno, vincitore: nil), verbosita: .normale)?.testo,
                        "È arrivato l'inverno: la campagna è conclusa, senza vincitore")
         XCTAssertEqual(campagna.annuncio(per: .campagnaConclusa(modo: .annientamento, vincitore: .giocatore),

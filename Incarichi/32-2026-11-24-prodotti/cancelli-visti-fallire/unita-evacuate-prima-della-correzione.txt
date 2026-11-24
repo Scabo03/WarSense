@@ -1,0 +1,7 @@
+	 Executed 0 tests, with 0 failures (0 unexpected) in 0.000 (0.000) seconds
+	 Executed 0 tests, with 0 failures (0 unexpected) in 0.000 (0.001) seconds
+	 Executed 2 tests, with 3 failures (0 unexpected) in 0.100 (0.100) seconds
+	 Executed 2 tests, with 3 failures (0 unexpected) in 0.100 (0.101) seconds
+Codice/Tests/MotoreTest/UnitaEvacuateTest.swift:63: error: -[MotoreTest.UnitaEvacuateTest test_01_10_4_le_unita_evacuate_tornano_in_campagna_con_gli_atomi_che_avevano] : XCTAssertEqual failed: ("[]") is not equal to ("[Motore.Reparto(archetipo: "fanteria_leggera", atomi: 3, miglioramento: nil, leva: nil), Motore.Reparto(archetip
+Codice/Tests/MotoreTest/UnitaEvacuateTest.swift:66: error: -[MotoreTest.UnitaEvacuateTest test_01_10_4_le_unita_evacuate_tornano_in_campagna_con_gli_atomi_che_avevano] : XCTAssertNotNil failed - e il gruppo ripiega, non sparisce
+Codice/Tests/MotoreTest/UnitaEvacuateTest.swift:91: error: -[MotoreTest.UnitaEvacuateTest test_01_10_4_2_un_reparto_troppo_ingombrante_si_evacua_spendendo_il_turno_intero] : XCTAssertEqual failed: ("[]") is not equal to ("[Motore.Reparto(archetipo: "fanteria_pesante", atomi: 24, miglioramento: nil, leva: nil)]")

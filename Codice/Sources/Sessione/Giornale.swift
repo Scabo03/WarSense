@@ -224,6 +224,10 @@ public enum VoceGiornale: Codable, Sendable {
     /// che rientrano —, sicché rigiocare il giornale del regno riproduce il regno senza rileggere
     /// i file della campagna.
     case campagnaConclusaNelRegno(esito: EsitoCampagna)
+    /// Il RICHIAMO dell'esercito in patria (01 §5.18.2; incarico 32): un gesto del giocatore che conclude
+    /// la campagna. Aggiunto in coda: i casi preesistenti si ricodificano identici
+    /// (`CompatibilitaGiornaleTest`), e un giornale scritto prima non lo contiene.
+    case richiamoDellEsercito(giorno: Int)
 }
 
 /// Una riga del giornale, numerata progressivamente.

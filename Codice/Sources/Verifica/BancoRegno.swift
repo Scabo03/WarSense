@@ -187,8 +187,13 @@ public struct SondaInvariantiRegno: Sendable {
             switch esito.modo {
             case .inverno:
                 if esito.vincitore != nil || esito.giornate != giornateOperative { v.append(.esitoIncoerente) }
-            case .annientamento:
+            case .annientamento, .presa:
                 if esito.vincitore == nil || !(1...giornateOperative).contains(esito.giornate) {
+                    v.append(.esitoIncoerente)
+                }
+            case .richiamo:
+                // Il richiamo è del giocatore e conta come perduto (01 §5.18.2).
+                if esito.vincitore != .avversario || !(1...giornateOperative).contains(esito.giornate) {
                     v.append(.esitoIncoerente)
                 }
             }

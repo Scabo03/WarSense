@@ -26,13 +26,35 @@ public struct VistaAvversario: Sendable {
     /// Le caselle in cui l'avversario OSSERVA ORA una formazione del giocatore
     /// (conoscenza confermato): l'unica cosa che sa delle posizioni del giocatore.
     public let formazioniGiocatoreNote: Set<Cella>
+    /// Ciò che sa della presa dei quartieri generali (01 §5.18.3; incarico 32): nulla se la campagna non
+    /// dichiara la regola.
+    public let presa: Presa?
+
+    /// Ciò che l'avversario conosce della presa: i due conteggi — il proprio quartier generale occupato,
+    /// che sa sempre, e la propria occupazione di quello del giocatore — e quali delle formazioni note
+    /// sono ARMATE, le sole che possono prendere un quartier generale. La categoria si distingue dalla
+    /// sagoma, per l'avversario come per il giocatore (incarico 19).
+    public struct Presa: Hashable, Sendable {
+        /// Le giornate che mancano al giocatore per prendere il quartier generale dell'avversario; nullo
+        /// se non lo occupa.
+        public let mancanoAlGiocatore: Int?
+        /// Le giornate che mancano all'avversario per prendere quello del giocatore; nullo se non lo occupa.
+        public let mancanoAllAvversario: Int?
+        /// Le caselle note in cui sta un gruppo armato del giocatore.
+        public let armateNote: Set<Cella>
+        public init(mancanoAlGiocatore: Int?, mancanoAllAvversario: Int?, armateNote: Set<Cella>) {
+            self.mancanoAlGiocatore = mancanoAlGiocatore; self.mancanoAllAvversario = mancanoAllAvversario
+            self.armateNote = armateNote
+        }
+    }
 
     public init(mappa: MappaCampagna, marcia: ValoriMarcia, condotta: ValoriCondotta,
                 gruppiPropri: [Gruppo], volumi: [IdGruppo: Int64],
-                formazioniGiocatoreNote: Set<Cella>) {
+                formazioniGiocatoreNote: Set<Cella>, presa: Presa? = nil) {
         self.mappa = mappa; self.marcia = marcia; self.condotta = condotta
         self.gruppiPropri = gruppiPropri; self.volumi = volumi
         self.formazioniGiocatoreNote = formazioniGiocatoreNote
+        self.presa = presa
     }
 
     public var qgProprio: Cella { mappa.quartierGenerale(di: .avversario) }
@@ -97,6 +119,16 @@ public struct VistaAvversario: Sendable {
 /// 3. **Difesa del quartier generale.** Se una formazione nota è entro la soglia dal
 ///    proprio quartier generale, un guadagno pari a quanto la mossa vi si avvicina: il
 ///    gruppo ripiega a difenderlo (01 §5.2.1).
+/// 4. **Presa del quartier generale** (01 §5.18.3; incarico 32). Un premio a entrare in quello
+///    del giocatore, dove la campagna dichiara la regola.
+///
+/// Dove la campagna dichiara la regola della presa, due decisioni precedono i punteggi
+/// (`comandoPerLaPresa`): chi occupa il quartier generale del giocatore lo TIENE, e chi sa
+/// occupato il proprio torna a RIPRENDERLO per la via più breve in giornate, entrando nella
+/// casella — salvo che stia per prendere prima quello del giocatore, o che non possa arrivare
+/// in tempo e ne tenga già uno. E la difesa guarda alla corsa: la accende una formazione ARMATA
+/// nota vicina al proprio quartier generale, ma non quando l'avversario arriverebbe prima a
+/// quello del giocatore, libero per ciò che ne sa.
 ///
 /// A parità di punteggio vince il PRESIDIO (l'avversario non si muove a vuoto) e, fra
 /// marce, la casella minore nell'ordine di lettura. Restituisce sempre un comando VALIDO;
@@ -132,6 +164,11 @@ public struct CondottaAvversaria: Sendable {
         // sabotaggio e studio — invece di ritirarle; la loro condotta è comunque provvisoria.
         if gruppo.categoria.eNonArmata { return .presidio(gruppo: gruppo.id) }
 
+        // LA PRESA DEL QUARTIER GENERALE (01 §5.18.3): tenere quello del giocatore, riprendere il proprio.
+        if let presa = vista.presa, let comando = comandoPerLaPresa(gruppo, vista: vista, presa: presa) {
+            return comando
+        }
+
         let c = vista.condotta
         let noti = vista.formazioniGiocatoreNote
         let griglia = vista.griglia
@@ -144,7 +181,11 @@ public struct CondottaAvversaria: Sendable {
 
         // Il proprio quartier generale è minacciato se una formazione nota vi è entro
         // la soglia (01 §5.2.1): decide sulla propria conoscenza, non sullo stato reale.
-        let qgMinacciato = noti.contains { griglia.distanza($0, qgAvv) <= c.sogliaDifesaQuartierGenerale }
+        let minacce = vista.presa?.armateNote ?? noti
+        var qgMinacciato = minacce.contains { griglia.distanza($0, qgAvv) <= c.sogliaDifesaQuartierGenerale }
+        if qgMinacciato, let presa = vista.presa, vinceLaCorsa(gruppo, vista: vista, presa: presa) {
+            qgMinacciato = false
+        }
 
         // Le caselle da cui si taglia il rifornimento di una formazione nota: le sue
         // spalle, verso il quartier generale del giocatore (01 §5.2.2.2).
@@ -159,6 +200,7 @@ public struct CondottaAvversaria: Sendable {
         func punteggio(dove: Cella, partenza: Cella) -> Int {
             var p = 0
             p += c.aggressivita * (distObiettivo(partenza) - distObiettivo(dove))
+            if vista.presa != nil, dove == qgGio { p += c.presaQuartierGenerale }
             if spalleDeiNoti.contains(dove) { p += c.minacciaRifornimento }
             if qgMinacciato {
                 p += c.difesaQuartierGenerale * (griglia.distanza(partenza, qgAvv) - griglia.distanza(dove, qgAvv))
@@ -197,6 +239,53 @@ public struct CondottaAvversaria: Sendable {
         // Altrimenti PRESIDIA (incarico 18): continua ad avanzare quando conviene, e non si ferma a
         // vuoto in modo da smettere di premere.
         return miglioreComando
+    }
+
+    /// Le due decisioni della presa (01 §5.18.3), nell'ordine in cui il giocatore le leggerà nel
+    /// comportamento. Nullo quando nessuna delle due si applica, e valgono i punteggi.
+    private func comandoPerLaPresa(_ gruppo: Gruppo, vista: VistaAvversario,
+                                   presa: VistaAvversario.Presa) -> ComandoCampagna? {
+        // Chi tiene una casella e ha accanto una formazione nota vi si apposta, altrimenti la presidia:
+        // la stessa scelta di chi non guadagna a muoversi.
+        func tieni() -> ComandoCampagna {
+            vista.formazioniGiocatoreNote.contains { vista.griglia.distanza($0, gruppo.posizione) == 1 }
+                ? .imboscata(gruppo: gruppo.id) : .presidio(gruppo: gruppo.id)
+        }
+        let proprieGiornate = gruppo.posizione == vista.qgGiocatore ? presa.mancanoAllAvversario : nil
+        if let scadenza = presa.mancanoAlGiocatore {
+            if gruppo.posizione == vista.qgProprio { return tieni() }
+            // Chi sta per prendere prima quello del giocatore vince la corsa, e resta.
+            if let mie = proprieGiornate, mie < scadenza { return tieni() }
+            let giornate = MotoreCampagna.giornate(
+                verso: vista.qgProprio, volumeColonna: vista.volumi[gruppo.id] ?? 0, mappa: vista.mappa,
+                marcia: vista.marcia,
+                evitando: vista.formazioniGiocatoreNote.subtracting([vista.qgProprio, gruppo.posizione]))
+            // Chi ne tiene già uno e non può arrivare in tempo a riprendere il proprio, resta.
+            if proprieGiornate != nil, (giornate[gruppo.posizione] ?? Int.max) > scadenza { return tieni() }
+            var migliore: (comando: ComandoCampagna, giornate: Int)?
+            for casella in vista.griglia.vicini(di: gruppo.posizione).sorted() {
+                guard let resto = giornate[casella], let comando = vista.comandoDiMarcia(di: gruppo, a: casella) else { continue }
+                let totale = vista.costoInGiorni(di: gruppo, a: casella) + resto
+                if migliore.map({ totale < $0.giornate }) ?? true { migliore = (comando, totale) }
+            }
+            return migliore?.comando
+        }
+        return proprieGiornate == nil ? nil : tieni()
+    }
+
+    /// Vero se il gruppo arriverebbe al quartier generale del giocatore prima che una qualunque delle
+    /// formazioni armate note arrivi al proprio (01 §5.18.3.5): allora prosegue invece di tornare. Le
+    /// giornate sono quelle della colonna propria per lui, e quelle di una colonna senza volume — le meno
+    /// che possano essere — per chi non conosce. Se il quartier generale del giocatore è notoriamente
+    /// difeso non c'è corsa: entrarvi è una battaglia.
+    private func vinceLaCorsa(_ gruppo: Gruppo, vista: VistaAvversario, presa: VistaAvversario.Presa) -> Bool {
+        guard !presa.armateNote.contains(vista.qgGiocatore) else { return false }
+        let mie = MotoreCampagna.giornate(verso: vista.qgGiocatore, volumeColonna: vista.volumi[gruppo.id] ?? 0,
+                                          mappa: vista.mappa, marcia: vista.marcia,
+                                          evitando: vista.formazioniGiocatoreNote.subtracting([gruppo.posizione]))[gruppo.posizione]
+        guard let mie else { return false }
+        let loro = MotoreCampagna.giornate(verso: vista.qgProprio, volumeColonna: 0, mappa: vista.mappa, marcia: vista.marcia)
+        return presa.armateNote.allSatisfy { mie < loro[$0] ?? Int.max }
     }
 
     /// Le distanze in caselle da una sorgente, su un cammino che AGGIRA un insieme di

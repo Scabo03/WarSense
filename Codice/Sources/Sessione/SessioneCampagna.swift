@@ -69,6 +69,9 @@ public actor SessioneCampagna {
         /// più, e nemmeno si torna indietro — annullare l'ordine che l'ha conclusa dopo averne
         /// ascoltato l'esito sarebbe rifare la mossa sapendo com'è andata (05 §6.5).
         case campagnaConclusa
+        /// Il richiamo dell'esercito è chiesto mentre qualcosa lo impedisce (01 §5.18.2): il rifiuto
+        /// porta l'impedimento, che la Presentazione dichiara (02 §6.5).
+        case richiamoImpedito(ImpedimentoDelRichiamo)
     }
 
     private let motore: MotoreCampagna
@@ -261,6 +264,23 @@ public actor SessioneCampagna {
                              eventi: motore.proiettaPerIlGiocatore(eventi, stato: stato))
     }
 
+    /// Perché l'esercito non si può richiamare adesso, oppure nulla se si può (01 §5.18.2, 02 §6.5).
+    public var impedimentoDelRichiamo: ImpedimentoDelRichiamo? { motore.impedimentoDelRichiamo(stato) }
+
+    /// Il RICHIAMO dell'esercito in patria (01 §5.18.2; incarico 32): la campagna si conclude, conta come
+    /// perduta, e i superstiti tornano tutti. Iscritto nel giornale, sicché la conclusione sopravvive a un
+    /// riavvio; non si annulla, come ogni conclusione.
+    public func richiamaLEsercito() throws -> [EventoCampagna] {
+        if let impedimento = motore.impedimentoDelRichiamo(stato) {
+            throw ErroreSessione.richiamoImpedito(impedimento)
+        }
+        do { try giornale.appendi(.richiamoDellEsercito(giorno: stato.giorno)) }
+        catch { throw ErroreSessione.scritturaFallita }
+        let eventi = motore.richiama(&stato)
+        try Self.scattaIstantanea(giornale: giornale, stato: stato, cartella: cartella, forzata: true)
+        return motore.proiettaPerIlGiocatore(eventi, stato: stato)
+    }
+
     /// I gruppi non-agiti di una parte, col loro stato e le azioni loro disponibili, in ordine di id.
     private func gruppiNonAgiti(di parte: Parte) -> [DiagnosticaChiusura.GruppoNonAgito] {
         stato.gruppi.values
@@ -414,10 +434,16 @@ public actor SessioneCampagna {
             try scattaIstantanea(giornale: giornale, stato: stato, cartella: cartella, forzata: false)
             return
         }
-        let haCompiutoUnaMarcia = eventi.contains {
-            if case .marciaCompiuta = $0 { return true } else { return false }
+        // Anche il passo di un'occupazione è un fatto che il giocatore ha ascoltato (01 §5.18.3): tornare
+        // indietro dopo averlo sentito sarebbe rifare la mossa sapendo com'è andata (RDA-102).
+        let haRisoltoQualcosa = eventi.contains {
+            switch $0 {
+            case .marciaCompiuta, .quartierGeneraleOccupato, .occupazioneProsegue, .occupazioneInterrotta,
+                 .quartierGeneralePreso: return true
+            default: return false
+            }
         }
-        if haCompiutoUnaMarcia || avversarioHaAgito {
+        if haRisoltoQualcosa || avversarioHaAgito {
             try giornale.appendi(.risoluzioneGiornata(giorno: stato.giorno))
         }
         try giornale.appendi(.aperturaGiornata(giorno: stato.giorno))
@@ -621,6 +647,12 @@ public actor SessioneCampagna {
                 // gruppi del giocatore che non avevano agito l'ordine di restare, come dal vivo. Il
                 // turno dell'avversario che l'ha seguita sta nelle righe successive, come comandi suoi.
                 _ = motore.concludiLaGiornataDelGiocatore(&statoCorrente)
+            case .richiamoDellEsercito:
+                // Il richiamo rigiocato conclude la campagna come dal vivo (incarico 32).
+                guard motore.impedimentoDelRichiamo(statoCorrente) == nil else {
+                    throw ErroreSessione.giornaleCorrotto(riga: riga.numero)
+                }
+                _ = motore.richiama(&statoCorrente)
             default:
                 continue
             }

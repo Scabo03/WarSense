@@ -193,7 +193,8 @@ final class SessioneRegnoSecondaTappaTest: XCTestCase {
     // MARK: - Due anni interi
 
     /// Due anni interi giocati attraverso le Sessioni. Il primo: una formazione tenuta in patria,
-    /// una perduta in battaglia — la prima, Corvo —, la campagna che l'inverno interrompe; d'inverno
+    /// una perduta in battaglia — la prima, Corvo —, la campagna che l'avversario vince prendendo il
+    /// quartier generale che occupa (incarico 32; fino alla build 32 la interrompeva l'inverno); d'inverno
     /// tre leve che maturano in tre stagioni diverse e un addestramento mirato. Il secondo: le reclute della
     /// primavera entrano con la prima giornata, quelle dell'estate arrivano a campagna aperta e
     /// vincono la battaglia che conclude la campagna, quelle dell'autunno non fanno in tempo ad
@@ -240,7 +241,8 @@ final class SessioneRegnoSecondaTappaTest: XCTestCase {
         XCTAssertNil(fronte.conclusione, "resta Lupo: la campagna prosegue")
         XCTAssertEqual(nomi(fronte, di: .giocatore), ["lupo", "falco"])
 
-        // Le giornate che restano, fino all'inverno.
+        // Le giornate che restano: l'avversario tiene il quartier generale del giocatore e, vinta la
+        // battaglia che vi è nata, dopo tre giornate lo prende (01 §5.18.3, incarico 32).
         var chiusure = 0
         while await campagna.stato.conclusione == nil, chiusure < 12 {
             if await !campagna.stato.battaglieInSospeso.isEmpty { return XCTFail("battaglia inattesa") }
@@ -248,8 +250,10 @@ final class SessioneRegnoSecondaTappaTest: XCTestCase {
             chiusure += 1
         }
         fronte = await campagna.stato
-        XCTAssertEqual(fronte.conclusione, ConclusioneCampagna(modo: .inverno, vincitore: nil, giorno: 6))
-        XCTAssertEqual(nomi(fronte, di: .giocatore), ["lupo", "falco"])
+        XCTAssertEqual(fronte.conclusione, ConclusioneCampagna(modo: .presa, vincitore: .avversario, giorno: 4),
+                       "vinta la battaglia nella seconda giornata, la tiene nella seconda, nella terza e nella quarta")
+        XCTAssertEqual(fronte.quartieriGeneraliPresi, [Self.quartierGenerale])
+        XCTAssertEqual(nomi(fronte, di: .giocatore), ["lupo", "falco"], "i superstiti tornano in patria")
 
         // L'esito torna in patria: Corvo — la prima formazione — è perduto; gli altri hanno il nome
         // di prima e non sono scalati di un posto; Orso è identico.

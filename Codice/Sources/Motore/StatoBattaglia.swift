@@ -176,6 +176,10 @@ public struct StatoBattaglia: Hashable, Codable, Sendable {
     // Ritirata combattuta (01 §10).
     public var resaDichiarataDa: Parte?
     public var evacuati: [Parte: [IdSciame]]
+    /// Gli sciami evacuati, com'erano quando hanno lasciato il campo (01 §10.4, §10.6; incarico 32): sono
+    /// salvi, e tornano in campagna con gli atomi che avevano. Nullo finché nessuno è stato evacuato;
+    /// facoltativo per le istantanee scritte prima.
+    public var sciamiEvacuati: [Sciame]? = nil
 
     // Perdite cumulative per la soglia della resa (01 §10.2).
     public var perditeSubite: [Parte: Int64]

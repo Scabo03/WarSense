@@ -196,6 +196,17 @@ public struct SondaInvariantiCampagna: Sendable {
         /// gruppi non-agiti, compresi quelli dell'avversario: ripetuto ogni giorno, l'avversario non
         /// muoveva mai. Nessun comando del giocatore può togliere un'azione all'altra parte.
         case azioneAvversariaSottratta(gruppo: Int)
+        // Invarianti della presa del quartier generale (01 §5.18.3, incarico 32).
+        /// Un'OCCUPAZIONE in corso non regge: la campagna non dichiara la regola, la casella non è un
+        /// quartier generale dell'altra parte o è già presa, ve ne sono due sulla stessa, il conteggio
+        /// esce da [0, giornate della regola), oppure nessun gruppo armato dell'occupante vi sta.
+        case occupazioneIncoerente(riga: Int, colonna: Int, motivo: String)
+        /// Una PRESA non regge: una parte ha perduto tutti i propri quartieri generali e la campagna non
+        /// è conclusa, oppure è conclusa per presa e chi ha perduto ne tiene ancora uno.
+        case presaIncoerente(motivo: String)
+        /// Una giornata di occupazione contata a chi non la teneva, o contata due volte: fra uno stato e
+        /// il successivo il conteggio di un'occupazione sale al più delle giornate che si sono chiuse.
+        case occupazioneContataTroppo(riga: Int, colonna: Int)
 
         /// Il codice della violazione, senza spazi: l'uscita del programma di
         /// verifica è dato per chi sviluppa e non testo di prodotto (05 §12.6),
@@ -255,6 +266,9 @@ public struct SondaInvariantiCampagna: Sendable {
             case .gruppoBloccatoSenzaAzioni(let g, let p): return "gruppo_bloccato_senza_azioni:gruppo=\(g):parte=\(p)"
             case .battagliaNonConclusaNelLimite(let g, let l): return "battaglia_non_conclusa_nel_limite:giri=\(g):limite=\(l)"
             case .azioneAvversariaSottratta(let g): return "azione_avversaria_sottratta:gruppo=\(g)"
+            case .occupazioneIncoerente(let r, let c, let m): return "occupazione_incoerente:riga=\(r):casella=\(c):motivo=\(m)"
+            case .presaIncoerente(let m): return "presa_incoerente:motivo=\(m)"
+            case .occupazioneContataTroppo(let r, let c): return "occupazione_contata_troppo:riga=\(r):casella=\(c)"
             }
         }
     }
@@ -318,6 +332,9 @@ public struct SondaInvariantiCampagna: Sendable {
         "gruppo_bloccato_senza_azioni",
         "battaglia_non_conclusa_nel_limite",
         "azione_avversaria_sottratta",
+        "occupazione_incoerente",
+        "presa_incoerente",
+        "occupazione_contata_troppo",
     ]
 
     /// Il codice nudo, senza i valori: la parte prima dei due punti.
@@ -436,7 +453,71 @@ public struct SondaInvariantiCampagna: Sendable {
         for gruppo in stato.gruppiOrdinati where gruppo.ordineImboscata && !gruppo.azioneSpesa {
             violazioni.append(.appostatoConAzioneNonSpesa(gruppo: gruppo.id.numero))
         }
+        violazioni.append(contentsOf: controllaLaPresa(stato))
         return violazioni
+    }
+
+    /// I quartieri generali di una parte, ricavati QUI dalla mappa e dalle fortezze.
+    private func quartieriGenerali(di parte: Parte, in stato: StatoCampagna) -> [Cella] {
+        [parte == .giocatore ? stato.mappa.quartierGeneraleGiocatore : stato.mappa.quartierGeneraleAvversario]
+            + (stato.fortezze ?? []).filter { $0.parte == parte }.map { Cella(riga: $0.riga, colonna: $0.colonna) }
+    }
+
+    /// Vero se nella casella sta un gruppo armato di `occupante` e la casella è un quartier generale
+    /// dell'altra parte, in una campagna che dichiara la regola: chi lo possiede lo sa sempre.
+    private func quartierGeneraleOccupato(_ cella: Cella, da occupante: Parte, in stato: StatoCampagna) -> Bool {
+        let altra: Parte = occupante == .giocatore ? .avversario : .giocatore
+        return stato.regole != nil && quartieriGenerali(di: altra, in: stato).contains(cella)
+            && stato.gruppi.values.contains { $0.parte == occupante && $0.posizione == cella && $0.categoria.eArmata }
+    }
+
+    /// La presa dei quartieri generali (01 §5.18.3; incarico 32), ricavata QUI dalla mappa e dalle
+    /// fortezze e non chiesta al Motore: ogni occupazione in corso sta su un quartier generale dell'altra
+    /// parte non ancora preso, una per casella, con il conteggio dentro la regola e un gruppo armato
+    /// dell'occupante sul posto; e la campagna è conclusa per presa se e solo se a una parte non resta
+    /// alcun quartier generale.
+    private func controllaLaPresa(_ stato: StatoCampagna) -> [Violazione] {
+        var violazioni: [Violazione] = []
+        let presi = Set(stato.quartieriGeneraliPresi ?? [])
+        var viste = Set<Cella>()
+        for o in stato.occupazioni ?? [] {
+            func viola(_ motivo: String) {
+                violazioni.append(.occupazioneIncoerente(riga: o.casella.riga, colonna: o.casella.colonna, motivo: motivo))
+            }
+            guard let regole = stato.regole else { viola("senza_regola"); continue }
+            if !viste.insert(o.casella).inserted { viola("doppia") }
+            let altra: Parte = o.occupante == .giocatore ? .avversario : .giocatore
+            if !quartieriGenerali(di: altra, in: stato).contains(o.casella) { viola("non_e_un_quartier_generale") }
+            if presi.contains(o.casella) { viola("gia_preso") }
+            if o.giornate < 0 || o.giornate >= regole.giornatePerLaPresa { viola("conteggio") }
+            if !stato.gruppi.values.contains(where: {
+                $0.parte == o.occupante && $0.posizione == o.casella && $0.categoria.eArmata
+            }) { viola("senza_occupante") }
+        }
+        let perdenti = Parte.allCases.filter { parte in quartieriGenerali(di: parte, in: stato).allSatisfy(presi.contains) }
+        switch stato.conclusione?.modo {
+        case .presa?:
+            if perdenti.isEmpty { violazioni.append(.presaIncoerente(motivo: "conclusa_con_un_quartier_generale_in_piedi")) }
+            else if let vincitore = stato.conclusione?.vincitore, perdenti.contains(vincitore) {
+                violazioni.append(.presaIncoerente(motivo: "ha_vinto_chi_ha_perduto_i_propri"))
+            }
+        default:
+            if !perdenti.isEmpty { violazioni.append(.presaIncoerente(motivo: "tutti_presi_e_non_conclusa")) }
+        }
+        return violazioni
+    }
+
+    /// Il conteggio fra uno stato e il successivo (01 §5.18.3.1): sale al più di una giornata per
+    /// ciascuna chiusura, e chi comincia adesso parte da zero.
+    public func controllaConteggioDellOccupazione(prima: StatoCampagna, dopo: StatoCampagna,
+                                                  giornateChiuse: Int) -> [Violazione] {
+        (dopo.occupazioni ?? []).compactMap { o in
+            let gia = prima.occupazioni?.first { $0.casella == o.casella && $0.occupante == o.occupante }?.giornate
+            // Chi non la occupava ancora: la chiusura in cui comincia non conta.
+            let massimo = gia.map { $0 + giornateChiuse } ?? max(0, giornateChiuse)
+            return o.giornate > massimo
+                ? .occupazioneContataTroppo(riga: o.casella.riga, colonna: o.casella.colonna) : nil
+        }
     }
 
     /// L'OCCULTAMENTO dell'imboscata (01 §5.11.1, incarico 21): su una casella con un gruppo
@@ -451,6 +532,9 @@ public struct SondaInvariantiCampagna: Sendable {
             let nemico: Parte = gruppo.parte == .giocatore ? .avversario : .giocatore
             let cella = gruppo.posizione
             guard stato.imboscateScoperte[nemico]?.contains(cella) != true else { continue }
+            // Chi possiede un quartier generale sa sempre che è occupato, anche da un appostato (01
+            // §5.18.3.3, incarico 32): è la sola eccezione all'occultamento.
+            guard !quartierGeneraleOccupato(cella, da: gruppo.parte, in: stato) else { continue }
             if case .confermato = conoscenzaDelNemico(nemico, cella) {
                 violazioni.append(.occultamentoViolato(parte: nemico.rawValue,
                                                        riga: cella.riga, colonna: cella.colonna))
@@ -874,6 +958,16 @@ public struct SondaInvariantiCampagna: Sendable {
                 // ordinario dopo la scoperta (l'esplorazione vede più lontano, §5.4), sicché non
                 // se ne esige l'osservazione.
                 break
+            case .quartierGeneraleOccupato(let casella), .quartierGeneraleLiberato(let casella):
+                // L'occupazione che il registro annota è quella subita: riguarda un quartier generale
+                // del giocatore, che sa sempre com'è (01 §5.18.3.3).
+                if !quartieriGenerali(di: .giocatore, in: dopo).contains(casella) {
+                    violazioni.append(.registroRivelaIgnoto(voce: voce.numero))
+                }
+            case .quartierGeneralePreso(let casella, let dalGiocatore):
+                if !quartieriGenerali(di: dalGiocatore ? .avversario : .giocatore, in: dopo).contains(casella) {
+                    violazioni.append(.registroRivelaIgnoto(voce: voce.numero))
+                }
             case .ordineAnnullato, .giornataAzzerata:
                 break
             case .stagioneCambiata:
@@ -898,7 +992,9 @@ public struct SondaInvariantiCampagna: Sendable {
             let ospitaGiocatore = stato.gruppi.values.contains {
                 $0.parte == .giocatore && $0.posizione == cella
             }
-            if !osservataDallAvversario(cella) || !ospitaGiocatore {
+            // Il proprio quartier generale occupato l'avversario lo sa sempre (01 §5.18.3.3).
+            let saputo = osservataDallAvversario(cella) || quartierGeneraleOccupato(cella, da: .giocatore, in: stato)
+            if !saputo || !ospitaGiocatore {
                 violazioni.append(.vistaAvversariaRivelaIgnoto(riga: cella.riga, colonna: cella.colonna))
             }
         }
@@ -1026,9 +1122,10 @@ public struct SondaInvariantiCampagna: Sendable {
     /// arretrato (01 §15.2.3, §15.5, §10.6): sullo stato di campagna DOPO il ritorno, ogni gruppo
     /// con superstiti vuoti nell'esito non c'è più; ogni gruppo con superstiti c'è ancora, con la
     /// composizione dei superstiti, e alla casella dovuta — il vincitore nella contesa, lo
-    /// sconfitto arretrato.
+    /// sconfitto arretrato. Lo sconfitto resta nella contesa soltanto se non esiste una casella in
+    /// cui ripiegare (S25a): `senzaRipiegamento` lo dice chi la cerca, prima del ritorno.
     public func controllaRitornoInCampagna(inSospeso: BattagliaInSospeso, esito: EsitoInCampagna,
-                                           dopo: StatoCampagna) -> [Violazione] {
+                                           dopo: StatoCampagna, senzaRipiegamento: Bool = false) -> [Violazione] {
         var violazioni: [Violazione] = []
         let vincitore = esito.vincitore
         for parte in Parte.allCases {
@@ -1050,7 +1147,7 @@ public struct SondaInvariantiCampagna: Sendable {
             if parte == vincitore, gruppo.posizione != inSospeso.casella {
                 violazioni.append(.ritornoInCampagnaScorretto(gruppo: id.numero, motivo: "vincitore_fuori_casella"))
             }
-            if parte == esito.sconfitto, gruppo.posizione == inSospeso.casella {
+            if parte == esito.sconfitto, !senzaRipiegamento, gruppo.posizione == inSospeso.casella {
                 violazioni.append(.ritornoInCampagnaScorretto(gruppo: id.numero, motivo: "sconfitto_non_arretrato"))
             }
         }

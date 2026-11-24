@@ -300,4 +300,16 @@ public enum EventoCampagna: Hashable, Codable, Sendable {
     /// vicina (01 §5.2.1, §5.17.1; incarico 31). Fatto che il giocatore non ha deciso adesso: entra
     /// nel registro e si annuncia.
     case arrivoDallaPatria(gruppo: IdGruppo, nome: IdentificatoreDati, casella: Cella)
+    /// Comincia l'OCCUPAZIONE di un quartier generale (01 §5.18.3; incarico 32): un gruppo armato
+    /// dell'altra parte lo tiene, e se non viene scacciato lo prende fra `mancano` giornate. Sempre
+    /// consegnato, all'attaccante e al difensore.
+    case quartierGeneraleOccupato(casella: Cella, occupante: Parte, mancano: Int)
+    /// L'occupazione PROSEGUE: un'altra giornata tenuta, ne mancano `mancano`. Sempre consegnato.
+    case occupazioneProsegue(casella: Cella, occupante: Parte, mancano: Int)
+    /// L'occupazione si è INTERROTTA — l'occupante ha lasciato la casella, o ha perduto la battaglia che
+    /// vi è nata — e il conteggio si è azzerato. Sempre consegnato.
+    case occupazioneInterrotta(casella: Cella, occupante: Parte)
+    /// Un quartier generale è CADUTO e a chi lo possedeva ne resta un altro (01 §5.14.3.2): se era
+    /// l'ultimo lo dice la conclusione della campagna. Sempre consegnato.
+    case quartierGeneralePreso(casella: Cella, occupante: Parte)
 }

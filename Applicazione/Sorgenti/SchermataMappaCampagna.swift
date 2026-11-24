@@ -43,7 +43,13 @@ final class SchermataMappaCampagna: UIViewController {
     private let pulsanteChiudiGiornata = PulsanteMultiriga(type: .system)
     private let pulsanteAnnulla = PulsanteMultiriga(type: .system)
     private let pulsanteAzzera = PulsanteMultiriga(type: .system)
+    /// Il richiamo dell'esercito in patria (01 §5.18.2): soltanto nella campagna che il regno ha aperta.
+    private let pulsanteRichiama = PulsanteMultiriga(type: .system)
     private let pulsanteEsci = PulsanteMultiriga(type: .system)
+    private var comandiDellaMappa: [PulsanteMultiriga] {
+        [pulsanteRegistro, pulsanteChiudiGiornata, pulsanteAnnulla, pulsanteAzzera]
+            + (partita.ritorno == .patria ? [pulsanteRichiama] : []) + [pulsanteEsci]
+    }
 
     init(partita: PartitaCampagna) {
         self.partita = partita
@@ -86,7 +92,8 @@ final class SchermataMappaCampagna: UIViewController {
                                    (pulsanteChiudiGiornata, #selector(chiudiGiornata)),
                                    (pulsanteAnnulla, #selector(annulla)),
                                    (pulsanteAzzera, #selector(azzera)),
-                                   (pulsanteEsci, #selector(esci))] {
+                                   (pulsanteRichiama, #selector(richiama)),
+                                   (pulsanteEsci, #selector(esci))] where comandiDellaMappa.contains(pulsante) {
             pulsante.addTarget(self, action: azione, for: .touchUpInside)
             pulsante.titleLabel?.font = .preferredFont(forTextStyle: .body)
             pulsante.titleLabel?.adjustsFontForContentSizeCategory = true
@@ -144,8 +151,7 @@ final class SchermataMappaCampagna: UIViewController {
         // contenitore scorrevole sta sul loro percorso d'accessibilità e VoiceOver li porta in vista
         // (osservazione 5 dell'esplorazione dell'incarico 27: a testo massimo «Torna all'inizio»
         // restava sotto il bordo).
-        scorrimentoComandi.accessibilityElements = [pulsanteRegistro, pulsanteChiudiGiornata,
-                                                    pulsanteAnnulla, pulsanteAzzera, pulsanteEsci]
+        scorrimentoComandi.accessibilityElements = comandiDellaMappa
         view.accessibilityElements = [vistaMappa, scorrimentoComandi]
         montaRotori()
         aggiorna(con: stato)
@@ -226,6 +232,10 @@ final class SchermataMappaCampagna: UIViewController {
         pulsanteAnnulla.setTitle(testi.frase("pulsante.annulla").testo, for: .normal)
         pulsanteAzzera.setTitle(testi.frase("pulsante.azzera").testo, for: .normal)
         pulsanteEsci.setTitle(testi.frase(partita.ritorno.chiaveTesto).testo, for: .normal)
+        let richiamo = costruttore.etichettaDelRichiamo()
+        pulsanteRichiama.setTitle(richiamo, for: .normal)
+        pulsanteRichiama.accessibilityLabel = richiamo
+        pulsanteRichiama.invalidateIntrinsicContentSize()
 
         vistaMappa.coloreCasella = { [weak self] casella in
             guard let self, let costruttore = self.costruttore else { return nil }
@@ -739,6 +749,57 @@ final class SchermataMappaCampagna: UIViewController {
         }
     }
 
+    /// Il RICHIAMO dell'esercito in patria (01 §5.18.2; incarico 32). Quando non si può dare dichiara il
+    /// perché, come fa già la sua etichetta (02 §6.5.5); altrimenti chiede conferma, perché conclude la
+    /// campagna e non si annulla.
+    @objc private func richiama() {
+        guard let costruttore else { return }
+        if let impedimento = costruttore.vista.impedimentoDelRichiamo {
+            annunciaIlRichiamoImpedito(impedimento)
+            return
+        }
+        let pannello = UIAlertController(title: testi.frase("campagna.richiamo_titolo").testo,
+                                         message: testi.frase("campagna.richiamo_conseguenza").testo,
+                                         preferredStyle: .alert)
+        let voci = [
+            VocePannello(titolo: testi.frase("campagna.richiamo_conferma").testo, stile: .destructive) { [weak self] in
+                // Il pannello si chiude e la schermata cambierà: l'annuncio della conclusione li
+                // accompagna (RDA-183).
+                Fuoco.staPerSpostarsi()
+                Task { await self?.eseguiIlRichiamo() }
+            },
+            VocePannello(titolo: testi.frase("pannello.marcia_rinuncia_azione").testo, stile: .cancel) { [weak self] in
+                Fuoco.sposta(a: self?.pulsanteRichiama, perche: .richiesto)
+            },
+        ]
+        for voce in voci {
+            pannello.addAction(UIAlertAction(title: voce.titolo, style: voce.stile) { _ in voce.esegui() })
+        }
+        vociPannello = voci
+        present(pannello, animated: false)
+    }
+
+    private func eseguiIlRichiamo() async {
+        // Il pannello di sistema si sta congedando: la schermata che segue lo aspetta, come quella che
+        // si apre dalla scelta del fronte.
+        try? await Task.sleep(nanoseconds: UInt64(Fuoco.attesaDelSistema * 1_000_000_000))
+        do {
+            let eventi = try await partita.richiamaLEsercito()
+            partita.segnala(eventi)
+            await ricaricaStato()
+        } catch SessioneCampagna.ErroreSessione.richiamoImpedito(let impedimento) {
+            annunciaIlRichiamoImpedito(impedimento)
+        } catch {
+            await ricaricaStato()
+        }
+    }
+
+    private func annunciaIlRichiamoImpedito(_ impedimento: ImpedimentoDelRichiamo) {
+        guard let costruttore else { return }
+        partita.ambiente.segnali.annuncia(
+            testi.frase("campagna.richiamo_impedito", costruttore.motivo(impedimento)))
+    }
+
     @objc private func esci() { alTermine?() }
 
     /// Il motivo di ogni comando respinto su una campagna conclusa (02 §6.5: il medesimo, perché
@@ -880,6 +941,7 @@ final class SchermataMappaCampagna: UIViewController {
     func apriRegistroPerProva() { apriRegistro() }
     /// Il pulsante «Chiudi la giornata» quale il titolare lo preme (incarico 26).
     func chiudiGiornataPerProva() { chiudiGiornata() }
+    func richiamaPerProva() { richiama() }
     var motorePerProva: MotoreCampagna { partita.motore }
     /// Il colore di riempimento che la mappa disegna per una casella, letto dallo STESSO
     /// blocco che il disegno usa (`vistaMappa.coloreCasella`): la prova d'interfaccia verifica

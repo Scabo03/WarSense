@@ -171,8 +171,9 @@ final class SchermataPatria: UIViewController {
             let nome = traduttore.fronte(esito.fronte)
             switch esito.modo {
             case .inverno: return testi.frase("patria.campagna_interrotta", nome).testo
-            case .annientamento:
+            case .annientamento, .presa:
                 return testi.frase(esito.vinta ? "patria.campagna_vinta" : "patria.campagna_perduta", nome).testo
+            case .richiamo: return testi.frase("patria.campagna_richiamata", nome).testo
             }
         }
     }

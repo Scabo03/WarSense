@@ -232,13 +232,18 @@ public struct ValoriCondotta: Codable, Hashable, Sendable {
     /// La distanza in caselle entro cui una formazione nota del giocatore rende il
     /// proprio quartier generale «minacciato» e accende la difesa. PROVVISORIO; almeno uno.
     public let sogliaDifesaQuartierGenerale: Int
+    /// Peso dell'ENTRARE nel quartier generale del giocatore, dove la campagna dichiara la regola
+    /// della presa (01 §5.18.3; incarico 32): maggiore della minaccia al rifornimento, o l'avversario
+    /// a un passo dal quartier generale preferirebbe girargli intorno. PROVVISORIO.
+    public let presaQuartierGenerale: Int
 
     public init(aggressivita: Int, minacciaRifornimento: Int, difesaQuartierGenerale: Int,
-                sogliaDifesaQuartierGenerale: Int) {
+                sogliaDifesaQuartierGenerale: Int, presaQuartierGenerale: Int) {
         self.aggressivita = aggressivita
         self.minacciaRifornimento = minacciaRifornimento
         self.difesaQuartierGenerale = difesaQuartierGenerale
         self.sogliaDifesaQuartierGenerale = sogliaDifesaQuartierGenerale
+        self.presaQuartierGenerale = presaQuartierGenerale
     }
 
     enum CodingKeys: String, CodingKey {
@@ -246,6 +251,7 @@ public struct ValoriCondotta: Codable, Hashable, Sendable {
         case minacciaRifornimento = "minaccia_rifornimento"
         case difesaQuartierGenerale = "difesa_quartier_generale"
         case sogliaDifesaQuartierGenerale = "soglia_difesa_quartier_generale"
+        case presaQuartierGenerale = "presa_quartier_generale"
     }
 }
 

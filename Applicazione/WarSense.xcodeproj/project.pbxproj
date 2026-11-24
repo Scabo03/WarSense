@@ -34,6 +34,7 @@
 		78DBF35F0D2BCE57B8D29F25 /* CostruttoreAnnunciCampagna.swift in Sources */ = {isa = PBXBuildFile; fileRef = C50CAE1A5AEB350F4FEDAB36 /* CostruttoreAnnunciCampagna.swift */; };
 		7A5079BF5C38019EE9CE070D /* Segnali in Frameworks */ = {isa = PBXBuildFile; productRef = 1F88D1E30799930786B4DDD2 /* Segnali */; };
 		7E69C9F2DB0BBABC72260BBB /* AnnunciEFuocoTest.swift in Sources */ = {isa = PBXBuildFile; fileRef = 1C877A8D5733D587BE7B618F /* AnnunciEFuocoTest.swift */; };
+		854BF091AF561745DBC8F1A3 /* CompletamentoDellaCampagnaTest.swift in Sources */ = {isa = PBXBuildFile; fileRef = B3B245B33BC398E8A80B4F93 /* CompletamentoDellaCampagnaTest.swift */; };
 		863515A22D57B0506B147DA9 /* PartitaRegno.swift in Sources */ = {isa = PBXBuildFile; fileRef = 161DCCDB96327251763C4304 /* PartitaRegno.swift */; };
 		873A5D26551D3035FC2D2BFE /* SimboliDegliArchetipiTest.swift in Sources */ = {isa = PBXBuildFile; fileRef = B3FD0402E55F3494E1F28DCF /* SimboliDegliArchetipiTest.swift */; };
 		873D9C045E99E55A19A8AC00 /* Servizi.swift in Sources */ = {isa = PBXBuildFile; fileRef = 47D2EC331332BE96EB5D410B /* Servizi.swift */; };
@@ -139,6 +140,7 @@
 		9EF7773BD1ED816307203E97 /* PartitaCorrente.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = PartitaCorrente.swift; sourceTree = "<group>"; };
 		A169EFE841A32EA35429F504 /* OsservazioniTesterTest.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = OsservazioniTesterTest.swift; sourceTree = "<group>"; };
 		B35836D88F72DCE771CB2A93 /* Impaginazione.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Impaginazione.swift; sourceTree = "<group>"; };
+		B3B245B33BC398E8A80B4F93 /* CompletamentoDellaCampagnaTest.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = CompletamentoDellaCampagnaTest.swift; sourceTree = "<group>"; };
 		B3FD0402E55F3494E1F28DCF /* SimboliDegliArchetipiTest.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SimboliDegliArchetipiTest.swift; sourceTree = "<group>"; };
 		B61635E47EDED9D5E8A15EA1 /* Codice */ = {isa = PBXFileReference; lastKnownFileType = folder; name = Codice; path = ../Codice; sourceTree = SOURCE_ROOT; };
 		B7792DA00B9CCC289C68A7E6 /* Info.plist */ = {isa = PBXFileReference; lastKnownFileType = text.plist; path = Info.plist; sourceTree = "<group>"; };
@@ -265,6 +267,7 @@
 				1C877A8D5733D587BE7B618F /* AnnunciEFuocoTest.swift */,
 				88D7A0731824F60DFDBEED2D /* AnnuncioDiCasellaTest.swift */,
 				2F77F23D7958A0EE7DC80E0A /* CatenaInterfacciaMotoreTest.swift */,
+				B3B245B33BC398E8A80B4F93 /* CompletamentoDellaCampagnaTest.swift */,
 				589A5B5EA3AF0D6D1EFB3900 /* DesignazioneBersaglioTest.swift */,
 				52406D8EA4A880585D67DA47 /* EsploratoriAvversarioInterfacciaTest.swift */,
 				3EF9E5EB5AC6650CDB0D1660 /* GestiUnLivelloSottoTest.swift */,
@@ -457,6 +460,7 @@
 				7E69C9F2DB0BBABC72260BBB /* AnnunciEFuocoTest.swift in Sources */,
 				C00890F2F953EE7041175812 /* AnnuncioDiCasellaTest.swift in Sources */,
 				321465D14C83340BB6030A0F /* CatenaInterfacciaMotoreTest.swift in Sources */,
+				854BF091AF561745DBC8F1A3 /* CompletamentoDellaCampagnaTest.swift in Sources */,
 				116EEE5C15D49181561AFDB5 /* DesignazioneBersaglioTest.swift in Sources */,
 				AAAF5011876C2223ECD3B289 /* EsploratoriAvversarioInterfacciaTest.swift in Sources */,
 				363082D02975925B7A44772B /* GestiUnLivelloSottoTest.swift in Sources */,

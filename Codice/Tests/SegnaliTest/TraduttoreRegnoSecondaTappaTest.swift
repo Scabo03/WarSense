@@ -71,7 +71,8 @@ final class TraduttoreRegnoSecondaTappaTest: XCTestCase {
     // MARK: - Ogni fatto, ogni motivo, ogni linguetta, ogni miglioramento ha la propria frase
 
     func test_incarico_31_ogni_fatto_della_patria_ha_la_propria_frase_risolta() {
-        XCTAssertEqual(FattoDiPatria.casiDiRiferimento.count, 14)
+        // Quattordici dall'incarico 31, più i tre modi nuovi in cui una campagna si conclude (incarico 32).
+        XCTAssertEqual(FattoDiPatria.casiDiRiferimento.count, 17)
         var frasi = Set<String>()
         for fatto in FattoDiPatria.casiDiRiferimento {
             for stagione in Stagione.allCases {

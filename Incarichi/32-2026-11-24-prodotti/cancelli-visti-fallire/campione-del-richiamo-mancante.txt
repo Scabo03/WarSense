@@ -1,0 +1,5 @@
+	 Executed 0 tests, with 0 failures (0 unexpected) in 0.000 (0.000) seconds
+	 Executed 0 tests, with 0 failures (0 unexpected) in 0.000 (0.001) seconds
+	 Executed 2 tests, with 1 failure (0 unexpected) in 0.109 (0.109) seconds
+	 Executed 2 tests, with 1 failure (0 unexpected) in 0.109 (0.110) seconds
+Codice/Tests/SessioneTest/CompatibilitaGiornaleTest.swift:340: error: -[SessioneTest.CompatibilitaGiornaleTest test_00_15_i_campioni_committati_si_decodificano_e_ricodificano_identici] : XCTAssertEqual failed: ("["comando", "comandoCampagna", "aperturaGiornata

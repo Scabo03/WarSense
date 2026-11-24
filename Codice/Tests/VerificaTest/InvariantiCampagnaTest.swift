@@ -409,6 +409,66 @@ final class InvariantiCampagnaTest: XCTestCase {
             "un volume riportato divergente non è stato visto")
     }
 
+    /// Il giocatore sul quartier generale avversario della pianura lunga, riga 1, con l'occupazione in corso.
+    static func statoConOccupazione(_ valoriCampagna: ValoriCampagna, _ valori: ValoriDiGioco) throws -> StatoCampagna {
+        let mappa = MappaCampagna(definizione: valoriCampagna.mappe["pianura_lunga"]!,
+                                  formato: valoriCampagna.formatiMappa[valoriCampagna.mappe["pianura_lunga"]!.formato]!)
+        let quartierGenerale = mappa.quartierGeneraleAvversario
+        var stato = try FabbricaCampagna.crea(
+            scenario: ScenarioCampagna(
+                mappa: "pianura_lunga",
+                gruppiGiocatore: [.init(riga: quartierGenerale.riga, colonna: quartierGenerale.colonna, composizione: composizioneLeggera)],
+                gruppiAvversario: [.init(riga: 5, colonna: 1, composizione: composizioneLeggera)],
+                calendario: CalendarioDiCampagna(anno: 1, giornatePerStagione: 30),
+                regole: RegoleDiCampagna(giornatePerLaPresa: 3)),
+            valori: valoriCampagna, archetipiNoti: Set(valori.archetipi.keys))
+        stato.occupazioni = [OccupazioneDelQuartierGenerale(casella: quartierGenerale, occupante: .giocatore, giornate: 1)]
+        return stato
+    }
+
+    /// Gli invarianti della presa (01 §5.18.3; incarico 32), uno per motivo: lo stato sano tace, ciascun
+    /// guasto si vede, e il conteggio sale al più di una giornata per chiusura.
+    func test_incarico_32_gli_invarianti_della_presa_vedono_ogni_guasto() throws {
+        let sano = try Self.statoConOccupazione(valoriCampagna, valori)
+        XCTAssertEqual(descrizioni(sonda.controlla(stato: sano)), [])
+        func guasto(_ modifica: (inout StatoCampagna) -> Void) -> [String] {
+            var s = sano; modifica(&s); return descrizioni(sonda.controlla(stato: s))
+        }
+        let casella = sano.occupazioni![0].casella
+        let dove = "riga=\(casella.riga):casella=\(casella.colonna)"
+        XCTAssertEqual(guasto { $0.regole = nil }, ["occupazione_incoerente:\(dove):motivo=senza_regola"])
+        XCTAssertEqual(guasto { $0.occupazioni!.append($0.occupazioni![0]) }, ["occupazione_incoerente:\(dove):motivo=doppia"])
+        XCTAssertEqual(guasto { $0.occupazioni![0].giornate = 3 }, ["occupazione_incoerente:\(dove):motivo=conteggio"])
+        XCTAssertEqual(guasto { $0.occupazioni![0].giornate = -1 }, ["occupazione_incoerente:\(dove):motivo=conteggio"])
+        XCTAssertEqual(guasto { s in s.gruppi.removeValue(forKey: s.gruppi(di: .giocatore)[0].id) },
+                       ["occupazione_incoerente:\(dove):motivo=senza_occupante"])
+        XCTAssertEqual(guasto { $0.occupazioni![0] = .init(casella: casella, occupante: .avversario, giornate: 0) }.sorted(),
+                       ["occupazione_incoerente:\(dove):motivo=non_e_un_quartier_generale",
+                        "occupazione_incoerente:\(dove):motivo=senza_occupante"])
+        XCTAssertEqual(guasto { $0.occupazioni = []; $0.quartieriGeneraliPresi = [casella] },
+                       ["presa_incoerente:motivo=tutti_presi_e_non_conclusa"])
+        XCTAssertEqual(guasto { $0.conclusione = ConclusioneCampagna(modo: .presa, vincitore: .giocatore, giorno: 3) },
+                       ["presa_incoerente:motivo=conclusa_con_un_quartier_generale_in_piedi"])
+        XCTAssertEqual(guasto { $0.occupazioni = []; $0.quartieriGeneraliPresi = [casella]
+                                $0.conclusione = ConclusioneCampagna(modo: .presa, vincitore: .avversario, giorno: 3) },
+                       ["presa_incoerente:motivo=ha_vinto_chi_ha_perduto_i_propri"])
+        XCTAssertEqual(guasto { $0.occupazioni = []; $0.quartieriGeneraliPresi = [casella]
+                                $0.conclusione = ConclusioneCampagna(modo: .presa, vincitore: .giocatore, giorno: 3) }, [])
+        // Con una fortezza il primo preso non basta, e non conclude.
+        XCTAssertEqual(guasto { $0.occupazioni = []; $0.quartieriGeneraliPresi = [casella]
+                                $0.fortezze = [Fortezza(riga: 2, colonna: 2, parte: .avversario)] }, [])
+        // Il conteggio, fra uno stato e il successivo.
+        var dopo = sano
+        dopo.occupazioni![0].giornate = 2
+        XCTAssertEqual(sonda.controllaConteggioDellOccupazione(prima: sano, dopo: dopo, giornateChiuse: 1), [])
+        XCTAssertEqual(descrizioni(sonda.controllaConteggioDellOccupazione(prima: sano, dopo: dopo, giornateChiuse: 0)),
+                       ["occupazione_contata_troppo:\(dove)"])
+        var senza = sano
+        senza.occupazioni = []
+        XCTAssertEqual(descrizioni(sonda.controllaConteggioDellOccupazione(prima: senza, dopo: dopo, giornateChiuse: 1)),
+                       ["occupazione_contata_troppo:\(dove)"], "chi comincia adesso non ha due giornate")
+    }
+
     func test_incarico_6_ogni_invariante_ha_almeno_un_mutante_che_lo_fa_scattare() throws {
         var visti = Set<String>()
         for (nome, produci) in try tavolaDeiMutanti() {
@@ -476,6 +536,12 @@ final class InvariantiCampagnaTest: XCTestCase {
                                        gruppiAvversario: [.init(riga: 1, colonna: 6, composizione: Self.composizioneLeggera)]),
             valori: valoriCampagna, archetipiNoti: Set(valori.archetipi.keys))
         let idAvversario = conAvversario.gruppi(di: .avversario)[0].id
+        // Uno stato in cui il giocatore OCCUPA il quartier generale avversario, per gli invarianti della
+        // presa (01 §5.18.3, incarico 32): la regola dichiarata e l'occupante sul posto.
+        let conOccupazione = try Self.statoConOccupazione(valoriCampagna, valori)
+        func occupato(_ modifica: (inout StatoCampagna) -> Void) -> StatoCampagna {
+            var s = conOccupazione; modifica(&s); return s
+        }
 
         return [
             ("gruppo_in_piu_caselle", {
@@ -891,6 +957,21 @@ final class InvariantiCampagnaTest: XCTestCase {
                 return sonda.controllaAzioniAvversarie(attesaPrima: [idAvversario],
                                                        giornoPrima: conAvversario.giorno,
                                                        dopo: dopo, comandatiDallAvversario: [])
+            }),
+            ("occupazione_incoerente", {
+                // Un'occupazione su una casella che non è un quartier generale.
+                sonda.controlla(stato: occupato { $0.occupazioni![0] = OccupazioneDelQuartierGenerale(
+                    casella: Cella(riga: 5, colonna: 5), occupante: .giocatore, giornate: 0) })
+            }),
+            ("presa_incoerente", {
+                // Tutti i quartieri generali dell'avversario presi, e la campagna va avanti.
+                sonda.controlla(stato: occupato { $0.occupazioni = []
+                                                   $0.quartieriGeneraliPresi = [$0.mappa.quartierGeneraleAvversario] })
+            }),
+            ("occupazione_contata_troppo", {
+                // Due giornate contate in una chiusura sola.
+                sonda.controllaConteggioDellOccupazione(prima: occupato { _ in },
+                                                        dopo: occupato { $0.occupazioni![0].giornate += 2 }, giornateChiuse: 1)
             }),
         ]
     }

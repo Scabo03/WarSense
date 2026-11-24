@@ -45,7 +45,7 @@ final class BancoRegnoTest: XCTestCase {
         let conViolazioni = anni.filter { !$0.violazioni.isEmpty }
         XCTAssertEqual(conViolazioni.map { "\($0.condotta.rawValue)/\($0.seme)/\($0.anno): \($0.violazioni)" }, [])
         for anno in anni where anno.conclusione != "ferma" {
-            XCTAssertTrue(["annientamento", "inverno"].contains(anno.conclusione), anno.conclusione)
+            XCTAssertTrue(["annientamento", "inverno", "presa"].contains(anno.conclusione), anno.conclusione)
             XCTAssertLessThanOrEqual(anno.atomiRientrati, anno.atomiPartiti, "nessun reintegro sul campo (01 §4.12)")
             XCTAssertLessThanOrEqual(anno.giornate, valoriRegno.giornateOperative)
             XCTAssertEqual(anno.proposteAvversarieRespinte, 0)
@@ -81,7 +81,7 @@ final class BancoRegnoTest: XCTestCase {
         XCTAssertEqual(conViolazioni.map { "\($0.condotta.rawValue)/\($0.seme)/\($0.anno): \($0.violazioni)" }, [])
         let conclusi = anni.filter { $0.conclusione != "ferma" }
         for anno in conclusi {
-            XCTAssertTrue(["annientamento", "inverno", "nessuna"].contains(anno.conclusione), anno.conclusione)
+            XCTAssertTrue(["annientamento", "inverno", "presa", "nessuna"].contains(anno.conclusione), anno.conclusione)
             XCTAssertLessThanOrEqual(anno.atomiRientrati, anno.atomiPartiti, "nessun reintegro sul campo (01 §4.12)")
             XCTAssertLessThanOrEqual(anno.giornate, valoriRegno.giornateOperative)
             XCTAssertEqual(anno.proposteAvversarieRespinte, 0)

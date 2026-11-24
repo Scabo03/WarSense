@@ -1,0 +1,6 @@
+	 Executed 0 tests, with 0 failures (0 unexpected) in 0.000 (0.000) seconds
+	 Executed 0 tests, with 0 failures (0 unexpected) in 0.000 (0.001) seconds
+	 Executed 2 tests, with 2 failures (0 unexpected) in 0.111 (0.111) seconds
+	 Executed 2 tests, with 2 failures (0 unexpected) in 0.111 (0.112) seconds
+Codice/Tests/MotoreTest/BudgetDelPrimoTurnoTest.swift:48: error: -[MotoreTest.BudgetDelPrimoTurnoTest test_01_9_3_un_elemento_che_sta_nel_budget_del_primo_turno_si_piazza_e_la_battaglia_continua] : XCTAssertNil failed: "EsitoBattaglia(sconfitto: Dati.Parte.gio
+Codice/Tests/MotoreTest/BudgetDelPrimoTurnoTest.swift:49: error: -[MotoreTest.BudgetDelPrimoTurnoTest test_01_9_3_un_elemento_che_sta_nel_budget_del_primo_turno_si_piazza_e_la_battaglia_continua] : XCTUnwrap failed: expected non-nil value of type "Cella"

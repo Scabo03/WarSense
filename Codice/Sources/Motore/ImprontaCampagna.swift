@@ -100,6 +100,9 @@ extension FattoRegistrato: CodificabileCanonico {
             c.testo(stagione.rawValue)
         case .arrivoDallaPatria(let gruppo, let casella):
             c.testo(gruppo); casella.codifica(in: &c)
+        case .quartierGeneraleOccupato(let casella), .quartierGeneraleLiberato(let casella),
+             .quartierGeneralePreso(let casella, _): // la chiave del testo dice già chi l'ha preso
+            casella.codifica(in: &c)
         }
     }
 }
@@ -247,6 +250,24 @@ extension StatoCampagna {
         if let regole {
             c.testo("regole")
             c.intero(Int64(regole.giornatePerLaPresa))
+        }
+        // Le occupazioni in corso, i quartieri generali presi e le fortezze, quando ce ne sono.
+        if let occupazioni, !occupazioni.isEmpty {
+            c.testo("occupazioni")
+            c.intero(Int64(occupazioni.count))
+            for o in occupazioni {
+                o.casella.codifica(in: &c); c.testo(o.occupante.rawValue); c.intero(Int64(o.giornate))
+            }
+        }
+        if let quartieriGeneraliPresi, !quartieriGeneraliPresi.isEmpty {
+            c.testo("quartieri_generali_presi")
+            c.intero(Int64(quartieriGeneraliPresi.count))
+            for casella in quartieriGeneraliPresi { casella.codifica(in: &c) }
+        }
+        if let fortezze, !fortezze.isEmpty {
+            c.testo("fortezze")
+            c.intero(Int64(fortezze.count))
+            for f in fortezze { f.casella.codifica(in: &c); c.testo(f.parte.rawValue) }
         }
         // I nomi riservati e gli arrivi dalla patria (incarico 31): due campagne che differiscono
         // per i nomi che possono ancora assegnare, o per ciò che deve ancora arrivare, non sono lo

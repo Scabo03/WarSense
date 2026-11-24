@@ -17,6 +17,9 @@ import Verifica
 //     il banco del regno (incarico 30): <partite> partite di <n> anni per condotta del giocatore, con la
 //     campagna dell'anno giocata fino alla sua conclusione e l'inverno; scrive i dati grezzi (una riga
 //     JSON per anno) e il riepilogo per condotta e per fronte.
+//   swift run -c release StrumentoVerifica --duelli [--uscita <cartella>]
+//     lo squilibrio fra le mappe (incarico 32): i duelli fra le composizioni degli scenari e le loro
+//     varianti, nei due ordini d'azione e con gli eserciti scambiati; una riga JSON per duello e la tabella.
 
 var cartellaValori = Ambiente.valoriDiFabbrica
 var cartellaScenari = Ambiente.scenariDiFabbrica
@@ -26,6 +29,7 @@ var fumo = false
 var partiteFrequenza: Int?
 var giornateMassime = 365
 var partiteRegno: Int?
+var duelli = false
 var anniRegno = 5
 
 var argomenti = Array(CommandLine.arguments.dropFirst())
@@ -64,6 +68,8 @@ while let argomento = argomenti.first {
         guard let valore = argomenti.first, let n = Int(valore) else { break }
         argomenti.removeFirst()
         partiteRegno = n
+    case "--duelli":
+        duelli = true
     case "--anni":
         guard let valore = argomenti.first, let n = Int(valore) else { break }
         argomenti.removeFirst()
@@ -103,6 +109,22 @@ if let partite = partiteRegno {
                                       atomically: true, encoding: .utf8)
             try rapporto.testo.write(to: cartellaUscita.appendingPathComponent("banco-del-regno.txt"),
                                      atomically: true, encoding: .utf8)
+        }
+        print(rapporto.testo)
+        exit(0)
+    } catch {
+        FileHandle.standardError.write(Data(("verifica.errore=\(error)\n").utf8))
+        exit(1)
+    }
+}
+
+if duelli {
+    do {
+        let rapporto = try DuelliDaRigaDiComando.esegui(cartellaValori: cartellaValori)
+        if let cartellaUscita {
+            try FileManager.default.createDirectory(at: cartellaUscita, withIntermediateDirectories: true)
+            try rapporto.grezzi.write(to: cartellaUscita.appendingPathComponent("duelli.jsonl"), atomically: true, encoding: .utf8)
+            try rapporto.testo.write(to: cartellaUscita.appendingPathComponent("duelli.txt"), atomically: true, encoding: .utf8)
         }
         print(rapporto.testo)
         exit(0)

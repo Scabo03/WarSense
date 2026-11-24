@@ -155,12 +155,22 @@ public struct BancoCampagna: Sendable {
                 .giocatore: TatticoBattaglia(motore: motoreB, ufficiale: ufficiale, parte: .giocatore),
                 .avversario: TatticoBattaglia(motore: motoreB, ufficiale: ufficiale, parte: .avversario)]
             var comandi: [(Parte, ComandoBattaglia)] = []
+            // Gli atomi evacuati, contati mentre lasciano il campo: sono salvi (01 §10.4). Fino
+            // all'incarico 32 nemmeno questo conteggio li guardava, e il ponte che li perdeva passava.
+            var evacuati: [Parte: Int] = [:]
+            func atomiInVita(_ sciame: Sciame) -> Int {
+                Int(sciame.atomiPresenti(puntiVitaPerAtomo: motore.valori.archetipi[sciame.archetipo]?.puntiVitaPerAtomo ?? 1,
+                                         minimo: motore.valori.minimi.atomiMinimiSciameVivo))
+            }
             var passi = 0
             while sb.esito == nil, sb.giro <= 400, passi < 40000 {
                 passi += 1
                 let parte = sb.parteDiTurno
                 let comando = tattici[parte]!.prossimoComando(stato: sb)
                 comandi.append((parte, comando))
+                if case .ritiraUnita(let id) = comando, let sciame = sb.sciami[id] {
+                    evacuati[parte, default: 0] += atomiInVita(sciame)
+                }
                 sb = motoreB.applica(comando, parte: parte, stato: sb).0
             }
             // (4) DETERMINISMO: rigioca la stessa sequenza e confronta l'impronta.
@@ -174,12 +184,8 @@ public struct BancoCampagna: Sendable {
             }
             // I superstiti, contati INDIPENDENTEMENTE dal Ponte, per la conservazione.
             func superstiti(_ parte: Parte) -> Int {
-                var totale = 0
-                for sciame in sb.sciami.values where sciame.parte == parte {
-                    let pv = motore.valori.archetipi[sciame.archetipo]?.puntiVitaPerAtomo ?? 1
-                    totale += Int(sciame.atomiPresenti(puntiVitaPerAtomo: pv,
-                                                       minimo: motore.valori.minimi.atomiMinimiSciameVivo))
-                }
+                var totale = evacuati[parte] ?? 0
+                for sciame in sb.sciami.values where sciame.parte == parte { totale += atomiInVita(sciame) }
                 for elemento in sb.deck[parte] ?? [] where elemento.esemplari > 0 {
                     totale += Int(elemento.atomi) * elemento.esemplari
                 }
@@ -189,10 +195,12 @@ public struct BancoCampagna: Sendable {
             // (1) CONSERVAZIONE: gli atomi che tornano coincidono coi superstiti.
             violazioni.formUnion(sonda.controllaConservazioneForze(esito: esito,
                 superstiti: [.giocatore: superstiti(.giocatore), .avversario: superstiti(.avversario)]).map(\.description))
+            let senzaRipiegamento = PonteCampagnaBattaglia.caselleDiRipiegamento(
+                per: esito.sconfitto, da: battaglia.casella, stato: stato).isEmpty
             _ = motore.applicaEsitoInCampagna(esito, in: &stato)
             // (2) RITORNO: annientato sparito, superstite ridotto e alla casella dovuta.
             violazioni.formUnion(sonda.controllaRitornoInCampagna(
-                inSospeso: battaglia, esito: esito, dopo: stato).map(\.description))
+                inSospeso: battaglia, esito: esito, dopo: stato, senzaRipiegamento: senzaRipiegamento).map(\.description))
             // (5) GIOCABILITÀ (incarico 25): tornata la campagna dalla battaglia, NESSUN gruppo può
             // essere non-agito e senza azioni — il blocco del titolare. È qui, subito dopo il
             // ritorno, che il difetto viveva; l'invariante lo rende impossibile.

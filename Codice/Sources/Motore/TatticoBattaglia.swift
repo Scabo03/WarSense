@@ -39,6 +39,10 @@ public struct TatticoBattaglia: Sendable {
         }
         if let comando = comandoDiPiazzamento(stato: stato) { return comando }
         if let comando = comandoDiReparto(stato: stato) { return comando }
+        if convieneUscireDalloStallo(stato: stato),
+           motore.valida(.dichiaraResa, parte: parte, stato: stato).eValido {
+            return .dichiaraResa
+        }
         return .fineTurno
     }
 
@@ -65,6 +69,15 @@ public struct TatticoBattaglia: Sendable {
         return motore.proporzionePerdite(per: parte, stato: stato) >= sogliaDiResa
     }
 
+    /// LO STALLO (01 §10.7.1; incarico 32): le due parti non possono più incontrarsi, per quanto
+    /// avanzino. È l'avversario a uscirne, ritirandosi: la sconfitta è una decisione e non un calcolo (01
+    /// §15.2.4), e una battaglia in cui nessuno può raggiungere l'altro non può restare aperta. Accade a
+    /// due schieramenti troppo ingombranti per avanzare, come i due gruppi di ventiquattro fanti pesanti
+    /// e dodici cavalieri degli scenari.
+    private func convieneUscireDalloStallo(stato: StatoBattaglia) -> Bool {
+        parte == .avversario && stato.resaDichiarataDa == nil && motore.nonPossonoPiuIncontrarsi(stato)
+    }
+
     private func comandoDiRitirata(stato: StatoBattaglia) -> ComandoBattaglia? {
         guard stato.resaDichiarataDa == parte else { return nil }
         let vantaggi = motore.valori.vantaggi
@@ -75,6 +88,17 @@ public struct TatticoBattaglia: Sendable {
             }
             if motore.valida(.ritiraUnita(sciame: sciame.id), parte: parte, stato: stato).eValido {
                 return .ritiraUnita(sciame: sciame.id)
+            }
+        }
+        // L'avversario evacua soltanto dalla propria riga più arretrata: chi sta più avanti vi torna.
+        if parte == .avversario, vantaggi.ritirataAvversariaSoloUltimaRiga {
+            for sciame in stato.sciamiOrdinati where sciame.parte == parte && !sciame.azioneSpesa {
+                let indietro = stato.griglia.celleArretrate(di: sciame.posizione, per: parte)
+                    .filter { stato.occupante(di: $0) == nil && !stato.ostacoli.contains($0) }.sorted()
+                for cella in indietro
+                where motore.valida(.muovi(sciame: sciame.id, percorso: [cella]), parte: parte, stato: stato).eValido {
+                    return .muovi(sciame: sciame.id, percorso: [cella])
+                }
             }
         }
         return nil

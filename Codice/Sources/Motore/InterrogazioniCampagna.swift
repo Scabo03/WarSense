@@ -86,6 +86,10 @@ public struct VistaCampagna: Sendable {
         /// si dichiara il volume (02 §6.4.1): appartiene solo all'occupante proprio.
         case composizionePropria([Reparto])
         case quartierGenerale(Parte)
+        /// L'OCCUPAZIONE in corso del quartier generale che sta nella casella (01 §5.18.3, incarico 32):
+        /// le giornate che mancano perché sia preso. Segue il quartier generale, e non compare finché
+        /// nessuno lo occupa. La riceve chi lo occupa e chi ne è occupato, cioè sempre il giocatore.
+        case occupazione(mancano: Int)
         case terreno(TerrenoCasella)
         case strada(TipoStrada)
         case strettoia
@@ -129,7 +133,12 @@ public struct VistaCampagna: Sendable {
         if let gruppo = occupanteProprio {
             voci.append(.composizionePropria(gruppo.composizione))
         }
-        if let parte = quartierGeneraleSu(casella) { voci.append(.quartierGenerale(parte)) }
+        if let parte = quartierGeneraleSu(casella) {
+            voci.append(.quartierGenerale(parte))
+            if let occupazione = stato.occupazione(di: casella), let mancano = stato.giornateMancanti(occupazione) {
+                voci.append(.occupazione(mancano: mancano))
+            }
+        }
         let terreno = terreno(di: casella)
         if terreno != .aperto { voci.append(.terreno(terreno)) }
         let strada = strada(di: casella)
@@ -286,6 +295,10 @@ public struct VistaCampagna: Sendable {
         /// Le giornate operative che restano DOPO quella in corso prima dell'inverno: zero
         /// nell'ultima giornata d'autunno. Nullo senza calendario.
         public let giornateAllInverno: Int?
+        /// Le giornate che mancano all'avversario per prendere il quartier generale del giocatore, se lo
+        /// occupa; e al giocatore per prendere quello avversario, se lo occupa (01 §5.18.3; incarico 32).
+        public let presaSubita: Int?
+        public let presaInCorso: Int?
     }
 
     public var informazioneDiStato: InformazioneDiStato {
@@ -311,8 +324,18 @@ public struct VistaCampagna: Sendable {
                                    gruppiTotali: miei.count,
                                    battaglieInSospeso: stato.battaglieInSospeso.map(\.casella),
                                    data: stato.data,
-                                   giornateAllInverno: stato.calendario.map { max(0, $0.ultimaGiornata - stato.giorno) })
+                                   giornateAllInverno: stato.calendario.map { max(0, $0.ultimaGiornata - stato.giorno) },
+                                   presaSubita: giornateAllaPresa(da: parte.avversaria),
+                                   presaInCorso: giornateAllaPresa(da: parte))
     }
+
+    /// Le giornate che mancano alla più vicina presa di una parte, se ne ha una in corso.
+    private func giornateAllaPresa(da occupante: Parte) -> Int? {
+        (stato.occupazioni ?? []).filter { $0.occupante == occupante }.compactMap { stato.giornateMancanti($0) }.min()
+    }
+
+    /// Perché l'esercito non si può richiamare adesso in patria, oppure nulla se si può (01 §5.18.2).
+    public var impedimentoDelRichiamo: ImpedimentoDelRichiamo? { motore.impedimentoDelRichiamo(stato) }
 
     /// Il secondo strato: il salto diretto al prossimo gruppo che non ha ancora
     /// agito (01 §5.16, 02 §7.3.1). Non è una comodità accessoria ma la
@@ -351,7 +374,8 @@ public struct VistaCampagna: Sendable {
         let parteAvversa: Parte = parte == .giocatore ? .avversario : .giocatore
         return stato.gruppi(di: parteAvversa)
             .map(\.posizione)
-            .filter { motore.osservata($0, da: parte, stato: stato) }
+            .filter { motore.osservata($0, da: parte, stato: stato)
+                || stato.quartierGeneraleOccupato(su: $0, da: parteAvversa) }
             .sorted()
     }
 

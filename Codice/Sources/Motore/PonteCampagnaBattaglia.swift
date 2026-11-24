@@ -85,7 +85,11 @@ public enum PonteCampagnaBattaglia {
         }
         func composizione(di parte: Parte) -> [Reparto] {
             var perSpecie: [Specie: Int] = [:]
-            for sciame in battaglia.sciami.values where sciame.parte == parte {
+            // Gli sciami rimasti in campo e quelli EVACUATI durante la ritirata, che sono salvi e
+            // ricompaiono sulla mappa (01 §10.4, §10.6): fino alla build 32 questi ultimi andavano
+            // perduti (incarico 32).
+            let salvi = Array(battaglia.sciami.values) + (battaglia.sciamiEvacuati ?? [])
+            for sciame in salvi where sciame.parte == parte {
                 let pv = valori.archetipi[sciame.archetipo]?.puntiVitaPerAtomo ?? 1
                 let atomi = sciame.atomiPresenti(puntiVitaPerAtomo: pv,
                                                  minimo: valori.minimi.atomiMinimiSciameVivo)
