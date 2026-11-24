@@ -141,7 +141,7 @@ def cella(elenco):
 
 
 with open(sys.argv[1], "w", encoding="utf-8") as f:
-    f.write("# Gli annunci, prima e dopo\n\nProdotta da `tabella.py` dalle misure grezze (`misure-grezze/*.jsonl`). In ogni cella: per quanto la voce ha detto l'annuncio, e se l'ha detto intero. «Prima» è il codice della build 32 (06dee59), «dopo» quello di questo incarico, entrambi nella copia strumentata che aggiunge il solo registro. I blocchi presa, subita, azzeramento, richiamo e conclusione sono rimisurati sul codice della build (`e19b47b`, file `dopo-finale-*.jsonl`, che prevalgono); gli altri sul commit precedente dell'applicazione (`e9f702e`), che ne differisce soltanto per l'attesa al ritorno in patria (`git diff e9f702e e19b47b -- Applicazione/Sorgenti Codice/Sources`). La velocità di VoiceOver è quella predefinita del simulatore (50 per cento).\n")
+    f.write("# Gli annunci, prima e dopo\n\nProdotta da `tabella.py` dalle misure grezze (`misure-grezze/*.jsonl`). In ogni cella: per quanto la voce ha detto l'annuncio, e se l'ha detto intero. «Prima» è il codice della build 32 (06dee59), «dopo» quello della build (c5bcb09), entrambi nella copia strumentata che aggiunge il solo registro. La velocità di VoiceOver è quella predefinita del simulatore (50 per cento).\n")
     for titolo, vuole in (("Annunci che accompagnano uno spostamento del fuoco o un cambio di schermata", True), ("Annunci che non spostano il fuoco", False)):
         f.write("\n## " + titolo + "\n\n| Quando | Annuncio (caratteri) | iPhone prima | iPhone dopo | iPad prima | iPad dopo |\n|---|---|---|---|---|---|\n")
         for (blocco, passo, k), v in tavola.items():
