@@ -905,16 +905,22 @@ public struct MotoreCampagna: Sendable {
 
     /// La CASELLA in cui entra una formazione che arriva dalla patria (01 §5.2.1: il quartier
     /// generale è «il punto di arrivo di truppe e asset militari inviati dalla patria»): il proprio
-    /// quartier generale, oppure — se è occupato — la casella libera più vicina, a parità di
-    /// distanza nell'ordine di lettura. Libera vuol dire senza alcuna formazione, propria o
-    /// avversaria, senza forze nemiche ferme e non meta di una marcia propria: chi arriva non
-    /// entra in contatto e non occupa un posto prenotato. Nulla se la mappa non ha una casella libera.
+    /// quartier generale, oppure — se è occupato — la casella libera più vicina; a parità di distanza
+    /// la più lontana da quello avversario (01 §5.2.1.1; incarico 32). Libera vuol dire senza alcuna
+    /// formazione, propria o avversaria, senza forze nemiche ferme e non meta di una marcia propria: chi
+    /// arriva non entra in contatto e non occupa un posto prenotato. Nulla se la mappa non ha una casella
+    /// libera. Una campagna nata prima della build 33, che non dichiara regole, conserva l'ordine di
+    /// allora — a parità di distanza il solo ordine di lettura —, o rigiocandola le reclute
+    /// entrerebbero altrove.
     public static func casellaDiArrivo(_ stato: StatoCampagna) -> Cella? {
-        let quartierGenerale = stato.mappa.quartierGenerale(di: .giocatore)
         var occupate = Set(stato.gruppi.values.map(\.posizione)).union(stato.forzeNemiche)
         for gruppo in stato.gruppi.values where gruppo.parte == .giocatore {
             if let meta = gruppo.marcia?.destinazione { occupate.insert(meta) }
         }
+        guard stato.regole == nil else {
+            return stato.mappa.caselleDallaPatria(di: .giocatore).first { !occupate.contains($0) }
+        }
+        let quartierGenerale = stato.mappa.quartierGenerale(di: .giocatore)
         let griglia = stato.griglia
         return griglia.tutteLeCaselle
             .filter { !occupate.contains($0) }

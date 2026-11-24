@@ -334,6 +334,7 @@
 "errore.dati.costo_marcia_incoerente" = "I valori della marcia sono incoerenti: costo o posizioni sotto il minimo, o pesi di terreno o strada mancanti";
 "errore.dati.conoscenza_incoerente" = "I valori della conoscenza sono incoerenti: raggio di osservazione negativo o soglia di decadimento sotto uno";
 "errore.dati.condotta_incoerente" = "I valori della condotta dell'avversario sono incoerenti: soglia di difesa del quartier generale sotto uno";
+"errore.dati.presa_incoerente" = "I valori della presa del quartier generale sono incoerenti: meno di una giornata di occupazione";
 "errore.dati.ricognizione_incoerente" = "I valori della ricognizione sono incoerenti: raggio di esplorazione non maggiore dell'osservazione, o soglie del rischio disordinate";
 "errore.dati.formato_ignoto" = "Formato di mappa ignoto in %@: %@";
 "errore.dati.casella_fuori_mappa" = "Casella fuori dai confini in %@ alla voce %@";
@@ -658,14 +659,24 @@
 "patria.formazione_in_patria.femminile" = "%1$@, %2$@: %3$@. Resta in patria";
 "patria.formazione_in_patria.maschile_plurale" = "%1$@, %2$@: %3$@. Restano in patria";
 "patria.formazione_in_patria.femminile_plurale" = "%1$@, %2$@: %3$@. Restano in patria";
-"patria.reclute_in_primavera.maschile" = "%1$@, %2$@, reclute dell'inverno: %3$@. Entra sul fronte in primavera, al quartier generale";
-"patria.reclute_in_primavera.femminile" = "%1$@, %2$@, reclute dell'inverno: %3$@. Entra sul fronte in primavera, al quartier generale";
-"patria.reclute_in_primavera.maschile_plurale" = "%1$@, %2$@, reclute dell'inverno: %3$@. Entrano sul fronte in primavera, al quartier generale";
-"patria.reclute_in_primavera.femminile_plurale" = "%1$@, %2$@, reclute dell'inverno: %3$@. Entrano sul fronte in primavera, al quartier generale";
-"patria.reclute_a_campagna_aperta.maschile" = "%1$@, %2$@, reclute dell'inverno: %3$@. Raggiunge il quartier generale in %4$@, a campagna aperta";
-"patria.reclute_a_campagna_aperta.femminile" = "%1$@, %2$@, reclute dell'inverno: %3$@. Raggiunge il quartier generale in %4$@, a campagna aperta";
-"patria.reclute_a_campagna_aperta.maschile_plurale" = "%1$@, %2$@, reclute dell'inverno: %3$@. Raggiungono il quartier generale in %4$@, a campagna aperta";
-"patria.reclute_a_campagna_aperta.femminile_plurale" = "%1$@, %2$@, reclute dell'inverno: %3$@. Raggiungono il quartier generale in %4$@, a campagna aperta";
+/* A campagna APERTA (incarico 32): dov'è adesso la formazione partita, con i reparti che ha; e la
+   formazione partita che sul fronte non c'è più, distrutta o riunita a un'altra. */
+"patria.formazione_sul_fronte.maschile" = "%1$@, %2$@: %3$@. Sul fronte, in riga %4$d, casella %5$d";
+"patria.formazione_sul_fronte.femminile" = "%1$@, %2$@: %3$@. Sul fronte, in riga %4$d, casella %5$d";
+"patria.formazione_sul_fronte.maschile_plurale" = "%1$@, %2$@: %3$@. Sul fronte, in riga %4$d, casella %5$d";
+"patria.formazione_sul_fronte.femminile_plurale" = "%1$@, %2$@: %3$@. Sul fronte, in riga %4$d, casella %5$d";
+"patria.formazione_perduta.maschile" = "%1$@, %2$@. Non è più sul fronte";
+"patria.formazione_perduta.femminile" = "%1$@, %2$@. Non è più sul fronte";
+"patria.formazione_perduta.maschile_plurale" = "%1$@, %2$@. Non sono più sul fronte";
+"patria.formazione_perduta.femminile_plurale" = "%1$@, %2$@. Non sono più sul fronte";
+"patria.reclute_in_primavera.maschile" = "%1$@, %2$@, reclute dell'inverno: %3$@. Entra sul fronte in primavera, al quartier generale o nella casella libera più vicina";
+"patria.reclute_in_primavera.femminile" = "%1$@, %2$@, reclute dell'inverno: %3$@. Entra sul fronte in primavera, al quartier generale o nella casella libera più vicina";
+"patria.reclute_in_primavera.maschile_plurale" = "%1$@, %2$@, reclute dell'inverno: %3$@. Entrano sul fronte in primavera, al quartier generale o nella casella libera più vicina";
+"patria.reclute_in_primavera.femminile_plurale" = "%1$@, %2$@, reclute dell'inverno: %3$@. Entrano sul fronte in primavera, al quartier generale o nella casella libera più vicina";
+"patria.reclute_a_campagna_aperta.maschile" = "%1$@, %2$@, reclute dell'inverno: %3$@. Raggiunge il fronte in %4$@, a campagna aperta, al quartier generale o nella casella libera più vicina";
+"patria.reclute_a_campagna_aperta.femminile" = "%1$@, %2$@, reclute dell'inverno: %3$@. Raggiunge il fronte in %4$@, a campagna aperta, al quartier generale o nella casella libera più vicina";
+"patria.reclute_a_campagna_aperta.maschile_plurale" = "%1$@, %2$@, reclute dell'inverno: %3$@. Raggiungono il fronte in %4$@, a campagna aperta, al quartier generale o nella casella libera più vicina";
+"patria.reclute_a_campagna_aperta.femminile_plurale" = "%1$@, %2$@, reclute dell'inverno: %3$@. Raggiungono il fronte in %4$@, a campagna aperta, al quartier generale o nella casella libera più vicina";
 "patria.reclute_con_l_inverno.maschile" = "%1$@, %2$@, reclute dell'inverno: %3$@. Arriva in patria con l'inverno";
 "patria.reclute_con_l_inverno.femminile" = "%1$@, %2$@, reclute dell'inverno: %3$@. Arriva in patria con l'inverno";
 "patria.reclute_con_l_inverno.maschile_plurale" = "%1$@, %2$@, reclute dell'inverno: %3$@. Arrivano in patria con l'inverno";
@@ -784,14 +795,14 @@
 "regno.miglioramento_in_corso" = "%1$@, %2$@ in corso";
 /* I fatti delle forze (incarico 31): la formazione è il soggetto e sta in testa, sicché la frase
    regge da sola e dopo l'anno e la stagione del registro. Senza punto finale: lo mette chi la usa. */
-"regno.reclute_in_primavera.maschile" = "%1$@ nasce dalle reclute dell'inverno, con %2$@, ed entra sul fronte in primavera, al quartier generale";
-"regno.reclute_in_primavera.femminile" = "%1$@ nasce dalle reclute dell'inverno, con %2$@, ed entra sul fronte in primavera, al quartier generale";
-"regno.reclute_in_primavera.maschile_plurale" = "%1$@ nascono dalle reclute dell'inverno, con %2$@, ed entrano sul fronte in primavera, al quartier generale";
-"regno.reclute_in_primavera.femminile_plurale" = "%1$@ nascono dalle reclute dell'inverno, con %2$@, ed entrano sul fronte in primavera, al quartier generale";
-"regno.reclute_a_campagna_aperta.maschile" = "%1$@ nasce dalle reclute dell'inverno, con %2$@, e raggiunge il quartier generale in %3$@, a campagna aperta";
-"regno.reclute_a_campagna_aperta.femminile" = "%1$@ nasce dalle reclute dell'inverno, con %2$@, e raggiunge il quartier generale in %3$@, a campagna aperta";
-"regno.reclute_a_campagna_aperta.maschile_plurale" = "%1$@ nascono dalle reclute dell'inverno, con %2$@, e raggiungono il quartier generale in %3$@, a campagna aperta";
-"regno.reclute_a_campagna_aperta.femminile_plurale" = "%1$@ nascono dalle reclute dell'inverno, con %2$@, e raggiungono il quartier generale in %3$@, a campagna aperta";
+"regno.reclute_in_primavera.maschile" = "%1$@ nasce dalle reclute dell'inverno, con %2$@, ed entra sul fronte in primavera, al quartier generale o nella casella libera più vicina";
+"regno.reclute_in_primavera.femminile" = "%1$@ nasce dalle reclute dell'inverno, con %2$@, ed entra sul fronte in primavera, al quartier generale o nella casella libera più vicina";
+"regno.reclute_in_primavera.maschile_plurale" = "%1$@ nascono dalle reclute dell'inverno, con %2$@, ed entrano sul fronte in primavera, al quartier generale o nella casella libera più vicina";
+"regno.reclute_in_primavera.femminile_plurale" = "%1$@ nascono dalle reclute dell'inverno, con %2$@, ed entrano sul fronte in primavera, al quartier generale o nella casella libera più vicina";
+"regno.reclute_a_campagna_aperta.maschile" = "%1$@ nasce dalle reclute dell'inverno, con %2$@, e raggiunge il fronte in %3$@, a campagna aperta, al quartier generale o nella casella libera più vicina";
+"regno.reclute_a_campagna_aperta.femminile" = "%1$@ nasce dalle reclute dell'inverno, con %2$@, e raggiunge il fronte in %3$@, a campagna aperta, al quartier generale o nella casella libera più vicina";
+"regno.reclute_a_campagna_aperta.maschile_plurale" = "%1$@ nascono dalle reclute dell'inverno, con %2$@, e raggiungono il fronte in %3$@, a campagna aperta, al quartier generale o nella casella libera più vicina";
+"regno.reclute_a_campagna_aperta.femminile_plurale" = "%1$@ nascono dalle reclute dell'inverno, con %2$@, e raggiungono il fronte in %3$@, a campagna aperta, al quartier generale o nella casella libera più vicina";
 "regno.reclute_con_l_inverno.maschile" = "%1$@ nasce dalle reclute dell'inverno, con %2$@, e arriva in patria con l'inverno";
 "regno.reclute_con_l_inverno.femminile" = "%1$@ nasce dalle reclute dell'inverno, con %2$@, e arriva in patria con l'inverno";
 "regno.reclute_con_l_inverno.maschile_plurale" = "%1$@ nascono dalle reclute dell'inverno, con %2$@, e arrivano in patria con l'inverno";

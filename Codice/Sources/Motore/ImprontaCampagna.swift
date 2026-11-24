@@ -242,6 +242,12 @@ extension StatoCampagna {
             c.testo(conclusione.vincitore?.rawValue ?? "")
             c.intero(Int64(conclusione.giorno))
         }
+        // Le regole con cui la campagna è nata (incarico 32): due campagne che si prendono in un numero
+        // diverso di giornate non sono lo stesso stato. OMESSE quando nulle, come sopra.
+        if let regole {
+            c.testo("regole")
+            c.intero(Int64(regole.giornatePerLaPresa))
+        }
         // I nomi riservati e gli arrivi dalla patria (incarico 31): due campagne che differiscono
         // per i nomi che possono ancora assegnare, o per ciò che deve ancora arrivare, non sono lo
         // stesso stato. OMESSI quando nulli, come sopra.

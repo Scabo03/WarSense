@@ -157,16 +157,16 @@ final class TraduttoreRegnoSecondaTappaTest: XCTestCase {
         // 3. Le reclute pronte in primavera.
         XCTAssertEqual(traduttore.formazione(try formazione("lince")),
                        "Lince, gruppo armato, reclute dell'inverno: 8 atomi di fanteria pesante, 6 atomi di fanteria leggera. "
-                       + "Entra sul fronte in primavera, al quartier generale")
+                       + "Entra sul fronte in primavera, al quartier generale o nella casella libera più vicina")
         // 4. Le reclute che arrivano a campagna aperta: in estate, in autunno.
         XCTAssertEqual(traduttore.formazione(try formazione("aquila")),
                        "Aquila, gruppo armato, reclute dell'inverno: 6 atomi di cavalleria manovrata. "
-                       + "Raggiunge il quartier generale in estate, a campagna aperta")
+                       + "Raggiunge il fronte in estate, a campagna aperta, al quartier generale o nella casella libera più vicina")
         var inAutunno = try formazione("aquila")
         inAutunno.arrivo = .autunno
         XCTAssertEqual(traduttore.formazione(inAutunno),
                        "Aquila, gruppo armato, reclute dell'inverno: 6 atomi di cavalleria manovrata. "
-                       + "Raggiunge il quartier generale in autunno, a campagna aperta")
+                       + "Raggiunge il fronte in autunno, a campagna aperta, al quartier generale o nella casella libera più vicina")
         // 5. Le reclute che maturano con l'inverno successivo.
         XCTAssertEqual(traduttore.formazione(try formazione("volpe")),
                        "Volpe, gruppo armato, reclute dell'inverno: 6 atomi di cavalleria manovrata. "
@@ -195,6 +195,44 @@ final class TraduttoreRegnoSecondaTappaTest: XCTestCase {
         XCTAssertEqual(righe[0].testo, "Corvo, gruppo armato: 6 atomi di fanteria leggera. Parte per il fronte")
         XCTAssertEqual(Set(righe.map { $0.testo.components(separatedBy: ". ").last ?? "" }).count, 5,
                        "cinque destinazioni diverse fra le sette formazioni")
+    }
+
+    /// S29q, punto (d) (incarico 32): a campagna aperta la riga dice dov'è la formazione ADESSO, con i
+    /// reparti che ha; il futuro resta soltanto a chi deve ancora arrivare.
+    func test_02_6_5_4_5_a_campagna_aperta_la_riga_dice_dov_e_la_formazione() throws {
+        let fronte = SituazioneDelFronte(
+            sulFronte: ["lupo": .init(casella: Cella(riga: 2, colonna: 3), composizione: [leggera(10)]),
+                        "lince": .init(casella: Cella(riga: 3, colonna: 1), composizione: [pesante(8), leggera(6)]),
+                        "orso": .init(casella: Cella(riga: 4, colonna: 4), composizione: [leggera(3)])],
+            inArrivo: ["aquila"])
+        func riga(_ nome: IdentificatoreDati) throws -> String { traduttore.formazione(try formazione(nome), fronte: fronte) }
+        // Partita: la casella, e i reparti che le restano.
+        XCTAssertEqual(try riga("lupo"), "Lupo, gruppo armato: 10 atomi di fanteria leggera. Sul fronte, in riga 2, casella 3")
+        XCTAssertEqual(try riga("orso"), "Orso, formazione di ricognizione: 3 atomi di fanteria leggera. Sul fronte, in riga 4, casella 4")
+        // Le reclute già arrivate: non ne parla più al futuro, e dice la casella vera.
+        XCTAssertEqual(try riga("lince"),
+                       "Lince, gruppo armato: 8 atomi di fanteria pesante, 6 atomi di fanteria leggera. Sul fronte, in riga 3, casella 1")
+        // Le reclute che devono ancora arrivare: il futuro è il loro.
+        XCTAssertEqual(try riga("aquila"),
+                       "Aquila, gruppo armato, reclute dell'inverno: 6 atomi di cavalleria manovrata. "
+                       + "Raggiunge il fronte in estate, a campagna aperta, al quartier generale o nella casella libera più vicina")
+        // Partita, e sul fronte non c'è più: distrutta, o riunita a un'altra.
+        XCTAssertEqual(try riga("corvo"), "Corvo, gruppo armato. Non è più sul fronte")
+        // Chi non è partito non cambia riga.
+        XCTAssertEqual(try riga("cervo"), traduttore.formazione(try formazione("cervo")))
+        XCTAssertEqual(try riga("volpe"), traduttore.formazione(try formazione("volpe")))
+        // Conclusa la campagna, chi doveva ancora arrivarvi resta in patria.
+        XCTAssertEqual(traduttore.formazione(try formazione("aquila"), condotta: true),
+                       "Aquila, gruppo armato, reclute dell'inverno: 6 atomi di cavalleria manovrata. Arriva in estate e resta in patria")
+        XCTAssertEqual(traduttore.forze(forze, fronte: fronte).map(\.unita), forze.formazioni.map(\.nome))
+        for riga in traduttore.forze(forze, fronte: fronte) { risolta(riga.testo, riga.unita) }
+        // Ogni nome della lista chiusa regge le righe nuove, nelle due forme.
+        for nome in valoriRegno.nomiDelleUnita {
+            let sola = FormazioneDelRegno(nome: nome, categoria: .armato, composizione: [leggera(6)])
+            risolta(traduttore.formazione(sola, fronte: SituazioneDelFronte(
+                sulFronte: [nome: .init(casella: Cella(riga: 1, colonna: 1), composizione: [leggera(6)])], inArrivo: [])), nome)
+            risolta(traduttore.formazione(sola, fronte: SituazioneDelFronte(sulFronte: [:], inArrivo: [])), nome)
+        }
     }
 
     func test_incarico_31_la_riga_si_accorda_al_numero_degli_atomi_e_al_genere_del_nome() throws {
@@ -263,13 +301,13 @@ final class TraduttoreRegnoSecondaTappaTest: XCTestCase {
     func test_incarico_31_l_ingresso_delle_reclute_dice_quale_formazione_con_che_cosa_e_dove_e_quando_entra() {
         XCTAssertEqual(traduttore.ingresso(Esemplari.ingresso(.primavera, confluite: false)),
                        "Lince nasce dalle reclute dell'inverno, con 6 atomi di fanteria leggera, ed entra sul fronte in primavera, "
-                       + "al quartier generale")
+                       + "al quartier generale o nella casella libera più vicina")
         XCTAssertEqual(traduttore.ingresso(Esemplari.ingresso(.estate, confluite: false)),
-                       "Lince nasce dalle reclute dell'inverno, con 6 atomi di fanteria leggera, e raggiunge il quartier generale "
-                       + "in estate, a campagna aperta")
+                       "Lince nasce dalle reclute dell'inverno, con 6 atomi di fanteria leggera, e raggiunge il fronte "
+                       + "in estate, a campagna aperta, al quartier generale o nella casella libera più vicina")
         XCTAssertEqual(traduttore.ingresso(Esemplari.ingresso(.autunno, confluite: false)),
-                       "Lince nasce dalle reclute dell'inverno, con 6 atomi di fanteria leggera, e raggiunge il quartier generale "
-                       + "in autunno, a campagna aperta")
+                       "Lince nasce dalle reclute dell'inverno, con 6 atomi di fanteria leggera, e raggiunge il fronte "
+                       + "in autunno, a campagna aperta, al quartier generale o nella casella libera più vicina")
         XCTAssertEqual(traduttore.ingresso(Esemplari.ingresso(.inverno, confluite: false)),
                        "Lince nasce dalle reclute dell'inverno, con 6 atomi di fanteria leggera, e arriva in patria con l'inverno")
         // A nomi esauriti le reclute si uniscono a una formazione che c'è già.
@@ -335,9 +373,9 @@ final class TraduttoreRegnoSecondaTappaTest: XCTestCase {
             fase: .arcaica)?.testo,
             "Comincia la primavera dell'anno 3. "
             + "Lince nasce dalle reclute dell'inverno, con 6 atomi di fanteria leggera, ed entra sul fronte in primavera, "
-            + "al quartier generale. "
-            + "Lince nasce dalle reclute dell'inverno, con 6 atomi di fanteria leggera, e raggiunge il quartier generale "
-            + "in estate, a campagna aperta. "
+            + "al quartier generale o nella casella libera più vicina. "
+            + "Lince nasce dalle reclute dell'inverno, con 6 atomi di fanteria leggera, e raggiunge il fronte "
+            + "in estate, a campagna aperta, al quartier generale o nella casella libera più vicina. "
             + "Lupo ha ora 8 atomi di fanteria pesante con addestramento mirato. "
             + "Corvo ha 6 atomi di fanteria leggera senza più addestramento mirato, per mancato mantenimento.")
         // Col riporto, e un solo miglioramento perduto.
@@ -406,7 +444,7 @@ final class TraduttoreRegnoSecondaTappaTest: XCTestCase {
                        + "il denaro non è bastato al mantenimento")
         XCTAssertEqual(voce(.recluteEntrate(Esemplari.ingresso(.estate, confluite: false))),
                        "Anno 2, primavera: Lince nasce dalle reclute dell'inverno, con 6 atomi di fanteria leggera, "
-                       + "e raggiunge il quartier generale in estate, a campagna aperta")
+                       + "e raggiunge il fronte in estate, a campagna aperta, al quartier generale o nella casella libera più vicina")
         XCTAssertEqual(voce(.recluteEntrate(Esemplari.ingresso(.inverno, confluite: false))),
                        "Anno 2, primavera: Lince nasce dalle reclute dell'inverno, con 6 atomi di fanteria leggera, "
                        + "e arriva in patria con l'inverno")
@@ -459,9 +497,9 @@ final class TraduttoreRegnoSecondaTappaTest: XCTestCase {
             "Anno 1, inverno: prelevato il mantenimento dell'esercito, monete di bronzo 27",
             "Anno 2, primavera: comincia la primavera; il riporto ha tolto ciò che eccedeva",
             "Anno 2, primavera: Lince nasce dalle reclute dell'inverno, con 6 atomi di fanteria leggera, ed entra sul fronte "
-                + "in primavera, al quartier generale",
+                + "in primavera, al quartier generale o nella casella libera più vicina",
             "Anno 2, primavera: Aquila nasce dalle reclute dell'inverno, con 6 atomi di cavalleria manovrata, e raggiunge "
-                + "il quartier generale in estate, a campagna aperta",
+                + "il fronte in estate, a campagna aperta, al quartier generale o nella casella libera più vicina",
             "Anno 2, primavera: Corvo ha ora 6 atomi di fanteria leggera con addestramento mirato",
             "Anno 2, inverno: comincia l'inverno e arriva l'entrata dell'anno",
             "Anno 2, inverno: prelevato il mantenimento dell'esercito, monete di bronzo 31",

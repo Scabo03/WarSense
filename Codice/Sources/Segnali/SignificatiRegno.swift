@@ -119,10 +119,23 @@ public struct TraduttoreEventiRegno: Sendable {
     /// La riga di una formazione in patria (incarico 31): il nome — che è il soggetto, e che il
     /// giocatore ritrova uguale da un anno all'altro —, la categoria, i reparti, e DOVE VA: se parte
     /// per il fronte o resta in patria; per le reclute dell'inverno, dove e quando entrano.
-    /// `lavori`, d'inverno, aggiungono a ciascun reparto lo stato del suo miglioramento.
-    public func formazione(_ formazione: FormazioneDelRegno, lavori: [LavoroOrdinato]? = nil) -> String {
+    /// `lavori`, d'inverno, aggiungono a ciascun reparto lo stato del suo miglioramento. `fronte`, a
+    /// campagna aperta, dice dov'è ADESSO la formazione partita (S29q, punto d; incarico 32): una
+    /// formazione già sul fronte dichiara la casella e i reparti che ha, una distrutta che non c'è più,
+    /// e soltanto quella che deve ancora arrivare parla al futuro. `condotta` è vero quando la campagna
+    /// dell'anno è già conclusa: chi doveva ancora arrivarvi resta in patria.
+    public func formazione(_ formazione: FormazioneDelRegno, lavori: [LavoroOrdinato]? = nil,
+                           fronte: SituazioneDelFronte? = nil, condotta: Bool = false) -> String {
         let nome = testi.soggetto(.gruppo, formazione.nome)
         let categoria = testi.termine(formazione.categoria.chiaveCategoria).testo
+        if let fronte, formazione.parteConLaCampagna, !fronte.inArrivo.contains(formazione.nome) {
+            guard let presenza = fronte.sulFronte[formazione.nome] else {
+                return testi.frase("patria.formazione_perduta", soggetto: nome, categoria).testo
+            }
+            return testi.frase("patria.formazione_sul_fronte", soggetto: nome, categoria,
+                               composizione(presenza.composizione),
+                               presenza.casella.riga, presenza.casella.colonna).testo
+        }
         let reparti: String
         if let lavori {
             reparti = formazione.composizione.enumerated().map { indice, reparto in
@@ -141,7 +154,7 @@ public struct TraduttoreEventiRegno: Sendable {
         if arrivo == .inverno {
             return testi.frase("patria.reclute_con_l_inverno", soggetto: nome, categoria, reparti).testo
         }
-        if formazione.inPatria {
+        if formazione.inPatria || condotta {
             return testi.frase("patria.reclute_in_patria", soggetto: nome, categoria, reparti, stagione).testo
         }
         return arrivo == .primavera
@@ -150,10 +163,12 @@ public struct TraduttoreEventiRegno: Sendable {
     }
 
     /// Le forze in parole, una riga per unità: è ciò che la patria elenca.
-    public func forze(_ forze: ForzeDelRegno, lavori: [LavoroOrdinato]? = nil) -> [(unita: IdentificatoreDati, testo: String)] {
+    public func forze(_ forze: ForzeDelRegno, lavori: [LavoroOrdinato]? = nil,
+                      fronte: SituazioneDelFronte? = nil,
+                      condotta: Bool = false) -> [(unita: IdentificatoreDati, testo: String)] {
         switch forze {
         case .sciami(let formazioni, _):
-            return formazioni.map { ($0.nome, formazione($0, lavori: lavori)) }
+            return formazioni.map { ($0.nome, formazione($0, lavori: lavori, fronte: fronte, condotta: condotta)) }
         }
     }
 

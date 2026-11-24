@@ -290,7 +290,7 @@ final class PatriaTest: XCTestCase {
         XCTAssertEqual(ambiente.segnali.annunciPronunciati.map(\.testo), [
             "Comincia la primavera dell'anno 2. Il riporto ha tolto: monete di bronzo 143, uomini 18, metalli 27, "
             + "materiale da costruzione 30, animali 12. Lince nasce dalle reclute dell'inverno, con 6 atomi di "
-            + "fanteria leggera, ed entra sul fronte in primavera, al quartier generale."])
+            + "fanteria leggera, ed entra sul fronte in primavera, al quartier generale o nella casella libera più vicina."])
         let letta = lettura(schermata)
         XCTAssertTrue(letta.contains("monete di bronzo: 20"), "avanza un decimo dell'entrata dell'anno (01 §5.5.1.4): \(letta)")
         XCTAssertTrue(letta.contains("uomini: 2"))
@@ -300,7 +300,7 @@ final class PatriaTest: XCTestCase {
             "Corvo, gruppo armato: 6 atomi di fanteria leggera. Parte per il fronte",
             "Lupo, gruppo armato: 18 atomi di fanteria leggera, 8 atomi di fanteria pesante. Parte per il fronte",
             "Falco, gruppo armato: 24 atomi di fanteria pesante, 12 atomi di cavalleria manovrata. Parte per il fronte",
-            "Lince, gruppo armato, reclute dell'inverno: 6 atomi di fanteria leggera. Entra sul fronte in primavera, al quartier generale",
+            "Lince, gruppo armato, reclute dell'inverno: 6 atomi di fanteria leggera. Entra sul fronte in primavera, al quartier generale o nella casella libera più vicina",
         ])
         XCTAssertTrue(letta.contains("Apri la campagna"))
         XCTAssertEqual(Fuoco.registro, [.schermataAperta], "la primavera è una schermata nuova")
@@ -311,7 +311,7 @@ final class PatriaTest: XCTestCase {
         registro.loadViewIfNeeded()
         XCTAssertEqual(lettura(registro), [
             "Registro della patria",
-            "Anno 2, primavera: Lince nasce dalle reclute dell'inverno, con 6 atomi di fanteria leggera, ed entra sul fronte in primavera, al quartier generale",
+            "Anno 2, primavera: Lince nasce dalle reclute dell'inverno, con 6 atomi di fanteria leggera, ed entra sul fronte in primavera, al quartier generale o nella casella libera più vicina",
             "Anno 2, primavera: comincia la primavera; il riporto ha tolto ciò che eccedeva",
             "Anno 1, inverno: prelevato il mantenimento dell'esercito, monete di bronzo 27",
             "Anno 1, inverno: comincia l'inverno e arriva l'entrata dell'anno",

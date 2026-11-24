@@ -1,6 +1,26 @@
 import Foundation
 import Dati
 
+/// Dove sono le formazioni del regno sul fronte di una campagna aperta (incarico 32): quelle che vi
+/// sono, con la casella e i reparti che hanno adesso, e quelle che devono ancora arrivare. Una
+/// formazione partita che non è né fra le une né fra le altre non c'è più: distrutta, o riunita a
+/// un'altra.
+public struct SituazioneDelFronte: Hashable, Sendable {
+    public struct Presenza: Hashable, Sendable {
+        public let casella: Cella
+        public let composizione: [Reparto]
+        public init(casella: Cella, composizione: [Reparto]) {
+            self.casella = casella; self.composizione = composizione
+        }
+    }
+    public let sulFronte: [IdentificatoreDati: Presenza]
+    public let inArrivo: Set<IdentificatoreDati>
+
+    public init(sulFronte: [IdentificatoreDati: Presenza], inArrivo: Set<IdentificatoreDati>) {
+        self.sulFronte = sulFronte; self.inArrivo = inArrivo
+    }
+}
+
 /// Il PONTE fra il regno e la campagna, nella modalità a sciami (incarico 30, RDA-162, RDA-166):
 /// gemello di `PonteCampagnaBattaglia`. Due funzioni pure. La prima fa della campagna dell'anno uno
 /// scenario — la mappa e le forze avversarie del fronte, le forze del regno al posto di quelle
@@ -25,7 +45,8 @@ public enum PonteRegnoCampagna {
     /// giocatore non tiene in patria, ciascuna col proprio NOME, nell'ordine in cui il regno le
     /// conserva: quelle che ci sono già occupano le caselle che lo scenario del fronte assegna ai
     /// gruppi del giocatore, nell'ordine dello scenario, e poi le caselle libere più vicine al
-    /// proprio quartier generale, a parità di distanza nell'ordine di lettura. Le reclute
+    /// proprio quartier generale, a parità di distanza le più lontane da quello avversario (01 §5.2.1.1:
+    /// la stessa regola degli arrivi, incarico 32). Le reclute
     /// dell'ultimo inverno entrano come ARRIVI DALLA PATRIA (01 §5.2.1): quelle pronte in primavera
     /// con la prima giornata, quelle pronte in estate e in autunno con la prima giornata di quella
     /// stagione, a campagna aperta. Le formazioni tenute in patria, e quelle che maturano soltanto
@@ -71,20 +92,13 @@ public enum PonteRegnoCampagna {
             formazioni.remove(at: ultima)
         }
 
-        // Le caselle: prima quelle dello scenario del fronte, poi le libere più vicine al quartier
-        // generale. Deterministico: nessuna estrazione, e l'ordine a parità di distanza è di lettura.
-        let quartierGenerale = mappa.quartierGenerale(di: .giocatore)
+        // Le caselle: prima quelle dello scenario del fronte, poi le libere nell'ordine in cui vi
+        // entra chi viene dalla patria. Deterministico: nessuna estrazione.
         var caselle: [Cella] = []
         for casella in base.gruppiGiocatore.map(\.casella) where !caselle.contains(casella) {
             caselle.append(casella)
         }
-        let libere = griglia.tutteLeCaselle
-            .filter { !caselle.contains($0) }
-            .sorted {
-                let da = griglia.distanza(quartierGenerale, $0), db = griglia.distanza(quartierGenerale, $1)
-                return da == db ? $0 < $1 : da < db
-            }
-        caselle += libere
+        caselle += mappa.caselleDallaPatria(di: .giocatore).filter { !caselle.contains($0) }
 
         func dichiarata(_ categoria: CategoriaFormazione) -> (String, Int?, Int?, Int?) {
             switch categoria {
@@ -122,7 +136,21 @@ public enum PonteRegnoCampagna {
                                 struttureDiRifornimento: base.struttureDiRifornimento,
                                 calendario: calendario,
                                 nomiRiservati: restano.map(\.nome),
-                                arrivi: arrivi)
+                                arrivi: arrivi,
+                                regole: RegoleDiCampagna(giornatePerLaPresa: valori.presa.giornateDiOccupazione))
+    }
+
+    /// Dove sono, sul fronte di una campagna APERTA, le formazioni che il regno vi ha mandato (02
+    /// §6.5.4.5; S29q, punto d; incarico 32): una lettura sola dello stato della campagna, per ciò che
+    /// la patria dice. Il regno continua a non saperne nulla finché la campagna non si conclude; è la
+    /// schermata che legge l'uno e l'altra.
+    public static func situazione(di stato: StatoCampagna) -> SituazioneDelFronte {
+        var sulFronte: [IdentificatoreDati: SituazioneDelFronte.Presenza] = [:]
+        for gruppo in stato.gruppiOrdinati where gruppo.parte == .giocatore {
+            sulFronte[gruppo.nome] = .init(casella: gruppo.posizione, composizione: gruppo.composizione)
+        }
+        return SituazioneDelFronte(sulFronte: sulFronte,
+                                   inArrivo: Set((stato.arriviInAttesa ?? []).map(\.nome)))
     }
 
     /// L'esito che una campagna CONCLUSA porta al regno; nulla se la campagna non è conclusa o non

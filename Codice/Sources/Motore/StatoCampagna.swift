@@ -913,6 +913,9 @@ public struct StatoCampagna: Hashable, Codable, Sendable {
     /// Gli ARRIVI DALLA PATRIA non ancora giunti (incarico 31), nell'ordine in cui arriveranno.
     /// Nullo nelle campagne che non ne dichiarano; vuoto quando sono giunti tutti.
     public var arriviInAttesa: [ArrivoInAttesa]?
+    /// Le REGOLE con cui la campagna è nata (incarico 32). Nulle nelle campagne che non ne dichiarano;
+    /// facoltative, come il calendario, per le istantanee scritte prima.
+    public var regole: RegoleDiCampagna?
 
     public init(mappa: MappaCampagna, giorno: Int, gruppi: [IdGruppo: Gruppo],
                 prossimoIdGruppo: Int, prossimoIndiceNome: Int,
@@ -928,7 +931,8 @@ public struct StatoCampagna: Hashable, Codable, Sendable {
                 calendario: CalendarioDiCampagna? = nil,
                 conclusione: ConclusioneCampagna? = nil,
                 nomiRiservati: [IdentificatoreDati]? = nil,
-                arriviInAttesa: [ArrivoInAttesa]? = nil) {
+                arriviInAttesa: [ArrivoInAttesa]? = nil,
+                regole: RegoleDiCampagna? = nil) {
         self.mappa = mappa; self.giorno = giorno; self.gruppi = gruppi
         self.prossimoIdGruppo = prossimoIdGruppo
         self.prossimoIndiceNome = prossimoIndiceNome
@@ -945,10 +949,23 @@ public struct StatoCampagna: Hashable, Codable, Sendable {
         self.conclusione = conclusione
         self.nomiRiservati = nomiRiservati
         self.arriviInAttesa = arriviInAttesa
+        self.regole = regole
     }
 
     /// La data della giornata in corso, se la campagna dichiara un calendario (01 §5.6.10.2).
     public var data: DataDiCampagna? { calendario?.data(del: giorno) }
+
+    /// Gli arrivi dalla patria di una giornata, come fatti da dire (01 §5.2.1, §5.17.1). Quelli della
+    /// giornata d'apertura li consegna la fabbrica nello stato iniziale, dove non c'è ancora chi li
+    /// ascolti: chi apre la campagna li legge di qui e li dice quando la mappa è comparsa (incarico 32).
+    public func arriviDallaPatria(delGiorno giorno: Int) -> [EventoCampagna] {
+        registro.compactMap { voce in
+            guard voce.giorno == giorno, case .arrivoDallaPatria(let nome, let casella) = voce.fatto,
+                  let gruppo = gruppi.values.first(where: { $0.parte == .giocatore && $0.nome == nome })
+            else { return nil }
+            return .arrivoDallaPatria(gruppo: gruppo.id, nome: nome, casella: casella)
+        }
+    }
 
     /// Quanti gruppi ARMATI ha una parte sul fronte: senza, non può più combattere (RDA-164).
     public func gruppiArmati(di parte: Parte) -> Int {

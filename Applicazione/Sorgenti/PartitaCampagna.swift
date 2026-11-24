@@ -115,14 +115,27 @@ final class PartitaCampagna {
     }
 
     /// La campagna dell'anno che il REGNO ha aperta (incarico 30): la Sessione è già nata o ripresa
-    /// nello slot annidato, e uscendo dalla mappa si torna in patria.
-    init(delRegno ambiente: Ambiente, sessione: SessioneCampagna, cartella: URL) {
+    /// nello slot annidato, e uscendo dalla mappa si torna in patria. `appenaAperta` è vero quando la
+    /// campagna nasce adesso, e la mappa ne dirà gli arrivi d'apertura.
+    init(delRegno ambiente: Ambiente, sessione: SessioneCampagna, cartella: URL, appenaAperta: Bool) {
         self.ambiente = ambiente
         self.motore = MotoreCampagna(valori: ambiente.valori,
                                      valoriCampagna: ambiente.valoriCampagna)
         self.sessione = sessione
         self.cartella = cartella
         self.ritorno = .patria
+        self.appenaAperta = appenaAperta
+    }
+
+    private var appenaAperta = false
+
+    /// Gli arrivi dalla patria con cui la campagna si è aperta, una volta sola (01 §5.2.1; incarico 32):
+    /// le reclute pronte in primavera entrano con la prima giornata, ciascuna nella casella che le è
+    /// toccata, e il giocatore la sente dire quando la mappa si apre.
+    func arriviDellApertura() async -> [EventoCampagna] {
+        guard appenaAperta else { return [] }
+        appenaAperta = false
+        return await sessione.stato.arriviDallaPatria(delGiorno: 1)
     }
 
     // MARK: - Letture

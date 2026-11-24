@@ -121,7 +121,7 @@ final class PartitaRegno {
         await segnala(aperta.eventi)
         guard let sessioneCampagna = aperta.campagna else { return (nil, aperta.esito) }
         return (PartitaCampagna(delRegno: ambiente, sessione: sessioneCampagna,
-                                cartella: Self.cartellaCampagna), aperta.esito)
+                                cartella: Self.cartellaCampagna, appenaAperta: true), aperta.esito)
     }
 
     /// La campagna che il regno dichiara aperta, ripresa dal proprio slot. Se lo slot è perduto la
@@ -143,7 +143,8 @@ final class PartitaRegno {
                 identificatore: UUID().uuidString) else { return nil }
             sessioneCampagna = ricreata
         }
-        return PartitaCampagna(delRegno: ambiente, sessione: sessioneCampagna, cartella: cartella)
+        return PartitaCampagna(delRegno: ambiente, sessione: sessioneCampagna, cartella: cartella,
+                               appenaAperta: false)
     }
 
     /// Se la campagna aperta si è conclusa, ne riporta l'esito in patria — lo iscrive nel giornale

@@ -122,19 +122,23 @@ final class ArriviDallaPatriaTest: XCTestCase {
         }
     }
 
-    /// La casella libera più vicina al quartier generale, a parità nell'ordine di lettura: la
-    /// regola dell'arrivo, ricalcolata qui sullo stato PRIMA dell'arrivo.
+    /// La casella libera più vicina al quartier generale; a parità la più lontana da quello avversario,
+    /// poi l'ordine di lettura: la regola dell'arrivo (01 §5.2.1.1), ricalcolata qui sullo stato PRIMA
+    /// dell'arrivo. Una campagna senza regole, nata prima della build 33, a parità conserva il solo
+    /// ordine di lettura.
     private func casellaAttesa(_ stato: StatoCampagna) -> Cella? {
         let qg = stato.mappa.quartierGenerale(di: .giocatore)
+        let avversario = stato.mappa.quartierGenerale(di: .avversario)
         var occupate = Set(stato.gruppi.values.map(\.posizione)).union(stato.forzeNemiche)
         for gruppo in stato.gruppi.values where gruppo.parte == .giocatore {
             if let meta = gruppo.marcia?.destinazione { occupate.insert(meta) }
         }
         var migliore: Cella?
         for casella in stato.griglia.tutteLeCaselle.sorted() where !occupate.contains(casella) {
-            if migliore == nil || stato.griglia.distanza(qg, casella) < stato.griglia.distanza(qg, migliore!) {
-                migliore = casella
-            }
+            guard let scelta = migliore else { migliore = casella; continue }
+            let vicina = stato.griglia.distanza(qg, casella), gia = stato.griglia.distanza(qg, scelta)
+            let piuLontana = stato.griglia.distanza(avversario, casella) > stato.griglia.distanza(avversario, scelta)
+            if vicina < gia || (vicina == gia && stato.regole != nil && piuLontana) { migliore = casella }
         }
         return migliore
     }
@@ -483,7 +487,7 @@ final class ArriviDallaPatriaTest: XCTestCase {
                 mappa: scenario.mappa, gruppiGiocatore: scenario.gruppiGiocatore,
                 gruppiAvversario: scenario.gruppiAvversario, forzeNemiche: scenario.forzeNemiche,
                 struttureDiRifornimento: scenario.struttureDiRifornimento, calendario: scenario.calendario,
-                nomiRiservati: ["cervo"]))
+                nomiRiservati: ["cervo"], regole: scenario.regole))
             let qg = senza.mappa.quartierGenerale(di: .giocatore)
             XCTAssertNotNil(senza.occupante(di: qg, parte: .giocatore), "\(nome): il quartier generale è occupato")
             let attesa = try XCTUnwrap(casellaAttesa(senza))
@@ -583,6 +587,95 @@ final class ArriviDallaPatriaTest: XCTestCase {
         var stato = dopo
         for id in dopo.gruppi.keys where prima.gruppi[id] == nil { stato.gruppi.removeValue(forKey: id) }
         return stato
+    }
+
+    /// S29q, punto (b) (incarico 32). Sul guado, partite le cinque formazioni, le reclute entravano in
+    /// riga 2, casella 2: a una casella dal quartier generale avversario, perché fra le caselle libere
+    /// alla stessa distanza dal proprio si prendeva la prima nell'ordine di lettura.
+    func test_01_5_2_1_1_a_parita_di_distanza_si_entra_nella_casella_piu_lontana_dal_quartier_generale_avversario() throws {
+        let regno = try CaricatoreRegno.carica(da: Contenuti.valoriDiFabbrica, archetipiNoti: Set(valori.archetipi.keys),
+                                               miglioramentiNoti: Set(valori.miglioramenti.keys))
+        let iniziali = try ForzeDelRegno.iniziali(regno.forzeIniziali, nomi: regno.nomiDelleUnita)
+        let forze = ForzeDelRegno.sciami(
+            formazioni: iniziali.formazioni + [armata("lince", [leggera(6, leva: 1)], arrivo: .primavera)], prossimoNome: 6)
+        let nuovo = try scenario(try scenarioDiFabbrica("campagna_piccola"), forze, dueGiornate)
+        XCTAssertEqual(nuovo.regole, RegoleDiCampagna(giornatePerLaPresa: valoriCampagna.presa.giornateDiOccupazione),
+                       "la campagna del regno dichiara le regole con cui nasce")
+        let stato = try crea(nuovo)
+        XCTAssertEqual(try gruppo("lince", stato).posizione, Cella(riga: 3, colonna: 1))
+        XCTAssertEqual(stato.griglia.distanza(stato.mappa.quartierGenerale(di: .avversario), Cella(riga: 3, colonna: 1)), 3)
+        XCTAssertEqual(stato.registro.map(\.fatto), [.arrivoDallaPatria(gruppo: "lince", casella: Cella(riga: 3, colonna: 1))])
+        // Chi apre la campagna legge di qui l'arrivo da dire, con la casella vera.
+        XCTAssertEqual(stato.arriviDallaPatria(delGiorno: 1),
+                       [.arrivoDallaPatria(gruppo: try gruppo("lince", stato).id, nome: "lince", casella: Cella(riga: 3, colonna: 1))])
+        XCTAssertEqual(stato.arriviDallaPatria(delGiorno: 2), [])
+
+        // Una campagna nata prima della build 33 non dichiara regole, e rigiocata fa entrare le reclute
+        // dov'erano entrate allora.
+        let vecchio = try crea(ScenarioCampagna(
+            mappa: nuovo.mappa, gruppiGiocatore: nuovo.gruppiGiocatore, gruppiAvversario: nuovo.gruppiAvversario,
+            forzeNemiche: nuovo.forzeNemiche, struttureDiRifornimento: nuovo.struttureDiRifornimento,
+            calendario: nuovo.calendario, nomiRiservati: nuovo.nomiRiservati, arrivi: nuovo.arrivi))
+        XCTAssertEqual(try gruppo("lince", vecchio).posizione, Cella(riga: 2, colonna: 2))
+        XCTAssertEqual(vecchio.griglia.distanza(vecchio.mappa.quartierGenerale(di: .avversario), Cella(riga: 2, colonna: 2)), 1)
+        XCTAssertNotEqual(stato.impronta(), vecchio.impronta())
+    }
+
+    /// L'ordine in cui entra chi viene dalla patria, per intero, sulle tre mappe: vicino a casa, e a
+    /// parità lontano dal nemico; a parità anche di quello, l'ordine di lettura.
+    func test_01_5_2_1_1_l_ordine_delle_caselle_di_chi_viene_dalla_patria() throws {
+        for nome in valoriCampagna.mappe.keys.sorted() {
+            let definizione = valoriCampagna.mappe[nome]!
+            let mappa = MappaCampagna(definizione: definizione, formato: valoriCampagna.formatiMappa[definizione.formato]!)
+            for parte in Parte.allCases {
+                let ordine = mappa.caselleDallaPatria(di: parte)
+                XCTAssertEqual(Set(ordine), Set(mappa.griglia.tutteLeCaselle), nome)
+                XCTAssertEqual(ordine.first, mappa.quartierGenerale(di: parte), nome)
+                for (prima, dopo) in zip(ordine, ordine.dropFirst()) {
+                    let a = mappa.griglia.distanza(mappa.quartierGenerale(di: parte), prima)
+                    let b = mappa.griglia.distanza(mappa.quartierGenerale(di: parte), dopo)
+                    XCTAssertLessThanOrEqual(a, b, nome)
+                    guard a == b else { continue }
+                    let la = mappa.griglia.distanza(mappa.quartierGenerale(di: parte.avversaria), prima)
+                    let lb = mappa.griglia.distanza(mappa.quartierGenerale(di: parte.avversaria), dopo)
+                    XCTAssertGreaterThanOrEqual(la, lb, nome)
+                    if la == lb { XCTAssertTrue(prima < dopo, nome) }
+                }
+            }
+        }
+    }
+
+    /// Anche le formazioni che partono con la campagna, oltre le caselle dello scenario del fronte,
+    /// prendono le caselle nello stesso ordine.
+    func test_01_5_2_1_1_le_formazioni_oltre_le_caselle_dello_scenario_si_dispongono_nello_stesso_ordine() throws {
+        let base = try scenarioDiFabbrica("campagna_piccola")
+        let nomi = ["corvo", "lupo", "falco", "orso", "cervo", "lince", "aquila"]
+        let forze = ForzeDelRegno.sciami(formazioni: nomi.map { armata($0, [leggera(6)]) }, prossimoNome: 7)
+        let nuovo = try scenario(base, forze, dueGiornate)
+        XCTAssertEqual(nuovo.gruppiGiocatore.prefix(4).map(\.casella), base.gruppiGiocatore.map(\.casella))
+        XCTAssertEqual(nuovo.gruppiGiocatore.dropFirst(4).map(\.casella),
+                       [Cella(riga: 3, colonna: 2), Cella(riga: 3, colonna: 1), Cella(riga: 3, colonna: 3)],
+                       "prima della build 33 la sesta formazione nasceva in riga 2, casella 2, a una casella dal nemico")
+    }
+
+    func test_incarico_32_le_regole_di_una_campagna_che_non_si_conclude_si_rifiutano() throws {
+        let base = try scenarioDiFabbrica("campagna_piccola")
+        func conRegole(_ giornate: Int, calendario: CalendarioDiCampagna?) -> ScenarioCampagna {
+            ScenarioCampagna(mappa: base.mappa, gruppiGiocatore: base.gruppiGiocatore,
+                             gruppiAvversario: base.gruppiAvversario, calendario: calendario,
+                             regole: RegoleDiCampagna(giornatePerLaPresa: giornate))
+        }
+        XCTAssertNoThrow(try crea(conRegole(1, calendario: dueGiornate)))
+        for scenario in [conRegole(0, calendario: dueGiornate), conRegole(3, calendario: nil)] {
+            XCTAssertThrowsError(try crea(scenario)) {
+                XCTAssertEqual($0 as? FabbricaCampagna.ErroreScenario, .regoleIncoerenti)
+            }
+        }
+        // Gli scenari senza regole si codificano come prima; con le regole, le portano e le rileggono.
+        let codificatore = JSONEncoder()
+        XCTAssertFalse(String(decoding: try codificatore.encode(base), as: UTF8.self).contains("regole"))
+        let riletto = try JSONDecoder().decode(ScenarioCampagna.self, from: try codificatore.encode(conRegole(3, calendario: dueGiornate)))
+        XCTAssertEqual(riletto.regole, RegoleDiCampagna(giornatePerLaPresa: 3))
     }
 
     func test_incarico_31_B_un_arrivo_senza_casella_libera_attende_la_giornata_successiva() throws {

@@ -151,6 +151,7 @@ final class SchermataMappaCampagna: UIViewController {
         aggiorna(con: stato)
 
         primaDaDecidere = await partita.vista.prossimoGruppoInAttesa(dopo: nil)?.posizione
+        arriviDellApertura = await partita.arriviDellApertura()
         caricata = true
         apriSeServe()
     }
@@ -162,6 +163,8 @@ final class SchermataMappaCampagna: UIViewController {
     private var apertaAlGiocatore = false
     /// La casella da cui la giornata comincia: quella del primo gruppo che attende una decisione.
     private var primaDaDecidere: Cella?
+    /// Gli arrivi dalla patria con cui la campagna si è appena aperta (01 §5.2.1).
+    private var arriviDellApertura: [EventoCampagna] = []
 
     override func viewDidAppear(_ animated: Bool) {
         super.viewDidAppear(animated)
@@ -187,6 +190,7 @@ final class SchermataMappaCampagna: UIViewController {
             TestoLocalizzato(testo: costruttore.annuncioApertura(), lingua: testi.lingua))
         partita.ambiente.segnali.annuncia(
             TestoLocalizzato(testo: costruttore.informazioneDiStato(), lingua: testi.lingua))
+        partita.segnala(arriviDellApertura)
     }
 
     // MARK: - Aggiornamento sul posto (RDA-03)

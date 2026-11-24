@@ -125,6 +125,14 @@ public enum CaricatoreCampagna {
                              file: "ricognizione-campagna.json")
         }
 
+        // La presa del quartier generale (01 §5.18.3): almeno una giornata di occupazione, o un
+        // quartier generale sarebbe preso nell'istante in cui vi si entra e il difensore non avrebbe
+        // modo di tornare a riprenderlo.
+        let presa = try leggi(ValoriPresa.self, "presa-campagna.json")
+        guard presa.giornateDiOccupazione >= 1 else {
+            throw ErroreDati(chiave: "errore.dati.presa_incoerente", file: "presa-campagna.json")
+        }
+
         // Le mappe sono un albero di file: ciascuna è contenuto a sé (05 §7.6).
         let cartellaDelleMappe = cartella.appendingPathComponent(cartellaMappe)
         let contenuti = (try? FileManager.default.contentsOfDirectory(
@@ -146,7 +154,7 @@ public enum CaricatoreCampagna {
 
         return ValoriCampagna(formatiMappa: formati, mappe: mappe,
                               nomiGruppi: nomi.chiavi, marcia: marcia, conoscenza: conoscenza,
-                              condotta: condotta, ricognizione: ricognizione)
+                              condotta: condotta, ricognizione: ricognizione, presa: presa)
     }
 
     /// Coerenza di una mappa (05 §7.8): formato noto, caselle dentro i confini e

@@ -165,7 +165,7 @@ final class TraduttoreRegnoTest: XCTestCase {
             fase: .arcaica)?.testo,
             "Comincia la primavera dell'anno 2. Il riporto ha tolto: monete di bronzo 64, uomini 4. "
             + "Lince nasce dalle reclute dell'inverno, con 6 atomi di fanteria leggera, ed entra sul fronte "
-            + "in primavera, al quartier generale.")
+            + "in primavera, al quartier generale o nella casella libera più vicina.")
         XCTAssertEqual(traduttore.significato(per: .campagnaAperta(fronte: "guado")), .conferma)
         XCTAssertEqual(traduttore.significato(per: .lavoroOrdinato(voce: "leva_fanteria_leggera", costo: .vuote,
                                                                    pronto: .primavera, bersaglio: nil)), .conferma)
@@ -216,7 +216,7 @@ final class TraduttoreRegnoTest: XCTestCase {
             numero: 1, anno: 2, stagione: .primavera,
             fatto: .recluteEntrate(Esemplari.ingresso(.primavera, confluite: false))), fase: .arcaica).testo,
             "Anno 2, primavera: Lince nasce dalle reclute dell'inverno, con 6 atomi di fanteria leggera, "
-            + "ed entra sul fronte in primavera, al quartier generale")
+            + "ed entra sul fronte in primavera, al quartier generale o nella casella libera più vicina")
     }
 
     // MARK: - La dichiarazione di conclusione (05 §9.3)

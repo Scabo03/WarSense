@@ -22,6 +22,8 @@ final class SchermataPatria: UIViewController {
     /// La campagna dell'anno, quando il regno ne ha una aperta.
     private var campagna: PartitaCampagna?
     private var dataDelFronte: DataDiCampagna?
+    /// Dove sono le formazioni sul fronte della campagna aperta (incarico 32).
+    private var situazione: SituazioneDelFronte?
     var alTermine: (() -> Void)?
 
     private let colonna = UIStackView()
@@ -118,7 +120,9 @@ final class SchermataPatria: UIViewController {
     private func aggiorna() async -> Bool {
         stato = await partita.stato
         guard let stato else { return false }
-        dataDelFronte = await campagna?.stato.data
+        let delFronte = await campagna?.stato
+        dataDelFronte = delFronte?.data
+        situazione = stato.campagna.fronteAperto == nil ? nil : delFronte.map(PonteRegnoCampagna.situazione)
         etichettaData.text = testoDellaData(stato)
         etichettaCampagna.text = testoDellaCampagna(stato)
         let nuovo = corpo(per: stato)
@@ -313,7 +317,9 @@ final class SchermataPatria: UIViewController {
                                          stato.riserve[risorsa]).testo
         }
         // D'inverno ogni reparto dice anche lo stato del proprio miglioramento (01 §4.14).
-        let forze = traduttore.forze(stato.forze, lavori: stato.momento.eInverno ? stato.lavori : nil)
+        // A campagna aperta ogni riga dice dov'è adesso la formazione (S29q, punto d; incarico 32).
+        let forze = traduttore.forze(stato.forze, lavori: stato.momento.eInverno ? stato.lavori : nil,
+                                     fronte: situazione, condotta: corpo(per: stato) == .condotta)
         for (riga, elemento) in zip(forze, righeForze) where riga.unita == elemento.unita {
             if let pulsante = elemento.vista as? PulsanteMultiriga {
                 pulsante.setTitle(riga.testo, for: .normal)
@@ -472,7 +478,29 @@ final class SchermataPatria: UIViewController {
 
     /// La scelta del fronte: una voce per fronte, ciascuna in una frase, e il congedo (00 §8.2: si
     /// seleziona da una lista e si conferma).
-    @objc private func scegliIlFronte() {
+    @objc private func scegliIlFronte() { Task { await offriLaSceltaDelFronte() } }
+
+    /// Se il regno rifiuterebbe la campagna su qualunque fronte — non c'è un gruppo armato da mandare —
+    /// il rifiuto si dichiara PRIMA di aprire la scelta (S29q, punto c; incarico 32): scegliere un fronte
+    /// per sentirsi dire che non si poteva è un'operazione a vuoto. Il motivo è quello della validazione.
+    private func offriLaSceltaDelFronte() async {
+        var motivo: MotivoNonValidoRegno?
+        var apribile = false
+        for fronte in partita.valori.fronti {
+            let esito = await partita.anteprima(.apriCampagna(fronte: fronte.identificatore))
+            if esito.eValido { apribile = true; break }
+            motivo = motivo ?? esito.motivo
+        }
+        guard apribile else {
+            if let motivo {
+                annuncia(traduttore.motivo(motivo, fase: stato?.fase ?? partita.valori.faseIniziale).testo)
+            }
+            return
+        }
+        mostraLaSceltaDelFronte()
+    }
+
+    private func mostraLaSceltaDelFronte() {
         let pannello = UIAlertController(title: testi.frase("patria.scegli_fronte").testo,
                                          message: nil, preferredStyle: .alert)
         for fronte in partita.valori.fronti {

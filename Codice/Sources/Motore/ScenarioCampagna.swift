@@ -1,6 +1,21 @@
 import Foundation
 import Dati
 
+/// Le REGOLE con cui una campagna nasce (incarico 32), quando ne dichiara: quelle che i dati possono
+/// cambiare, e che una campagna in corso deve conservare com'erano alla sua nascita, perché il giornale
+/// si rigiochi identico (00 §15). Le dichiara il regno alla campagna dell'anno. Nulle nelle campagne di
+/// prova e in quelle nate prima della build 33, che continuano senza la presa del quartier generale e
+/// con la casella d'arrivo di prima.
+public struct RegoleDiCampagna: Hashable, Codable, Sendable {
+    /// Le giornate di fila che un gruppo armato deve tenere un quartier generale dell'altra parte,
+    /// senza esserne scacciato, perché sia preso (01 §5.18.3).
+    public let giornatePerLaPresa: Int
+
+    public init(giornatePerLaPresa: Int) { self.giornatePerLaPresa = giornatePerLaPresa }
+
+    enum CodingKeys: String, CodingKey { case giornatePerLaPresa = "giornate_per_la_presa" }
+}
+
 /// La definizione dichiarativa di una campagna: da qui nasce lo stato iniziale.
 /// È anche la forma degli scenari di campagna del programma di verifica (05 §12.2).
 public struct ScenarioCampagna: Hashable, Codable, Sendable {
@@ -168,12 +183,16 @@ public struct ScenarioCampagna: Hashable, Codable, Sendable {
     /// Gli ARRIVI DALLA PATRIA che il regno ha programmato (01 §5.2.1; incarico 31). Vuoto negli
     /// scenari di prova, e allora omesso dalla codifica.
     public let arrivi: [ArrivoProgrammato]
+    /// Le REGOLE con cui la campagna nasce (01 §5.18.3; incarico 32). Nulle negli scenari di prova e di
+    /// verifica che non ne dichiarano e nelle campagne nate prima della build 33, e allora omesse.
+    public let regole: RegoleDiCampagna?
 
     public init(mappa: IdentificatoreDati, gruppiGiocatore: [GruppoIniziale],
                 gruppiAvversario: [GruppoIniziale] = [],
                 forzeNemiche: [Cella] = [], struttureDiRifornimento: [Cella] = [],
                 calendario: CalendarioDiCampagna? = nil,
-                nomiRiservati: [IdentificatoreDati] = [], arrivi: [ArrivoProgrammato] = []) {
+                nomiRiservati: [IdentificatoreDati] = [], arrivi: [ArrivoProgrammato] = [],
+                regole: RegoleDiCampagna? = nil) {
         self.mappa = mappa
         self.gruppiGiocatore = gruppiGiocatore
         self.gruppiAvversario = gruppiAvversario
@@ -182,6 +201,7 @@ public struct ScenarioCampagna: Hashable, Codable, Sendable {
         self.calendario = calendario
         self.nomiRiservati = nomiRiservati
         self.arrivi = arrivi
+        self.regole = regole
     }
 
     enum CodingKeys: String, CodingKey {
@@ -192,7 +212,7 @@ public struct ScenarioCampagna: Hashable, Codable, Sendable {
         case struttureDiRifornimento = "strutture_di_rifornimento"
         case calendario
         case nomiRiservati = "nomi_riservati"
-        case arrivi
+        case arrivi, regole
     }
 
     public init(from decoder: Decoder) throws {
@@ -206,6 +226,7 @@ public struct ScenarioCampagna: Hashable, Codable, Sendable {
         calendario = try c.decodeIfPresent(CalendarioDiCampagna.self, forKey: .calendario)
         nomiRiservati = try c.decodeIfPresent([IdentificatoreDati].self, forKey: .nomiRiservati) ?? []
         arrivi = try c.decodeIfPresent([ArrivoProgrammato].self, forKey: .arrivi) ?? []
+        regole = try c.decodeIfPresent(RegoleDiCampagna.self, forKey: .regole)
     }
 
     public func encode(to encoder: Encoder) throws {
@@ -222,6 +243,7 @@ public struct ScenarioCampagna: Hashable, Codable, Sendable {
         try c.encodeIfPresent(calendario, forKey: .calendario)
         if !nomiRiservati.isEmpty { try c.encode(nomiRiservati, forKey: .nomiRiservati) }
         if !arrivi.isEmpty { try c.encode(arrivi, forKey: .arrivi) }
+        try c.encodeIfPresent(regole, forKey: .regole)
     }
 }
 
@@ -265,6 +287,9 @@ public enum FabbricaCampagna {
         case nomeDuplicato(IdentificatoreDati)
         /// Un arrivo dalla patria con una giornata non positiva o senza composizione (incarico 31).
         case arrivoIncoerente(IdentificatoreDati)
+        /// Regole che non si possono applicare: meno di una giornata per la presa, o le regole di una
+        /// campagna che si conclude in uno scenario senza calendario, che non si conclude (incarico 32).
+        case regoleIncoerenti
     }
 
     /// Traduce i campi dichiarativi della categoria (01 §5.2) nel tipo con valore
@@ -426,6 +451,14 @@ public enum FabbricaCampagna {
             }
         }
 
+        // Le regole, quando lo scenario le dichiara (incarico 32): valgono in una campagna che si
+        // conclude, cioè in una che dichiara un calendario.
+        if let regole = scenario.regole {
+            guard regole.giornatePerLaPresa >= 1, scenario.calendario != nil else {
+                throw ErroreScenario.regoleIncoerenti
+            }
+        }
+
         // Gli ARRIVI DALLA PATRIA (01 §5.2.1; incarico 31): verificati come i gruppi — giornata
         // positiva, composizione non vuota, reparti con atomi positivi e archetipi noti, categoria
         // coerente — e tenuti in attesa nell'ordine in cui arriveranno, a parità di giornata in
@@ -466,7 +499,8 @@ public enum FabbricaCampagna {
                                   calendario: scenario.calendario,
                                   nomiRiservati: tenuti.isEmpty ? nil : valori.nomiGruppi.filter { tenuti.contains($0) }
                                       + tenuti.filter { !valori.nomiGruppi.contains($0) }.sorted(),
-                                  arriviInAttesa: scenario.arrivi.isEmpty ? nil : inOrdine)
+                                  arriviInAttesa: scenario.arrivi.isEmpty ? nil : inOrdine,
+                                  regole: scenario.regole)
         // Le reclute pronte in primavera entrano con la prima giornata: gli arrivi della giornata
         // d'apertura si consegnano qui, e il registro nasce già con la loro voce.
         _ = MotoreCampagna.consegnaGliArrivi(&stato)

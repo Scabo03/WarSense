@@ -301,6 +301,18 @@ public struct ValoriRicognizione: Codable, Hashable, Sendable {
     }
 }
 
+/// I valori della PRESA DEL QUARTIER GENERALE (01 §5.18.3, 03 §4.8.4; incarico 32): quante giornate di
+/// fila un gruppo armato deve tenere un quartier generale dell'altra parte, senza esserne scacciato,
+/// perché sia preso. PROVVISORIO, nei dati e mai nel codice (00 §13.1). Vale quello del momento in cui la
+/// campagna nasce: lo scenario lo porta con sé, e una campagna in corso non lo vede cambiare.
+public struct ValoriPresa: Codable, Hashable, Sendable {
+    public let giornateDiOccupazione: Int
+
+    public init(giornateDiOccupazione: Int) { self.giornateDiOccupazione = giornateDiOccupazione }
+
+    enum CodingKeys: String, CodingKey { case giornateDiOccupazione = "giornate_di_occupazione" }
+}
+
 /// I valori del piano di campagna caricati e validati.
 public struct ValoriCampagna: Sendable {
     public let formatiMappa: [IdentificatoreDati: FormatoMappa]
@@ -310,12 +322,13 @@ public struct ValoriCampagna: Sendable {
     public let conoscenza: ValoriConoscenza
     public let condotta: ValoriCondotta
     public let ricognizione: ValoriRicognizione
+    public let presa: ValoriPresa
 
     public init(formatiMappa: [IdentificatoreDati: FormatoMappa],
                 mappe: [IdentificatoreDati: DefinizioneMappa],
                 nomiGruppi: [IdentificatoreDati], marcia: ValoriMarcia,
                 conoscenza: ValoriConoscenza, condotta: ValoriCondotta,
-                ricognizione: ValoriRicognizione) {
+                ricognizione: ValoriRicognizione, presa: ValoriPresa) {
         self.formatiMappa = formatiMappa
         self.mappe = mappe
         self.nomiGruppi = nomiGruppi
@@ -323,5 +336,6 @@ public struct ValoriCampagna: Sendable {
         self.conoscenza = conoscenza
         self.condotta = condotta
         self.ricognizione = ricognizione
+        self.presa = presa
     }
 }

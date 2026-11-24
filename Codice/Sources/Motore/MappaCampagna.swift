@@ -82,6 +82,21 @@ public struct MappaCampagna: Hashable, Codable, Sendable {
         return nil
     }
 
+    /// Le caselle della mappa nell'ordine in cui vi entra chi viene dalla patria (01 §5.2.1.1): dalla più
+    /// vicina al proprio quartier generale; a parità di distanza, dalla più LONTANA da quello dell'altra
+    /// parte; a parità anche di quella, nell'ordine di lettura (S29q, punto b; incarico 32). Fino alla
+    /// build 32 a parità di distanza valeva il solo ordine di lettura, che comincia dalla parte del
+    /// nemico, e sul guado le reclute comparivano a una casella dal suo quartier generale.
+    public func caselleDallaPatria(di parte: Parte) -> [Cella] {
+        let proprio = quartierGenerale(di: parte), altrui = quartierGenerale(di: parte.avversaria)
+        return griglia.tutteLeCaselle.sorted { a, b in
+            let da = griglia.distanza(proprio, a), db = griglia.distanza(proprio, b)
+            if da != db { return da < db }
+            let la = griglia.distanza(altrui, a), lb = griglia.distanza(altrui, b)
+            return la == lb ? a < b : la > lb
+        }
+    }
+
     /// Costruisce la mappa dalla definizione dichiarativa già validata (05 §7.6).
     public init(definizione: DefinizioneMappa, formato: FormatoMappa) {
         self.identificatore = definizione.identificatore

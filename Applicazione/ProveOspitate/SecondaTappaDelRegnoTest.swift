@@ -146,6 +146,14 @@ final class SecondaTappaDelRegnoTest: XCTestCase {
         await schermata.apriLaCampagnaPerProva(sul: "guado")
         XCTAssertNil(schermata.presentedViewController, "nessuna campagna senza un gruppo armato che parta")
         XCTAssertEqual(ambiente.segnali.annunciPronunciati.map(\.testo), ["nessun gruppo armato da mandare"])
+        // E lo dice prima che la scelta del fronte si apra (S29q, punto c; incarico 32): premuto il
+        // comando si sente il motivo, e nessun pannello compare.
+        ambiente.segnali.azzeraAnnunciPronunciati()
+        try premi("Apri la campagna", in: schermata)
+        try await attendi("il rifiuto si dichiara") { !ambiente.segnali.annunciPronunciati.isEmpty }
+        XCTAssertEqual(ambiente.segnali.annunciPronunciati.map(\.testo), ["nessun gruppo armato da mandare"])
+        try await Task.sleep(nanoseconds: 500_000_000)
+        XCTAssertNil(schermata.presentedViewController, "la scelta del fronte non si apre")
 
         // Partono Lupo, Falco e gli esploratori; Corvo e Cervo restano.
         for nome in ["Lupo", "Falco", "Cervo"] {
@@ -241,7 +249,7 @@ final class SecondaTappaDelRegnoTest: XCTestCase {
         try await attendi("la leva è ordinata") { self.lettura(schermata).contains("monete di bronzo: 27") }
         try await finoAllaPrimavera(schermata, anno: 1)
         XCTAssertEqual(riga("Lince", in: schermata),
-                       "Lince, gruppo armato, reclute dell'inverno: 6 atomi di fanteria leggera. Entra sul fronte in primavera, al quartier generale")
+                       "Lince, gruppo armato, reclute dell'inverno: 6 atomi di fanteria leggera. Entra sul fronte in primavera, al quartier generale o nella casella libera più vicina")
 
         // Secondo inverno, senza campagna: 3 monete riportate più 38 fanno 41; la quota sarebbe 44.
         ambiente.segnali.azzeraAnnunciPronunciati()
@@ -414,10 +422,10 @@ final class SecondaTappaDelRegnoTest: XCTestCase {
         ambiente.segnali.azzeraAnnunciPronunciati()
         try await finoAllaPrimavera(schermata, anno: 1, dallaStazione: 4)
         XCTAssertTrue(ambiente.segnali.annunciPronunciati.last?.testo.hasSuffix(
-            "Lince nasce dalle reclute dell'inverno, con 6 atomi di fanteria leggera, e raggiunge il quartier generale in estate, a campagna aperta.") ?? false,
+            "Lince nasce dalle reclute dell'inverno, con 6 atomi di fanteria leggera, e raggiunge il fronte in estate, a campagna aperta, al quartier generale o nella casella libera più vicina.") ?? false,
                       "\(ambiente.segnali.annunciPronunciati.map(\.testo))")
         XCTAssertEqual(riga("Lince", in: schermata),
-                       "Lince, gruppo armato, reclute dell'inverno: 6 atomi di fanteria leggera. Raggiunge il quartier generale in estate, a campagna aperta")
+                       "Lince, gruppo armato, reclute dell'inverno: 6 atomi di fanteria leggera. Raggiunge il fronte in estate, a campagna aperta, al quartier generale o nella casella libera più vicina")
 
         // La campagna del secondo anno: Lince non c'è alla prima giornata, arriva con l'estate.
         await schermata.apriLaCampagnaPerProva(sul: "guado")
@@ -426,6 +434,12 @@ final class SecondaTappaDelRegnoTest: XCTestCase {
         try await attendi("la mappa si carica") { !mappa.elementiPerProva.isEmpty }
         XCTAssertEqual(mappa.statoPerProva?.gruppi(di: .giocatore).count, 5)
         XCTAssertEqual(mappa.statoPerProva?.arriviInAttesa?.map(\.nome), ["lince"])
+        // A campagna aperta la patria dice dov'è chi è partito, e di Lince, che deve ancora arrivare,
+        // parla al futuro (S29q, punto d; incarico 32). La si legge senza chiudere la mappa.
+        await schermata.aggiornaPerProva()
+        XCTAssertEqual(riga("Corvo", in: schermata), "Corvo, gruppo armato: 6 atomi di fanteria leggera. Sul fronte, in riga 4, casella 2")
+        XCTAssertEqual(riga("Lince", in: schermata),
+                       "Lince, gruppo armato, reclute dell'inverno: 6 atomi di fanteria leggera. Raggiunge il fronte in estate, a campagna aperta, al quartier generale o nella casella libera più vicina")
         ambiente.segnali.azzeraAnnunciPronunciati()
         mappa.chiudiGiornataPerProva()
         try await attendi("comincia l'estate") { mappa.statoPerProva?.giorno == 2 }
@@ -443,6 +457,10 @@ final class SecondaTappaDelRegnoTest: XCTestCase {
         let attesoAnnuncio = "Lince è arrivata dalla patria in riga \(casella.riga), casella \(casella.colonna)"
         XCTAssertTrue(annunci.contains(attesoAnnuncio), "\(annunci)")
         XCTAssertEqual(mappa.statoPerProva?.arriviInAttesa, [])
+        // Arrivata, la sua riga in patria non ne parla più al futuro e dice la casella vera.
+        await schermata.aggiornaPerProva()
+        XCTAssertEqual(riga("Lince", in: schermata),
+                       "Lince, gruppo armato: 6 atomi di fanteria leggera. Sul fronte, in riga \(casella.riga), casella \(casella.colonna)")
         // Il registro della campagna annota l'arrivo, con il luogo.
         mappa.apriRegistroPerProva()
         try await attendi("si apre il registro") { mappa.presentedViewController is SchermataRegistro }
@@ -466,6 +484,35 @@ final class SecondaTappaDelRegnoTest: XCTestCase {
         dichiarazione.chiudiTuttoPerProva()
         try await attendi("si torna in patria") { schermata.presentedViewController == nil }
         XCTAssertEqual(riga("Lince", in: schermata), "Lince, gruppo armato: 6 atomi di fanteria leggera. Parte per il fronte")
+    }
+
+    /// Le reclute pronte in primavera entrano con la prima giornata: aperta la campagna, la mappa dice
+    /// dov'è entrata la formazione, e la patria la stessa casella (S29q, punti b e d; incarico 32).
+    func test_01_5_2_1_1_le_reclute_di_primavera_si_annunciano_all_apertura_con_la_casella_vera() async throws {
+        let (schermata, ambiente) = try await patria()
+        try premi("Attendi l'inverno", in: schermata)
+        try await attendi("arriva l'inverno") { self.lettura(schermata).contains("Anno 1, inverno, schermata 1 di 4") }
+        try premi("Leva di fanteria leggera.", in: schermata)
+        try await attendi("la leva è ordinata") { self.lettura(schermata).contains("Leva di fanteria leggera, pronta in primavera") }
+        try await finoAllaPrimavera(schermata, anno: 1)
+        ambiente.segnali.azzeraAnnunciPronunciati()
+        await schermata.apriLaCampagnaPerProva(sul: "guado")
+        try await attendi("si entra nel fronte") { schermata.presentedViewController is SchermataMappaCampagna }
+        let mappa = try XCTUnwrap(schermata.presentedViewController as? SchermataMappaCampagna)
+        let atteso = "Lince è arrivata dalla patria in riga 3, casella 1"
+        try await attendi("l'arrivo si annuncia") { ambiente.segnali.annunciPronunciati.contains { $0.testo == atteso } }
+        XCTAssertEqual(ambiente.segnali.annunciPronunciati.last?.testo, atteso, "dopo l'apertura e lo stato")
+        XCTAssertEqual(mappa.statoPerProva?.gruppi(di: .giocatore).first { $0.nome == "lince" }?.posizione, Cella(riga: 3, colonna: 1))
+        await schermata.aggiornaPerProva()
+        XCTAssertEqual(riga("Lince", in: schermata), "Lince, gruppo armato: 6 atomi di fanteria leggera. Sul fronte, in riga 3, casella 1")
+        // Uscendo e rientrando l'arrivo non si ripete: è già stato detto, ed è nel registro.
+        mappa.dismiss(animated: false)
+        try await attendi("si torna in patria") { schermata.presentedViewController == nil }
+        ambiente.segnali.azzeraAnnunciPronunciati()
+        try premi("Entra nel fronte", in: schermata)
+        try await attendi("si rientra nel fronte") { schermata.presentedViewController is SchermataMappaCampagna }
+        try await attendi("la mappa si annuncia") { ambiente.segnali.annunciPronunciati.count >= 2 }
+        XCTAssertFalse(ambiente.segnali.annunciPronunciati.contains { $0.testo == atteso })
     }
 
     // MARK: - Il reparto migliorato in battaglia (01 §4.13; terza parte)
