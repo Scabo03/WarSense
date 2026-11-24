@@ -240,4 +240,6 @@ Corse sugli invii al `principale` (API pubblica di GitHub Actions; `gh` non è i
 
 - 45084954650 su `752277c`, che il resoconto dell'incarico 30 dava in corso: VERDE (2026-11-22, 23:45:33Z–00:12:33Z).
 - 45085133698 su `41cccff`, l'ultimo invio dell'incarico 30, di cui quel resoconto non aveva visto l'esito: **ROSSA**. Fallisce il passo «Collaudo completo (pacchetto, ospitate, interfaccia)» dopo 37 minuti e 8 secondi (23:47:58Z–00:25:06Z), con «Process completed with exit code 65» (annotazione pubblica della corsa), cioè una prova ospitata o d'interfaccia fallita sul simulatore della macchina remota. Fra `752277c` e `41cccff` cambiano tre file, tutti di documentazione (`git diff --stat`): il codice è lo stesso della corsa verde partita due minuti prima. È un'intermittenza della corsa remota; quale prova sia fallita non l'ho potuto stabilire.
-⟦CI-SEGUITO⟧
+- 45346930361 su `7033195`, il commit da cui la build è archiviata: **VERDE** (2026-11-24, 07:18:06Z–07:43:33Z, venticinque minuti e mezzo).
+- 45348490210 su `b512621` (lo stesso codice, più la riga del registro delle build, i prodotti del caricamento e questo resoconto): partita alle 07:30:17Z, ancora in corso alle 07:44Z. L'esito non l'ho visto.
+- L'invio di questo resoconto col presente capoverso fa partire un'altra corsa, su un commit che cambia soltanto questo file: il suo esito non l'ho visto.
