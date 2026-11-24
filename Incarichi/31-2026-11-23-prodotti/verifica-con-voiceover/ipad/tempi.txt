@@ -1,0 +1,1 @@
+2026-11-24 07:58:02 percorsi ipad 2 (8D3583DB-1E8D-4688-93E7-5F959B7B7D62), blocchi tutti: compilazione 0 s, avvio del pilota 6 s, percorsi 2066 s, chiusura 20 s (date +%s); VoiceOver spento: sì

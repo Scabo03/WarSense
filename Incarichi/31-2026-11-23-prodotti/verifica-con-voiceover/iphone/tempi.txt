@@ -1,0 +1,1 @@
+2026-11-24 07:57:53 percorsi iphone 2 (76DF33B6-7EA7-489D-98AD-459879B75C2D), blocchi tutti: compilazione 2 s, avvio del pilota 8 s, percorsi 2058 s, chiusura 23 s (date +%s); VoiceOver spento: sì

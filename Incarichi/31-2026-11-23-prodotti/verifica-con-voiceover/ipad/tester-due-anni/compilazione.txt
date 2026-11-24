@@ -1,0 +1,6 @@
+commit dd7b8ef, ramo incarico-31, righe di «git status --short»: 2, compilato in 2 s (date +%s) il 2026-11-24 07:23:04
+«git status --short» al momento della copia:
+ M note-di-rilascio.txt
+?? nota-per-il-titolare-il-regno-seconda-tappa.md
+impronta di ciò da cui dipendono app e pilota (Applicazione/Sorgenti Applicazione/Risorse Applicazione/Esplorazione Applicazione/project.yml Codice/Sources Codice/Package.swift): eb4ef74de18b7be80e64012ae1eb2ced437fd9da2db9a4fd9c7e3bbf7399f95d
+Xcode 27.2 Build version 27B52 

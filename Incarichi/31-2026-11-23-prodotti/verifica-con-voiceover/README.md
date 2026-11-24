@@ -39,12 +39,13 @@ Simulatori iOS 27.0, Xcode 27.2 (27B52), macOS 27.0.1: «WarSense iPhone Air · 
 | percorsi, iPhone 2, cinque blocchi | `messa-a-punto/iphone-percorsi-su-c3b5e2a/` | `c3b5e2a` (02:26:45 del 24 novembre) | MESSA A PUNTO, non esito finale: finita, 81 controlli, 74 ok e 7 NO (riepilogo del guidatore in `guidatore.log`), 1164 s |
 | percorsi, iPad 2 | `messa-a-punto/ipad-percorsi-su-88d4874-interrotta/` | `88d4874` (02:31:10; sorgenti di app identici a `c3b5e2a`) | messa a punto, fermata da me a metà: il blocco `inverno` vi è caduto per un errore del guidatore (un nome di variabile che copriva una funzione), poi corretto |
 | tester, iPhone 3 e iPad 3 | `messa-a-punto/iphone-tester-su-88d4874-interrotto/`, `messa-a-punto/ipad-tester-su-88d4874-interrotto/` | `88d4874` | messa a punto, fermati da me al primo anno quando il commit sotto verifica è diventato `b0a15f2` |
-| **percorsi, iPhone 2, nove blocchi** | `iphone/` | **`b0a15f2`** (02:48:36), più il pilota esteso non committato | DEFINITIVA: in corso dalle 02:52 |
-| **percorsi, iPad 2, nove blocchi** | `ipad/` | **`b0a15f2`** | DEFINITIVA: in corso dalle 02:52 |
-| **tester, due anni, guado, iPhone 3** | `iphone/tester-due-anni/` | **`b0a15f2`** | DEFINITIVA: in corso dalle 02:52 |
-| **tester, due anni, istmo, iPad 3** | `ipad/tester-due-anni/` | **`b0a15f2`** | DEFINITIVA: in corso dalle 02:52 |
+| percorsi e tester, prima partenza delle definitive | `messa-a-punto/iphone-su-b0a15f2-interrotta-dal-limite-d-uso/`, `messa-a-punto/ipad-su-b0a15f2-interrotta-dal-limite-d-uso/` | `b0a15f2` (02:48:36), più il pilota esteso allora non committato | INTERROTTE: partite alle 02:52, fermate alle 03:01 dal limite d'uso della sessione, a metà del terzo blocco; dati parziali conservati |
+| **percorsi, iPhone 2, nove blocchi** | `iphone/` | **`dd7b8ef`** (07:23:04): il codice dell'app è quello di `b0a15f2`, col pilota esteso committato | **DEFINITIVA, finita**: 106 controlli, 94 ok, 12 NO (11 su reperti dichiarati, 1 altro), 2058 s |
+| **percorsi, iPad 2, nove blocchi** | `ipad/` | **`dd7b8ef`** | **DEFINITIVA, finita**: 105 controlli, 90 ok, 15 NO (11 su reperti dichiarati, 4 altri), 2066 s |
+| **tester, due anni, guado, iPhone 3** | `iphone/tester-due-anni/` | **`dd7b8ef`** | **DEFINITIVA, finita**: due anni interi, 479 righe di diario, nessun errore, 2859 s |
+| **tester, due anni, istmo, iPad 3** | `ipad/tester-due-anni/` | **`dd7b8ef`** | **DEFINITIVA, finita**: due anni interi, 479 righe di diario, nessun errore, 2849 s |
 
-`git status --short` al momento della copia di `b0a15f2` è in `iphone/compilazione.txt`: fra ciò da cui dipendono app e pilota è modificato il solo `Applicazione/Esplorazione/SessioneInterattivaTest.swift` (il pilota esteso).
+Le quattro corse definitive le ha rilanciate la sessione principale alle 07:22 del 24 novembre, dopo l'interruzione, con `corri.sh` com'era; le sezioni di questo file fino a «Che cosa NON si guida» sono del sotto-agente che ha costruito lo strumentario, e la sezione «Le corse definitive» in fondo è della sessione. `git status --short` al momento della copia è in `iphone/compilazione.txt`: di ciò da cui dipendono app e pilota nulla è modificato rispetto al commit `dd7b8ef`, che differisce da `b0a15f2` per il solo pilota (`git diff --stat b0a15f2 dd7b8ef -- Applicazione/Sorgenti Codice/Sources`: vuoto).
 
 ## Che cosa si è sentito nella corsa di messa a punto sull'iPhone (app di `c3b5e2a`)
 
@@ -121,3 +122,54 @@ Con tutti i gruppi armati tenuti in patria «Apri la campagna» apre comunque la
 - L'audio: il simulatore non dà la voce da sentire; che un annuncio sia interrotto a metà lo si deduce dagli istanti delle pronunce e dalla coda del gioco, non lo si ascolta.
 - Lo scioglimento dei reparti per denaro insufficiente: coi valori di fabbrica non si produce (27 monete di mantenimento su 200 di rendita). Non guidato con VoiceOver; lo coprono le prove ospitate (`SecondaTappaDelRegnoTest`). Via onesta vista e non percorsa: i valori messi a punto nel file `Documents/Valori/regno.json` dell'app (00 §15.4), come fa la prova ospitata.
 - Il nome di un gruppo avversario al primo e al secondo anno: l'interfaccia non lo dice mai (la casella dice «formazione avversaria», senza nome: `CostruttoreAnnunciCampagna`), e nei diari del tester non compare alcun nome avversario. Non coperto.
+
+## Le corse definitive (app di `dd7b8ef`, cioè il codice di `b0a15f2`)
+
+Scritta dalla sessione principale dai file di questa cartella: `iphone/controlli.jsonl`, `ipad/controlli.jsonl`, i due `guidatore.log`, i due diari del tester, i quattro `tempi.txt`.
+
+### I percorsi a controlli
+
+| blocco | iPhone 2 | iPad 2 | che cosa cade |
+|---|---|---|---|
+| partenza | 16 su 16 | 16 su 16 | |
+| mappa | 10 su 10 | 10 su 10 | |
+| inverno | 30 su 34 | 30 su 34 | i quattro controlli «voce» (reperto 1) |
+| estate | 8 su 9 | 8 su 9 | la riga in patria di una formazione già arrivata (osservazione 4, qui sotto) |
+| reclute | 8 su 9 | 8 su 9 | un controllo «voce» (reperto 1) |
+| mantenimento | 11 su 13 | 11 su 13 | due controlli «voce» (reperto 1) |
+| voce | 2 su 6 | 2 su 6 | le quattro misure senza copie degli annunci superati (reperto 1) |
+| orizzontale | 3 su 3 | 1 su 3 | sull'iPad, un artefatto del pilota (sotto) |
+| testo | 6 su 6 | 4 su 5 | sull'iPad, lo stesso artefatto |
+| **in tutto** | **94 su 106** | **90 su 105** | |
+
+Sull'iPad il blocco `testo` ha un controllo in meno che sull'iPhone: lo dice il conteggio del guidatore, e non ne ho cercato la ragione.
+
+**Le misure pulite del reperto 1** (blocco `voce`, senza copie negli appunti; «al più», doppio tocco compreso):
+
+| annuncio | iPhone 2 | iPad 2 | sostituito da |
+|---|---|---|---|
+| l'inverno, con l'entrata e il mantenimento | 1,45 s | 1,48 s | «Anno 1, inverno, schermata 1 di 4» |
+| la primavera | 1,45 s | 1,48 s | «Anno 2, primavera» |
+| la conferma dell'addestramento mirato | 1,44 s | 1,47 s | la rilettura della voce su cui il fuoco torna |
+| il rifiuto della scelta impedita | 1,30 s | 1,31 s | la rilettura della voce |
+| la conferma di una leva, che non sposta il fuoco | resta fino alla fine dell'ascolto | resta | — |
+| all'apertura della campagna, il primo annuncio in coda (36 caratteri) | cede dopo 0,76 s | 0,79 s | «Mappa Guado, 4 righe per 4 caselle…» |
+
+Negli altri blocchi, dove il pilota copia negli appunti mentre ascolta, gli stessi annunci sono superati dopo al più 1,2–1,75 s.
+
+**I quattro «NO» fuori dai reperti dichiarati.**
+
+- *Osservazione 4 — la riga in patria di una formazione già arrivata* (iPhone e iPad, blocco `estate`). Lince, ordinata alla quarta schermata, arriva al quartier generale il primo giorno dell'estate, e la mappa e il registro lo dicono. Tornati in patria a campagna aperta, la sua riga dice ancora «Lince, gruppo armato, reclute dell'inverno: 6 atomi di fanteria leggera. Raggiunge il quartier generale in estate, a campagna aperta», come di un fatto a venire. Ricavato dal codice: a campagna aperta il regno non sa nulla del fronte finché la campagna non si conclude, e la riga legge lo stato del regno. Il controllo è marcato «osservazione» dal guidatore e porta esito «NO».
+- *Un artefatto del pilota, non dell'app* (soltanto iPad, tre controlli: due in `orizzontale`, uno in `testo`). In tre letture di una schermata intera una o due posizioni, su 19 o 32, portano al posto dell'etichetta dell'elemento la pronuncia «Tastiera visibile»: è VoiceOver che annuncia la tastiera quando il pilota gli dà da tastiera il comando di copia. Ogni altra posizione coincide con l'atteso; le stesse letture passano per intero sull'iPad in verticale a dimensione ordinaria (blocco `partenza`, 19 elementi su 19) e sull'iPhone in orizzontale e a testo massimo. Le posizioni colpite cambiano da una lettura all'altra (la dodicesima, la quindicesima, la dodicesima e la sedicesima).
+
+### Il tester a orecchio, due anni
+
+Lo stesso copione sui due apparecchi: iPhone 3 sul fronte del guado, iPad 3 sul fronte dell'istmo. 479 righe di diario ciascuno, nessuna con un errore; 2859 s e 2849 s di partita.
+
+- **Primo anno.** In patria le cinque formazioni col loro nome; Cervo tenuta in patria («Cervo resta in patria.»); aperta la campagna, sulla mappa ci sono le altre quattro e non Cervo. Le giornate chiuse una per una fino all'inverno; «Nuova stagione: estate» alla chiusura della trentesima e «Nuova stagione: autunno» alla sessantesima; la campagna si conclude con l'inverno, senza battaglie. D'inverno: «Mantenimento dell'esercito: monete di bronzo 27» nell'annuncio e la riga nella prima schermata; le tre intestazioni; la scelta impedita per i 18 atomi di fanteria leggera di Lupo («Costa: monete di bronzo 225 su 193», e attivandola «Non si può ordinare: mancano monete di bronzo.»); l'addestramento mirato ordinato per i 12 atomi di cavalleria di Falco (150 su 193); alla quarta schermata «Leva di fanteria leggera ordinata: pronta in estate.».
+- **Secondo anno.** Ogni nome è rimasto alla sua formazione (il tester confronta le righe delle forze fra una primavera e l'altra). Falco «con addestramento mirato» in patria e sulla mappa. Alla chiusura della trentesima giornata: «Nuova stagione: estate» e poi «Lince è arrivata dalla patria in riga 3, casella 2» sul guado, «in riga 5, casella 3» sull'istmo; da quel momento le formazioni sulla mappa sono cinque. Il secondo inverno: mantenimento 29; la scelta del mantenimento dell'addestramento offre il solo Falco (12 su 184), pagato. Alla terza primavera i nomi sono ancora gli stessi.
+- **Che cosa il tester non fa**: non combatte (la sua condotta chiude le giornate, e in due anni non incontra una battaglia: «battaglie: 0» nei due anni); non tiene in patria una formazione armata; non lascia scadere un addestramento. Queste cose le coprono i percorsi a controlli (blocchi `partenza`, `mantenimento`) e le prove ospitate.
+
+### Schermate
+
+`schermate/`: sei PNG presi dal pilota con VoiceOver acceso, dopo le corse, sul secondo iPhone e sul secondo iPad: la patria in primavera, la prima schermata dell'inverno (il mantenimento dopo le riserve, le forze, la prima intestazione), la scelta del reparto coi sette costi e le due scelte impedite.
