@@ -38,6 +38,9 @@ final class SchermataBattaglia: UIViewController {
     /// Vero dopo che il fuoco d'apertura è stato portato sull'intestazione del deck: si porta una volta
     /// sola, alla prima comparsa (incarico 29).
     private var fuocoDiAperturaDato = false
+    /// Vero quando lo stato è caricato e gli elementi della griglia e del deck esistono.
+    private var caricata = false
+    private var apertaAlGiocatore = false
     /// Il resoconto si presenta una volta sola (incarico 32): fra la fine e la sua comparsa passa un istante.
     private var resocontoMostrato = false
     /// La battaglia si è conclusa in questa schermata: il fuoco appartiene al resoconto.
@@ -78,9 +81,27 @@ final class SchermataBattaglia: UIViewController {
     /// caricamento: gli elementi della griglia e del deck arrivano dopo, e il fuoco resta dov'è.
     override func viewDidAppear(_ animated: Bool) {
         super.viewDidAppear(animated)
-        guard !fuocoDiAperturaDato else { return }
-        fuocoDiAperturaDato = true
-        Fuoco.sposta(a: intestazioneDeck, perche: .schermataAperta)
+        if !fuocoDiAperturaDato {
+            fuocoDiAperturaDato = true
+            Fuoco.sposta(a: intestazioneDeck, perche: .schermataAperta)
+        }
+        apriSeServe()
+    }
+
+    /// L'annuncio d'apertura (02 §4.4.2) e ciò che lo segue — i fatti del primo turno, la prima mossa
+    /// dell'avversario, il resoconto di una battaglia ripresa già conclusa —, una volta sola, quando la
+    /// schermata è caricata ed è COMPARSA, cioè ha già chiesto il fuoco (incarico 32, RDA-183), come fa la
+    /// mappa. Finché partiva alla fine del caricamento, a seconda di chi arrivava prima usciva un istante
+    /// prima della richiesta del fuoco, a priorità predefinita, e la lettura dell'intestazione lo toglieva:
+    /// lo ha mostrato la stessa misura, una volta su quattro, sull'iPhone.
+    private func apriSeServe() {
+        guard caricata, fuocoDiAperturaDato, !apertaAlGiocatore else { return }
+        apertaAlGiocatore = true
+        if let costruttore {
+            partita.ambiente.segnali.annuncia(
+                TestoLocalizzato(testo: costruttore.annuncioApertura(), lingua: testi.lingua))
+        }
+        Task { await prosegueDallApertura() }
     }
 
     private func montaViste() {
@@ -190,12 +211,12 @@ final class SchermataBattaglia: UIViewController {
         montaDeck(stato: stato)
         montaRotori()
         aggiorna(con: stato)
+        caricata = true
+        apriSeServe()
+    }
 
-        // Annuncio di apertura (02 §4.4.2) e fuoco sull'intestazione del deck (02 §2.9).
-        if let costruttore {
-            partita.ambiente.segnali.annuncia(
-                TestoLocalizzato(testo: costruttore.annuncioApertura(), lingua: testi.lingua))
-        }
+    private func prosegueDallApertura() async {
+        let stato = await partita.stato
         let eventi = await partita.eventiIniziali
         ricevi(eventi)
         // Se la battaglia si apre col turno dell'avversario — primo occupante l'avversario, 01

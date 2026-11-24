@@ -40,3 +40,13 @@ Test Case '-[WarSenseTest.PassaggioBattagliaInterfacciaTest test_02_2_9_dal_pann
 Test Case '-[WarSenseTest.PannelloAzioniTest test_02_5_7_l_evacuazione_che_conclude_la_battaglia_porta_il_fuoco_al_resoconto]' failed (1.197 seconds).
 ** TEST FAILED **
 
+== la battaglia si annuncia alla fine del caricamento, comparsa o no (build 32 e prima stesura)
+   sorgente: Applicazione/Sorgenti/SchermataBattaglia.swift
+   tolto:  guard caricata, fuocoDiAperturaDato, !apertaAlGiocatore else { return }
+   messo:  guard caricata, !apertaAlGiocatore else { return }
+   prove ospitate: OsservazioniTesterTest/test_02_5_5_1_la_battaglia_si_annuncia_alla_comparsa_anche_se_il_caricamento_finisce_prima (uscita 65)
+/Users/lucascabini/Developer/WarSense/Applicazione/ProveOspitate/OsservazioniTesterTest.swift:190: error: -[WarSenseTest.OsservazioniTesterTest test_02_5_5_1_la_battaglia_si_annuncia_alla_comparsa_anche_se_il_caricamento_finisce_prima] : XCTAssertEqual failed: ("["Battaglia su WarSense, 10 righe per 10 celle. Il campo è campo aperto, ostacolo"]") is not equal to ("[]") - caricata e non ancora comparsa: nulla
+/Users/lucascabini/Developer/WarSense/Applicazione/ProveOspitate/OsservazioniTesterTest.swift:197: error: -[WarSenseTest.OsservazioniTesterTest test_02_5_5_1_la_battaglia_si_annuncia_alla_comparsa_anche_se_il_caricamento_finisce_prima] : XCTAssertEqual failed: ("nil") is not equal to ("Optional(WarSense.Fuoco.Movimento.schermataAperta)") - il fuoco è già stato chiesto
+Test Case '-[WarSenseTest.OsservazioniTesterTest test_02_5_5_1_la_battaglia_si_annuncia_alla_comparsa_anche_se_il_caricamento_finisce_prima]' failed (0.414 seconds).
+** TEST FAILED **
+

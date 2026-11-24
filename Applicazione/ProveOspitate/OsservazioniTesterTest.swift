@@ -177,6 +177,29 @@ final class OsservazioniTesterTest: XCTestCase {
         XCTAssertEqual(Fuoco.registro.count, movimenti, "il fuoco d'apertura si porta una volta sola")
     }
 
+    /// L'annuncio d'apertura segue la richiesta del fuoco, chiunque arrivi prima fra il caricamento e la
+    /// comparsa (incarico 32, RDA-183): prima della comparsa, a caricamento compiuto, non si annuncia nulla.
+    func test_02_5_5_1_la_battaglia_si_annuncia_alla_comparsa_anche_se_il_caricamento_finisce_prima() async throws {
+        let ambiente = try Ambiente()
+        let schermata = SchermataBattaglia(partita: try await PartitaCorrente(nuova: ambiente))
+        ambiente.segnali.azzeraAnnunciPronunciati()
+        Fuoco.azzeraRegistro()
+        schermata.loadViewIfNeeded()
+        try await attendi { !schermata.elementiPerProva.isEmpty }
+        try await Task.sleep(nanoseconds: 300_000_000)
+        XCTAssertEqual(ambiente.segnali.annunciPronunciati.map(\.testo), [], "caricata e non ancora comparsa: nulla")
+        XCTAssertEqual(Fuoco.registro, [])
+        let finestra = UIWindow(frame: CGRect(x: 0, y: 0, width: 420, height: 912))
+        finestre.append(finestra)
+        finestra.rootViewController = schermata
+        finestra.makeKeyAndVisible()
+        try await attendi { !ambiente.segnali.annunciPronunciati.isEmpty }
+        XCTAssertEqual(Fuoco.registro.first, .schermataAperta, "il fuoco è già stato chiesto")
+        XCTAssertTrue(ambiente.segnali.annunciPronunciati.first?.testo.hasPrefix("Battaglia su WarSense") == true,
+                      "\(ambiente.segnali.annunciPronunciati.map(\.testo))")
+        XCTAssertEqual(ambiente.segnali.annunciPronunciati.filter { $0.testo.hasPrefix("Battaglia su WarSense") }.count, 1)
+    }
+
     // MARK: - Osservazione 4 — il gesto di uscita chiude impostazioni, apprendimento e resoconto
 
     /// Il gesto di fuga risale di un livello (02 §6.7): chiude le impostazioni e l'apprendimento, e il
