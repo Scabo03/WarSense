@@ -1,0 +1,229 @@
+{"azione": "avvia", "ascolto": 2, "n": 1}
+{"azione": "vo_accendi", "ascolto": 1, "n": 2}
+{"azione": "attiva", "ascolto": 5, "intere": "ogni", "etichetta": "Nuovo regno", "tipo": "pulsante", "n": 3}
+{"azione": "giro", "ascolto": 0.3, "intere": true, "n": 4}
+{"azione": "albero", "ascolto": 0.2, "n": 5}
+{"azione": "albero", "ascolto": 0.2, "n": 6}
+{"azione": "attiva", "ascolto": 3.5, "intere": "ogni", "prefisso": "Cervo,", "tipo": "pulsante", "n": 7}
+{"azione": "albero", "ascolto": 0.2, "n": 8}
+{"azione": "albero", "ascolto": 0.2, "n": 9}
+{"azione": "attiva", "ascolto": 3, "intere": "ogni", "etichetta": "Apri la campagna", "tipo": "pulsante", "n": 10}
+{"azione": "attiva", "ascolto": 8, "intere": "ogni", "prefisso": "fronte del guado", "tipo": "pulsante", "n": 11}
+{"azione": "albero", "ascolto": 0.2, "n": 12}
+{"azione": "albero", "ascolto": 0.2, "n": 13}
+{"azione": "albero", "ascolto": 0.2, "n": 14}
+{"azione": "albero", "ascolto": 0.2, "n": 15}
+{"azione": "multi_tocco", "tocchi": 2, "dita": 2, "ascolto": 3.0, "etichetta": "Registro della campagna", "tipo": "pulsante", "n": 16}
+{"azione": "albero", "ascolto": 0.2, "n": 17}
+{"azione": "albero", "ascolto": 0.2, "n": 18}
+{"azione": "attiva", "ascolto": 2.0, "contiene": "riga 4, casella 1,", "n": 19}
+{"azione": "albero", "ascolto": 0.2, "n": 20}
+{"azione": "attiva", "ascolto": 2.0, "etichetta": "Esplora la zona", "tipo": "pulsante", "n": 21}
+{"azione": "albero", "ascolto": 0.2, "n": 22}
+{"azione": "albero", "ascolto": 0.2, "n": 23}
+{"azione": "attiva", "ascolto": 2.0, "contiene": "riga 4, casella 2,", "n": 24}
+{"azione": "albero", "ascolto": 0.2, "n": 25}
+{"azione": "attiva", "ascolto": 2.0, "etichetta": "Presidia: resta fermo in guardia", "tipo": "pulsante", "n": 26}
+{"azione": "albero", "ascolto": 0.2, "n": 27}
+{"azione": "albero", "ascolto": 0.2, "n": 28}
+{"azione": "attiva", "ascolto": 2.0, "contiene": "riga 4, casella 3,", "n": 29}
+{"azione": "albero", "ascolto": 0.2, "n": 30}
+{"azione": "attiva", "ascolto": 2.0, "etichetta": "Marcia: scegli la casella sulla mappa", "tipo": "pulsante", "n": 31}
+{"azione": "attiva", "ascolto": 2.5, "contiene": "riga 3, casella 3,", "n": 32}
+{"azione": "albero", "ascolto": 0.2, "n": 33}
+{"azione": "albero", "ascolto": 0.2, "n": 34}
+{"azione": "attiva", "ascolto": 2.0, "contiene": "riga 4, casella 4,", "n": 35}
+{"azione": "albero", "ascolto": 0.2, "n": 36}
+{"azione": "attiva", "ascolto": 2.0, "etichetta": "Presidia: resta fermo in guardia", "tipo": "pulsante", "n": 37}
+{"azione": "albero", "ascolto": 0.2, "n": 38}
+{"azione": "albero", "ascolto": 0.2, "n": 39}
+{"azione": "albero", "ascolto": 0.2, "n": 40}
+{"azione": "multi_tocco", "tocchi": 2, "dita": 2, "ascolto": 3.0, "etichetta": "Registro della campagna", "tipo": "pulsante", "n": 41}
+{"azione": "albero", "ascolto": 0.2, "n": 42}
+{"azione": "albero", "ascolto": 0.2, "n": 43}
+{"azione": "attiva", "ascolto": 2.0, "contiene": "riga 4, casella 1,", "n": 44}
+{"azione": "albero", "ascolto": 0.2, "n": 45}
+{"azione": "attiva", "ascolto": 2.0, "etichetta": "Esplora la zona", "tipo": "pulsante", "n": 46}
+{"azione": "albero", "ascolto": 0.2, "n": 47}
+{"azione": "albero", "ascolto": 0.2, "n": 48}
+{"azione": "attiva", "ascolto": 2.0, "contiene": "riga 4, casella 2,", "n": 49}
+{"azione": "albero", "ascolto": 0.2, "n": 50}
+{"azione": "attiva", "ascolto": 2.0, "etichetta": "Presidia: resta fermo in guardia", "tipo": "pulsante", "n": 51}
+{"azione": "albero", "ascolto": 0.2, "n": 52}
+{"azione": "albero", "ascolto": 0.2, "n": 53}
+{"azione": "attiva", "ascolto": 2.0, "contiene": "riga 4, casella 4,", "n": 54}
+{"azione": "albero", "ascolto": 0.2, "n": 55}
+{"azione": "attiva", "ascolto": 2.0, "etichetta": "Marcia: scegli la casella sulla mappa", "tipo": "pulsante", "n": 56}
+{"azione": "attiva", "ascolto": 2.5, "contiene": "riga 3, casella 4,", "n": 57}
+{"azione": "albero", "ascolto": 0.2, "n": 58}
+{"azione": "albero", "ascolto": 0.2, "n": 59}
+{"azione": "attiva", "ascolto": 2.0, "contiene": "riga 3, casella 3,", "n": 60}
+{"azione": "albero", "ascolto": 0.2, "n": 61}
+{"azione": "attiva", "ascolto": 2.0, "etichetta": "Presidia: resta fermo in guardia", "tipo": "pulsante", "n": 62}
+{"azione": "albero", "ascolto": 0.2, "n": 63}
+{"azione": "albero", "ascolto": 0.2, "n": 64}
+{"azione": "albero", "ascolto": 0.2, "n": 65}
+{"azione": "multi_tocco", "tocchi": 2, "dita": 2, "ascolto": 3.0, "etichetta": "Registro della campagna", "tipo": "pulsante", "n": 66}
+{"azione": "albero", "ascolto": 0.2, "n": 67}
+{"azione": "albero", "ascolto": 0.2, "n": 68}
+{"azione": "attiva", "ascolto": 2.0, "contiene": "riga 4, casella 1,", "n": 69}
+{"azione": "albero", "ascolto": 0.2, "n": 70}
+{"azione": "attiva", "ascolto": 2.0, "etichetta": "Esplora la zona", "tipo": "pulsante", "n": 71}
+{"azione": "albero", "ascolto": 0.2, "n": 72}
+{"azione": "albero", "ascolto": 0.2, "n": 73}
+{"azione": "attiva", "ascolto": 2.0, "contiene": "riga 4, casella 2,", "n": 74}
+{"azione": "albero", "ascolto": 0.2, "n": 75}
+{"azione": "attiva", "ascolto": 2.0, "etichetta": "Presidia: resta fermo in guardia", "tipo": "pulsante", "n": 76}
+{"azione": "albero", "ascolto": 0.2, "n": 77}
+{"azione": "albero", "ascolto": 0.2, "n": 78}
+{"azione": "attiva", "ascolto": 2.0, "contiene": "riga 3, casella 3,", "n": 79}
+{"azione": "albero", "ascolto": 0.2, "n": 80}
+{"azione": "attiva", "ascolto": 2.0, "etichetta": "Marcia: scegli la casella sulla mappa", "tipo": "pulsante", "n": 81}
+{"azione": "attiva", "ascolto": 2.5, "contiene": "riga 2, casella 3,", "n": 82}
+{"azione": "albero", "ascolto": 0.2, "n": 83}
+{"azione": "albero", "ascolto": 0.2, "n": 84}
+{"azione": "albero", "ascolto": 0.2, "n": 85}
+{"azione": "multi_tocco", "tocchi": 2, "dita": 2, "etichetta": "Registro della campagna", "tipo": "pulsante", "ascolto": 3.0, "intere": "ogni", "n": 86}
+{"azione": "attiva", "ascolto": 3, "etichetta": "Chiudi la giornata", "tipo": "pulsante", "n": 87}
+{"azione": "albero", "ascolto": 0.2, "n": 88}
+{"azione": "attiva", "ascolto": 3, "etichetta": "Chiudi la giornata", "tipo": "pulsante", "n": 89}
+{"azione": "albero", "ascolto": 0.2, "n": 90}
+{"azione": "attiva", "ascolto": 3, "etichetta": "Chiudi la giornata", "tipo": "pulsante", "n": 91}
+{"azione": "albero", "ascolto": 0.2, "n": 92}
+{"azione": "attiva", "ascolto": 3, "etichetta": "Chiudi la giornata", "tipo": "pulsante", "n": 93}
+{"azione": "albero", "ascolto": 0.2, "n": 94}
+{"azione": "attiva", "ascolto": 3, "etichetta": "Chiudi la giornata", "tipo": "pulsante", "n": 95}
+{"azione": "albero", "ascolto": 0.2, "n": 96}
+{"azione": "attiva", "ascolto": 3, "etichetta": "Chiudi la giornata", "tipo": "pulsante", "n": 97}
+{"azione": "albero", "ascolto": 0.2, "n": 98}
+{"azione": "attiva", "ascolto": 3, "etichetta": "Chiudi la giornata", "tipo": "pulsante", "n": 99}
+{"azione": "albero", "ascolto": 0.2, "n": 100}
+{"azione": "attiva", "ascolto": 3, "etichetta": "Chiudi la giornata", "tipo": "pulsante", "n": 101}
+{"azione": "albero", "ascolto": 0.2, "n": 102}
+{"azione": "attiva", "ascolto": 3, "etichetta": "Chiudi la giornata", "tipo": "pulsante", "n": 103}
+{"azione": "albero", "ascolto": 0.2, "n": 104}
+{"azione": "attiva", "ascolto": 3, "etichetta": "Chiudi la giornata", "tipo": "pulsante", "n": 105}
+{"azione": "albero", "ascolto": 0.2, "n": 106}
+{"azione": "attiva", "ascolto": 3, "etichetta": "Chiudi la giornata", "tipo": "pulsante", "n": 107}
+{"azione": "albero", "ascolto": 0.2, "n": 108}
+{"azione": "attiva", "ascolto": 3, "etichetta": "Chiudi la giornata", "tipo": "pulsante", "n": 109}
+{"azione": "albero", "ascolto": 0.2, "n": 110}
+{"azione": "attiva", "ascolto": 3, "etichetta": "Chiudi la giornata", "tipo": "pulsante", "n": 111}
+{"azione": "albero", "ascolto": 0.2, "n": 112}
+{"azione": "attiva", "ascolto": 3, "etichetta": "Chiudi la giornata", "tipo": "pulsante", "n": 113}
+{"azione": "albero", "ascolto": 0.2, "n": 114}
+{"azione": "attiva", "ascolto": 3, "etichetta": "Chiudi la giornata", "tipo": "pulsante", "n": 115}
+{"azione": "albero", "ascolto": 0.2, "n": 116}
+{"azione": "attiva", "ascolto": 3, "etichetta": "Chiudi la giornata", "tipo": "pulsante", "n": 117}
+{"azione": "albero", "ascolto": 0.2, "n": 118}
+{"azione": "attiva", "ascolto": 3, "etichetta": "Chiudi la giornata", "tipo": "pulsante", "n": 119}
+{"azione": "albero", "ascolto": 0.2, "n": 120}
+{"azione": "attiva", "ascolto": 3, "etichetta": "Chiudi la giornata", "tipo": "pulsante", "n": 121}
+{"azione": "albero", "ascolto": 0.2, "n": 122}
+{"azione": "attiva", "ascolto": 3, "etichetta": "Chiudi la giornata", "tipo": "pulsante", "n": 123}
+{"azione": "albero", "ascolto": 0.2, "n": 124}
+{"azione": "attiva", "ascolto": 3, "etichetta": "Chiudi la giornata", "tipo": "pulsante", "n": 125}
+{"azione": "albero", "ascolto": 0.2, "n": 126}
+{"azione": "attiva", "ascolto": 3, "etichetta": "Chiudi la giornata", "tipo": "pulsante", "n": 127}
+{"azione": "albero", "ascolto": 0.2, "n": 128}
+{"azione": "attiva", "ascolto": 3, "etichetta": "Chiudi la giornata", "tipo": "pulsante", "n": 129}
+{"azione": "albero", "ascolto": 0.2, "n": 130}
+{"azione": "attiva", "ascolto": 3, "etichetta": "Chiudi la giornata", "tipo": "pulsante", "n": 131}
+{"azione": "albero", "ascolto": 0.2, "n": 132}
+{"azione": "attiva", "ascolto": 3, "etichetta": "Chiudi la giornata", "tipo": "pulsante", "n": 133}
+{"azione": "albero", "ascolto": 0.2, "n": 134}
+{"azione": "albero", "ascolto": 0.2, "n": 135}
+{"azione": "multi_tocco", "tocchi": 2, "dita": 2, "etichetta": "Registro della campagna", "tipo": "pulsante", "ascolto": 3.0, "intere": "ogni", "n": 136}
+{"azione": "attiva", "ascolto": 3, "etichetta": "Chiudi la giornata", "tipo": "pulsante", "n": 137}
+{"azione": "albero", "ascolto": 0.2, "n": 138}
+{"azione": "attiva", "ascolto": 3, "etichetta": "Chiudi la giornata", "tipo": "pulsante", "n": 139}
+{"azione": "albero", "ascolto": 0.2, "n": 140}
+{"azione": "attiva", "etichetta": "Chiudi la giornata", "tipo": "pulsante", "ascolto": 45, "quiete": 11, "intere": "ogni", "n": 141}
+{"azione": "albero", "ascolto": 0.2, "n": 142}
+{"azione": "albero", "ascolto": 0.2, "n": 143}
+{"azione": "attiva", "ascolto": 3, "etichetta": "Chiudi la giornata", "tipo": "pulsante", "n": 144}
+{"azione": "albero", "ascolto": 0.2, "n": 145}
+{"azione": "attiva", "ascolto": 3, "etichetta": "Chiudi la giornata", "tipo": "pulsante", "n": 146}
+{"azione": "albero", "ascolto": 0.2, "n": 147}
+{"azione": "attiva", "ascolto": 3, "etichetta": "Chiudi la giornata", "tipo": "pulsante", "n": 148}
+{"azione": "albero", "ascolto": 0.2, "n": 149}
+{"azione": "attiva", "ascolto": 3, "etichetta": "Chiudi la giornata", "tipo": "pulsante", "n": 150}
+{"azione": "albero", "ascolto": 0.2, "n": 151}
+{"azione": "attiva", "ascolto": 3, "etichetta": "Chiudi la giornata", "tipo": "pulsante", "n": 152}
+{"azione": "albero", "ascolto": 0.2, "n": 153}
+{"azione": "attiva", "ascolto": 3, "etichetta": "Chiudi la giornata", "tipo": "pulsante", "n": 154}
+{"azione": "albero", "ascolto": 0.2, "n": 155}
+{"azione": "attiva", "ascolto": 3, "etichetta": "Chiudi la giornata", "tipo": "pulsante", "n": 156}
+{"azione": "albero", "ascolto": 0.2, "n": 157}
+{"azione": "attiva", "ascolto": 3, "etichetta": "Chiudi la giornata", "tipo": "pulsante", "n": 158}
+{"azione": "albero", "ascolto": 0.2, "n": 159}
+{"azione": "attiva", "ascolto": 3, "etichetta": "Chiudi la giornata", "tipo": "pulsante", "n": 160}
+{"azione": "albero", "ascolto": 0.2, "n": 161}
+{"azione": "attiva", "ascolto": 3, "etichetta": "Chiudi la giornata", "tipo": "pulsante", "n": 162}
+{"azione": "albero", "ascolto": 0.2, "n": 163}
+{"azione": "attiva", "ascolto": 3, "etichetta": "Chiudi la giornata", "tipo": "pulsante", "n": 164}
+{"azione": "albero", "ascolto": 0.2, "n": 165}
+{"azione": "attiva", "ascolto": 3, "etichetta": "Chiudi la giornata", "tipo": "pulsante", "n": 166}
+{"azione": "albero", "ascolto": 0.2, "n": 167}
+{"azione": "attiva", "ascolto": 3, "etichetta": "Chiudi la giornata", "tipo": "pulsante", "n": 168}
+{"azione": "albero", "ascolto": 0.2, "n": 169}
+{"azione": "attiva", "ascolto": 3, "etichetta": "Chiudi la giornata", "tipo": "pulsante", "n": 170}
+{"azione": "albero", "ascolto": 0.2, "n": 171}
+{"azione": "attiva", "ascolto": 3, "etichetta": "Chiudi la giornata", "tipo": "pulsante", "n": 172}
+{"azione": "albero", "ascolto": 0.2, "n": 173}
+{"azione": "attiva", "ascolto": 3, "etichetta": "Chiudi la giornata", "tipo": "pulsante", "n": 174}
+{"azione": "albero", "ascolto": 0.2, "n": 175}
+{"azione": "attiva", "ascolto": 3, "etichetta": "Chiudi la giornata", "tipo": "pulsante", "n": 176}
+{"azione": "albero", "ascolto": 0.2, "n": 177}
+{"azione": "attiva", "ascolto": 3, "etichetta": "Chiudi la giornata", "tipo": "pulsante", "n": 178}
+{"azione": "albero", "ascolto": 0.2, "n": 179}
+{"azione": "attiva", "ascolto": 3, "etichetta": "Chiudi la giornata", "tipo": "pulsante", "n": 180}
+{"azione": "albero", "ascolto": 0.2, "n": 181}
+{"azione": "attiva", "ascolto": 3, "etichetta": "Chiudi la giornata", "tipo": "pulsante", "n": 182}
+{"azione": "albero", "ascolto": 0.2, "n": 183}
+{"azione": "attiva", "ascolto": 3, "etichetta": "Chiudi la giornata", "tipo": "pulsante", "n": 184}
+{"azione": "albero", "ascolto": 0.2, "n": 185}
+{"azione": "attiva", "ascolto": 3, "etichetta": "Chiudi la giornata", "tipo": "pulsante", "n": 186}
+{"azione": "albero", "ascolto": 0.2, "n": 187}
+{"azione": "attiva", "ascolto": 3, "etichetta": "Chiudi la giornata", "tipo": "pulsante", "n": 188}
+{"azione": "albero", "ascolto": 0.2, "n": 189}
+{"azione": "attiva", "ascolto": 3, "etichetta": "Chiudi la giornata", "tipo": "pulsante", "n": 190}
+{"azione": "albero", "ascolto": 0.2, "n": 191}
+{"azione": "attiva", "ascolto": 3, "etichetta": "Chiudi la giornata", "tipo": "pulsante", "n": 192}
+{"azione": "albero", "ascolto": 0.2, "n": 193}
+{"azione": "attiva", "ascolto": 3, "etichetta": "Chiudi la giornata", "tipo": "pulsante", "n": 194}
+{"azione": "albero", "ascolto": 0.2, "n": 195}
+{"azione": "attiva", "ascolto": 3, "etichetta": "Chiudi la giornata", "tipo": "pulsante", "n": 196}
+{"azione": "albero", "ascolto": 0.2, "n": 197}
+{"azione": "albero", "ascolto": 0.2, "n": 198}
+{"azione": "multi_tocco", "tocchi": 2, "dita": 2, "etichetta": "Registro della campagna", "tipo": "pulsante", "ascolto": 3.0, "intere": "ogni", "n": 199}
+{"azione": "attiva", "ascolto": 3, "etichetta": "Chiudi la giornata", "tipo": "pulsante", "n": 200}
+{"azione": "albero", "ascolto": 0.2, "n": 201}
+{"azione": "attiva", "ascolto": 3, "etichetta": "Chiudi la giornata", "tipo": "pulsante", "n": 202}
+{"azione": "albero", "ascolto": 0.2, "n": 203}
+{"azione": "attiva", "etichetta": "Chiudi la giornata", "tipo": "pulsante", "ascolto": 45, "quiete": 11, "intere": "ogni", "n": 204}
+{"azione": "albero", "ascolto": 0.2, "n": 205}
+{"azione": "albero", "ascolto": 0.2, "n": 206}
+{"azione": "attiva", "ascolto": 3, "etichetta": "Chiudi la giornata", "tipo": "pulsante", "n": 207}
+{"azione": "albero", "ascolto": 0.2, "n": 208}
+{"azione": "attiva", "ascolto": 3, "etichetta": "Chiudi la giornata", "tipo": "pulsante", "n": 209}
+{"azione": "albero", "ascolto": 0.2, "n": 210}
+{"azione": "attiva", "ascolto": 3, "etichetta": "Chiudi la giornata", "tipo": "pulsante", "n": 211}
+{"azione": "albero", "ascolto": 0.2, "n": 212}
+{"azione": "attiva", "ascolto": 3, "etichetta": "Chiudi la giornata", "tipo": "pulsante", "n": 213}
+{"azione": "albero", "ascolto": 0.2, "n": 214}
+{"azione": "attiva", "ascolto": 3, "etichetta": "Chiudi la giornata", "tipo": "pulsante", "n": 215}
+{"azione": "albero", "ascolto": 0.2, "n": 216}
+{"azione": "attiva", "ascolto": 3, "etichetta": "Chiudi la giornata", "tipo": "pulsante", "n": 217}
+{"azione": "albero", "ascolto": 0.2, "n": 218}
+{"azione": "attiva", "ascolto": 3, "etichetta": "Chiudi la giornata", "tipo": "pulsante", "n": 219}
+{"azione": "albero", "ascolto": 0.2, "n": 220}
+{"azione": "attiva", "ascolto": 3, "etichetta": "Chiudi la giornata", "tipo": "pulsante", "n": 221}
+{"azione": "albero", "ascolto": 0.2, "n": 222}
+{"azione": "attiva", "ascolto": 3, "etichetta": "Chiudi la giornata", "tipo": "pulsante", "n": 223}
+{"azione": "albero", "ascolto": 0.2, "n": 224}
+{"azione": "attiva", "ascolto": 3, "etichetta": "Chiudi la giornata", "tipo": "pulsante", "n": 225}
+{"azione": "orientamento", "verso": "verticale", "ascolto": 0.2, "n": 226}
+{"azione": "vo_spegni", "ascolto": 0.2, "n": 227}
+{"azione": "termina", "ascolto": 0.2, "n": 228}
+{"azione": "fine", "n": 229}

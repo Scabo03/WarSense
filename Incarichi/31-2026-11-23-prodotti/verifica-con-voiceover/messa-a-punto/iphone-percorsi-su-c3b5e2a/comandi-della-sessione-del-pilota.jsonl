@@ -1,0 +1,160 @@
+{"azione": "termina", "ascolto": 0.3, "n": 1}
+{"azione": "avvia", "ascolto": 2, "n": 2}
+{"azione": "vo_accendi", "ascolto": 1, "n": 3}
+{"azione": "attiva", "ascolto": 5, "intere": "ogni", "etichetta": "Nuovo regno", "tipo": "pulsante", "n": 4}
+{"azione": "giro", "ascolto": 0.3, "intere": true, "con_schermata": true, "nome": "iphone-patria-primavera", "n": 5}
+{"azione": "albero", "ascolto": 0.2, "n": 6}
+{"azione": "elementi", "ascolto": 0.2, "contiene": " atomi di ", "n": 7}
+{"azione": "attiva", "ascolto": 5, "intere": "ogni", "prefisso": "Cervo,", "tipo": "pulsante", "pausa_fuoco": 1.0, "fuoco_intero": true, "n": 8}
+{"azione": "albero", "ascolto": 0.2, "n": 9}
+{"azione": "avanti", "ascolto": 0.3, "intere": true, "n": 10}
+{"azione": "indietro", "ascolto": 0.3, "intere": true, "n": 11}
+{"azione": "schermata", "nome": "iphone-patria-cervo-resta", "ascolto": 0.2, "n": 12}
+{"azione": "attiva", "ascolto": 5, "intere": "ogni", "prefisso": "Cervo,", "tipo": "pulsante", "n": 13}
+{"azione": "albero", "ascolto": 0.2, "n": 14}
+{"azione": "avanti", "ascolto": 0.3, "intere": true, "n": 15}
+{"azione": "indietro", "ascolto": 0.3, "intere": true, "n": 16}
+{"azione": "attiva", "ascolto": 4, "intere": "ogni", "prefisso": "Corvo,", "tipo": "pulsante", "n": 17}
+{"azione": "attiva", "ascolto": 4, "intere": "ogni", "prefisso": "Lupo,", "tipo": "pulsante", "n": 18}
+{"azione": "attiva", "ascolto": 4, "intere": "ogni", "prefisso": "Falco,", "tipo": "pulsante", "n": 19}
+{"azione": "albero", "ascolto": 0.2, "n": 20}
+{"azione": "schermata", "nome": "iphone-patria-armati-in-patria", "ascolto": 0.2, "n": 21}
+{"azione": "attiva", "ascolto": 3, "intere": "ogni", "etichetta": "Apri la campagna", "tipo": "pulsante", "n": 22}
+{"azione": "albero", "ascolto": 0.2, "n": 23}
+{"azione": "attiva", "ascolto": 8, "intere": "ogni", "etichetta": "fronte del guado, mappa 4 per 4", "tipo": "pulsante", "n": 24}
+{"azione": "albero", "ascolto": 0.2, "n": 25}
+{"azione": "albero", "ascolto": 0.2, "n": 26}
+{"azione": "albero", "ascolto": 0.2, "n": 27}
+{"azione": "albero", "ascolto": 0.2, "n": 28}
+{"azione": "attiva", "ascolto": 3, "intere": "ogni", "prefisso": "Lupo,", "tipo": "pulsante", "n": 29}
+{"azione": "albero", "ascolto": 0.2, "n": 30}
+{"azione": "attiva", "ascolto": 3, "intere": "ogni", "prefisso": "Falco,", "tipo": "pulsante", "n": 31}
+{"azione": "albero", "ascolto": 0.2, "n": 32}
+{"azione": "albero", "ascolto": 0.2, "n": 33}
+{"azione": "attiva", "ascolto": 3, "intere": "ogni", "prefisso": "Cervo,", "tipo": "pulsante", "n": 34}
+{"azione": "albero", "ascolto": 0.2, "n": 35}
+{"azione": "giro", "ascolto": 0.3, "intere": true, "con_schermata": true, "nome": "iphone-patria-chi-parte", "n": 36}
+{"azione": "attiva", "ascolto": 2.5, "intere": "ogni", "etichetta": "Apri la campagna", "tipo": "pulsante", "n": 37}
+{"azione": "attiva", "ascolto": 10, "etichetta": "fronte del guado, mappa 4 per 4", "tipo": "pulsante", "n": 38}
+{"azione": "albero", "ascolto": 0.2, "n": 39}
+{"azione": "tocca", "prefisso": "riga 4, casella 2,", "ascolto": 1.5, "intere": "fine", "n": 40}
+{"azione": "multi_tocco", "tocchi": 2, "dita": 2, "etichetta": "Registro della campagna", "tipo": "pulsante", "ascolto": 4, "intere": "ogni", "n": 41}
+{"azione": "schermata", "nome": "iphone-mappa-chi-parte", "ascolto": 0.2, "n": 42}
+{"azione": "attiva", "ascolto": 16, "etichetta": "Chiudi la giornata", "tipo": "pulsante", "quiete": 11, "n": 43}
+{"azione": "attiva", "ascolto": 4, "intere": "ogni", "etichetta": "Torna in patria", "tipo": "pulsante", "n": 44}
+{"azione": "albero", "ascolto": 0.2, "n": 45}
+{"azione": "elementi", "ascolto": 0.2, "contiene": " atomi di ", "n": 46}
+{"azione": "termina", "ascolto": 0.3, "n": 47}
+{"azione": "avvia", "ascolto": 2, "n": 48}
+{"azione": "vo_accendi", "ascolto": 1, "n": 49}
+{"azione": "attiva", "ascolto": 5, "intere": "ogni", "etichetta": "Nuovo regno", "tipo": "pulsante", "n": 50}
+{"azione": "attiva", "ascolto": 12, "intere": "ogni", "etichetta": "Attendi l'inverno", "tipo": "pulsante", "n": 51}
+{"azione": "giro", "ascolto": 0.3, "intere": true, "con_schermata": true, "nome": "iphone-inverno-prima-schermata", "n": 52}
+{"azione": "albero", "ascolto": 0.2, "n": 53}
+{"azione": "elementi", "ascolto": 0.2, "prefisso": "Lavori ", "n": 54}
+{"azione": "tocca", "etichetta": "Patria", "tipo": "testo", "ascolto": 0.5, "n": 55}
+{"azione": "tasto", "tasto": "destra", "modificatori": ["control", "option", "command"], "ascolto": 0.8, "n": 56}
+{"azione": "tasto", "tasto": "destra", "modificatori": ["control", "option", "command"], "ascolto": 0.8, "n": 57}
+{"azione": "tasto", "tasto": "destra", "modificatori": ["control", "option", "command"], "ascolto": 0.8, "n": 58}
+{"azione": "tasto", "tasto": "destra", "modificatori": ["control", "option", "command"], "ascolto": 0.8, "n": 59}
+{"azione": "tasto", "tasto": "destra", "modificatori": ["control", "option", "command"], "ascolto": 0.8, "n": 60}
+{"azione": "tasto", "tasto": "giu", "modificatori": ["control", "option", "command"], "ascolto": 0.8, "n": 61}
+{"azione": "tasto", "tasto": "giu", "modificatori": ["control", "option", "command"], "ascolto": 0.8, "n": 62}
+{"azione": "tasto", "tasto": "giu", "modificatori": ["control", "option", "command"], "ascolto": 0.8, "n": 63}
+{"azione": "tasto", "tasto": "giu", "modificatori": ["control", "option", "command"], "ascolto": 0.8, "n": 64}
+{"azione": "tasto", "tasto": "giu", "modificatori": ["control", "option", "command"], "ascolto": 0.8, "n": 65}
+{"azione": "tasto", "tasto": "giu", "modificatori": ["control", "option", "command"], "ascolto": 0.8, "n": 66}
+{"azione": "tasto", "tasto": "giu", "modificatori": ["control", "option", "command"], "ascolto": 0.8, "n": 67}
+{"azione": "tasto", "tasto": "giu", "modificatori": ["control", "option", "command"], "ascolto": 0.8, "n": 68}
+{"azione": "attiva", "ascolto": 4, "intere": "ogni", "prefisso": "Addestramento mirato.", "tipo": "pulsante", "n": 69}
+{"azione": "giro", "ascolto": 0.3, "intere": true, "con_schermata": true, "nome": "iphone-scelta-del-reparto", "n": 70}
+{"azione": "attiva", "ascolto": 7, "intere": "ogni", "prefisso": "Falco: 24 atomi di fanteria pesante.", "tipo": "pulsante", "n": 71}
+{"azione": "albero", "ascolto": 0.2, "n": 72}
+{"azione": "avanti", "ascolto": 0.3, "intere": true, "n": 73}
+{"azione": "indietro", "ascolto": 0.3, "intere": true, "n": 74}
+{"azione": "attiva", "ascolto": 2.5, "intere": "ogni", "prefisso": "Addestramento mirato.", "tipo": "pulsante", "n": 75}
+{"azione": "attiva", "ascolto": 9, "intere": "ogni", "prefisso": "Lupo: 8 atomi di fanteria pesante.", "tipo": "pulsante", "n": 76}
+{"azione": "avanti", "ascolto": 0.3, "intere": true, "n": 77}
+{"azione": "indietro", "ascolto": 0.3, "intere": true, "n": 78}
+{"azione": "albero", "ascolto": 0.2, "n": 79}
+{"azione": "schermata", "nome": "iphone-inverno-dopo-l-addestramento", "ascolto": 0.2, "n": 80}
+{"azione": "attiva", "ascolto": 2.5, "intere": "ogni", "prefisso": "Addestramento mirato.", "tipo": "pulsante", "n": 81}
+{"azione": "albero", "ascolto": 0.2, "n": 82}
+{"azione": "attiva", "ascolto": 3, "intere": "ogni", "etichetta": "Chiudi il pannello", "tipo": "pulsante", "n": 83}
+{"azione": "avanti", "ascolto": 0.3, "intere": true, "n": 84}
+{"azione": "indietro", "ascolto": 0.3, "intere": true, "n": 85}
+{"azione": "albero", "ascolto": 0.2, "n": 86}
+{"azione": "attiva", "ascolto": 3, "intere": "ogni", "etichetta": "Prosegui alla schermata 2 di 4", "tipo": "pulsante", "n": 87}
+{"azione": "albero", "ascolto": 0.2, "n": 88}
+{"azione": "attiva", "ascolto": 3, "intere": "ogni", "etichetta": "Registro della patria", "tipo": "pulsante", "n": 89}
+{"azione": "giro", "ascolto": 0.3, "intere": true, "con_schermata": true, "nome": "iphone-registro-della-patria-inverno", "n": 90}
+{"azione": "attiva", "ascolto": 2.5, "intere": "ogni", "etichetta": "Chiudi il registro", "tipo": "pulsante", "n": 91}
+{"azione": "attiva", "ascolto": 3, "intere": "ogni", "etichetta": "Prosegui alla schermata 3 di 4", "tipo": "pulsante", "n": 92}
+{"azione": "albero", "ascolto": 0.2, "n": 93}
+{"azione": "attiva", "ascolto": 3, "intere": "ogni", "etichetta": "Prosegui alla schermata 4 di 4", "tipo": "pulsante", "n": 94}
+{"azione": "albero", "ascolto": 0.2, "n": 95}
+{"azione": "attiva", "ascolto": 5, "intere": "ogni", "prefisso": "Leva di fanteria leggera.", "tipo": "pulsante", "n": 96}
+{"azione": "albero", "ascolto": 0.2, "n": 97}
+{"azione": "schermata", "nome": "iphone-inverno-quarta-schermata", "ascolto": 0.2, "n": 98}
+{"azione": "attiva", "ascolto": 14, "intere": "ogni", "etichetta": "Prosegui alla primavera", "tipo": "pulsante", "n": 99}
+{"azione": "giro", "ascolto": 0.3, "intere": true, "con_schermata": true, "nome": "iphone-patria-seconda-primavera", "n": 100}
+{"azione": "attiva", "ascolto": 3, "intere": "ogni", "etichetta": "Registro della patria", "tipo": "pulsante", "n": 101}
+{"azione": "giro", "ascolto": 0.3, "intere": true, "con_schermata": true, "nome": "iphone-registro-della-patria-primavera", "n": 102}
+{"azione": "attiva", "ascolto": 2.5, "intere": "ogni", "etichetta": "Chiudi il registro", "tipo": "pulsante", "n": 103}
+{"azione": "termina", "ascolto": 0.3, "n": 104}
+{"azione": "avvia", "ascolto": 2, "n": 105}
+{"azione": "vo_accendi", "ascolto": 1, "n": 106}
+{"azione": "attiva", "ascolto": 5, "intere": "ogni", "etichetta": "Nuovo regno", "tipo": "pulsante", "n": 107}
+{"azione": "attiva", "ascolto": 3, "intere": "ogni", "etichetta": "Attendi l'inverno", "tipo": "pulsante", "n": 108}
+{"azione": "attiva", "ascolto": 5, "intere": "ogni", "prefisso": "Leva di fanteria leggera.", "tipo": "pulsante", "n": 109}
+{"azione": "avanti", "ascolto": 0.3, "intere": true, "n": 110}
+{"azione": "indietro", "ascolto": 0.3, "intere": true, "n": 111}
+{"azione": "attiva", "ascolto": 2.5, "intere": "ogni", "etichetta": "Prosegui alla schermata 2 di 4", "tipo": "pulsante", "n": 112}
+{"azione": "attiva", "ascolto": 2.5, "intere": "ogni", "etichetta": "Prosegui alla schermata 3 di 4", "tipo": "pulsante", "n": 113}
+{"azione": "attiva", "ascolto": 2.5, "intere": "ogni", "etichetta": "Prosegui alla schermata 4 di 4", "tipo": "pulsante", "n": 114}
+{"azione": "attiva", "ascolto": 14, "intere": "ogni", "etichetta": "Prosegui alla primavera", "tipo": "pulsante", "n": 115}
+{"azione": "giro", "ascolto": 0.3, "intere": true, "con_schermata": true, "nome": "iphone-patria-primavera-con-le-reclute", "n": 116}
+{"azione": "attiva", "ascolto": 3, "intere": "ogni", "etichetta": "Registro della patria", "tipo": "pulsante", "n": 117}
+{"azione": "giro", "ascolto": 0.3, "intere": true, "n": 118}
+{"azione": "attiva", "ascolto": 2.5, "intere": "ogni", "etichetta": "Chiudi il registro", "tipo": "pulsante", "n": 119}
+{"azione": "attiva", "ascolto": 2.5, "intere": "ogni", "etichetta": "Apri la campagna", "tipo": "pulsante", "n": 120}
+{"azione": "attiva", "ascolto": 24, "intere": "ogni", "etichetta": "fronte del guado, mappa 4 per 4", "tipo": "pulsante", "n": 121}
+{"azione": "albero", "ascolto": 0.2, "n": 122}
+{"azione": "schermata", "nome": "iphone-mappa-con-le-reclute", "ascolto": 0.2, "n": 123}
+{"azione": "attiva", "ascolto": 3, "intere": "ogni", "etichetta": "Registro della campagna", "tipo": "pulsante", "n": 124}
+{"azione": "giro", "ascolto": 0.3, "intere": true, "con_schermata": true, "nome": "iphone-registro-della-campagna-reclute", "n": 125}
+{"azione": "attiva", "ascolto": 2.5, "intere": "ogni", "etichetta": "Chiudi il registro", "tipo": "pulsante", "n": 126}
+{"azione": "termina", "ascolto": 0.3, "n": 127}
+{"azione": "avvia", "ascolto": 2, "n": 128}
+{"azione": "vo_accendi", "ascolto": 1, "n": 129}
+{"azione": "attiva", "ascolto": 5, "intere": "ogni", "etichetta": "Nuovo regno", "tipo": "pulsante", "n": 130}
+{"azione": "attiva", "ascolto": 3, "intere": "ogni", "etichetta": "Attendi l'inverno", "tipo": "pulsante", "n": 131}
+{"azione": "attiva", "ascolto": 2.5, "intere": "ogni", "prefisso": "Addestramento mirato.", "tipo": "pulsante", "n": 132}
+{"azione": "attiva", "ascolto": 4, "intere": "ogni", "prefisso": "Lupo: 8 atomi di fanteria pesante.", "tipo": "pulsante", "n": 133}
+{"azione": "attiva", "ascolto": 2.5, "intere": "ogni", "prefisso": "Addestramento mirato.", "tipo": "pulsante", "n": 134}
+{"azione": "attiva", "ascolto": 4, "intere": "ogni", "prefisso": "Corvo: 6 atomi di fanteria leggera.", "tipo": "pulsante", "n": 135}
+{"azione": "albero", "ascolto": 0.2, "n": 136}
+{"azione": "attiva", "ascolto": 2.5, "intere": "ogni", "etichetta": "Prosegui alla schermata 2 di 4", "tipo": "pulsante", "n": 137}
+{"azione": "attiva", "ascolto": 2.5, "intere": "ogni", "etichetta": "Prosegui alla schermata 3 di 4", "tipo": "pulsante", "n": 138}
+{"azione": "attiva", "ascolto": 2.5, "intere": "ogni", "etichetta": "Prosegui alla schermata 4 di 4", "tipo": "pulsante", "n": 139}
+{"azione": "attiva", "ascolto": 14, "intere": "ogni", "etichetta": "Prosegui alla primavera", "tipo": "pulsante", "n": 140}
+{"azione": "albero", "ascolto": 0.2, "n": 141}
+{"azione": "attiva", "ascolto": 12, "intere": "ogni", "etichetta": "Attendi l'inverno", "tipo": "pulsante", "n": 142}
+{"azione": "albero", "ascolto": 0.2, "n": 143}
+{"azione": "attiva", "ascolto": 4, "intere": "ogni", "prefisso": "Mantenimento dell'addestramento mirato.", "tipo": "pulsante", "n": 144}
+{"azione": "giro", "ascolto": 0.3, "intere": true, "con_schermata": true, "nome": "iphone-scelta-del-mantenimento", "n": 145}
+{"azione": "attiva", "ascolto": 9, "intere": "ogni", "prefisso": "Lupo: 8 atomi di fanteria pesante con addestramento mirato.", "tipo": "pulsante", "n": 146}
+{"azione": "albero", "ascolto": 0.2, "n": 147}
+{"azione": "avanti", "ascolto": 0.3, "intere": true, "n": 148}
+{"azione": "indietro", "ascolto": 0.3, "intere": true, "n": 149}
+{"azione": "schermata", "nome": "iphone-inverno-mantenimento-pagato", "ascolto": 0.2, "n": 150}
+{"azione": "attiva", "ascolto": 2.5, "intere": "ogni", "etichetta": "Prosegui alla schermata 2 di 4", "tipo": "pulsante", "n": 151}
+{"azione": "attiva", "ascolto": 2.5, "intere": "ogni", "etichetta": "Prosegui alla schermata 3 di 4", "tipo": "pulsante", "n": 152}
+{"azione": "attiva", "ascolto": 2.5, "intere": "ogni", "etichetta": "Prosegui alla schermata 4 di 4", "tipo": "pulsante", "n": 153}
+{"azione": "attiva", "ascolto": 14, "intere": "ogni", "etichetta": "Prosegui alla primavera", "tipo": "pulsante", "n": 154}
+{"azione": "albero", "ascolto": 0.2, "n": 155}
+{"azione": "schermata", "nome": "iphone-patria-terza-primavera", "ascolto": 0.2, "n": 156}
+{"azione": "orientamento", "verso": "verticale", "ascolto": 0.2, "n": 157}
+{"azione": "vo_spegni", "ascolto": 0.2, "n": 158}
+{"azione": "termina", "ascolto": 0.2, "n": 159}
+{"azione": "fine", "n": 160}

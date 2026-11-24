@@ -1,0 +1,18 @@
+commit b0a15f2, ramo incarico-31, righe di «git status --short»: 14, compilato in 3 s (date +%s) il 2026-11-24 02:48:36
+«git status --short» al momento della copia:
+ M Applicazione/Esplorazione/SessioneInterattivaTest.swift
+ M Fondamenta/registro-decisioni-architetturali.md
+ M Incarichi/31-2026-11-23-prodotti/banco-del-regno/README.md
+ M Proposte/classi-dei-campioni.md
+ M note-di-rilascio.txt
+ M registro-scostamenti.md
+ M scripts/interattivo.py
+ M scripts/tester.py
+?? Incarichi/31-2026-11-23-decisioni-titolare-regno-classi-seconda-tappa-regno-build-32-resoconto.md
+?? Incarichi/31-2026-11-23-prodotti/cancelli-visti-fallire/mutanti-dei-sorgenti.py
+?? Incarichi/31-2026-11-23-prodotti/cancelli-visti-fallire/mutanti-dei-sorgenti.txt
+?? Incarichi/31-2026-11-23-prodotti/salvataggi-build-31/fixture-del-pacchetto/
+?? Incarichi/31-2026-11-23-prodotti/verifica-con-voiceover/
+?? nota-per-il-titolare-il-regno-seconda-tappa.md
+impronta di ciò da cui dipendono app e pilota (Applicazione/Sorgenti Applicazione/Risorse Applicazione/Esplorazione Applicazione/project.yml Codice/Sources Codice/Package.swift): cdd95f270ef49c7f29aee0f1ebf59049843883a2e637985308d8542d7e67ba95
+Xcode 27.2 Build version 27B52 

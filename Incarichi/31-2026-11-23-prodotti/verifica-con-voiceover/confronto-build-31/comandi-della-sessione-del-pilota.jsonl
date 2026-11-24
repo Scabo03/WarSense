@@ -1,0 +1,15 @@
+{"azione": "avvia", "ascolto": 2, "n": 1}
+{"azione": "vo_accendi", "ascolto": 1, "n": 2}
+{"azione": "attiva", "ascolto": 5, "etichetta": "Nuovo regno", "tipo": "pulsante", "n": 3}
+{"azione": "attiva", "ascolto": 14, "etichetta": "Attendi l'inverno", "tipo": "pulsante", "n": 4}
+{"azione": "attiva", "ascolto": 8, "prefisso": "Leva di fanteria leggera.", "tipo": "pulsante", "n": 5}
+{"azione": "attiva", "ascolto": 3, "etichetta": "Prosegui alla schermata 2 di 4", "tipo": "pulsante", "n": 6}
+{"azione": "attiva", "ascolto": 3, "etichetta": "Prosegui alla schermata 3 di 4", "tipo": "pulsante", "n": 7}
+{"azione": "attiva", "ascolto": 3, "etichetta": "Prosegui alla schermata 4 di 4", "tipo": "pulsante", "n": 8}
+{"azione": "attiva", "ascolto": 16, "etichetta": "Prosegui alla primavera", "tipo": "pulsante", "n": 9}
+{"azione": "attiva", "ascolto": 2.5, "etichetta": "Apri la campagna", "tipo": "pulsante", "n": 10}
+{"azione": "attiva", "ascolto": 12, "etichetta": "fronte del guado, mappa 4 per 4", "tipo": "pulsante", "n": 11}
+{"azione": "attiva", "ascolto": 14, "etichetta": "Chiudi la giornata", "tipo": "pulsante", "n": 12}
+{"azione": "vo_spegni", "ascolto": 0.2, "n": 13}
+{"azione": "termina", "ascolto": 0.2, "n": 14}
+{"azione": "fine", "n": 15}

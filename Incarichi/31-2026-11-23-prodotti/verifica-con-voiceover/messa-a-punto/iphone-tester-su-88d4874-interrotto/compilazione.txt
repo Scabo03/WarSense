@@ -1,0 +1,11 @@
+commit 88d4874, ramo incarico-31, righe di «git status --short»: 7, compilato in 3 s (date +%s) il 2026-11-24 02:31:10
+«git status --short» al momento della copia:
+ M Applicazione/Esplorazione/SessioneInterattivaTest.swift
+ M note-di-rilascio.txt
+ M scripts/interattivo.py
+ M scripts/tester.py
+?? Incarichi/31-2026-11-23-decisioni-titolare-regno-classi-seconda-tappa-regno-build-32-resoconto.md
+?? Incarichi/31-2026-11-23-prodotti/verifica-con-voiceover/
+?? nota-per-il-titolare-il-regno-seconda-tappa.md
+impronta di ciò da cui dipendono app e pilota (Applicazione/Sorgenti Applicazione/Risorse Applicazione/Esplorazione Applicazione/project.yml Codice/Sources Codice/Package.swift): 00dad6b9df82ca8998aeca2b5f2775e13980940f4a82f621b434974d403fe7ae
+Xcode 27.2 Build version 27B52 

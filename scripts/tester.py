@@ -18,8 +18,22 @@ che nasce — finché la campagna si conclude; ascolta la dichiarazione di concl
 passa l'inverno ordinando le leve che può pagare, annulla una spesa, percorre le quattro schermate e
 arriva alla primavera, dove apre la campagna dell'anno nuovo e conta le proprie formazioni sulla mappa.
   python3 scripts/tester.py <cartella> <formato> <giornate giocate muovendo i gruppi> regno [opzioni]
+
+Con l'opzione «due-anni» (incarico 31) il tester gioca DUE ANNI DEL REGNO usando ciò che la seconda tappa
+ha portato: in primavera sceglie chi parte e chi resta in patria attivando le righe delle forze; gioca la
+campagna fino alla conclusione; d'inverno ascolta il mantenimento, ordina un addestramento mirato dalla
+scelta del reparto (toccando prima una scelta impedita, se c'è), e alla quarta schermata ordina una leva,
+che sarà pronta in estate; nella seconda primavera rilegge le forze e confronta i nomi con quelli del primo
+anno; nella seconda campagna ascolta, alla chiusura che apre l'estate, l'arrivo delle reclute dalla patria;
+nel secondo inverno paga il mantenimento dell'addestramento; nella terza primavera rilegge le forze.
+  python3 scripts/tester.py <cartella> <formato> <giornate> regno due-anni [tieni=Cervo] [solo=Corvo]
+      [tieni2=…] [solo2=Falco] ["addestra=Falco: 12"] [contatto] …
+«tieni=» le formazioni da tenere in patria il primo anno (separate da virgola); «solo=» la sola che parte;
+«tieni2=» e «solo2=» lo stesso per il secondo anno; «addestra=» l'inizio della scelta del reparto da
+addestrare (altrimenti la più costosa che lascia di che pagare la leva della quarta schermata).
 """
 import json
+import os
 import pathlib
 import re
 import sys
@@ -34,7 +48,11 @@ GIORNATE = int(sys.argv[3]) if len(sys.argv) > 3 else 30
 # (incarico 30) = ogni gruppo armato marcia verso la formazione armata avversaria che la mappa mostra,
 # scegliendo fra le caselle raggiungibili la più vicina a quella, ed entrandovi quando è raggiungibile.
 OPZIONI = set(sys.argv[5:])
-DIARIO = CARTELLA / f"diario-{FORMATO}.jsonl"
+# Le opzioni con un valore («tieni=Cervo»), per i due anni del regno (incarico 31).
+PARAMETRI = dict(o.split("=", 1) for o in sys.argv[5:] if "=" in o)
+# Il diario si scrive una riga alla volta: di norma accanto ai comandi del pilota; chi lancia il tester può
+# farlo scrivere altrove (fra i prodotti dell'incarico), perché un'interruzione non lo perda.
+DIARIO = pathlib.Path(os.environ.get("TESTER_DIARIO") or CARTELLA / f"diario-{FORMATO}.jsonl")
 # Il possessivo che dichiara una formazione propria, nelle quattro forme accordate (02 §4.6).
 PROPRIO = re.compile(r"\btu(o|a|oi|e) ")
 
@@ -153,6 +171,9 @@ def evacua():
 
 def battaglia():
     diario("battaglia_aperta", sentito=sentito(cmd({"azione": "parla", "ascolto": 3})))
+    # Le tessere del deck come l'albero le espone, col loro valore (incarico 31): il reparto che in patria
+    # ha ricevuto un miglioramento lo dichiara in coda al valore («…, addestramento mirato»).
+    diario("tessere_del_deck", righe=[r for r in albero() if "esemplar" in r and "=" in r])
     ritirata = False
     for turno in range(1, 25):
         nomi = etichette()
@@ -411,7 +432,8 @@ def anno_del_regno():
     nomi = etichette()
     diario("primavera", sentito=sentito(e), fuoco=e.get("dopo"),
            riserve=[n for n in nomi if re.match(r"^(monete di bronzo|uomini|metalli|materiale da costruzione|animali): \d+$", n)],
-           forze=[n for n in nomi if n.startswith("gruppo armato") or n.startswith("formazione")])
+           # Dall'incarico 31 ogni riga delle forze comincia dal nome della formazione.
+           forze=[n for n in nomi if RIGA_FORZE.match(n) or n.startswith("gruppo armato") or n.startswith("formazione")])
     cmd({"azione": "schermata", "nome": f"{FORMATO}-seconda-primavera", "ascolto": 0.3})
     # 5. La campagna dell'anno nuovo: le formazioni del regno, reclute comprese, sono sulla mappa.
     attiva(etichetta="Apri la campagna", tipo="pulsante", ascolto=3)
@@ -420,10 +442,286 @@ def anno_del_regno():
     diario("seconda_campagna", formazioni_sulla_mappa=len(proprie), etichette=proprie, stato=tocco_magico())
 
 
+# ---------------------------------------------------------------- i due anni del regno (incarico 31)
+
+# Una riga delle forze in patria: il nome, la categoria, i reparti, e dove va la formazione.
+RIGA_FORZE = re.compile(r"^(\w+), (gruppo armato|formazione di ricognizione|formazione non armata)"
+                        r"(, reclute dell'inverno)?: (.*)\. ([^.]+)$")
+RISERVA = re.compile(r"^(monete di bronzo|uomini|metalli|materiale da costruzione|animali): \d+$")
+
+
+def sentito_intero(e):
+    """Ciò che si è sentito dopo un'azione: le pronunce intere lette dagli appunti (il servizio VoiceOver
+    delle prove tronca a 64 caratteri), poi quelle troncate."""
+    piene = [x.get("testo", "") for x in e.get("intere", []) if x.get("testo")]
+    return " | ".join(piene + e.get("ascoltate", [])) or e.get("dopo", "")
+
+
+def attiva_e_ascolta(**chi):
+    """Come `attiva`, chiedendo al pilota anche la pronuncia intera di ciò che VoiceOver dice dopo."""
+    e = cmd(dict({"azione": "attiva", "ascolto": chi.pop("ascolto", 3.5), "intere": "ogni"}, **chi))
+    diario("attiva", chi=chi, fuoco=e.get("fuoco"), sentito=sentito_intero(e), errore=e.get("errore"))
+    return e
+
+
+def letta_per_intero():
+    """La schermata letta dall'inizio alla fine, con le pronunce intere dove gli appunti le danno."""
+    e = cmd({"azione": "giro", "ascolto": 0.3, "intere": True}, attesa=900)
+    piene, troncate = e.get("pronunce_intere", []), e.get("pronunce", [])
+    return [(piene[i] if i < len(piene) and piene[i] else t) for i, t in enumerate(troncate)]
+
+
+def forze_in_patria():
+    """Le righe delle forze come la patria le espone: nome, categoria, reparti, dove va."""
+    righe = []
+    for n in etichette():
+        m = RIGA_FORZE.match(n)
+        if m and not any(r["riga"] == n for r in righe):
+            righe.append({"nome": m.group(1), "categoria": m.group(2), "reclute": bool(m.group(3)),
+                          "reparti": m.group(4), "dove": m.group(5), "riga": n})
+    return righe
+
+
+def reparti_di(testo):
+    """I reparti nominati in una riga: archetipo -> atomi."""
+    out = {}
+    for atomi, archetipo in re.findall(r"(\d+) atomi di ([a-z ]+?)(?= con |,|$)", testo):
+        out[archetipo] = out.get(archetipo, 0) + int(atomi)
+    return out
+
+
+def confronta_i_nomi(prima, dopo):
+    """I nomi non scorrono (incarico 31): ogni formazione che c'era e c'è ancora ha la stessa categoria,
+    nessun tipo di reparto nuovo e mai più atomi di prima. Era il difetto della build 31: dopo la perdita
+    di un gruppo «Corvo» diventava la formazione che era «Lupo». Restituisce i nomi scorsi."""
+    di_prima = {f["nome"]: f for f in prima}
+    scorsi = []
+    for f in dopo:
+        p = di_prima.get(f["nome"])
+        if not p:
+            continue
+        a, b = reparti_di(p["reparti"]), reparti_di(f["reparti"])
+        if p["categoria"] != f["categoria"] or any(k not in a or v > a[k] for k, v in b.items()):
+            scorsi.append({"nome": f["nome"], "prima": p["riga"], "dopo": f["riga"]})
+    return scorsi
+
+
+def scegli_chi_parte(anno):
+    """In primavera, prima di aprire la campagna: attivando le righe delle forze tiene in patria o manda
+    al fronte ciascuna formazione, secondo le opzioni, e ascolta la conferma di ogni scelta."""
+    solo = PARAMETRI.get("solo" if anno == 1 else "solo2")
+    tieni = PARAMETRI.get("tieni", "") if anno == 1 else PARAMETRI.get("tieni2", PARAMETRI.get("tieni", ""))
+    tieni = [x for x in tieni.split(",") if x]
+    for f in forze_in_patria():
+        if f["reclute"]:
+            continue  # le reclute entrano come la loro riga dichiara
+        vuole = (f["nome"] == solo) if solo else (f["nome"] not in tieni)
+        if vuole != f["dove"].startswith("Part"):
+            e = attiva_e_ascolta(prefisso=f["nome"] + ",", tipo="pulsante")
+            ora = next((r for r in forze_in_patria() if r["nome"] == f["nome"]), {})
+            diario("destinazione", anno=anno, nome=f["nome"], al_fronte=vuole, sentito=sentito_intero(e),
+                   riga=ora.get("riga"))
+    diario("chi_parte", anno=anno, forze=[f["riga"] for f in forze_in_patria()])
+
+
+def formazioni_sulla_mappa():
+    return [n for n in etichette() if re.search(r"riga \d+, casella \d+", n) and PROPRIO.search(n)]
+
+
+def giorno_dallo_stato():
+    """Il giorno della campagna come lo dice l'informazione di stato (tocco magico, pronuncia intera)."""
+    if "Registro della campagna" not in etichette():
+        return None
+    e = cmd({"azione": "multi_tocco", "tocchi": 2, "dita": 2, "etichetta": "Registro della campagna",
+             "tipo": "pulsante", "ascolto": 3.0, "intere": "ogni"})
+    s = sentito_intero(e)
+    diario("tocco_magico", sentito=s)
+    m = re.search(r"Giorno (\d+)\.", s)
+    return int(m.group(1)) if m else None
+
+
+def campagna_dell_anno(anno):
+    """La campagna di un anno: le prime giornate muovendo i gruppi, le altre chiuse col comando; la
+    chiusura che apre una stagione si ascolta a lungo, perché è lì che arrivano dalla patria le reclute
+    ordinate tardi; poi la dichiarazione di conclusione e il ritorno in patria. Falso se non si conclude."""
+    attiva_e_ascolta(etichetta="Apri la campagna", tipo="pulsante", ascolto=3)
+    e = attiva_e_ascolta(prefisso=FRONTE[FORMATO], tipo="pulsante", ascolto=8)
+    diario("campagna_aperta", anno=anno, fronte=FRONTE[FORMATO], sentito=sentito_intero(e),
+           formazioni_sulla_mappa=formazioni_sulla_mappa())
+
+    def conclusa():
+        return "Campagna conclusa" in etichette()
+
+    if "Torna in patria" not in etichette() and not conclusa():
+        diario("osservazione_tester", testo="la campagna non si è aperta", anno=anno, sentito=sentito_intero(e))
+        return False
+    battaglie = 0
+    for g in range(1, GIORNATE + 1):
+        if conclusa():
+            break
+        esito = giornata(g)
+        diario("fine_giornata", numero=g, esito=esito)
+        if esito == "battaglia":
+            battaglie += 1
+    giorno = None
+    for _ in range(170):
+        if conclusa():
+            break
+        if giorno is None or giorno in (28, 58):
+            giorno = giorno_dallo_stato() or giorno
+        if giorno is not None and giorno % 30 == 0 and giorno < 90:
+            # La chiusura che apre l'estate o l'autunno: si ascolta finché la voce tace.
+            e = cmd({"azione": "attiva", "etichetta": "Chiudi la giornata", "tipo": "pulsante", "ascolto": 45,
+                     "quiete": 11, "intere": "ogni"})
+            s = sentito_intero(e)
+            diario("stagione_nuova", anno=anno, chiusa_la_giornata=giorno, sentito=s, pronunce=e.get("ascoltate"),
+                   istanti=e.get("ascoltate_t"), formazioni_sulla_mappa=formazioni_sulla_mappa())
+        else:
+            e = attiva(etichetta="Chiudi la giornata", tipo="pulsante", ascolto=3)
+            s = sentito(e)
+            diario("giornata_chiusa", numero=giorno, sentito=s, errore=e.get("errore"))
+        giorno = giorno + 1 if giorno is not None and "Giornata chiusa" in s else None
+        if "battaglia in sospeso" in s or "Battaglia" in s or e.get("errore"):
+            esito = giornata(giorno or 0)
+            diario("fine_giornata", numero=giorno, esito=esito)
+            if esito == "battaglia":
+                battaglie += 1
+            giorno = None
+    if not conclusa():
+        diario("osservazione_tester", testo="la campagna non si è conclusa nelle giornate giocate", anno=anno)
+        return False
+    cmd({"azione": "schermata", "nome": f"{FORMATO}-conclusione-anno-{anno}", "ascolto": 0.3})
+    diario("dichiarazione_di_conclusione", anno=anno, pronunce=letta_per_intero(), battaglie=battaglie)
+    e = attiva_e_ascolta(etichetta="Torna in patria", tipo="pulsante", ascolto=4)
+    diario("ritorno_in_patria", anno=anno, fuoco=e.get("dopo"), forze=[f["riga"] for f in forze_in_patria()])
+    return True
+
+
+def costo_in_monete(voce):
+    m = re.search(r"Costa: monete di bronzo (\d+) su (\d+)", voce)
+    return (int(m.group(1)), int(m.group(2))) if m else None
+
+
+def scelte_del_reparto():
+    out = []
+    for n in etichette():
+        if re.match(r"^\w+: \d+ atomi di ", n) and n not in out:
+            out.append(n)
+    return out
+
+
+def inverno_dei_due_anni(anno):
+    """L'inverno con le cose nuove: il mantenimento che il gioco preleva e dichiara; il mantenimento
+    dell'addestramento per chi lo porta; al primo inverno l'addestramento mirato dalla scelta del reparto
+    (dopo aver toccato una scelta impedita, se c'è) e, alla quarta schermata, una leva che sarà pronta in
+    estate; poi la primavera. Restituisce le forze lette in primavera."""
+    e = attiva_e_ascolta(etichetta="Attendi l'inverno", tipo="pulsante", ascolto=10)
+    nomi = etichette()
+    diario("inverno", anno=anno, sentito=sentito_intero(e), fuoco=e.get("dopo"),
+           riserve=[n for n in nomi if RISERVA.match(n)],
+           mantenimento=[n for n in nomi if n.startswith("Mantenimento dell'esercito") or "reparto sciolto" in n
+                         or n.startswith("Il denaro non è bastato")],
+           linguette=[n for n in nomi if n in ("Lavori lunghi", "Lavori di media durata", "Lavori brevi")],
+           forze=[f["riga"] for f in forze_in_patria()])
+    # Chi porta un miglioramento lo conserva soltanto se lo si mantiene (01 §4.14): lo si paga a tutti.
+    for _ in range(8):
+        if not any("da mantenere entro l'inverno" in f["riga"] for f in forze_in_patria()):
+            break
+        attiva_e_ascolta(prefisso="Mantenimento dell'addestramento mirato.", tipo="pulsante", ascolto=3)
+        scelte = scelte_del_reparto()
+        diario("scelta_del_mantenimento", anno=anno, scelte=scelte)
+        pagabili = [s for s in scelte if "Non si può ordinare" not in s]
+        if not pagabili:
+            if PANNELLO["chiudi"] in etichette():
+                attiva(etichetta=PANNELLO["chiudi"], tipo="pulsante")
+            break
+        e = attiva_e_ascolta(prefisso=pagabili[0].split(" Costa:")[0], tipo="pulsante", ascolto=8)
+        diario("mantenimento_dell_addestramento", anno=anno, scelta=pagabili[0], sentito=sentito_intero(e),
+               forze=[f["riga"] for f in forze_in_patria() if "addestramento" in f["riga"]])
+        if "ordinato" not in sentito_intero(e):
+            break
+    if anno == 1:
+        leva = next((n for n in nomi if n.startswith("Leva di fanteria leggera.")), "")
+        costo_leva = (costo_in_monete(leva) or (0, 0))[0]
+        attiva_e_ascolta(prefisso="Addestramento mirato.", tipo="pulsante", ascolto=3)
+        diario("scelta_del_reparto", anno=anno, pronunce=letta_per_intero())
+        scelte = scelte_del_reparto()
+        impedite = [s for s in scelte if "Non si può ordinare" in s]
+        if impedite:
+            e = attiva_e_ascolta(prefisso=impedite[0].split(" Non si può")[0], tipo="pulsante", ascolto=6)
+            diario("scelta_impedita", scelta=impedite[0], sentito=sentito_intero(e),
+                   riserve=[n for n in etichette() if RISERVA.match(n)])
+            attiva_e_ascolta(prefisso="Addestramento mirato.", tipo="pulsante", ascolto=3)
+            scelte = scelte_del_reparto()
+        pagabili = [(costo_in_monete(s), s) for s in scelte if "Non si può ordinare" not in s and costo_in_monete(s)]
+        voluta = PARAMETRI.get("addestra")
+        scelta = next((s for _, s in pagabili if voluta and s.startswith(voluta)), None)
+        if scelta is None and pagabili:
+            # La più costosa che lasci di che pagare la leva della quarta schermata.
+            con_la_leva = [(c, s) for c, s in pagabili if c[1] - c[0] >= costo_leva]
+            scelta = max(con_la_leva or pagabili, key=lambda x: x[0][0])[1]
+        if scelta:
+            e = attiva_e_ascolta(prefisso=scelta.split(" Costa:")[0], tipo="pulsante", ascolto=8)
+            dopo = cmd({"azione": "avanti", "ascolto": 0.3, "intere": True})
+            qui = cmd({"azione": "indietro", "ascolto": 0.3, "intere": True})
+            ora = etichette()
+            diario("addestramento_mirato", scelta=scelta, sentito=sentito_intero(e),
+                   fuoco_dopo={"indietro": qui.get("pronunce_intere") or qui.get("pronunce"),
+                               "avanti": dopo.get("pronunce_intere") or dopo.get("pronunce")},
+                   riserve=[n for n in ora if RISERVA.match(n)],
+                   forze=[f["riga"] for f in forze_in_patria() if "addestramento" in f["riga"]],
+                   lavori=[n for n in ora if n.startswith("Addestramento mirato per")])
+        elif PANNELLO["chiudi"] in etichette():
+            attiva(etichetta=PANNELLO["chiudi"], tipo="pulsante")
+    for stazione in (2, 3, 4):
+        e = attiva_e_ascolta(etichetta=f"Prosegui alla schermata {stazione} di 4", tipo="pulsante", ascolto=3.5)
+        leve = []
+        for n in etichette():
+            if n.startswith("Leva di") and "Costa" in n and n not in leve:
+                leve.append(n)
+        diario("stazione", anno=anno, numero=stazione, sentito=sentito_intero(e), leve=leve)
+    if anno == 1:
+        if any(n.startswith("Leva di fanteria leggera.") and "Non si può ordinare" not in n for n in etichette()):
+            e = attiva_e_ascolta(prefisso="Leva di fanteria leggera.", tipo="pulsante", ascolto=5)
+            diario("leva_alla_quarta_schermata", sentito=sentito_intero(e),
+                   lavori=[n for n in etichette() if n.startswith("Leva di") and "Costa" not in n])
+        else:
+            diario("osservazione_tester", testo="alla quarta schermata la leva di fanteria leggera non si può ordinare")
+    e = attiva_e_ascolta(etichetta="Prosegui alla primavera", tipo="pulsante", ascolto=10)
+    forze = forze_in_patria()
+    diario("primavera", anno=anno + 1, sentito=sentito_intero(e), fuoco=e.get("dopo"),
+           riserve=[n for n in etichette() if RISERVA.match(n)], forze=[f["riga"] for f in forze])
+    cmd({"azione": "schermata", "nome": f"{FORMATO}-primavera-anno-{anno + 1}", "ascolto": 0.3})
+    return forze
+
+
+def due_anni_del_regno():
+    """Due anni del regno, dall'avvio alla terza primavera, con VoiceOver acceso."""
+    e = attiva_e_ascolta(etichetta="Nuovo regno", tipo="pulsante", ascolto=5)
+    diario("patria", anno=1, fuoco=e.get("dopo"), pronunce=letta_per_intero())
+    forze = {1: forze_in_patria()}
+    for anno in (1, 2):
+        scegli_chi_parte(anno)
+        if not campagna_dell_anno(anno):
+            return
+        forze[anno + 1] = inverno_dei_due_anni(anno)
+        scorsi = confronta_i_nomi(forze[anno], forze[anno + 1])
+        diario("nomi", dalla_primavera=anno, alla_primavera=anno + 1,
+               prima=[f["riga"] for f in forze[anno]], dopo=[f["riga"] for f in forze[anno + 1]], scorsi=scorsi,
+               esito="ogni nome è rimasto alla sua formazione" if not scorsi else "NOMI SCORSI")
+    scorsi = confronta_i_nomi(forze[1], forze[3])
+    diario("nomi", dalla_primavera=1, alla_primavera=3, scorsi=scorsi,
+           esito="ogni nome è rimasto alla sua formazione" if not scorsi else "NOMI SCORSI")
+
+
 def main():
     if len(sys.argv) > 4 and sys.argv[4] == "regno":
-        anno_del_regno()
-        diario("fine", stato="anno del regno")
+        if "due-anni" in OPZIONI:
+            due_anni_del_regno()
+            diario("fine", stato="due anni del regno")
+        else:
+            anno_del_regno()
+            diario("fine", stato="anno del regno")
         print(f"diario: {DIARIO}")
         return
     if len(sys.argv) > 4 and sys.argv[4] == "riprendi":

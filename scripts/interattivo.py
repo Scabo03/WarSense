@@ -9,9 +9,18 @@ suoi parametri, per esempio {"azione": "attiva", "etichetta": "Impostazioni", "t
 Uso:
   python3 scripts/interattivo.py <cartella> '<comando JSON>' [secondi di attesa]
   python3 scripts/interattivo.py <cartella> --pronto [secondi]   attende che il pilota sia acceso
+  python3 scripts/interattivo.py <cartella> --appunti <udid>     serve al pilota gli appunti del simulatore
+
+Gli appunti (incarico 31). Il servizio VoiceOver delle prove tronca ogni pronuncia a 64 caratteri. Il
+pilota dà a VoiceOver il comando che copia negli appunti l'ultima cosa detta, per intero, e chiede di
+leggerli lasciando un file `appunti/richiesta-<k>` nella cartella: questo servitore li legge con
+`xcrun simctl pbpaste <udid>`, risponde in `appunti/risposta-<k>.txt` e li svuota, sicché una copia
+non riuscita dà una risposta vuota e non quella di prima. Finisce da sé quando il pilota finisce.
 """
 import json
+import os
 import pathlib
+import subprocess
 import sys
 import time
 
@@ -48,9 +57,54 @@ def breve(e):
     return "\n  ".join(parti)
 
 
+def pilota_finito(cartella):
+    """Vero se il pilota ha finito: ha scritto «fine» o «inerzia», oppure il suo processo non c'è più."""
+    if any(e.get("azione") in ("fine", "inerzia") for e in esiti(cartella)):
+        return True
+    f = cartella / "pilota.pid"
+    if f.exists():
+        try:
+            os.kill(int(f.read_text().strip()), 0)
+        except (ValueError, ProcessLookupError):
+            return True
+        except PermissionError:
+            pass
+    return False
+
+
+def servi_appunti(cartella, udid):
+    """Serve al pilota gli appunti del simulatore, una richiesta alla volta, finché il pilota non finisce."""
+    appunti = cartella / "appunti"
+    appunti.mkdir(parents=True, exist_ok=True)
+    servite, ultimo_controllo = 0, time.time()
+    while True:
+        richieste = sorted(appunti.glob("richiesta-*"), key=lambda p: int(p.name.split("-")[1]))
+        for richiesta in richieste:
+            k = richiesta.name.split("-")[1]
+            try:
+                testo = subprocess.run(["xcrun", "simctl", "pbpaste", udid], capture_output=True, text=True, timeout=10).stdout
+                subprocess.run(["xcrun", "simctl", "pbcopy", udid], input="", text=True, timeout=10)
+            except subprocess.TimeoutExpired:
+                testo = ""
+            provvisorio = appunti / f".risposta-{k}"
+            provvisorio.write_text(testo, encoding="utf-8")
+            provvisorio.rename(appunti / f"risposta-{k}.txt")
+            richiesta.unlink(missing_ok=True)
+            servite += 1
+        if time.time() - ultimo_controllo > 4:
+            ultimo_controllo = time.time()
+            if pilota_finito(cartella):
+                break
+        time.sleep(0.03)
+    print(f"appunti: {servite} richieste servite")
+    return 0
+
+
 def main():
     cartella = pathlib.Path(sys.argv[1])
     cartella.mkdir(parents=True, exist_ok=True)
+    if sys.argv[2] == "--appunti":
+        return servi_appunti(cartella, sys.argv[3])
     if sys.argv[2] == "--pronto":
         limite = time.time() + float(sys.argv[3] if len(sys.argv) > 3 else 300)
         while time.time() < limite:

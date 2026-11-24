@@ -1,0 +1,1 @@
+2026-11-24 02:51:10 tester «tester-due-anni» iphone 3 (E2C6F42C-A154-485C-B504-DB8BB5C3FFA4), argomenti «piccola 3 regno due-anni tieni=Cervo»: avvio 74 s, partita 1098 s, chiusura 31 s (date +%s); VoiceOver spento: sì

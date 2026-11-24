@@ -1,0 +1,1 @@
+2026-11-24 02:51:07 tester «tester-due-anni» ipad 3 (75A249BF-88AB-46A0-86A9-9378408D540E), argomenti «media 3 regno due-anni tieni=Cervo»: avvio 67 s, partita 1103 s, chiusura 28 s (date +%s); VoiceOver spento: sì

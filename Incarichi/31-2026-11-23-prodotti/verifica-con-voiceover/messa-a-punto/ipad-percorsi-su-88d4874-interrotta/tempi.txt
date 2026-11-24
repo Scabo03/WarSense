@@ -1,0 +1,1 @@
+2026-11-24 02:51:07 percorsi ipad 2 (8D3583DB-1E8D-4688-93E7-5F959B7B7D62), blocchi partenza mappa inverno reclute mantenimento estate orizzontale testo: compilazione 0 s, avvio del pilota 30 s, percorsi 792 s, chiusura 28 s (date +%s); VoiceOver spento: sì

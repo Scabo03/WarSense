@@ -1,0 +1,13 @@
+Questa corsa (percorsi sul secondo iPhone, 02:26–02:46 del 24 novembre) è girata sull'app compilata alle 02:26:45 dalla copia dell'albero presa a c3b5e2a (uscita di corri.sh: «compilato: commit c3b5e2a … il 2026-11-24 02:26:45»). La nota che segue è della compilazione successiva, delle 02:31:10 a 88d4874, copiata qui a fine corsa: fra c3b5e2a e 88d4874 ciò da cui dipendono app e pilota è identico («git diff --stat c3b5e2a 88d4874 -- <percorsi>» vuoto).
+commit 88d4874, ramo incarico-31, righe di «git status --short»: 7, compilato in 3 s (date +%s) il 2026-11-24 02:31:10
+«git status --short» al momento della copia:
+ M Applicazione/Esplorazione/SessioneInterattivaTest.swift
+ M note-di-rilascio.txt
+ M scripts/interattivo.py
+ M scripts/tester.py
+?? Incarichi/31-2026-11-23-decisioni-titolare-regno-classi-seconda-tappa-regno-build-32-resoconto.md
+?? Incarichi/31-2026-11-23-prodotti/verifica-con-voiceover/
+?? nota-per-il-titolare-il-regno-seconda-tappa.md
+impronta di ciò da cui dipendono app e pilota (Applicazione/Sorgenti Applicazione/Risorse Applicazione/Esplorazione Applicazione/project.yml Codice/Sources Codice/Package.swift): 00dad6b9df82ca8998aeca2b5f2775e13980940f4a82f621b434974d403fe7ae
+Xcode 27.2 Build version 27B52 
+impronta del contenuto (senza il commit), calcolata il 2026-11-24 02:33:02 sullo stesso albero della compilazione delle 02:31:10: c4cf35c9296b961f22de221a1d1a8bb0bc319f186c8b96deb72e70a3b89029b5

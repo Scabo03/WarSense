@@ -1,0 +1,1 @@
+2026-11-24 02:46:36 percorsi iphone 2 (76DF33B6-7EA7-489D-98AD-459879B75C2D), blocchi partenza mappa inverno reclute mantenimento: compilazione 5 s, avvio del pilota 8 s, percorsi 1164 s, chiusura 19 s (date +%s); VoiceOver spento: sì

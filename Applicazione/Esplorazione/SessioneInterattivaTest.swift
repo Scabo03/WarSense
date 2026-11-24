@@ -9,6 +9,11 @@ import XCTest
 /// annunci, quando coincidono con ciò che VoiceOver dice), l'albero essenziale e, a richiesta, una
 /// schermata. Chi guida legge l'esito e decide il passo seguente. Vive nel bersaglio
 /// dell'esplorazione: il collaudo non lo esegue, e l'app non ne sa nulla.
+///
+/// Dall'incarico 31: «elementi» dà gli elementi col loro tipo (comando o testo) e, se l'istantanea
+/// li porta, coi tratti; «sonda» elenca ciò che il servizio VoiceOver e l'istantanea portano oltre
+/// l'interfaccia pubblica; «quiete» accorcia l'ascolto quando la voce tace; «pausa_fuoco» fa
+/// ascoltare l'elemento prima di attivarlo; ogni esito porta l'istante «t» e la durata dell'ascolto.
 @available(iOS 27.0, *)
 @MainActor
 final class SessioneInterattivaTest: XCTestCase {
@@ -56,21 +61,139 @@ final class SessioneInterattivaTest: XCTestCase {
 
     // MARK: - VoiceOver
 
+    /// La pronuncia corrente, come la restituisce il servizio: troncata a 64 caratteri. Dopo una copia
+    /// negli appunti (vedi `interaDagliAppunti`) VoiceOver accoda alla pronuncia «copiato negli
+    /// appunti»: finché la pronuncia è la stessa di prima della copia, con quella coda, si restituisce
+    /// quella di prima.
     private func parla() -> String {
-        do { return try vo.currentSpeech().utterance } catch { return "<nessuna pronuncia: \(error.localizedDescription)>" }
+        let grezza: String
+        do { grezza = try vo.currentSpeech().utterance } catch { return "<nessuna pronuncia: \(error.localizedDescription)>" }
+        return ripulita(grezza)
+    }
+    /// La pronuncia che era corrente quando si è chiesta l'ultima copia negli appunti.
+    private var baseDellaCopia: String?
+
+    /// Toglie a una pronuncia la coda che VoiceOver le accoda dopo una copia negli appunti: se è
+    /// quella di prima della copia seguita soltanto da quella coda — ripetuta, o tagliata dai 64
+    /// caratteri — è quella di prima. Una pronuncia diversa è nuova, e la coda non c'è più.
+    private func ripulita(_ pronuncia: String) -> String {
+        guard let base = baseDellaCopia else { return pronuncia }
+        if !base.isEmpty, pronuncia.hasPrefix(base) {
+            var resto = pronuncia.dropFirst(base.count)
+            while resto.hasPrefix(Self.codaDellaCopia) { resto = resto.dropFirst(Self.codaDellaCopia.count) }
+            if Self.codaDellaCopia.hasPrefix(resto) { return base }
+        }
+        baseDellaCopia = nil
+        return pronuncia
+    }
+
+    // MARK: - La pronuncia intera, dagli appunti (incarico 31)
+
+    /// Ciò che VoiceOver accoda alla pronuncia quando copia: è una frase sua, non del gioco, nella
+    /// lingua in cui VoiceOver parla sul simulatore.
+    private static let codaDellaCopia = " copiato negli appunti"
+    private var richiesteAgliAppunti = 0
+    private var appuntiMuti = 0
+
+    /// LA PRONUNCIA INTERA. Il servizio VoiceOver delle prove tronca ogni pronuncia a 64 caratteri, e
+    /// oltre quel punto stanno la coda di una riga lunga, il suo tratto («Pulsante», «Intestazione»),
+    /// il suo suggerimento, e la coda degli annunci lunghi. VoiceOver ha però un comando che copia
+    /// negli appunti l'ultima cosa detta, per intero (da tastiera Control, Opzione, Maiuscole, C): lo
+    /// si dà qui, e gli appunti del simulatore li legge il lato Mac (`scripts/interattivo.py
+    /// --appunti`, con `xcrun simctl pbpaste`), a cui si chiede con un file nella cartella dei
+    /// comandi. Nulla se il lato Mac non risponde: dopo due silenzi non lo si chiede più.
+    private func interaDagliAppunti() -> String? {
+        guard appuntiMuti < 2, vo.isEnabled else { return nil }
+        let base = parla()
+        app.typeKey("c", modifierFlags: [.control, .option, .shift])
+        baseDellaCopia = base
+        Thread.sleep(forTimeInterval: 0.15)
+        let appunti = cartella.appendingPathComponent("appunti")
+        try? FileManager.default.createDirectory(at: appunti, withIntermediateDirectories: true)
+        richiesteAgliAppunti += 1
+        let richiesta = appunti.appendingPathComponent("richiesta-\(richiesteAgliAppunti)")
+        let risposta = appunti.appendingPathComponent("risposta-\(richiesteAgliAppunti).txt")
+        try? Data().write(to: richiesta)
+        let limite = Date().addingTimeInterval(3)
+        while Date() < limite {
+            if let testo = try? String(contentsOf: risposta, encoding: .utf8) {
+                try? FileManager.default.removeItem(at: risposta)
+                appuntiMuti = 0
+                var intera = testo
+                if let coda = testo.range(of: Self.codaDellaCopia) { intera = String(testo[..<coda.lowerBound]) }
+                // Ciò che si è copiato è ciò che VoiceOver stava dicendo nell'istante della copia, che
+                // può essere già la pronuncia successiva a quella letta un momento prima: la base
+                // per riconoscere la coda è l'inizio di ciò che si è copiato davvero.
+                if !intera.isEmpty { baseDellaCopia = String(intera.prefix(64)) }
+                return intera
+            }
+            Thread.sleep(forTimeInterval: 0.03)
+        }
+        try? FileManager.default.removeItem(at: richiesta)
+        appuntiMuti += 1
+        return nil
+    }
+
+    /// Ciò che un ascolto ha sentito: le pronunce distinte, l'istante in cui ciascuna è comparsa
+    /// (secondi dall'inizio dell'ascolto) e, se richieste, le pronunce intere lette dagli appunti.
+    private struct Ascolto {
+        var pronunce: [String] = []
+        var istanti: [Double] = []
+        var intere: [[String: Any]] = []
     }
 
     /// Le pronunce distinte nei `secondi` successivi, a passi di un quarto di secondo: un annuncio che
     /// VoiceOver dice dopo un'azione vi compare quando è ciò che VoiceOver sta dicendo.
-    private func ascolta(_ secondi: Double) -> [String] {
-        var viste: [String] = []
-        let fine = Date().addingTimeInterval(secondi)
+    ///
+    /// Con `quiete` (incarico 31) l'ascolto finisce prima, appena la pronuncia non cambia più da
+    /// quei secondi: serve dove gli annunci arrivano in fila e non si sa quanti siano — la chiusura
+    /// di una giornata che apre una stagione dice la giornata, la stagione e chi è arrivato dalla
+    /// patria —, senza pagare ogni volta l'ascolto più lungo. La quiete va scelta più lunga della
+    /// frase più lunga: mentre VoiceOver la sta dicendo la pronuncia non cambia.
+    ///
+    /// Con `intere` si chiede anche la pronuncia intera: «ogni» a ogni pronuncia nuova, appena
+    /// compare; «fine» una volta sola, in coda all'ascolto, per l'ultima.
+    private func ascolta(_ secondi: Double, quiete: Double? = nil, intere: String? = nil) -> Ascolto {
+        var esito = Ascolto()
+        let inizio = Date()
+        let fine = inizio.addingTimeInterval(secondi)
+        var ultimoCambio = inizio
+        var copiataLUltima = false
+        var ultimaIntera: String?
+        func istante() -> Double { (Date().timeIntervalSince(inizio) * 100).rounded() / 100 }
+        func copia() {
+            let richiesta = istante()
+            guard let intera = interaDagliAppunti() else { return }
+            // «t_richiesta» è l'istante in cui si è dato il comando di copia, «t» quello in cui gli
+            // appunti sono tornati: ciò che si è copiato era la pronuncia corrente fra i due.
+            esito.intere.append(["t_richiesta": richiesta, "t": istante(), "testo": intera])
+            ultimaIntera = intera
+            copiataLUltima = true
+            // Mentre si copia non si ascolta: se ciò che si è copiato non è la pronuncia che aveva
+            // fatto chiedere la copia, è una pronuncia arrivata nel frattempo, e va in elenco.
+            let inizioDellaCopiata = String(intera.prefix(64))
+            if !intera.isEmpty, esito.pronunce.last != inizioDellaCopiata {
+                esito.pronunce.append(inizioDellaCopiata)
+                esito.istanti.append(istante())
+                ultimoCambio = Date()
+            }
+        }
         while Date() < fine {
             let u = parla()
-            if viste.last != u { viste.append(u) }
+            if esito.pronunce.last != u {
+                esito.pronunce.append(u)
+                esito.istanti.append((Date().timeIntervalSince(inizio) * 100).rounded() / 100)
+                ultimoCambio = Date()
+                // Se la copia precedente aveva già preso questa pronuncia — arrivata mentre si
+                // copiava quella di prima — non la si copia due volte.
+                copiataLUltima = ultimaIntera.map { String($0.prefix(64)) == u } ?? false
+                if intere == "ogni", !copiataLUltima { copia() }
+            }
+            if let quiete, Date().timeIntervalSince(ultimoCambio) >= quiete { break }
             Thread.sleep(forTimeInterval: 0.25)
         }
-        return viste
+        if intere != nil, !copiataLUltima { copia() }
+        return esito
     }
 
     // MARK: - Gli elementi
@@ -110,6 +233,98 @@ final class SessioneInterattivaTest: XCTestCase {
         }
         scendi(radice)
         return righe
+    }
+
+    // MARK: - Gli elementi con il loro tipo (incarico 31)
+
+    /// Il nome del tipo che XCUITest attribuisce a un elemento: un comando è «pulsante», una riga di
+    /// testo è «testo». Serve a dire se una riga è un comando o soltanto testo, cosa che l'albero
+    /// essenziale non dice.
+    private func nomeDelTipo(_ tipo: XCUIElement.ElementType) -> String {
+        switch tipo {
+        case .button: return "pulsante"
+        case .staticText: return "testo"
+        case .other: return "altro"
+        case .application: return "applicazione"
+        case .window: return "finestra"
+        case .scrollView: return "scorrimento"
+        case .alert: return "avviso"
+        case .cell: return "cella"
+        case .image: return "immagine"
+        default: return "tipo-\(tipo.rawValue)"
+        }
+    }
+
+    /// I tratti d'accessibilità di un nodo dell'istantanea, se l'istantanea li porta. L'interfaccia
+    /// pubblica di XCUITest non li espone (`XCUIElementAttributes` ha etichetta, valore, tipo, cornice
+    /// e poco altro, senza tratti né suggerimento): si chiede all'oggetto concreto se risponde a
+    /// «traits», e soltanto allora lo si legge. Nulla se non risponde.
+    private func tratti(_ nodo: XCUIElementSnapshot) -> UInt64? {
+        guard let oggetto = nodo as? NSObject,
+              oggetto.responds(to: NSSelectorFromString("traits")),
+              let numero = oggetto.value(forKey: "traits") as? NSNumber else { return nil }
+        return numero.uint64Value
+    }
+
+    /// I nomi dei tratti che contano per le prove: i valori sono quelli di `UIAccessibilityTraits`.
+    private func nomiDeiTratti(_ tratti: UInt64) -> [String] {
+        var nomi: [String] = []
+        if tratti & 0x1 != 0 { nomi.append("pulsante") }
+        if tratti & 0x8 != 0 { nomi.append("selezionato") }
+        if tratti & 0x40 != 0 { nomi.append("testo statico") }
+        if tratti & 0x100 != 0 { nomi.append("non abilitato") }
+        if tratti & 0x10000 != 0 { nomi.append("intestazione") }
+        return nomi
+    }
+
+    /// Gli elementi con etichetta, nell'ordine dell'albero, ciascuno con tipo, identificatore, valore,
+    /// cornice, e i tratti quando l'istantanea li porta. Con «prefisso» o «contiene» soltanto quelli
+    /// la cui etichetta corrisponde.
+    private func elementi(_ c: [String: Any]) -> [[String: Any]] {
+        guard let radice = try? app.snapshot() else { return [] }
+        let prefisso = c["prefisso"] as? String, contiene = c["contiene"] as? String
+        var righe: [[String: Any]] = []
+        func scendi(_ n: XCUIElementSnapshot) {
+            guard righe.count < 600 else { return }
+            let scelto = prefisso.map { n.label.hasPrefix($0) } ?? contiene.map { n.label.contains($0) } ?? true
+            if !n.label.isEmpty, scelto {
+                let f = n.frame
+                var riga: [String: Any] = [
+                    "etichetta": n.label, "tipo": nomeDelTipo(n.elementType), "identificatore": n.identifier,
+                    "cornice": [Int(f.minX), Int(f.minY), Int(f.width), Int(f.height)],
+                    "abilitato": n.isEnabled, "selezionato": n.isSelected,
+                ]
+                if let valore = n.value { riga["valore"] = "\(valore)" }
+                if let t = tratti(n) { riga["tratti"] = t; riga["nomi_dei_tratti"] = nomiDeiTratti(t) }
+                righe.append(riga)
+            }
+            for figlio in n.children { scendi(figlio) }
+        }
+        scendi(radice)
+        return righe
+    }
+
+    /// Le classi, le proprietà e i metodi di un oggetto, letti dall'ambiente di esecuzione: la sonda
+    /// con cui si accerta che cosa il servizio VoiceOver delle prove e l'istantanea portano oltre
+    /// l'interfaccia pubblica (la pronuncia intera, i tratti, il suggerimento).
+    private func anatomia(_ oggetto: AnyObject) -> [String: Any] {
+        var classi: [String] = [], proprieta: [String] = [], metodi: [String] = []
+        var classe: AnyClass? = type(of: oggetto)
+        while let c = classe, NSStringFromClass(c) != "NSObject" {
+            classi.append(NSStringFromClass(c))
+            var quanti: UInt32 = 0
+            if let elenco = class_copyPropertyList(c, &quanti) {
+                for i in 0..<Int(quanti) { proprieta.append(String(cString: property_getName(elenco[i]))) }
+                free(elenco)
+            }
+            quanti = 0
+            if let elenco = class_copyMethodList(c, &quanti) {
+                for i in 0..<Int(quanti) { metodi.append(NSStringFromSelector(method_getName(elenco[i]))) }
+                free(elenco)
+            }
+            classe = class_getSuperclass(c)
+        }
+        return ["classi": classi, "proprieta": proprieta, "metodi": metodi]
     }
 
     private func schermata(_ nome: String) -> String {
@@ -173,14 +388,19 @@ final class SessioneInterattivaTest: XCTestCase {
         case "vo_spegni":
             do { try vo.disable() } catch { esito["errore"] = "\(error)" }
         case "avanti", "indietro":
-            var pronunce: [String] = []
+            // Con «intere» (incarico 31) ogni pronuncia si legge anche per intero, dagli appunti.
+            var pronunce: [String] = [], intere: [String] = []
             for _ in 0..<(c["volte"] as? Int ?? 1) {
-                do { pronunce.append(try (azione == "avanti" ? vo.moveForward() : vo.moveBackward()).utterance) }
+                do { pronunce.append(ripulita(try (azione == "avanti" ? vo.moveForward() : vo.moveBackward()).utterance)) }
                 catch { pronunce.append("<errore: \(error.localizedDescription)>"); break }
+                if c["intere"] as? Bool == true { intere.append(interaDagliAppunti() ?? "") }
             }
             esito["pronunce"] = pronunce
+            if c["intere"] as? Bool == true { esito["pronunce_intere"] = intere }
         case "giro":
             // Dall'inizio della schermata alla fine: indietro finché la pronuncia si ripete, poi avanti.
+            // Con «intere» (incarico 31) ogni elemento si legge anche per intero, dagli appunti:
+            // l'etichetta fino in fondo, il tratto, il suggerimento.
             var ultima = parla(), salite = 0
             while salite < 300 {
                 let t = Date()
@@ -188,14 +408,23 @@ final class SessioneInterattivaTest: XCTestCase {
                 if u == ultima && Date().timeIntervalSince(t) > 1.5 { break }
                 ultima = u; salite += 1
             }
-            var pronunce = [parla()]
+            let conIntere = c["intere"] as? Bool == true
+            var pronunce = [parla()], intere: [String] = []
+            if conIntere { intere.append(interaDagliAppunti() ?? "") }
             while pronunce.count < 300 {
                 let t = Date()
-                guard let u = try? vo.moveForward().utterance else { break }
+                guard let grezza = try? vo.moveForward().utterance else { break }
+                let u = ripulita(grezza)
                 if u == pronunce.last && Date().timeIntervalSince(t) > 1.5 { break }
                 pronunce.append(u)
+                if conIntere { intere.append(interaDagliAppunti() ?? "") }
             }
             esito["pronunce"] = pronunce
+            if conIntere { esito["pronunce_intere"] = intere }
+        case "copia":
+            // L'ultima cosa che VoiceOver ha detto, per intero, dagli appunti (incarico 31).
+            if let intera = interaDagliAppunti() { esito["intera"] = intera }
+            else { esito["errore"] = "gli appunti non rispondono: il lato Mac li serve con scripts/interattivo.py --appunti" }
         case "tocca", "doppio_tocco", "attiva", "multi_tocco", "rotazione", "scorri", "pressione":
             // Senza bersaglio, la finestra dell'app: sull'iPad l'intera applicazione non ha coordinate
             // calcolabili per i gesti («unable to compute coordinates»), la finestra sì.
@@ -205,7 +434,25 @@ final class SessioneInterattivaTest: XCTestCase {
             switch azione {
             case "tocca": e.tap()
             case "doppio_tocco": e.doubleTap()
-            case "attiva": e.tap(); Thread.sleep(forTimeInterval: 0.6); esito["fuoco"] = parla(); e.doubleTap()
+            case "attiva":
+                // Il tocco porta il fuoco sull'elemento, il doppio tocco lo attiva. Con «pausa_fuoco»
+                // (incarico 31) fra i due si ascolta più a lungo, e «fuoco_ascoltate» riporta ciò che
+                // VoiceOver dice dell'elemento prima che lo si attivi.
+                e.tap()
+                if let pausa = c["pausa_fuoco"] as? Double {
+                    let dette = ascolta(pausa, intere: c["fuoco_intero"] as? Bool == true ? "fine" : nil)
+                    esito["fuoco_ascoltate"] = dette.pronunce
+                    esito["fuoco"] = dette.pronunce.last ?? ""
+                    if let intera = dette.intere.last?["testo"] { esito["fuoco_intero"] = intera }
+                } else {
+                    Thread.sleep(forTimeInterval: 0.6); esito["fuoco"] = parla()
+                }
+                // Quanto dura il doppio tocco (incarico 31): ciò che l'attivazione fa dire comincia
+                // dentro questo tempo, prima che l'ascolto cominci, e chi misura quanto un annuncio
+                // resta la pronuncia corrente deve contarlo.
+                let primaDelDoppioTocco = Date()
+                e.doubleTap()
+                esito["doppio_tocco_s"] = (Date().timeIntervalSince(primaDelDoppioTocco) * 100).rounded() / 100
             case "multi_tocco":
                 e.tap(withNumberOfTaps: c["tocchi"] as? Int ?? 2, numberOfTouches: c["dita"] as? Int ?? 2)
             case "rotazione":
@@ -235,16 +482,33 @@ final class SessioneInterattivaTest: XCTestCase {
             XCUIDevice.shared.press(c["pulsante"] as? String == "home" ? .home : .home)
         case "attendi":
             Thread.sleep(forTimeInterval: c["secondi"] as? Double ?? 1.0)
-        case "parla", "albero", "schermata":
+        case "parla", "albero", "schermata", "elementi":
             break
+        case "sonda":
+            // Che cosa portano, oltre l'interfaccia pubblica, il servizio VoiceOver, la sua uscita e
+            // l'istantanea di un elemento (incarico 31): si elencano classi, proprietà e metodi.
+            esito["servizio"] = anatomia(vo)
+            esito["servizio_descrizione"] = vo.debugDescription
+            if let uscita = try? vo.currentSpeech() {
+                esito["uscita"] = anatomia(uscita)
+                esito["uscita_descrizione"] = (uscita as NSObject).debugDescription
+            }
+            if let radice = try? app.snapshot() { esito["istantanea"] = anatomia(radice as AnyObject) }
         default:
             esito["errore"] = "azione sconosciuta"
         }
         esito["durata_azione_s"] = (Date().timeIntervalSince(inizio) * 100).rounded() / 100
         if vo.isEnabled {
-            esito["ascoltate"] = ascolta(ascolto)
+            let inizioAscolto = Date()
+            let sentito = ascolta(ascolto, quiete: c["quiete"] as? Double, intere: c["intere"] as? String)
+            esito["ascoltate"] = sentito.pronunce
+            esito["ascoltate_t"] = sentito.istanti
+            if !sentito.intere.isEmpty { esito["intere"] = sentito.intere }
+            esito["ascolto_s"] = (Date().timeIntervalSince(inizioAscolto) * 100).rounded() / 100
             esito["dopo"] = parla()
         }
+        esito["t"] = (Date().timeIntervalSince1970 * 10).rounded() / 10
+        if azione == "elementi" { esito["elementi"] = elementi(c) }
         if azione == "albero" || c["con_albero"] as? Bool == true { esito["albero"] = albero() }
         if azione == "schermata" || c["con_schermata"] as? Bool == true {
             esito["schermata"] = schermata(c["nome"] as? String ?? "passo-\(c["n"] ?? 0)")
