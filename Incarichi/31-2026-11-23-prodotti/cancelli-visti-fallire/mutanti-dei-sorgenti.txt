@@ -1,0 +1,341 @@
+I MUTANTI DEI SORGENTI — incarico 31
+pacchetto: esportazione del commit b0a15f2 (git archive HEAD Codice); sorgenti e prove del repo PULITI
+prove eseguite a ogni mutante: swift test -j 5 --filter 'Regno|ArriviDallaPatria|MiglioramentoInBattaglia'
+
+SENZA MUTANTI: uscita 0, 157 prove avviate, 157 passate, 0 fallite, 38 s (comprende la prima compilazione della copia)
+
+MUTANTE 1: la quota di mantenimento senza il minimo
+  file: Codice/Sources/Motore/ForzeDelRegno.swift
+  - max(valori.quotaMinima, Int(valori.quotaPerMisura.applicato(a: Int64(reparto.atomi))))
+  + Int(valori.quotaPerMisura.applicato(a: Int64(reparto.atomi)))
+  UCCISO: uscita 1, 157 prove avviate, 155 passate, 2 fallite, 16 s
+    fallita: MotoreTest.RegnoSecondaTappaTest test_incarico_31_D_la_quota_di_un_reparto_e_atomi_per_quota_troncata_mai_sotto_il_minimo
+    fallita: VerificaTest.BancoRegnoTest test_incarico_31_il_banco_su_piu_semi_e_piu_anni_non_produce_alcuna_violazione
+    .build/mutanti-31/Codice/Tests/VerificaTest/BancoRegnoTest.swift:81: error: -[VerificaTest.BancoRegnoTest test_incarico_31_il_banco_su_piu_semi_e_piu_anni_non_produce_alcuna_violazione] : XCTAssertEqual failed: ("["competente/4/3: [\"mantenimento_errato\"]", "competente/4/4: [\"mantenimento_errato\"]", "competente/4/5: [\"mantenimento_errato\"]"]") is not equal to ("[]")
+    .build/mutanti-31/Codice/Tests/MotoreTest/RegnoSecondaTappaTest.swift:498: error: -[MotoreTest.RegnoSecondaTappaTest test_incarico_31_D_la_quota_di_un_reparto_e_atomi_per_quota_troncata_mai_sotto_il_minimo] : XCTAssertEqual failed: ("0") is not equal to ("1") - 1 atomi
+
+MUTANTE 2: se il denaro non basta si scioglie per primo il reparto più anziano
+  file: Codice/Sources/Motore/ForzeDelRegno.swift
+  - if scelto == nil || leva >= scelto!.leva { scelto = (f, r, leva) }
+  + if scelto == nil || leva <= scelto!.leva { scelto = (f, r, leva) }
+  UCCISO: uscita 1, 157 prove avviate, 153 passate, 4 fallite, 14 s
+    fallita: MotoreTest.RegnoSecondaTappaTest test_incarico_31_D_chi_arriva_con_l_inverno_si_mantiene_e_si_scioglie_come_gli_altri
+    fallita: MotoreTest.RegnoSecondaTappaTest test_incarico_31_D_se_il_denaro_non_basta_si_sciolgono_per_primi_i_reparti_reclutati_per_ultimi
+    fallita: MotoreTest.RegnoSecondaTappaTest test_incarico_31_D_una_formazione_rimasta_vuota_sparisce_e_le_altre_conservano_nome_e_posto
+    fallita: VerificaTest.BancoRegnoTest test_sulle_transizioni_del_motore_la_sonda_tace
+    .build/mutanti-31/Codice/Tests/VerificaTest/BancoRegnoTest.swift:340: error: -[VerificaTest.BancoRegnoTest test_sulle_transizioni_del_motore_la_sonda_tace] : XCTAssertEqual failed: ("["sciolto_fuori_ordine"]") is not equal to ("[]") - transizione legittima «inverno_povero»
+    .build/mutanti-31/Codice/Tests/VerificaTest/BancoRegnoTest.swift:358: error: -[VerificaTest.BancoRegnoTest test_sulle_transizioni_del_motore_la_sonda_tace] : XCTAssertEqual failed: ("["corvo", "lupo", "falco"]") is not equal to ("["falco", "lupo"]") - prima l'ultimo reclutato che sta più in fondo
+
+MUTANTE 3: il mantenimento dichiarato e non prelevato
+  file: Codice/Sources/Motore/MotoreRegno.swift
+  - stato.riserve = stato.riserve - prelievo
+  + stato.riserve = stato.riserve - Riserve()
+  UCCISO: uscita 1, 157 prove avviate, 144 passate, 13 fallite, 21 s
+    fallita: MotoreTest.RegnoSecondaTappaTest test_incarico_31_D_all_inizio_dell_inverno_dopo_l_entrata_il_gioco_preleva_la_quota_e_lo_dichiara
+    fallita: MotoreTest.RegnoSecondaTappaTest test_incarico_31_D_chi_arriva_con_l_inverno_si_mantiene_e_si_scioglie_come_gli_altri
+    fallita: MotoreTest.RegnoSecondaTappaTest test_incarico_31_D_se_il_denaro_non_basta_si_sciolgono_per_primi_i_reparti_reclutati_per_ultimi
+    fallita: MotoreTest.RegnoTest test_01_5_9_1_5_la_voce_che_non_si_puo_pagare_dice_quali_risorse_mancano
+    fallita: MotoreTest.RegnoTest test_01_5_9_un_anno_intero_la_campagna_l_inverno_la_leva_la_primavera
+    fallita: SessioneTest.SessioneRegnoSecondaTappaTest test_incarico_31_due_anni_interi_con_una_formazione_perduta_una_in_patria_un_arrivo_ricevuto_e_uno_mai_giunto
+    fallita: SessioneTest.SessioneRegnoTest test_05_14_6_riproduzione_d_oro_di_due_anni_di_regno
+    fallita: SessioneTest.SessioneRegnoTest test_un_anno_intero_fino_alla_seconda_primavera_e_la_ripresa_dal_giornale
+    fallita: VerificaTest.BancoRegnoTest test_il_banco_gioca_anni_interi_coi_valori_di_fabbrica_senza_violare_alcun_invariante
+    fallita: VerificaTest.BancoRegnoTest test_incarico_31_il_banco_col_denaro_che_non_basta_scioglie_reparti_senza_violare_alcun_invariante
+    fallita: VerificaTest.BancoRegnoTest test_incarico_31_il_banco_su_piu_semi_e_piu_anni_non_produce_alcuna_violazione
+    fallita: VerificaTest.BancoRegnoTest test_incarico_31_ogni_invariante_nuovo_violato_di_proposito_e_riferito_col_suo_codice
+    fallita: VerificaTest.BancoRegnoTest test_sulle_transizioni_del_motore_la_sonda_tace
+    .build/mutanti-31/Codice/Tests/VerificaTest/BancoRegnoTest.swift:46: error: -[VerificaTest.BancoRegnoTest test_il_banco_gioca_anni_interi_coi_valori_di_fabbrica_senza_violare_alcun_invariante] : XCTAssertEqual failed: ("["competente/0/1: [\"mantenimento_non_conservato\"]", "competente/0/2: [\"mantenimento_non_conservato\"]", "competente/0/3: [\"mantenimento_non_conservato\"]", "competente/1/1: [\"mantenimento_non_conservato\"]", "competente/1/2: [\"mantenimento_non_conservato\"]", "competente/1/3: [\"mantenimento_n
+    .build/mutanti-31/Codice/Tests/VerificaTest/BancoRegnoTest.swift:125: error: -[VerificaTest.BancoRegnoTest test_incarico_31_il_banco_col_denaro_che_non_basta_scioglie_reparti_senza_violare_alcun_invariante] : XCTAssertEqual failed: ("["competente/0/1: [\"mantenimento_non_conservato\"]", "competente/0/2: [\"mantenimento_non_conservato\"]", "competente/0/3: [\"mantenimento_non_conservato\"]", "competente/0/4: [\"mantenimento_non_conservato\"]", "competente/1/1: [\"mantenimento_non_conservato\"]", "competente/1/2: [\"
+
+MUTANTE 4: il lavoro compiuto alla prima stazione di una stagione è dato per la stagione dopo
+  file: Codice/Sources/Motore/MotoreRegno.swift
+  - if compiuto <= inizio { return stagione }
+  + if compiuto < inizio { return stagione }
+  UCCISO: uscita 1, 157 prove avviate, 144 passate, 13 fallite, 18 s
+    fallita: MotoreTest.RegnoSecondaTappaTest test_incarico_31_B_gli_arrivi_mai_giunti_tornano_ancora_in_arrivo_e_con_l_inverno_raggiungono_le_altre
+    fallita: MotoreTest.RegnoSecondaTappaTest test_incarico_31_B_le_reclute_formano_una_formazione_armata_per_ciascuna_stagione_in_cui_maturano
+    fallita: MotoreTest.RegnoSecondaTappaTest test_incarico_31_B_senza_campagna_le_reclute_raggiungono_le_altre_con_l_inverno
+    fallita: MotoreTest.RegnoSecondaTappaTest test_incarico_31_C_senza_una_formazione_armata_presente_e_destinata_al_fronte_la_campagna_non_si_apre
+    fallita: MotoreTest.RegnoSecondaTappaTest test_incarico_31_E_coi_valori_di_fabbrica_ogni_voce_e_pronta_nella_stagione_decisa
+    fallita: MotoreTest.RegnoSecondaTappaTest test_incarico_31_E_il_lavoro_ordinato_porta_la_stazione_e_la_stagione_in_cui_sara_pronto
+    fallita: MotoreTest.RegnoSecondaTappaTest test_incarico_31_E_un_lavoro_ordinato_alla_stazione_s_e_lungo_d_e_compiuto_a_s_piu_d
+    fallita: MotoreTest.RegnoSecondaTappaTest test_incarico_31_F_l_addestramento_mirato_costa_atomi_per_base_per_peso_ed_e_pronto_in_primavera
+    fallita: MotoreTest.RegnoSecondaTappaTest test_incarico_31_lo_stato_del_regno_si_codifica_e_si_rilegge_sullo_stesso_stato
+    fallita: SessioneTest.SessioneRegnoTest test_05_14_6_riproduzione_d_oro_di_due_anni_di_regno
+    fallita: VerificaTest.BancoRegnoTest test_il_banco_gioca_anni_interi_coi_valori_di_fabbrica_senza_violare_alcun_invariante
+    fallita: VerificaTest.BancoRegnoTest test_incarico_31_il_banco_su_piu_semi_e_piu_anni_non_produce_alcuna_violazione
+    fallita: VerificaTest.BancoRegnoTest test_incarico_31_la_sonda_tace_su_ogni_voce_ordinata_a_ogni_stazione
+    .build/mutanti-31/Codice/Tests/VerificaTest/BancoRegnoTest.swift:46: error: -[VerificaTest.BancoRegnoTest test_il_banco_gioca_anni_interi_coi_valori_di_fabbrica_senza_violare_alcun_invariante] : XCTAssertEqual failed: ("["competente/0/1: [\"pronto_fuori_regola\"]", "competente/0/2: [\"pronto_fuori_regola\"]", "competente/0/3: [\"pronto_fuori_regola\"]", "competente/1/1: [\"pronto_fuori_regola\"]", "competente/1/2: [\"pronto_fuori_regola\"]", "competente/2/1: [\"pronto_fuori_regola\"]", "competente/2/2: [\"pronto_fu
+    .build/mutanti-31/Codice/Tests/VerificaTest/BancoRegnoTest.swift:81: error: -[VerificaTest.BancoRegnoTest test_incarico_31_il_banco_su_piu_semi_e_piu_anni_non_produce_alcuna_violazione] : XCTAssertEqual failed: ("["competente/0/1: [\"pronto_fuori_regola\"]", "competente/0/2: [\"pronto_fuori_regola\"]", "competente/0/3: [\"pronto_fuori_regola\"]", "competente/1/1: [\"pronto_fuori_regola\"]", "competente/1/2: [\"pronto_fuori_regola\"]", "competente/2/1: [\"pronto_fuori_regola\"]", "competente/2/2: [\"pronto_fuori_reg
+
+MUTANTE 5: il nome libero cercato sempre dall'inizio della lista
+  file: Codice/Sources/Motore/ForzeDelRegno.swift
+  - let indice = (posizione + passo) % nomi.count
+  + let indice = passo % nomi.count
+  UCCISO: uscita 1, 157 prove avviate, 150 passate, 7 fallite, 13 s
+    fallita: MotoreTest.RegnoSecondaTappaTest test_incarico_31_A_il_primo_nome_libero_si_cerca_in_giro_dalla_posizione_corrente
+    fallita: MotoreTest.RegnoSecondaTappaTest test_incarico_31_A_una_formazione_ha_lo_stesso_nome_prima_al_rientro_e_l_anno_dopo_anche_se_un_altra_e_perduta
+    fallita: MotoreTest.RegnoSecondaTappaTest test_incarico_31_D_una_formazione_rimasta_vuota_sparisce_e_le_altre_conservano_nome_e_posto
+    fallita: MotoreTest.RegnoTest test_01_5_9_un_anno_intero_la_campagna_l_inverno_la_leva_la_primavera
+    fallita: SessioneTest.SessioneRegnoSecondaTappaTest test_incarico_31_due_anni_interi_con_una_formazione_perduta_una_in_patria_un_arrivo_ricevuto_e_uno_mai_giunto
+    fallita: SessioneTest.SessioneRegnoTest test_05_14_6_riproduzione_d_oro_di_due_anni_di_regno
+    fallita: VerificaTest.BancoRegnoTest test_sulle_transizioni_del_motore_la_sonda_tace
+    .build/mutanti-31/Codice/Tests/VerificaTest/BancoRegnoTest.swift:346: error: -[VerificaTest.BancoRegnoTest test_sulle_transizioni_del_motore_la_sonda_tace] : XCTAssertEqual failed: ("["corvo", "lupo", "falco", "cervo", "orso", "lince"]") is not equal to ("["corvo", "lupo", "falco", "cervo", "lince", "aquila"]")
+    .build/mutanti-31/Codice/Tests/SessioneTest/SessioneRegnoSecondaTappaTest.swift:323: error: -[SessioneTest.SessioneRegnoSecondaTappaTest test_incarico_31_due_anni_interi_con_una_formazione_perduta_una_in_patria_un_arrivo_ricevuto_e_uno_mai_giunto] : XCTAssertEqual failed: ("["corvo", "cervo", "lince"]") is not equal to ("["cervo", "lince", "aquila"]")
+
+MUTANTE 6: chi parte si può cambiare a campagna aperta
+  file: Codice/Sources/Motore/MotoreRegno.swift
+  - case .aperta: return .nonValido(.campagnaAperta)
+  - case .conclusa: return .nonValido(.campagnaGiaCondotta)
+  - case .nonAperta: break
+  - }
+  - guard stato.forze.conosce(unita: unita) else { return .nonValido(.unitaIgnota) }
+  + case .aperta: break
+  + case .conclusa: return .nonValido(.campagnaGiaCondotta)
+  + case .nonAperta: break
+  + }
+  + guard stato.forze.conosce(unita: unita) else { return .nonValido(.unitaIgnota) }
+  UCCISO: uscita 1, 157 prove avviate, 155 passate, 2 fallite, 13 s
+    fallita: MotoreTest.RegnoSecondaTappaTest test_incarico_31_C_destina_vale_soltanto_fuori_dall_inverno_e_prima_di_aprire_la_campagna
+    fallita: SessioneTest.SessioneRegnoSecondaTappaTest test_incarico_31_due_anni_interi_con_una_formazione_perduta_una_in_patria_un_arrivo_ricevuto_e_uno_mai_giunto
+    .build/mutanti-31/Codice/Tests/SessioneTest/SessioneRegnoSecondaTappaTest.swift:230: error: -[SessioneTest.SessioneRegnoSecondaTappaTest test_incarico_31_due_anni_interi_con_una_formazione_perduta_una_in_patria_un_arrivo_ricevuto_e_uno_mai_giunto] : XCTAssertEqual failed: ("nil") is not equal to ("Optional(Motore.MotivoNonValidoRegno.campagnaAperta)")
+    .build/mutanti-31/Codice/Tests/SessioneTest/SessioneRegnoSecondaTappaTest.swift:258: error: -[SessioneTest.SessioneRegnoSecondaTappaTest test_incarico_31_due_anni_interi_con_una_formazione_perduta_una_in_patria_un_arrivo_ricevuto_e_uno_mai_giunto] : XCTAssertEqual failed: ("["lupo", "falco"]") is not equal to ("["lupo", "falco", "orso"]")
+
+MUTANTE 7: il miglioramento che nessuno ha mantenuto resta
+  file: Codice/Sources/Motore/ForzeDelRegno.swift
+  - formazioni[f].composizione[r] = reparto.con(miglioramento: nil)
+  + formazioni[f].composizione[r] = reparto
+  UCCISO: uscita 1, 157 prove avviate, 154 passate, 3 fallite, 13 s
+    fallita: MotoreTest.RegnoSecondaTappaTest test_incarico_31_F_il_miglioramento_si_conserva_soltanto_se_mantenuto_altrimenti_si_perde_e_il_reparto_resta
+    fallita: SessioneTest.SessioneRegnoTest test_05_14_6_riproduzione_d_oro_di_due_anni_di_regno
+    fallita: VerificaTest.BancoRegnoTest test_sulle_transizioni_del_motore_la_sonda_tace
+    .build/mutanti-31/Codice/Tests/VerificaTest/BancoRegnoTest.swift:340: error: -[VerificaTest.BancoRegnoTest test_sulle_transizioni_del_motore_la_sonda_tace] : XCTAssertEqual failed: ("["miglioramento_fuori_regola"]") is not equal to ("[]") - transizione legittima «primavera_col_miglioramento_perduto»
+    .build/mutanti-31/Codice/Tests/VerificaTest/BancoRegnoTest.swift:355: error: -[VerificaTest.BancoRegnoTest test_sulle_transizioni_del_motore_la_sonda_tace] : XCTAssertNil failed: "addestramento_mirato"
+
+MUTANTE 8: il reparto addestrato colpisce come gli altri
+  file: Codice/Sources/Motore/MotoreBattaglia.swift
+  - base = miglioramento.capacitaOffensiva.applicato(a: base)
+  + _ = miglioramento.capacitaOffensiva.applicato(a: base)
+  UCCISO: uscita 1, 157 prove avviate, 154 passate, 3 fallite, 13 s
+    fallita: MotoreTest.MiglioramentoInBattagliaTest test_incarico_31_F_il_reparto_migliorato_infligge_piu_danno_nella_misura_del_coefficiente
+    fallita: MotoreTest.MiglioramentoInBattagliaTest test_incarico_31_F_in_una_battaglia_giocata_il_tiro_del_reparto_addestrato_fa_piu_danno
+    fallita: MotoreTest.MiglioramentoInBattagliaTest test_incarico_31_F_la_misura_e_quella_dichiarata_nei_valori
+    .build/mutanti-31/Codice/Tests/MotoreTest/MiglioramentoInBattagliaTest.swift:103: error: -[MotoreTest.MiglioramentoInBattagliaTest test_incarico_31_F_il_reparto_migliorato_infligge_piu_danno_nella_misura_del_coefficiente] : XCTAssertEqual failed: ("15") is not equal to ("18") - migliorato: fanteria_leggera, 1 atomi, anti_saturazione, coefficiente 1000
+    .build/mutanti-31/Codice/Tests/MotoreTest/MiglioramentoInBattagliaTest.swift:103: error: -[MotoreTest.MiglioramentoInBattagliaTest test_incarico_31_F_il_reparto_migliorato_infligge_piu_danno_nella_misura_del_coefficiente] : XCTAssertEqual failed: ("7") is not equal to ("9") - migliorato: fanteria_leggera, 1 atomi, anti_saturazione, coefficiente 500
+
+MUTANTE 9: la formazione tenuta in patria parte lo stesso
+  file: Codice/Sources/Motore/PonteRegnoCampagna.swift
+  - var formazioni = tutte.filter { $0.parteConLaCampagna && $0.arrivo == nil }
+  + var formazioni = tutte.filter { $0.arrivo == nil }
+  UCCISO: uscita 1, 157 prove avviate, 144 passate, 13 fallite, 14 s
+    fallita: MotoreTest.ArriviDallaPatriaTest test_incarico_31_A_i_gruppi_avversari_non_prendono_mai_un_nome_del_regno
+    fallita: MotoreTest.ArriviDallaPatriaTest test_incarico_31_A_il_distaccamento_riceve_un_nome_che_nessuna_formazione_del_regno_porta
+    fallita: MotoreTest.ArriviDallaPatriaTest test_incarico_31_B_finche_attende_la_formazione_non_e_un_gruppo_e_all_arrivo_attende_una_decisione
+    fallita: MotoreTest.ArriviDallaPatriaTest test_incarico_31_B_gli_arrivi_d_estate_e_d_autunno_giungono_all_apertura_della_prima_giornata_della_stagione
+    fallita: MotoreTest.ArriviDallaPatriaTest test_incarico_31_B_il_ponte_programma_gli_arrivi_alla_prima_giornata_della_stagione
+    fallita: MotoreTest.ArriviDallaPatriaTest test_incarico_31_B_le_reclute_pronte_in_primavera_entrano_con_la_prima_giornata_al_quartier_generale
+    fallita: MotoreTest.ArriviDallaPatriaTest test_incarico_31_B_se_la_campagna_si_conclude_prima_gli_arrivi_mai_giunti_tornano_al_regno_ancora_in_arrivo
+    fallita: MotoreTest.ArriviDallaPatriaTest test_incarico_31_C_la_formazione_tenuta_in_patria_non_compare_nello_scenario_e_il_suo_nome_e_riservato
+    fallita: SessioneTest.SessioneRegnoSecondaTappaTest test_incarico_31_C_la_scelta_di_chi_parte_passa_dal_giornale_e_regge_la_ripresa
+    fallita: SessioneTest.SessioneRegnoSecondaTappaTest test_incarico_31_due_anni_interi_con_una_formazione_perduta_una_in_patria_un_arrivo_ricevuto_e_uno_mai_giunto
+    fallita: VerificaTest.BancoRegnoTest test_il_banco_gioca_anni_interi_coi_valori_di_fabbrica_senza_violare_alcun_invariante
+    fallita: VerificaTest.BancoRegnoTest test_incarico_31_il_banco_col_denaro_che_non_basta_scioglie_reparti_senza_violare_alcun_invariante
+    fallita: VerificaTest.BancoRegnoTest test_incarico_31_il_banco_su_piu_semi_e_piu_anni_non_produce_alcuna_violazione
+    .build/mutanti-31/Codice/Tests/VerificaTest/BancoRegnoTest.swift:46: error: -[VerificaTest.BancoRegnoTest test_il_banco_gioca_anni_interi_coi_valori_di_fabbrica_senza_violare_alcun_invariante] : XCTAssertEqual failed: ("["prudente/2/2: [\"forze_cambiate_fuori_tempo\"]"]") is not equal to ("[]")
+    .build/mutanti-31/Codice/Tests/VerificaTest/BancoRegnoTest.swift:125: error: -[VerificaTest.BancoRegnoTest test_incarico_31_il_banco_col_denaro_che_non_basta_scioglie_reparti_senza_violare_alcun_invariante] : XCTAssertEqual failed: ("["prudente/2/2: [\"forze_cambiate_fuori_tempo\"]"]") is not equal to ("[]")
+
+MUTANTE 10: l'arrivo programmato un giorno dopo l'inizio della stagione
+  file: Codice/Sources/Motore/PonteRegnoCampagna.swift
+  - giorno: posizione * calendario.giornatePerStagione + 1, nome: formazione.nome,
+  + giorno: posizione * calendario.giornatePerStagione + 2, nome: formazione.nome,
+  UCCISO: uscita 1, 157 prove avviate, 147 passate, 10 fallite, 12 s
+    fallita: MotoreTest.ArriviDallaPatriaTest test_incarico_31_A_i_gruppi_avversari_non_prendono_mai_un_nome_del_regno
+    fallita: MotoreTest.ArriviDallaPatriaTest test_incarico_31_A_lo_scenario_senza_nomi_si_codifica_come_prima_e_quello_coi_nomi_si_rilegge
+    fallita: MotoreTest.ArriviDallaPatriaTest test_incarico_31_B_col_quartier_generale_occupato_le_reclute_entrano_nella_casella_libera_piu_vicina
+    fallita: MotoreTest.ArriviDallaPatriaTest test_incarico_31_B_finche_attende_la_formazione_non_e_un_gruppo_e_all_arrivo_attende_una_decisione
+    fallita: MotoreTest.ArriviDallaPatriaTest test_incarico_31_B_gli_arrivi_d_estate_e_d_autunno_giungono_all_apertura_della_prima_giornata_della_stagione
+    fallita: MotoreTest.ArriviDallaPatriaTest test_incarico_31_B_il_ponte_programma_gli_arrivi_alla_prima_giornata_della_stagione
+    fallita: MotoreTest.ArriviDallaPatriaTest test_incarico_31_B_le_reclute_pronte_in_primavera_entrano_con_la_prima_giornata_al_quartier_generale
+    fallita: MotoreTest.ArriviDallaPatriaTest test_incarico_31_B_un_arrivo_senza_casella_libera_attende_la_giornata_successiva
+    fallita: SessioneTest.SessioneRegnoSecondaTappaTest test_incarico_31_due_anni_interi_con_una_formazione_perduta_una_in_patria_un_arrivo_ricevuto_e_uno_mai_giunto
+    fallita: SessioneTest.SessioneRegnoTest test_un_anno_intero_fino_alla_seconda_primavera_e_la_ripresa_dal_giornale
+    .build/mutanti-31/Codice/Tests/SessioneTest/SessioneRegnoSecondaTappaTest.swift:337: error: -[SessioneTest.SessioneRegnoSecondaTappaTest test_incarico_31_due_anni_interi_con_una_formazione_perduta_una_in_patria_un_arrivo_ricevuto_e_uno_mai_giunto] : XCTAssertEqual failed: ("["lupo", "falco"]") is not equal to ("["lupo", "falco", "cervo"]") - le reclute della primavera sono entrate con la prima giornata
+    .build/mutanti-31/Codice/Tests/SessioneTest/SessioneRegnoSecondaTappaTest.swift:341: error: -[SessioneTest.SessioneRegnoSecondaTappaTest test_incarico_31_due_anni_interi_con_una_formazione_perduta_una_in_patria_un_arrivo_ricevuto_e_uno_mai_giunto] : XCTUnwrap failed: expected non-nil value of type "Gruppo"
+
+MUTANTE 11: chi nasce sul fronte può prendere un nome che il regno tiene
+  file: Codice/Sources/Motore/MotoreCampagna.swift
+  - if !riservati.contains(nome) { return (indice, nome) }
+  + if riservati.count >= 0 { return (indice, nome) }
+  UCCISO: uscita 1, 157 prove avviate, 151 passate, 6 fallite, 14 s
+    fallita: MotoreTest.ArriviDallaPatriaTest test_incarico_31_A_il_distaccamento_riceve_un_nome_che_nessuna_formazione_del_regno_porta
+    fallita: MotoreTest.ArriviDallaPatriaTest test_incarico_31_A_l_avversario_porta_gli_stessi_nomi_ogni_anno_e_le_reclute_non_li_ereditano
+    fallita: MotoreTest.ArriviDallaPatriaTest test_incarico_31_C_la_formazione_tenuta_in_patria_non_compare_nello_scenario_e_il_suo_nome_e_riservato
+    fallita: VerificaTest.BancoRegnoTest test_il_banco_gioca_anni_interi_coi_valori_di_fabbrica_senza_violare_alcun_invariante
+    fallita: VerificaTest.BancoRegnoTest test_incarico_31_il_banco_col_denaro_che_non_basta_scioglie_reparti_senza_violare_alcun_invariante
+    fallita: VerificaTest.BancoRegnoTest test_incarico_31_il_banco_su_piu_semi_e_piu_anni_non_produce_alcuna_violazione
+    .build/mutanti-31/Codice/Tests/VerificaTest/BancoRegnoTest.swift:46: error: -[VerificaTest.BancoRegnoTest test_il_banco_gioca_anni_interi_coi_valori_di_fabbrica_senza_violare_alcun_invariante] : XCTAssertEqual failed: ("["competente/1/2: [\"forze_cambiate_fuori_tempo\"]"]") is not equal to ("[]")
+    .build/mutanti-31/Codice/Tests/VerificaTest/BancoRegnoTest.swift:125: error: -[VerificaTest.BancoRegnoTest test_incarico_31_il_banco_col_denaro_che_non_basta_scioglie_reparti_senza_violare_alcun_invariante] : XCTAssertEqual failed: ("["competente/1/2: [\"forze_cambiate_fuori_tempo\"]"]") is not equal to ("[]")
+
+MUTANTE 12: le reclute entrano al quartier generale anche se è occupato
+  file: Codice/Sources/Motore/MotoreCampagna.swift
+  - return griglia.tutteLeCaselle
+  - .filter { !occupate.contains($0) }
+  - .min {
+  + return griglia.tutteLeCaselle
+  + .filter { _ in occupate.count >= 0 }
+  + .min {
+  UCCISO: uscita 1, 157 prove avviate, 148 passate, 9 fallite, 15 s
+    fallita: MotoreTest.ArriviDallaPatriaTest test_incarico_31_B_col_quartier_generale_occupato_le_reclute_entrano_nella_casella_libera_piu_vicina
+    fallita: MotoreTest.ArriviDallaPatriaTest test_incarico_31_B_finche_attende_la_formazione_non_e_un_gruppo_e_all_arrivo_attende_una_decisione
+    fallita: MotoreTest.ArriviDallaPatriaTest test_incarico_31_B_gli_arrivi_d_estate_e_d_autunno_giungono_all_apertura_della_prima_giornata_della_stagione
+    fallita: MotoreTest.ArriviDallaPatriaTest test_incarico_31_B_la_casella_d_arrivo_evita_ogni_formazione_le_forze_nemiche_e_le_mete_di_marcia
+    fallita: MotoreTest.ArriviDallaPatriaTest test_incarico_31_B_un_arrivo_senza_casella_libera_attende_la_giornata_successiva
+    fallita: SessioneTest.SessioneRegnoSecondaTappaTest test_incarico_31_due_anni_interi_con_una_formazione_perduta_una_in_patria_un_arrivo_ricevuto_e_uno_mai_giunto
+    fallita: VerificaTest.BancoRegnoTest test_il_banco_gioca_anni_interi_coi_valori_di_fabbrica_senza_violare_alcun_invariante
+    fallita: VerificaTest.BancoRegnoTest test_incarico_31_il_banco_col_denaro_che_non_basta_scioglie_reparti_senza_violare_alcun_invariante
+    fallita: VerificaTest.BancoRegnoTest test_incarico_31_il_banco_su_piu_semi_e_piu_anni_non_produce_alcuna_violazione
+    .build/mutanti-31/Codice/Tests/VerificaTest/BancoRegnoTest.swift:46: error: -[VerificaTest.BancoRegnoTest test_il_banco_gioca_anni_interi_coi_valori_di_fabbrica_senza_violare_alcun_invariante] : XCTAssertEqual failed: ("["competente/0/2: [\"due_gruppi_stessa_casella\"]", "competente/0/3: [\"due_gruppi_stessa_casella\"]", "competente/1/2: [\"due_gruppi_stessa_casella\"]", "competente/1/3: [\"due_gruppi_stessa_casella\"]", "competente/2/2: [\"due_gruppi_stessa_casella\"]", "competente/2/3: [\"due_gruppi_stessa_casell
+    .build/mutanti-31/Codice/Tests/VerificaTest/BancoRegnoTest.swift:125: error: -[VerificaTest.BancoRegnoTest test_incarico_31_il_banco_col_denaro_che_non_basta_scioglie_reparti_senza_violare_alcun_invariante] : XCTAssertEqual failed: ("["competente/3/2: [\"due_gruppi_stessa_casella\"]"]") is not equal to ("[]")
+
+MUTANTE 13: i superstiti sul campo perdono il miglioramento
+  file: Codice/Sources/Motore/PonteCampagnaBattaglia.swift
+  - perSpecie[Specie(archetipo: sciame.archetipo, miglioramento: sciame.miglioramento,
+  - leva: sciame.leva), default: 0] += Int(atomi)
+  + perSpecie[Specie(archetipo: sciame.archetipo, miglioramento: nil,
+  + leva: sciame.leva), default: 0] += Int(atomi)
+  UCCISO: uscita 1, 157 prove avviate, 156 passate, 1 fallite, 16 s
+    fallita: MotoreTest.MiglioramentoInBattagliaTest test_incarico_31_F_in_una_battaglia_combattuta_ogni_superstite_e_della_specie_con_cui_e_sceso
+    .build/mutanti-31/Codice/Tests/MotoreTest/MiglioramentoInBattagliaTest.swift:372: error: -[MotoreTest.MiglioramentoInBattagliaTest test_incarico_31_F_in_una_battaglia_combattuta_ogni_superstite_e_della_specie_con_cui_e_sceso] : XCTAssertLessThanOrEqual failed: ("12") is greater than ("6")
+    .build/mutanti-31/Codice/Tests/MotoreTest/MiglioramentoInBattagliaTest.swift:372: error: -[MotoreTest.MiglioramentoInBattagliaTest test_incarico_31_F_in_una_battaglia_combattuta_ogni_superstite_e_della_specie_con_cui_e_sceso] : XCTUnwrap failed: expected non-nil value of type "Int" - specie mai scesa in battaglia: Specie(archetipo: "fanteria_pesante", miglioramento: nil, leva: nil)
+
+MUTANTE 14: gli arrivi mai giunti si perdono con la fine della campagna
+  file: Codice/Sources/Motore/PonteRegnoCampagna.swift
+  - for arrivo in stato.arriviInAttesa ?? [] {
+  - superstiti.append(
+  + for arrivo in (stato.arriviInAttesa ?? []).prefix(0) {
+  + superstiti.append(
+  UCCISO: uscita 1, 90 prove avviate, 87 passate, 2 fallite, 13 s
+    (1 prove avviate e mai concluse: un fascio di prove si è interrotto per un errore fatale)
+    fallita: MotoreTest.ArriviDallaPatriaTest test_incarico_31_B_chi_attende_non_conta_fra_i_gruppi_armati_del_fronte
+    fallita: SessioneTest.SessioneRegnoSecondaTappaTest test_incarico_31_due_anni_interi_con_una_formazione_perduta_una_in_patria_un_arrivo_ricevuto_e_uno_mai_giunto
+    .build/mutanti-31/Codice/Tests/SessioneTest/SessioneRegnoSecondaTappaTest.swift:400: error: -[SessioneTest.SessioneRegnoSecondaTappaTest test_incarico_31_due_anni_interi_con_una_formazione_perduta_una_in_patria_un_arrivo_ricevuto_e_uno_mai_giunto] : XCTAssertEqual failed: ("["lupo", "falco", "orso", "cervo", "lince"]") is not equal to ("["lupo", "falco", "orso", "cervo", "lince", "aquila"]")
+    .build/mutanti-31/Codice/Tests/SessioneTest/SessioneRegnoSecondaTappaTest.swift:401: error: -[SessioneTest.SessioneRegnoSecondaTappaTest test_incarico_31_due_anni_interi_con_una_formazione_perduta_una_in_patria_un_arrivo_ricevuto_e_uno_mai_giunto] : XCTAssertEqual failed: ("[nil, nil, nil, nil, nil]") is not equal to ("[nil, nil, nil, nil, nil, Optional(Dati.Stagione.autunno)]")
+
+MUTANTE 15: due lavori sullo stesso reparto nello stesso inverno
+  file: Codice/Sources/Motore/MotoreRegno.swift
+  - guard !stato.lavori.contains(where: { $0.bersaglio == bersaglio }) else {
+  + guard !stato.lavori.contains(where: { $0.bersaglio == bersaglio && $0.bersaglio == nil }) else {
+  UCCISO: uscita 1, 157 prove avviate, 155 passate, 2 fallite, 13 s
+    fallita: MotoreTest.RegnoSecondaTappaTest test_incarico_31_F_ogni_ordine_fuori_regola_su_un_reparto_e_respinto_col_suo_motivo
+    fallita: SessioneTest.SessioneRegnoSecondaTappaTest test_incarico_31_due_anni_interi_con_una_formazione_perduta_una_in_patria_un_arrivo_ricevuto_e_uno_mai_giunto
+    .build/mutanti-31/Codice/Tests/SessioneTest/SessioneRegnoSecondaTappaTest.swift:301: error: -[SessioneTest.SessioneRegnoSecondaTappaTest test_incarico_31_due_anni_interi_con_una_formazione_perduta_una_in_patria_un_arrivo_ricevuto_e_uno_mai_giunto] : XCTAssertEqual failed: ("nil") is not equal to ("Optional(Motore.MotivoNonValidoRegno.giaOrdinato)")
+    .build/mutanti-31/Codice/Tests/SessioneTest/SessioneRegnoSecondaTappaTest.swift:306: error: -[SessioneTest.SessioneRegnoSecondaTappaTest test_incarico_31_due_anni_interi_con_una_formazione_perduta_una_in_patria_un_arrivo_ricevuto_e_uno_mai_giunto] : XCTAssertEqual failed: ("[Dati.Stagione.primavera, Dati.Stagione.estate, Dati.Stagione.primavera, Dati.Stagione.primavera, Dati.Stagione.autunno]") is not equal to ("[Dati.Stagione.primavera, Dati.Stagione.estate, Dati.Stagione.primavera, Dati.Stagione.autunno]")
+
+MUTANTE 16: l'annuncio delle reclute di primavera dice che entrano con l'inverno
+  file: Codice/Sources/Segnali/SignificatiRegno.swift
+  - return testi.frase("regno.reclute_in_primavera", soggetto: nome, reparti).testo
+  + return testi.frase("regno.reclute_con_l_inverno", soggetto: nome, reparti).testo
+  UCCISO: uscita 1, 157 prove avviate, 151 passate, 6 fallite, 14 s
+    fallita: SegnaliTest.TraduttoreRegnoSecondaTappaTest test_incarico_31_l_ingresso_delle_reclute_dice_quale_formazione_con_che_cosa_e_dove_e_quando_entra
+    fallita: SegnaliTest.TraduttoreRegnoSecondaTappaTest test_incarico_31_la_primavera_annuncia_le_reclute_i_miglioramenti_dati_e_quelli_perduti
+    fallita: SegnaliTest.TraduttoreRegnoSecondaTappaTest test_incarico_31_ogni_fatto_della_patria_ha_la_propria_frase_risolta
+    fallita: SegnaliTest.TraduttoreRegnoSecondaTappaTest test_incarico_31_ogni_voce_del_registro_di_due_anni_giocati_si_risolve
+    fallita: SegnaliTest.TraduttoreRegnoTest test_02_6_6_ogni_fatto_della_patria_ha_la_propria_frase_con_l_anno_e_la_stagione
+    fallita: SegnaliTest.TraduttoreRegnoTest test_05_10_7_ogni_evento_del_regno_ha_il_proprio_annuncio
+    .build/mutanti-31/Codice/Tests/SegnaliTest/TraduttoreRegnoSecondaTappaTest.swift:264: error: -[SegnaliTest.TraduttoreRegnoSecondaTappaTest test_incarico_31_l_ingresso_delle_reclute_dice_quale_formazione_con_che_cosa_e_dove_e_quando_entra] : XCTAssertEqual failed: ("Lince nasce dalle reclute dell'inverno, con 6 atomi di fanteria leggera, e arriva in patria con l'inverno") is not equal to ("Lince nasce dalle reclute dell'inverno, con 6 atomi di fanteria leggera, ed entra sul fronte in primavera, al quartier generale"
+    .build/mutanti-31/Codice/Tests/SegnaliTest/TraduttoreRegnoSecondaTappaTest.swift:330: error: -[SegnaliTest.TraduttoreRegnoSecondaTappaTest test_incarico_31_la_primavera_annuncia_le_reclute_i_miglioramenti_dati_e_quelli_perduti] : XCTAssertEqual failed: ("Optional("Comincia la primavera dell\'anno 3. Lince nasce dalle reclute dell\'inverno, con 6 atomi di fanteria leggera, e arriva in patria con l\'inverno. Lince nasce dalle reclute dell\'inverno, con 6 atomi di fanteria leggera, e raggiunge il quartier generale in 
+
+MUTANTE 17: l'arrivo consegnato il giorno dopo quello dichiarato
+  file: Codice/Sources/Motore/MotoreCampagna.swift
+  - guard arrivo.giorno <= stato.giorno, let casella = casellaDiArrivo(stato) else {
+  + guard arrivo.giorno < stato.giorno, let casella = casellaDiArrivo(stato) else {
+  UCCISO: uscita 1, 157 prove avviate, 149 passate, 8 fallite, 13 s
+    fallita: MotoreTest.ArriviDallaPatriaTest test_incarico_31_A_i_gruppi_avversari_non_prendono_mai_un_nome_del_regno
+    fallita: MotoreTest.ArriviDallaPatriaTest test_incarico_31_B_col_quartier_generale_occupato_le_reclute_entrano_nella_casella_libera_piu_vicina
+    fallita: MotoreTest.ArriviDallaPatriaTest test_incarico_31_B_finche_attende_la_formazione_non_e_un_gruppo_e_all_arrivo_attende_una_decisione
+    fallita: MotoreTest.ArriviDallaPatriaTest test_incarico_31_B_gli_arrivi_d_estate_e_d_autunno_giungono_all_apertura_della_prima_giornata_della_stagione
+    fallita: MotoreTest.ArriviDallaPatriaTest test_incarico_31_B_le_reclute_pronte_in_primavera_entrano_con_la_prima_giornata_al_quartier_generale
+    fallita: MotoreTest.ArriviDallaPatriaTest test_incarico_31_B_un_arrivo_senza_casella_libera_attende_la_giornata_successiva
+    fallita: SessioneTest.SessioneRegnoSecondaTappaTest test_incarico_31_due_anni_interi_con_una_formazione_perduta_una_in_patria_un_arrivo_ricevuto_e_uno_mai_giunto
+    fallita: SessioneTest.SessioneRegnoTest test_un_anno_intero_fino_alla_seconda_primavera_e_la_ripresa_dal_giornale
+    .build/mutanti-31/Codice/Tests/SessioneTest/SessioneRegnoSecondaTappaTest.swift:337: error: -[SessioneTest.SessioneRegnoSecondaTappaTest test_incarico_31_due_anni_interi_con_una_formazione_perduta_una_in_patria_un_arrivo_ricevuto_e_uno_mai_giunto] : XCTAssertEqual failed: ("["lupo", "falco"]") is not equal to ("["lupo", "falco", "cervo"]") - le reclute della primavera sono entrate con la prima giornata
+    .build/mutanti-31/Codice/Tests/SessioneTest/SessioneRegnoSecondaTappaTest.swift:341: error: -[SessioneTest.SessioneRegnoSecondaTappaTest test_incarico_31_due_anni_interi_con_una_formazione_perduta_una_in_patria_un_arrivo_ricevuto_e_uno_mai_giunto] : XCTUnwrap failed: expected non-nil value of type "Gruppo"
+
+MUTANTE 18: chi è ancora in arrivo non raggiunge le altre con l'inverno
+  file: Codice/Sources/Motore/ForzeDelRegno.swift
+  - nuova.arrivo = nil
+  - return nuova
+  + nuova.arrivo = formazione.arrivo
+  + return nuova
+  UCCISO: uscita 1, 157 prove avviate, 149 passate, 8 fallite, 13 s
+    fallita: MotoreTest.ArriviDallaPatriaTest test_incarico_31_B_se_la_campagna_si_conclude_prima_gli_arrivi_mai_giunti_tornano_al_regno_ancora_in_arrivo
+    fallita: MotoreTest.RegnoSecondaTappaTest test_incarico_31_B_gli_arrivi_mai_giunti_tornano_ancora_in_arrivo_e_con_l_inverno_raggiungono_le_altre
+    fallita: MotoreTest.RegnoSecondaTappaTest test_incarico_31_B_senza_campagna_le_reclute_raggiungono_le_altre_con_l_inverno
+    fallita: MotoreTest.RegnoSecondaTappaTest test_incarico_31_D_chi_arriva_con_l_inverno_si_mantiene_e_si_scioglie_come_gli_altri
+    fallita: SessioneTest.SessioneRegnoSecondaTappaTest test_incarico_31_due_anni_interi_con_una_formazione_perduta_una_in_patria_un_arrivo_ricevuto_e_uno_mai_giunto
+    fallita: SessioneTest.SessioneRegnoTest test_05_14_6_riproduzione_d_oro_di_due_anni_di_regno
+    fallita: VerificaTest.BancoRegnoTest test_incarico_31_il_banco_su_piu_semi_e_piu_anni_non_produce_alcuna_violazione
+    fallita: VerificaTest.BancoRegnoTest test_sulle_transizioni_del_motore_la_sonda_tace
+    .build/mutanti-31/Codice/Tests/VerificaTest/BancoRegnoTest.swift:81: error: -[VerificaTest.BancoRegnoTest test_incarico_31_il_banco_su_piu_semi_e_piu_anni_non_produce_alcuna_violazione] : XCTAssertEqual failed: ("["competente/3/4: [\"forze_cambiate_fuori_tempo\"]", "competente/5/2: [\"forze_cambiate_fuori_tempo\"]", "prudente/2/5: [\"forze_cambiate_fuori_tempo\"]", "prudente/5/5: [\"forze_cambiate_fuori_tempo\"]"]") is not equal to ("[]")
+    .build/mutanti-31/Codice/Tests/VerificaTest/BancoRegnoTest.swift:340: error: -[VerificaTest.BancoRegnoTest test_sulle_transizioni_del_motore_la_sonda_tace] : XCTAssertEqual failed: ("["forze_cambiate_fuori_tempo"]") is not equal to ("[]") - transizione legittima «inverno_con_gli_arrivi»
+
+MUTANTE 19: la formazione tenuta in patria sparisce al rientro delle altre
+  file: Codice/Sources/Motore/ForzeDelRegno.swift
+  - if !formazione.parteConLaCampagna {
+  - esito.append(formazione)
+  - 
+  + if !formazione.parteConLaCampagna {
+  + _ = formazione
+  + 
+  UCCISO: uscita 1, 157 prove avviate, 144 passate, 13 fallite, 13 s
+    fallita: MotoreTest.ArriviDallaPatriaTest test_incarico_31_A_il_distaccamento_riceve_un_nome_che_nessuna_formazione_del_regno_porta
+    fallita: MotoreTest.ArriviDallaPatriaTest test_incarico_31_B_se_la_campagna_si_conclude_prima_gli_arrivi_mai_giunti_tornano_al_regno_ancora_in_arrivo
+    fallita: MotoreTest.ArriviDallaPatriaTest test_incarico_31_C_la_formazione_tenuta_in_patria_non_compare_nello_scenario_e_il_suo_nome_e_riservato
+    fallita: MotoreTest.RegnoSecondaTappaTest test_incarico_31_B_gli_arrivi_mai_giunti_tornano_ancora_in_arrivo_e_con_l_inverno_raggiungono_le_altre
+    fallita: MotoreTest.RegnoSecondaTappaTest test_incarico_31_C_destina_vale_soltanto_fuori_dall_inverno_e_prima_di_aprire_la_campagna
+    fallita: MotoreTest.RegnoSecondaTappaTest test_incarico_31_C_la_formazione_tenuta_in_patria_resta_identica_dopo_la_campagna_e_la_scelta_resta_l_anno_dopo
+    fallita: SessioneTest.SessioneRegnoSecondaTappaTest test_incarico_31_due_anni_interi_con_una_formazione_perduta_una_in_patria_un_arrivo_ricevuto_e_uno_mai_giunto
+    fallita: SessioneTest.SessioneRegnoTest test_05_14_6_riproduzione_d_oro_di_due_anni_di_regno
+    fallita: VerificaTest.BancoRegnoTest test_il_banco_gioca_anni_interi_coi_valori_di_fabbrica_senza_violare_alcun_invariante
+    fallita: VerificaTest.BancoRegnoTest test_incarico_31_il_banco_col_denaro_che_non_basta_scioglie_reparti_senza_violare_alcun_invariante
+    fallita: VerificaTest.BancoRegnoTest test_incarico_31_il_banco_su_piu_semi_e_piu_anni_non_produce_alcuna_violazione
+    fallita: VerificaTest.BancoRegnoTest test_incarico_31_ogni_invariante_nuovo_violato_di_proposito_e_riferito_col_suo_codice
+    fallita: VerificaTest.BancoRegnoTest test_sulle_transizioni_del_motore_la_sonda_tace
+    .build/mutanti-31/Codice/Tests/VerificaTest/BancoRegnoTest.swift:46: error: -[VerificaTest.BancoRegnoTest test_il_banco_gioca_anni_interi_coi_valori_di_fabbrica_senza_violare_alcun_invariante] : XCTAssertEqual failed: ("["prudente/2/2: [\"formazione_in_patria_cambiata\", \"forze_cambiate_fuori_tempo\"]"]") is not equal to ("[]")
+    .build/mutanti-31/Codice/Tests/VerificaTest/BancoRegnoTest.swift:125: error: -[VerificaTest.BancoRegnoTest test_incarico_31_il_banco_col_denaro_che_non_basta_scioglie_reparti_senza_violare_alcun_invariante] : XCTAssertEqual failed: ("["prudente/2/2: [\"formazione_in_patria_cambiata\", \"forze_cambiate_fuori_tempo\"]"]") is not equal to ("[]")
+
+MUTANTE 20: l'addestramento mirato costa come per un solo atomo
+  file: Codice/Sources/Motore/MotoreRegno.swift
+  - guard let bersaglio, let misura = stato.forze.misura(di: bersaglio) else { return nil }
+  - return costo(di: voce, misura: misura)
+  + guard let bersaglio, let misura = stato.forze.misura(di: bersaglio) else { return nil }
+  + return costo(di: voce, misura: min(misura, 1))
+  UCCISO: uscita 1, 157 prove avviate, 149 passate, 8 fallite, 12 s
+    fallita: MotoreTest.RegnoSecondaTappaTest test_incarico_31_F_il_miglioramento_segue_il_reparto_al_fronte_e_al_rientro
+    fallita: MotoreTest.RegnoSecondaTappaTest test_incarico_31_F_il_miglioramento_si_conserva_soltanto_se_mantenuto_altrimenti_si_perde_e_il_reparto_resta
+    fallita: MotoreTest.RegnoSecondaTappaTest test_incarico_31_F_l_addestramento_mirato_costa_atomi_per_base_per_peso_ed_e_pronto_in_primavera
+    fallita: MotoreTest.RegnoSecondaTappaTest test_incarico_31_F_ogni_ordine_fuori_regola_su_un_reparto_e_respinto_col_suo_motivo
+    fallita: SegnaliTest.TraduttoreRegnoSecondaTappaTest test_incarico_31_l_etichetta_del_reparto_da_scegliere_dice_il_costo_sulla_riserva
+    fallita: SessioneTest.SessioneRegnoSecondaTappaTest test_incarico_31_F_gli_ordini_su_un_reparto_si_annullano_e_si_azzerano_come_le_altre_spese
+    fallita: SessioneTest.SessioneRegnoSecondaTappaTest test_incarico_31_due_anni_interi_con_una_formazione_perduta_una_in_patria_un_arrivo_ricevuto_e_uno_mai_giunto
+    fallita: SessioneTest.SessioneRegnoTest test_05_14_6_riproduzione_d_oro_di_due_anni_di_regno
+    .build/mutanti-31/Codice/Tests/SessioneTest/SessioneRegnoSecondaTappaTest.swift:292: error: -[SessioneTest.SessioneRegnoSecondaTappaTest test_incarico_31_due_anni_interi_con_una_formazione_perduta_una_in_patria_un_arrivo_ricevuto_e_uno_mai_giunto] : XCTAssertEqual failed: ("Optional(4)") is not equal to ("Optional(32)") - otto atomi per cinque monete per otto decimi
+    .build/mutanti-31/Codice/Tests/SessioneTest/SessioneRegnoSecondaTappaTest.swift:519: error: -[SessioneTest.SessioneRegnoSecondaTappaTest test_incarico_31_F_gli_ordini_su_un_reparto_si_annullano_e_si_azzerano_come_le_altre_spese] : XCTAssertEqual failed: ("395") is not equal to ("347")
+
+MUTANTE 21: nella campagna di un regno l'avversario prende i primi nomi liberi, come prima della correzione
+  file: Codice/Sources/Motore/ScenarioCampagna.swift
+  - let dalFondo = !riservati.isEmpty
+  + let dalFondo = false && !riservati.isEmpty
+  UCCISO: uscita 1, 157 prove avviate, 149 passate, 8 fallite, 12 s
+    fallita: MotoreTest.ArriviDallaPatriaTest test_incarico_31_A_i_gruppi_avversari_non_prendono_mai_un_nome_del_regno
+    fallita: MotoreTest.ArriviDallaPatriaTest test_incarico_31_A_il_distaccamento_riceve_un_nome_che_nessuna_formazione_del_regno_porta
+    fallita: MotoreTest.ArriviDallaPatriaTest test_incarico_31_A_l_avversario_porta_gli_stessi_nomi_ogni_anno_e_le_reclute_non_li_ereditano
+    fallita: MotoreTest.ArriviDallaPatriaTest test_incarico_31_A_sul_fronte_ogni_gruppo_porta_il_nome_della_propria_formazione
+    fallita: MotoreTest.ArriviDallaPatriaTest test_incarico_31_B_le_reclute_pronte_in_primavera_entrano_con_la_prima_giornata_al_quartier_generale
+    fallita: MotoreTest.ArriviDallaPatriaTest test_incarico_31_C_la_formazione_tenuta_in_patria_non_compare_nello_scenario_e_il_suo_nome_e_riservato
+    fallita: SessioneTest.SessioneRegnoSecondaTappaTest test_incarico_31_due_anni_interi_con_una_formazione_perduta_una_in_patria_un_arrivo_ricevuto_e_uno_mai_giunto
+    fallita: SessioneTest.SessioneRegnoTest test_la_campagna_dell_anno_nasce_nello_slot_annidato_con_le_forze_del_regno_e_il_calendario
+    .build/mutanti-31/Codice/Tests/SessioneTest/SessioneRegnoSecondaTappaTest.swift:226: error: -[SessioneTest.SessioneRegnoSecondaTappaTest test_incarico_31_due_anni_interi_con_una_formazione_perduta_una_in_patria_un_arrivo_ricevuto_e_uno_mai_giunto] : XCTAssertEqual failed: ("Optional(Set(["corvo", "orso", "lupo", "falco"]))") is not equal to ("Optional(Set(["corvo", "lupo", "falco", "orso", "cervo"]))") - la campagna tiene da parte i nomi del regno e quelli che l'avversario ha preso dal fondo della lista
+    .build/mutanti-31/Codice/Tests/SessioneTest/SessioneRegnoTest.swift:135: error: -[SessioneTest.SessioneRegnoTest test_la_campagna_dell_anno_nasce_nello_slot_annidato_con_le_forze_del_regno_e_il_calendario] : XCTAssertEqual failed: ("["orso"]") is not equal to ("["muflone"]")
+
+IN TUTTO: 21 mutanti, 21 uccisi, 0 sopravvissuti, 0 che non compilano, 0 non applicati

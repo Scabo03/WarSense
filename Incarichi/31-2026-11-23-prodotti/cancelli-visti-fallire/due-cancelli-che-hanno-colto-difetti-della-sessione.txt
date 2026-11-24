@@ -1,0 +1,26 @@
+DUE CANCELLI ESISTENTI CHE HANNO COLTO DUE DIFETTI DELLA SESSIONE (incarico 31)
+
+Prima esecuzione dell'intera suite del pacchetto dopo l'adeguamento delle prove alla seconda tappa
+(`cd Codice && swift test`, 24 novembre, albero di lavoro prima del commit c3b5e2a): uscita 1,
+531 casi passati, 2 falliti, 63 s. I due fallimenti, come li stampa l'esecutore:
+
+Tests/VerificaTest/BancoRegnoTest.swift:462: error: -[VerificaTest.BancoRegnoTest test_ogni_invariante_violato_di_proposito_e_riferito_col_suo_codice] : XCTAssertTrue failed - la sonda non riferisce «entrata_non_conservata»: ha visto ["mantenimento_non_conservato"]
+Tests/DatiTest/AccordoDiGenereTest.swift:174: error: -[DatiTest.AccordoDiGenereTest test_il_codice_inserisce_i_soggetti_soltanto_nelle_forme_accordate] : XCTAssertEqual failed: ("["Codice/Sources/Segnali/SignificatiRegno.swift: una frase con soggetto ha una chiave non scritta per esteso", "Codice/Sources/Segnali/SignificatiRegno.swift: una frase con soggetto ha una chiave non scritta per esteso"]") is not equal to ("[]") - il codice incolla soggetti fuori dalle forme accordate:
+
+Che cosa erano.
+
+1. `AccordoDiGenereTest` (cancello dell'incarico 22 sulle frasi con soggetto): nel traduttore del regno
+   (`Codice/Sources/Segnali/SignificatiRegno.swift`) la frase della scelta di chi parte prendeva la chiave
+   con l'operatore ternario, e l'etichetta della voce con bersaglio metteva una frase senza soggetto subito
+   prima di una con soggetto, senza una virgola in mezzo: l'espressione regolare del cancello legge entrambe
+   come «chiave non scritta per esteso». Corretto il codice (due chiamate con la chiave letterale; le frasi
+   con soggetto per prime), non il cancello.
+
+2. `BancoRegnoTest`, mutante «entrata_non_conservata» dell'incarico 30: riscrivendo la sonda per il
+   mantenimento avevo assorbito quell'invariante nel codice nuovo `mantenimento_non_conservato`, e il mutante
+   che viola l'entrata non riceveva più il proprio codice. Ripristinato: per le risorse diverse dal denaro la
+   sonda riferisce l'entrata non conservata (o il mantenimento, se il prelievo dichiara di toccarle); per il
+   denaro, il mantenimento.
+
+Dopo le due correzioni (commit c3b5e2a): uscita 0, 533 casi passati, nessuno fallito, 2 saltati (le due
+rigenerazioni esplicite dell'oro, che girano soltanto a richiesta), 66 s.
