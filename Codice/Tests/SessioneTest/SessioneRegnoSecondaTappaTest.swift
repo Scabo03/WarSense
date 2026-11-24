@@ -223,7 +223,8 @@ final class SessioneRegnoSecondaTappaTest: XCTestCase {
         let delRegno = Set(stato.forze.formazioni.map(\.nome))
         XCTAssertTrue(delRegno.isDisjoint(with: nomi(fronte, di: .avversario)),
                       "l'avversario non porta un nome del regno, nemmeno quello di chi è rimasto in patria")
-        XCTAssertEqual(fronte.nomiRiservati.map(Set.init), delRegno)
+        XCTAssertEqual(fronte.nomiRiservati.map(Set.init), delRegno.union(nomi(fronte, di: .avversario)),
+                       "la campagna tiene da parte i nomi del regno e quelli che l'avversario ha preso dal fondo della lista")
         // A campagna aperta la scelta di chi parte non si cambia più.
         let tardi = try await regno.esegui(.destina(unita: "orso", alFronte: true))
         XCTAssertEqual(tardi.esito.motivo, .campagnaAperta)

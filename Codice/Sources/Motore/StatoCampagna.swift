@@ -903,9 +903,10 @@ public struct StatoCampagna: Hashable, Codable, Sendable {
     /// campagna ogni comando è respinto col medesimo motivo e nulla più avanza. Si pone soltanto
     /// nella campagna che dichiara un calendario.
     public var conclusione: ConclusioneCampagna?
-    /// I NOMI che questa campagna non assegna (01 §5.6.0.4; incarico 31): quelli che il regno
-    /// tiene per le proprie formazioni — al fronte, in patria o in arrivo. Un gruppo che nasce sul
-    /// fronte, avversario o distaccamento, prende il primo nome della lista chiusa che non sia
+    /// I NOMI che questa campagna non assegna più (01 §5.6.0.4; incarico 31): quelli che il regno
+    /// tiene per le proprie formazioni — al fronte, in patria o in arrivo — e quelli che
+    /// l'avversario ha preso, alla nascita della campagna, dal fondo della lista. Un gruppo che
+    /// nasce sul fronte, cioè un distaccamento, prende il primo nome della lista chiusa che non sia
     /// fra questi (`MotoreCampagna.prossimoNomeLibero`). Nullo nelle campagne di prova, dove la
     /// lista si scorre in ordine com'era; facoltativo, come il calendario, per le istantanee.
     public var nomiRiservati: [IdentificatoreDati]?

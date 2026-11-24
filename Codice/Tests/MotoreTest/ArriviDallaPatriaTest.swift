@@ -175,8 +175,8 @@ final class ArriviDallaPatriaTest: XCTestCase {
                           "l'avversario non dichiara nomi: glieli dà la fabbrica, fra quelli liberi")
             let stato = try crea(scenario)
             XCTAssertEqual(nomi(stato, di: .giocatore), ["corvo", "lupo", "falco", "orso", "cervo"], fronte.identificatore)
-            XCTAssertEqual(nomi(stato, di: .avversario), ["lince", "aquila", "volpe"],
-                           "\(fronte.identificatore): i primi nomi della lista che il regno non porta")
+            XCTAssertEqual(nomi(stato, di: .avversario), ["muflone", "ermellino", "sciacallo"],
+                           "\(fronte.identificatore): gli ultimi nomi della lista, presi dal fondo")
             // La formazione e il gruppo sono la stessa cosa: stesso nome, stessa categoria, stessi reparti.
             for formazione in forze.formazioni {
                 let gruppo = try gruppo(formazione.nome, stato)
@@ -189,43 +189,84 @@ final class ArriviDallaPatriaTest: XCTestCase {
     }
 
     func test_incarico_31_A_i_gruppi_avversari_non_prendono_mai_un_nome_del_regno() throws {
-        // Il regno porta nomi sparsi per la lista: due al fronte, uno in patria, tre in arrivo — uno
-        // dei quali soltanto con l'inverno. L'avversario prende i primi che restano.
+        // Il regno porta nomi sparsi per la lista, anche in fondo: due al fronte, uno in patria,
+        // tre in arrivo — uno dei quali soltanto con l'inverno. L'avversario prende dal fondo gli
+        // ultimi che restano: Muflone è del regno ed Ermellino è in patria, e la ricerca li salta.
         let forze = ForzeDelRegno.sciami(formazioni: [
             armata("lupo", [leggera(6)]),
-            armata("orso", [leggera(6)]),
-            armata("corvo", [leggera(6)], inPatria: true),
+            armata("muflone", [leggera(6)]),
+            armata("ermellino", [leggera(6)], inPatria: true),
             armata("lince", [leggera(6, leva: 1)], arrivo: .primavera),
-            armata("volpe", [leggera(6, leva: 1)], arrivo: .estate),
+            armata("poiana", [leggera(6, leva: 1)], arrivo: .estate),
             armata("ariete", [leggera(6, leva: 1)], arrivo: .inverno),
         ], prossimoNome: 9)
         let delRegno = Set(forze.formazioni.map(\.nome))
         for nome in ["campagna_piccola", "campagna_media", "campagna_grande"] {
             let stato = try crea(try scenario(try scenarioDiFabbrica(nome), forze, dueGiornate))
             let avversari = nomi(stato, di: .avversario)
-            XCTAssertEqual(avversari, ["falco", "cervo", "aquila"], nome)
+            XCTAssertEqual(avversari, ["sciacallo", "donnola", "ghiro"], nome)
             XCTAssertTrue(delRegno.isDisjoint(with: avversari), "\(nome): un gruppo avversario porta un nome del regno")
-            XCTAssertEqual(Set(nomi(stato, di: .giocatore)), ["lupo", "orso", "lince"],
+            XCTAssertEqual(Set(nomi(stato, di: .giocatore)), ["lupo", "muflone", "lince"],
                            "\(nome): al fronte chi è partito e chi è arrivato con la prima giornata")
-            XCTAssertEqual(stato.nomiRiservati.map(Set.init), delRegno,
-                           "\(nome): la campagna tiene da parte ogni nome del regno")
+            XCTAssertEqual(stato.nomiRiservati.map(Set.init), delRegno.union(avversari),
+                           "\(nome): la campagna tiene da parte ogni nome del regno e quelli che l'avversario ha preso")
+            XCTAssertEqual(motore.prossimoNomeLibero(stato)?.nome, "corvo",
+                           "\(nome): chi nasce sul fronte prende il primo nome che nessuna delle due parti tiene")
+        }
+    }
+
+    /// I NOMI DELLE DUE PARTI D'ANNO IN ANNO (incarico 31, trovato a tappa costruita). Il regno
+    /// assegna i nomi dall'inizio della lista chiusa; nella campagna di un regno l'avversario li
+    /// prende dal FONDO. Così i gruppi nemici portano gli stessi nomi ogni anno, e le reclute di
+    /// un inverno non ricevono il nome che l'anno prima era di un gruppo nemico. Finché
+    /// l'avversario prendeva i primi nomi liberi, al primo anno erano Lince, Aquila e Volpe: proprio
+    /// quelli che la primavera dopo toccavano alle formazioni nuove del regno.
+    func test_incarico_31_A_l_avversario_porta_gli_stessi_nomi_ogni_anno_e_le_reclute_non_li_ereditano() throws {
+        let regno = try CaricatoreRegno.carica(da: Contenuti.valoriDiFabbrica, archetipiNoti: Set(valori.archetipi.keys),
+                                               miglioramentiNoti: Set(valori.miglioramenti.keys))
+        let primoAnno = try ForzeDelRegno.iniziali(regno.forzeIniziali, nomi: regno.nomiDelleUnita)
+        // L'inverno del primo anno: una leva pronta in primavera e una pronta in estate.
+        let secondoAnno = primoAnno.dopoLaPrimavera(
+            reclute: [(effetto: .reclutaReparto(archetipo: "fanteria_leggera", atomi: 6), pronto: .primavera),
+                      (effetto: .reclutaReparto(archetipo: "cavalleria_manovrata", atomi: 6), pronto: .estate)],
+            miglioramenti: [], mantenuti: [], anno: 1, nomi: regno.nomiDelleUnita).forze
+        let delRegnoAlSecondoAnno = secondoAnno.formazioni.map(\.nome)
+        XCTAssertEqual(delRegnoAlSecondoAnno, ["corvo", "lupo", "falco", "orso", "cervo", "lince", "aquila"])
+
+        for fronte in regno.fronti {
+            let base = try scenarioDiFabbrica(fronte.scenario)
+            let uno = try crea(try scenario(base, primoAnno, CalendarioDiCampagna(anno: 1, giornatePerStagione: 30)))
+            let due = try crea(try scenario(base, secondoAnno, CalendarioDiCampagna(anno: 2, giornatePerStagione: 30)))
+            let nemiciDelPrimoAnno = nomi(uno, di: .avversario)
+            let nemiciDelSecondoAnno = nomi(due, di: .avversario)
+            print("NOMI-DELLE-PARTI-31 fronte=\(fronte.identificatore) nemici_anno_1=\(nemiciDelPrimoAnno) "
+                  + "nemici_anno_2=\(nemiciDelSecondoAnno) regno_anno_2=\(delRegnoAlSecondoAnno)")
+            XCTAssertEqual(nemiciDelSecondoAnno, nemiciDelPrimoAnno,
+                           "\(fronte.identificatore): i gruppi nemici portano gli stessi nomi ogni anno")
+            XCTAssertTrue(Set(delRegnoAlSecondoAnno).isDisjoint(with: nemiciDelPrimoAnno),
+                          "\(fronte.identificatore): una formazione del regno porta il nome che l'anno prima era di un gruppo nemico")
+            XCTAssertEqual(nemiciDelPrimoAnno, ["muflone", "ermellino", "sciacallo"],
+                           "\(fronte.identificatore): gli ultimi nomi della lista, dal fondo")
+            // Chi nasce sul fronte prende il primo nome che né il regno né l'avversario tengono.
+            XCTAssertEqual(motore.prossimoNomeLibero(uno)?.nome, "lince", fronte.identificatore)
+            XCTAssertEqual(motore.prossimoNomeLibero(due)?.nome, "volpe", fronte.identificatore)
         }
     }
 
     func test_incarico_31_A_il_distaccamento_riceve_un_nome_che_nessuna_formazione_del_regno_porta() throws {
-        // Lince è tenuta in patria: è proprio il nome che la lista darebbe al primo distaccamento,
-        // dopo i tre dell'avversario. Volpe matura con l'inverno, e nemmeno lei è sul fronte.
+        // Falco è tenuto in patria: è proprio il nome che la lista darebbe al primo distaccamento.
+        // Cervo matura con l'inverno, e nemmeno lui è sul fronte: sarebbe il nome del secondo.
         let forze = ForzeDelRegno.sciami(formazioni: [
             armata("corvo", [leggera(6)]),
             armata("lupo", [leggera(18), pesante(8), leggera(4)]),
-            armata("lince", [leggera(6)], inPatria: true),
-            armata("volpe", [leggera(6, leva: 1)], arrivo: .inverno),
-        ], prossimoNome: 8)
+            armata("falco", [leggera(6)], inPatria: true),
+            armata("cervo", [leggera(6, leva: 1)], arrivo: .inverno),
+        ], prossimoNome: 5)
         var stato = try crea(try scenario(try scenarioDiFabbrica("campagna_piccola"), forze, dueGiornate))
         XCTAssertEqual(nomi(stato, di: .giocatore), ["corvo", "lupo"])
-        XCTAssertEqual(nomi(stato, di: .avversario), ["falco", "orso", "cervo"])
-        XCTAssertEqual(motore.prossimoNomeLibero(stato)?.nome, "aquila",
-                       "non Lince, tenuta in patria: il primo nome che nessuno porta")
+        XCTAssertEqual(nomi(stato, di: .avversario), ["muflone", "ermellino", "sciacallo"])
+        XCTAssertEqual(motore.prossimoNomeLibero(stato)?.nome, "orso",
+                       "non Falco, tenuto in patria: il primo nome che nessuno porta")
 
         // Lupo stacca il reparto pesante, poi — il giorno dopo — il terzo reparto.
         let lupo = try gruppo("lupo", stato)
@@ -239,7 +280,7 @@ final class ArriviDallaPatriaTest: XCTestCase {
             return XCTFail("la divisione si dichiara con un evento")
         }
         XCTAssertEqual(origine, "lupo")
-        XCTAssertEqual(nomeDelPrimo, "aquila")
+        XCTAssertEqual(nomeDelPrimo, "orso")
         chiudiUnaGiornata(&stato)
         XCTAssertEqual(stato.giorno, 2)
         let secondo = try XCTUnwrap(stato.griglia.vicini(di: lupo.posizione).sorted().first {
@@ -250,8 +291,8 @@ final class ArriviDallaPatriaTest: XCTestCase {
         guard case .gruppoDiviso(_, _, _, let nomeDelSecondo, _)? = eventi.first else {
             return XCTFail("la divisione si dichiara con un evento")
         }
-        XCTAssertEqual(nomeDelSecondo, "ariete", "Volpe è del regno, e la lista la salta")
-        XCTAssertEqual(nomi(stato, di: .giocatore), ["corvo", "lupo", "aquila", "ariete"])
+        XCTAssertEqual(nomeDelSecondo, "lince", "Cervo è del regno, e la lista lo salta")
+        XCTAssertEqual(nomi(stato, di: .giocatore), ["corvo", "lupo", "orso", "lince"])
         let delRegno = Set(forze.formazioni.map(\.nome))
         XCTAssertFalse(delRegno.contains(nomeDelPrimo))
         XCTAssertFalse(delRegno.contains(nomeDelSecondo))
@@ -260,15 +301,15 @@ final class ArriviDallaPatriaTest: XCTestCase {
         // La campagna si conclude, e i distaccamenti tornano in patria col nome che hanno ricevuto.
         try combatti(&stato, sopravviveIlGiocatore: true, sopravviveLAvversario: false)
         let esito = try XCTUnwrap(PonteRegnoCampagna.esito(da: stato, fronte: "guado"))
-        XCTAssertEqual(esito.superstiti.formazioni.map(\.nome), ["corvo", "lupo", "aquila", "ariete"])
-        XCTAssertEqual(esito.superstiti.formazioni.first { $0.nome == "aquila" }?.composizione, [pesante(8)])
-        XCTAssertEqual(esito.superstiti.formazioni.first { $0.nome == "ariete" }?.composizione, [leggera(4)])
+        XCTAssertEqual(esito.superstiti.formazioni.map(\.nome), ["corvo", "lupo", "orso", "lince"])
+        XCTAssertEqual(esito.superstiti.formazioni.first { $0.nome == "orso" }?.composizione, [pesante(8)])
+        XCTAssertEqual(esito.superstiti.formazioni.first { $0.nome == "lince" }?.composizione, [leggera(4)])
         XCTAssertEqual(esito.superstiti.formazioni.first { $0.nome == "lupo" }?.composizione, [leggera(18)])
         // Nel regno: chi c'era al suo posto, chi è nato sul fronte in coda, e nessun nome ripetuto.
         let dopo = forze.dopoLaCampagna(rientrano: esito.superstiti)
-        XCTAssertEqual(dopo.formazioni.map(\.nome), ["corvo", "lupo", "lince", "volpe", "aquila", "ariete"])
+        XCTAssertEqual(dopo.formazioni.map(\.nome), ["corvo", "lupo", "falco", "cervo", "orso", "lince"])
         XCTAssertEqual(Set(dopo.formazioni.map(\.nome)).count, 6)
-        XCTAssertEqual(dopo.formazioni[2], forze.formazioni[2], "Lince, rimasta in patria, è identica")
+        XCTAssertEqual(dopo.formazioni[2], forze.formazioni[2], "Falco, rimasto in patria, è identico")
         XCTAssertEqual(dopo.formazioni[3], forze.formazioni[3])
     }
 
@@ -419,11 +460,11 @@ final class ArriviDallaPatriaTest: XCTestCase {
         // Restano in attesa gli arrivi delle stagioni successive, nell'ordine in cui giungeranno.
         XCTAssertEqual(stato.arriviInAttesa?.map(\.nome), ["lince", "aquila"])
         XCTAssertEqual(stato.arriviInAttesa?.map(\.giorno), [3, 5])
-        // L'avversario prende il primo nome che il regno non porta, e chi resta in patria non c'è.
-        XCTAssertEqual(nomi(stato, di: .avversario), ["falco"])
+        // L'avversario prende l'ultimo nome della lista, e chi resta in patria non c'è.
+        XCTAssertEqual(nomi(stato, di: .avversario), ["muflone"])
         XCTAssertFalse(stato.gruppi.values.contains { $0.nome == "orso" || $0.nome == "volpe" })
-        XCTAssertEqual(stato.nomiRiservati, ["corvo", "lupo", "orso", "cervo", "lince", "aquila", "volpe"],
-                       "ogni nome del regno, nell'ordine della lista")
+        XCTAssertEqual(stato.nomiRiservati, ["corvo", "lupo", "orso", "cervo", "lince", "aquila", "volpe", "muflone"],
+                       "ogni nome del regno e quello dell'avversario, nell'ordine della lista")
         // Il gruppo arrivato si comanda come gli altri.
         XCTAssertTrue(motore.valida(.presidio(gruppo: cervo.id), parte: .giocatore, stato: stato).eValido)
     }
@@ -618,7 +659,8 @@ final class ArriviDallaPatriaTest: XCTestCase {
         XCTAssertTrue(scenario.arrivi.isEmpty)
         var stato = try crea(scenario)
         XCTAssertEqual(nomi(stato, di: .giocatore), ["corvo", "falco"])
-        XCTAssertEqual(nomi(stato, di: .avversario), ["orso", "cervo", "lince"], "Lupo è del regno anche se non è qui")
+        XCTAssertEqual(nomi(stato, di: .avversario), ["muflone", "ermellino", "sciacallo"])
+        XCTAssertEqual(motore.prossimoNomeLibero(stato)?.nome, "orso", "Lupo è del regno anche se non è qui: chi nasce sul fronte non lo prende")
         // La campagna si conclude: Lupo non è fra chi rientra, e nel regno è rimasto com'era.
         try combatti(&stato, sopravviveIlGiocatore: true, sopravviveLAvversario: false)
         let esito = try XCTUnwrap(PonteRegnoCampagna.esito(da: stato, fronte: "guado"))

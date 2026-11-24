@@ -318,10 +318,14 @@ public enum FabbricaCampagna {
         guard !scenario.gruppiGiocatore.isEmpty else { throw ErroreScenario.nessunGruppo }
 
         // I NOMI (01 §5.6.0.4; incarico 31). Un gruppo che dichiara il proprio nome lo conserva: è
-        // la formazione del regno, che lo porta da un anno all'altro. Gli altri — i gruppi delle
-        // campagne di prova, l'avversario — prendono in ordine i nomi della lista chiusa che nessuno
-        // tiene per sé: né un gruppo iniziale, né un arrivo, né una formazione rimasta in patria.
-        // Senza nomi dichiarati né riservati la lista si scorre dall'inizio, com'era.
+        // la formazione del regno, che lo porta da un anno all'altro. Gli altri prendono i nomi
+        // della lista chiusa che nessuno tiene per sé: né un gruppo iniziale, né un arrivo, né una
+        // formazione rimasta in patria. Nelle campagne di prova, che non dichiarano né riservano
+        // nomi, la lista si scorre dall'inizio, com'era. Nella campagna di un REGNO i gruppi senza
+        // nome sono quelli dell'avversario, e li prendono dal FONDO della lista: il regno assegna i
+        // propri dall'inizio (`ForzeDelRegno`), sicché le due parti non si incontrano finché la
+        // lista basta, i gruppi nemici portano gli stessi nomi ogni anno, e le reclute di un inverno
+        // non ricevono il nome che l'anno prima era di un gruppo nemico.
         let dichiarati = scenario.gruppiGiocatore.compactMap(\.nome)
             + scenario.gruppiAvversario.compactMap(\.nome) + scenario.arrivi.map(\.nome)
         var visti = Set<IdentificatoreDati>()
@@ -342,6 +346,9 @@ public enum FabbricaCampagna {
         var occupate: [Parte: Set<Cella>] = [.giocatore: [], .avversario: []]
         var prossimoId = 1
         var prossimoNome = 0
+        let dalFondo = !riservati.isEmpty
+        var ultimoNome = valori.nomiGruppi.count - 1
+        var presiDalFondo: [IdentificatoreDati] = []
 
         // Le due parti nascono con lo STESSO percorso — stessi rifiuti, stessa
         // derivazione del volume, nomi dalla medesima lista chiusa (i nomi non si
@@ -377,6 +384,13 @@ public enum FabbricaCampagna {
                 let nome: IdentificatoreDati
                 if let dichiarato = iniziale.nome {
                     nome = dichiarato
+                } else if dalFondo {
+                    // I nomi liberi bastano (il rifiuto `nomiInsufficienti` qui sopra): la
+                    // ricerca all'indietro non esce dalla lista.
+                    while riservati.contains(valori.nomiGruppi[ultimoNome]) { ultimoNome -= 1 }
+                    nome = valori.nomiGruppi[ultimoNome]
+                    ultimoNome -= 1
+                    presiDalFondo.append(nome)
                 } else {
                     while riservati.contains(valori.nomiGruppi[prossimoNome]) { prossimoNome += 1 }
                     nome = valori.nomiGruppi[prossimoNome]
@@ -440,6 +454,9 @@ public enum FabbricaCampagna {
                                                                : $0.element.giorno < $1.element.giorno }
             .map(\.element)
 
+        // Ciò che chi nasce sul fronte non deve prendere: i nomi del regno e quelli che
+        // l'avversario ha preso dal fondo.
+        let tenuti = riservati.union(presiDalFondo)
         var stato = StatoCampagna(mappa: mappa, giorno: 1, gruppi: gruppi,
                                   prossimoIdGruppo: prossimoId,
                                   prossimoIndiceNome: prossimoNome,
@@ -447,8 +464,8 @@ public enum FabbricaCampagna {
                                   forzeNemiche: Set(scenario.forzeNemiche),
                                   struttureDiRifornimento: Set(scenario.struttureDiRifornimento),
                                   calendario: scenario.calendario,
-                                  nomiRiservati: riservati.isEmpty ? nil : valori.nomiGruppi.filter { riservati.contains($0) }
-                                      + riservati.filter { !valori.nomiGruppi.contains($0) }.sorted(),
+                                  nomiRiservati: tenuti.isEmpty ? nil : valori.nomiGruppi.filter { tenuti.contains($0) }
+                                      + tenuti.filter { !valori.nomiGruppi.contains($0) }.sorted(),
                                   arriviInAttesa: scenario.arrivi.isEmpty ? nil : inOrdine)
         // Le reclute pronte in primavera entrano con la prima giornata: gli arrivi della giornata
         // d'apertura si consegnano qui, e il registro nasce già con la loro voce.

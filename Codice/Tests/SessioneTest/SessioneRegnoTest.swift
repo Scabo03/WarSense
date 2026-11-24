@@ -128,11 +128,11 @@ final class SessioneRegnoTest: XCTestCase {
         XCTAssertEqual(stato.gruppi(di: .giocatore).count, 3, "partono tutte le formazioni del regno")
         XCTAssertEqual(stato.gruppi(di: .avversario).count, 1, "le forze avversarie sono quelle del fronte")
         // Incarico 31: sul fronte ciascun gruppo porta il nome della propria formazione, e
-        // l'avversario prende il primo nome della lista che il regno non tiene per sé.
+        // l'avversario prende l'ultimo nome della lista che il regno non tiene per sé.
         let forzeDelRegno = await regno.stato.forze
         XCTAssertEqual(forzeDelRegno.formazioni.map(\.nome), ["corvo", "lupo", "falco"])
         XCTAssertEqual(stato.gruppiOrdinati.filter { $0.parte == .giocatore }.map(\.nome), ["corvo", "lupo", "falco"])
-        XCTAssertEqual(stato.gruppiOrdinati.filter { $0.parte == .avversario }.map(\.nome), ["orso"])
+        XCTAssertEqual(stato.gruppiOrdinati.filter { $0.parte == .avversario }.map(\.nome), ["muflone"])
         XCTAssertTrue(FileManager.default.fileExists(
             atPath: cartella.appendingPathComponent(SessioneRegno.cartellaCampagna)
                 .appendingPathComponent("giornale.jsonl").path))
