@@ -181,3 +181,63 @@ Test Case '-[WarSenseTest.SecondaTappaDelRegnoTest test_01_5_2_1_1_le_reclute_di
 Test Case '-[WarSenseTest.SecondaTappaDelRegnoTest test_incarico_31_le_reclute_ordinate_tardi_arrivano_al_quartier_generale_a_campagna_aperta]' failed (0.931 seconds).
 ** TEST FAILED **
 
+== (d) la formazione partita resta al futuro: la riga non guarda se e' gia' sul fronte
+   sorgente: Codice/Sources/Segnali/SignificatiRegno.swift
+   tolto:  if let fronte, formazione.parteConLaCampagna, !fronte.inArrivo.contains(formazione.nome) {
+   messo:  if let fronte, false, formazione.parteConLaCampagna, !fronte.inArrivo.contains(formazione.nome) {
+   prove:  swift test --filter TraduttoreRegnoSecondaTappaTest (uscita 1)
+Codice/Tests/SegnaliTest/TraduttoreRegnoSecondaTappaTest.swift:211: error: -[SegnaliTest.TraduttoreRegnoSecondaTappaTest test_02_6_5_4_5_a_campagna_aperta_la_riga_dice_dov_e_la_formazione] : XCTAssertEqual failed: ("Lupo, gruppo armato: 18 atomi di fanteria leggera, 8 atomi di fanteria pesante con addestramento mirato. Parte per il fronte") is not equal to ("Lupo, gruppo armato: 10 atomi di fanteria leggera. Sul fronte, in riga 2, casella 3")
+Codice/Tests/SegnaliTest/TraduttoreRegnoSecondaTappaTest.swift:212: error: -[SegnaliTest.TraduttoreRegnoSecondaTappaTest test_02_6_5_4_5_a_campagna_aperta_la_riga_dice_dov_e_la_formazione] : XCTAssertEqual failed: ("Orso, formazione di ricognizione: 3 atomi di fanteria leggera. Parte per il fronte") is not equal to ("Orso, formazione di ricognizione: 3 atomi di fanteria leggera. Sul fronte, in riga 4, casella 4")
+Codice/Tests/SegnaliTest/TraduttoreRegnoSecondaTappaTest.swift:214: error: -[SegnaliTest.TraduttoreRegnoSecondaTappaTest test_02_6_5_4_5_a_campagna_aperta_la_riga_dice_dov_e_la_formazione] : XCTAssertEqual failed: ("Lince, gruppo armato, reclute dell'inverno: 8 atomi di fanteria pesante, 6 atomi di fanteria leggera. Entra sul fronte in primavera, al quartier generale o nella casella libera più vicina") is not equal to ("Lince, gruppo armato: 8 atomi di fanteria pesante, 6 atomi di fanteria leggera. Sul fronte, in riga 3, casella 1")
+Codice/Tests/SegnaliTest/TraduttoreRegnoSecondaTappaTest.swift:221: error: -[SegnaliTest.TraduttoreRegnoSecondaTappaTest test_02_6_5_4_5_a_campagna_aperta_la_riga_dice_dov_e_la_formazione] : XCTAssertEqual failed: ("Corvo, gruppo armato: 6 atomi di fanteria leggera. Parte per il fronte") is not equal to ("Corvo, gruppo armato. Non è più sul fronte")
+Test Case '-[SegnaliTest.TraduttoreRegnoSecondaTappaTest test_02_6_5_4_5_a_campagna_aperta_la_riga_dice_dov_e_la_formazione]' failed (0.130 seconds).
+Test Case '-[SegnaliTest.TraduttoreRegnoSecondaTappaTest test_incarico_31_d_inverno_la_riga_dice_lo_stato_del_miglioramento_di_ciascun_reparto]' passed (0.035 seconds).
+Test Case '-[SegnaliTest.TraduttoreRegnoSecondaTappaTest test_incarico_31_il_lavoro_elencato_dice_su_che_cosa_e_quando_sara_pronto]' passed (0.033 seconds).
+Test Case '-[SegnaliTest.TraduttoreRegnoSecondaTappaTest test_incarico_31_il_registro_annota_i_fatti_delle_forze_con_la_frase_dell_annuncio]' passed (0.033 seconds).
+Test Case '-[SegnaliTest.TraduttoreRegnoSecondaTappaTest test_incarico_31_l_arrivo_dalla_patria_si_annuncia_ed_entra_nel_registro_accordato_al_genere]' passed (0.036 seconds).
+Test Case '-[SegnaliTest.TraduttoreRegnoSecondaTappaTest test_incarico_31_l_etichetta_del_reparto_da_scegliere_dice_il_costo_sulla_riserva]' passed (0.036 seconds).
+Test Case '-[SegnaliTest.TraduttoreRegnoSecondaTappaTest test_incarico_31_l_etichetta_della_voce_che_si_ordina_su_un_reparto]' passed (0.035 seconds).
+Test Case '-[SegnaliTest.TraduttoreRegnoSecondaTappaTest test_incarico_31_l_ingresso_delle_reclute_dice_quale_formazione_con_che_cosa_e_dove_e_quando_entra]' passed (0.038 seconds).
+Test Case '-[SegnaliTest.TraduttoreRegnoSecondaTappaTest test_incarico_31_l_inverno_annuncia_l_entrata_il_mantenimento_e_cio_che_e_stato_sciolto]' passed (0.041 seconds).
+Test Case '-[SegnaliTest.TraduttoreRegnoSecondaTappaTest test_incarico_31_l_ordine_su_un_reparto_e_la_scelta_di_chi_parte_si_annunciano_e_portano_la_conferma]' passed (0.038 seconds).
+Test Case '-[SegnaliTest.TraduttoreRegnoSecondaTappaTest test_incarico_31_la_conclusione_conta_fra_chi_rientra_soltanto_chi_era_sul_fronte]' passed (0.038 seconds).
+Test Case '-[SegnaliTest.TraduttoreRegnoSecondaTappaTest test_incarico_31_la_prima_schermata_dichiara_il_mantenimento_e_cio_che_ha_sciolto]' passed (0.035 seconds).
+Test Case '-[SegnaliTest.TraduttoreRegnoSecondaTappaTest test_incarico_31_la_primavera_annuncia_le_reclute_i_miglioramenti_dati_e_quelli_perduti]' passed (0.034 seconds).
+Test Case '-[SegnaliTest.TraduttoreRegnoSecondaTappaTest test_incarico_31_la_riga_di_una_formazione_dice_il_nome_la_categoria_i_reparti_e_dove_va]' passed (0.034 seconds).
+Test Case '-[SegnaliTest.TraduttoreRegnoSecondaTappaTest test_incarico_31_la_riga_si_accorda_al_numero_degli_atomi_e_al_genere_del_nome]' passed (0.038 seconds).
+Test Case '-[SegnaliTest.TraduttoreRegnoSecondaTappaTest test_incarico_31_lo_scioglimento_e_i_miglioramenti_hanno_la_formazione_per_soggetto]' passed (0.034 seconds).
+Test Case '-[SegnaliTest.TraduttoreRegnoSecondaTappaTest test_incarico_31_ogni_fatto_della_patria_ha_la_propria_frase_risolta]' passed (0.037 seconds).
+Test Case '-[SegnaliTest.TraduttoreRegnoSecondaTappaTest test_incarico_31_ogni_linguetta_e_ogni_miglioramento_dei_valori_di_fabbrica_ha_il_proprio_testo]' passed (0.034 seconds).
+Test Case '-[SegnaliTest.TraduttoreRegnoSecondaTappaTest test_incarico_31_ogni_motivo_del_regno_ha_la_propria_frase_risolta]' passed (0.034 seconds).
+Test Case '-[SegnaliTest.TraduttoreRegnoSecondaTappaTest test_incarico_31_ogni_voce_del_registro_di_due_anni_giocati_si_risolve]' passed (0.035 seconds).
+	 Executed 20 tests, with 4 failures (0 unexpected) in 0.807 (0.809) seconds
+	 Executed 20 tests, with 4 failures (0 unexpected) in 0.807 (0.810) seconds
+
+== (d) le reclute in arrivo si dicono gia' sul fronte
+   sorgente: Codice/Sources/Segnali/SignificatiRegno.swift
+   tolto:  if let fronte, formazione.parteConLaCampagna, !fronte.inArrivo.contains(formazione.nome) {
+   messo:  if let fronte, formazione.parteConLaCampagna {
+   prove:  swift test --filter TraduttoreRegnoSecondaTappaTest (uscita 1)
+Codice/Tests/SegnaliTest/TraduttoreRegnoSecondaTappaTest.swift:217: error: -[SegnaliTest.TraduttoreRegnoSecondaTappaTest test_02_6_5_4_5_a_campagna_aperta_la_riga_dice_dov_e_la_formazione] : XCTAssertEqual failed: ("Aquila, gruppo armato. Non è più sul fronte") is not equal to ("Aquila, gruppo armato, reclute dell'inverno: 6 atomi di cavalleria manovrata. Raggiunge il fronte in estate, a campagna aperta, al quartier generale o nella casella libera più vicina")
+Test Case '-[SegnaliTest.TraduttoreRegnoSecondaTappaTest test_02_6_5_4_5_a_campagna_aperta_la_riga_dice_dov_e_la_formazione]' failed (0.113 seconds).
+Test Case '-[SegnaliTest.TraduttoreRegnoSecondaTappaTest test_incarico_31_d_inverno_la_riga_dice_lo_stato_del_miglioramento_di_ciascun_reparto]' passed (0.033 seconds).
+Test Case '-[SegnaliTest.TraduttoreRegnoSecondaTappaTest test_incarico_31_il_lavoro_elencato_dice_su_che_cosa_e_quando_sara_pronto]' passed (0.031 seconds).
+Test Case '-[SegnaliTest.TraduttoreRegnoSecondaTappaTest test_incarico_31_il_registro_annota_i_fatti_delle_forze_con_la_frase_dell_annuncio]' passed (0.032 seconds).
+Test Case '-[SegnaliTest.TraduttoreRegnoSecondaTappaTest test_incarico_31_l_arrivo_dalla_patria_si_annuncia_ed_entra_nel_registro_accordato_al_genere]' passed (0.033 seconds).
+Test Case '-[SegnaliTest.TraduttoreRegnoSecondaTappaTest test_incarico_31_l_etichetta_del_reparto_da_scegliere_dice_il_costo_sulla_riserva]' passed (0.033 seconds).
+Test Case '-[SegnaliTest.TraduttoreRegnoSecondaTappaTest test_incarico_31_l_etichetta_della_voce_che_si_ordina_su_un_reparto]' passed (0.033 seconds).
+Test Case '-[SegnaliTest.TraduttoreRegnoSecondaTappaTest test_incarico_31_l_ingresso_delle_reclute_dice_quale_formazione_con_che_cosa_e_dove_e_quando_entra]' passed (0.033 seconds).
+Test Case '-[SegnaliTest.TraduttoreRegnoSecondaTappaTest test_incarico_31_l_inverno_annuncia_l_entrata_il_mantenimento_e_cio_che_e_stato_sciolto]' passed (0.032 seconds).
+Test Case '-[SegnaliTest.TraduttoreRegnoSecondaTappaTest test_incarico_31_l_ordine_su_un_reparto_e_la_scelta_di_chi_parte_si_annunciano_e_portano_la_conferma]' passed (0.032 seconds).
+Test Case '-[SegnaliTest.TraduttoreRegnoSecondaTappaTest test_incarico_31_la_conclusione_conta_fra_chi_rientra_soltanto_chi_era_sul_fronte]' passed (0.032 seconds).
+Test Case '-[SegnaliTest.TraduttoreRegnoSecondaTappaTest test_incarico_31_la_prima_schermata_dichiara_il_mantenimento_e_cio_che_ha_sciolto]' passed (0.031 seconds).
+Test Case '-[SegnaliTest.TraduttoreRegnoSecondaTappaTest test_incarico_31_la_primavera_annuncia_le_reclute_i_miglioramenti_dati_e_quelli_perduti]' passed (0.032 seconds).
+Test Case '-[SegnaliTest.TraduttoreRegnoSecondaTappaTest test_incarico_31_la_riga_di_una_formazione_dice_il_nome_la_categoria_i_reparti_e_dove_va]' passed (0.032 seconds).
+Test Case '-[SegnaliTest.TraduttoreRegnoSecondaTappaTest test_incarico_31_la_riga_si_accorda_al_numero_degli_atomi_e_al_genere_del_nome]' passed (0.037 seconds).
+Test Case '-[SegnaliTest.TraduttoreRegnoSecondaTappaTest test_incarico_31_lo_scioglimento_e_i_miglioramenti_hanno_la_formazione_per_soggetto]' passed (0.033 seconds).
+Test Case '-[SegnaliTest.TraduttoreRegnoSecondaTappaTest test_incarico_31_ogni_fatto_della_patria_ha_la_propria_frase_risolta]' passed (0.036 seconds).
+Test Case '-[SegnaliTest.TraduttoreRegnoSecondaTappaTest test_incarico_31_ogni_linguetta_e_ogni_miglioramento_dei_valori_di_fabbrica_ha_il_proprio_testo]' passed (0.032 seconds).
+Test Case '-[SegnaliTest.TraduttoreRegnoSecondaTappaTest test_incarico_31_ogni_motivo_del_regno_ha_la_propria_frase_risolta]' passed (0.032 seconds).
+Test Case '-[SegnaliTest.TraduttoreRegnoSecondaTappaTest test_incarico_31_ogni_voce_del_registro_di_due_anni_giocati_si_risolve]' passed (0.034 seconds).
+	 Executed 20 tests, with 1 failure (0 unexpected) in 0.735 (0.737) seconds
+

@@ -30,11 +30,12 @@ final class CompletamentoDellaCampagnaTest: XCTestCase {
     }
 
     private func nuova(_ cartella: URL, _ giocatore: [ScenarioCampagna.GruppoIniziale],
-                       _ avversario: [ScenarioCampagna.GruppoIniziale]) throws -> SessioneCampagna {
+                       _ avversario: [ScenarioCampagna.GruppoIniziale],
+                       regole: RegoleDiCampagna? = RegoleDiCampagna(giornatePerLaPresa: 3)) throws -> SessioneCampagna {
         try SessioneCampagna(
             nuova: ScenarioCampagna(mappa: "guado", gruppiGiocatore: giocatore, gruppiAvversario: avversario,
                                     calendario: CalendarioDiCampagna(anno: 1, giornatePerStagione: 30),
-                                    regole: RegoleDiCampagna(giornatePerLaPresa: 3)),
+                                    regole: regole),
             valori: valori, valoriCampagna: valoriCampagna, versioneTesti: "0.1.1", cartella: cartella,
             seme: 32, identificatore: "completamento")
     }
@@ -116,18 +117,26 @@ final class CompletamentoDellaCampagnaTest: XCTestCase {
     }
 
     /// Il passo di un'occupazione sigilla la giornata (RDA-102): sentito, l'ordine che l'ha chiusa non si
-    /// annulla più.
+    /// annulla più. L'avversario è in una marcia di tre giorni: alla seconda chiusura non agisce e non arriva,
+    /// e null'altro la sigilla — senza la regola, e senza il passo, la stessa chiusura si annulla.
     func test_05_6_5_il_passo_di_un_occupazione_non_si_annulla() async throws {
-        let cartella = try slot()
-        // L'avversario ha soltanto un gruppo in marcia lunga: non agisce, e la chiusura non la sigillerebbe lui.
-        let campagna = try nuova(cartella, [armato(1, 2)], [armato(4, 4)])
-        let mioGruppo = await campagna.stato.gruppi(di: .giocatore)[0]
-        let esito = try await campagna.esegui(.presidio(gruppo: mioGruppo.id), parte: .giocatore)
-        XCTAssertEqual(presa(esito.eventi).first, .quartierGeneraleOccupato(casella: suo, occupante: .giocatore, mancano: 3))
-        do {
-            _ = try await campagna.annulla(parte: .giocatore)
-            XCTFail("il passo dell'occupazione è stato sentito")
-        } catch SessioneCampagna.ErroreSessione.oltreLaGiornataInCorso {}
+        let regola = RegoleDiCampagna(giornatePerLaPresa: 3)
+        for regole in [regola, nil] as [RegoleDiCampagna?] {
+            let campagna = try nuova(try slot(), [armato(1, 2)], [armato(4, 4, 60)], regole: regole)
+            let mioGruppo = await campagna.stato.gruppi(di: .giocatore)[0]
+            _ = try await campagna.esegui(.presidio(gruppo: mioGruppo.id), parte: .giocatore)
+            let esito = try await campagna.esegui(.presidio(gruppo: mioGruppo.id), parte: .giocatore)
+            let marcia = await campagna.stato.gruppi(di: .avversario)[0].marcia
+            XCTAssertEqual(marcia.map { $0.giorniTotali - $0.giorniCompiuti }, 1, "in marcia: non agisce e non arriva")
+            XCTAssertEqual(presa(esito.eventi), regole == nil ? [] : [.occupazioneProsegue(casella: suo, occupante: .giocatore, mancano: 2)])
+            do {
+                let annullamento = try await campagna.annulla(parte: .giocatore)
+                XCTAssertNil(regole, "il passo dell'occupazione è stato sentito")
+                XCTAssertTrue(annullamento.giornataRiaperta)
+            } catch SessioneCampagna.ErroreSessione.oltreLaGiornataInCorso {
+                XCTAssertNotNil(regole)
+            }
+        }
     }
 
     // MARK: - Il richiamo (01 §5.18.2)

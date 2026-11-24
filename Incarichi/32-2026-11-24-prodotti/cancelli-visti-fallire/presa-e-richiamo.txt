@@ -597,3 +597,518 @@ Test Case '-[MotoreTest.CampagnaDelRegnoTest test_sul_fronte_dell_istmo_il_primo
 	 Executed 17 tests, with 1 failure (0 unexpected) in 0.260 (0.261) seconds
 	 Executed 17 tests, with 1 failure (0 unexpected) in 0.260 (0.262) seconds
 
+== gli annunci della presa scambiano chi occupa e chi e' occupato
+   sorgente: Codice/Sources/Segnali/SignificatiCampagna.swift
+   tolto:  return testi.frase(occupante == parte ? "campagna.qg_avversario_occupato" : "campagna.qg_proprio_occupato",
+   messo:  return testi.frase(occupante != parte ? "campagna.qg_avversario_occupato" : "campagna.qg_proprio_occupato",
+   prove:  swift test --filter TraduttoreCampagnaTest (uscita 1)
+Test Case '-[SegnaliTest.TraduttoreCampagnaTest test_00_13_8_l_annullamento_che_riapre_la_giornata_ha_una_frase_propria]' passed (0.034 seconds).
+Test Case '-[SegnaliTest.TraduttoreCampagnaTest test_00_14_2_l_annuncio_e_una_frase_intera_con_i_segnaposto_riempiti]' passed (0.025 seconds).
+Test Case '-[SegnaliTest.TraduttoreCampagnaTest test_01_5_6_0_4_ogni_nome_dell_elenco_chiuso_ha_il_proprio_testo]' passed (0.025 seconds).
+Test Case '-[SegnaliTest.TraduttoreCampagnaTest test_01_5_6_0_6_che_cosa_si_sente_alla_chiusura_e_all_apertura_di_una_giornata]' passed (0.034 seconds).
+Test Case '-[SegnaliTest.TraduttoreCampagnaTest test_01_5_6_3_3_l_annuncio_della_marcia_ordinata_declina_i_giorni]' passed (0.025 seconds).
+Test Case '-[SegnaliTest.TraduttoreCampagnaTest test_01_5_6_3_3_l_annuncio_della_revoca_declina_i_giorni_persi]' passed (0.025 seconds).
+Test Case '-[SegnaliTest.TraduttoreCampagnaTest test_02_11_5_la_chiusura_della_giornata_non_aggiunge_un_significato_tattile]' passed (0.023 seconds).
+Test Case '-[SegnaliTest.TraduttoreCampagnaTest test_02_11_7_i_segnali_del_rifornimento]' passed (0.023 seconds).
+Test Case '-[SegnaliTest.TraduttoreCampagnaTest test_02_4_ogni_termine_del_vocabolario_di_campagna_esiste_nei_testi]' passed (0.025 seconds).
+Test Case '-[SegnaliTest.TraduttoreCampagnaTest test_02_6_5_5_il_richiamo_impedito_dice_il_perche]' passed (0.026 seconds).
+Codice/Tests/SegnaliTest/TraduttoreCampagnaTest.swift:60: error: -[SegnaliTest.TraduttoreCampagnaTest test_02_6_5_6_l_occupazione_di_un_quartier_generale_si_annuncia_alle_due_parti] : XCTAssertEqual failed: ("Occupi il quartier generale avversario, in riga 4, casella 2: se lo tieni sarà preso fra 3 giornate") is not equal to ("L'avversario occupa il tuo quartier generale, in riga 4, casella 2: se non lo scacci sarà preso fra 3 giornate")
+Codice/Tests/SegnaliTest/TraduttoreCampagnaTest.swift:62: error: -[SegnaliTest.TraduttoreCampagnaTest test_02_6_5_6_l_occupazione_di_un_quartier_generale_si_annuncia_alle_due_parti] : XCTAssertEqual failed: ("Occupi il quartier generale avversario, in riga 4, casella 2: se lo tieni sarà preso fra 1 giornata") is not equal to ("L'avversario occupa il tuo quartier generale, in riga 4, casella 2: se non lo scacci sarà preso fra 1 giornata")
+Codice/Tests/SegnaliTest/TraduttoreCampagnaTest.swift:73: error: -[SegnaliTest.TraduttoreCampagnaTest test_02_6_5_6_l_occupazione_di_un_quartier_generale_si_annuncia_alle_due_parti] : XCTAssertEqual failed: ("L'avversario occupa il tuo quartier generale, in riga 4, casella 2: se non lo scacci sarà preso fra 3 giornate") is not equal to ("Occupi il quartier generale avversario, in riga 4, casella 2: se lo tieni sarà preso fra 3 giornate")
+Codice/Tests/SegnaliTest/TraduttoreCampagnaTest.swift:82: error: -[SegnaliTest.TraduttoreCampagnaTest test_02_6_5_6_l_occupazione_di_un_quartier_generale_si_annuncia_alle_due_parti] : XCTAssertEqual failed: ("Quartier generale avversario occupato, 3 giornate alla presa") is not equal to ("Tuo quartier generale occupato, 3 giornate alla presa")
+Test Case '-[SegnaliTest.TraduttoreCampagnaTest test_02_6_5_6_l_occupazione_di_un_quartier_generale_si_annuncia_alle_due_parti]' failed (0.105 seconds).
+Test Case '-[SegnaliTest.TraduttoreCampagnaTest test_02_6_6_ogni_fatto_del_registro_ha_la_propria_frase_compiuta]' passed (0.027 seconds).
+Test Case '-[SegnaliTest.TraduttoreCampagnaTest test_05_10_7_ogni_evento_annunciabile_ha_il_suo_modello_nei_tre_livelli]' passed (0.026 seconds).
+Test Case '-[SegnaliTest.TraduttoreCampagnaTest test_05_7_8_ogni_errore_dei_dati_di_campagna_ha_la_propria_chiave_di_testo]' passed (0.025 seconds).
+Test Case '-[SegnaliTest.TraduttoreCampagnaTest test_incarico_29_gli_annunci_si_accordano_al_genere_del_gruppo]' passed (0.026 seconds).
+Test Case '-[SegnaliTest.TraduttoreCampagnaTest test_incarico_29_le_voci_del_registro_si_accordano_al_genere]' passed (0.026 seconds).
+	 Executed 16 tests, with 4 failures (0 unexpected) in 0.501 (0.502) seconds
+	 Executed 16 tests, with 4 failures (0 unexpected) in 0.501 (0.503) seconds
+
+== le giornate che mancano, a occupazione in corso, sono quelle dette all'inizio
+   sorgente: Codice/Sources/Segnali/SignificatiCampagna.swift
+   tolto:  return testi.frase(occupante == parte ? "campagna.qg_avversario_tenuto" : "campagna.qg_proprio_tenuto", verbosita: verbosita, mancano)
+   messo:  return testi.frase(occupante == parte ? "campagna.qg_avversario_tenuto" : "campagna.qg_proprio_tenuto", verbosita: verbosita, mancano + 1)
+   prove:  swift test --filter TraduttoreCampagnaTest (uscita 1)
+Test Case '-[SegnaliTest.TraduttoreCampagnaTest test_00_13_8_l_annullamento_che_riapre_la_giornata_ha_una_frase_propria]' passed (0.028 seconds).
+Test Case '-[SegnaliTest.TraduttoreCampagnaTest test_00_14_2_l_annuncio_e_una_frase_intera_con_i_segnaposto_riempiti]' passed (0.033 seconds).
+Test Case '-[SegnaliTest.TraduttoreCampagnaTest test_01_5_6_0_4_ogni_nome_dell_elenco_chiuso_ha_il_proprio_testo]' passed (0.026 seconds).
+Test Case '-[SegnaliTest.TraduttoreCampagnaTest test_01_5_6_0_6_che_cosa_si_sente_alla_chiusura_e_all_apertura_di_una_giornata]' passed (0.038 seconds).
+Test Case '-[SegnaliTest.TraduttoreCampagnaTest test_01_5_6_3_3_l_annuncio_della_marcia_ordinata_declina_i_giorni]' passed (0.027 seconds).
+Test Case '-[SegnaliTest.TraduttoreCampagnaTest test_01_5_6_3_3_l_annuncio_della_revoca_declina_i_giorni_persi]' passed (0.028 seconds).
+Test Case '-[SegnaliTest.TraduttoreCampagnaTest test_02_11_5_la_chiusura_della_giornata_non_aggiunge_un_significato_tattile]' passed (0.024 seconds).
+Test Case '-[SegnaliTest.TraduttoreCampagnaTest test_02_11_7_i_segnali_del_rifornimento]' passed (0.027 seconds).
+Test Case '-[SegnaliTest.TraduttoreCampagnaTest test_02_4_ogni_termine_del_vocabolario_di_campagna_esiste_nei_testi]' passed (0.031 seconds).
+Test Case '-[SegnaliTest.TraduttoreCampagnaTest test_02_6_5_5_il_richiamo_impedito_dice_il_perche]' passed (0.027 seconds).
+Codice/Tests/SegnaliTest/TraduttoreCampagnaTest.swift:64: error: -[SegnaliTest.TraduttoreCampagnaTest test_02_6_5_6_l_occupazione_di_un_quartier_generale_si_annuncia_alle_due_parti] : XCTAssertEqual failed: ("Il tuo quartier generale è ancora occupato: sarà preso fra 3 giornate") is not equal to ("Il tuo quartier generale è ancora occupato: sarà preso fra 2 giornate")
+Codice/Tests/SegnaliTest/TraduttoreCampagnaTest.swift:66: error: -[SegnaliTest.TraduttoreCampagnaTest test_02_6_5_6_l_occupazione_di_un_quartier_generale_si_annuncia_alle_due_parti] : XCTAssertEqual failed: ("Il tuo quartier generale è ancora occupato: sarà preso fra 2 giornate") is not equal to ("Il tuo quartier generale è ancora occupato: sarà preso fra 1 giornata")
+Codice/Tests/SegnaliTest/TraduttoreCampagnaTest.swift:75: error: -[SegnaliTest.TraduttoreCampagnaTest test_02_6_5_6_l_occupazione_di_un_quartier_generale_si_annuncia_alle_due_parti] : XCTAssertEqual failed: ("Tieni il quartier generale avversario: sarà preso fra 2 giornate") is not equal to ("Tieni il quartier generale avversario: sarà preso fra 1 giornata")
+Codice/Tests/SegnaliTest/TraduttoreCampagnaTest.swift:84: error: -[SegnaliTest.TraduttoreCampagnaTest test_02_6_5_6_l_occupazione_di_un_quartier_generale_si_annuncia_alle_due_parti] : XCTAssertEqual failed: ("Quartier generale avversario occupato, 2 giornate alla presa") is not equal to ("Quartier generale avversario occupato, 1 giornata alla presa")
+Test Case '-[SegnaliTest.TraduttoreCampagnaTest test_02_6_5_6_l_occupazione_di_un_quartier_generale_si_annuncia_alle_due_parti]' failed (0.101 seconds).
+Test Case '-[SegnaliTest.TraduttoreCampagnaTest test_02_6_6_ogni_fatto_del_registro_ha_la_propria_frase_compiuta]' passed (0.029 seconds).
+Test Case '-[SegnaliTest.TraduttoreCampagnaTest test_05_10_7_ogni_evento_annunciabile_ha_il_suo_modello_nei_tre_livelli]' passed (0.027 seconds).
+Test Case '-[SegnaliTest.TraduttoreCampagnaTest test_05_7_8_ogni_errore_dei_dati_di_campagna_ha_la_propria_chiave_di_testo]' passed (0.026 seconds).
+Test Case '-[SegnaliTest.TraduttoreCampagnaTest test_incarico_29_gli_annunci_si_accordano_al_genere_del_gruppo]' passed (0.026 seconds).
+Test Case '-[SegnaliTest.TraduttoreCampagnaTest test_incarico_29_le_voci_del_registro_si_accordano_al_genere]' passed (0.027 seconds).
+	 Executed 16 tests, with 4 failures (0 unexpected) in 0.525 (0.526) seconds
+
+== il motivo del richiamo impedito dice sempre il rifornimento
+   sorgente: Codice/Sources/Segnali/SignificatiCampagna.swift
+   tolto:  return testi.frase("richiamo.a_contatto", soggetto: soggetto(gruppo), casella.riga, casella.colonna)
+   messo:  return testi.frase("richiamo.rifornimento_tagliato", soggetto: soggetto(gruppo), casella.riga, casella.colonna)
+   prove:  swift test --filter TraduttoreCampagnaTest (uscita 1)
+Test Case '-[SegnaliTest.TraduttoreCampagnaTest test_00_13_8_l_annullamento_che_riapre_la_giornata_ha_una_frase_propria]' passed (0.029 seconds).
+Test Case '-[SegnaliTest.TraduttoreCampagnaTest test_00_14_2_l_annuncio_e_una_frase_intera_con_i_segnaposto_riempiti]' passed (0.027 seconds).
+Test Case '-[SegnaliTest.TraduttoreCampagnaTest test_01_5_6_0_4_ogni_nome_dell_elenco_chiuso_ha_il_proprio_testo]' passed (0.025 seconds).
+Test Case '-[SegnaliTest.TraduttoreCampagnaTest test_01_5_6_0_6_che_cosa_si_sente_alla_chiusura_e_all_apertura_di_una_giornata]' passed (0.035 seconds).
+Test Case '-[SegnaliTest.TraduttoreCampagnaTest test_01_5_6_3_3_l_annuncio_della_marcia_ordinata_declina_i_giorni]' passed (0.025 seconds).
+Test Case '-[SegnaliTest.TraduttoreCampagnaTest test_01_5_6_3_3_l_annuncio_della_revoca_declina_i_giorni_persi]' passed (0.025 seconds).
+Test Case '-[SegnaliTest.TraduttoreCampagnaTest test_02_11_5_la_chiusura_della_giornata_non_aggiunge_un_significato_tattile]' passed (0.023 seconds).
+Test Case '-[SegnaliTest.TraduttoreCampagnaTest test_02_11_7_i_segnali_del_rifornimento]' passed (0.023 seconds).
+Test Case '-[SegnaliTest.TraduttoreCampagnaTest test_02_4_ogni_termine_del_vocabolario_di_campagna_esiste_nei_testi]' passed (0.028 seconds).
+Codice/Tests/SegnaliTest/TraduttoreCampagnaTest.swift:124: error: -[SegnaliTest.TraduttoreCampagnaTest test_02_6_5_5_il_richiamo_impedito_dice_il_perche] : XCTAssertEqual failed: ("Aquila ha il rifornimento tagliato in riga 2, casella 3") is not equal to ("Aquila è a contatto con l'avversario in riga 2, casella 3")
+Test Case '-[SegnaliTest.TraduttoreCampagnaTest test_02_6_5_5_il_richiamo_impedito_dice_il_perche]' failed (0.103 seconds).
+Test Case '-[SegnaliTest.TraduttoreCampagnaTest test_02_6_5_6_l_occupazione_di_un_quartier_generale_si_annuncia_alle_due_parti]' passed (0.025 seconds).
+Test Case '-[SegnaliTest.TraduttoreCampagnaTest test_02_6_6_ogni_fatto_del_registro_ha_la_propria_frase_compiuta]' passed (0.026 seconds).
+Test Case '-[SegnaliTest.TraduttoreCampagnaTest test_05_10_7_ogni_evento_annunciabile_ha_il_suo_modello_nei_tre_livelli]' passed (0.025 seconds).
+Test Case '-[SegnaliTest.TraduttoreCampagnaTest test_05_7_8_ogni_errore_dei_dati_di_campagna_ha_la_propria_chiave_di_testo]' passed (0.025 seconds).
+Test Case '-[SegnaliTest.TraduttoreCampagnaTest test_incarico_29_gli_annunci_si_accordano_al_genere_del_gruppo]' passed (0.025 seconds).
+Test Case '-[SegnaliTest.TraduttoreCampagnaTest test_incarico_29_le_voci_del_registro_si_accordano_al_genere]' passed (0.025 seconds).
+	 Executed 16 tests, with 1 failure (0 unexpected) in 0.494 (0.495) seconds
+
+== nessuna giornata di occupazione e' ammessa dal caricatore
+   sorgente: Codice/Sources/Dati/CaricatoreCampagna.swift
+   tolto:  guard presa.giornateDiOccupazione >= 1 else {
+   messo:  guard presa.giornateDiOccupazione >= 0 else {
+   prove:  swift test --filter CaricamentoCampagnaTest (uscita 1)
+Test Case '-[DatiTest.CaricamentoCampagnaTest test_01_5_14_3_2_un_quartier_generale_fuori_dall_ultima_riga_e_respinto]' passed (0.008 seconds).
+Test Case '-[DatiTest.CaricamentoCampagnaTest test_01_5_1_3_una_strettoia_fuori_dai_confini_e_respinta]' passed (0.004 seconds).
+Test Case '-[DatiTest.CaricamentoCampagnaTest test_01_5_1_esiste_una_mappa_per_ciascuno_dei_tre_formati]' passed (0.001 seconds).
+Test Case '-[DatiTest.CaricamentoCampagnaTest test_01_5_6_0_4_un_elenco_di_nomi_con_ripetizioni_e_respinto]' passed (0.004 seconds).
+Codice/Tests/DatiTest/CaricamentoCampagnaTest.swift:112: error: -[DatiTest.CaricamentoCampagnaTest test_03_4_12_1_le_giornate_della_presa_si_leggono_dai_dati_e_meno_di_una_e_respinta] : failed - il caricamento avrebbe dovuto respingere
+Test Case '-[DatiTest.CaricamentoCampagnaTest test_03_4_12_1_le_giornate_della_presa_si_leggono_dai_dati_e_meno_di_una_e_respinta]' failed (0.061 seconds).
+Test Case '-[DatiTest.CaricamentoCampagnaTest test_05_7_7_un_terreno_ignoto_e_respinto_anziche_ignorato_in_silenzio]' passed (0.005 seconds).
+Test Case '-[DatiTest.CaricamentoCampagnaTest test_05_7_7_un_tipo_di_strada_ignoto_e_respinto]' passed (0.005 seconds).
+Test Case '-[DatiTest.CaricamentoCampagnaTest test_05_7_8_due_mappe_con_lo_stesso_identificatore_sono_respinte]' passed (0.004 seconds).
+Test Case '-[DatiTest.CaricamentoCampagnaTest test_05_7_8_i_valori_di_campagna_di_fabbrica_si_caricano_e_validano]' passed (0.001 seconds).
+Test Case '-[DatiTest.CaricamentoCampagnaTest test_05_7_8_un_formato_di_lato_inferiore_a_due_e_respinto]' passed (0.003 seconds).
+Test Case '-[DatiTest.CaricamentoCampagnaTest test_05_7_8_una_casella_dichiarata_due_volte_e_respinta]' passed (0.005 seconds).
+Test Case '-[DatiTest.CaricamentoCampagnaTest test_05_7_8_una_casella_fuori_dai_confini_e_respinta]' passed (0.005 seconds).
+Test Case '-[DatiTest.CaricamentoCampagnaTest test_05_7_8_una_mappa_con_formato_ignoto_e_respinta]' passed (0.004 seconds).
+	 Executed 13 tests, with 1 failure (0 unexpected) in 0.111 (0.112) seconds
+
+== gli invarianti non vedono l'occupazione contata due volte sulla stessa casella
+   sorgente: Codice/Sources/Verifica/InvariantiCampagna.swift
+   tolto:  if !viste.insert(o.casella).inserted { viola("doppia") }
+   messo:  _ = viste.insert(o.casella)
+   prove:  swift test --filter InvariantiCampagnaTest (uscita 1)
+Test Case '-[VerificaTest.InvariantiCampagnaTest test_05_12_3_1_due_corse_sugli_stessi_dati_danno_lo_stesso_identico_esito]' passed (0.551 seconds).
+Test Case '-[VerificaTest.InvariantiCampagnaTest test_incarico_16_il_banco_genera_ogni_fenomeno_del_rifornimento]' passed (0.848 seconds).
+Test Case '-[VerificaTest.InvariantiCampagnaTest test_incarico_19_il_banco_genera_i_fenomeni_della_ricognizione]' passed (0.064 seconds).
+Test Case '-[VerificaTest.InvariantiCampagnaTest test_incarico_21_il_banco_genera_i_fenomeni_dell_imboscata]' passed (0.134 seconds).
+Test Case '-[VerificaTest.InvariantiCampagnaTest test_incarico_22_il_banco_genera_e_misura_gli_avvistamenti]' passed (0.134 seconds).
+Test Case '-[VerificaTest.InvariantiCampagnaTest test_incarico_22_il_cancello_del_nessun_avvistamento_scatta_e_tace]' passed (0.007 seconds).
+Test Case '-[VerificaTest.InvariantiCampagnaTest test_incarico_22_il_cancello_dell_avvistamento_senza_formazione_scatta_e_tace]' passed (0.007 seconds).
+Test Case '-[VerificaTest.InvariantiCampagnaTest test_incarico_23_lo_scenario_iniziale_schiera_le_tre_categorie]' passed (0.007 seconds).
+Test Case '-[VerificaTest.InvariantiCampagnaTest test_incarico_25_il_banco_prosegue_dopo_le_battaglie]' passed (0.844 seconds).
+Test Case '-[VerificaTest.InvariantiCampagnaTest test_incarico_28_nessun_gesto_del_giocatore_toglie_un_azione_all_avversario]' passed (0.007 seconds).
+Codice/Tests/VerificaTest/InvariantiCampagnaTest.swift:440: error: -[VerificaTest.InvariantiCampagnaTest test_incarico_32_gli_invarianti_della_presa_vedono_ogni_guasto] : XCTAssertEqual failed: ("[]") is not equal to ("["occupazione_incoerente:riga=1:casella=5:motivo=doppia"]")
+Test Case '-[VerificaTest.InvariantiCampagnaTest test_incarico_32_gli_invarianti_della_presa_vedono_ogni_guasto]' failed (0.105 seconds).
+Test Case '-[VerificaTest.InvariantiCampagnaTest test_incarico_6_molte_giornate_generate_senza_alcuna_violazione]' passed (0.842 seconds).
+Test Case '-[VerificaTest.InvariantiCampagnaTest test_incarico_6_ogni_invariante_ha_almeno_un_mutante_che_lo_fa_scattare]' passed (0.008 seconds).
+Test Case '-[VerificaTest.InvariantiCampagnaTest test_mutante_due_gruppi_nella_stessa_casella_vengono_visti]' passed (0.007 seconds).
+Test Case '-[VerificaTest.InvariantiCampagnaTest test_mutante_i_giorni_mancanti_fuori_intervallo_vengono_visti]' passed (0.007 seconds).
+Test Case '-[VerificaTest.InvariantiCampagnaTest test_mutante_il_giorno_che_avanza_senza_chiusura_viene_visto]' passed (0.007 seconds).
+Test Case '-[VerificaTest.InvariantiCampagnaTest test_mutante_il_giorno_che_resta_fermo_alla_chiusura_viene_visto]' passed (0.007 seconds).
+Test Case '-[VerificaTest.InvariantiCampagnaTest test_mutante_il_giorno_che_torna_indietro_viene_visto]' passed (0.007 seconds).
+Test Case '-[VerificaTest.InvariantiCampagnaTest test_mutante_le_azioni_non_azzerate_alla_chiusura_vengono_viste]' passed (0.007 seconds).
+Test Case '-[VerificaTest.InvariantiCampagnaTest test_mutante_un_azione_ordinata_e_non_registrata_viene_vista]' passed (0.007 seconds).
+Test Case '-[VerificaTest.InvariantiCampagnaTest test_mutante_un_gruppo_che_agisce_da_se_viene_visto]' passed (0.007 seconds).
+Test Case '-[VerificaTest.InvariantiCampagnaTest test_mutante_un_gruppo_che_agisce_due_volte_viene_visto]' passed (0.007 seconds).
+Test Case '-[VerificaTest.InvariantiCampagnaTest test_mutante_un_gruppo_fra_due_caselle_viene_visto]' passed (0.007 seconds).
+Test Case '-[VerificaTest.InvariantiCampagnaTest test_mutante_un_gruppo_fuori_dalla_mappa_viene_visto]' passed (0.007 seconds).
+Test Case '-[VerificaTest.InvariantiCampagnaTest test_mutante_un_gruppo_in_due_caselle_viene_visto]' passed (0.007 seconds).
+Test Case '-[VerificaTest.InvariantiCampagnaTest test_mutante_un_gruppo_in_marcia_che_riceve_un_ordine_viene_visto]' passed (0.007 seconds).
+Test Case '-[VerificaTest.InvariantiCampagnaTest test_mutante_un_gruppo_vuoto_viene_visto]' passed (0.007 seconds).
+Test Case '-[VerificaTest.InvariantiCampagnaTest test_mutante_un_movimento_fra_caselle_non_adiacenti_viene_visto]' passed (0.007 seconds).
+Test Case '-[VerificaTest.InvariantiCampagnaTest test_mutante_un_registro_fuori_ordine_viene_visto]' passed (0.007 seconds).
+Test Case '-[VerificaTest.InvariantiCampagnaTest test_mutante_un_salto_che_dimentica_un_gruppo_viene_visto]' passed (0.007 seconds).
+Test Case '-[VerificaTest.InvariantiCampagnaTest test_mutante_un_salto_che_propone_chi_ha_gia_agito_viene_visto]' passed (0.007 seconds).
+Test Case '-[VerificaTest.InvariantiCampagnaTest test_mutante_un_salto_che_ripete_un_gruppo_viene_visto]' passed (0.007 seconds).
+Test Case '-[VerificaTest.InvariantiCampagnaTest test_mutante_un_volume_incoerente_viene_visto]' passed (0.007 seconds).
+Test Case '-[VerificaTest.InvariantiCampagnaTest test_mutante_una_casella_percorribile_irraggiungibile_viene_vista]' passed (0.007 seconds).
+Test Case '-[VerificaTest.InvariantiCampagnaTest test_mutante_una_posizione_visiva_incoerente_viene_vista]' passed (0.007 seconds).
+Test Case '-[VerificaTest.InvariantiCampagnaTest test_mutante_una_revoca_non_conforme_viene_vista]' passed (0.007 seconds).
+	 Executed 36 tests, with 1 failure (0 unexpected) in 3.723 (3.725) seconds
+
+== gli invarianti non vedono il conteggio fuori dai limiti
+   sorgente: Codice/Sources/Verifica/InvariantiCampagna.swift
+   tolto:  if o.giornate < 0 || o.giornate >= regole.giornatePerLaPresa { viola("conteggio") }
+   messo:  if o.giornate < 0 { viola("conteggio") }
+   prove:  swift test --filter InvariantiCampagnaTest (uscita 1)
+Test Case '-[VerificaTest.InvariantiCampagnaTest test_05_12_3_1_due_corse_sugli_stessi_dati_danno_lo_stesso_identico_esito]' passed (0.543 seconds).
+Test Case '-[VerificaTest.InvariantiCampagnaTest test_incarico_16_il_banco_genera_ogni_fenomeno_del_rifornimento]' passed (0.824 seconds).
+Test Case '-[VerificaTest.InvariantiCampagnaTest test_incarico_19_il_banco_genera_i_fenomeni_della_ricognizione]' passed (0.065 seconds).
+Test Case '-[VerificaTest.InvariantiCampagnaTest test_incarico_21_il_banco_genera_i_fenomeni_dell_imboscata]' passed (0.135 seconds).
+Test Case '-[VerificaTest.InvariantiCampagnaTest test_incarico_22_il_banco_genera_e_misura_gli_avvistamenti]' passed (0.136 seconds).
+Test Case '-[VerificaTest.InvariantiCampagnaTest test_incarico_22_il_cancello_del_nessun_avvistamento_scatta_e_tace]' passed (0.007 seconds).
+Test Case '-[VerificaTest.InvariantiCampagnaTest test_incarico_22_il_cancello_dell_avvistamento_senza_formazione_scatta_e_tace]' passed (0.007 seconds).
+Test Case '-[VerificaTest.InvariantiCampagnaTest test_incarico_23_lo_scenario_iniziale_schiera_le_tre_categorie]' passed (0.007 seconds).
+Test Case '-[VerificaTest.InvariantiCampagnaTest test_incarico_25_il_banco_prosegue_dopo_le_battaglie]' passed (0.830 seconds).
+Test Case '-[VerificaTest.InvariantiCampagnaTest test_incarico_28_nessun_gesto_del_giocatore_toglie_un_azione_all_avversario]' passed (0.007 seconds).
+Codice/Tests/VerificaTest/InvariantiCampagnaTest.swift:441: error: -[VerificaTest.InvariantiCampagnaTest test_incarico_32_gli_invarianti_della_presa_vedono_ogni_guasto] : XCTAssertEqual failed: ("[]") is not equal to ("["occupazione_incoerente:riga=1:casella=5:motivo=conteggio"]")
+Test Case '-[VerificaTest.InvariantiCampagnaTest test_incarico_32_gli_invarianti_della_presa_vedono_ogni_guasto]' failed (0.098 seconds).
+Test Case '-[VerificaTest.InvariantiCampagnaTest test_incarico_6_molte_giornate_generate_senza_alcuna_violazione]' passed (0.826 seconds).
+Test Case '-[VerificaTest.InvariantiCampagnaTest test_incarico_6_ogni_invariante_ha_almeno_un_mutante_che_lo_fa_scattare]' passed (0.008 seconds).
+Test Case '-[VerificaTest.InvariantiCampagnaTest test_mutante_due_gruppi_nella_stessa_casella_vengono_visti]' passed (0.007 seconds).
+Test Case '-[VerificaTest.InvariantiCampagnaTest test_mutante_i_giorni_mancanti_fuori_intervallo_vengono_visti]' passed (0.007 seconds).
+Test Case '-[VerificaTest.InvariantiCampagnaTest test_mutante_il_giorno_che_avanza_senza_chiusura_viene_visto]' passed (0.007 seconds).
+Test Case '-[VerificaTest.InvariantiCampagnaTest test_mutante_il_giorno_che_resta_fermo_alla_chiusura_viene_visto]' passed (0.007 seconds).
+Test Case '-[VerificaTest.InvariantiCampagnaTest test_mutante_il_giorno_che_torna_indietro_viene_visto]' passed (0.007 seconds).
+Test Case '-[VerificaTest.InvariantiCampagnaTest test_mutante_le_azioni_non_azzerate_alla_chiusura_vengono_viste]' passed (0.007 seconds).
+Test Case '-[VerificaTest.InvariantiCampagnaTest test_mutante_un_azione_ordinata_e_non_registrata_viene_vista]' passed (0.007 seconds).
+Test Case '-[VerificaTest.InvariantiCampagnaTest test_mutante_un_gruppo_che_agisce_da_se_viene_visto]' passed (0.007 seconds).
+Test Case '-[VerificaTest.InvariantiCampagnaTest test_mutante_un_gruppo_che_agisce_due_volte_viene_visto]' passed (0.007 seconds).
+Test Case '-[VerificaTest.InvariantiCampagnaTest test_mutante_un_gruppo_fra_due_caselle_viene_visto]' passed (0.007 seconds).
+Test Case '-[VerificaTest.InvariantiCampagnaTest test_mutante_un_gruppo_fuori_dalla_mappa_viene_visto]' passed (0.007 seconds).
+Test Case '-[VerificaTest.InvariantiCampagnaTest test_mutante_un_gruppo_in_due_caselle_viene_visto]' passed (0.007 seconds).
+Test Case '-[VerificaTest.InvariantiCampagnaTest test_mutante_un_gruppo_in_marcia_che_riceve_un_ordine_viene_visto]' passed (0.007 seconds).
+Test Case '-[VerificaTest.InvariantiCampagnaTest test_mutante_un_gruppo_vuoto_viene_visto]' passed (0.007 seconds).
+Test Case '-[VerificaTest.InvariantiCampagnaTest test_mutante_un_movimento_fra_caselle_non_adiacenti_viene_visto]' passed (0.007 seconds).
+Test Case '-[VerificaTest.InvariantiCampagnaTest test_mutante_un_registro_fuori_ordine_viene_visto]' passed (0.007 seconds).
+Test Case '-[VerificaTest.InvariantiCampagnaTest test_mutante_un_salto_che_dimentica_un_gruppo_viene_visto]' passed (0.007 seconds).
+Test Case '-[VerificaTest.InvariantiCampagnaTest test_mutante_un_salto_che_propone_chi_ha_gia_agito_viene_visto]' passed (0.007 seconds).
+Test Case '-[VerificaTest.InvariantiCampagnaTest test_mutante_un_salto_che_ripete_un_gruppo_viene_visto]' passed (0.007 seconds).
+Test Case '-[VerificaTest.InvariantiCampagnaTest test_mutante_un_volume_incoerente_viene_visto]' passed (0.007 seconds).
+Test Case '-[VerificaTest.InvariantiCampagnaTest test_mutante_una_casella_percorribile_irraggiungibile_viene_vista]' passed (0.007 seconds).
+Test Case '-[VerificaTest.InvariantiCampagnaTest test_mutante_una_posizione_visiva_incoerente_viene_vista]' passed (0.007 seconds).
+Test Case '-[VerificaTest.InvariantiCampagnaTest test_mutante_una_revoca_non_conforme_viene_vista]' passed (0.007 seconds).
+	 Executed 36 tests, with 1 failure (0 unexpected) in 3.657 (3.658) seconds
+	 Executed 36 tests, with 1 failure (0 unexpected) in 3.657 (3.659) seconds
+
+== la casella del quartier generale non dice che e' occupato (ospitate)
+   sorgente: Applicazione/Sorgenti/CostruttoreAnnunciCampagna.swift
+   tolto:  return testi.frase("casella.occupazione", mancano).testo
+   messo:  return ""
+   prove ospitate: CompletamentoDellaCampagnaTest (uscita 65)
+Test Case '-[WarSenseTest.CompletamentoDellaCampagnaTest test_01_5_18_2_il_richiamo_chiede_conferma_e_riporta_l_esercito_in_patria]' passed (1.284 seconds).
+Test Case '-[WarSenseTest.CompletamentoDellaCampagnaTest test_01_5_18_2_le_campagne_di_prova_non_hanno_il_richiamo]' passed (0.072 seconds).
+Applicazione/ProveOspitate/CompletamentoDellaCampagnaTest.swift:146: error: -[WarSenseTest.CompletamentoDellaCampagnaTest test_01_5_18_3_3_il_difensore_sa_sempre_che_il_proprio_quartier_generale_e_occupato] : XCTAssertTrue failed - riga 4, casella 2, formazione avversaria, tuo quartier generale, , strada battuta
+Applicazione/ProveOspitate/CompletamentoDellaCampagnaTest.swift:163: error: -[WarSenseTest.CompletamentoDellaCampagnaTest test_01_5_18_3_3_il_difensore_sa_sempre_che_il_proprio_quartier_generale_e_occupato] : XCTAssertTrue failed - riga 4, casella 2, formazione avversaria, tuo quartier generale, , strada battuta
+Test Case '-[WarSenseTest.CompletamentoDellaCampagnaTest test_01_5_18_3_3_il_difensore_sa_sempre_che_il_proprio_quartier_generale_e_occupato]' failed (0.770 seconds).
+Applicazione/ProveOspitate/CompletamentoDellaCampagnaTest.swift:117: error: -[WarSenseTest.CompletamentoDellaCampagnaTest test_01_5_18_3_il_giocatore_prende_il_quartier_generale_e_ogni_passo_si_sente] : XCTAssertTrue failed - riga 1, casella 2, tuo Corvo, in attesa, composta da 6 atomi di fanteria leggera, quartier generale avversario, , strada battuta
+Test Case '-[WarSenseTest.CompletamentoDellaCampagnaTest test_01_5_18_3_il_giocatore_prende_il_quartier_generale_e_ogni_passo_si_sente]' failed (0.701 seconds).
+Test Case '-[WarSenseTest.CompletamentoDellaCampagnaTest test_02_6_5_5_il_richiamo_impedito_dichiara_il_perche]' passed (0.883 seconds).
+** TEST FAILED **
+
+== lo stato non dice il quartier generale avversario occupato (ospitate)
+   sorgente: Applicazione/Sorgenti/CostruttoreAnnunciCampagna.swift
+   tolto:  if let mancano = info.presaInCorso { frase += testi.frase("campagna.stato_qg_avversario_occupato", mancano).testo }
+   messo:  
+   prove ospitate: CompletamentoDellaCampagnaTest (uscita 65)
+Test Case '-[WarSenseTest.CompletamentoDellaCampagnaTest test_01_5_18_2_il_richiamo_chiede_conferma_e_riporta_l_esercito_in_patria]' passed (1.202 seconds).
+Test Case '-[WarSenseTest.CompletamentoDellaCampagnaTest test_01_5_18_2_le_campagne_di_prova_non_hanno_il_richiamo]' passed (0.071 seconds).
+Test Case '-[WarSenseTest.CompletamentoDellaCampagnaTest test_01_5_18_3_3_il_difensore_sa_sempre_che_il_proprio_quartier_generale_e_occupato]' passed (0.743 seconds).
+Applicazione/ProveOspitate/CompletamentoDellaCampagnaTest.swift:122: error: -[WarSenseTest.CompletamentoDellaCampagnaTest test_01_5_18_3_il_giocatore_prende_il_quartier_generale_e_ogni_passo_si_sente] : XCTAssertTrue failed - Anno 1, primavera, mancano 88 giornate all'inverno. Giorno 2. Nessun gruppo ha ancora agito, sono 5
+Applicazione/ProveOspitate/CompletamentoDellaCampagnaTest.swift:122: error: -[WarSenseTest.CompletamentoDellaCampagnaTest test_01_5_18_3_il_giocatore_prende_il_quartier_generale_e_ogni_passo_si_sente] : XCTAssertTrue failed - Anno 1, primavera, mancano 87 giornate all'inverno. Giorno 3. Nessun gruppo ha ancora agito, sono 5
+Applicazione/ProveOspitate/CompletamentoDellaCampagnaTest.swift:122: error: -[WarSenseTest.CompletamentoDellaCampagnaTest test_01_5_18_3_il_giocatore_prende_il_quartier_generale_e_ogni_passo_si_sente] : XCTAssertTrue failed - Anno 1, primavera, mancano 86 giornate all'inverno. Giorno 4. Nessun gruppo ha ancora agito, sono 5, 1 senza rifornimento
+Test Case '-[WarSenseTest.CompletamentoDellaCampagnaTest test_01_5_18_3_il_giocatore_prende_il_quartier_generale_e_ogni_passo_si_sente]' failed (0.710 seconds).
+Test Case '-[WarSenseTest.CompletamentoDellaCampagnaTest test_02_6_5_5_il_richiamo_impedito_dichiara_il_perche]' passed (0.877 seconds).
+** TEST FAILED **
+
+== il proprio quartier generale occupato non e' confermato se nessuno lo vede (ospitate)
+   sorgente: Codice/Sources/Motore/MotoreCampagna.swift
+   tolto:  if stato.quartierGeneraleOccupato(su: cella, da: avversa) { return .confermato }
+   messo:  
+   prove ospitate: CompletamentoDellaCampagnaTest (uscita 65)
+Test Case '-[WarSenseTest.CompletamentoDellaCampagnaTest test_01_5_18_2_il_richiamo_chiede_conferma_e_riporta_l_esercito_in_patria]' passed (1.200 seconds).
+Test Case '-[WarSenseTest.CompletamentoDellaCampagnaTest test_01_5_18_2_le_campagne_di_prova_non_hanno_il_richiamo]' passed (0.063 seconds).
+Applicazione/ProveOspitate/CompletamentoDellaCampagnaTest.swift:146: error: -[WarSenseTest.CompletamentoDellaCampagnaTest test_01_5_18_3_3_il_difensore_sa_sempre_che_il_proprio_quartier_generale_e_occupato] : XCTAssertTrue failed - riga 4, casella 2, inesplorato, tuo quartier generale, occupato, sarà preso fra 3 giornate, strada battuta
+Applicazione/ProveOspitate/CompletamentoDellaCampagnaTest.swift:147: error: -[WarSenseTest.CompletamentoDellaCampagnaTest test_01_5_18_3_3_il_difensore_sa_sempre_che_il_proprio_quartier_generale_e_occupato] : XCTAssertFalse failed - lo sa, anche senza osservarlo: riga 4, casella 2, inesplorato, tuo quartier generale, occupato, sarà preso fra 3 giornate, strada battuta
+Test Case '-[WarSenseTest.CompletamentoDellaCampagnaTest test_01_5_18_3_3_il_difensore_sa_sempre_che_il_proprio_quartier_generale_e_occupato]' failed (0.749 seconds).
+Test Case '-[WarSenseTest.CompletamentoDellaCampagnaTest test_01_5_18_3_il_giocatore_prende_il_quartier_generale_e_ogni_passo_si_sente]' passed (0.711 seconds).
+Test Case '-[WarSenseTest.CompletamentoDellaCampagnaTest test_02_6_5_5_il_richiamo_impedito_dichiara_il_perche]' passed (0.848 seconds).
+** TEST FAILED **
+
+== il richiamo si esegue senza chiedere conferma (ospitate)
+   sorgente: Applicazione/Sorgenti/SchermataMappaCampagna.swift
+   tolto:  vociPannello = voci present(pannello, animated: false) } private func eseguiIlRichiamo() async {
+   messo:  vociPannello = voci Task { await eseguiIlRichiamo() } } private func eseguiIlRichiamo() async {
+   prove ospitate: CompletamentoDellaCampagnaTest (uscita 65)
+Applicazione/ProveOspitate/CompletamentoDellaCampagnaTest.swift:191: error: -[WarSenseTest.CompletamentoDellaCampagnaTest test_01_5_18_2_il_richiamo_chiede_conferma_e_riporta_l_esercito_in_patria] : XCTAssertTrue failed - attesa scaduta: si chiede conferma
+Applicazione/ProveOspitate/CompletamentoDellaCampagnaTest.swift:192: error: -[WarSenseTest.CompletamentoDellaCampagnaTest test_01_5_18_2_il_richiamo_chiede_conferma_e_riporta_l_esercito_in_patria] : XCTUnwrap failed: expected non-nil value of type "UIAlertController"
+Test Case '-[WarSenseTest.CompletamentoDellaCampagnaTest test_01_5_18_2_il_richiamo_chiede_conferma_e_riporta_l_esercito_in_patria]' failed (11.651 seconds).
+Test Case '-[WarSenseTest.CompletamentoDellaCampagnaTest test_01_5_18_2_le_campagne_di_prova_non_hanno_il_richiamo]' passed (0.070 seconds).
+Test Case '-[WarSenseTest.CompletamentoDellaCampagnaTest test_01_5_18_3_3_il_difensore_sa_sempre_che_il_proprio_quartier_generale_e_occupato]' passed (0.725 seconds).
+Test Case '-[WarSenseTest.CompletamentoDellaCampagnaTest test_01_5_18_3_il_giocatore_prende_il_quartier_generale_e_ogni_passo_si_sente]' passed (0.712 seconds).
+Test Case '-[WarSenseTest.CompletamentoDellaCampagnaTest test_02_6_5_5_il_richiamo_impedito_dichiara_il_perche]' passed (0.885 seconds).
+** TEST FAILED **
+
+== l'etichetta del richiamo impedito non dice il perche' (ospitate)
+   sorgente: Applicazione/Sorgenti/CostruttoreAnnunciCampagna.swift
+   tolto:  guard let impedimento = vista.impedimentoDelRichiamo else { return testi.frase("campagna.richiama").testo } return testi.frase("campagna.richiama_impedito", motivo(impedimento)).testo
+   messo:  return testi.frase("campagna.richiama").testo
+   prove ospitate: CompletamentoDellaCampagnaTest (uscita 65)
+Test Case '-[WarSenseTest.CompletamentoDellaCampagnaTest test_01_5_18_2_il_richiamo_chiede_conferma_e_riporta_l_esercito_in_patria]' passed (1.198 seconds).
+Test Case '-[WarSenseTest.CompletamentoDellaCampagnaTest test_01_5_18_2_le_campagne_di_prova_non_hanno_il_richiamo]' passed (0.070 seconds).
+Test Case '-[WarSenseTest.CompletamentoDellaCampagnaTest test_01_5_18_3_3_il_difensore_sa_sempre_che_il_proprio_quartier_generale_e_occupato]' passed (0.719 seconds).
+Test Case '-[WarSenseTest.CompletamentoDellaCampagnaTest test_01_5_18_3_il_giocatore_prende_il_quartier_generale_e_ogni_passo_si_sente]' passed (0.689 seconds).
+Applicazione/ProveOspitate/CompletamentoDellaCampagnaTest.swift:225: error: -[WarSenseTest.CompletamentoDellaCampagnaTest test_02_6_5_5_il_richiamo_impedito_dichiara_il_perche] : XCTAssertTrue failed - ["riga 1, casella 1, libera", "riga 1, casella 2, quartier generale avversario, strada battuta", "riga 1, casella 3, libera", "riga 1, casella 4, tuo Cervo, formazione non armata, in attesa, composta da 4 atomi di fanteria leggera, bosco", "riga 2, casella 1, acqua", "riga 2, casella 2, tuo Corvo, in attesa, composta da 6 atomi di fanteria leggera, acqua, strada battuta", "riga 2, casella 3, acqua", "riga 2, casella 4, acqua", "riga 3, casella 1, bosco", "riga 3, casella 2, formazione avversaria, strada battuta", "riga 3, casella 3, libera", "riga 3, casella 4, tuo Orso, formazione di ricognizione, in attesa, composta da 3 atomi di fanteria leggera, bosco", "riga 4, casella 1, tuo Falco, in attesa, composta da 24 atomi di fanteria pesante, 12 atomi di cavalleria manovrata", "riga 4, casella 2, tuo quartier generale, strada battuta", "riga 4, casella 3, libera", "riga 4, casella 4, tuo Lupo, in attesa, composta da 18 atomi di fanteria leggera, 8 atomi di fanteria pesante", "Registro della campagna", "Chiudi la giornata", "Annulla l\'ultima operazione", "Azzera lo schieramento del turno", "Richiama l\'esercito in patria", "Torna in patria"]
+Test Case '-[WarSenseTest.CompletamentoDellaCampagnaTest test_02_6_5_5_il_richiamo_impedito_dichiara_il_perche]' failed (0.853 seconds).
+** TEST FAILED **
+
+== il richiamo impedito si apre comunque in un pannello (ospitate)
+   sorgente: Applicazione/Sorgenti/SchermataMappaCampagna.swift
+   tolto:  annunciaIlRichiamoImpedito(impedimento) return } let pannello = UIAlertController(title: testi.frase("campagna.richiamo_titolo").testo,
+   messo:  annunciaIlRichiamoImpedito(impedimento) } let pannello = UIAlertController(title: testi.frase("campagna.richiamo_titolo").testo,
+   prove ospitate: CompletamentoDellaCampagnaTest (uscita 65)
+Test Case '-[WarSenseTest.CompletamentoDellaCampagnaTest test_01_5_18_2_il_richiamo_chiede_conferma_e_riporta_l_esercito_in_patria]' passed (1.201 seconds).
+Test Case '-[WarSenseTest.CompletamentoDellaCampagnaTest test_01_5_18_2_le_campagne_di_prova_non_hanno_il_richiamo]' passed (0.074 seconds).
+Test Case '-[WarSenseTest.CompletamentoDellaCampagnaTest test_01_5_18_3_3_il_difensore_sa_sempre_che_il_proprio_quartier_generale_e_occupato]' passed (0.733 seconds).
+Test Case '-[WarSenseTest.CompletamentoDellaCampagnaTest test_01_5_18_3_il_giocatore_prende_il_quartier_generale_e_ogni_passo_si_sente]' passed (0.704 seconds).
+Applicazione/ProveOspitate/CompletamentoDellaCampagnaTest.swift:230: error: -[WarSenseTest.CompletamentoDellaCampagnaTest test_02_6_5_5_il_richiamo_impedito_dichiara_il_perche] : XCTAssertNil failed: "<UIAlertController: 0x10327c600>"
+Test Case '-[WarSenseTest.CompletamentoDellaCampagnaTest test_02_6_5_5_il_richiamo_impedito_dichiara_il_perche]' failed (0.882 seconds).
+** TEST FAILED **
+
+== il richiamo compare anche nelle campagne di prova (ospitate)
+   sorgente: Applicazione/Sorgenti/SchermataMappaCampagna.swift
+   tolto:  + (partita.ritorno == .patria ? [pulsanteRichiama] : []) + [pulsanteEsci]
+   messo:  + [pulsanteRichiama, pulsanteEsci]
+   prove ospitate: CompletamentoDellaCampagnaTest (uscita 65)
+Test Case '-[WarSenseTest.CompletamentoDellaCampagnaTest test_01_5_18_2_il_richiamo_chiede_conferma_e_riporta_l_esercito_in_patria]' passed (1.232 seconds).
+Applicazione/ProveOspitate/CompletamentoDellaCampagnaTest.swift:240: error: -[WarSenseTest.CompletamentoDellaCampagnaTest test_01_5_18_2_le_campagne_di_prova_non_hanno_il_richiamo] : XCTAssertFalse failed - ["riga 1, casella 1, inesplorato", "riga 1, casella 2, inesplorato, quartier generale avversario, strada battuta", "riga 1, casella 3, inesplorato", "riga 1, casella 4, inesplorato, bosco", "riga 2, casella 1, acqua", "riga 2, casella 2, acqua, strada battuta", "riga 2, casella 3, acqua", "riga 2, casella 4, acqua", "riga 3, casella 1, bosco", "riga 3, casella 2, strada battuta", "riga 3, casella 3, libera", "riga 3, casella 4, bosco", "riga 4, casella 1, tuo Orso, formazione non armata, in attesa, composta da 4 atomi di fanteria leggera", "riga 4, casella 2, tuo Corvo, in attesa, composta da 6 atomi di fanteria leggera, tuo quartier generale, strada battuta", "riga 4, casella 3, tuo Lupo, in attesa, composta da 18 atomi di fanteria leggera, 8 atomi di fanteria pesante", "riga 4, casella 4, tuo Falco, formazione di ricognizione, in attesa, composta da 3 atomi di fanteria leggera", "Registro della campagna", "Chiudi la giornata", "Annulla l\'ultima operazione", "Azzera lo schieramento del turno", "Richiama l\'esercito in patria, adesso non si può: la campagna è conclusa", "Torna all\'inizio"]
+Test Case '-[WarSenseTest.CompletamentoDellaCampagnaTest test_01_5_18_2_le_campagne_di_prova_non_hanno_il_richiamo]' failed (0.073 seconds).
+Test Case '-[WarSenseTest.CompletamentoDellaCampagnaTest test_01_5_18_3_3_il_difensore_sa_sempre_che_il_proprio_quartier_generale_e_occupato]' passed (0.760 seconds).
+Test Case '-[WarSenseTest.CompletamentoDellaCampagnaTest test_01_5_18_3_il_giocatore_prende_il_quartier_generale_e_ogni_passo_si_sente]' passed (0.680 seconds).
+Test Case '-[WarSenseTest.CompletamentoDellaCampagnaTest test_02_6_5_5_il_richiamo_impedito_dichiara_il_perche]' passed (0.881 seconds).
+** TEST FAILED **
+
+== serve una giornata in piu' di quelle che la campagna dichiara
+   sorgente: Codice/Sources/Motore/PresaDelQuartierGenerale.swift
+   tolto:  let mancano = regole.giornatePerLaPresa - stato.occupazioni![indice].giornate
+   messo:  let mancano = regole.giornatePerLaPresa + 1 - stato.occupazioni![indice].giornate
+   prove:  swift test --filter PresaDelQuartierGeneraleTest/(test_01_5_18_3_il_quartier_generale_cade|test_01_5_18_3_le_giornate_sono|test_01_5_18_3_4_la_presa_che_si_compie|test_01_5_18_3_4_la_caduta) (uscita 1)
+Codice/Tests/MotoreTest/PresaDelQuartierGeneraleTest.swift:371: error: -[MotoreTest.PresaDelQuartierGeneraleTest test_01_5_18_3_4_la_caduta_dell_ultimo_quartier_generale_chiude_anche_le_battaglie_in_sospeso] : XCTAssertEqual failed: ("nil") is not equal to ("Optional(Motore.ConclusioneCampagna.Modo.presa)")
+Codice/Tests/MotoreTest/PresaDelQuartierGeneraleTest.swift:372: error: -[MotoreTest.PresaDelQuartierGeneraleTest test_01_5_18_3_4_la_caduta_dell_ultimo_quartier_generale_chiude_anche_le_battaglie_in_sospeso] : XCTAssertEqual failed: ("[Motore.BattagliaInSospeso(identificatore: "battaglia-4-2-4", casella: Motore.Cella(riga: 2, colonna: 4), gruppoGiocatore: gruppo-2, gruppoAvversario: gruppo-3, primoOccupante: Dati.Parte.avversario, imboscante: nil, giorno: 4)]") is not equal to ("[]")
+Test Case '-[MotoreTest.PresaDelQuartierGeneraleTest test_01_5_18_3_4_la_caduta_dell_ultimo_quartier_generale_chiude_anche_le_battaglie_in_sospeso]' failed (0.105 seconds).
+Codice/Tests/MotoreTest/PresaDelQuartierGeneraleTest.swift:324: error: -[MotoreTest.PresaDelQuartierGeneraleTest test_01_5_18_3_4_la_presa_che_si_compie_nell_ultima_giornata_vince_sull_inverno] : XCTAssertEqual failed: ("Optional(Motore.ConclusioneCampagna(modo: Motore.ConclusioneCampagna.Modo.inverno, vincitore: nil, giorno: 3))") is not equal to ("Optional(Motore.ConclusioneCampagna(modo: Motore.ConclusioneCampagna.Modo.presa, vincitore: Optional(Dati.Parte.giocatore), giorno: 3))")
+Test Case '-[MotoreTest.PresaDelQuartierGeneraleTest test_01_5_18_3_4_la_presa_che_si_compie_nell_ultima_giornata_vince_sull_inverno]' failed (0.007 seconds).
+Codice/Tests/MotoreTest/PresaDelQuartierGeneraleTest.swift:122: error: -[MotoreTest.PresaDelQuartierGeneraleTest test_01_5_18_3_il_quartier_generale_cade_dopo_le_giornate_della_regola_per_le_due_parti] : XCTAssertEqual failed: ("[Motore.EventoCampagna.occupazioneProsegue(casella: Motore.Cella(riga: 1, colonna: 2), occupante: Dati.Parte.giocatore, mancano: 3)]") is not equal to ("[Motore.EventoCampagna.occupazioneProsegue(casella: Motore.Cella(riga: 1, colonna: 2), occupante: Dati.Parte.giocatore, mancano: 2)]")
+Codice/Tests/MotoreTest/PresaDelQuartierGeneraleTest.swift:123: error: -[MotoreTest.PresaDelQuartierGeneraleTest test_01_5_18_3_il_quartier_generale_cade_dopo_le_giornate_della_regola_per_le_due_parti] : XCTAssertEqual failed: ("[Motore.EventoCampagna.occupazioneProsegue(casella: Motore.Cella(riga: 1, colonna: 2), occupante: Dati.Parte.giocatore, mancano: 2)]") is not equal to ("[Motore.EventoCampagna.occupazioneProsegue(casella: Motore.Cella(riga: 1, colonna: 2), occupante: Dati.Parte.giocatore, mancano: 1)]")
+Codice/Tests/MotoreTest/PresaDelQuartierGeneraleTest.swift:126: error: -[MotoreTest.PresaDelQuartierGeneraleTest test_01_5_18_3_il_quartier_generale_cade_dopo_le_giornate_della_regola_per_le_due_parti] : XCTAssertEqual failed: ("[Motore.EventoCampagna.occupazioneProsegue(casella: Motore.Cella(riga: 1, colonna: 2), occupante: Dati.Parte.giocatore, mancano: 1)]") is not equal to ("[Motore.EventoCampagna.campagnaConclusa(modo: Motore.ConclusioneCampagna.Modo.presa, vincitore: Optional(Dati.Parte.giocatore))]")
+Codice/Tests/MotoreTest/PresaDelQuartierGeneraleTest.swift:127: error: -[MotoreTest.PresaDelQuartierGeneraleTest test_01_5_18_3_il_quartier_generale_cade_dopo_le_giornate_della_regola_per_le_due_parti] : XCTAssertEqual failed: ("nil") is not equal to ("Optional(Motore.ConclusioneCampagna(modo: Motore.ConclusioneCampagna.Modo.presa, vincitore: Optional(Dati.Parte.giocatore), giorno: 4))")
+Codice/Tests/MotoreTest/PresaDelQuartierGeneraleTest.swift:128: error: -[MotoreTest.PresaDelQuartierGeneraleTest test_01_5_18_3_il_quartier_generale_cade_dopo_le_giornate_della_regola_per_le_due_parti] : XCTAssertEqual failed: ("nil") is not equal to ("Optional([Motore.Cella(riga: 1, colonna: 2)])")
+Codice/Tests/MotoreTest/PresaDelQuartierGeneraleTest.swift:129: error: -[MotoreTest.PresaDelQuartierGeneraleTest test_01_5_18_3_il_quartier_generale_cade_dopo_le_giornate_della_regola_per_le_due_parti] : XCTAssertEqual failed: ("Optional([Motore.OccupazioneDelQuartierGenerale(casella: Motore.Cella(riga: 1, colonna: 2), occupante: Dati.Parte.giocatore, giornate: 3)])") is not equal to ("Optional([])")
+Codice/Tests/MotoreTest/PresaDelQuartierGeneraleTest.swift:130: error: -[MotoreTest.PresaDelQuartierGeneraleTest test_01_5_18_3_il_quartier_generale_cade_dopo_le_giornate_della_regola_per_le_due_parti] : XCTAssertEqual failed: ("5") is not equal to ("4") - la giornata nuova non si apre
+Codice/Tests/MotoreTest/PresaDelQuartierGeneraleTest.swift:131: error: -[MotoreTest.PresaDelQuartierGeneraleTest test_01_5_18_3_il_quartier_generale_cade_dopo_le_giornate_della_regola_per_le_due_parti] : XCTAssertFalse failed
+Codice/Tests/MotoreTest/PresaDelQuartierGeneraleTest.swift:134: error: -[MotoreTest.PresaDelQuartierGeneraleTest test_01_5_18_3_il_quartier_generale_cade_dopo_le_giornate_della_regola_per_le_due_parti] : XCTAssertEqual failed: ("nil") is not equal to ("Optional(Motore.MotivoNonValidoCampagna.campagnaConclusa)")
+Codice/Tests/MotoreTest/PresaDelQuartierGeneraleTest.swift:122: error: -[MotoreTest.PresaDelQuartierGeneraleTest test_01_5_18_3_il_quartier_generale_cade_dopo_le_giornate_della_regola_per_le_due_parti] : XCTAssertEqual failed: ("[Motore.EventoCampagna.occupazioneProsegue(casella: Motore.Cella(riga: 4, colonna: 2), occupante: Dati.Parte.avversario, mancano: 3)]") is not equal to ("[Motore.EventoCampagna.occupazioneProsegue(casella: Motore.Cella(riga: 4, colonna: 2), occupante: Dati.Parte.avversario, mancano: 2)]")
+Codice/Tests/MotoreTest/PresaDelQuartierGeneraleTest.swift:123: error: -[MotoreTest.PresaDelQuartierGeneraleTest test_01_5_18_3_il_quartier_generale_cade_dopo_le_giornate_della_regola_per_le_due_parti] : XCTAssertEqual failed: ("[Motore.EventoCampagna.occupazioneProsegue(casella: Motore.Cella(riga: 4, colonna: 2), occupante: Dati.Parte.avversario, mancano: 2)]") is not equal to ("[Motore.EventoCampagna.occupazioneProsegue(casella: Motore.Cella(riga: 4, colonna: 2), occupante: Dati.Parte.avversario, mancano: 1)]")
+Codice/Tests/MotoreTest/PresaDelQuartierGeneraleTest.swift:126: error: -[MotoreTest.PresaDelQuartierGeneraleTest test_01_5_18_3_il_quartier_generale_cade_dopo_le_giornate_della_regola_per_le_due_parti] : XCTAssertEqual failed: ("[Motore.EventoCampagna.occupazioneProsegue(casella: Motore.Cella(riga: 4, colonna: 2), occupante: Dati.Parte.avversario, mancano: 1)]") is not equal to ("[Motore.EventoCampagna.campagnaConclusa(modo: Motore.ConclusioneCampagna.Modo.presa, vincitore: Optional(Dati.Parte.avversario))]")
+Codice/Tests/MotoreTest/PresaDelQuartierGeneraleTest.swift:127: error: -[MotoreTest.PresaDelQuartierGeneraleTest test_01_5_18_3_il_quartier_generale_cade_dopo_le_giornate_della_regola_per_le_due_parti] : XCTAssertEqual failed: ("nil") is not equal to ("Optional(Motore.ConclusioneCampagna(modo: Motore.ConclusioneCampagna.Modo.presa, vincitore: Optional(Dati.Parte.avversario), giorno: 4))")
+Codice/Tests/MotoreTest/PresaDelQuartierGeneraleTest.swift:128: error: -[MotoreTest.PresaDelQuartierGeneraleTest test_01_5_18_3_il_quartier_generale_cade_dopo_le_giornate_della_regola_per_le_due_parti] : XCTAssertEqual failed: ("nil") is not equal to ("Optional([Motore.Cella(riga: 4, colonna: 2)])")
+Codice/Tests/MotoreTest/PresaDelQuartierGeneraleTest.swift:129: error: -[MotoreTest.PresaDelQuartierGeneraleTest test_01_5_18_3_il_quartier_generale_cade_dopo_le_giornate_della_regola_per_le_due_parti] : XCTAssertEqual failed: ("Optional([Motore.OccupazioneDelQuartierGenerale(casella: Motore.Cella(riga: 4, colonna: 2), occupante: Dati.Parte.avversario, giornate: 3)])") is not equal to ("Optional([])")
+Test Case '-[MotoreTest.PresaDelQuartierGeneraleTest test_01_5_18_3_il_quartier_generale_cade_dopo_le_giornate_della_regola_per_le_due_parti]' failed (0.009 seconds).
+Codice/Tests/MotoreTest/PresaDelQuartierGeneraleTest.swift:151: error: -[MotoreTest.PresaDelQuartierGeneraleTest test_01_5_18_3_le_giornate_sono_quelle_che_la_campagna_dichiara] : XCTAssertEqual failed: ("nil") is not equal to ("Optional(Motore.ConclusioneCampagna.Modo.presa)") - 1
+Codice/Tests/MotoreTest/PresaDelQuartierGeneraleTest.swift:151: error: -[MotoreTest.PresaDelQuartierGeneraleTest test_01_5_18_3_le_giornate_sono_quelle_che_la_campagna_dichiara] : XCTAssertEqual failed: ("nil") is not equal to ("Optional(Motore.ConclusioneCampagna.Modo.presa)") - 2
+Codice/Tests/MotoreTest/PresaDelQuartierGeneraleTest.swift:151: error: -[MotoreTest.PresaDelQuartierGeneraleTest test_01_5_18_3_le_giornate_sono_quelle_che_la_campagna_dichiara] : XCTAssertEqual failed: ("nil") is not equal to ("Optional(Motore.ConclusioneCampagna.Modo.presa)") - 5
+Test Case '-[MotoreTest.PresaDelQuartierGeneraleTest test_01_5_18_3_le_giornate_sono_quelle_che_la_campagna_dichiara]' failed (0.007 seconds).
+	 Executed 4 tests, with 26 failures (0 unexpected) in 0.129 (0.130) seconds
+
+== caduti insieme vince l'avversario anche col vantaggio acceso
+   sorgente: Codice/Sources/Motore/PresaDelQuartierGenerale.swift
+   tolto:  ? [.giocatore, .avversario] : [.avversario, .giocatore]
+   messo:  ? [.avversario, .giocatore] : [.giocatore, .avversario]
+   prove:  swift test --filter PresaDelQuartierGeneraleTest/(test_01_15_2_5|test_05_12_5) (uscita 1)
+Codice/Tests/MotoreTest/PresaDelQuartierGeneraleTest.swift:336: error: -[MotoreTest.PresaDelQuartierGeneraleTest test_01_15_2_5_caduti_insieme_gli_ultimi_quartieri_generali_vince_il_giocatore] : XCTAssertEqual failed: ("Optional(Dati.Parte.avversario)") is not equal to ("Optional(Dati.Parte.giocatore)")
+Codice/Tests/MotoreTest/PresaDelQuartierGeneraleTest.swift:337: error: -[MotoreTest.PresaDelQuartierGeneraleTest test_01_15_2_5_caduti_insieme_gli_ultimi_quartieri_generali_vince_il_giocatore] : XCTAssertEqual failed: ("Optional(Motore.EventoCampagna.campagnaConclusa(modo: Motore.ConclusioneCampagna.Modo.presa, vincitore: Optional(Dati.Parte.avversario)))") is not equal to ("Optional(Motore.EventoCampagna.campagnaConclusa(modo: Motore.ConclusioneCampagna.Modo.presa, vincitore: Optional(Dati.Parte.giocatore)))")
+Codice/Tests/MotoreTest/PresaDelQuartierGeneraleTest.swift:338: error: -[MotoreTest.PresaDelQuartierGeneraleTest test_01_15_2_5_caduti_insieme_gli_ultimi_quartieri_generali_vince_il_giocatore] : XCTAssertEqual failed: ("Optional([Motore.Cella(riga: 4, colonna: 2)])") is not equal to ("Optional([Motore.Cella(riga: 1, colonna: 2)])")
+Test Case '-[MotoreTest.PresaDelQuartierGeneraleTest test_01_15_2_5_caduti_insieme_gli_ultimi_quartieri_generali_vince_il_giocatore]' failed (0.100 seconds).
+Codice/Tests/MotoreTest/PresaDelQuartierGeneraleTest.swift:358: error: -[MotoreTest.PresaDelQuartierGeneraleTest test_05_12_5_il_vantaggio_della_caduta_simultanea_e_disattivabile] : XCTAssertEqual failed: ("Optional(Motore.ConclusioneCampagna(modo: Motore.ConclusioneCampagna.Modo.presa, vincitore: Optional(Dati.Parte.giocatore), giorno: 4))") is not equal to ("Optional(Motore.ConclusioneCampagna(modo: Motore.ConclusioneCampagna.Modo.presa, vincitore: Optional(Dati.Parte.avversario), giorno: 4))")
+Test Case '-[MotoreTest.PresaDelQuartierGeneraleTest test_05_12_5_il_vantaggio_della_caduta_simultanea_e_disattivabile]' failed (0.022 seconds).
+	 Executed 2 tests, with 4 failures (0 unexpected) in 0.122 (0.122) seconds
+	 Executed 2 tests, with 4 failures (0 unexpected) in 0.122 (0.123) seconds
+
+== la riunione non rivede le occupazioni lasciate
+   sorgente: Codice/Sources/Motore/MotoreCampagna.swift
+   tolto:  eventi.append(contentsOf: interrompiLeOccupazioniLasciate(&nuovo))
+   messo:  
+   prove:  swift test --filter PresaDelQuartierGeneraleTest/test_01_5_18_3_2_riunito (uscita 1)
+Codice/Tests/MotoreTest/PresaDelQuartierGeneraleTest.swift:312: error: -[MotoreTest.PresaDelQuartierGeneraleTest test_01_5_18_3_2_riunito_altrove_l_occupante_lascia_il_quartier_generale] : XCTAssertEqual failed: ("[]") is not equal to ("[Motore.EventoCampagna.occupazioneInterrotta(casella: Motore.Cella(riga: 1, colonna: 2), occupante: Dati.Parte.giocatore)]")
+Codice/Tests/MotoreTest/PresaDelQuartierGeneraleTest.swift:313: error: -[MotoreTest.PresaDelQuartierGeneraleTest test_01_5_18_3_2_riunito_altrove_l_occupante_lascia_il_quartier_generale] : XCTAssertEqual failed: ("Optional([Motore.OccupazioneDelQuartierGenerale(casella: Motore.Cella(riga: 1, colonna: 2), occupante: Dati.Parte.giocatore, giornate: 1)])") is not equal to ("Optional([])")
+Test Case '-[MotoreTest.PresaDelQuartierGeneraleTest test_01_5_18_3_2_riunito_altrove_l_occupante_lascia_il_quartier_generale]' failed (0.092 seconds).
+	 Executed 1 test, with 2 failures (0 unexpected) in 0.092 (0.093) seconds
+
+== la caduta dell'ultimo quartier generale lascia in sospeso le battaglie
+   sorgente: Codice/Sources/Motore/PresaDelQuartierGenerale.swift
+   tolto:  stato.battaglieInSospeso = [] return [Self.concludi
+   messo:  return [Self.concludi
+   prove:  swift test --filter PresaDelQuartierGeneraleTest/test_01_5_18_3_4_la_caduta (uscita 1)
+Codice/Tests/MotoreTest/PresaDelQuartierGeneraleTest.swift:372: error: -[MotoreTest.PresaDelQuartierGeneraleTest test_01_5_18_3_4_la_caduta_dell_ultimo_quartier_generale_chiude_anche_le_battaglie_in_sospeso] : XCTAssertEqual failed: ("[Motore.BattagliaInSospeso(identificatore: "battaglia-4-2-4", casella: Motore.Cella(riga: 2, colonna: 4), gruppoGiocatore: gruppo-2, gruppoAvversario: gruppo-3, primoOccupante: Dati.Parte.avversario, imboscante: nil, giorno: 4)]") is not equal to ("[]")
+Test Case '-[MotoreTest.PresaDelQuartierGeneraleTest test_01_5_18_3_4_la_caduta_dell_ultimo_quartier_generale_chiude_anche_le_battaglie_in_sospeso]' failed (0.098 seconds).
+	 Executed 1 test, with 1 failure (0 unexpected) in 0.098 (0.099) seconds
+
+== l'impronta della campagna non distingue le occupazioni
+   sorgente: Codice/Sources/Motore/ImprontaCampagna.swift
+   tolto:  if let occupazioni, !occupazioni.isEmpty {
+   messo:  if let occupazioni, occupazioni.count > 99 {
+   prove:  swift test --filter PresaDelQuartierGeneraleTest/test_00_15 (uscita 1)
+Codice/Tests/MotoreTest/PresaDelQuartierGeneraleTest.swift:491: error: -[MotoreTest.PresaDelQuartierGeneraleTest test_00_15_le_occupazioni_stanno_nello_stato_e_nell_impronta] : XCTAssertNotEqual failed: ("843c51f5212ad819b5fc4557f065ab399fb6ccab0be7db4b6d1258742eb451c5") is equal to ("843c51f5212ad819b5fc4557f065ab399fb6ccab0be7db4b6d1258742eb451c5")
+Test Case '-[MotoreTest.PresaDelQuartierGeneraleTest test_00_15_le_occupazioni_stanno_nello_stato_e_nell_impronta]' failed (0.099 seconds).
+	 Executed 1 test, with 1 failure (0 unexpected) in 0.099 (0.099) seconds
+
+== le giornate verso una meta passano anche dalle caselle da evitare
+   sorgente: Codice/Sources/Motore/PresaDelQuartierGenerale.swift
+   tolto:  where !evitando.contains(vicino) {
+   messo:  where !vicino.riga.isMultiple(of: 99) {
+   prove:  swift test --filter PresaDelQuartierGeneraleTest/test_01_5_6_3_1 (uscita 1)
+Codice/Tests/MotoreTest/PresaDelQuartierGeneraleTest.swift:647: error: -[MotoreTest.PresaDelQuartierGeneraleTest test_01_5_6_3_1_le_giornate_verso_una_meta_seguono_la_via_piu_breve] : XCTAssertNil failed: "1"
+Test Case '-[MotoreTest.PresaDelQuartierGeneraleTest test_01_5_6_3_1_le_giornate_verso_una_meta_seguono_la_via_piu_breve]' failed (0.099 seconds).
+	 Executed 1 test, with 1 failure (0 unexpected) in 0.099 (0.099) seconds
+	 Executed 1 test, with 1 failure (0 unexpected) in 0.099 (0.100) seconds
+
+== le giornate verso una meta scelgono la via col costo piu' alto
+   sorgente: Codice/Sources/Motore/PresaDelQuartierGenerale.swift
+   tolto:  if costo < distanze[vicino] ?? Int.max {
+   messo:  if distanze[vicino] == nil {
+   prove:  swift test --filter PresaDelQuartierGeneraleTest/test_01_5_6_3_1 (uscita 1)
+Codice/Tests/MotoreTest/PresaDelQuartierGeneraleTest.swift:643: error: -[MotoreTest.PresaDelQuartierGeneraleTest test_01_5_6_3_1_le_giornate_verso_una_meta_seguono_la_via_piu_breve] : XCTAssertEqual failed: ("Optional(7)") is not equal to ("Optional(4)") - Cella(riga: 3, colonna: 1)
+Codice/Tests/MotoreTest/PresaDelQuartierGeneraleTest.swift:643: error: -[MotoreTest.PresaDelQuartierGeneraleTest test_01_5_6_3_1_le_giornate_verso_una_meta_seguono_la_via_piu_breve] : XCTAssertEqual failed: ("Optional(6)") is not equal to ("Optional(4)") - Cella(riga: 3, colonna: 3)
+Codice/Tests/MotoreTest/PresaDelQuartierGeneraleTest.swift:643: error: -[MotoreTest.PresaDelQuartierGeneraleTest test_01_5_6_3_1_le_giornate_verso_una_meta_seguono_la_via_piu_breve] : XCTAssertEqual failed: ("Optional(10)") is not equal to ("Optional(8)") - Cella(riga: 3, colonna: 4)
+Test Case '-[MotoreTest.PresaDelQuartierGeneraleTest test_01_5_6_3_1_le_giornate_verso_una_meta_seguono_la_via_piu_breve]' failed (0.093 seconds).
+	 Executed 1 test, with 3 failures (0 unexpected) in 0.093 (0.093) seconds
+	 Executed 1 test, with 3 failures (0 unexpected) in 0.093 (0.094) seconds
+
+== l'avversario che occupa il quartier generale non lo tiene
+   sorgente: Codice/Sources/Motore/CondottaAvversaria.swift
+   tolto:  return proprieGiornate == nil ? nil : tieni()
+   messo:  return nil
+   prove:  swift test --filter PresaDelQuartierGeneraleTest/test_01_5_18_3_5 (uscita 0)
+Test Case '-[MotoreTest.PresaDelQuartierGeneraleTest test_01_5_18_3_5_a_un_passo_l_avversario_entra_nel_quartier_generale]' passed (0.010 seconds).
+Test Case '-[MotoreTest.PresaDelQuartierGeneraleTest test_01_5_18_3_5_l_avversario_che_occupa_il_quartier_generale_lo_tiene]' passed (0.008 seconds).
+Test Case '-[MotoreTest.PresaDelQuartierGeneraleTest test_01_5_18_3_5_l_avversario_torna_a_riprendere_il_proprio_quartier_generale]' passed (0.008 seconds).
+Test Case '-[MotoreTest.PresaDelQuartierGeneraleTest test_01_5_18_3_5_l_avversario_valuta_la_corsa]' passed (0.007 seconds).
+	 Executed 4 tests, with 0 failures (0 unexpected) in 0.032 (0.033) seconds
+
+== il giocatore che tiene il quartier generale avversario non conta la regola
+   sorgente: Codice/Sources/Motore/ScenarioCampagna.swift
+   tolto:  guard regole.giornatePerLaPresa >= 1, scenario.calendario != nil else {
+   messo:  guard regole.giornatePerLaPresa >= 1 else {
+   prove:  swift test --filter ArriviDallaPatriaTest/test_incarico_32_le_regole (uscita 1)
+Codice/Tests/MotoreTest/ArriviDallaPatriaTest.swift:670: error: -[MotoreTest.ArriviDallaPatriaTest test_incarico_32_le_regole_di_una_campagna_che_non_si_conclude_si_rifiutano] : XCTAssertThrowsError failed: did not throw an error
+Test Case '-[MotoreTest.ArriviDallaPatriaTest test_incarico_32_le_regole_di_una_campagna_che_non_si_conclude_si_rifiutano]' failed (0.095 seconds).
+	 Executed 1 test, with 1 failure (0 unexpected) in 0.095 (0.095) seconds
+
+== l'avversario che occupa il quartier generale non lo tiene (dopo la prova rafforzata)
+   sorgente: Codice/Sources/Motore/CondottaAvversaria.swift
+   tolto:  return proprieGiornate == nil ? nil : tieni()
+   messo:  return nil
+   prove:  swift test --filter PresaDelQuartierGeneraleTest/test_01_5_18_3_5 (uscita 1)
+Test Case '-[MotoreTest.PresaDelQuartierGeneraleTest test_01_5_18_3_5_a_un_passo_l_avversario_entra_nel_quartier_generale]' passed (0.010 seconds).
+Codice/Tests/MotoreTest/PresaDelQuartierGeneraleTest.swift:574: error: -[MotoreTest.PresaDelQuartierGeneraleTest test_01_5_18_3_5_l_avversario_che_occupa_il_quartier_generale_lo_tiene] : XCTAssertEqual failed: ("marcia(gruppo: gruppo-2, a: Motore.Cella(riga: 3, colonna: 2), giorni: 1)") is not equal to ("presidio(gruppo: gruppo-2)")
+Test Case '-[MotoreTest.PresaDelQuartierGeneraleTest test_01_5_18_3_5_l_avversario_che_occupa_il_quartier_generale_lo_tiene]' failed (0.097 seconds).
+Test Case '-[MotoreTest.PresaDelQuartierGeneraleTest test_01_5_18_3_5_l_avversario_torna_a_riprendere_il_proprio_quartier_generale]' passed (0.008 seconds).
+Test Case '-[MotoreTest.PresaDelQuartierGeneraleTest test_01_5_18_3_5_l_avversario_valuta_la_corsa]' passed (0.007 seconds).
+	 Executed 4 tests, with 1 failure (0 unexpected) in 0.122 (0.122) seconds
+	 Executed 4 tests, with 1 failure (0 unexpected) in 0.122 (0.123) seconds
+
+== l'avversario a un passo non guarda la corsa
+   sorgente: Codice/Sources/Motore/CondottaAvversaria.swift
+   tolto:  if qgMinacciato, let presa = vista.presa, vinceLaCorsa(gruppo, vista: vista, presa: presa) {
+   messo:  if qgMinacciato, vista.presa == nil {
+   prove:  swift test --filter PresaDelQuartierGeneraleTest/test_01_5_18_3_5 (uscita 1)
+Codice/Tests/MotoreTest/PresaDelQuartierGeneraleTest.swift:587: error: -[MotoreTest.PresaDelQuartierGeneraleTest test_01_5_18_3_5_a_un_passo_l_avversario_entra_nel_quartier_generale] : XCTAssertEqual failed: ("Cella(riga: 2, colonna: 2)") is not equal to ("Cella(riga: 4, colonna: 2)")
+Test Case '-[MotoreTest.PresaDelQuartierGeneraleTest test_01_5_18_3_5_a_un_passo_l_avversario_entra_nel_quartier_generale]' failed (0.100 seconds).
+Test Case '-[MotoreTest.PresaDelQuartierGeneraleTest test_01_5_18_3_5_l_avversario_che_occupa_il_quartier_generale_lo_tiene]' passed (0.008 seconds).
+Test Case '-[MotoreTest.PresaDelQuartierGeneraleTest test_01_5_18_3_5_l_avversario_torna_a_riprendere_il_proprio_quartier_generale]' passed (0.007 seconds).
+Test Case '-[MotoreTest.PresaDelQuartierGeneraleTest test_01_5_18_3_5_l_avversario_valuta_la_corsa]' passed (0.007 seconds).
+	 Executed 4 tests, with 1 failure (0 unexpected) in 0.122 (0.122) seconds
+	 Executed 4 tests, with 1 failure (0 unexpected) in 0.122 (0.123) seconds
+
+== entrare nel quartier generale del giocatore non vale di piu'
+   sorgente: Codice/Sources/Motore/CondottaAvversaria.swift
+   tolto:  if vista.presa != nil, dove == qgGio { p += c.presaQuartierGenerale }
+   messo:  
+   prove:  swift test --filter PresaDelQuartierGeneraleTest/test_01_5_18_3_5 (uscita 1)
+Codice/Tests/MotoreTest/PresaDelQuartierGeneraleTest.swift:586: error: -[MotoreTest.PresaDelQuartierGeneraleTest test_01_5_18_3_5_a_un_passo_l_avversario_entra_nel_quartier_generale] : failed - presidio(gruppo: gruppo-2)
+Test Case '-[MotoreTest.PresaDelQuartierGeneraleTest test_01_5_18_3_5_a_un_passo_l_avversario_entra_nel_quartier_generale]' failed (0.094 seconds).
+Test Case '-[MotoreTest.PresaDelQuartierGeneraleTest test_01_5_18_3_5_l_avversario_che_occupa_il_quartier_generale_lo_tiene]' passed (0.008 seconds).
+Test Case '-[MotoreTest.PresaDelQuartierGeneraleTest test_01_5_18_3_5_l_avversario_torna_a_riprendere_il_proprio_quartier_generale]' passed (0.007 seconds).
+Test Case '-[MotoreTest.PresaDelQuartierGeneraleTest test_01_5_18_3_5_l_avversario_valuta_la_corsa]' passed (0.007 seconds).
+	 Executed 4 tests, with 1 failure (0 unexpected) in 0.116 (0.117) seconds
+
+== un esploratore noto vale come una formazione armata
+   sorgente: Codice/Sources/Motore/CondottaAvversaria.swift
+   tolto:  let minacce = vista.presa?.armateNote ?? noti
+   messo:  let minacce = noti
+   prove:  swift test --filter PresaDelQuartierGeneraleTest/test_01_5_18_3_5 (uscita 0)
+Test Case '-[MotoreTest.PresaDelQuartierGeneraleTest test_01_5_18_3_5_a_un_passo_l_avversario_entra_nel_quartier_generale]' passed (0.010 seconds).
+Test Case '-[MotoreTest.PresaDelQuartierGeneraleTest test_01_5_18_3_5_l_avversario_che_occupa_il_quartier_generale_lo_tiene]' passed (0.008 seconds).
+Test Case '-[MotoreTest.PresaDelQuartierGeneraleTest test_01_5_18_3_5_l_avversario_torna_a_riprendere_il_proprio_quartier_generale]' passed (0.008 seconds).
+Test Case '-[MotoreTest.PresaDelQuartierGeneraleTest test_01_5_18_3_5_l_avversario_valuta_la_corsa]' passed (0.007 seconds).
+	 Executed 4 tests, with 0 failures (0 unexpected) in 0.033 (0.033) seconds
+
+== un esploratore noto vale come una formazione armata (dopo la prova rafforzata)
+   sorgente: Codice/Sources/Motore/CondottaAvversaria.swift
+   tolto:  let minacce = vista.presa?.armateNote ?? noti
+   messo:  let minacce = noti
+   prove:  swift test --filter PresaDelQuartierGeneraleTest/test_01_5_18_3_5 (uscita 1)
+Codice/Tests/MotoreTest/PresaDelQuartierGeneraleTest.swift:608: error: -[MotoreTest.PresaDelQuartierGeneraleTest test_01_5_18_3_5_a_un_passo_l_avversario_entra_nel_quartier_generale] : XCTAssertEqual failed: ("Cella(riga: 4, colonna: 3)") is not equal to ("Cella(riga: 6, colonna: 3)")
+Test Case '-[MotoreTest.PresaDelQuartierGeneraleTest test_01_5_18_3_5_a_un_passo_l_avversario_entra_nel_quartier_generale]' failed (0.104 seconds).
+Test Case '-[MotoreTest.PresaDelQuartierGeneraleTest test_01_5_18_3_5_l_avversario_che_occupa_il_quartier_generale_lo_tiene]' passed (0.008 seconds).
+Test Case '-[MotoreTest.PresaDelQuartierGeneraleTest test_01_5_18_3_5_l_avversario_torna_a_riprendere_il_proprio_quartier_generale]' passed (0.007 seconds).
+Test Case '-[MotoreTest.PresaDelQuartierGeneraleTest test_01_5_18_3_5_l_avversario_valuta_la_corsa]' passed (0.007 seconds).
+	 Executed 4 tests, with 1 failure (0 unexpected) in 0.126 (0.127) seconds
+
+== il ritorno da una battaglia non rivede le occupazioni
+   sorgente: Codice/Sources/Motore/MotoreCampagna.swift
+   tolto:  eventi.append(contentsOf: rivediLeOccupazioni(dopo: esito, &stato))
+   messo:  
+   prove:  swift test --filter SessioneTest.CompletamentoDellaCampagnaTest/test_01_5_18_3 (uscita 1)
+Codice/Tests/SessioneTest/CompletamentoDellaCampagnaTest.swift:110: error: -[SessioneTest.CompletamentoDellaCampagnaTest test_01_5_18_3_2_l_avversario_torna_a_riprendere_il_proprio_e_la_battaglia_decide] : XCTAssertEqual failed: ("nil") is not equal to ("Optional(Motore.EventoCampagna.occupazioneInterrotta(casella: Motore.Cella(riga: 1, colonna: 2), occupante: Dati.Parte.giocatore))")
+Test Case '-[SessioneTest.CompletamentoDellaCampagnaTest test_01_5_18_3_2_l_avversario_torna_a_riprendere_il_proprio_e_la_battaglia_decide]' failed (0.099 seconds).
+Test Case '-[SessioneTest.CompletamentoDellaCampagnaTest test_01_5_18_3_l_avversario_prende_il_quartier_generale_e_il_giocatore_sente_ogni_passo]' passed (0.014 seconds).
+	 Executed 2 tests, with 1 failure (0 unexpected) in 0.113 (0.113) seconds
+	 Executed 2 tests, with 1 failure (0 unexpected) in 0.113 (0.114) seconds
+
+== le giornate che mancano non si annunciano a ogni chiusura
+   sorgente: Codice/Sources/Motore/PresaDelQuartierGenerale.swift
+   tolto:  eventi.append(.occupazioneProsegue(casella: casella, occupante: occupante, mancano: mancano))
+   messo:  _ = mancano
+   prove:  swift test --filter SessioneTest.CompletamentoDellaCampagnaTest/test_01_5_18_3 (uscita 1)
+Test Case '-[SessioneTest.CompletamentoDellaCampagnaTest test_01_5_18_3_2_l_avversario_torna_a_riprendere_il_proprio_e_la_battaglia_decide]' passed (0.017 seconds).
+Codice/Tests/SessioneTest/CompletamentoDellaCampagnaTest.swift:76: error: -[SessioneTest.CompletamentoDellaCampagnaTest test_01_5_18_3_l_avversario_prende_il_quartier_generale_e_il_giocatore_sente_ogni_passo] : XCTAssertEqual failed: ("[Motore.EventoCampagna.quartierGeneraleOccupato(casella: Motore.Cella(riga: 4, colonna: 2), occupante: Dati.Parte.avversario, mancano: 3), Motore.EventoCampagna.campagnaConclusa(modo: Motore.ConclusioneCampagna.Modo.presa, vincitore: Optional(Dati.Parte.avversario))]") is not equal to ("[Motore.EventoCampagna.quartierGeneraleOccupato(casella: Motore.Cella(riga: 4, colonna: 2), occupante: Dati.Parte.avversario, mancano: 3), Motore.EventoCampagna.occupazioneProsegue(casella: Motore.Cella(riga: 4, colonna: 2), occupante: Dati.Parte.avversario, mancano: 2), Motore.EventoCampagna.occupazioneProsegue(casella: Motore.Cella(riga: 4, colonna: 2), occupante: Dati.Parte.avversario, mancano: 1), Motore.EventoCampagna.campagnaConclusa(modo: Motore.ConclusioneCampagna.Modo.presa, vincitore: Optional(Dati.Parte.avversario))]")
+Test Case '-[SessioneTest.CompletamentoDellaCampagnaTest test_01_5_18_3_l_avversario_prende_il_quartier_generale_e_il_giocatore_sente_ogni_passo]' failed (0.102 seconds).
+	 Executed 2 tests, with 1 failure (0 unexpected) in 0.118 (0.118) seconds
+	 Executed 2 tests, with 1 failure (0 unexpected) in 0.118 (0.119) seconds
+
+== il passo di un'occupazione si puo' annullare
+   sorgente: Codice/Sources/Sessione/SessioneCampagna.swift
+   tolto:  case .marciaCompiuta, .quartierGeneraleOccupato, .occupazioneProsegue, .occupazioneInterrotta, .quartierGeneralePreso: return true
+   messo:  case .marciaCompiuta, .quartierGeneralePreso: return true
+   prove:  swift test --filter SessioneTest.CompletamentoDellaCampagnaTest/test_05_6_5 (uscita 0)
+Test Case '-[SessioneTest.CompletamentoDellaCampagnaTest test_05_6_5_il_passo_di_un_occupazione_non_si_annulla]' passed (0.012 seconds).
+	 Executed 1 test, with 0 failures (0 unexpected) in 0.012 (0.013) seconds
+
+== una campagna senza regole ne ha comunque di predefinite
+   sorgente: Codice/Sources/Motore/PresaDelQuartierGenerale.swift
+   tolto:  guard let regole = stato.regole, stato.conclusione == nil else { return [] } var eventi: [EventoCampagna] = [] let ordine
+   messo:  let regole = stato.regole ?? RegoleDiCampagna(giornatePerLaPresa: 3) guard stato.conclusione == nil else { return [] } var eventi: [EventoCampagna] = [] let ordine
+   prove:  swift test --filter PresaDelQuartierGeneraleTest/test_incarico_32_senza_la_regola_nulla (uscita 1)
+Codice/Tests/MotoreTest/PresaDelQuartierGeneraleTest.swift:160: error: -[MotoreTest.PresaDelQuartierGeneraleTest test_incarico_32_senza_la_regola_nulla_cambia] : XCTAssertEqual failed: ("[Motore.EventoCampagna.quartierGeneraleOccupato(casella: Motore.Cella(riga: 1, colonna: 2), occupante: Dati.Parte.giocatore, mancano: 3), Motore.EventoCampagna.occupazioneProsegue(casella: Motore.Cella(riga: 1, colonna: 2), occupante: Dati.Parte.giocatore, mancano: 2), Motore.EventoCampagna.occupazioneProsegue(casella: Motore.Cella(riga: 1, colonna: 2), occupante: Dati.Parte.giocatore, mancano: 1), Motore.EventoCampagna.campagnaConclusa(modo: Motore.ConclusioneCampagna.Modo.presa, vincitore: Optional(Dati.Parte.giocatore))]") is not equal to ("[]")
+Codice/Tests/MotoreTest/PresaDelQuartierGeneraleTest.swift:161: error: -[MotoreTest.PresaDelQuartierGeneraleTest test_incarico_32_senza_la_regola_nulla_cambia] : XCTAssertNil failed: "[]"
+Codice/Tests/MotoreTest/PresaDelQuartierGeneraleTest.swift:162: error: -[MotoreTest.PresaDelQuartierGeneraleTest test_incarico_32_senza_la_regola_nulla_cambia] : XCTAssertNil failed: "ConclusioneCampagna(modo: Motore.ConclusioneCampagna.Modo.presa, vincitore: Optional(Dati.Parte.giocatore), giorno: 4)"
+Codice/Tests/MotoreTest/PresaDelQuartierGeneraleTest.swift:163: error: -[MotoreTest.PresaDelQuartierGeneraleTest test_incarico_32_senza_la_regola_nulla_cambia] : XCTAssertEqual failed: ("4") is not equal to ("9")
+Test Case '-[MotoreTest.PresaDelQuartierGeneraleTest test_incarico_32_senza_la_regola_nulla_cambia]' failed (0.098 seconds).
+	 Executed 1 test, with 4 failures (0 unexpected) in 0.098 (0.098) seconds
+	 Executed 1 test, with 4 failures (0 unexpected) in 0.098 (0.099) seconds
+
+== il passo di un'occupazione si puo' annullare (dopo la prova rafforzata)
+   sorgente: Codice/Sources/Sessione/SessioneCampagna.swift
+   tolto:  case .marciaCompiuta, .quartierGeneraleOccupato, .occupazioneProsegue, .occupazioneInterrotta, .quartierGeneralePreso: return true
+   messo:  case .marciaCompiuta, .quartierGeneralePreso: return true
+   prove:  swift test --filter SessioneTest.CompletamentoDellaCampagnaTest/test_05_6_5 (uscita 1)
+Codice/Tests/SessioneTest/CompletamentoDellaCampagnaTest.swift:134: error: -[SessioneTest.CompletamentoDellaCampagnaTest test_05_6_5_il_passo_di_un_occupazione_non_si_annulla] : XCTAssertNil failed: "RegoleDiCampagna(giornatePerLaPresa: 3)" - il passo dell'occupazione è stato sentito
+Test Case '-[SessioneTest.CompletamentoDellaCampagnaTest test_05_6_5_il_passo_di_un_occupazione_non_si_annulla]' failed (0.097 seconds).
+	 Executed 1 test, with 1 failure (0 unexpected) in 0.097 (0.098) seconds
+

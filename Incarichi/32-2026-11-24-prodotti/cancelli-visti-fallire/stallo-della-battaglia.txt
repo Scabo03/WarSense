@@ -61,3 +61,85 @@ Test Case '-[MotoreTest.StalloDellaBattagliaTest test_01_15_2_4_il_tattico_del_g
 	 Executed 6 tests, with 1 failure (0 unexpected) in 0.137 (0.138) seconds
 	 Executed 6 tests, with 1 failure (0 unexpected) in 0.137 (0.139) seconds
 
+== lo stallo non guarda il divieto d'ingaggio
+   sorgente: Codice/Sources/Motore/MotoreBattaglia.swift
+   tolto:  !stato.divietoIngaggio.values.contains(where: { $0 >= stato.giro }),
+   messo:  
+   prove:  swift test --filter StalloDellaBattagliaTest/test_01_10_7_1 (uscita 1)
+Codice/Tests/MotoreTest/StalloDellaBattagliaTest.swift:160: error: -[MotoreTest.StalloDellaBattagliaTest test_01_10_7_1_chi_puo_ancora_fare_un_passo_verso_il_nemico_non_e_in_stallo] : XCTAssertFalse failed - il divieto d'ingaggio passa: non è uno stallo
+Test Case '-[MotoreTest.StalloDellaBattagliaTest test_01_10_7_1_chi_puo_ancora_fare_un_passo_verso_il_nemico_non_e_in_stallo]' failed (0.092 seconds).
+Test Case '-[MotoreTest.StalloDellaBattagliaTest test_01_10_7_1_due_schieramenti_che_non_possono_incontrarsi_si_concludono_con_la_ritirata_dell_avversario]' passed (0.008 seconds).
+Test Case '-[MotoreTest.StalloDellaBattagliaTest test_01_10_7_1_due_schieramenti_che_possono_incontrarsi_non_sono_in_stallo]' passed (0.007 seconds).
+Test Case '-[MotoreTest.StalloDellaBattagliaTest test_01_10_7_1_quando_nessuno_puo_piu_avvicinarsi_l_avversario_si_ritira]' passed (0.008 seconds).
+	 Executed 4 tests, with 1 failure (0 unexpected) in 0.115 (0.115) seconds
+	 Executed 4 tests, with 1 failure (0 unexpected) in 0.115 (0.116) seconds
+
+== nessuno si avvicina mai
+   sorgente: Codice/Sources/Motore/MotoreBattaglia.swift
+   tolto:  && valido(.muovi(sciame: sciame.id, percorso: [passo]))
+   messo:  && valido(.muovi(sciame: sciame.id, percorso: [passo])) && false
+   prove:  swift test --filter StalloDellaBattagliaTest/test_01_10_7_1 (uscita 1)
+Codice/Tests/MotoreTest/StalloDellaBattagliaTest.swift:152: error: -[MotoreTest.StalloDellaBattagliaTest test_01_10_7_1_chi_puo_ancora_fare_un_passo_verso_il_nemico_non_e_in_stallo] : XCTAssertFalse failed
+Test Case '-[MotoreTest.StalloDellaBattagliaTest test_01_10_7_1_chi_puo_ancora_fare_un_passo_verso_il_nemico_non_e_in_stallo]' failed (0.096 seconds).
+Test Case '-[MotoreTest.StalloDellaBattagliaTest test_01_10_7_1_due_schieramenti_che_non_possono_incontrarsi_si_concludono_con_la_ritirata_dell_avversario]' passed (0.008 seconds).
+Codice/Tests/MotoreTest/StalloDellaBattagliaTest.swift:109: error: -[MotoreTest.StalloDellaBattagliaTest test_01_10_7_1_due_schieramenti_che_possono_incontrarsi_non_sono_in_stallo] : XCTAssertFalse failed - passo 14
+Codice/Tests/MotoreTest/StalloDellaBattagliaTest.swift:109: error: -[MotoreTest.StalloDellaBattagliaTest test_01_10_7_1_due_schieramenti_che_possono_incontrarsi_non_sono_in_stallo] : XCTAssertFalse failed - passo 15
+Codice/Tests/MotoreTest/StalloDellaBattagliaTest.swift:109: error: -[MotoreTest.StalloDellaBattagliaTest test_01_10_7_1_due_schieramenti_che_possono_incontrarsi_non_sono_in_stallo] : XCTAssertFalse failed - passo 16
+Codice/Tests/MotoreTest/StalloDellaBattagliaTest.swift:109: error: -[MotoreTest.StalloDellaBattagliaTest test_01_10_7_1_due_schieramenti_che_possono_incontrarsi_non_sono_in_stallo] : XCTAssertFalse failed - passo 17
+Codice/Tests/MotoreTest/StalloDellaBattagliaTest.swift:109: error: -[MotoreTest.StalloDellaBattagliaTest test_01_10_7_1_due_schieramenti_che_possono_incontrarsi_non_sono_in_stallo] : XCTAssertFalse failed - passo 18
+Codice/Tests/MotoreTest/StalloDellaBattagliaTest.swift:109: error: -[MotoreTest.StalloDellaBattagliaTest test_01_10_7_1_due_schieramenti_che_possono_incontrarsi_non_sono_in_stallo] : XCTAssertFalse failed - passo 19
+Codice/Tests/MotoreTest/StalloDellaBattagliaTest.swift:109: error: -[MotoreTest.StalloDellaBattagliaTest test_01_10_7_1_due_schieramenti_che_possono_incontrarsi_non_sono_in_stallo] : XCTAssertFalse failed - passo 20
+Codice/Tests/MotoreTest/StalloDellaBattagliaTest.swift:109: error: -[MotoreTest.StalloDellaBattagliaTest test_01_10_7_1_due_schieramenti_che_possono_incontrarsi_non_sono_in_stallo] : XCTAssertFalse failed - passo 21
+Codice/Tests/MotoreTest/StalloDellaBattagliaTest.swift:109: error: -[MotoreTest.StalloDellaBattagliaTest test_01_10_7_1_due_schieramenti_che_possono_incontrarsi_non_sono_in_stallo] : XCTAssertFalse failed - passo 22
+Codice/Tests/MotoreTest/StalloDellaBattagliaTest.swift:109: error: -[MotoreTest.StalloDellaBattagliaTest test_01_10_7_1_due_schieramenti_che_possono_incontrarsi_non_sono_in_stallo] : XCTAssertFalse failed - passo 23
+Codice/Tests/MotoreTest/StalloDellaBattagliaTest.swift:109: error: -[MotoreTest.StalloDellaBattagliaTest test_01_10_7_1_due_schieramenti_che_possono_incontrarsi_non_sono_in_stallo] : XCTAssertFalse failed - passo 24
+Codice/Tests/MotoreTest/StalloDellaBattagliaTest.swift:109: error: -[MotoreTest.StalloDellaBattagliaTest test_01_10_7_1_due_schieramenti_che_possono_incontrarsi_non_sono_in_stallo] : XCTAssertFalse failed - passo 25
+Codice/Tests/MotoreTest/StalloDellaBattagliaTest.swift:109: error: -[MotoreTest.StalloDellaBattagliaTest test_01_10_7_1_due_schieramenti_che_possono_incontrarsi_non_sono_in_stallo] : XCTAssertFalse failed - passo 26
+Codice/Tests/MotoreTest/StalloDellaBattagliaTest.swift:109: error: -[MotoreTest.StalloDellaBattagliaTest test_01_10_7_1_due_schieramenti_che_possono_incontrarsi_non_sono_in_stallo] : XCTAssertFalse failed - passo 27
+Codice/Tests/MotoreTest/StalloDellaBattagliaTest.swift:109: error: -[MotoreTest.StalloDellaBattagliaTest test_01_10_7_1_due_schieramenti_che_possono_incontrarsi_non_sono_in_stallo] : XCTAssertFalse failed - passo 28
+Codice/Tests/MotoreTest/StalloDellaBattagliaTest.swift:109: error: -[MotoreTest.StalloDellaBattagliaTest test_01_10_7_1_due_schieramenti_che_possono_incontrarsi_non_sono_in_stallo] : XCTAssertFalse failed - passo 29
+Codice/Tests/MotoreTest/StalloDellaBattagliaTest.swift:109: error: -[MotoreTest.StalloDellaBattagliaTest test_01_10_7_1_due_schieramenti_che_possono_incontrarsi_non_sono_in_stallo] : XCTAssertFalse failed - passo 30
+Codice/Tests/MotoreTest/StalloDellaBattagliaTest.swift:109: error: -[MotoreTest.StalloDellaBattagliaTest test_01_10_7_1_due_schieramenti_che_possono_incontrarsi_non_sono_in_stallo] : XCTAssertFalse failed - passo 31
+Codice/Tests/MotoreTest/StalloDellaBattagliaTest.swift:109: error: -[MotoreTest.StalloDellaBattagliaTest test_01_10_7_1_due_schieramenti_che_possono_incontrarsi_non_sono_in_stallo] : XCTAssertFalse failed - passo 34
+Codice/Tests/MotoreTest/StalloDellaBattagliaTest.swift:109: error: -[MotoreTest.StalloDellaBattagliaTest test_01_10_7_1_due_schieramenti_che_possono_incontrarsi_non_sono_in_stallo] : XCTAssertFalse failed - passo 35
+Codice/Tests/MotoreTest/StalloDellaBattagliaTest.swift:109: error: -[MotoreTest.StalloDellaBattagliaTest test_01_10_7_1_due_schieramenti_che_possono_incontrarsi_non_sono_in_stallo] : XCTAssertFalse failed - passo 38
+Codice/Tests/MotoreTest/StalloDellaBattagliaTest.swift:109: error: -[MotoreTest.StalloDellaBattagliaTest test_01_10_7_1_due_schieramenti_che_possono_incontrarsi_non_sono_in_stallo] : XCTAssertFalse failed - passo 39
+Codice/Tests/MotoreTest/StalloDellaBattagliaTest.swift:113: error: -[MotoreTest.StalloDellaBattagliaTest test_01_10_7_1_due_schieramenti_che_possono_incontrarsi_non_sono_in_stallo] : XCTAssertFalse failed - si sono incontrati
+Test Case '-[MotoreTest.StalloDellaBattagliaTest test_01_10_7_1_due_schieramenti_che_possono_incontrarsi_non_sono_in_stallo]' failed (0.011 seconds).
+Test Case '-[MotoreTest.StalloDellaBattagliaTest test_01_10_7_1_quando_nessuno_puo_piu_avvicinarsi_l_avversario_si_ritira]' passed (0.008 seconds).
+	 Executed 4 tests, with 24 failures (0 unexpected) in 0.122 (0.123) seconds
+
+== si incontrano soltanto le righe che costano poco
+   sorgente: Codice/Sources/Motore/MotoreBattaglia.swift
+   tolto:  guard c <= regime else { break }
+   messo:  guard c <= regime.dividedReportingOverflow(by: 8).partialValue else { break }
+   prove:  swift test --filter StalloDellaBattagliaTest/test_01_10_7_1 (uscita 1)
+Test Case '-[MotoreTest.StalloDellaBattagliaTest test_01_10_7_1_chi_puo_ancora_fare_un_passo_verso_il_nemico_non_e_in_stallo]' passed (0.008 seconds).
+Test Case '-[MotoreTest.StalloDellaBattagliaTest test_01_10_7_1_due_schieramenti_che_non_possono_incontrarsi_si_concludono_con_la_ritirata_dell_avversario]' passed (0.008 seconds).
+Codice/Tests/MotoreTest/StalloDellaBattagliaTest.swift:108: error: -[MotoreTest.StalloDellaBattagliaTest test_01_10_7_1_due_schieramenti_che_possono_incontrarsi_non_sono_in_stallo] : XCTAssertFalse failed - passo 14
+Codice/Tests/MotoreTest/StalloDellaBattagliaTest.swift:108: error: -[MotoreTest.StalloDellaBattagliaTest test_01_10_7_1_due_schieramenti_che_possono_incontrarsi_non_sono_in_stallo] : XCTAssertFalse failed - passo 15
+Codice/Tests/MotoreTest/StalloDellaBattagliaTest.swift:108: error: -[MotoreTest.StalloDellaBattagliaTest test_01_10_7_1_due_schieramenti_che_possono_incontrarsi_non_sono_in_stallo] : XCTAssertFalse failed - passo 16
+Codice/Tests/MotoreTest/StalloDellaBattagliaTest.swift:108: error: -[MotoreTest.StalloDellaBattagliaTest test_01_10_7_1_due_schieramenti_che_possono_incontrarsi_non_sono_in_stallo] : XCTAssertFalse failed - passo 17
+Codice/Tests/MotoreTest/StalloDellaBattagliaTest.swift:108: error: -[MotoreTest.StalloDellaBattagliaTest test_01_10_7_1_due_schieramenti_che_possono_incontrarsi_non_sono_in_stallo] : XCTAssertFalse failed - passo 18
+Codice/Tests/MotoreTest/StalloDellaBattagliaTest.swift:108: error: -[MotoreTest.StalloDellaBattagliaTest test_01_10_7_1_due_schieramenti_che_possono_incontrarsi_non_sono_in_stallo] : XCTAssertFalse failed - passo 19
+Codice/Tests/MotoreTest/StalloDellaBattagliaTest.swift:108: error: -[MotoreTest.StalloDellaBattagliaTest test_01_10_7_1_due_schieramenti_che_possono_incontrarsi_non_sono_in_stallo] : XCTAssertFalse failed - passo 20
+Codice/Tests/MotoreTest/StalloDellaBattagliaTest.swift:108: error: -[MotoreTest.StalloDellaBattagliaTest test_01_10_7_1_due_schieramenti_che_possono_incontrarsi_non_sono_in_stallo] : XCTAssertFalse failed - passo 21
+Codice/Tests/MotoreTest/StalloDellaBattagliaTest.swift:108: error: -[MotoreTest.StalloDellaBattagliaTest test_01_10_7_1_due_schieramenti_che_possono_incontrarsi_non_sono_in_stallo] : XCTAssertFalse failed - passo 22
+Codice/Tests/MotoreTest/StalloDellaBattagliaTest.swift:108: error: -[MotoreTest.StalloDellaBattagliaTest test_01_10_7_1_due_schieramenti_che_possono_incontrarsi_non_sono_in_stallo] : XCTAssertFalse failed - passo 23
+Codice/Tests/MotoreTest/StalloDellaBattagliaTest.swift:108: error: -[MotoreTest.StalloDellaBattagliaTest test_01_10_7_1_due_schieramenti_che_possono_incontrarsi_non_sono_in_stallo] : XCTAssertFalse failed - passo 24
+Codice/Tests/MotoreTest/StalloDellaBattagliaTest.swift:108: error: -[MotoreTest.StalloDellaBattagliaTest test_01_10_7_1_due_schieramenti_che_possono_incontrarsi_non_sono_in_stallo] : XCTAssertFalse failed - passo 25
+Codice/Tests/MotoreTest/StalloDellaBattagliaTest.swift:108: error: -[MotoreTest.StalloDellaBattagliaTest test_01_10_7_1_due_schieramenti_che_possono_incontrarsi_non_sono_in_stallo] : XCTAssertFalse failed - passo 26
+Codice/Tests/MotoreTest/StalloDellaBattagliaTest.swift:108: error: -[MotoreTest.StalloDellaBattagliaTest test_01_10_7_1_due_schieramenti_che_possono_incontrarsi_non_sono_in_stallo] : XCTAssertFalse failed - passo 27
+Codice/Tests/MotoreTest/StalloDellaBattagliaTest.swift:108: error: -[MotoreTest.StalloDellaBattagliaTest test_01_10_7_1_due_schieramenti_che_possono_incontrarsi_non_sono_in_stallo] : XCTAssertFalse failed - passo 28
+Codice/Tests/MotoreTest/StalloDellaBattagliaTest.swift:108: error: -[MotoreTest.StalloDellaBattagliaTest test_01_10_7_1_due_schieramenti_che_possono_incontrarsi_non_sono_in_stallo] : XCTAssertFalse failed - passo 29
+Codice/Tests/MotoreTest/StalloDellaBattagliaTest.swift:108: error: -[MotoreTest.StalloDellaBattagliaTest test_01_10_7_1_due_schieramenti_che_possono_incontrarsi_non_sono_in_stallo] : XCTAssertFalse failed - passo 30
+Codice/Tests/MotoreTest/StalloDellaBattagliaTest.swift:108: error: -[MotoreTest.StalloDellaBattagliaTest test_01_10_7_1_due_schieramenti_che_possono_incontrarsi_non_sono_in_stallo] : XCTAssertFalse failed - passo 31
+Codice/Tests/MotoreTest/StalloDellaBattagliaTest.swift:108: error: -[MotoreTest.StalloDellaBattagliaTest test_01_10_7_1_due_schieramenti_che_possono_incontrarsi_non_sono_in_stallo] : XCTAssertFalse failed - passo 34
+Codice/Tests/MotoreTest/StalloDellaBattagliaTest.swift:108: error: -[MotoreTest.StalloDellaBattagliaTest test_01_10_7_1_due_schieramenti_che_possono_incontrarsi_non_sono_in_stallo] : XCTAssertFalse failed - passo 35
+Codice/Tests/MotoreTest/StalloDellaBattagliaTest.swift:108: error: -[MotoreTest.StalloDellaBattagliaTest test_01_10_7_1_due_schieramenti_che_possono_incontrarsi_non_sono_in_stallo] : XCTAssertFalse failed - passo 38
+Codice/Tests/MotoreTest/StalloDellaBattagliaTest.swift:108: error: -[MotoreTest.StalloDellaBattagliaTest test_01_10_7_1_due_schieramenti_che_possono_incontrarsi_non_sono_in_stallo] : XCTAssertFalse failed - passo 39
+Codice/Tests/MotoreTest/StalloDellaBattagliaTest.swift:113: error: -[MotoreTest.StalloDellaBattagliaTest test_01_10_7_1_due_schieramenti_che_possono_incontrarsi_non_sono_in_stallo] : XCTAssertFalse failed - si sono incontrati
+Test Case '-[MotoreTest.StalloDellaBattagliaTest test_01_10_7_1_due_schieramenti_che_possono_incontrarsi_non_sono_in_stallo]' failed (0.093 seconds).
+Test Case '-[MotoreTest.StalloDellaBattagliaTest test_01_10_7_1_quando_nessuno_puo_piu_avvicinarsi_l_avversario_si_ritira]' passed (0.008 seconds).
+	 Executed 4 tests, with 23 failures (0 unexpected) in 0.117 (0.118) seconds
+

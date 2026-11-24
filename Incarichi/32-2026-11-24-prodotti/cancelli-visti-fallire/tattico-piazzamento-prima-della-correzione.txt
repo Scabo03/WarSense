@@ -16,3 +16,14 @@ Test Case '-[MotoreTest.TatticoPiazzamentoTest test_un_elemento_non_piazzabile_n
 	 Executed 4 tests, with 5 failures (0 unexpected) in 0.110 (0.110) seconds
 	 Executed 4 tests, with 5 failures (0 unexpected) in 0.110 (0.110) seconds
 	 Executed 4 tests, with 5 failures (0 unexpected) in 0.110 (0.111) seconds
+== il tattico prova gli elementi del mazzo dall'ultimo
+   sorgente: Codice/Sources/Motore/TatticoBattaglia.swift
+   tolto:  for (indice, elemento) in elementi.enumerated() where elemento.esemplari > 0 {
+   messo:  for (indice, elemento) in elementi.enumerated().reversed() where elemento.esemplari > 0 {
+   prove:  swift test --filter TatticoPiazzamentoTest/test_quando_tutto (uscita 1)
+Codice/Tests/MotoreTest/TatticoPiazzamentoTest.swift:77: error: -[MotoreTest.TatticoPiazzamentoTest test_quando_tutto_ci_sta_l_ordine_del_mazzo_resta] : XCTAssertEqual failed: ("[Motore.ComandoBattaglia.seleziona(indiceDeck: 1)]") is not equal to ("[Motore.ComandoBattaglia.seleziona(indiceDeck: 0)]")
+Codice/Tests/MotoreTest/TatticoPiazzamentoTest.swift:79: error: -[MotoreTest.TatticoPiazzamentoTest test_quando_tutto_ci_sta_l_ordine_del_mazzo_resta] : XCTAssertEqual failed: ("["fanteria_pesante", "fanteria_leggera"]") is not equal to ("["fanteria_leggera", "fanteria_pesante"]")
+Test Case '-[MotoreTest.TatticoPiazzamentoTest test_quando_tutto_ci_sta_l_ordine_del_mazzo_resta]' failed (0.094 seconds).
+	 Executed 1 test, with 2 failures (0 unexpected) in 0.094 (0.094) seconds
+	 Executed 1 test, with 2 failures (0 unexpected) in 0.094 (0.095) seconds
+

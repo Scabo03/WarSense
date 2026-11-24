@@ -337,6 +337,7 @@ def battaglia():
                 attiva(4, prefisso=re.match(r"^riga \d+, cella \d+", scelta).group(0))
         mio = next((n for n in albero() if re.match(r"^riga \d+, cella \d+, tu(o|a|oi|e) ", n)), None)
         if mio:
+            aspetta = vicino_al_nemico(mio)  # si guarda prima di aprire il pannello, che copre la griglia
             attiva(3, prefisso=re.match(r"^riga \d+, cella \d+", mio).group(0))
             voci = albero()
             trovate = [v for v in voci if v.startswith("Ingaggia") or v.startswith("Tira su")]
@@ -344,7 +345,7 @@ def battaglia():
             if trovate:
                 e = puls(trovate[0], 8)
                 frasi += sentito(e)
-            elif "Scegli la destinazione sulla griglia" in voci and not vicino_al_nemico(mio):
+            elif "Scegli la destinazione sulla griglia" in voci and not aspetta:
                 puls("Scegli la destinazione sulla griglia", 3)
                 mete = [n for n in albero() if re.search(r", libera, costa \d+, restano \d+$", n)]
                 if mete:

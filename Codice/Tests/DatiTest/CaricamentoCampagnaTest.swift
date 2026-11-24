@@ -106,7 +106,7 @@ final class CaricamentoCampagnaTest: XCTestCase {
         attendiRifiuto(cartella, chiave: "errore.dati.quartier_generale_non_in_ultima_riga")
     }
 
-    func test_03_4_8_4_le_giornate_della_presa_si_leggono_dai_dati_e_meno_di_una_e_respinta() throws {
+    func test_03_4_12_1_le_giornate_della_presa_si_leggono_dai_dati_e_meno_di_una_e_respinta() throws {
         XCTAssertEqual(try CaricatoreCampagna.carica(da: Contenuti.valoriDiFabbrica).presa, ValoriPresa(giornateDiOccupazione: 3),
                        "il valore di fabbrica, provvisorio (decisione del titolare del 24 novembre 2026)")
         attendiRifiuto(try valoriGuasti(scrivendo: "{ \"giornate_di_occupazione\": 0 }", in: "presa-campagna.json"),

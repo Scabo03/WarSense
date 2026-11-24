@@ -1,6 +1,6 @@
 # Gli annunci, prima e dopo
 
-Prodotta da `tabella.py` dalle misure grezze (`misure/*.jsonl`). In ogni cella: per quanto la voce ha detto l'annuncio, e se l'ha detto intero. «Prima» è il codice della build 32 (06dee59), «dopo» quello di questo incarico, entrambi nella copia strumentata che aggiunge il solo registro. La velocità di VoiceOver è quella predefinita del simulatore (50 per cento).
+Prodotta da `tabella.py` dalle misure grezze (`misure-grezze/*.jsonl`). In ogni cella: per quanto la voce ha detto l'annuncio, e se l'ha detto intero. «Prima» è il codice della build 32 (06dee59), «dopo» quello di questo incarico, entrambi nella copia strumentata che aggiunge il solo registro. I blocchi presa, subita, azzeramento, richiamo e conclusione sono rimisurati sul codice della build (`e19b47b`, file `dopo-finale-*.jsonl`, che prevalgono); gli altri sul commit precedente dell'applicazione (`e9f702e`), che ne differisce soltanto per l'attesa al ritorno in patria (`git diff e9f702e e19b47b -- Applicazione/Sorgenti Codice/Sources`). La velocità di VoiceOver è quella predefinita del simulatore (50 per cento).
 
 ## Annunci che accompagnano uno spostamento del fuoco o un cambio di schermata
 
@@ -34,13 +34,12 @@ Prodotta da `tabella.py` dalle misure grezze (`misure/*.jsonl`). In ogni cella: 
 | battaglia · evacuazione che conclude la battaglia | «La battaglia è conclusa: la ritirata è compiuta» (47) | 3.14 s intero | 3.13 s intero | 3.13 s intero | 3.13 s intero |
 | battaglia · ritorno sulla mappa dopo la battaglia | «Battaglia persa in riga 1, casella 2» (36) | 0.77 s interrotto | 2.62 s intero | 0.77 s interrotto | 2.63 s intero |
 | conclusione · giornata chiusa (3) | «Giornata chiusa. 5 gruppi non avevano agito e restano fermi: ne è stata conservata una tra…» (118) | superato dal gioco | superato dal gioco | superato dal gioco | superato dal gioco |
-| conclusione · giornata chiusa (3) | «È arrivato l'inverno: la campagna è conclusa, senza vincitore» (61) | 0.00 s interrotto | 4.25 s intero | 0.00 s interrotto | 4.25 s intero |
-| richiamo · richiamo compiuto | «Campagna conclusa: hai richiamato l'esercito in patria. Conta come perduta» (74) | — | 4.89 s intero | — | 4.91 s intero |
-| velocita · comincia l'inverno, voce al 90 per cento | «Comincia l'inverno dell'anno 1. Entrate: monete di bronzo 200, uomini 24, metalli 30, mate…» (175) | — | 4.05 s intero | — | 4.04 s intero |
-| velocita · addestramento ordinato, voce al 90 per cento | «Addestramento mirato ordinato per 8 atomi di fanteria pesante di Lupo: pronto in primavera…» (91) | — | 1.59 s intero | — | 1.57 s intero |
-| velocita · apertura della campagna, voce al 90 per cento | «Campagna aperta sul fronte del guado» (36) | — | 0.68 s intero | — | 0.68 s intero |
-| velocita · apertura della campagna, voce al 90 per cento | «Mappa Guado, 4 righe per 4 caselle. Il tuo quartier generale è in riga 4, casella 2» (83) | — | 1.82 s intero | — | 1.84 s intero |
-| velocita · apertura della campagna, voce al 90 per cento | «Anno 1, primavera, mancano 89 giornate all'inverno. Giorno 1. Nessun gruppo ha ancora agit…» (99) | — | 2.29 s intero | — | 2.30 s intero |
+| conclusione · giornata chiusa (3) | «È arrivato l'inverno: la campagna è conclusa, senza vincitore» (61) | 0.00 s interrotto | 4.25 s intero | 0.00 s interrotto | 4.24 s intero |
+| presa · giornata chiusa (4) | «Giornata chiusa. 5 gruppi non avevano agito e restano fermi: ne è stata conservata una tra…» (118) | — | superato dal gioco | — | superato dal gioco |
+| presa · giornata chiusa (4) | «Campagna conclusa: il quartier generale avversario è caduto. Hai vinto» (70) | — | 4.57 s intero | — | 4.57 s intero |
+| subita · giornata chiusa (4) | «Giornata chiusa. 5 gruppi non avevano agito e restano fermi: ne è stata conservata una tra…» (118) | — | superato dal gioco | — | superato dal gioco |
+| subita · giornata chiusa (4) | «Campagna conclusa: il tuo quartier generale è caduto. Hai perso» (63) | — | 4.19 s intero | — | 4.19 s intero |
+| richiamo · richiamo compiuto | «Campagna conclusa: hai richiamato l'esercito in patria. Conta come perduta» (74) | — | 4.90 s intero | — | 4.91 s intero |
 
 ## Annunci che non spostano il fuoco
 
@@ -75,59 +74,82 @@ Prodotta da `tabella.py` dalle misure grezze (`misure/*.jsonl`). In ogni cella: 
 | battaglia · giornata chiusa, la battaglia che nasce | «Giornata conclusa: comincia il giorno 2» (39) | 2.75 s intero | 2.76 s intero | 2.80 s intero | 2.76 s intero |
 | conclusione · giornata chiusa (cambio di stagione) | «Giornata chiusa. 5 gruppi non avevano agito e restano fermi: ne è stata conservata una tra…» (118) | 6.98 s intero | 7.00 s intero | 7.00 s intero | 7.00 s intero |
 | conclusione · giornata chiusa (cambio di stagione) | «Giornata conclusa: comincia il giorno 2» (39) | 2.77 s intero | 2.76 s intero | 2.78 s intero | 2.76 s intero |
-| conclusione · giornata chiusa (cambio di stagione) | «Nuova stagione: estate» (22) | 1.96 s intero | 1.97 s intero | 2.01 s intero | 1.96 s intero |
-| conclusione · giornata chiusa (2) | «Giornata chiusa. 5 gruppi non avevano agito e restano fermi: ne è stata conservata una tra…» (118) | 7.00 s intero | 7.01 s intero | 7.02 s intero | 7.00 s intero |
-| conclusione · giornata chiusa (2) | «Giornata conclusa: comincia il giorno 3» (39) | 2.74 s intero | 2.76 s intero | 2.74 s intero | 2.75 s intero |
-| conclusione · giornata chiusa (2) | «Nuova stagione: autunno» (23) | 1.97 s intero | 1.92 s intero | 1.94 s intero | 1.93 s intero |
+| conclusione · giornata chiusa (cambio di stagione) | «Nuova stagione: estate» (22) | 1.96 s intero | 1.96 s intero | 2.01 s intero | 1.96 s intero |
+| conclusione · giornata chiusa (2) | «Giornata chiusa. 5 gruppi non avevano agito e restano fermi: ne è stata conservata una tra…» (118) | 7.00 s intero | 7.00 s intero | 7.02 s intero | 7.01 s intero |
+| conclusione · giornata chiusa (2) | «Giornata conclusa: comincia il giorno 3» (39) | 2.74 s intero | 2.76 s intero | 2.74 s intero | 2.76 s intero |
+| conclusione · giornata chiusa (2) | «Nuova stagione: autunno» (23) | 1.97 s intero | 1.93 s intero | 1.94 s intero | 1.93 s intero |
 | mappa · divisione incompleta rifiutata | «Scegli almeno un reparto da staccare e almeno uno da tenere» (59) | — | 3.22 s intero | — | 3.22 s intero |
 | presa · giornata chiusa (1) | «Giornata chiusa. 5 gruppi non avevano agito e restano fermi: ne è stata conservata una tra…» (118) | — | 7.00 s intero | — | 7.00 s intero |
-| presa · giornata chiusa (1) | «Formazione avversaria avvistata in riga 4, casella 3» (52) | — | 3.77 s intero | — | 3.76 s intero |
-| presa · giornata chiusa (1) | «Occupi il quartier generale avversario, in riga 1, casella 2: se lo tieni sarà preso fra 3…» (99) | — | 6.53 s intero | — | 6.52 s intero |
-| presa · giornata chiusa (1) | «Giornata conclusa: comincia il giorno 2» (39) | — | 2.74 s intero | — | 2.75 s intero |
-| presa · giornata chiusa (2) | «Giornata chiusa. 5 gruppi non avevano agito e restano fermi: ne è stata conservata una tra…» (118) | — | 6.99 s intero | — | 7.00 s intero |
-| presa · giornata chiusa (2) | «Formazione avversaria avvistata in riga 3, casella 3» (52) | — | 3.47 s intero | — | 3.46 s intero |
-| presa · giornata chiusa (2) | «Tieni il quartier generale avversario: sarà preso fra 2 giornate» (64) | — | 3.94 s intero | — | 3.94 s intero |
-| presa · giornata chiusa (2) | «Giornata conclusa: comincia il giorno 3» (39) | — | 2.76 s intero | — | 2.76 s intero |
-| presa · giornata chiusa (3) | «Giornata chiusa. 5 gruppi non avevano agito e restano fermi: ne è stata conservata una tra…» (118) | — | 7.01 s intero | — | 7.00 s intero |
-| presa · giornata chiusa (3) | «Formazione avversaria avvistata in riga 3, casella 2» (52) | — | 3.47 s intero | — | 3.46 s intero |
-| presa · giornata chiusa (3) | «Tieni il quartier generale avversario: sarà preso fra 1 giornata» (64) | — | 3.93 s intero | — | 3.94 s intero |
-| presa · giornata chiusa (3) | «Rifornimento di Falco interrotto in riga 3, casella 1» (53) | — | 3.54 s intero | — | 3.54 s intero |
-| presa · giornata chiusa (3) | «Giornata conclusa: comincia il giorno 4» (39) | — | 3.08 s intero | — | 3.08 s intero |
-| presa · giornata chiusa (4) | «Giornata chiusa. 5 gruppi non avevano agito e restano fermi: ne è stata conservata una tra…» (118) | — | superato dal gioco | — | superato dal gioco |
-| presa · giornata chiusa (4) | «Campagna conclusa: il quartier generale avversario è caduto. Hai vinto» (70) | — | 4.58 s intero | — | 4.58 s intero |
+| presa · giornata chiusa (1) | «Formazione avversaria avvistata in riga 4, casella 3» (52) | — | 3.76 s intero | — | 3.76 s intero |
+| presa · giornata chiusa (1) | «Occupi il quartier generale avversario, in riga 1, casella 2: se lo tieni sarà preso fra 3…» (99) | — | 6.53 s intero | — | 6.53 s intero |
+| presa · giornata chiusa (1) | «Giornata conclusa: comincia il giorno 2» (39) | — | 2.75 s intero | — | 2.75 s intero |
+| presa · giornata chiusa (2) | «Giornata chiusa. 5 gruppi non avevano agito e restano fermi: ne è stata conservata una tra…» (118) | — | 6.98 s intero | — | 7.00 s intero |
+| presa · giornata chiusa (2) | «Formazione avversaria avvistata in riga 3, casella 3» (52) | — | 3.46 s intero | — | 3.46 s intero |
+| presa · giornata chiusa (2) | «Tieni il quartier generale avversario: sarà preso fra 2 giornate» (64) | — | 3.95 s intero | — | 3.95 s intero |
+| presa · giornata chiusa (2) | «Giornata conclusa: comincia il giorno 3» (39) | — | 2.75 s intero | — | 2.75 s intero |
+| presa · giornata chiusa (3) | «Giornata chiusa. 5 gruppi non avevano agito e restano fermi: ne è stata conservata una tra…» (118) | — | 7.04 s intero | — | 7.00 s intero |
+| presa · giornata chiusa (3) | «Formazione avversaria avvistata in riga 3, casella 2» (52) | — | 3.45 s intero | — | 3.47 s intero |
+| presa · giornata chiusa (3) | «Tieni il quartier generale avversario: sarà preso fra 1 giornata» (64) | — | 3.95 s intero | — | 3.93 s intero |
+| presa · giornata chiusa (3) | «Rifornimento di Falco interrotto in riga 3, casella 1» (53) | — | 3.53 s intero | — | 3.55 s intero |
+| presa · giornata chiusa (3) | «Giornata conclusa: comincia il giorno 4» (39) | — | 3.07 s intero | — | 3.08 s intero |
 | subita · giornata chiusa (1) | «Giornata chiusa. 5 gruppi non avevano agito e restano fermi: ne è stata conservata una tra…» (118) | — | 7.00 s intero | — | 7.00 s intero |
-| subita · giornata chiusa (1) | «L'avversario occupa il tuo quartier generale, in riga 4, casella 2: se non lo scacci sarà …» (110) | — | 7.26 s intero | — | 7.26 s intero |
+| subita · giornata chiusa (1) | «L'avversario occupa il tuo quartier generale, in riga 4, casella 2: se non lo scacci sarà …» (110) | — | 7.27 s intero | — | 7.27 s intero |
 | subita · giornata chiusa (1) | «Giornata conclusa: comincia il giorno 2» (39) | — | 2.76 s intero | — | 2.76 s intero |
-| subita · giornata chiusa (2) | «Giornata chiusa. 5 gruppi non avevano agito e restano fermi: ne è stata conservata una tra…» (118) | — | 7.00 s intero | — | 6.99 s intero |
+| subita · giornata chiusa (2) | «Giornata chiusa. 5 gruppi non avevano agito e restano fermi: ne è stata conservata una tra…» (118) | — | 7.01 s intero | — | 7.01 s intero |
 | subita · giornata chiusa (2) | «Il tuo quartier generale è ancora occupato: sarà preso fra 2 giornate» (69) | — | 4.23 s intero | — | 4.23 s intero |
-| subita · giornata chiusa (2) | «Giornata conclusa: comincia il giorno 3» (39) | — | 2.76 s intero | — | 2.76 s intero |
-| subita · giornata chiusa (3) | «Giornata chiusa. 5 gruppi non avevano agito e restano fermi: ne è stata conservata una tra…» (118) | — | 7.00 s intero | — | 7.01 s intero |
+| subita · giornata chiusa (2) | «Giornata conclusa: comincia il giorno 3» (39) | — | 2.75 s intero | — | 2.76 s intero |
+| subita · giornata chiusa (3) | «Giornata chiusa. 5 gruppi non avevano agito e restano fermi: ne è stata conservata una tra…» (118) | — | 7.01 s intero | — | 7.00 s intero |
 | subita · giornata chiusa (3) | «Il tuo quartier generale è ancora occupato: sarà preso fra 1 giornata» (69) | — | 4.22 s intero | — | 4.22 s intero |
-| subita · giornata chiusa (3) | «Giornata conclusa: comincia il giorno 4» (39) | — | 3.07 s intero | — | 3.07 s intero |
-| subita · giornata chiusa (4) | «Giornata chiusa. 5 gruppi non avevano agito e restano fermi: ne è stata conservata una tra…» (118) | — | superato dal gioco | — | superato dal gioco |
-| subita · giornata chiusa (4) | «Campagna conclusa: il tuo quartier generale è caduto. Hai perso» (63) | — | 4.18 s intero | — | 4.19 s intero |
+| subita · giornata chiusa (3) | «Giornata conclusa: comincia il giorno 4» (39) | — | 3.08 s intero | — | 3.08 s intero |
 | azzeramento · giornata chiusa, l'occupazione comincia | «Giornata chiusa. 5 gruppi non avevano agito e restano fermi: ne è stata conservata una tra…» (118) | — | 7.00 s intero | — | 7.00 s intero |
-| azzeramento · giornata chiusa, l'occupazione comincia | «Formazione avversaria avvistata in riga 4, casella 3» (52) | — | 3.77 s intero | — | 3.77 s intero |
+| azzeramento · giornata chiusa, l'occupazione comincia | «Formazione avversaria avvistata in riga 4, casella 3» (52) | — | 3.77 s intero | — | 3.76 s intero |
 | azzeramento · giornata chiusa, l'occupazione comincia | «Occupi il quartier generale avversario, in riga 1, casella 2: se lo tieni sarà preso fra 3…» (99) | — | 6.53 s intero | — | 6.52 s intero |
-| azzeramento · giornata chiusa, l'occupazione comincia | «Giornata conclusa: comincia il giorno 2» (39) | — | 2.75 s intero | — | 2.74 s intero |
-| azzeramento · tocco magico con un'occupazione in corso | «Anno 1, primavera, mancano 88 giornate all'inverno. Giorno 2. Nessun gruppo ha ancora agit…» (166) | — | 11.96 s intero | — | 11.97 s intero |
-| azzeramento · marcia che lascia il quartier generale | «Corvo marcia verso riga 1, casella 3, 1 giorno al termine» (57) | — | 4.17 s intero | — | 4.16 s intero |
+| azzeramento · giornata chiusa, l'occupazione comincia | «Giornata conclusa: comincia il giorno 2» (39) | — | 2.75 s intero | — | 2.75 s intero |
+| azzeramento · tocco magico con un'occupazione in corso | «Anno 1, primavera, mancano 88 giornate all'inverno. Giorno 2. Nessun gruppo ha ancora agit…» (166) | — | 11.97 s intero | — | 11.97 s intero |
+| azzeramento · marcia che lascia il quartier generale | «Corvo marcia verso riga 1, casella 3, 1 giorno al termine» (57) | — | 4.17 s intero | — | 4.17 s intero |
 | azzeramento · giornata chiusa dopo aver lasciato (1) | «Giornata chiusa. 4 gruppi non avevano agito e restano fermi: ne è stata conservata una tra…» (118) | — | 7.03 s intero | — | 7.02 s intero |
-| azzeramento · giornata chiusa dopo aver lasciato (1) | «Corvo è arrivato in riga 1, casella 3» (37) | — | 2.54 s intero | — | 2.54 s intero |
-| azzeramento · giornata chiusa dopo aver lasciato (1) | «Formazione avversaria avvistata in riga 3, casella 3» (52) | — | 3.45 s intero | — | 3.45 s intero |
-| azzeramento · giornata chiusa dopo aver lasciato (1) | «Non occupi più il quartier generale avversario: il conteggio si azzera» (70) | — | 4.09 s intero | — | 4.09 s intero |
-| azzeramento · giornata chiusa dopo aver lasciato (1) | «Giornata conclusa: comincia il giorno 3» (39) | — | 2.75 s intero | — | 2.75 s intero |
+| azzeramento · giornata chiusa dopo aver lasciato (1) | «Corvo è arrivato in riga 1, casella 3» (37) | — | 2.54 s intero | — | 2.53 s intero |
+| azzeramento · giornata chiusa dopo aver lasciato (1) | «Formazione avversaria avvistata in riga 3, casella 3» (52) | — | 3.45 s intero | — | 3.47 s intero |
+| azzeramento · giornata chiusa dopo aver lasciato (1) | «Non occupi più il quartier generale avversario: il conteggio si azzera» (70) | — | 4.08 s intero | — | 4.09 s intero |
+| azzeramento · giornata chiusa dopo aver lasciato (1) | «Giornata conclusa: comincia il giorno 3» (39) | — | 2.75 s intero | — | 2.76 s intero |
 | richiamo · richiamo impedito | «L'esercito non si può richiamare: Corvo ha il rifornimento tagliato in riga 2, casella 2» (88) | — | 5.36 s intero | — | 5.36 s intero |
-| velocita · leva ordinata, voce al 90 per cento | «Leva di fanteria leggera ordinata: pronta in primavera.» (55) | — | 0.99 s intero | — | 0.99 s intero |
-| velocita · giornata chiusa, voce al 90 per cento | «Giornata chiusa. 5 gruppi non avevano agito e restano fermi: ne è stata conservata una tra…» (118) | — | 2.02 s intero | — | 2.00 s intero |
-| velocita · giornata chiusa, voce al 90 per cento | «Giornata conclusa: comincia il giorno 2» (39) | — | 0.81 s intero | — | 0.81 s intero |
 
 ## Riassunto
 
 | | iPhone prima | iPhone dopo | iPad prima | iPad dopo |
 |---|---|---|---|---|
-| Con spostamento: interi su detti | 9 su 28 | 34 su 34 | 8 su 28 | 34 su 34 |
-| Senza spostamento: interi su detti | 33 su 33 | 73 su 73 | 33 su 33 | 73 su 73 |
+| Con spostamento: interi su detti | 9 su 28 | 31 su 31 | 8 su 28 | 31 su 31 |
+| Senza spostamento: interi su detti | 33 su 33 | 68 su 68 | 33 su 33 | 68 su 68 |
+
+## Voce al 90 per cento
+
+Misurata soltanto dopo. Per ogni annuncio: quanto dura al 50 per cento (mediana delle volte intere, dello stesso testo o, se cambia solo un numero, del testo a meno dei numeri), quanto è durato al 90, e il rapporto. Detto per intero se è durato almeno tre quarti di quanto dovrebbe, con il rapporto ricavato dalle righe che non spostano il fuoco (mediana: iPhone 3.45, iPad 3.45). Un annuncio tagliato avrebbe un rapporto più alto.
+
+| Quando | Annuncio (caratteri) | sposta il fuoco | iPhone: 50 → 90 (rapporto) | iPad: 50 → 90 (rapporto) |
+|---|---|---|---|---|
+| comincia l'inverno, voce al 90 per cento | «Comincia l'inverno dell'anno 1. Entrate: monete di bronzo 20…» (175) | sì | 14.18 → 4.05 s (3.50) intero | 14.18 → 4.04 s (3.51) intero |
+| addestramento ordinato, voce al 90 per cento | «Addestramento mirato ordinato per 8 atomi di fanteria pesant…» (91) | sì | 5.53 → 1.59 s (3.47) intero | 5.53 → 1.57 s (3.52) intero |
+| leva ordinata, voce al 90 per cento | «Leva di fanteria leggera ordinata: pronta in primavera.» (55) | no | 3.42 → 0.99 s (3.45) intero | 3.42 → 0.99 s (3.45) intero |
+| apertura della campagna, voce al 90 per cento | «Campagna aperta sul fronte del guado» (36) | sì | 2.32 → 0.68 s (3.41) intero | 2.32 → 0.68 s (3.41) intero |
+| apertura della campagna, voce al 90 per cento | «Mappa Guado, 4 righe per 4 caselle. Il tuo quartier generale…» (83) | sì | 6.27 → 1.82 s (3.45) intero | 6.27 → 1.84 s (3.41) intero |
+| apertura della campagna, voce al 90 per cento | «Anno 1, primavera, mancano 89 giornate all'inverno. Giorno 1…» (99) | sì | 7.92 → 2.29 s (3.46) intero | 7.92 → 2.30 s (3.44) intero |
+| giornata chiusa, voce al 90 per cento | «Giornata chiusa. 5 gruppi non avevano agito e restano fermi:…» (118) | no | 7.00 → 2.02 s (3.47) intero | 7.00 → 2.00 s (3.50) intero |
+| giornata chiusa, voce al 90 per cento | «Giornata conclusa: comincia il giorno 2» (39) | no | 2.76 → 0.81 s (3.41) intero | 2.76 → 0.81 s (3.41) intero |
+
+## Gli annunci della build 32 tagliati che il sistema dava per riusciti
+
+Perché la notifica di conclusione non decide da sola: la voce li ha detti per il tempo della seconda colonna, e la notifica dice «riuscito».
+
+| Apparecchio | Detto | Quando | Caratteri |
+|---|---|---|---|
+| iphone | 0.01 s | regno · comincia l'inverno | 175 |
+| iphone | 0.00 s | regno · comincia la primavera | 206 |
+| iphone | 0.02 s | scontro · apertura dello scontro | 79 |
+| iphone | 0.00 s | conclusione · giornata chiusa (3) | 61 |
+| ipad | 0.00 s | regno · comincia l'inverno | 175 |
+| ipad | 0.06 s | regno · comincia la primavera | 206 |
+| ipad | 0.00 s | mappa · entra nel fronte | 83 |
+| ipad | 0.00 s | conclusione · giornata chiusa (3) | 61 |
 
 ## Dove arriva il fuoco
 

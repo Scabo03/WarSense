@@ -1,0 +1,106 @@
+== svuotata, la coda non riparte: l'annuncio in corso resta in corso
+   sorgente: Codice/Sources/Segnali/CodaAnnunci.swift
+   tolto:  inAttesa.removeAll() inCorso = nil interrotti.removeAll()
+   messo:  inAttesa.removeAll() interrotti.removeAll()
+   prove:  swift test --filter CodaAnnunciTest (uscita 1)
+Test Case '-[SegnaliTest.CodaAnnunciTest test_05_10_7_l_esito_chiesto_dal_giocatore_supera_cio_che_attende]' passed (0.000 seconds).
+Test Case '-[SegnaliTest.CodaAnnunciTest test_05_11_6_la_conclusione_della_campagna_supera_e_ogni_altro_evento_si_accoda]' passed (0.000 seconds).
+Test Case '-[SegnaliTest.CodaAnnunciTest test_05_11_6_un_annuncio_alla_volta_nell_ordine_di_arrivo]' passed (0.000 seconds).
+Test Case '-[SegnaliTest.CodaAnnunciTest test_chiusure_ripetute_non_lasciano_indietro_la_coda]' passed (0.000 seconds).
+Test Case '-[SegnaliTest.CodaAnnunciTest test_gli_eventi_che_cambiano_schermata]' passed (0.000 seconds).
+Test Case '-[SegnaliTest.CodaAnnunciTest test_la_conclusione_tardiva_dell_annuncio_interrotto_non_fa_avanzare_la_coda]' passed (0.000 seconds).
+Test Case '-[SegnaliTest.CodaAnnunciTest test_la_finestra_resta_aperta_per_il_tempo_in_cui_il_fuoco_puo_arrivare]' passed (0.000 seconds).
+Test Case '-[SegnaliTest.CodaAnnunciTest test_nessuna_conclusione_ferma_la_coda]' passed (0.000 seconds).
+Codice/Tests/SegnaliTest/CodaAnnunciTest.swift:110: error: -[SegnaliTest.CodaAnnunciTest test_svuotata_la_coda_riparte] : XCTAssertEqual failed: ("nil") is not equal to ("Optional("il primo che si sente")")
+Codice/Tests/SegnaliTest/CodaAnnunciTest.swift:111: error: -[SegnaliTest.CodaAnnunciTest test_svuotata_la_coda_riparte] : XCTAssertTrue failed
+Test Case '-[SegnaliTest.CodaAnnunciTest test_svuotata_la_coda_riparte]' failed (0.089 seconds).
+	 Executed 9 tests, with 2 failures (0 unexpected) in 0.090 (0.091) seconds
+	 Executed 9 tests, with 2 failures (0 unexpected) in 0.090 (0.092) seconds
+
+== la finestra del fuoco dura meno di quanto VoiceOver impiega a spostarlo (0,8 s)
+   sorgente: Codice/Sources/Segnali/CodaAnnunci.swift
+   tolto:  static let durata: TimeInterval = 2
+   messo:  static let durata: TimeInterval = 0.5
+   prove:  swift test --filter CodaAnnunciTest (uscita 1)
+Test Case '-[SegnaliTest.CodaAnnunciTest test_05_10_7_l_esito_chiesto_dal_giocatore_supera_cio_che_attende]' passed (0.000 seconds).
+Test Case '-[SegnaliTest.CodaAnnunciTest test_05_11_6_la_conclusione_della_campagna_supera_e_ogni_altro_evento_si_accoda]' passed (0.000 seconds).
+Test Case '-[SegnaliTest.CodaAnnunciTest test_05_11_6_un_annuncio_alla_volta_nell_ordine_di_arrivo]' passed (0.000 seconds).
+Test Case '-[SegnaliTest.CodaAnnunciTest test_chiusure_ripetute_non_lasciano_indietro_la_coda]' passed (0.000 seconds).
+Test Case '-[SegnaliTest.CodaAnnunciTest test_gli_eventi_che_cambiano_schermata]' passed (0.000 seconds).
+Test Case '-[SegnaliTest.CodaAnnunciTest test_la_conclusione_tardiva_dell_annuncio_interrotto_non_fa_avanzare_la_coda]' passed (0.000 seconds).
+Codice/Tests/SegnaliTest/CodaAnnunciTest.swift:123: error: -[SegnaliTest.CodaAnnunciTest test_la_finestra_resta_aperta_per_il_tempo_in_cui_il_fuoco_puo_arrivare] : XCTAssertTrue failed
+Codice/Tests/SegnaliTest/CodaAnnunciTest.swift:127: error: -[SegnaliTest.CodaAnnunciTest test_la_finestra_resta_aperta_per_il_tempo_in_cui_il_fuoco_puo_arrivare] : XCTAssertTrue failed - una richiesta nuova la riapre
+Test Case '-[SegnaliTest.CodaAnnunciTest test_la_finestra_resta_aperta_per_il_tempo_in_cui_il_fuoco_puo_arrivare]' failed (0.078 seconds).
+Test Case '-[SegnaliTest.CodaAnnunciTest test_nessuna_conclusione_ferma_la_coda]' passed (0.000 seconds).
+Test Case '-[SegnaliTest.CodaAnnunciTest test_svuotata_la_coda_riparte]' passed (0.000 seconds).
+	 Executed 9 tests, with 2 failures (0 unexpected) in 0.079 (0.080) seconds
+	 Executed 9 tests, with 2 failures (0 unexpected) in 0.079 (0.081) seconds
+
+== la finestra del fuoco vale anche per gli istanti di prima della richiesta
+   sorgente: Codice/Sources/Segnali/CodaAnnunci.swift
+   tolto:  return istante >= chiestoA && istante - chiestoA <= Self.durata
+   messo:  return istante - chiestoA <= Self.durata
+   prove:  swift test --filter CodaAnnunciTest (uscita 1)
+Test Case '-[SegnaliTest.CodaAnnunciTest test_05_10_7_l_esito_chiesto_dal_giocatore_supera_cio_che_attende]' passed (0.000 seconds).
+Test Case '-[SegnaliTest.CodaAnnunciTest test_05_11_6_la_conclusione_della_campagna_supera_e_ogni_altro_evento_si_accoda]' passed (0.001 seconds).
+Test Case '-[SegnaliTest.CodaAnnunciTest test_05_11_6_un_annuncio_alla_volta_nell_ordine_di_arrivo]' passed (0.000 seconds).
+Test Case '-[SegnaliTest.CodaAnnunciTest test_chiusure_ripetute_non_lasciano_indietro_la_coda]' passed (0.000 seconds).
+Test Case '-[SegnaliTest.CodaAnnunciTest test_gli_eventi_che_cambiano_schermata]' passed (0.000 seconds).
+Test Case '-[SegnaliTest.CodaAnnunciTest test_la_conclusione_tardiva_dell_annuncio_interrotto_non_fa_avanzare_la_coda]' passed (0.000 seconds).
+Codice/Tests/SegnaliTest/CodaAnnunciTest.swift:128: error: -[SegnaliTest.CodaAnnunciTest test_la_finestra_resta_aperta_per_il_tempo_in_cui_il_fuoco_puo_arrivare] : XCTAssertFalse failed - un istante di prima della richiesta non vi cade
+Test Case '-[SegnaliTest.CodaAnnunciTest test_la_finestra_resta_aperta_per_il_tempo_in_cui_il_fuoco_puo_arrivare]' failed (0.084 seconds).
+Test Case '-[SegnaliTest.CodaAnnunciTest test_nessuna_conclusione_ferma_la_coda]' passed (0.000 seconds).
+Test Case '-[SegnaliTest.CodaAnnunciTest test_svuotata_la_coda_riparte]' passed (0.000 seconds).
+	 Executed 9 tests, with 1 failure (0 unexpected) in 0.085 (0.086) seconds
+
+== la conclusione della campagna non e' un cambio di schermata
+   sorgente: Codice/Sources/Segnali/SignificatiCampagna.swift
+   tolto:  if case .campagnaConclusa = evento { return true } return false } /// Il significato di segnale per l'evento, se l'evento ne merita uno. ///
+   messo:  return false } /// Il significato di segnale per l'evento, se l'evento ne merita uno. ///
+   prove:  swift test --filter CodaAnnunciTest (uscita 1)
+Test Case '-[SegnaliTest.CodaAnnunciTest test_05_10_7_l_esito_chiesto_dal_giocatore_supera_cio_che_attende]' passed (0.000 seconds).
+Test Case '-[SegnaliTest.CodaAnnunciTest test_05_11_6_la_conclusione_della_campagna_supera_e_ogni_altro_evento_si_accoda]' passed (0.000 seconds).
+Test Case '-[SegnaliTest.CodaAnnunciTest test_05_11_6_un_annuncio_alla_volta_nell_ordine_di_arrivo]' passed (0.000 seconds).
+Test Case '-[SegnaliTest.CodaAnnunciTest test_chiusure_ripetute_non_lasciano_indietro_la_coda]' passed (0.000 seconds).
+Codice/Tests/SegnaliTest/CodaAnnunciTest.swift:133: error: -[SegnaliTest.CodaAnnunciTest test_gli_eventi_che_cambiano_schermata] : XCTAssertTrue failed
+Test Case '-[SegnaliTest.CodaAnnunciTest test_gli_eventi_che_cambiano_schermata]' failed (0.073 seconds).
+Test Case '-[SegnaliTest.CodaAnnunciTest test_la_conclusione_tardiva_dell_annuncio_interrotto_non_fa_avanzare_la_coda]' passed (0.000 seconds).
+Test Case '-[SegnaliTest.CodaAnnunciTest test_la_finestra_resta_aperta_per_il_tempo_in_cui_il_fuoco_puo_arrivare]' passed (0.000 seconds).
+Test Case '-[SegnaliTest.CodaAnnunciTest test_nessuna_conclusione_ferma_la_coda]' passed (0.000 seconds).
+Test Case '-[SegnaliTest.CodaAnnunciTest test_svuotata_la_coda_riparte]' passed (0.000 seconds).
+	 Executed 9 tests, with 1 failure (0 unexpected) in 0.074 (0.075) seconds
+
+== nel regno anche una stazione dell'inverno vale come cambio di schermata
+   sorgente: Codice/Sources/Segnali/SignificatiRegno.swift
+   tolto:  case .campagnaAperta, .campagnaConclusa, .invernoCominciato, .primaveraCominciata: return true case .lavoroOrdinato, .stazioneAperta, .unitaDestinata: return false
+   messo:  case .campagnaAperta, .campagnaConclusa, .invernoCominciato, .primaveraCominciata, .stazioneAperta: return true case .lavoroOrdinato, .unitaDestinata: return false
+   prove:  swift test --filter CodaAnnunciTest (uscita 1)
+Test Case '-[SegnaliTest.CodaAnnunciTest test_05_10_7_l_esito_chiesto_dal_giocatore_supera_cio_che_attende]' passed (0.000 seconds).
+Test Case '-[SegnaliTest.CodaAnnunciTest test_05_11_6_la_conclusione_della_campagna_supera_e_ogni_altro_evento_si_accoda]' passed (0.000 seconds).
+Test Case '-[SegnaliTest.CodaAnnunciTest test_05_11_6_un_annuncio_alla_volta_nell_ordine_di_arrivo]' passed (0.000 seconds).
+Test Case '-[SegnaliTest.CodaAnnunciTest test_chiusure_ripetute_non_lasciano_indietro_la_coda]' passed (0.000 seconds).
+Codice/Tests/SegnaliTest/CodaAnnunciTest.swift:142: error: -[SegnaliTest.CodaAnnunciTest test_gli_eventi_che_cambiano_schermata] : XCTAssertFalse failed - fra le schermate dell'inverno gli elementi si aggiornano sul posto e il fuoco resta (02 §8.7.3)
+Test Case '-[SegnaliTest.CodaAnnunciTest test_gli_eventi_che_cambiano_schermata]' failed (0.071 seconds).
+Test Case '-[SegnaliTest.CodaAnnunciTest test_la_conclusione_tardiva_dell_annuncio_interrotto_non_fa_avanzare_la_coda]' passed (0.000 seconds).
+Test Case '-[SegnaliTest.CodaAnnunciTest test_la_finestra_resta_aperta_per_il_tempo_in_cui_il_fuoco_puo_arrivare]' passed (0.000 seconds).
+Test Case '-[SegnaliTest.CodaAnnunciTest test_nessuna_conclusione_ferma_la_coda]' passed (0.000 seconds).
+Test Case '-[SegnaliTest.CodaAnnunciTest test_svuotata_la_coda_riparte]' passed (0.000 seconds).
+	 Executed 9 tests, with 1 failure (0 unexpected) in 0.072 (0.072) seconds
+	 Executed 9 tests, with 1 failure (0 unexpected) in 0.072 (0.073) seconds
+
+== cancello: un annuncio prima della richiesta del fuoco (battaglia che non si apre)
+   sorgente: Applicazione/Sorgenti/SchermataMappaCampagna.swift
+   tolto:  Fuoco.sposta(a: elementi[battaglia.casella], perche: .richiesto) partita.ambiente.segnali.annuncia(TestoLocalizzato( testo: testi.frase("campagna.battaglia_non_apribile").testo, lingua: testi.lingua), interrompente: true)
+   messo:  partita.ambiente.segnali.annuncia(TestoLocalizzato( testo: testi.frase("campagna.battaglia_non_apribile").testo, lingua: testi.lingua), interrompente: true) Fuoco.sposta(a: elementi[battaglia.casella], perche: .richiesto)
+   prove:  swift test --filter ConfiniTest (uscita 1)
+Test Case '-[ConfiniTest.ConfiniTest test_00_14_1_nessuna_stringa_di_testo_utente_nel_codice]' passed (0.052 seconds).
+Test Case '-[ConfiniTest.ConfiniTest test_00_5_3_le_notifiche_di_accessibilita_hanno_un_punto_solo]' passed (0.020 seconds).
+Test Case '-[ConfiniTest.ConfiniTest test_01_1_2_il_regno_comune_non_nomina_la_modalita_di_battaglia]' passed (0.014 seconds).
+Codice/Tests/ConfiniTest/ConfiniTest.swift:198: error: -[ConfiniTest.ConfiniTest test_02_5_5_1_l_annuncio_che_accompagna_uno_spostamento_segue_la_richiesta_del_fuoco] : XCTAssertTrue failed - SchermataMappaCampagna.swift:608 annuncia prima che alla riga 611 il fuoco si sposti: lo si chiede, o lo si dichiara, prima di annunciare (RDA-183)
+Test Case '-[ConfiniTest.ConfiniTest test_02_5_5_1_l_annuncio_che_accompagna_uno_spostamento_segue_la_richiesta_del_fuoco]' failed (0.050 seconds).
+Test Case '-[ConfiniTest.ConfiniTest test_05_1_3_confini_della_presentazione]' passed (0.005 seconds).
+Test Case '-[ConfiniTest.ConfiniTest test_05_1_3_regole_di_dipendenza_fra_i_bersagli]' passed (0.037 seconds).
+Test Case '-[ConfiniTest.ConfiniTest test_05_2_2_1_nessuna_virgola_mobile_nel_motore]' passed (0.025 seconds).
+	 Executed 7 tests, with 1 failure (0 unexpected) in 0.203 (0.203) seconds
+	 Executed 7 tests, with 1 failure (0 unexpected) in 0.203 (0.204) seconds
+

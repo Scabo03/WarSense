@@ -4,3 +4,15 @@
 	 Executed 2 tests, with 2 failures (0 unexpected) in 0.111 (0.112) seconds
 Codice/Tests/MotoreTest/BudgetDelPrimoTurnoTest.swift:48: error: -[MotoreTest.BudgetDelPrimoTurnoTest test_01_9_3_un_elemento_che_sta_nel_budget_del_primo_turno_si_piazza_e_la_battaglia_continua] : XCTAssertNil failed: "EsitoBattaglia(sconfitto: Dati.Parte.gio
 Codice/Tests/MotoreTest/BudgetDelPrimoTurnoTest.swift:49: error: -[MotoreTest.BudgetDelPrimoTurnoTest test_01_9_3_un_elemento_che_sta_nel_budget_del_primo_turno_si_piazza_e_la_battaglia_continua] : XCTUnwrap failed: expected non-nil value of type "Cella"
+== passato il primo turno la riserva troppo grande tiene viva la parte
+   sorgente: Codice/Sources/Motore/MotoreBattaglia.swift
+   tolto:  if (stato.turniGiocati[parte] ?? 0) == 0 { return max(regime, f.coefficientePrimoTurno.applicato(a: f.budgetVolumeBase)) } return stato.parteDiTurno == parte ? max(regime, stato.bilancio[parte]?.disponibile ?? 0) : regime
+   messo:  return max(regime, f.coefficientePrimoTurno.applicato(a: f.budgetVolumeBase))
+   prove:  swift test --filter BudgetDelPrimoTurnoTest (uscita 1)
+Test Case '-[MotoreTest.BudgetDelPrimoTurnoTest test_01_9_3_un_elemento_che_sta_nel_budget_del_primo_turno_si_piazza_e_la_battaglia_continua]' passed (0.009 seconds).
+Codice/Tests/MotoreTest/BudgetDelPrimoTurnoTest.swift:66: error: -[MotoreTest.BudgetDelPrimoTurnoTest test_rda_140_passato_il_primo_turno_la_riserva_troppo_grande_non_tiene_viva_la_parte] : XCTAssertEqual failed: ("nil") is not equal to ("Optional(Dati.Parte.giocatore)")
+Codice/Tests/MotoreTest/BudgetDelPrimoTurnoTest.swift:67: error: -[MotoreTest.BudgetDelPrimoTurnoTest test_rda_140_passato_il_primo_turno_la_riserva_troppo_grande_non_tiene_viva_la_parte] : XCTAssertEqual failed: ("nil") is not equal to ("Optional(Motore.EsitoBattaglia.Modo.annientamento)")
+Test Case '-[MotoreTest.BudgetDelPrimoTurnoTest test_rda_140_passato_il_primo_turno_la_riserva_troppo_grande_non_tiene_viva_la_parte]' failed (0.095 seconds).
+	 Executed 2 tests, with 2 failures (0 unexpected) in 0.104 (0.104) seconds
+	 Executed 2 tests, with 2 failures (0 unexpected) in 0.104 (0.105) seconds
+

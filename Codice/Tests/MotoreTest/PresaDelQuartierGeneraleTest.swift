@@ -555,6 +555,23 @@ final class PresaDelQuartierGeneraleTest: XCTestCase {
         var accanto = try crea([armato(4, 1)], [armato(4, 2)])
         chiudi(&accanto)
         XCTAssertEqual(comando(accanto), .imboscata(gruppo: gruppo(.avversario, accanto).id))
+        // È una decisione e non un punteggio: con pesi che farebbero convenire di andare alle spalle di una
+        // formazione nota — e senza la presa ci andrebbe — resta.
+        var tentato = try crea([armato(2, 2)], [armato(4, 2)])
+        chiudi(&tentato)
+        let vista = motore.vistaAvversario(stato: tentato)
+        XCTAssertEqual(vista.presa?.mancanoAllAvversario, 3)
+        func conPesi(_ presa: VistaAvversario.Presa?) -> ComandoCampagna {
+            CondottaAvversaria().comando(per: gruppo(.avversario, tentato), vista: VistaAvversario(
+                mappa: vista.mappa, marcia: vista.marcia,
+                condotta: ValoriCondotta(aggressivita: 0, minacciaRifornimento: 900, difesaQuartierGenerale: 0,
+                                         sogliaDifesaQuartierGenerale: 3, presaQuartierGenerale: 0),
+                gruppiPropri: vista.gruppiPropri, volumi: vista.volumi,
+                formazioniGiocatoreNote: vista.formazioniGiocatoreNote, presa: presa))
+        }
+        guard case .marcia(_, let altrove, _) = conPesi(nil) else { return XCTFail("\(conPesi(nil))") }
+        XCTAssertEqual(altrove, Cella(riga: 3, colonna: 2), "alle spalle della formazione nota")
+        XCTAssertEqual(conPesi(vista.presa), .presidio(gruppo: gruppo(.avversario, tentato).id))
         // E la campagna finisce con la sua vittoria, se nessuno lo scaccia.
         for _ in 0..<3 { giocaLaGiornata(&stato) }
         XCTAssertEqual(stato.conclusione, ConclusioneCampagna(modo: .presa, vincitore: .avversario, giorno: stato.giorno))
@@ -578,6 +595,17 @@ final class PresaDelQuartierGeneraleTest: XCTestCase {
         XCTAssertEqual(motore.vistaAvversario(stato: esploratore).presa?.armateNote, [])
         guard case .marcia(_, let dove, _) = comando(esploratore) else { return XCTFail("\(comando(esploratore))") }
         XCTAssertEqual(dove, mio)
+        // Nemmeno dove la corsa non si valuta, perché il quartier generale del giocatore è difeso: sull'istmo una
+        // formazione armata accanto al suo lo richiama, un esploratore nella stessa casella no.
+        func sullIstmo(_ vicino: ScenarioCampagna.GruppoIniziale) throws -> ComandoCampagna {
+            comando(try crea([vicino, armato(6, 3)], [armato(5, 3)], mappa: "istmo"))
+        }
+        guard case .marcia(_, let colRichiamo, _) = try sullIstmo(armato(3, 3)),
+              case .marcia(_, let senzaRichiamo, _) = try sullIstmo(
+                .init(riga: 3, colonna: 3, composizione: reparti(3), categoria: "ricognizione", competenza: 5))
+        else { return XCTFail() }
+        XCTAssertEqual(colRichiamo, Cella(riga: 4, colonna: 3))
+        XCTAssertEqual(senzaRichiamo, Cella(riga: 6, colonna: 3))
     }
 
     /// Sa occupato il proprio: torna a riprenderlo per la via più breve e vi entra, e la battaglia nasce.
