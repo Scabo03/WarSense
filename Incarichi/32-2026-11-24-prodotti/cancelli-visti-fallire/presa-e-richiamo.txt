@@ -571,3 +571,29 @@ Test Case '-[MotoreTest.PresaDelQuartierGeneraleTest test_incarico_32_senza_la_r
 	 Executed 29 tests, with 5 failures (0 unexpected) in 0.350 (0.351) seconds
 	 Executed 29 tests, with 5 failures (0 unexpected) in 0.350 (0.352) seconds
 
+== l'annientamento simultaneo della campagna non guarda il vantaggio (build 32)
+   sorgente: Codice/Sources/Motore/MotoreCampagna.swift
+   tolto:  case (true, true): vincitore = valori.vantaggi.annientamentoSimultaneoAlGiocatore ? .giocatore : .avversario
+   messo:  case (true, true): vincitore = .giocatore
+   prove:  swift test --filter CampagnaDelRegnoTest (uscita 1)
+Test Case '-[MotoreTest.CampagnaDelRegnoTest test_00_15_lo_scenario_senza_calendario_si_codifica_come_prima]' passed (0.011 seconds).
+Test Case '-[MotoreTest.CampagnaDelRegnoTest test_01_15_2_5_l_annientamento_simultaneo_assegna_la_campagna_al_giocatore]' passed (0.009 seconds).
+Test Case '-[MotoreTest.CampagnaDelRegnoTest test_01_5_17_1_il_cambio_di_stagione_si_annuncia_ed_entra_nel_registro]' passed (0.008 seconds).
+Test Case '-[MotoreTest.CampagnaDelRegnoTest test_01_5_9_chiusa_l_ultima_giornata_d_autunno_la_campagna_si_conclude_senza_vincitore]' passed (0.008 seconds).
+Test Case '-[MotoreTest.CampagnaDelRegnoTest test_01_5_9_il_calendario_dice_la_stagione_di_ogni_giornata]' passed (0.007 seconds).
+/Users/lucascabini/Developer/WarSense/Codice/Tests/MotoreTest/CampagnaDelRegnoTest.swift:214: error: -[MotoreTest.CampagnaDelRegnoTest test_05_12_5_il_vantaggio_dell_annientamento_simultaneo_si_spegne_anche_in_campagna] : XCTAssertEqual failed: ("Optional(Dati.Parte.giocatore)") is not equal to ("Optional(Dati.Parte.avversario)")
+Test Case '-[MotoreTest.CampagnaDelRegnoTest test_05_12_5_il_vantaggio_dell_annientamento_simultaneo_si_spegne_anche_in_campagna]' failed (0.129 seconds).
+Test Case '-[MotoreTest.CampagnaDelRegnoTest test_05_2_9_l_impronta_distingue_il_calendario_e_la_conclusione]' passed (0.014 seconds).
+Test Case '-[MotoreTest.CampagnaDelRegnoTest test_il_giocatore_senza_gruppi_armati_ha_perso_anche_se_gli_restano_gli_esploratori]' passed (0.008 seconds).
+Test Case '-[MotoreTest.CampagnaDelRegnoTest test_il_ponte_rifiuta_cio_che_non_puo_diventare_una_campagna]' passed (0.009 seconds).
+Test Case '-[MotoreTest.CampagnaDelRegnoTest test_l_avversario_senza_gruppi_armati_ha_perso_la_campagna]' passed (0.007 seconds).
+Test Case '-[MotoreTest.CampagnaDelRegnoTest test_l_esito_porta_al_regno_il_modo_le_battaglie_e_chi_rientra]' passed (0.007 seconds).
+Test Case '-[MotoreTest.CampagnaDelRegnoTest test_l_inverno_attende_la_battaglia_nata_dall_ultima_risoluzione]' passed (0.007 seconds).
+Test Case '-[MotoreTest.CampagnaDelRegnoTest test_le_campagne_senza_calendario_restano_senza_stagioni_e_senza_conclusione]' passed (0.007 seconds).
+Test Case '-[MotoreTest.CampagnaDelRegnoTest test_le_formazioni_in_piu_occupano_le_caselle_libere_piu_vicine_al_quartier_generale]' passed (0.007 seconds).
+Test Case '-[MotoreTest.CampagnaDelRegnoTest test_le_formazioni_oltre_il_tetto_confluiscono_nell_armata_che_le_precede]' passed (0.008 seconds).
+Test Case '-[MotoreTest.CampagnaDelRegnoTest test_senza_calendario_l_annientamento_non_conclude_nulla]' passed (0.007 seconds).
+Test Case '-[MotoreTest.CampagnaDelRegnoTest test_sul_fronte_dell_istmo_il_primo_anno_e_lo_scenario_di_oggi_col_calendario]' passed (0.007 seconds).
+	 Executed 17 tests, with 1 failure (0 unexpected) in 0.260 (0.261) seconds
+	 Executed 17 tests, with 1 failure (0 unexpected) in 0.260 (0.262) seconds
+

@@ -198,6 +198,25 @@ final class CampagnaDelRegnoTest: XCTestCase {
                        "il vantaggio nascosto che assegna l'annientamento simultaneo (01 §15.2.5) vale anche qui")
     }
 
+    /// Il vantaggio si spegne dal file anche per la campagna (S28f, chiuso dall'incarico 32): allora vince
+    /// l'avversario. Il caso non simultaneo non ne è toccato.
+    func test_05_12_5_il_vantaggio_dell_annientamento_simultaneo_si_spegne_anche_in_campagna() throws {
+        let copia = FileManager.default.temporaryDirectory.appendingPathComponent("valori-\(UUID().uuidString)")
+        addTeardownBlock { try? FileManager.default.removeItem(at: copia) }
+        try FileManager.default.copyItem(at: Contenuti.valoriDiFabbrica, to: copia)
+        let file = copia.appendingPathComponent("vantaggi-nascosti.json")
+        var voci = try XCTUnwrap(JSONSerialization.jsonObject(with: Data(contentsOf: file)) as? [String: Any])
+        voci["annientamento_simultaneo_al_giocatore"] = false
+        try JSONSerialization.data(withJSONObject: voci).write(to: file)
+        motore = MotoreCampagna(valori: try CaricatoreValori.carica(da: copia), valoriCampagna: valoriCampagna)
+        var stato = try crea(calendario: dueGiornate)
+        _ = try combatti(&stato, sopravviveIlGiocatore: false, sopravviveLAvversario: false)
+        XCTAssertEqual(stato.conclusione?.vincitore, .avversario)
+        stato = try crea(calendario: dueGiornate)
+        _ = try combatti(&stato, sopravviveIlGiocatore: true, sopravviveLAvversario: false)
+        XCTAssertEqual(stato.conclusione?.vincitore, .giocatore)
+    }
+
     func test_senza_calendario_l_annientamento_non_conclude_nulla() throws {
         var stato = try crea(calendario: nil)
         _ = try combatti(&stato, sopravviveIlGiocatore: true, sopravviveLAvversario: false)

@@ -1013,15 +1013,18 @@ public struct MotoreCampagna: Sendable {
     /// La conclusione per ANNIENTAMENTO (01 §5.14.3.3; incarico 30, RDA-164): al ritorno da una
     /// battaglia, la campagna che dichiara un calendario si conclude se una delle due parti non ha
     /// più gruppi armati sul fronte, e vince l'altra. Se non ne ha più nessuna delle due — l'esito
-    /// dell'annientamento simultaneo, che il vantaggio nascosto assegna al giocatore (01 §15.2.5) —
-    /// vince il giocatore, per la stessa regola. Vero se ha concluso ora.
+    /// dell'annientamento simultaneo — vince il giocatore: è il vantaggio nascosto di 01 §15.2.5, e la
+    /// sua voce di dati lo spegne anche qui (S28f, chiuso dall'incarico 32). Vero se ha concluso ora.
     private func concludiPerAnnientamentoSeServe(_ stato: inout StatoCampagna,
                                                  _ eventi: inout [EventoCampagna]) -> Bool {
         guard stato.conclusione == nil, let calendario = stato.calendario else { return false }
         let vincitore: Parte
-        if stato.gruppiArmati(di: .avversario) == 0 { vincitore = .giocatore }
-        else if stato.gruppiArmati(di: .giocatore) == 0 { vincitore = .avversario }
-        else { return false }
+        switch (stato.gruppiArmati(di: .giocatore) == 0, stato.gruppiArmati(di: .avversario) == 0) {
+        case (false, false): return false
+        case (false, true): vincitore = .giocatore
+        case (true, false): vincitore = .avversario
+        case (true, true): vincitore = valori.vantaggi.annientamentoSimultaneoAlGiocatore ? .giocatore : .avversario
+        }
         eventi.append(Self.concludi(&stato, modo: .annientamento, vincitore: vincitore,
                                     giorno: min(stato.giorno, calendario.ultimaGiornata)))
         return true
