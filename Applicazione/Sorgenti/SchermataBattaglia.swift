@@ -367,10 +367,8 @@ final class SchermataBattaglia: UIViewController {
                 guard let self else { return }
                 self.designazione = .movimento(sciame: sciame.id)
                 if let stato = self.statoCorrente { self.aggiorna(con: stato) }
-                self.partita.ambiente.segnali.annuncia(TestoLocalizzato(
-                    testo: self.testi.frase("pannello.designazione_avviata").testo,
-                    lingua: self.testi.lingua))
-                self.chiudiPannello(cella: sciame.posizione, poi: nil)
+                self.chiudiPannello(cella: sciame.posizione, poi: nil,
+                                    annunciando: self.testi.frase("pannello.designazione_avviata"))
             })
         }
         // Evacuazione durante la ritirata (01 §10.4).
@@ -406,10 +404,14 @@ final class SchermataBattaglia: UIViewController {
     /// Alla chiusura del pannello il fuoco torna alla cella d'origine (05 §10.3).
     /// L'avviso di sistema si congeda DA SOLO al tocco di una voce: congedare qui
     /// senza pannello presentato congederebbe la schermata dello scontro stessa.
-    private func chiudiPannello(cella: Cella, poi azione: (() async -> Void)?) {
+    /// Ciò che il pannello fa dire si annuncia DOPO aver chiesto il fuoco, che l'annuncio accompagna
+    /// (incarico 32, RDA-183).
+    private func chiudiPannello(cella: Cella, poi azione: (() async -> Void)?,
+                                annunciando testo: TestoLocalizzato? = nil) {
         let ripristina: () -> Void = { [weak self] in
             guard let self else { return }
             Fuoco.sposta(a: self.elementi[cella], perche: .richiesto)
+            if let testo { self.partita.ambiente.segnali.annuncia(testo) }
             if let azione { Task { await azione() } }
         }
         if let pannello = presentedViewController as? UIAlertController,

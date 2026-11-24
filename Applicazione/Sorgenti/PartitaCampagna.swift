@@ -148,7 +148,7 @@ final class PartitaCampagna {
     /// proiettati dalla Sessione: la sola via per cui un fatto della campagna diventa annuncio,
     /// suono o vibrazione (00 §5.3). La usano l'ordine e la chiusura esplicita della giornata.
     func segnala(_ eventi: [EventoCampagna]) {
-        for evento in eventi { ambiente.segnali.segnala(evento: evento, per: .giocatore) }
+        ambiente.segnali.segnala(eventi: eventi, per: .giocatore)
     }
 
     // MARK: - Passaggio alla battaglia e ritorno (01 §6, §15, incarico 24)
@@ -193,14 +193,16 @@ final class PartitaCampagna {
 
     /// Riporta in campagna l'esito (01 §15): lo iscrive nel giornale di campagna e lo piega sulla
     /// mappa; poi rimuove lo slot della battaglia, che ha esaurito il suo compito (l'esito vive ora
-    /// nel giornale di campagna e vi si rigioca identico). Annuncia l'esito a chi torna sulla mappa.
-    func concludiBattaglia(_ battaglia: BattagliaInSospeso, esito: EsitoInCampagna) async throws {
-        try await sessione.concludiBattaglia(esito)
-        ambiente.segnali.segnala(
-            evento: .battagliaConclusa(casella: esito.casella,
-                                       giocatoreSconfitto: esito.sconfitto == .giocatore),
-            per: .giocatore)
+    /// nel giornale di campagna e vi si rigioca identico). Restituisce i fatti che il giocatore è
+    /// titolato a conoscere — com'è andata, e tutto ciò che il ritorno ha messo in moto: la giornata
+    /// che si chiude, l'avversario che muove, l'occupazione di un quartier generale che comincia o
+    /// cade, la campagna che si conclude —, che il chiamante consegna con `segnala` quando ha già
+    /// portato il fuoco sulla mappa (incarico 32). Fino alla build 32 si annunciava il solo esito, e
+    /// ciò che il ritorno metteva in moto restava nel registro.
+    func concludiBattaglia(_ battaglia: BattagliaInSospeso, esito: EsitoInCampagna) async throws -> [EventoCampagna] {
+        let eventi = try await sessione.concludiBattaglia(esito)
         try? FileManager.default.removeItem(at: cartellaDellaBattaglia(battaglia.identificatore))
+        return eventi
     }
 
     /// Lo slot della battaglia dentro lo slot di QUESTA campagna.

@@ -150,20 +150,43 @@ final class SchermataMappaCampagna: UIViewController {
         montaRotori()
         aggiorna(con: stato)
 
-        if let costruttore {
-            partita.ambiente.segnali.annuncia(
-                TestoLocalizzato(testo: costruttore.annuncioApertura(), lingua: testi.lingua))
-            partita.ambiente.segnali.annuncia(
-                TestoLocalizzato(testo: costruttore.informazioneDiStato(), lingua: testi.lingua))
-        }
-        // All'apertura il fuoco va al primo gruppo che attende una decisione: è la
-        // casella da cui la giornata comincia (01 §5.16).
-        let vista = await partita.vista
-        if let primo = vista.prossimoGruppoInAttesa(dopo: nil), let elemento = elementi[primo.posizione] {
-            Fuoco.sposta(a: elemento, perche: .schermataAperta)
-        } else {
-            Fuoco.sposta(a: nil, perche: .schermataAperta)
-        }
+        primaDaDecidere = await partita.vista.prossimoGruppoInAttesa(dopo: nil)?.posizione
+        caricata = true
+        apriSeServe()
+    }
+
+    /// Vero quando lo stato è caricato e gli elementi delle caselle esistono.
+    private var caricata = false
+    /// Vero quando la schermata è comparsa.
+    private var comparsa = false
+    private var apertaAlGiocatore = false
+    /// La casella da cui la giornata comincia: quella del primo gruppo che attende una decisione.
+    private var primaDaDecidere: Cella?
+
+    override func viewDidAppear(_ animated: Bool) {
+        super.viewDidAppear(animated)
+        comparsa = true
+        apriSeServe()
+    }
+
+    /// Il fuoco d'apertura e gli annunci che lo accompagnano, una volta sola, quando la schermata è
+    /// COMPARSA e le sue caselle esistono (incarico 32). Fino alla build 32 partivano alla fine del
+    /// caricamento, che aprendo la campagna dal regno si compie prima della comparsa: VoiceOver non
+    /// trovava ancora la casella e portava il fuoco sull'ultimo comando della schermata, «Torna in
+    /// patria». È la stessa corsa dell'apertura della battaglia sull'iPad (incarico 29).
+    ///
+    /// All'apertura il fuoco va al primo gruppo che attende una decisione (01 §5.16). Lo si chiede
+    /// PRIMA di annunciare (RDA-183): l'apertura e lo stato lo accompagnano, e la lettura della
+    /// casella non li taglia.
+    private func apriSeServe() {
+        guard caricata, comparsa, !apertaAlGiocatore else { return }
+        apertaAlGiocatore = true
+        Fuoco.sposta(a: primaDaDecidere.flatMap { elementi[$0] }, perche: .schermataAperta)
+        guard let costruttore else { return }
+        partita.ambiente.segnali.annuncia(
+            TestoLocalizzato(testo: costruttore.annuncioApertura(), lingua: testi.lingua))
+        partita.ambiente.segnali.annuncia(
+            TestoLocalizzato(testo: costruttore.informazioneDiStato(), lingua: testi.lingua))
     }
 
     // MARK: - Aggiornamento sul posto (RDA-03)
@@ -328,10 +351,8 @@ final class SchermataMappaCampagna: UIViewController {
                 guard let self else { return }
                 self.designazione = .marcia(gruppo: gruppo.id)
                 if let stato = self.statoCorrente { self.aggiorna(con: stato) }
-                self.partita.ambiente.segnali.annuncia(TestoLocalizzato(
-                    testo: self.testi.frase("pannello.marcia_designazione_avviata").testo,
-                    lingua: self.testi.lingua))
-                self.chiudiPannello(casella: gruppo.posizione, poi: nil)
+                self.chiudiPannello(casella: gruppo.posizione, poi: nil,
+                                    annunciando: self.testi.frase("pannello.marcia_designazione_avviata"))
             })
         }
         // Il presidio è sempre disponibile per un gruppo che non ha ancora agito:
@@ -492,12 +513,20 @@ final class SchermataMappaCampagna: UIViewController {
             gruppo: gruppo,
             destinazioni: costruttore.vista.destinazioniValide(per: gruppo.id),
             testi: testi)
+        // Chiusa la schermata il fuoco torna sulla casella del gruppo, da cui la si era aperta (02
+        // §5.1; incarico 32), e l'annuncio della divisione lo accompagna. Fino alla build 32 il fuoco
+        // lo riportava il sistema, da sé, e la sua lettura tagliava l'annuncio.
         schermata.alConferma = { [weak self] staccati, cella in
-            guard let self,
-                  let comando = self.costruttore?.vista.comandoDiDivisione(
+            guard let self else { return }
+            Fuoco.sposta(a: self.elementi[gruppo.posizione], perche: .schermataChiusa)
+            guard let comando = self.costruttore?.vista.comandoDiDivisione(
                     per: gruppo.id, staccando: staccati, a: cella) else { return }
             Task { await self.eseguiComando(comando) }
         }
+        schermata.alCongedo = { [weak self] in
+            Fuoco.sposta(a: self?.elementi[gruppo.posizione], perche: .schermataChiusa)
+        }
+        schermata.annuncia = { [weak self] testo in self?.partita.ambiente.segnali.annuncia(testo) }
         schermata.modalPresentationStyle = .fullScreen
         present(schermata, animated: false)
     }
@@ -505,10 +534,14 @@ final class SchermataMappaCampagna: UIViewController {
     /// Alla chiusura il fuoco torna alla casella d'origine (05 §10.3). L'avviso di
     /// sistema si congeda DA SOLO al tocco di una voce: si congeda qui soltanto un
     /// pannello ancora presentato (precisazione P5).
-    private func chiudiPannello(casella: Cella, poi azione: (() async -> Void)?) {
+    /// Ciò che il pannello fa dire si annuncia DOPO aver chiesto il fuoco, che l'annuncio accompagna
+    /// (incarico 32, RDA-183).
+    private func chiudiPannello(casella: Cella, poi azione: (() async -> Void)?,
+                                annunciando testo: TestoLocalizzato? = nil) {
         let ripristina: () -> Void = { [weak self] in
             guard let self else { return }
             Fuoco.sposta(a: self.elementi[casella], perche: .richiesto)
+            if let testo { self.partita.ambiente.segnali.annuncia(testo) }
             if let azione { Task { await azione() } }
         }
         if let pannello = presentedViewController as? UIAlertController, !pannello.isBeingDismissed {
@@ -548,6 +581,9 @@ final class SchermataMappaCampagna: UIViewController {
     /// piega nulla: la battaglia resta in sospeso e si potrà riaprire.
     private func concludiLaBattaglia(_ battaglia: BattagliaInSospeso,
                                      partitaBattaglia: PartitaCorrente) async {
+        // Congedato il resoconto la schermata cambia, e il fuoco andrà sulla mappa: gli annunci del
+        // ritorno lo accompagnano (incarico 32, RDA-183).
+        Fuoco.staPerSpostarsi()
         let statoBattaglia = await partitaBattaglia.stato
         guard statoBattaglia.esito != nil else { return }
         var esito = await partita.esitoDiRitorno(battaglia, statoBattaglia: statoBattaglia)
@@ -560,10 +596,12 @@ final class SchermataMappaCampagna: UIViewController {
                 esito = esito.conPosizioneGiocatore(scelta)
             }
         }
-        do { try await partita.concludiBattaglia(battaglia, esito: esito) }
+        var eventi: [EventoCampagna] = []
+        do { eventi = try await partita.concludiBattaglia(battaglia, esito: esito) }
         catch { }
         await ricaricaStato()
         Fuoco.sposta(a: elementi[esito.posizione(di: .giocatore) ?? battaglia.casella], perche: .schermataAperta)
+        partita.segnala(eventi)
     }
 
     /// Offre le CASELLE DI RIPIEGAMENTO, ciascuna come voce a sé in una frase compatta, e attende la

@@ -44,6 +44,14 @@ public struct TraduttoreEventi: Sendable {
         self.parte = parte
     }
 
+    /// Vero se all'evento segue un'ALTRA SCHERMATA (incarico 32): conclusa la battaglia si mostra il
+    /// resoconto. Il punto dei segnali lo chiede prima di consegnare i fatti dell'azione, perché li
+    /// accompagnino a priorità alta (RDA-183).
+    public static func cambiaSchermata(_ evento: EventoBattaglia) -> Bool {
+        if case .battagliaConclusa = evento { return true }
+        return false
+    }
+
     /// Il significato di segnale per l'evento, se l'evento ne merita uno.
     public func significato(per evento: EventoBattaglia) -> SignificatoSegnale? {
         switch evento {

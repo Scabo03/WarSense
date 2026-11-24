@@ -77,9 +77,7 @@ final class PartitaRegno {
 
     private func segnala(_ eventi: [EventoRegno]) async {
         let stato = await sessione.stato
-        for evento in eventi {
-            ambiente.segnali.segnala(evento: evento, fase: stato.fase, forze: stato.forze)
-        }
+        ambiente.segnali.segnala(eventi: eventi, fase: stato.fase, forze: stato.forze)
     }
 
     @discardableResult

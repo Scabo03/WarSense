@@ -20,8 +20,16 @@ final class SchermataDivisione: UIViewController {
     private let gruppo: Gruppo
     private let destinazioni: [Cella]
     private let testi: Testi
-    /// La divisione confermata: i reparti da staccare (per indice) e dove collocarli.
+    /// La divisione confermata: i reparti da staccare (per indice) e dove collocarli. Chiamata a
+    /// schermata chiusa.
     var alConferma: (([Int], Cella) -> Void)?
+    /// Il giocatore esce senza dividere: chiamata a schermata chiusa, chi l'ha aperta riporta il fuoco
+    /// dove il giocatore l'aveva lasciato (02 §5.1; incarico 32).
+    var alCongedo: (() -> Void)?
+    /// Un annuncio della schermata: passa dal punto unico dei segnali (00 §5.3), che chi la apre le
+    /// presta. Fino alla build 32 la schermata annunciava da sé, fuori dalla coda e senza la lingua
+    /// dichiarata (00 §14.4).
+    var annuncia: ((TestoLocalizzato) -> Void)?
 
     private var staccati: Set<Int> = []
     private var pulsantiReparto: [(indice: Int, pulsante: UIButton)] = []
@@ -90,7 +98,7 @@ final class SchermataDivisione: UIViewController {
         }
 
         let annulla = pulsanteRiga(testi.frase("divisione.annulla").testo)
-        annulla.addAction(UIAction { [weak self] _ in self?.dismiss(animated: false) }, for: .touchUpInside)
+        annulla.addAction(UIAction { [weak self] _ in self?.esci() }, for: .touchUpInside)
         colonna.addArrangedSubview(annulla)
     }
 
@@ -109,8 +117,7 @@ final class SchermataDivisione: UIViewController {
         // Nessuna parte vuota (01 §5.6.0.2): almeno un reparto staccato e almeno uno
         // tenuto. La scelta impossibile non divide e si dichiara.
         guard !staccati.isEmpty, staccati.count < gruppo.composizione.count else {
-            UIAccessibility.post(notification: .announcement,
-                                 argument: testi.frase("divisione.scelta_incompleta").testo)
+            annuncia?(testi.frase("divisione.scelta_incompleta"))
             return
         }
         let indici = staccati.sorted()
@@ -153,8 +160,12 @@ final class SchermataDivisione: UIViewController {
         return pulsante
     }
 
+    private func esci() {
+        dismiss(animated: false) { [alCongedo] in alCongedo?() }
+    }
+
     override func accessibilityPerformEscape() -> Bool {
-        dismiss(animated: false)
+        esci()
         return true
     }
 }

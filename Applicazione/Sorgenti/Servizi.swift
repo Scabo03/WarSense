@@ -147,8 +147,21 @@ enum Fuoco {
     static func sposta(a elemento: Any?, perche movimento: Movimento) {
         registro.append(movimento)
         ultimoBersaglio = elemento as AnyObject?
+        // Gli annunci che seguono accompagnano questo spostamento (RDA-183).
+        PuntoSegnali.ilFuocoSiSposta()
         UIAccessibility.post(notification: .screenChanged, argument: elemento)
     }
+
+    /// Quanto attendere, chiusa una schermata o un pannello di sistema, prima di chiedere il fuoco o di
+    /// mostrare la schermata che lo porterà: tempo d'interfaccia, non numero di gioco (05 §0.4), il
+    /// minimo perché VoiceOver abbia concluso la propria rifocalizzazione, che altrimenti scavalca la
+    /// richiesta del gioco (incarico 28; incarico 32 per la mappa aperta dalla scelta del fronte).
+    static let attesaDelSistema: TimeInterval = 0.4
+
+    /// Un cambio di schermata che il SISTEMA sta per compiere da sé — un pannello che si chiude, una
+    /// schermata che si congeda — e a cui seguono degli annunci: si dichiara prima di consegnarli,
+    /// senza alcuna notifica di fuoco, perché la lettura di ciò che compare non li tagli (RDA-183).
+    static func staPerSpostarsi() { PuntoSegnali.ilFuocoSiSposta() }
 
     /// Un cambiamento di disposizione che NON sposta il fuoco (aggiornamenti sul posto).
     static func aggiornaDisposizione() {

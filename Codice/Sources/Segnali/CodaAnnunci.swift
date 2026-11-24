@@ -54,10 +54,45 @@ struct CodaAnnunci<Annuncio> {
         return prossimo()
     }
 
+    /// Dimentica tutto: ciò che attende, ciò che è in corso e ciò che è stato interrotto (incarico 32).
+    /// Serve quando il lettore di schermo si accende: degli annunci consegnati a lettore spento il
+    /// sistema non notifica la conclusione, e la coda li attenderebbe per sempre.
+    mutating func svuota() {
+        inAttesa.removeAll()
+        inCorso = nil
+        interrotti.removeAll()
+    }
+
     private mutating func prossimo() -> Annuncio? {
         guard inCorso == nil, !inAttesa.isEmpty else { return nil }
         let primo = inAttesa.removeFirst()
         inCorso = primo.testo
         return primo.annuncio
+    }
+}
+
+/// Se uno spostamento del fuoco è IN ARRIVO (incarico 32, RDA-183). Il gioco lo chiede — spostando il
+/// fuoco, o consegnando un fatto a cui segue un'altra schermata —, e VoiceOver lo applica più tardi:
+/// 0,77–0,80 secondi dopo la richiesta, misurati sui simulatori dell'iPhone e dell'iPad. Un annuncio
+/// che esce in quell'intervallo a priorità predefinita è tagliato dalla lettura dell'elemento su cui il
+/// fuoco arriva; il punto dei segnali lo fa uscire perciò a priorità alta.
+///
+/// La finestra è più larga del tempo misurato, perché un apparecchio può essere più lento, e non si
+/// chiude all'arrivo del fuoco, perché il sistema può spostarlo più d'una volta per la stessa azione
+/// (un pannello che si congeda, poi la schermata che il gioco mostra). Essere larga non costa nulla a
+/// chi ascolta: la priorità alta cambia soltanto che cosa può interrompere l'annuncio — non la lettura
+/// di ciò che compare da sé, sempre il gesto di chi gioca.
+struct FinestraDelFuoco {
+    /// L'istante dell'ultima richiesta, se ce n'è stata una.
+    private(set) var chiestoA: TimeInterval?
+    /// Quanto resta aperta: tempo d'interfaccia e non di gioco (05 §0.4, 00 §4.2 — nulla scade per chi
+    /// gioca: cambia soltanto la priorità con cui un annuncio esce).
+    static let durata: TimeInterval = 2
+
+    mutating func chiesto(a istante: TimeInterval) { chiestoA = istante }
+
+    func eAperta(a istante: TimeInterval) -> Bool {
+        guard let chiestoA else { return false }
+        return istante >= chiestoA && istante - chiestoA <= Self.durata
     }
 }

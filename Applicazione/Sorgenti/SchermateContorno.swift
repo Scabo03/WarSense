@@ -61,7 +61,7 @@ final class SchermataAvvio: UIViewController {
     private func riportaIlFuoco() {
         let chiave = chiaveDiOrigine
         chiaveDiOrigine = nil
-        DispatchQueue.main.asyncAfter(deadline: .now() + Self.attesaDelRitorno) { [weak self] in
+        DispatchQueue.main.asyncAfter(deadline: .now() + Fuoco.attesaDelSistema) { [weak self] in
             guard let self else { return }
             let origine = chiave.flatMap { self.pulsante(perChiave: $0) }
             // A testo massimo la colonna è più alta dello schermo: il comando d'origine si porta
@@ -73,10 +73,6 @@ final class SchermataAvvio: UIViewController {
             Fuoco.sposta(a: origine ?? self.colonna.arrangedSubviews.first, perche: .schermataChiusa)
         }
     }
-
-    /// Quanto attendere, chiusa una schermata, prima di riportare il fuoco: tempo d'interfaccia, non
-    /// numero di gioco (05 §0.4), il minimo perché VoiceOver abbia concluso la propria rifocalizzazione.
-    private static let attesaDelRitorno: TimeInterval = 0.4
 
     private func ricostruisciVoci() {
         for vista in colonna.arrangedSubviews.dropFirst() { vista.removeFromSuperview() }

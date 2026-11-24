@@ -481,6 +481,9 @@ final class SchermataPatria: UIViewController {
                 titolo = testi.frase("patria.fronte_voce", titolo, formato.righe, formato.colonne).testo
             }
             pannello.addAction(UIAlertAction(title: titolo, style: .default) { [weak self] _ in
+                // Il pannello si chiude e la schermata cambia: gli annunci dell'apertura li
+                // accompagnano (incarico 32, RDA-183).
+                Fuoco.staPerSpostarsi()
                 Task { await self?.apriLaCampagna(sul: fronte.identificatore) }
             })
         }
@@ -499,6 +502,10 @@ final class SchermataPatria: UIViewController {
             }
             campagna = nuova
             await aggiorna()
+            // Il pannello della scelta si è appena congedato, e VoiceOver vi sta ancora rifocalizzando la
+            // patria: presentata subito, la mappa perdeva il proprio fuoco d'apertura, che finiva su
+            // «Torna in patria» (trovato e misurato nell'incarico 32; era così anche prima).
+            try? await Task.sleep(nanoseconds: UInt64(Fuoco.attesaDelSistema * 1_000_000_000))
             presentaIlFronte(nuova)
         } catch {
             annuncia(testi.frase("patria.campagna_non_apribile").testo, interrompente: true)

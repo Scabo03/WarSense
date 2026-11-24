@@ -176,7 +176,12 @@ public actor SessioneCampagna {
     /// campagna si sblocca (01 §15.8) e, ove serva, l'avversario riprende il proprio turno nella
     /// giornata ripresa. Rifiuta se la battaglia indicata non è in sospeso: non si conclude ciò
     /// che non è aperto.
-    public func concludiBattaglia(_ esito: EsitoInCampagna) throws {
+    ///
+    /// Restituisce i fatti che il giocatore è titolato a conoscere, già proiettati (incarico 32): la
+    /// conclusione della battaglia e ciò che il ritorno ha messo in moto, il turno dell'avversario
+    /// compreso.
+    @discardableResult
+    public func concludiBattaglia(_ esito: EsitoInCampagna) throws -> [EventoCampagna] {
         guard stato.battaglieInSospeso.contains(where: { $0.identificatore == esito.identificatore }) else {
             throw ErroreSessione.operazioneNonDisponibile
         }
@@ -186,14 +191,15 @@ public actor SessioneCampagna {
         // (incarico 25): i marcatori di quella chiusura vanno nel giornale, o il confine
         // dell'annullamento perderebbe l'apertura della giornata nuova (05 §6.5). I marcatori NON
         // toccano la ricostruzione (`ricostruisci` li salta), sicché la rigiocatura resta identica.
-        let eventi = motore.applicaEsitoInCampagna(esito, in: &stato)
+        var eventi = motore.applicaEsitoInCampagna(esito, in: &stato)
         try Self.registraChiusura(eventi, avversarioHaAgito: false,
                                   giornale: giornale, cartella: cartella, stato: stato)
         try Self.scattaIstantanea(giornale: giornale, stato: stato, cartella: cartella, forzata: true)
         // Sbloccata la campagna, se i gruppi del giocatore hanno già tutti concluso la giornata
         // ripresa (raro: p. es. l'unico gruppo che restava è caduto), l'avversario deve muovere.
-        try Self.svolgiTurnoAvversario(giornale: giornale, motore: motore,
-                                       condotta: condotta, cartella: cartella, stato: &stato)
+        eventi += try Self.svolgiTurnoAvversario(giornale: giornale, motore: motore,
+                                                 condotta: condotta, cartella: cartella, stato: &stato).eventi
+        return motore.proiettaPerIlGiocatore(eventi, stato: stato)
     }
 
     /// La CHIUSURA ESPLICITA della giornata (incarico 26, decisione del titolare; corretta

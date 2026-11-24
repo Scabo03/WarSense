@@ -132,6 +132,83 @@ final class ConfiniTest: XCTestCase {
         XCTAssertGreaterThan(esaminati, 500, "i file del regno comune sono stati letti")
     }
 
+    /// GLI ANNUNCI E IL FUOCO (RDA-183, incarico 32). Le notifiche del sistema d'accessibilità hanno un
+    /// punto solo ciascuna: gli annunci escono dal punto dei segnali, che ne decide la priorità (00
+    /// §5.3), e il fuoco si sposta dal suo registro (00 §11.2). Fino alla build 32 la schermata di
+    /// divisione annunciava da sé, fuori dalla coda e senza la lingua dichiarata.
+    static let notificheAmmesse: [String: Set<String>] = [
+        "PuntoSegnali.swift": ["announcement"],
+        "Servizi.swift": ["screenChanged", "layoutChanged"],
+    ]
+
+    func test_00_5_3_le_notifiche_di_accessibilita_hanno_un_punto_solo() throws {
+        let invio = try NSRegularExpression(pattern: "UIAccessibility\\.post\\(notification: \\.([A-Za-z]+)")
+        var inviate: [String: Set<String>] = [:]
+        for file in try fileDellApplicazione() + fileSwift(di: "Segnali") {
+            let testo = try String(contentsOf: file, encoding: .utf8)
+            for riga in testo.split(separator: "\n") {
+                let codice = riga.components(separatedBy: "//")[0]
+                let ns = codice as NSString
+                let trovate = invio.matches(in: codice, range: NSRange(location: 0, length: ns.length))
+                if codice.contains("UIAccessibility.post") {
+                    XCTAssertEqual(trovate.count, 1, "notifica non riconosciuta in \(file.lastPathComponent): \(codice)")
+                }
+                for corrispondenza in trovate {
+                    let quale = ns.substring(with: corrispondenza.range(at: 1))
+                    inviate[file.lastPathComponent, default: []].insert(quale)
+                    XCTAssertTrue(Self.notificheAmmesse[file.lastPathComponent]?.contains(quale) == true,
+                                  "\(file.lastPathComponent) invia da sé la notifica «\(quale)»: gli annunci escono dal punto dei segnali e il fuoco dal suo registro (00 §5.3, RDA-183)")
+                }
+            }
+        }
+        XCTAssertEqual(inviate, Self.notificheAmmesse, "le notifiche ammesse sono tutte in uso, e nessun'altra")
+    }
+
+    /// L'ANNUNCIO CHE ACCOMPAGNA UNO SPOSTAMENTO DEL FUOCO SEGUE LA RICHIESTA (RDA-183, incarico 32).
+    /// La priorità dell'annuncio si decide quando esce: se il fuoco è chiesto dopo, l'annuncio esce a
+    /// priorità predefinita e la lettura dell'elemento lo taglia dopo otto decimi di secondo, che è il
+    /// difetto corretto. Il cancello legge il codice dell'applicazione: dentro una funzione, un annuncio
+    /// a cui segue uno spostamento del fuoco — chiesto, o portato da un pannello che si chiude o da una
+    /// schermata che compare — dev'essere preceduto dalla sua dichiarazione. L'annuncio di un rifiuto,
+    /// che precede un'uscita dalla funzione, non accompagna nulla.
+    func test_02_8_l_annuncio_che_accompagna_uno_spostamento_segue_la_richiesta_del_fuoco() throws {
+        let funzione = try NSRegularExpression(pattern: "^    (?:@objc |private |public |fileprivate |override |static |@discardableResult )*(?:func |init\\()")
+        let annuncio = try NSRegularExpression(pattern: "segnali\\.annuncia\\(|\\bannuncia\\(|\\bsegnala\\(")
+        let dichiarazione = try NSRegularExpression(pattern: "Fuoco\\.(?:sposta|staPerSpostarsi)\\(")
+        let spostamento = try NSRegularExpression(pattern: "Fuoco\\.sposta\\(|chiudiPannello\\(|presentaIlFronte\\(|(?<![A-Za-z.])present\\(|\\bdismiss\\(")
+        func vale(_ espressione: NSRegularExpression, _ riga: String) -> Bool {
+            espressione.firstMatch(in: riga, range: NSRange(location: 0, length: (riga as NSString).length)) != nil
+        }
+        var esaminati = 0
+        for file in try fileDellApplicazione() {
+            let righe = try String(contentsOf: file, encoding: .utf8)
+                .split(separator: "\n", omittingEmptySubsequences: false).map { String($0) }
+            var corpo: [(numero: Int, testo: String)] = []
+            for (indice, riga) in righe.enumerated() {
+                if vale(funzione, riga) { corpo = [] }
+                corpo.append((indice + 1, riga.components(separatedBy: "//")[0]))
+                guard riga == "    }" else { continue }
+                for (posizione, voce) in corpo.enumerated() where vale(annuncio, voce.testo) && !voce.testo.contains("func ") {
+                    esaminati += 1
+                    let seguito = corpo[posizione..<min(posizione + 3, corpo.count)]
+                        .map { $0.testo.trimmingCharacters(in: .whitespaces) }
+                    if seguito.contains(where: { $0.hasPrefix("return") || $0.contains(" return") }) { continue }
+                    let dopo = corpo[(posizione + 1)...].first { vale(spostamento, $0.testo) && !$0.testo.contains("func ") }
+                    let prima = corpo[..<posizione].contains { vale(dichiarazione, $0.testo) }
+                    XCTAssertTrue(dopo == nil || prima,
+                                  "\(file.lastPathComponent):\(voce.numero) annuncia prima che alla riga \(dopo?.numero ?? 0) il fuoco si sposti: lo si chiede, o lo si dichiara, prima di annunciare (RDA-183)")
+                }
+                corpo = []
+            }
+        }
+        XCTAssertGreaterThan(esaminati, 10, "gli annunci dell'applicazione sono stati letti")
+    }
+
+    private func fileDellApplicazione() throws -> [URL] {
+        try FileManager.default.contentsOfDirectory(at: Self.sorgentiApplicazione, includingPropertiesForKeys: nil)
+            .filter { $0.pathExtension == "swift" }.sorted { $0.path < $1.path }
+    }
+
     /// La virgola mobile è vietata nel Motore (05 §2.2.1, RDA-44).
     func test_05_2_2_1_nessuna_virgola_mobile_nel_motore() throws {
         for file in try fileSwift(di: "Motore") {

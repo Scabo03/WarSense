@@ -146,9 +146,7 @@ final class PartitaCorrente {
     }
 
     private func distribuisci(_ eventi: [EventoBattaglia]) {
-        for evento in eventi {
-            ambiente.segnali.segnala(evento: evento, per: .giocatore)
-        }
+        ambiente.segnali.segnala(eventi: eventi, per: .giocatore)
         consegnaEventi?(eventi)
     }
 }

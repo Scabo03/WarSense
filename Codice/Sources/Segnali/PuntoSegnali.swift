@@ -62,6 +62,14 @@ public final class PuntoSegnali {
         self.decisore = DecisoreCanali(
             apparecchioConAptica: CHHapticEngine.capabilitiesForHardware().supportsHaptics)
         preparaMotoreAptico() // mantenuto pronto, mai acceso e spento a ogni evento (00 §5.6)
+        // Quando il lettore di schermo si accende la coda riparte vuota (incarico 32): degli annunci
+        // consegnati a lettore spento il sistema non notifica la conclusione, e la coda resterebbe ad
+        // attenderla, tenendo indietro tutto ciò che segue.
+        NotificationCenter.default.addObserver(
+            forName: UIAccessibility.voiceOverStatusDidChangeNotification,
+            object: nil, queue: .main) { [weak self] _ in
+            MainActor.assumeIsolated { self?.coda.svuota() }
+        }
         NotificationCenter.default.addObserver(
             forName: UIAccessibility.announcementDidFinishNotification,
             object: nil, queue: .main) { [weak self] nota in
@@ -73,10 +81,43 @@ public final class PuntoSegnali {
         }
     }
 
+    // MARK: - Il fuoco in arrivo (incarico 32, RDA-183)
+
+    /// Lo spostamento del fuoco che il gioco ha chiesto per ultimo. È del processo e non del singolo
+    /// punto: il fuoco di VoiceOver è uno solo.
+    private static var finestra = FinestraDelFuoco()
+
+    /// Il gioco sposta il fuoco, oppure sta per mostrare un'altra schermata. Chi lo chiama lo fa PRIMA
+    /// di consegnare gli annunci che l'accompagnano: da qui in poi, per il tempo in cui il fuoco può
+    /// ancora arrivare, ogni annuncio che esce dalla coda esce a priorità alta, perché la lettura
+    /// dell'elemento su cui il fuoco arriva lo segua invece di tagliarlo.
+    public static func ilFuocoSiSposta() {
+        finestra.chiesto(a: ProcessInfo.processInfo.systemUptime)
+    }
+
     // MARK: - Ingresso
 
-    /// L'ingresso del punto: l'evento astratto, tradotto e smistato sui canali.
-    public func segnala(evento: EventoBattaglia, per parte: Parte) {
+    /// I fatti di un'azione sola, nell'ordine in cui sono accaduti. Se uno di loro porta a un'altra
+    /// schermata — la battaglia o la campagna che si conclude — lo si dichiara prima di consegnare il
+    /// primo, sicché li accompagnino tutti.
+    public func segnala(eventi: [EventoBattaglia], per parte: Parte) {
+        if eventi.contains(where: TraduttoreEventi.cambiaSchermata) { Self.ilFuocoSiSposta() }
+        for evento in eventi { segnala(evento: evento, per: parte) }
+    }
+
+    public func segnala(eventi: [EventoCampagna], per parte: Parte) {
+        if eventi.contains(where: TraduttoreEventiCampagna.cambiaSchermata) { Self.ilFuocoSiSposta() }
+        for evento in eventi { segnala(evento: evento, per: parte) }
+    }
+
+    public func segnala(eventi: [EventoRegno], fase: Fase, forze: ForzeDelRegno) {
+        if eventi.contains(where: TraduttoreEventiRegno.cambiaSchermata) { Self.ilFuocoSiSposta() }
+        for evento in eventi { segnala(evento: evento, fase: fase, forze: forze) }
+    }
+
+    /// Un fatto solo, tradotto e smistato sui canali. Privato: da fuori si consegnano i fatti di
+    /// un'azione tutti insieme, o la dichiarazione del cambio di schermata non li precederebbe.
+    private func segnala(evento: EventoBattaglia, per parte: Parte) {
         let traduttore = TraduttoreEventi(testi: testi, parte: parte)
         let p = preferenze()
         if let annuncio = traduttore.annuncio(per: evento, verbosita: p.verbosita) {
@@ -86,8 +127,8 @@ public final class PuntoSegnali {
         emetti(significato: significato)
     }
 
-    /// L'ingresso per gli eventi della campagna: stesso punto, stessa disciplina.
-    public func segnala(evento: EventoCampagna, per parte: Parte) {
+    /// Un fatto della campagna: stesso punto, stessa disciplina.
+    private func segnala(evento: EventoCampagna, per parte: Parte) {
         let traduttore = TraduttoreEventiCampagna(testi: testi, parte: parte)
         let p = preferenze()
         if let annuncio = traduttore.annuncio(per: evento, verbosita: p.verbosita) {
@@ -98,11 +139,10 @@ public final class PuntoSegnali {
         emetti(significato: significato)
     }
 
-    /// I fatti di pura navigazione prodotti dalla Presentazione (00 §11.6, 05 §11.2).
     /// Un fatto del regno (incarico 30): stessa via degli eventi della battaglia e della campagna,
     /// perché il punto dei segnali resti uno solo (00 §5.3). La fase storica serve al nome della
     /// moneta (01 §5.5.1.3).
-    public func segnala(evento: EventoRegno, fase: Fase, forze: ForzeDelRegno? = nil) {
+    private func segnala(evento: EventoRegno, fase: Fase, forze: ForzeDelRegno) {
         let traduttore = TraduttoreEventiRegno(testi: testi)
         if let annuncio = traduttore.annuncio(per: evento, fase: fase, forze: forze) {
             accoda(annuncio, interrompente: false)
@@ -111,6 +151,7 @@ public final class PuntoSegnali {
         emetti(significato: significato)
     }
 
+    /// I fatti di pura navigazione prodotti dalla Presentazione (00 §11.6, 05 §11.2).
     public func segnalaCambioRiga(conNemici: Bool) {
         emetti(significato: conNemici ? .cambioRigaConNemici : .cambioRiga)
     }
@@ -145,14 +186,29 @@ public final class PuntoSegnali {
             .accessibilitySpeechLanguage: testo.lingua, // 00 §14.4
         ])
         if let daDire = coda.accoda(attribuito, testo: testo.testo, interrompente: interrompente) {
-            UIAccessibility.post(notification: .announcement, argument: daDire)
+            pubblica(daDire)
         }
     }
 
     private func annuncioConcluso(_ testo: String?) {
-        if let daDire = coda.concluso(testo: testo) {
-            UIAccessibility.post(notification: .announcement, argument: daDire)
+        if let daDire = coda.concluso(testo: testo) { pubblica(daDire) }
+    }
+
+    /// Consegna al sistema l'annuncio che la coda fa uscire. La PRIORITÀ si decide qui, nell'istante in
+    /// cui esce (RDA-183): alta se uno spostamento del fuoco può ancora arrivare, predefinita
+    /// altrimenti. A quella predefinita la lettura dell'elemento su cui il fuoco arriva taglia
+    /// l'annuncio dopo 0,8 secondi, o prima ancora che cominci; a quella alta VoiceOver lo dice per
+    /// intero e legge l'elemento dopo. La priorità alta lo protegge da ciò che il sistema legge da sé,
+    /// non da chi gioca: ogni suo gesto di navigazione lo interrompe, come sempre (misurato).
+    private func pubblica(_ annuncio: NSAttributedString) {
+        guard Self.finestra.eAperta(a: ProcessInfo.processInfo.systemUptime) else {
+            UIAccessibility.post(notification: .announcement, argument: annuncio)
+            return
         }
+        let alta = NSMutableAttributedString(attributedString: annuncio)
+        alta.addAttribute(.accessibilitySpeechAnnouncementPriority, value: UIAccessibilityPriority.high,
+                          range: NSRange(location: 0, length: alta.length))
+        UIAccessibility.post(notification: .announcement, argument: alta)
     }
 
     // MARK: - Suoni (02 §12)

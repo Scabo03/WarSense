@@ -25,6 +25,14 @@ public struct TraduttoreEventiCampagna: Sendable {
         return false
     }
 
+    /// Vero se all'evento segue un'ALTRA SCHERMATA (incarico 32): conclusa la campagna si torna in
+    /// patria, alla dichiarazione di conclusione. Il punto dei segnali lo chiede prima di consegnare i
+    /// fatti dell'azione, perché li accompagnino a priorità alta (RDA-183).
+    public static func cambiaSchermata(_ evento: EventoCampagna) -> Bool {
+        if case .campagnaConclusa = evento { return true }
+        return false
+    }
+
     /// Il significato di segnale per l'evento, se l'evento ne merita uno.
     ///
     /// La chiusura della giornata NON ha segnale tattile né sonoro proprio: il tetto

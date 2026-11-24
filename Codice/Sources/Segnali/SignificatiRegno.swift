@@ -15,6 +15,18 @@ public struct TraduttoreEventiRegno: Sendable {
         self.testi = testi
     }
 
+    /// Vero se all'evento segue un'ALTRA SCHERMATA (incarico 32): aperta la campagna si entra sulla
+    /// mappa; con l'inverno e con la primavera la patria cambia corpo e il fuoco torna in testa. Il
+    /// punto dei segnali lo chiede prima di consegnare i fatti dell'azione, perché li accompagnino a
+    /// priorità alta (RDA-183). Il passaggio da una schermata dell'inverno alla successiva non è fra
+    /// questi: gli elementi si aggiornano sul posto e il fuoco resta dov'è (02 §8.7.3).
+    public static func cambiaSchermata(_ evento: EventoRegno) -> Bool {
+        switch evento {
+        case .campagnaAperta, .campagnaConclusa, .invernoCominciato, .primaveraCominciata: return true
+        case .lavoroOrdinato, .stazioneAperta, .unitaDestinata: return false
+        }
+    }
+
     /// Ciò che separa le voci di un elenco e le frasi di un'etichetta: testo anch'esso, e quindi
     /// fuori dal codice (00 §14.1).
     private var separatoreDiElenco: String { testi.frase("regno.separatore_elenco").testo }

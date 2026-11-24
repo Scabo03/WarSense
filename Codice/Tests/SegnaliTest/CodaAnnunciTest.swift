@@ -98,4 +98,49 @@ final class CodaAnnunciTest: XCTestCase {
         XCTAssertFalse(TraduttoreEventiCampagna.supera(
             .rifornimentoInterrotto(gruppo: IdGruppo(1), nome: "corvo", casella: Cella(riga: 5, colonna: 5))))
     }
+
+    /// Acceso il lettore di schermo, la coda riparte vuota (incarico 32): ciò che era stato consegnato
+    /// a lettore spento non conclude mai, e terrebbe indietro tutto ciò che segue.
+    func test_svuotata_la_coda_riparte() {
+        var coda = CodaAnnunci<String>()
+        _ = accoda(&coda, "detto a lettore spento")
+        XCTAssertNil(accoda(&coda, "fermo dietro il primo"))
+        _ = accoda(&coda, "interrompente a lettore spento", interrompente: true)
+        coda.svuota()
+        XCTAssertEqual(accoda(&coda, "il primo che si sente"), "il primo che si sente")
+        XCTAssertTrue(coda.inAttesa.isEmpty)
+        XCTAssertTrue(coda.interrotti.isEmpty)
+    }
+
+    // MARK: - La finestra del fuoco (incarico 32, RDA-183)
+
+    func test_la_finestra_resta_aperta_per_il_tempo_in_cui_il_fuoco_puo_arrivare() {
+        var finestra = FinestraDelFuoco()
+        XCTAssertFalse(finestra.eAperta(a: 10), "nessuna richiesta: chiusa")
+        finestra.chiesto(a: 10)
+        XCTAssertTrue(finestra.eAperta(a: 10))
+        // VoiceOver applica lo spostamento 0,77–0,80 s dopo la richiesta (misurato sui simulatori).
+        XCTAssertTrue(finestra.eAperta(a: 10.8))
+        XCTAssertTrue(finestra.eAperta(a: 10 + FinestraDelFuoco.durata))
+        XCTAssertFalse(finestra.eAperta(a: 10.01 + FinestraDelFuoco.durata))
+        finestra.chiesto(a: 20)
+        XCTAssertTrue(finestra.eAperta(a: 21), "una richiesta nuova la riapre")
+        XCTAssertFalse(finestra.eAperta(a: 19.9), "un istante di prima della richiesta non vi cade")
+    }
+
+    /// Gli eventi a cui segue un'altra schermata, e nessun altro.
+    func test_gli_eventi_che_cambiano_schermata() {
+        XCTAssertTrue(TraduttoreEventiCampagna.cambiaSchermata(.campagnaConclusa(modo: .inverno, vincitore: nil)))
+        XCTAssertFalse(TraduttoreEventiCampagna.cambiaSchermata(.giornataAperta(giorno: 2)))
+        XCTAssertFalse(TraduttoreEventiCampagna.cambiaSchermata(.battagliaInnescata(casella: Cella(riga: 1, colonna: 1), daImboscata: false)),
+                       "una battaglia in sospeso non porta altrove: il passaggio lo decide il giocatore (02 §5.6)")
+        XCTAssertTrue(TraduttoreEventi.cambiaSchermata(.battagliaConclusa(EsitoBattaglia(sconfitto: .avversario, modo: .annientamento, turni: 3))))
+        XCTAssertFalse(TraduttoreEventi.cambiaSchermata(.turnoIniziato(parte: .giocatore, numeroGiro: 2)))
+        XCTAssertTrue(TraduttoreEventiRegno.cambiaSchermata(.campagnaAperta(fronte: "guado")))
+        XCTAssertTrue(TraduttoreEventiRegno.cambiaSchermata(.invernoCominciato(anno: 1, entrata: .vuote, mantenimento: .vuote, sciolti: [])))
+        XCTAssertTrue(TraduttoreEventiRegno.cambiaSchermata(.primaveraCominciata(anno: 2, perduto: .vuote, ingressi: [], migliorati: [], miglioramentiPerduti: [])))
+        XCTAssertFalse(TraduttoreEventiRegno.cambiaSchermata(.stazioneAperta(stazione: 2)),
+                       "fra le schermate dell'inverno gli elementi si aggiornano sul posto e il fuoco resta (02 §8.7.3)")
+        XCTAssertFalse(TraduttoreEventiRegno.cambiaSchermata(.unitaDestinata(unita: "lupo", alFronte: true)))
+    }
 }
