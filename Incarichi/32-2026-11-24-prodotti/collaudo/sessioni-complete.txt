@@ -1,19 +1,19 @@
-Corsa separata delle sessioni complete (scripts/esegui-sessioni-complete.sh), commit ac8c39e (codice e19b47b), avviata alle 21:19:52 e finita alle 21:29:10.
+Corsa separata delle sessioni complete (scripts/esegui-sessioni-complete.sh), commit bb1a69b (codice della build: c5bcb09), avviata alle 23:58:58 e finita alle 00:07:35.
 
 esito.json:
 {
- "data": "2026-11-24T20:19:52Z",
- "commit": "ac8c39ea7796b3b4e461e4171c6591299fba65b0",
+ "data": "2026-11-24T22:58:58Z",
+ "commit": "bb1a69bbbc182ca291a52327114f0d58fe377d54",
  "esito": "successo",
  "dettaglio": "144 campagna per interfaccia + headless completo con 32 battaglia al Motore (S11)"
 }
 
 == 1/2 Sessioni complete di CAMPAGNA per l'interfaccia (144) ==
-  campagna per l'interfaccia (144): VERDE (durata prova 549.8s)
+  campagna per l'interfaccia (144): VERDE (durata prova 506.5s)
 == 2/2 Sessioni complete HEADLESS: campagna e 32 di BATTAGLIA (Motore) ==
   headless (campagna + 32 battaglia): VERDE
   esito scritto in esiti-sessioni-complete/esito.json: successo
 == Corsa separata: SUCCESSO ==
 
 Prova d'attualità (scripts/controlla-sessioni.py):
-corsa separata delle sessioni complete: esito «successo», girata su ac8c39e, codice a e19b47b (data 2026-11-24T20:19:52Z)
+corsa separata delle sessioni complete: esito «successo», girata su bb1a69b, codice a c5bcb09 (data 2026-11-24T22:58:58Z)

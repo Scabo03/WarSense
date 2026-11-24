@@ -1,7 +1,7 @@
-Collaudo completo (scripts/collaudo-completo.sh) sul commit 10dd1f5 (codice dell'applicazione e del pacchetto: e19b47b).
-Inizio 2026-11-24 21:57:13, durata 413 s (orologio). Strumenti: swift test (pacchetto) e xcodebuild test con xcresulttool (ospitate e d'interfaccia).
+Collaudo completo (scripts/collaudo-completo.sh) sul commit 13c73d8 (codice della build: c5bcb09).
+Inizio 2026-11-25 00:07:44, durata 409 s (orologio). Strumenti: swift test (pacchetto) e xcodebuild test con xcresulttool (ospitate e d'interfaccia).
 
-Pacchetto: 607 passate, 0 fallite, 3 saltate.
+Pacchetto: 611 passate, 0 fallite, 3 saltate.
 Saltate (si eseguono soltanto su richiesta): SessioneTest.GeneraFixtureBuild32Test test_genera_le_fixture_della_build_32; SessioneTest.RigenerazioneOroTest test_rigenerazione_esplicita_dei_copioni_d_oro; SessioneTest.RigenerazioneOroTest test_rigenerazione_esplicita_dell_oro_del_regno
 
   VerificaTest BancoRegnoTest                                   10 passed
@@ -29,7 +29,7 @@ Saltate (si eseguono soltanto su richiesta): SessioneTest.GeneraFixtureBuild32Te
   SessioneTest SessioneCampagnaTest                             10 passed
   SessioneTest SessioneRegnoSecondaTappaTest                    4 passed
   SessioneTest SessioneRegnoTest                                9 passed
-  SegnaliTest  CodaAnnunciTest                                  9 passed
+  SegnaliTest  CodaAnnunciTest                                  13 passed
   SegnaliTest  DecisoreCanaliTest                               3 passed
   SegnaliTest  TraduttoreCampagnaTest                           16 passed
   SegnaliTest  TraduttoreEventiTest                             8 passed
@@ -72,7 +72,9 @@ Saltate (si eseguono soltanto su richiesta): SessioneTest.GeneraFixtureBuild32Te
   ConfiniTest  ConfiniTest                                      7 passed
 
 Simboli d'archetipo: biiezione verificata su 9 archetipi (cavalleria_manovrata, cavalleria_ricognizione, fanteria_leggera, fanteria_pesante, guardia_elite, macchina_assedio, macchina_tiro, piattaforma_trainata, tiratori)
-  esecutore (xcresulttool summary): 153 prove eseguite fra ospitate e interfaccia — 153 passate, 0 fallite, 0 saltate; esito Passed
-    per bersaglio: WarSenseTest = 136
+  esecutore (xcresulttool summary): 159 prove eseguite fra ospitate e interfaccia — 159 passate, 0 fallite, 0 saltate; esito Passed
+    per bersaglio: WarSenseTest = 142
     per bersaglio: WarSenseUITest = 17
 == Collaudo completo: tutto verde ==
+
+Corse precedenti, entrambe verdi: ac8c39e (437 s, 607 del pacchetto, 136 ospitate e 17 d'interfaccia) e 10dd1f5 (413 s, 607 del pacchetto, 136 ospitate e 17 d'interfaccia). La sola differenza di codice e' la conferma del fuoco.
