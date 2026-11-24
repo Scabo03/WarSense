@@ -408,10 +408,14 @@ public struct ProgrammaDiVerifica: Sendable {
         let pieno = base.deckGiocatore
         let minimo = Array(pieno.prefix(1))
         // Il mazzo abbondante: gli stessi elementi con esemplari moltiplicati, così
-        // che il volume non basti a schierarli tutti e qualcosa resti in riserva.
+        // che il volume non basti a schierarli tutti e qualcosa resti in riserva a
+        // battaglia CONCLUSA. Fino all'incarico 31 il moltiplicatore era tre, e le riserve
+        // restavano soltanto perché quelle battaglie si fermavano al primo turno, sulla
+        // selezione alternata del tattico (incarico 32); col tattico che chiude il turno il
+        // triplo scende tutto in campo, e ne servono otto volte tanti.
         let abbondante = pieno.map {
             ScenarioBattaglia.ElementoScenario(archetipo: $0.archetipo, protezione: $0.protezione,
-                                               atomi: $0.atomi, esemplari: $0.esemplari * 3)
+                                               atomi: $0.atomi, esemplari: $0.esemplari * 8)
         }
         let unSoloArchetipo = pieno.prefix(1).map {
             ScenarioBattaglia.ElementoScenario(archetipo: $0.archetipo, protezione: $0.protezione,

@@ -287,8 +287,14 @@ final class SessioniCompleteTest: XCTestCase {
 
         let battaglia = try XCTUnwrap(rapporto.sezioni.first { $0.nome == "sessioni_battaglia" })
         let riserve = try XCTUnwrap(battaglia.intestazione.firstIndex(of: "riserve_rimaste"))
-        XCTAssertTrue(battaglia.righe.contains { (Int($0[riserve]) ?? 0) > 0 },
-                      "nessuna sessione di battaglia lascia forze in riserva: la composizione "
+        let conclusa = try XCTUnwrap(battaglia.intestazione.firstIndex(of: "conclusa"))
+        // Le riserve contano a battaglia CONCLUSA (incarico 32). Fino all'incarico 31 questa prova
+        // non lo chiedeva, e passava su battaglie ferme al primo turno: la composizione abbondante
+        // non si concludeva mai, per la selezione alternata del tattico.
+        XCTAssertTrue(battaglia.righe.contains { $0[conclusa] == "true" && (Int($0[riserve]) ?? 0) > 0 },
+                      "nessuna sessione di battaglia conclusa lascia forze in riserva: la composizione "
                       + "abbondante non sta esercitando il deck come riserva vera (01 §9.3.5)")
+        XCTAssertEqual(battaglia.righe.filter { $0[conclusa] != "true" }, [],
+                       "una sessione di battaglia non si è conclusa entro i tetti")
     }
 }

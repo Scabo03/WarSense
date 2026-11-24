@@ -1,0 +1,18 @@
+TatticoPiazzamentoTest eseguito sul tattico di 06dee59 (la riga di TatticoBattaglia.swift riportata a HEAD, poi ripristinata):
+
+Test Case '-[MotoreTest.TatticoPiazzamentoTest test_due_elementi_non_piazzabili_non_alternano_la_selezione]' started.
+Tests/MotoreTest/TatticoPiazzamentoTest.swift:47: error: -[MotoreTest.TatticoPiazzamentoTest test_due_elementi_non_piazzabili_non_alternano_la_selezione] : XCTAssertEqual failed: ("Optional(Motore.ComandoBattaglia.seleziona(indiceDeck: 5))") is not equal to ("Optional(Motore.ComandoBattaglia.fineTurno)") - il turno si chiude: 60 comandi, ultimi [Motore.ComandoBattaglia.seleziona(indiceDeck: 4), Motore.ComandoBattaglia.seleziona(indiceDeck: 5), Motore.ComandoBattaglia.seleziona(indiceDeck: 4), Motore.ComandoBattaglia.seleziona(indiceDeck: 5)]
+Tests/MotoreTest/TatticoPiazzamentoTest.swift:51: error: -[MotoreTest.TatticoPiazzamentoTest test_due_elementi_non_piazzabili_non_alternano_la_selezione] : XCTAssertEqual failed: ("56") is not equal to ("4") - una selezione per elemento piazzato, e nessuna per chi non può scendere
+Test Case '-[MotoreTest.TatticoPiazzamentoTest test_due_elementi_non_piazzabili_non_alternano_la_selezione]' failed (0.089 seconds).
+Test Case '-[MotoreTest.TatticoPiazzamentoTest test_quando_tutto_ci_sta_l_ordine_del_mazzo_resta]' started.
+Test Case '-[MotoreTest.TatticoPiazzamentoTest test_quando_tutto_ci_sta_l_ordine_del_mazzo_resta]' passed (0.007 seconds).
+Test Case '-[MotoreTest.TatticoPiazzamentoTest test_senza_nulla_di_piazzabile_il_turno_si_chiude_senza_selezionare]' started.
+Tests/MotoreTest/TatticoPiazzamentoTest.swift:68: error: -[MotoreTest.TatticoPiazzamentoTest test_senza_nulla_di_piazzabile_il_turno_si_chiude_senza_selezionare] : XCTAssertEqual failed: ("[Motore.ComandoBattaglia.seleziona(indiceDeck: 0)]") is not equal to ("[Motore.ComandoBattaglia.fineTurno]")
+Test Case '-[MotoreTest.TatticoPiazzamentoTest test_senza_nulla_di_piazzabile_il_turno_si_chiude_senza_selezionare]' failed (0.007 seconds).
+Test Case '-[MotoreTest.TatticoPiazzamentoTest test_un_elemento_non_piazzabile_non_ferma_quello_che_lo_segue]' started.
+Tests/MotoreTest/TatticoPiazzamentoTest.swift:59: error: -[MotoreTest.TatticoPiazzamentoTest test_un_elemento_non_piazzabile_non_ferma_quello_che_lo_segue] : XCTAssertEqual failed: ("Optional(Motore.ComandoBattaglia.seleziona(indiceDeck: 1))") is not equal to ("Optional(Motore.ComandoBattaglia.fineTurno)")
+Tests/MotoreTest/TatticoPiazzamentoTest.swift:60: error: -[MotoreTest.TatticoPiazzamentoTest test_un_elemento_non_piazzabile_non_ferma_quello_che_lo_segue] : XCTAssertEqual failed: ("Optional([1, 1])") is not equal to ("Optional([1, 0])") - la fanteria leggera scende, la pesante che eccede il volume del turno resta nel mazzo
+Test Case '-[MotoreTest.TatticoPiazzamentoTest test_un_elemento_non_piazzabile_non_ferma_quello_che_lo_segue]' failed (0.008 seconds).
+	 Executed 4 tests, with 5 failures (0 unexpected) in 0.110 (0.110) seconds
+	 Executed 4 tests, with 5 failures (0 unexpected) in 0.110 (0.110) seconds
+	 Executed 4 tests, with 5 failures (0 unexpected) in 0.110 (0.111) seconds

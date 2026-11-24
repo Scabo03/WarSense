@@ -374,8 +374,11 @@ public struct BancoRegno: Sendable {
         /// dell'anno, e la prima (`MisuraFrequenzaBattaglie.Partita`).
         public let proposteAvversarieRespinte: Int
         public let primaPropostaRespinta: String?
+        /// Com'era la battaglia che non si è conclusa e ha fermato la campagna dell'anno (incarico 32);
+        /// nulla, e omesso dalla riga, quando la campagna si è conclusa.
+        public var diagnosi: DiagnosiBattaglia?
         enum CodingKeys: String, CodingKey {
-            case seme, condotta, anno, fronte, conclusione, vincitore, giornate, battaglie, vinte, perse
+            case seme, condotta, anno, fronte, conclusione, vincitore, giornate, battaglie, vinte, perse, diagnosi
             case atomiPartiti = "atomi_partiti"
             case atomiRientrati = "atomi_rientrati"
             case formazioniPartite = "formazioni_partite"
@@ -495,7 +498,8 @@ public struct BancoRegno: Sendable {
                         arriviACampagnaAperta: arriviACampagnaAperta, tenuteInPatria: tenuteInPatria,
                         riportato: [:], violazioni: violazioni.sorted(),
                         motivoFerma: partita.motivoFerma ?? partita.fine.rawValue,
-                        proposteAvversarieRespinte: respinte, primaPropostaRespinta: primaRespinta))
+                        proposteAvversarieRespinte: respinte, primaPropostaRespinta: primaRespinta,
+                        diagnosi: partita.diagnosi))
                     return giocati
                 }
                 prima = stato

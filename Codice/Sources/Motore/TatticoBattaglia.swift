@@ -82,20 +82,25 @@ public struct TatticoBattaglia: Sendable {
 
     // MARK: - Piazzamento
 
+    /// Piazza il primo elemento del mazzo che, così com'è il turno, può scendere in campo: lo
+    /// seleziona se non è quello selezionato, poi lo piazza. Un elemento che il Motore non ammette in
+    /// alcuna cella — perché il volume che resta non basta — NON si seleziona (incarico 32). Fino alla
+    /// build 32 il tattico selezionava comunque il primo elemento diverso da quello selezionato, e con
+    /// un elemento impiazzabile seguito da un altro ancora da piazzare alternava la selezione dei due
+    /// senza chiudere mai il turno: è la causa di tutte le battaglie che al banco non si concludevano
+    /// (33 nella misura della frequenza, 78 nel banco del regno).
     private func comandoDiPiazzamento(stato: StatoBattaglia) -> ComandoBattaglia? {
         guard let elementi = stato.deck[parte] else { return nil }
+        let celle = celleDiPiazzamentoOrdinate(stato: stato)
         for (indice, elemento) in elementi.enumerated() where elemento.esemplari > 0 {
-            if stato.selezione[parte] != indice {
-                if motore.valida(.seleziona(indiceDeck: indice), parte: parte, stato: stato).eValido {
-                    return .seleziona(indiceDeck: indice)
-                }
-                continue
-            }
-            for cella in celleDiPiazzamentoOrdinate(stato: stato) {
-                if motore.valida(.piazza(cella: cella), parte: parte, stato: stato).eValido {
-                    return .piazza(cella: cella)
-                }
-            }
+            var selezionato = stato
+            selezionato.selezione[parte] = indice
+            guard let cella = celle.first(where: {
+                motore.valida(.piazza(cella: $0), parte: parte, stato: selezionato).eValido
+            }) else { continue }
+            if stato.selezione[parte] == indice { return .piazza(cella: cella) }
+            let selezione = ComandoBattaglia.seleziona(indiceDeck: indice)
+            if motore.valida(selezione, parte: parte, stato: stato).eValido { return selezione }
         }
         return nil
     }

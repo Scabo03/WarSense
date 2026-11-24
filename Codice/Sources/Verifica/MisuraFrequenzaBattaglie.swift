@@ -81,8 +81,11 @@ public struct MisuraFrequenzaBattaglie: Sendable {
         public let proposteAvversarieRespinte: Int?
         /// La prima proposta respinta: giorno, comando e motivo, come chiavi coi loro valori.
         public let primaPropostaRespinta: String?
+        /// Com'era la battaglia che non si è conclusa e ha fermato la partita (incarico 32); nulla, e
+        /// omesso dalla riga, quando la partita non si è fermata su una battaglia.
+        public let diagnosi: DiagnosiBattaglia?
         enum CodingKeys: String, CodingKey {
-            case formato, condotta, seme, giornate, battaglie, vinte, perse, fine
+            case formato, condotta, seme, giornate, battaglie, vinte, perse, fine, diagnosi
             case giornateDelleBattaglie = "giornate_delle_battaglie"
             case primaBattaglia = "prima_battaglia"
             case daImboscata = "da_imboscata"
@@ -151,6 +154,7 @@ public struct MisuraFrequenzaBattaglie: Sendable {
         var giornoPrimaViolazione: Int?
         var proposteRespinte = 0
         var primaPropostaRespinta: String?
+        var diagnosi: DiagnosiBattaglia?
         /// La sonda degli invarianti dello stato, dopo ogni cambiamento dello stato.
         func sorveglia() {
             let viste = sonda.controlla(stato: stato).map(SondaInvariantiCampagna.codice(di:))
@@ -163,11 +167,16 @@ public struct MisuraFrequenzaBattaglie: Sendable {
         /// battaglia che non si conclude entro i tetti del banco ferma la partita e si registra.
         func giocaLeBattaglie() -> String? {
             while let battaglia = stato.battaglieInSospeso.first {
-                guard let esito = giocaBattagliaComeAlBanco(battaglia, stato: stato) else {
+                let esito: EsitoInCampagna
+                switch giocaBattagliaComeAlBanco(battaglia, stato: stato) {
+                case .conclusa(let e): esito = e
+                case .nonGiocabile: return "battaglia_non_giocabile:giorno=\(battaglia.giorno)"
+                case .nonConclusa(let trovata):
                     // I motivi sono chiavi con i loro valori, come le altre uscite del programma di
                     // verifica: nessun testo nel codice (00 §14.1).
+                    diagnosi = trovata
                     let imboscata = battaglia.daImboscata
-                    return "battaglia_non_conclusa:giri=\(Self.tettoGiri):giorno=\(battaglia.giorno):casella=\(battaglia.casella.riga),\(battaglia.casella.colonna):imboscata=\(imboscata)"
+                    return "battaglia_non_conclusa:\(trovata.inUnaRiga):giorno=\(battaglia.giorno):casella=\(battaglia.casella.riga),\(battaglia.casella.colonna):imboscata=\(imboscata)"
                 }
                 _ = motore.applicaEsitoInCampagna(esito, in: &stato)
                 sorveglia()
@@ -271,7 +280,7 @@ public struct MisuraFrequenzaBattaglie: Sendable {
                        motivoFerma: motivoFerma, violazioni: violazioni.sorted(),
                        giornoPrimaViolazione: giornoPrimaViolazione,
                        proposteAvversarieRespinte: proposteRespinte == 0 ? nil : proposteRespinte,
-                       primaPropostaRespinta: primaPropostaRespinta),
+                       primaPropostaRespinta: primaPropostaRespinta, diagnosi: diagnosi),
                 stato)
     }
 
@@ -281,16 +290,28 @@ public struct MisuraFrequenzaBattaglie: Sendable {
     static let tettoGiri = 400
     static let tettoPassi = 40_000
 
+    /// Com'è finita una battaglia giocata al banco.
+    enum EsitoAlBanco {
+        /// Conclusa: l'esito da piegare in campagna.
+        case conclusa(EsitoInCampagna)
+        /// Non conclusa entro i tetti: com'era quando la si è fermata (incarico 32).
+        case nonConclusa(DiagnosiBattaglia)
+        /// Lo scenario o l'ufficiale mancano: la battaglia non si può giocare.
+        case nonGiocabile
+    }
+
     /// Combatte una battaglia in sospeso come `BancoCampagna.giocaBattaglieInSospeso`: lo scenario dal
     /// ponte col modello di scontro del banco, due tattici deterministici col primo ufficiale, gli stessi
-    /// tetti. Restituisce l'esito da piegare in campagna, o nulla se la battaglia non si conclude: il banco
-    /// in quel caso si fermerebbe sulla precondizione del ponte, la misura lo registra.
-    func giocaBattagliaComeAlBanco(_ battaglia: BattagliaInSospeso, stato: StatoCampagna) -> EsitoInCampagna? {
+    /// tetti. Una battaglia che non si conclude porta la diagnosi di com'era quando la si è fermata: il
+    /// banco in quel caso si fermerebbe sulla precondizione del ponte, la misura la registra.
+    func giocaBattagliaComeAlBanco(_ battaglia: BattagliaInSospeso, stato: StatoCampagna) -> EsitoAlBanco {
         let motoreB = MotoreBattaglia(valori: motore.valori)
         guard let uffId = banco.modelloScontro.ufficialeAvversario,
-              let ufficiale = motore.valori.ufficiali[uffId] else { return nil }
+              let ufficiale = motore.valori.ufficiali[uffId] else { return .nonGiocabile }
         let scenario = PonteCampagnaBattaglia.scenario(da: battaglia, stato: stato, modello: banco.modelloScontro)
-        guard var sb = try? FabbricaBattaglia.crea(scenario: scenario, valori: motore.valori).0 else { return nil }
+        guard var sb = try? FabbricaBattaglia.crea(scenario: scenario, valori: motore.valori).0 else { return .nonGiocabile }
+        let iniziale = sb
+        var ultimi: [(Parte, ComandoBattaglia)] = []
         let tattici: [Parte: TatticoBattaglia] = [
             .giocatore: TatticoBattaglia(motore: motoreB, ufficiale: ufficiale, parte: .giocatore),
             .avversario: TatticoBattaglia(motore: motoreB, ufficiale: ufficiale, parte: .avversario)]
@@ -298,10 +319,16 @@ public struct MisuraFrequenzaBattaglie: Sendable {
         while sb.esito == nil, sb.giro <= Self.tettoGiri, passi < Self.tettoPassi {
             passi += 1
             let parte = sb.parteDiTurno
-            sb = motoreB.applica(tattici[parte]!.prossimoComando(stato: sb), parte: parte, stato: sb).0
+            let comando = tattici[parte]!.prossimoComando(stato: sb)
+            // Gli ultimi ordini servono alla sola diagnosi: si tengono soltanto vicino ai tetti.
+            if sb.giro > Self.tettoGiri - 20 || passi > Self.tettoPassi - 400 { ultimi.append((parte, comando)) }
+            sb = motoreB.applica(comando, parte: parte, stato: sb).0
         }
-        guard sb.esito != nil else { return nil }
-        return PonteCampagnaBattaglia.esito(da: sb, per: battaglia, stato: stato, valori: motore.valori)
+        guard sb.esito != nil else {
+            return .nonConclusa(DiagnosiBattaglia(stato: sb, iniziale: iniziale, passi: passi,
+                                                  ultimi: ultimi, motore: motoreB))
+        }
+        return .conclusa(PonteCampagnaBattaglia.esito(da: sb, per: battaglia, stato: stato, valori: motore.valori))
     }
 
     // MARK: - La condotta competente: quella del banco, con lo sfasamento
