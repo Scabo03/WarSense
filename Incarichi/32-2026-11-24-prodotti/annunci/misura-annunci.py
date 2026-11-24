@@ -289,8 +289,8 @@ def blocco_mappa():
     c = caselle_proprie()
     misura("marcia revocata", [att(3, prefisso=c.get("Lupo", "riga 4, casella 3")), puls("Revoca la marcia", 3), puls("Conferma la revoca", 14)], True)
     misura("presidio ordinato", [att(3, prefisso=c.get("Corvo", "riga 4, casella 2")), puls("Presidia: resta fermo in guardia", 14)], True)
-    misura("divisione incompleta rifiutata", [att(3, prefisso=c.get("Falco", "riga 4, casella 4")), puls("Dividi: scegli i reparti da staccare", 3),
-                                              att(6, prefisso="Colloca in riga", tipo="pulsante")], False)
+    misura("divisione aperta dal pannello", [att(3, prefisso=c.get("Falco", "riga 4, casella 4")), puls("Dividi: scegli i reparti da staccare", 8)], True)
+    misura("divisione incompleta rifiutata", [att(6, prefisso="Colloca in riga", tipo="pulsante")], False)
     misura("divisione compiuta", [att(1.5, contiene="fanteria pesante", tipo="pulsante"), att(18, prefisso="Colloca in riga", tipo="pulsante")], True)
     c = caselle_proprie()
     altro = next((n for n in albero() if n.startswith("Riunisci")), None)

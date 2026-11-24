@@ -253,8 +253,10 @@ public struct VantaggiNascosti: Codable, Hashable, Sendable {
     public let riduzionePropensioneRitirataAvversaria: Scalato
     /// L'annientamento simultaneo non si risolve a sfavore del giocatore (01 §13.2,
     /// §15.2.5): quando entrambe le parti restano senza nulla nello stesso giro,
-    /// sconfitto è l'avversario. A falso vale il comportamento opposto, che esiste
-    /// soltanto perché il programma di verifica misuri le probabilità reali (05 §12.5).
+    /// sconfitto è l'avversario. Lo stesso vale per gli ultimi quartieri generali delle due parti, quando
+    /// cadono nella stessa chiusura: la campagna è del giocatore (01 §5.18.3.4; incarico 32). A falso vale
+    /// il comportamento opposto, che esiste soltanto perché il programma di verifica misuri le
+    /// probabilità reali (05 §12.5).
     public let annientamentoSimultaneoAlGiocatore: Bool
     enum CodingKeys: String, CodingKey {
         case ritirataAvversariaSoloUltimaRiga = "ritirata_avversaria_solo_ultima_riga"

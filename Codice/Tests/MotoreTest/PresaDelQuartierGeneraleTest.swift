@@ -269,6 +269,25 @@ final class PresaDelQuartierGeneraleTest: XCTestCase {
         }
     }
 
+    /// L'occupante battuto che non ha una casella in cui ripiegare resta nel quartier generale, ma non lo
+    /// occupa più: il conteggio si azzera lo stesso, e non ricomincia finché il difensore vi sta.
+    func test_01_5_18_3_2_l_occupante_battuto_che_non_puo_ripiegare_perde_comunque_il_conteggio() throws {
+        var stato = try crea([armato(3, 2), armato(1, 4)], [armato(4, 2), armato(1, 1)])
+        chiudi(&stato)
+        let difensore = try XCTUnwrap(stato.gruppiOrdinati.first { $0.parte == .giocatore && $0.posizione == Cella(riga: 3, colonna: 2) })
+        marcia(difensore, a: mio, &stato)
+        var giri = 0
+        while stato.battaglieInSospeso.isEmpty, stato.conclusione == nil, giri < 4 { chiudi(&stato); giri += 1 }
+        XCTAssertNotNil(stato.occupazione(di: mio), "contesa, l'occupazione dura")
+        let esito = try combatti(&stato, perde: .avversario, ripiegaIn: mio)
+        XCTAssertEqual(stato.gruppi.values.filter { $0.posizione == mio }.count, 2, "stanno fronte a fronte")
+        XCTAssertEqual(occupazioni(esito).first, .occupazioneInterrotta(casella: mio, occupante: .avversario))
+        XCTAssertNil(stato.occupazione(di: mio))
+        XCTAssertTrue(stato.registro.map(\.fatto).contains(.quartierGeneraleLiberato(casella: mio)))
+        XCTAssertEqual(occupazioni(chiudi(&stato, 4)), [], "battuto, non occupa finché il difensore vi sta")
+        XCTAssertNil(stato.conclusione)
+    }
+
     /// Chi entra in un quartier generale difeso combatte: se vince, l'occupazione comincia lì, al ritorno
     /// dalla battaglia.
     func test_01_5_18_3_2_vinta_la_battaglia_contro_il_difensore_comincia_l_occupazione() throws {
@@ -317,6 +336,26 @@ final class PresaDelQuartierGeneraleTest: XCTestCase {
         XCTAssertEqual(stato.conclusione?.vincitore, .giocatore)
         XCTAssertEqual(occupazioni(eventi).last, .campagnaConclusa(modo: .presa, vincitore: .giocatore))
         XCTAssertEqual(stato.quartieriGeneraliPresi, [suo])
+    }
+
+    /// È un vantaggio nascosto (01 §13.2), e la voce di dati che governa l'annientamento simultaneo lo spegne
+    /// (05 §12.5): allora vince l'avversario.
+    func test_05_12_5_il_vantaggio_della_caduta_simultanea_e_disattivabile() throws {
+        let copia = FileManager.default.temporaryDirectory.appendingPathComponent("valori-\(UUID().uuidString)")
+        addTeardownBlock { try? FileManager.default.removeItem(at: copia) }
+        try FileManager.default.copyItem(at: Contenuti.valoriDiFabbrica, to: copia)
+        let file = copia.appendingPathComponent("vantaggi-nascosti.json")
+        var voci = try XCTUnwrap(JSONSerialization.jsonObject(with: Data(contentsOf: file)) as? [String: Any])
+        voci["annientamento_simultaneo_al_giocatore"] = false
+        try JSONSerialization.data(withJSONObject: voci).write(to: file)
+        let spento = MotoreCampagna(valori: try CaricatoreValori.carica(da: copia), valoriCampagna: valoriCampagna)
+        XCTAssertTrue(motore.valori.vantaggi.annientamentoSimultaneoAlGiocatore, "di fabbrica è acceso")
+        let acceso = motore
+        motore = spento
+        defer { motore = acceso }
+        var stato = try crea([armato(1, 2)], [armato(4, 2)])
+        chiudi(&stato, 4)
+        XCTAssertEqual(stato.conclusione, ConclusioneCampagna(modo: .presa, vincitore: .avversario, giorno: 4))
     }
 
     /// Una battaglia rimasta in sospeso altrove non si combatte più: la campagna è finita.

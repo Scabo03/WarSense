@@ -99,12 +99,15 @@ extension MotoreCampagna {
     /// gruppo vi entra COMINCIA l'occupazione e non conta; ogni chiusura successiva in cui la tiene conta
     /// una giornata; quella in cui è contesa non conta e non azzera; quella in cui non c'è più azzera.
     /// Raggiunte le giornate della regola il quartier generale è preso; preso l'ultimo, la campagna è
-    /// conclusa. Il giocatore per primo: se nella stessa chiusura cadessero gli ultimi quartieri generali
-    /// di entrambi, vince lui, come nell'annientamento simultaneo (01 §15.2.5).
+    /// conclusa. Se nella stessa chiusura cadessero gli ultimi quartieri generali di entrambi vince il
+    /// giocatore, come nell'annientamento simultaneo (01 §15.2.5): è il medesimo vantaggio nascosto, e la
+    /// medesima voce di dati lo spegne (01 §13.2, §5.18.3.4).
     func contaLeOccupazioni(_ stato: inout StatoCampagna) -> [EventoCampagna] {
         guard let regole = stato.regole, stato.conclusione == nil else { return [] }
         var eventi: [EventoCampagna] = []
-        for occupante in [Parte.giocatore, .avversario] {
+        let ordine: [Parte] = valori.vantaggi.annientamentoSimultaneoAlGiocatore
+            ? [.giocatore, .avversario] : [.avversario, .giocatore]
+        for occupante in ordine {
             for casella in occupabili(da: occupante, stato: stato) {
                 let posto = stato.occupazioni?.firstIndex { $0.casella == casella }
                 switch (tenuta(di: casella, da: occupante, stato: stato), posto) {

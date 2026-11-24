@@ -1,0 +1,573 @@
+== la caduta simultanea va sempre al giocatore, anche col vantaggio spento
+   sorgente: Codice/Sources/Motore/PresaDelQuartierGenerale.swift
+   tolto:  ? [.giocatore, .avversario] : [.avversario, .giocatore]
+   messo:  ? [.giocatore, .avversario] : [.giocatore, .avversario]
+   prove:  swift test --filter PresaDelQuartierGeneraleTest (uscita 1)
+Test Case '-[MotoreTest.PresaDelQuartierGeneraleTest test_00_15_le_occupazioni_stanno_nello_stato_e_nell_impronta]' passed (0.013 seconds).
+Test Case '-[MotoreTest.PresaDelQuartierGeneraleTest test_01_15_2_5_caduti_insieme_gli_ultimi_quartieri_generali_vince_il_giocatore]' passed (0.008 seconds).
+Test Case '-[MotoreTest.PresaDelQuartierGeneraleTest test_01_5_14_3_2_con_una_fortezza_vanno_presi_tutti_e_due_i_quartieri_generali]' passed (0.008 seconds).
+Test Case '-[MotoreTest.PresaDelQuartierGeneraleTest test_01_5_17_1_il_registro_annota_l_occupazione_subita]' passed (0.008 seconds).
+Test Case '-[MotoreTest.PresaDelQuartierGeneraleTest test_01_5_18_2_il_contatto_col_nemico_impedisce_il_richiamo_e_dice_quale_gruppo_e_dove]' passed (0.008 seconds).
+Test Case '-[MotoreTest.PresaDelQuartierGeneraleTest test_01_5_18_2_il_rifornimento_tagliato_impedisce_il_richiamo_e_dice_quale_gruppo]' passed (0.008 seconds).
+Test Case '-[MotoreTest.PresaDelQuartierGeneraleTest test_01_5_18_2_l_esercito_si_richiama_quando_nessun_gruppo_e_tagliato_ne_a_contatto]' passed (0.008 seconds).
+Test Case '-[MotoreTest.PresaDelQuartierGeneraleTest test_01_5_18_3_2_chi_sta_per_uscire_occupa_ancora_finche_non_e_uscito]' passed (0.008 seconds).
+Test Case '-[MotoreTest.PresaDelQuartierGeneraleTest test_01_5_18_3_2_il_difensore_battuto_che_non_puo_ripiegare_non_ferma_il_conteggio]' passed (0.008 seconds).
+Test Case '-[MotoreTest.PresaDelQuartierGeneraleTest test_01_5_18_3_2_il_difensore_che_torna_e_vince_azzera_e_se_perde_il_conteggio_riprende]' passed (0.008 seconds).
+Test Case '-[MotoreTest.PresaDelQuartierGeneraleTest test_01_5_18_3_2_lasciata_la_casella_il_conteggio_si_azzera_e_ricomincia_da_capo]' passed (0.008 seconds).
+Test Case '-[MotoreTest.PresaDelQuartierGeneraleTest test_01_5_18_3_2_riunito_altrove_l_occupante_lascia_il_quartier_generale]' passed (0.007 seconds).
+Test Case '-[MotoreTest.PresaDelQuartierGeneraleTest test_01_5_18_3_2_vinta_la_battaglia_contro_il_difensore_comincia_l_occupazione]' passed (0.008 seconds).
+Test Case '-[MotoreTest.PresaDelQuartierGeneraleTest test_01_5_18_3_3_chi_possiede_il_quartier_generale_sa_sempre_che_e_occupato]' passed (0.008 seconds).
+Test Case '-[MotoreTest.PresaDelQuartierGeneraleTest test_01_5_18_3_4_l_esito_della_presa_e_del_richiamo_arriva_al_regno]' passed (0.008 seconds).
+Test Case '-[MotoreTest.PresaDelQuartierGeneraleTest test_01_5_18_3_4_la_caduta_dell_ultimo_quartier_generale_chiude_anche_le_battaglie_in_sospeso]' passed (0.008 seconds).
+Test Case '-[MotoreTest.PresaDelQuartierGeneraleTest test_01_5_18_3_4_la_presa_che_si_compie_nell_ultima_giornata_vince_sull_inverno]' passed (0.008 seconds).
+Test Case '-[MotoreTest.PresaDelQuartierGeneraleTest test_01_5_18_3_5_a_un_passo_l_avversario_entra_nel_quartier_generale]' passed (0.007 seconds).
+Test Case '-[MotoreTest.PresaDelQuartierGeneraleTest test_01_5_18_3_5_l_avversario_che_occupa_il_quartier_generale_lo_tiene]' passed (0.008 seconds).
+Test Case '-[MotoreTest.PresaDelQuartierGeneraleTest test_01_5_18_3_5_l_avversario_torna_a_riprendere_il_proprio_quartier_generale]' passed (0.008 seconds).
+Test Case '-[MotoreTest.PresaDelQuartierGeneraleTest test_01_5_18_3_5_l_avversario_valuta_la_corsa]' passed (0.008 seconds).
+Test Case '-[MotoreTest.PresaDelQuartierGeneraleTest test_01_5_18_3_il_quartier_generale_cade_dopo_le_giornate_della_regola_per_le_due_parti]' passed (0.008 seconds).
+Test Case '-[MotoreTest.PresaDelQuartierGeneraleTest test_01_5_18_3_la_ricognizione_e_le_non_armate_non_occupano]' passed (0.008 seconds).
+Test Case '-[MotoreTest.PresaDelQuartierGeneraleTest test_01_5_18_3_le_giornate_sono_quelle_che_la_campagna_dichiara]' passed (0.008 seconds).
+Test Case '-[MotoreTest.PresaDelQuartierGeneraleTest test_01_5_6_3_1_le_giornate_verso_una_meta_seguono_la_via_piu_breve]' passed (0.008 seconds).
+/Users/lucascabini/Developer/WarSense/Codice/Tests/MotoreTest/PresaDelQuartierGeneraleTest.swift:339: error: -[MotoreTest.PresaDelQuartierGeneraleTest test_05_12_5_il_vantaggio_della_caduta_simultanea_e_disattivabile] : XCTAssertEqual failed: ("Optional(Motore.ConclusioneCampagna(modo: Motore.ConclusioneCampagna.Modo.presa, vincitore: Optional(Dati.Parte.giocatore), giorno: 4))") is not equal to ("Optional(Motore.ConclusioneCampagna(modo: Motore.ConclusioneCampagna.Modo.presa, vincitore: Optional(Dati.Parte.avversario), giorno: 4))")
+Test Case '-[MotoreTest.PresaDelQuartierGeneraleTest test_05_12_5_il_vantaggio_della_caduta_simultanea_e_disattivabile]' failed (0.140 seconds).
+Test Case '-[MotoreTest.PresaDelQuartierGeneraleTest test_incarico_32_senza_la_regola_la_condotta_non_cambia]' passed (0.009 seconds).
+Test Case '-[MotoreTest.PresaDelQuartierGeneraleTest test_incarico_32_senza_la_regola_nulla_cambia]' passed (0.008 seconds).
+	 Executed 28 tests, with 1 failure (0 unexpected) in 0.359 (0.360) seconds
+	 Executed 28 tests, with 1 failure (0 unexpected) in 0.359 (0.361) seconds
+
+== la chiusura in cui si entra conta una giornata
+   sorgente: Codice/Sources/Motore/PresaDelQuartierGenerale.swift
+   tolto:  + [OccupazioneDelQuartierGenerale(casella: casella, occupante: occupante, giornate: 0)]
+   messo:  + [OccupazioneDelQuartierGenerale(casella: casella, occupante: occupante, giornate: 1)]
+   prove:  swift test --filter PresaDelQuartierGeneraleTest (uscita 1)
+Test Case '-[MotoreTest.PresaDelQuartierGeneraleTest test_00_15_le_occupazioni_stanno_nello_stato_e_nell_impronta]' passed (0.017 seconds).
+Test Case '-[MotoreTest.PresaDelQuartierGeneraleTest test_01_15_2_5_caduti_insieme_gli_ultimi_quartieri_generali_vince_il_giocatore]' passed (0.008 seconds).
+Test Case '-[MotoreTest.PresaDelQuartierGeneraleTest test_01_5_14_3_2_con_una_fortezza_vanno_presi_tutti_e_due_i_quartieri_generali]' passed (0.008 seconds).
+Test Case '-[MotoreTest.PresaDelQuartierGeneraleTest test_01_5_17_1_il_registro_annota_l_occupazione_subita]' passed (0.008 seconds).
+Test Case '-[MotoreTest.PresaDelQuartierGeneraleTest test_01_5_18_2_il_contatto_col_nemico_impedisce_il_richiamo_e_dice_quale_gruppo_e_dove]' passed (0.008 seconds).
+Test Case '-[MotoreTest.PresaDelQuartierGeneraleTest test_01_5_18_2_il_rifornimento_tagliato_impedisce_il_richiamo_e_dice_quale_gruppo]' passed (0.007 seconds).
+Test Case '-[MotoreTest.PresaDelQuartierGeneraleTest test_01_5_18_2_l_esercito_si_richiama_quando_nessun_gruppo_e_tagliato_ne_a_contatto]' passed (0.008 seconds).
+/Users/lucascabini/Developer/WarSense/Codice/Tests/MotoreTest/PresaDelQuartierGeneraleTest.swift:212: error: -[MotoreTest.PresaDelQuartierGeneraleTest test_01_5_18_3_2_chi_sta_per_uscire_occupa_ancora_finche_non_e_uscito] : XCTAssertEqual failed: ("[Motore.EventoCampagna.occupazioneProsegue(casella: Motore.Cella(riga: 1, colonna: 2), occupante: Dati.Parte.giocatore, mancano: 1)]") is not equal to ("[Motore.EventoCampagna.occupazioneProsegue(casella: Motore.Cella(riga: 1, colonna: 2), occupante: Dati.Parte.giocatore, mancano: 2)]")
+Test Case '-[MotoreTest.PresaDelQuartierGeneraleTest test_01_5_18_3_2_chi_sta_per_uscire_occupa_ancora_finche_non_e_uscito]' failed (0.114 seconds).
+Test Case '-[MotoreTest.PresaDelQuartierGeneraleTest test_01_5_18_3_2_il_difensore_battuto_che_non_puo_ripiegare_non_ferma_il_conteggio]' passed (0.009 seconds).
+/Users/lucascabini/Developer/WarSense/Codice/Tests/MotoreTest/PresaDelQuartierGeneraleTest.swift:221: error: -[MotoreTest.PresaDelQuartierGeneraleTest test_01_5_18_3_2_il_difensore_che_torna_e_vince_azzera_e_se_perde_il_conteggio_riprende] : XCTAssertEqual failed: ("Optional([Motore.OccupazioneDelQuartierGenerale(casella: Motore.Cella(riga: 4, colonna: 2), occupante: Dati.Parte.avversario, giornate: 1)])") is not equal to ("Optional([Motore.OccupazioneDelQuartierGenerale(casella: Motore.Cella(riga: 4, colonna: 2), occupante: Dati.Parte.avversario, giornate: 0)])")
+/Users/lucascabini/Developer/WarSense/Codice/Tests/MotoreTest/PresaDelQuartierGeneraleTest.swift:233: error: -[MotoreTest.PresaDelQuartierGeneraleTest test_01_5_18_3_2_il_difensore_che_torna_e_vince_azzera_e_se_perde_il_conteggio_riprende] : XCTAssertEqual failed: ("1") is not equal to ("0")
+Test Case '-[MotoreTest.PresaDelQuartierGeneraleTest test_01_5_18_3_2_il_difensore_che_torna_e_vince_azzera_e_se_perde_il_conteggio_riprende]' failed (0.009 seconds).
+/Users/lucascabini/Developer/WarSense/Codice/Tests/MotoreTest/PresaDelQuartierGeneraleTest.swift:183: error: -[MotoreTest.PresaDelQuartierGeneraleTest test_01_5_18_3_2_lasciata_la_casella_il_conteggio_si_azzera_e_ricomincia_da_capo] : XCTAssertEqual failed: ("nil") is not equal to ("Optional(2)") - ne manca una
+/Users/lucascabini/Developer/WarSense/Codice/Tests/MotoreTest/PresaDelQuartierGeneraleTest.swift:186: error: -[MotoreTest.PresaDelQuartierGeneraleTest test_01_5_18_3_2_lasciata_la_casella_il_conteggio_si_azzera_e_ricomincia_da_capo] : XCTAssertEqual failed: ("Optional(Motore.MotivoNonValidoCampagna.campagnaConclusa)") is not equal to ("nil")
+error: Process '/Applications/Xcode.app/Contents/Developer/usr/bin/xctest -XCTest MotoreTest.PresaDelQuartierGeneraleTest/test_00_15_le_occupazioni_stanno_nello_stato_e_nell_impronta,MotoreTest.PresaDelQuartierGeneraleTest/test_01_15_2_5_caduti_insieme_gli_ultimi_quartieri_generali_vince_il_giocatore,MotoreTest.PresaDelQuartierGeneraleTest/test_01_5_14_3_2_con_una_fortezza_vanno_presi_tutti_e_due_i_quartieri_generali,MotoreTest.PresaDelQuartierGeneraleTest/test_01_5_17_1_il_registro_annota_l_occupazione_subita,MotoreTest.PresaDelQuartierGeneraleTest/test_01_5_18_2_il_contatto_col_nemico_impedisce_il_richiamo_e_dice_quale_gruppo_e_dove,MotoreTest.PresaDelQuartierGeneraleTest/test_01_5_18_2_il_rifornimento_tagliato_impedisce_il_richiamo_e_dice_quale_gruppo,MotoreTest.PresaDelQuartierGeneraleTest/test_01_5_18_2_l_esercito_si_richiama_quando_nessun_gruppo_e_tagliato_ne_a_contatto,MotoreTest.PresaDelQuartierGeneraleTest/test_01_5_18_3_2_chi_sta_per_uscire_occupa_ancora_finche_non_e_uscito,MotoreTest.PresaDelQuartierGeneraleTest/test_01_5_18_3_2_il_difensore_battuto_che_non_puo_ripiegare_non_ferma_il_conteggio,MotoreTest.PresaDelQuartierGeneraleTest/test_01_5_18_3_2_il_difensore_che_torna_e_vince_azzera_e_se_perde_il_conteggio_riprende,MotoreTest.PresaDelQuartierGeneraleTest/test_01_5_18_3_2_lasciata_la_casella_il_conteggio_si_azzera_e_ricomincia_da_capo,MotoreTest.PresaDelQuartierGeneraleTest/test_01_5_18_3_2_riunito_altrove_l_occupante_lascia_il_quartier_generale,MotoreTest.PresaDelQuartierGeneraleTest/test_01_5_18_3_2_vinta_la_battaglia_contro_il_difensore_comincia_l_occupazione,MotoreTest.PresaDelQuartierGeneraleTest/test_01_5_18_3_3_chi_possiede_il_quartier_generale_sa_sempre_che_e_occupato,MotoreTest.PresaDelQuartierGeneraleTest/test_01_5_18_3_4_l_esito_della_presa_e_del_richiamo_arriva_al_regno,MotoreTest.PresaDelQuartierGeneraleTest/test_01_5_18_3_4_la_caduta_dell_ultimo_quartier_generale_chiude_anche_le_battaglie_in_sospeso,MotoreTest.PresaDelQuartierGeneraleTest/test_01_5_18_3_4_la_presa_che_si_compie_nell_ultima_giornata_vince_sull_inverno,MotoreTest.PresaDelQuartierGeneraleTest/test_01_5_18_3_5_a_un_passo_l_avversario_entra_nel_quartier_generale,MotoreTest.PresaDelQuartierGeneraleTest/test_01_5_18_3_5_l_avversario_che_occupa_il_quartier_generale_lo_tiene,MotoreTest.PresaDelQuartierGeneraleTest/test_01_5_18_3_5_l_avversario_torna_a_riprendere_il_proprio_quartier_generale,MotoreTest.PresaDelQuartierGeneraleTest/test_01_5_18_3_5_l_avversario_valuta_la_corsa,MotoreTest.PresaDelQuartierGeneraleTest/test_01_5_18_3_il_quartier_generale_cade_dopo_le_giornate_della_regola_per_le_due_parti,MotoreTest.PresaDelQuartierGeneraleTest/test_01_5_18_3_la_ricognizione_e_le_non_armate_non_occupano,MotoreTest.PresaDelQuartierGeneraleTest/test_01_5_18_3_le_giornate_sono_quelle_che_la_campagna_dichiara,MotoreTest.PresaDelQuartierGeneraleTest/test_01_5_6_3_1_le_giornate_verso_una_meta_seguono_la_via_piu_breve,MotoreTest.PresaDelQuartierGeneraleTest/test_05_12_5_il_vantaggio_della_caduta_simultanea_e_disattivabile,MotoreTest.PresaDelQuartierGeneraleTest/test_incarico_32_senza_la_regola_la_condotta_non_cambia,MotoreTest.PresaDelQuartierGeneraleTest/test_incarico_32_senza_la_regola_nulla_cambia /Users/lucascabini/Developer/WarSense/Codice/.build/out/Products/Debug/MotoreTest.xctest' exited with unexpected signal code 5
+
+== lasciare la casella non azzera
+   sorgente: Codice/Sources/Motore/PresaDelQuartierGenerale.swift
+   tolto:  case (.libero, .some): eventi.append(interrompiLOccupazione(di: casella, da: occupante, in: &stato)) case (.conteso, _), (.libero, nil):
+   messo:  case (.conteso, _), (.libero, _):
+   prove:  swift test --filter PresaDelQuartierGeneraleTest (uscita 1)
+Test Case '-[MotoreTest.PresaDelQuartierGeneraleTest test_00_15_le_occupazioni_stanno_nello_stato_e_nell_impronta]' passed (0.014 seconds).
+Test Case '-[MotoreTest.PresaDelQuartierGeneraleTest test_01_15_2_5_caduti_insieme_gli_ultimi_quartieri_generali_vince_il_giocatore]' passed (0.009 seconds).
+Test Case '-[MotoreTest.PresaDelQuartierGeneraleTest test_01_5_14_3_2_con_una_fortezza_vanno_presi_tutti_e_due_i_quartieri_generali]' passed (0.009 seconds).
+/Users/lucascabini/Developer/WarSense/Codice/Tests/MotoreTest/PresaDelQuartierGeneraleTest.swift:458: error: -[MotoreTest.PresaDelQuartierGeneraleTest test_01_5_17_1_il_registro_annota_l_occupazione_subita] : XCTAssertEqual failed: ("Optional(Motore.FattoRegistrato.quartierGeneraleOccupato(casella: Motore.Cella(riga: 4, colonna: 2)))") is not equal to ("Optional(Motore.FattoRegistrato.quartierGeneraleLiberato(casella: Motore.Cella(riga: 4, colonna: 2)))")
+Test Case '-[MotoreTest.PresaDelQuartierGeneraleTest test_01_5_17_1_il_registro_annota_l_occupazione_subita]' failed (0.101 seconds).
+Test Case '-[MotoreTest.PresaDelQuartierGeneraleTest test_01_5_18_2_il_contatto_col_nemico_impedisce_il_richiamo_e_dice_quale_gruppo_e_dove]' passed (0.008 seconds).
+Test Case '-[MotoreTest.PresaDelQuartierGeneraleTest test_01_5_18_2_il_rifornimento_tagliato_impedisce_il_richiamo_e_dice_quale_gruppo]' passed (0.008 seconds).
+Test Case '-[MotoreTest.PresaDelQuartierGeneraleTest test_01_5_18_2_l_esercito_si_richiama_quando_nessun_gruppo_e_tagliato_ne_a_contatto]' passed (0.008 seconds).
+Test Case '-[MotoreTest.PresaDelQuartierGeneraleTest test_01_5_18_3_2_chi_sta_per_uscire_occupa_ancora_finche_non_e_uscito]' passed (0.007 seconds).
+Test Case '-[MotoreTest.PresaDelQuartierGeneraleTest test_01_5_18_3_2_il_difensore_battuto_che_non_puo_ripiegare_non_ferma_il_conteggio]' passed (0.009 seconds).
+Test Case '-[MotoreTest.PresaDelQuartierGeneraleTest test_01_5_18_3_2_il_difensore_che_torna_e_vince_azzera_e_se_perde_il_conteggio_riprende]' passed (0.008 seconds).
+/Users/lucascabini/Developer/WarSense/Codice/Tests/MotoreTest/PresaDelQuartierGeneraleTest.swift:194: error: -[MotoreTest.PresaDelQuartierGeneraleTest test_01_5_18_3_2_lasciata_la_casella_il_conteggio_si_azzera_e_ricomincia_da_capo] : XCTAssertEqual failed: ("[]") is not equal to ("[Motore.EventoCampagna.occupazioneInterrotta(casella: Motore.Cella(riga: 1, colonna: 2), occupante: Dati.Parte.giocatore)]")
+/Users/lucascabini/Developer/WarSense/Codice/Tests/MotoreTest/PresaDelQuartierGeneraleTest.swift:195: error: -[MotoreTest.PresaDelQuartierGeneraleTest test_01_5_18_3_2_lasciata_la_casella_il_conteggio_si_azzera_e_ricomincia_da_capo] : XCTAssertEqual failed: ("Optional([Motore.OccupazioneDelQuartierGenerale(casella: Motore.Cella(riga: 1, colonna: 2), occupante: Dati.Parte.giocatore, giornate: 2)])") is not equal to ("Optional([])")
+/Users/lucascabini/Developer/WarSense/Codice/Tests/MotoreTest/PresaDelQuartierGeneraleTest.swift:200: error: -[MotoreTest.PresaDelQuartierGeneraleTest test_01_5_18_3_2_lasciata_la_casella_il_conteggio_si_azzera_e_ricomincia_da_capo] : XCTAssertEqual failed: ("[Motore.EventoCampagna.campagnaConclusa(modo: Motore.ConclusioneCampagna.Modo.presa, vincitore: Optional(Dati.Parte.giocatore))]") is not equal to ("[Motore.EventoCampagna.quartierGeneraleOccupato(casella: Motore.Cella(riga: 1, colonna: 2), occupante: Dati.Parte.giocatore, mancano: 3)]")
+Test Case '-[MotoreTest.PresaDelQuartierGeneraleTest test_01_5_18_3_2_lasciata_la_casella_il_conteggio_si_azzera_e_ricomincia_da_capo]' failed (0.010 seconds).
+Test Case '-[MotoreTest.PresaDelQuartierGeneraleTest test_01_5_18_3_2_riunito_altrove_l_occupante_lascia_il_quartier_generale]' passed (0.007 seconds).
+Test Case '-[MotoreTest.PresaDelQuartierGeneraleTest test_01_5_18_3_2_vinta_la_battaglia_contro_il_difensore_comincia_l_occupazione]' passed (0.008 seconds).
+Test Case '-[MotoreTest.PresaDelQuartierGeneraleTest test_01_5_18_3_3_chi_possiede_il_quartier_generale_sa_sempre_che_e_occupato]' passed (0.008 seconds).
+Test Case '-[MotoreTest.PresaDelQuartierGeneraleTest test_01_5_18_3_4_l_esito_della_presa_e_del_richiamo_arriva_al_regno]' passed (0.008 seconds).
+Test Case '-[MotoreTest.PresaDelQuartierGeneraleTest test_01_5_18_3_4_la_caduta_dell_ultimo_quartier_generale_chiude_anche_le_battaglie_in_sospeso]' passed (0.008 seconds).
+Test Case '-[MotoreTest.PresaDelQuartierGeneraleTest test_01_5_18_3_4_la_presa_che_si_compie_nell_ultima_giornata_vince_sull_inverno]' passed (0.008 seconds).
+Test Case '-[MotoreTest.PresaDelQuartierGeneraleTest test_01_5_18_3_5_a_un_passo_l_avversario_entra_nel_quartier_generale]' passed (0.008 seconds).
+Test Case '-[MotoreTest.PresaDelQuartierGeneraleTest test_01_5_18_3_5_l_avversario_che_occupa_il_quartier_generale_lo_tiene]' passed (0.008 seconds).
+Test Case '-[MotoreTest.PresaDelQuartierGeneraleTest test_01_5_18_3_5_l_avversario_torna_a_riprendere_il_proprio_quartier_generale]' passed (0.008 seconds).
+Test Case '-[MotoreTest.PresaDelQuartierGeneraleTest test_01_5_18_3_5_l_avversario_valuta_la_corsa]' passed (0.008 seconds).
+Test Case '-[MotoreTest.PresaDelQuartierGeneraleTest test_01_5_18_3_il_quartier_generale_cade_dopo_le_giornate_della_regola_per_le_due_parti]' passed (0.008 seconds).
+Test Case '-[MotoreTest.PresaDelQuartierGeneraleTest test_01_5_18_3_la_ricognizione_e_le_non_armate_non_occupano]' passed (0.008 seconds).
+Test Case '-[MotoreTest.PresaDelQuartierGeneraleTest test_01_5_18_3_le_giornate_sono_quelle_che_la_campagna_dichiara]' passed (0.009 seconds).
+Test Case '-[MotoreTest.PresaDelQuartierGeneraleTest test_01_5_6_3_1_le_giornate_verso_una_meta_seguono_la_via_piu_breve]' passed (0.008 seconds).
+Test Case '-[MotoreTest.PresaDelQuartierGeneraleTest test_05_12_5_il_vantaggio_della_caduta_simultanea_e_disattivabile]' passed (0.022 seconds).
+Test Case '-[MotoreTest.PresaDelQuartierGeneraleTest test_incarico_32_senza_la_regola_la_condotta_non_cambia]' passed (0.008 seconds).
+Test Case '-[MotoreTest.PresaDelQuartierGeneraleTest test_incarico_32_senza_la_regola_nulla_cambia]' passed (0.008 seconds).
+	 Executed 28 tests, with 4 failures (0 unexpected) in 0.339 (0.340) seconds
+	 Executed 28 tests, with 4 failures (0 unexpected) in 0.339 (0.341) seconds
+
+== perdere la battaglia non azzera
+   sorgente: Codice/Sources/Motore/PresaDelQuartierGenerale.swift
+   tolto:  if inCorso { eventi.append(interrompiLOccupazione(di: esito.casella, da: occupante, in: &stato)) }
+   messo:  _ = inCorso
+   prove:  swift test --filter PresaDelQuartierGeneraleTest (uscita 0)
+Test Case '-[MotoreTest.PresaDelQuartierGeneraleTest test_00_15_le_occupazioni_stanno_nello_stato_e_nell_impronta]' passed (0.016 seconds).
+Test Case '-[MotoreTest.PresaDelQuartierGeneraleTest test_01_15_2_5_caduti_insieme_gli_ultimi_quartieri_generali_vince_il_giocatore]' passed (0.008 seconds).
+Test Case '-[MotoreTest.PresaDelQuartierGeneraleTest test_01_5_14_3_2_con_una_fortezza_vanno_presi_tutti_e_due_i_quartieri_generali]' passed (0.009 seconds).
+Test Case '-[MotoreTest.PresaDelQuartierGeneraleTest test_01_5_17_1_il_registro_annota_l_occupazione_subita]' passed (0.008 seconds).
+Test Case '-[MotoreTest.PresaDelQuartierGeneraleTest test_01_5_18_2_il_contatto_col_nemico_impedisce_il_richiamo_e_dice_quale_gruppo_e_dove]' passed (0.008 seconds).
+Test Case '-[MotoreTest.PresaDelQuartierGeneraleTest test_01_5_18_2_il_rifornimento_tagliato_impedisce_il_richiamo_e_dice_quale_gruppo]' passed (0.008 seconds).
+Test Case '-[MotoreTest.PresaDelQuartierGeneraleTest test_01_5_18_2_l_esercito_si_richiama_quando_nessun_gruppo_e_tagliato_ne_a_contatto]' passed (0.008 seconds).
+Test Case '-[MotoreTest.PresaDelQuartierGeneraleTest test_01_5_18_3_2_chi_sta_per_uscire_occupa_ancora_finche_non_e_uscito]' passed (0.008 seconds).
+Test Case '-[MotoreTest.PresaDelQuartierGeneraleTest test_01_5_18_3_2_il_difensore_battuto_che_non_puo_ripiegare_non_ferma_il_conteggio]' passed (0.009 seconds).
+Test Case '-[MotoreTest.PresaDelQuartierGeneraleTest test_01_5_18_3_2_il_difensore_che_torna_e_vince_azzera_e_se_perde_il_conteggio_riprende]' passed (0.008 seconds).
+Test Case '-[MotoreTest.PresaDelQuartierGeneraleTest test_01_5_18_3_2_lasciata_la_casella_il_conteggio_si_azzera_e_ricomincia_da_capo]' passed (0.008 seconds).
+Test Case '-[MotoreTest.PresaDelQuartierGeneraleTest test_01_5_18_3_2_riunito_altrove_l_occupante_lascia_il_quartier_generale]' passed (0.007 seconds).
+Test Case '-[MotoreTest.PresaDelQuartierGeneraleTest test_01_5_18_3_2_vinta_la_battaglia_contro_il_difensore_comincia_l_occupazione]' passed (0.008 seconds).
+Test Case '-[MotoreTest.PresaDelQuartierGeneraleTest test_01_5_18_3_3_chi_possiede_il_quartier_generale_sa_sempre_che_e_occupato]' passed (0.008 seconds).
+Test Case '-[MotoreTest.PresaDelQuartierGeneraleTest test_01_5_18_3_4_l_esito_della_presa_e_del_richiamo_arriva_al_regno]' passed (0.008 seconds).
+Test Case '-[MotoreTest.PresaDelQuartierGeneraleTest test_01_5_18_3_4_la_caduta_dell_ultimo_quartier_generale_chiude_anche_le_battaglie_in_sospeso]' passed (0.008 seconds).
+Test Case '-[MotoreTest.PresaDelQuartierGeneraleTest test_01_5_18_3_4_la_presa_che_si_compie_nell_ultima_giornata_vince_sull_inverno]' passed (0.008 seconds).
+Test Case '-[MotoreTest.PresaDelQuartierGeneraleTest test_01_5_18_3_5_a_un_passo_l_avversario_entra_nel_quartier_generale]' passed (0.008 seconds).
+Test Case '-[MotoreTest.PresaDelQuartierGeneraleTest test_01_5_18_3_5_l_avversario_che_occupa_il_quartier_generale_lo_tiene]' passed (0.008 seconds).
+Test Case '-[MotoreTest.PresaDelQuartierGeneraleTest test_01_5_18_3_5_l_avversario_torna_a_riprendere_il_proprio_quartier_generale]' passed (0.009 seconds).
+Test Case '-[MotoreTest.PresaDelQuartierGeneraleTest test_01_5_18_3_5_l_avversario_valuta_la_corsa]' passed (0.007 seconds).
+Test Case '-[MotoreTest.PresaDelQuartierGeneraleTest test_01_5_18_3_il_quartier_generale_cade_dopo_le_giornate_della_regola_per_le_due_parti]' passed (0.008 seconds).
+Test Case '-[MotoreTest.PresaDelQuartierGeneraleTest test_01_5_18_3_la_ricognizione_e_le_non_armate_non_occupano]' passed (0.008 seconds).
+Test Case '-[MotoreTest.PresaDelQuartierGeneraleTest test_01_5_18_3_le_giornate_sono_quelle_che_la_campagna_dichiara]' passed (0.008 seconds).
+Test Case '-[MotoreTest.PresaDelQuartierGeneraleTest test_01_5_6_3_1_le_giornate_verso_una_meta_seguono_la_via_piu_breve]' passed (0.008 seconds).
+Test Case '-[MotoreTest.PresaDelQuartierGeneraleTest test_05_12_5_il_vantaggio_della_caduta_simultanea_e_disattivabile]' passed (0.024 seconds).
+Test Case '-[MotoreTest.PresaDelQuartierGeneraleTest test_incarico_32_senza_la_regola_la_condotta_non_cambia]' passed (0.008 seconds).
+Test Case '-[MotoreTest.PresaDelQuartierGeneraleTest test_incarico_32_senza_la_regola_nulla_cambia]' passed (0.008 seconds).
+	 Executed 28 tests, with 0 failures (0 unexpected) in 0.248 (0.249) seconds
+	 Executed 28 tests, with 0 failures (0 unexpected) in 0.248 (0.250) seconds
+
+== con una battaglia in sospeso la giornata conta
+   sorgente: Codice/Sources/Motore/PresaDelQuartierGenerale.swift
+   tolto:  if stato.battagliaInSospeso(su: casella) != nil { return .conteso }
+   messo:  if stato.battagliaInSospeso(su: casella) != nil { return .tenuto }
+   prove:  swift test --filter PresaDelQuartierGeneraleTest (uscita 1)
+Test Case '-[MotoreTest.PresaDelQuartierGeneraleTest test_00_15_le_occupazioni_stanno_nello_stato_e_nell_impronta]' passed (0.013 seconds).
+Test Case '-[MotoreTest.PresaDelQuartierGeneraleTest test_01_15_2_5_caduti_insieme_gli_ultimi_quartieri_generali_vince_il_giocatore]' passed (0.008 seconds).
+Test Case '-[MotoreTest.PresaDelQuartierGeneraleTest test_01_5_14_3_2_con_una_fortezza_vanno_presi_tutti_e_due_i_quartieri_generali]' passed (0.008 seconds).
+Test Case '-[MotoreTest.PresaDelQuartierGeneraleTest test_01_5_17_1_il_registro_annota_l_occupazione_subita]' passed (0.008 seconds).
+Test Case '-[MotoreTest.PresaDelQuartierGeneraleTest test_01_5_18_2_il_contatto_col_nemico_impedisce_il_richiamo_e_dice_quale_gruppo_e_dove]' passed (0.008 seconds).
+Test Case '-[MotoreTest.PresaDelQuartierGeneraleTest test_01_5_18_2_il_rifornimento_tagliato_impedisce_il_richiamo_e_dice_quale_gruppo]' passed (0.007 seconds).
+Test Case '-[MotoreTest.PresaDelQuartierGeneraleTest test_01_5_18_2_l_esercito_si_richiama_quando_nessun_gruppo_e_tagliato_ne_a_contatto]' passed (0.007 seconds).
+Test Case '-[MotoreTest.PresaDelQuartierGeneraleTest test_01_5_18_3_2_chi_sta_per_uscire_occupa_ancora_finche_non_e_uscito]' passed (0.007 seconds).
+/Users/lucascabini/Developer/WarSense/Codice/Tests/MotoreTest/PresaDelQuartierGeneraleTest.swift:259: error: -[MotoreTest.PresaDelQuartierGeneraleTest test_01_5_18_3_2_il_difensore_battuto_che_non_puo_ripiegare_non_ferma_il_conteggio] : XCTAssertEqual failed: ("nil") is not equal to ("Optional(Motore.EventoCampagna.quartierGeneraleOccupato(casella: Motore.Cella(riga: 4, colonna: 2), occupante: Dati.Parte.avversario, mancano: 3))")
+/Users/lucascabini/Developer/WarSense/Codice/Tests/MotoreTest/PresaDelQuartierGeneraleTest.swift:265: error: -[MotoreTest.PresaDelQuartierGeneraleTest test_01_5_18_3_2_il_difensore_battuto_che_non_puo_ripiegare_non_ferma_il_conteggio] : XCTAssertEqual failed: ("[Motore.EventoCampagna.occupazioneInterrotta(casella: Motore.Cella(riga: 4, colonna: 2), occupante: Dati.Parte.avversario)]") is not equal to ("[]")
+Test Case '-[MotoreTest.PresaDelQuartierGeneraleTest test_01_5_18_3_2_il_difensore_battuto_che_non_puo_ripiegare_non_ferma_il_conteggio]' failed (0.105 seconds).
+/Users/lucascabini/Developer/WarSense/Codice/Tests/MotoreTest/PresaDelQuartierGeneraleTest.swift:232: error: -[MotoreTest.PresaDelQuartierGeneraleTest test_01_5_18_3_2_il_difensore_che_torna_e_vince_azzera_e_se_perde_il_conteggio_riprende] : XCTAssertEqual failed: ("[Motore.EventoCampagna.occupazioneProsegue(casella: Motore.Cella(riga: 4, colonna: 2), occupante: Dati.Parte.avversario, mancano: 2)]") is not equal to ("[]") - la giornata contesa non conta e non azzera
+/Users/lucascabini/Developer/WarSense/Codice/Tests/MotoreTest/PresaDelQuartierGeneraleTest.swift:233: error: -[MotoreTest.PresaDelQuartierGeneraleTest test_01_5_18_3_2_il_difensore_che_torna_e_vince_azzera_e_se_perde_il_conteggio_riprende] : XCTAssertEqual failed: ("1") is not equal to ("0")
+Test Case '-[MotoreTest.PresaDelQuartierGeneraleTest test_01_5_18_3_2_il_difensore_che_torna_e_vince_azzera_e_se_perde_il_conteggio_riprende]' failed (0.008 seconds).
+Test Case '-[MotoreTest.PresaDelQuartierGeneraleTest test_01_5_18_3_2_lasciata_la_casella_il_conteggio_si_azzera_e_ricomincia_da_capo]' passed (0.008 seconds).
+Test Case '-[MotoreTest.PresaDelQuartierGeneraleTest test_01_5_18_3_2_riunito_altrove_l_occupante_lascia_il_quartier_generale]' passed (0.008 seconds).
+/Users/lucascabini/Developer/WarSense/Codice/Tests/MotoreTest/PresaDelQuartierGeneraleTest.swift:279: error: -[MotoreTest.PresaDelQuartierGeneraleTest test_01_5_18_3_2_vinta_la_battaglia_contro_il_difensore_comincia_l_occupazione] : XCTAssertEqual failed: ("[Motore.EventoCampagna.quartierGeneraleOccupato(casella: Motore.Cella(riga: 1, colonna: 2), occupante: Dati.Parte.giocatore, mancano: 3)]") is not equal to ("[]") - contesa: l'occupazione non comincia finché il difensore vi sta
+/Users/lucascabini/Developer/WarSense/Codice/Tests/MotoreTest/PresaDelQuartierGeneraleTest.swift:280: error: -[MotoreTest.PresaDelQuartierGeneraleTest test_01_5_18_3_2_vinta_la_battaglia_contro_il_difensore_comincia_l_occupazione] : XCTAssertNil failed: "OccupazioneDelQuartierGenerale(casella: Motore.Cella(riga: 1, colonna: 2), occupante: Dati.Parte.giocatore, giornate: 0)"
+/Users/lucascabini/Developer/WarSense/Codice/Tests/MotoreTest/PresaDelQuartierGeneraleTest.swift:282: error: -[MotoreTest.PresaDelQuartierGeneraleTest test_01_5_18_3_2_vinta_la_battaglia_contro_il_difensore_comincia_l_occupazione] : XCTAssertEqual failed: ("nil") is not equal to ("Optional(Motore.EventoCampagna.quartierGeneraleOccupato(casella: Motore.Cella(riga: 1, colonna: 2), occupante: Dati.Parte.giocatore, mancano: 3))")
+Test Case '-[MotoreTest.PresaDelQuartierGeneraleTest test_01_5_18_3_2_vinta_la_battaglia_contro_il_difensore_comincia_l_occupazione]' failed (0.008 seconds).
+Test Case '-[MotoreTest.PresaDelQuartierGeneraleTest test_01_5_18_3_3_chi_possiede_il_quartier_generale_sa_sempre_che_e_occupato]' passed (0.007 seconds).
+Test Case '-[MotoreTest.PresaDelQuartierGeneraleTest test_01_5_18_3_4_l_esito_della_presa_e_del_richiamo_arriva_al_regno]' passed (0.008 seconds).
+Test Case '-[MotoreTest.PresaDelQuartierGeneraleTest test_01_5_18_3_4_la_caduta_dell_ultimo_quartier_generale_chiude_anche_le_battaglie_in_sospeso]' passed (0.007 seconds).
+Test Case '-[MotoreTest.PresaDelQuartierGeneraleTest test_01_5_18_3_4_la_presa_che_si_compie_nell_ultima_giornata_vince_sull_inverno]' passed (0.008 seconds).
+Test Case '-[MotoreTest.PresaDelQuartierGeneraleTest test_01_5_18_3_5_a_un_passo_l_avversario_entra_nel_quartier_generale]' passed (0.008 seconds).
+Test Case '-[MotoreTest.PresaDelQuartierGeneraleTest test_01_5_18_3_5_l_avversario_che_occupa_il_quartier_generale_lo_tiene]' passed (0.007 seconds).
+/Users/lucascabini/Developer/WarSense/Codice/Tests/MotoreTest/PresaDelQuartierGeneraleTest.swift:573: error: -[MotoreTest.PresaDelQuartierGeneraleTest test_01_5_18_3_5_l_avversario_torna_a_riprendere_il_proprio_quartier_generale] : XCTAssertEqual failed: ("[]") is not equal to ("[Motore.Cella(riga: 1, colonna: 2)]") - entra nella casella a scacciare l'occupante
+Test Case '-[MotoreTest.PresaDelQuartierGeneraleTest test_01_5_18_3_5_l_avversario_torna_a_riprendere_il_proprio_quartier_generale]' failed (0.012 seconds).
+Test Case '-[MotoreTest.PresaDelQuartierGeneraleTest test_01_5_18_3_5_l_avversario_valuta_la_corsa]' passed (0.008 seconds).
+Test Case '-[MotoreTest.PresaDelQuartierGeneraleTest test_01_5_18_3_il_quartier_generale_cade_dopo_le_giornate_della_regola_per_le_due_parti]' passed (0.008 seconds).
+Test Case '-[MotoreTest.PresaDelQuartierGeneraleTest test_01_5_18_3_la_ricognizione_e_le_non_armate_non_occupano]' passed (0.008 seconds).
+Test Case '-[MotoreTest.PresaDelQuartierGeneraleTest test_01_5_18_3_le_giornate_sono_quelle_che_la_campagna_dichiara]' passed (0.009 seconds).
+Test Case '-[MotoreTest.PresaDelQuartierGeneraleTest test_01_5_6_3_1_le_giornate_verso_una_meta_seguono_la_via_piu_breve]' passed (0.008 seconds).
+Test Case '-[MotoreTest.PresaDelQuartierGeneraleTest test_05_12_5_il_vantaggio_della_caduta_simultanea_e_disattivabile]' passed (0.022 seconds).
+Test Case '-[MotoreTest.PresaDelQuartierGeneraleTest test_incarico_32_senza_la_regola_la_condotta_non_cambia]' passed (0.007 seconds).
+Test Case '-[MotoreTest.PresaDelQuartierGeneraleTest test_incarico_32_senza_la_regola_nulla_cambia]' passed (0.008 seconds).
+	 Executed 28 tests, with 10 failures (0 unexpected) in 0.338 (0.340) seconds
+
+== occupa anche chi non e' armato
+   sorgente: Codice/Sources/Motore/PresaDelQuartierGenerale.swift
+   tolto:  guard stato.occupante(di: casella, parte: occupante)?.categoria.eArmata == true else { return .libero } if stato.battaglia
+   messo:  guard stato.occupante(di: casella, parte: occupante) != nil else { return .libero } if stato.battaglia
+   prove:  swift test --filter PresaDelQuartierGeneraleTest (uscita 1)
+Test Case '-[MotoreTest.PresaDelQuartierGeneraleTest test_00_15_le_occupazioni_stanno_nello_stato_e_nell_impronta]' passed (0.014 seconds).
+Test Case '-[MotoreTest.PresaDelQuartierGeneraleTest test_01_15_2_5_caduti_insieme_gli_ultimi_quartieri_generali_vince_il_giocatore]' passed (0.008 seconds).
+Test Case '-[MotoreTest.PresaDelQuartierGeneraleTest test_01_5_14_3_2_con_una_fortezza_vanno_presi_tutti_e_due_i_quartieri_generali]' passed (0.009 seconds).
+Test Case '-[MotoreTest.PresaDelQuartierGeneraleTest test_01_5_17_1_il_registro_annota_l_occupazione_subita]' passed (0.008 seconds).
+Test Case '-[MotoreTest.PresaDelQuartierGeneraleTest test_01_5_18_2_il_contatto_col_nemico_impedisce_il_richiamo_e_dice_quale_gruppo_e_dove]' passed (0.007 seconds).
+Test Case '-[MotoreTest.PresaDelQuartierGeneraleTest test_01_5_18_2_il_rifornimento_tagliato_impedisce_il_richiamo_e_dice_quale_gruppo]' passed (0.008 seconds).
+Test Case '-[MotoreTest.PresaDelQuartierGeneraleTest test_01_5_18_2_l_esercito_si_richiama_quando_nessun_gruppo_e_tagliato_ne_a_contatto]' passed (0.007 seconds).
+Test Case '-[MotoreTest.PresaDelQuartierGeneraleTest test_01_5_18_3_2_chi_sta_per_uscire_occupa_ancora_finche_non_e_uscito]' passed (0.007 seconds).
+Test Case '-[MotoreTest.PresaDelQuartierGeneraleTest test_01_5_18_3_2_il_difensore_battuto_che_non_puo_ripiegare_non_ferma_il_conteggio]' passed (0.008 seconds).
+Test Case '-[MotoreTest.PresaDelQuartierGeneraleTest test_01_5_18_3_2_il_difensore_che_torna_e_vince_azzera_e_se_perde_il_conteggio_riprende]' passed (0.008 seconds).
+Test Case '-[MotoreTest.PresaDelQuartierGeneraleTest test_01_5_18_3_2_lasciata_la_casella_il_conteggio_si_azzera_e_ricomincia_da_capo]' passed (0.007 seconds).
+Test Case '-[MotoreTest.PresaDelQuartierGeneraleTest test_01_5_18_3_2_riunito_altrove_l_occupante_lascia_il_quartier_generale]' passed (0.007 seconds).
+Test Case '-[MotoreTest.PresaDelQuartierGeneraleTest test_01_5_18_3_2_vinta_la_battaglia_contro_il_difensore_comincia_l_occupazione]' passed (0.007 seconds).
+Test Case '-[MotoreTest.PresaDelQuartierGeneraleTest test_01_5_18_3_3_chi_possiede_il_quartier_generale_sa_sempre_che_e_occupato]' passed (0.007 seconds).
+Test Case '-[MotoreTest.PresaDelQuartierGeneraleTest test_01_5_18_3_4_l_esito_della_presa_e_del_richiamo_arriva_al_regno]' passed (0.009 seconds).
+Test Case '-[MotoreTest.PresaDelQuartierGeneraleTest test_01_5_18_3_4_la_caduta_dell_ultimo_quartier_generale_chiude_anche_le_battaglie_in_sospeso]' passed (0.007 seconds).
+Test Case '-[MotoreTest.PresaDelQuartierGeneraleTest test_01_5_18_3_4_la_presa_che_si_compie_nell_ultima_giornata_vince_sull_inverno]' passed (0.007 seconds).
+Test Case '-[MotoreTest.PresaDelQuartierGeneraleTest test_01_5_18_3_5_a_un_passo_l_avversario_entra_nel_quartier_generale]' passed (0.008 seconds).
+Test Case '-[MotoreTest.PresaDelQuartierGeneraleTest test_01_5_18_3_5_l_avversario_che_occupa_il_quartier_generale_lo_tiene]' passed (0.007 seconds).
+Test Case '-[MotoreTest.PresaDelQuartierGeneraleTest test_01_5_18_3_5_l_avversario_torna_a_riprendere_il_proprio_quartier_generale]' passed (0.008 seconds).
+Test Case '-[MotoreTest.PresaDelQuartierGeneraleTest test_01_5_18_3_5_l_avversario_valuta_la_corsa]' passed (0.007 seconds).
+Test Case '-[MotoreTest.PresaDelQuartierGeneraleTest test_01_5_18_3_il_quartier_generale_cade_dopo_le_giornate_della_regola_per_le_due_parti]' passed (0.008 seconds).
+/Users/lucascabini/Developer/WarSense/Codice/Tests/MotoreTest/PresaDelQuartierGeneraleTest.swift:172: error: -[MotoreTest.PresaDelQuartierGeneraleTest test_01_5_18_3_la_ricognizione_e_le_non_armate_non_occupano] : XCTAssertEqual failed: ("[Motore.EventoCampagna.quartierGeneraleOccupato(casella: Motore.Cella(riga: 1, colonna: 2), occupante: Dati.Parte.giocatore, mancano: 3), Motore.EventoCampagna.occupazioneProsegue(casella: Motore.Cella(riga: 1, colonna: 2), occupante: Dati.Parte.giocatore, mancano: 2), Motore.EventoCampagna.occupazioneProsegue(casella: Motore.Cella(riga: 1, colonna: 2), occupante: Dati.Parte.giocatore, mancano: 1), Motore.EventoCampagna.campagnaConclusa(modo: Motore.ConclusioneCampagna.Modo.presa, vincitore: Optional(Dati.Parte.giocatore))]") is not equal to ("[]") - ricognizione
+/Users/lucascabini/Developer/WarSense/Codice/Tests/MotoreTest/PresaDelQuartierGeneraleTest.swift:173: error: -[MotoreTest.PresaDelQuartierGeneraleTest test_01_5_18_3_la_ricognizione_e_le_non_armate_non_occupano] : XCTAssertNil failed: "ConclusioneCampagna(modo: Motore.ConclusioneCampagna.Modo.presa, vincitore: Optional(Dati.Parte.giocatore), giorno: 4)"
+/Users/lucascabini/Developer/WarSense/Codice/Tests/MotoreTest/PresaDelQuartierGeneraleTest.swift:172: error: -[MotoreTest.PresaDelQuartierGeneraleTest test_01_5_18_3_la_ricognizione_e_le_non_armate_non_occupano] : XCTAssertEqual failed: ("[Motore.EventoCampagna.quartierGeneraleOccupato(casella: Motore.Cella(riga: 1, colonna: 2), occupante: Dati.Parte.giocatore, mancano: 3), Motore.EventoCampagna.occupazioneProsegue(casella: Motore.Cella(riga: 1, colonna: 2), occupante: Dati.Parte.giocatore, mancano: 2), Motore.EventoCampagna.occupazioneProsegue(casella: Motore.Cella(riga: 1, colonna: 2), occupante: Dati.Parte.giocatore, mancano: 1), Motore.EventoCampagna.campagnaConclusa(modo: Motore.ConclusioneCampagna.Modo.presa, vincitore: Optional(Dati.Parte.giocatore))]") is not equal to ("[]") - non_armata
+Test Case '-[MotoreTest.PresaDelQuartierGeneraleTest test_01_5_18_3_la_ricognizione_e_le_non_armate_non_occupano]' failed (0.101 seconds).
+Test Case '-[MotoreTest.PresaDelQuartierGeneraleTest test_01_5_18_3_le_giornate_sono_quelle_che_la_campagna_dichiara]' passed (0.008 seconds).
+Test Case '-[MotoreTest.PresaDelQuartierGeneraleTest test_01_5_6_3_1_le_giornate_verso_una_meta_seguono_la_via_piu_breve]' passed (0.008 seconds).
+Test Case '-[MotoreTest.PresaDelQuartierGeneraleTest test_05_12_5_il_vantaggio_della_caduta_simultanea_e_disattivabile]' passed (0.022 seconds).
+Test Case '-[MotoreTest.PresaDelQuartierGeneraleTest test_incarico_32_senza_la_regola_la_condotta_non_cambia]' passed (0.007 seconds).
+Test Case '-[MotoreTest.PresaDelQuartierGeneraleTest test_incarico_32_senza_la_regola_nulla_cambia]' passed (0.008 seconds).
+	 Executed 28 tests, with 4 failures (0 unexpected) in 0.328 (0.330) seconds
+	 Executed 28 tests, with 4 failures (0 unexpected) in 0.328 (0.331) seconds
+
+== caduto il primo quartier generale la campagna e' conclusa anche con una fortezza
+   sorgente: Codice/Sources/Motore/PresaDelQuartierGenerale.swift
+   tolto:  guard occupabili(da: occupante, stato: stato).isEmpty else {
+   messo:  guard true else {
+   prove:  swift test --filter PresaDelQuartierGeneraleTest (uscita 1)
+Test Case '-[MotoreTest.PresaDelQuartierGeneraleTest test_00_15_le_occupazioni_stanno_nello_stato_e_nell_impronta]' passed (0.014 seconds).
+Test Case '-[MotoreTest.PresaDelQuartierGeneraleTest test_01_15_2_5_caduti_insieme_gli_ultimi_quartieri_generali_vince_il_giocatore]' passed (0.009 seconds).
+/Users/lucascabini/Developer/WarSense/Codice/Tests/MotoreTest/PresaDelQuartierGeneraleTest.swift:366: error: -[MotoreTest.PresaDelQuartierGeneraleTest test_01_5_14_3_2_con_una_fortezza_vanno_presi_tutti_e_due_i_quartieri_generali] : XCTAssertEqual failed: ("[Motore.EventoCampagna.campagnaConclusa(modo: Motore.ConclusioneCampagna.Modo.presa, vincitore: Optional(Dati.Parte.giocatore))]") is not equal to ("[Motore.EventoCampagna.quartierGeneralePreso(casella: Motore.Cella(riga: 1, colonna: 2), occupante: Dati.Parte.giocatore)]")
+/Users/lucascabini/Developer/WarSense/Codice/Tests/MotoreTest/PresaDelQuartierGeneraleTest.swift:367: error: -[MotoreTest.PresaDelQuartierGeneraleTest test_01_5_14_3_2_con_una_fortezza_vanno_presi_tutti_e_due_i_quartieri_generali] : XCTAssertNil failed: "ConclusioneCampagna(modo: Motore.ConclusioneCampagna.Modo.presa, vincitore: Optional(Dati.Parte.giocatore), giorno: 2)" - resta la fortezza
+/Users/lucascabini/Developer/WarSense/Codice/Tests/MotoreTest/PresaDelQuartierGeneraleTest.swift:368: error: -[MotoreTest.PresaDelQuartierGeneraleTest test_01_5_14_3_2_con_una_fortezza_vanno_presi_tutti_e_due_i_quartieri_generali] : XCTAssertEqual failed: ("nil") is not equal to ("Optional(Motore.FattoRegistrato.quartierGeneralePreso(casella: Motore.Cella(riga: 1, colonna: 2), dalGiocatore: true))")
+/Users/lucascabini/Developer/WarSense/Codice/Tests/MotoreTest/PresaDelQuartierGeneraleTest.swift:373: error: -[MotoreTest.PresaDelQuartierGeneraleTest test_01_5_14_3_2_con_una_fortezza_vanno_presi_tutti_e_due_i_quartieri_generali] : XCTAssertEqual failed: ("[]") is not equal to ("[Motore.EventoCampagna.quartierGeneraleOccupato(casella: Motore.Cella(riga: 1, colonna: 4), occupante: Dati.Parte.giocatore, mancano: 1)]")
+/Users/lucascabini/Developer/WarSense/Codice/Tests/MotoreTest/PresaDelQuartierGeneraleTest.swift:374: error: -[MotoreTest.PresaDelQuartierGeneraleTest test_01_5_14_3_2_con_una_fortezza_vanno_presi_tutti_e_due_i_quartieri_generali] : XCTAssertEqual failed: ("[]") is not equal to ("[Motore.EventoCampagna.campagnaConclusa(modo: Motore.ConclusioneCampagna.Modo.presa, vincitore: Optional(Dati.Parte.giocatore))]")
+/Users/lucascabini/Developer/WarSense/Codice/Tests/MotoreTest/PresaDelQuartierGeneraleTest.swift:375: error: -[MotoreTest.PresaDelQuartierGeneraleTest test_01_5_14_3_2_con_una_fortezza_vanno_presi_tutti_e_due_i_quartieri_generali] : XCTAssertEqual failed: ("Optional([Motore.Cella(riga: 1, colonna: 2)])") is not equal to ("Optional([Motore.Cella(riga: 1, colonna: 2), Motore.Cella(riga: 1, colonna: 4)])")
+/Users/lucascabini/Developer/WarSense/Codice/Tests/MotoreTest/PresaDelQuartierGeneraleTest.swift:380: error: -[MotoreTest.PresaDelQuartierGeneraleTest test_01_5_14_3_2_con_una_fortezza_vanno_presi_tutti_e_due_i_quartieri_generali] : XCTAssertNil failed: "ConclusioneCampagna(modo: Motore.ConclusioneCampagna.Modo.presa, vincitore: Optional(Dati.Parte.avversario), giorno: 2)"
+/Users/lucascabini/Developer/WarSense/Codice/Tests/MotoreTest/PresaDelQuartierGeneraleTest.swift:382: error: -[MotoreTest.PresaDelQuartierGeneraleTest test_01_5_14_3_2_con_una_fortezza_vanno_presi_tutti_e_due_i_quartieri_generali] : XCTAssertTrue failed
+Test Case '-[MotoreTest.PresaDelQuartierGeneraleTest test_01_5_14_3_2_con_una_fortezza_vanno_presi_tutti_e_due_i_quartieri_generali]' failed (0.104 seconds).
+Test Case '-[MotoreTest.PresaDelQuartierGeneraleTest test_01_5_17_1_il_registro_annota_l_occupazione_subita]' passed (0.008 seconds).
+Test Case '-[MotoreTest.PresaDelQuartierGeneraleTest test_01_5_18_2_il_contatto_col_nemico_impedisce_il_richiamo_e_dice_quale_gruppo_e_dove]' passed (0.008 seconds).
+Test Case '-[MotoreTest.PresaDelQuartierGeneraleTest test_01_5_18_2_il_rifornimento_tagliato_impedisce_il_richiamo_e_dice_quale_gruppo]' passed (0.009 seconds).
+Test Case '-[MotoreTest.PresaDelQuartierGeneraleTest test_01_5_18_2_l_esercito_si_richiama_quando_nessun_gruppo_e_tagliato_ne_a_contatto]' passed (0.010 seconds).
+Test Case '-[MotoreTest.PresaDelQuartierGeneraleTest test_01_5_18_3_2_chi_sta_per_uscire_occupa_ancora_finche_non_e_uscito]' passed (0.011 seconds).
+Test Case '-[MotoreTest.PresaDelQuartierGeneraleTest test_01_5_18_3_2_il_difensore_battuto_che_non_puo_ripiegare_non_ferma_il_conteggio]' passed (0.013 seconds).
+Test Case '-[MotoreTest.PresaDelQuartierGeneraleTest test_01_5_18_3_2_il_difensore_che_torna_e_vince_azzera_e_se_perde_il_conteggio_riprende]' passed (0.011 seconds).
+Test Case '-[MotoreTest.PresaDelQuartierGeneraleTest test_01_5_18_3_2_lasciata_la_casella_il_conteggio_si_azzera_e_ricomincia_da_capo]' passed (0.011 seconds).
+Test Case '-[MotoreTest.PresaDelQuartierGeneraleTest test_01_5_18_3_2_riunito_altrove_l_occupante_lascia_il_quartier_generale]' passed (0.011 seconds).
+Test Case '-[MotoreTest.PresaDelQuartierGeneraleTest test_01_5_18_3_2_vinta_la_battaglia_contro_il_difensore_comincia_l_occupazione]' passed (0.010 seconds).
+Test Case '-[MotoreTest.PresaDelQuartierGeneraleTest test_01_5_18_3_3_chi_possiede_il_quartier_generale_sa_sempre_che_e_occupato]' passed (0.009 seconds).
+Test Case '-[MotoreTest.PresaDelQuartierGeneraleTest test_01_5_18_3_4_l_esito_della_presa_e_del_richiamo_arriva_al_regno]' passed (0.009 seconds).
+Test Case '-[MotoreTest.PresaDelQuartierGeneraleTest test_01_5_18_3_4_la_caduta_dell_ultimo_quartier_generale_chiude_anche_le_battaglie_in_sospeso]' passed (0.010 seconds).
+Test Case '-[MotoreTest.PresaDelQuartierGeneraleTest test_01_5_18_3_4_la_presa_che_si_compie_nell_ultima_giornata_vince_sull_inverno]' passed (0.009 seconds).
+Test Case '-[MotoreTest.PresaDelQuartierGeneraleTest test_01_5_18_3_5_a_un_passo_l_avversario_entra_nel_quartier_generale]' passed (0.008 seconds).
+Test Case '-[MotoreTest.PresaDelQuartierGeneraleTest test_01_5_18_3_5_l_avversario_che_occupa_il_quartier_generale_lo_tiene]' passed (0.008 seconds).
+Test Case '-[MotoreTest.PresaDelQuartierGeneraleTest test_01_5_18_3_5_l_avversario_torna_a_riprendere_il_proprio_quartier_generale]' passed (0.008 seconds).
+Test Case '-[MotoreTest.PresaDelQuartierGeneraleTest test_01_5_18_3_5_l_avversario_valuta_la_corsa]' passed (0.008 seconds).
+Test Case '-[MotoreTest.PresaDelQuartierGeneraleTest test_01_5_18_3_il_quartier_generale_cade_dopo_le_giornate_della_regola_per_le_due_parti]' passed (0.007 seconds).
+Test Case '-[MotoreTest.PresaDelQuartierGeneraleTest test_01_5_18_3_la_ricognizione_e_le_non_armate_non_occupano]' passed (0.008 seconds).
+Test Case '-[MotoreTest.PresaDelQuartierGeneraleTest test_01_5_18_3_le_giornate_sono_quelle_che_la_campagna_dichiara]' passed (0.008 seconds).
+Test Case '-[MotoreTest.PresaDelQuartierGeneraleTest test_01_5_6_3_1_le_giornate_verso_una_meta_seguono_la_via_piu_breve]' passed (0.007 seconds).
+Test Case '-[MotoreTest.PresaDelQuartierGeneraleTest test_05_12_5_il_vantaggio_della_caduta_simultanea_e_disattivabile]' passed (0.022 seconds).
+Test Case '-[MotoreTest.PresaDelQuartierGeneraleTest test_incarico_32_senza_la_regola_la_condotta_non_cambia]' passed (0.008 seconds).
+Test Case '-[MotoreTest.PresaDelQuartierGeneraleTest test_incarico_32_senza_la_regola_nulla_cambia]' passed (0.008 seconds).
+	 Executed 28 tests, with 8 failures (0 unexpected) in 0.365 (0.367) seconds
+
+== chi possiede il quartier generale non lo sa
+   sorgente: Codice/Sources/Motore/PresaDelQuartierGenerale.swift
+   tolto:  regole != nil && quartieriGenerali(di: occupante.avversaria).contains(casella)
+   messo:  false && quartieriGenerali(di: occupante.avversaria).contains(casella)
+   prove:  swift test --filter PresaDelQuartierGeneraleTest (uscita 1)
+Test Case '-[MotoreTest.PresaDelQuartierGeneraleTest test_00_15_le_occupazioni_stanno_nello_stato_e_nell_impronta]' passed (0.014 seconds).
+Test Case '-[MotoreTest.PresaDelQuartierGeneraleTest test_01_15_2_5_caduti_insieme_gli_ultimi_quartieri_generali_vince_il_giocatore]' passed (0.009 seconds).
+Test Case '-[MotoreTest.PresaDelQuartierGeneraleTest test_01_5_14_3_2_con_una_fortezza_vanno_presi_tutti_e_due_i_quartieri_generali]' passed (0.008 seconds).
+Test Case '-[MotoreTest.PresaDelQuartierGeneraleTest test_01_5_17_1_il_registro_annota_l_occupazione_subita]' passed (0.007 seconds).
+Test Case '-[MotoreTest.PresaDelQuartierGeneraleTest test_01_5_18_2_il_contatto_col_nemico_impedisce_il_richiamo_e_dice_quale_gruppo_e_dove]' passed (0.008 seconds).
+Test Case '-[MotoreTest.PresaDelQuartierGeneraleTest test_01_5_18_2_il_rifornimento_tagliato_impedisce_il_richiamo_e_dice_quale_gruppo]' passed (0.007 seconds).
+Test Case '-[MotoreTest.PresaDelQuartierGeneraleTest test_01_5_18_2_l_esercito_si_richiama_quando_nessun_gruppo_e_tagliato_ne_a_contatto]' passed (0.007 seconds).
+Test Case '-[MotoreTest.PresaDelQuartierGeneraleTest test_01_5_18_3_2_chi_sta_per_uscire_occupa_ancora_finche_non_e_uscito]' passed (0.008 seconds).
+Test Case '-[MotoreTest.PresaDelQuartierGeneraleTest test_01_5_18_3_2_il_difensore_battuto_che_non_puo_ripiegare_non_ferma_il_conteggio]' passed (0.008 seconds).
+Test Case '-[MotoreTest.PresaDelQuartierGeneraleTest test_01_5_18_3_2_il_difensore_che_torna_e_vince_azzera_e_se_perde_il_conteggio_riprende]' passed (0.007 seconds).
+Test Case '-[MotoreTest.PresaDelQuartierGeneraleTest test_01_5_18_3_2_lasciata_la_casella_il_conteggio_si_azzera_e_ricomincia_da_capo]' passed (0.007 seconds).
+Test Case '-[MotoreTest.PresaDelQuartierGeneraleTest test_01_5_18_3_2_riunito_altrove_l_occupante_lascia_il_quartier_generale]' passed (0.007 seconds).
+Test Case '-[MotoreTest.PresaDelQuartierGeneraleTest test_01_5_18_3_2_vinta_la_battaglia_contro_il_difensore_comincia_l_occupazione]' passed (0.007 seconds).
+/Users/lucascabini/Developer/WarSense/Codice/Tests/MotoreTest/PresaDelQuartierGeneraleTest.swift:422: error: -[MotoreTest.PresaDelQuartierGeneraleTest test_01_5_18_3_3_chi_possiede_il_quartier_generale_sa_sempre_che_e_occupato] : XCTAssertEqual failed: ("inesplorato") is not equal to ("confermato")
+/Users/lucascabini/Developer/WarSense/Codice/Tests/MotoreTest/PresaDelQuartierGeneraleTest.swift:424: error: -[MotoreTest.PresaDelQuartierGeneraleTest test_01_5_18_3_3_chi_possiede_il_quartier_generale_sa_sempre_che_e_occupato] : XCTAssertTrue failed
+/Users/lucascabini/Developer/WarSense/Codice/Tests/MotoreTest/PresaDelQuartierGeneraleTest.swift:425: error: -[MotoreTest.PresaDelQuartierGeneraleTest test_01_5_18_3_3_chi_possiede_il_quartier_generale_sa_sempre_che_e_occupato] : XCTAssertEqual failed: ("[]") is not equal to ("[Motore.Cella(riga: 4, colonna: 2)]") - e il rotore delle formazioni note vi porta
+/Users/lucascabini/Developer/WarSense/Codice/Tests/MotoreTest/PresaDelQuartierGeneraleTest.swift:430: error: -[MotoreTest.PresaDelQuartierGeneraleTest test_01_5_18_3_3_chi_possiede_il_quartier_generale_sa_sempre_che_e_occupato] : XCTAssertEqual failed: ("inesplorato") is not equal to ("confermato")
+/Users/lucascabini/Developer/WarSense/Codice/Tests/MotoreTest/PresaDelQuartierGeneraleTest.swift:441: error: -[MotoreTest.PresaDelQuartierGeneraleTest test_01_5_18_3_3_chi_possiede_il_quartier_generale_sa_sempre_che_e_occupato] : XCTAssertEqual failed: ("[]") is not equal to ("[Motore.Cella(riga: 1, colonna: 2)]")
+/Users/lucascabini/Developer/WarSense/Codice/Tests/MotoreTest/PresaDelQuartierGeneraleTest.swift:442: error: -[MotoreTest.PresaDelQuartierGeneraleTest test_01_5_18_3_3_chi_possiede_il_quartier_generale_sa_sempre_che_e_occupato] : XCTAssertEqual failed: ("inesplorato") is not equal to ("confermato")
+Test Case '-[MotoreTest.PresaDelQuartierGeneraleTest test_01_5_18_3_3_chi_possiede_il_quartier_generale_sa_sempre_che_e_occupato]' failed (0.104 seconds).
+Test Case '-[MotoreTest.PresaDelQuartierGeneraleTest test_01_5_18_3_4_l_esito_della_presa_e_del_richiamo_arriva_al_regno]' passed (0.009 seconds).
+Test Case '-[MotoreTest.PresaDelQuartierGeneraleTest test_01_5_18_3_4_la_caduta_dell_ultimo_quartier_generale_chiude_anche_le_battaglie_in_sospeso]' passed (0.007 seconds).
+Test Case '-[MotoreTest.PresaDelQuartierGeneraleTest test_01_5_18_3_4_la_presa_che_si_compie_nell_ultima_giornata_vince_sull_inverno]' passed (0.008 seconds).
+Test Case '-[MotoreTest.PresaDelQuartierGeneraleTest test_01_5_18_3_5_a_un_passo_l_avversario_entra_nel_quartier_generale]' passed (0.008 seconds).
+Test Case '-[MotoreTest.PresaDelQuartierGeneraleTest test_01_5_18_3_5_l_avversario_che_occupa_il_quartier_generale_lo_tiene]' passed (0.008 seconds).
+/Users/lucascabini/Developer/WarSense/Codice/Tests/MotoreTest/PresaDelQuartierGeneraleTest.swift:573: error: -[MotoreTest.PresaDelQuartierGeneraleTest test_01_5_18_3_5_l_avversario_torna_a_riprendere_il_proprio_quartier_generale] : XCTAssertEqual failed: ("[]") is not equal to ("[Motore.Cella(riga: 1, colonna: 2)]") - entra nella casella a scacciare l'occupante
+Test Case '-[MotoreTest.PresaDelQuartierGeneraleTest test_01_5_18_3_5_l_avversario_torna_a_riprendere_il_proprio_quartier_generale]' failed (0.008 seconds).
+/Users/lucascabini/Developer/WarSense/Codice/Tests/MotoreTest/PresaDelQuartierGeneraleTest.swift:590: error: -[MotoreTest.PresaDelQuartierGeneraleTest test_01_5_18_3_5_l_avversario_valuta_la_corsa] : failed - presidio(gruppo: gruppo-2)
+Test Case '-[MotoreTest.PresaDelQuartierGeneraleTest test_01_5_18_3_5_l_avversario_valuta_la_corsa]' failed (0.008 seconds).
+Test Case '-[MotoreTest.PresaDelQuartierGeneraleTest test_01_5_18_3_il_quartier_generale_cade_dopo_le_giornate_della_regola_per_le_due_parti]' passed (0.009 seconds).
+Test Case '-[MotoreTest.PresaDelQuartierGeneraleTest test_01_5_18_3_la_ricognizione_e_le_non_armate_non_occupano]' passed (0.008 seconds).
+Test Case '-[MotoreTest.PresaDelQuartierGeneraleTest test_01_5_18_3_le_giornate_sono_quelle_che_la_campagna_dichiara]' passed (0.008 seconds).
+Test Case '-[MotoreTest.PresaDelQuartierGeneraleTest test_01_5_6_3_1_le_giornate_verso_una_meta_seguono_la_via_piu_breve]' passed (0.007 seconds).
+Test Case '-[MotoreTest.PresaDelQuartierGeneraleTest test_05_12_5_il_vantaggio_della_caduta_simultanea_e_disattivabile]' passed (0.022 seconds).
+/Users/lucascabini/Developer/WarSense/Codice/Tests/MotoreTest/PresaDelQuartierGeneraleTest.swift:608: error: -[MotoreTest.PresaDelQuartierGeneraleTest test_incarico_32_senza_la_regola_la_condotta_non_cambia] : failed - imboscata(gruppo: gruppo-3)
+Test Case '-[MotoreTest.PresaDelQuartierGeneraleTest test_incarico_32_senza_la_regola_la_condotta_non_cambia]' failed (0.008 seconds).
+Test Case '-[MotoreTest.PresaDelQuartierGeneraleTest test_incarico_32_senza_la_regola_nulla_cambia]' passed (0.008 seconds).
+	 Executed 28 tests, with 9 failures (0 unexpected) in 0.334 (0.335) seconds
+	 Executed 28 tests, with 9 failures (0 unexpected) in 0.334 (0.336) seconds
+
+== il richiamo non guarda il contatto
+   sorgente: Codice/Sources/Motore/PresaDelQuartierGenerale.swift
+   tolto:  for gruppo in miei where stato.occupante(di: gruppo.posizione, parte: .avversario) != nil {
+   messo:  for gruppo in miei where stato.occupante(di: gruppo.posizione, parte: .avversario) == nil && false {
+   prove:  swift test --filter PresaDelQuartierGeneraleTest|CompletamentoDellaCampagnaTest (uscita 1)
+Test Case '-[SessioneTest.CompletamentoDellaCampagnaTest test_01_5_18_2_il_richiamo_conclude_la_campagna_sta_nel_giornale_e_non_si_annulla]' passed (0.020 seconds).
+Test Case '-[SessioneTest.CompletamentoDellaCampagnaTest test_01_5_18_2_il_richiamo_impedito_si_rifiuta_col_motivo_e_non_scrive_nulla]' passed (0.009 seconds).
+Test Case '-[SessioneTest.CompletamentoDellaCampagnaTest test_01_5_18_3_2_l_avversario_torna_a_riprendere_il_proprio_e_la_battaglia_decide]' passed (0.013 seconds).
+Test Case '-[SessioneTest.CompletamentoDellaCampagnaTest test_01_5_18_3_l_avversario_prende_il_quartier_generale_e_il_giocatore_sente_ogni_passo]' passed (0.014 seconds).
+Test Case '-[SessioneTest.CompletamentoDellaCampagnaTest test_05_6_5_il_passo_di_un_occupazione_non_si_annulla]' passed (0.009 seconds).
+Test Case '-[SessioneTest.CompletamentoDellaCampagnaTest test_05_6_8_un_richiamo_impossibile_nel_giornale_lo_dichiara_corrotto]' passed (0.009 seconds).
+	 Executed 6 tests, with 0 failures (0 unexpected) in 0.073 (0.073) seconds
+	 Executed 6 tests, with 0 failures (0 unexpected) in 0.073 (0.074) seconds
+Test Case '-[MotoreTest.PresaDelQuartierGeneraleTest test_00_15_le_occupazioni_stanno_nello_stato_e_nell_impronta]' passed (0.015 seconds).
+Test Case '-[MotoreTest.PresaDelQuartierGeneraleTest test_01_15_2_5_caduti_insieme_gli_ultimi_quartieri_generali_vince_il_giocatore]' passed (0.009 seconds).
+Test Case '-[MotoreTest.PresaDelQuartierGeneraleTest test_01_5_14_3_2_con_una_fortezza_vanno_presi_tutti_e_due_i_quartieri_generali]' passed (0.009 seconds).
+Test Case '-[MotoreTest.PresaDelQuartierGeneraleTest test_01_5_17_1_il_registro_annota_l_occupazione_subita]' passed (0.007 seconds).
+/Users/lucascabini/Developer/WarSense/Codice/Tests/MotoreTest/PresaDelQuartierGeneraleTest.swift:510: error: -[MotoreTest.PresaDelQuartierGeneraleTest test_01_5_18_2_il_contatto_col_nemico_impedisce_il_richiamo_e_dice_quale_gruppo_e_dove] : XCTAssertEqual failed: ("nil") is not equal to ("Optional(Motore.ImpedimentoDelRichiamo.aContatto(gruppo: "lupo", casella: Motore.Cella(riga: 3, colonna: 4)))")
+Test Case '-[MotoreTest.PresaDelQuartierGeneraleTest test_01_5_18_2_il_contatto_col_nemico_impedisce_il_richiamo_e_dice_quale_gruppo_e_dove]' failed (0.109 seconds).
+Test Case '-[MotoreTest.PresaDelQuartierGeneraleTest test_01_5_18_2_il_rifornimento_tagliato_impedisce_il_richiamo_e_dice_quale_gruppo]' passed (0.010 seconds).
+Test Case '-[MotoreTest.PresaDelQuartierGeneraleTest test_01_5_18_2_l_esercito_si_richiama_quando_nessun_gruppo_e_tagliato_ne_a_contatto]' passed (0.008 seconds).
+Test Case '-[MotoreTest.PresaDelQuartierGeneraleTest test_01_5_18_3_2_chi_sta_per_uscire_occupa_ancora_finche_non_e_uscito]' passed (0.008 seconds).
+Test Case '-[MotoreTest.PresaDelQuartierGeneraleTest test_01_5_18_3_2_il_difensore_battuto_che_non_puo_ripiegare_non_ferma_il_conteggio]' passed (0.010 seconds).
+Test Case '-[MotoreTest.PresaDelQuartierGeneraleTest test_01_5_18_3_2_il_difensore_che_torna_e_vince_azzera_e_se_perde_il_conteggio_riprende]' passed (0.008 seconds).
+Test Case '-[MotoreTest.PresaDelQuartierGeneraleTest test_01_5_18_3_2_lasciata_la_casella_il_conteggio_si_azzera_e_ricomincia_da_capo]' passed (0.007 seconds).
+Test Case '-[MotoreTest.PresaDelQuartierGeneraleTest test_01_5_18_3_2_riunito_altrove_l_occupante_lascia_il_quartier_generale]' passed (0.008 seconds).
+Test Case '-[MotoreTest.PresaDelQuartierGeneraleTest test_01_5_18_3_2_vinta_la_battaglia_contro_il_difensore_comincia_l_occupazione]' passed (0.008 seconds).
+Test Case '-[MotoreTest.PresaDelQuartierGeneraleTest test_01_5_18_3_3_chi_possiede_il_quartier_generale_sa_sempre_che_e_occupato]' passed (0.008 seconds).
+Test Case '-[MotoreTest.PresaDelQuartierGeneraleTest test_01_5_18_3_4_l_esito_della_presa_e_del_richiamo_arriva_al_regno]' passed (0.009 seconds).
+Test Case '-[MotoreTest.PresaDelQuartierGeneraleTest test_01_5_18_3_4_la_caduta_dell_ultimo_quartier_generale_chiude_anche_le_battaglie_in_sospeso]' passed (0.008 seconds).
+Test Case '-[MotoreTest.PresaDelQuartierGeneraleTest test_01_5_18_3_4_la_presa_che_si_compie_nell_ultima_giornata_vince_sull_inverno]' passed (0.009 seconds).
+Test Case '-[MotoreTest.PresaDelQuartierGeneraleTest test_01_5_18_3_5_a_un_passo_l_avversario_entra_nel_quartier_generale]' passed (0.008 seconds).
+Test Case '-[MotoreTest.PresaDelQuartierGeneraleTest test_01_5_18_3_5_l_avversario_che_occupa_il_quartier_generale_lo_tiene]' passed (0.008 seconds).
+Test Case '-[MotoreTest.PresaDelQuartierGeneraleTest test_01_5_18_3_5_l_avversario_torna_a_riprendere_il_proprio_quartier_generale]' passed (0.008 seconds).
+Test Case '-[MotoreTest.PresaDelQuartierGeneraleTest test_01_5_18_3_5_l_avversario_valuta_la_corsa]' passed (0.007 seconds).
+Test Case '-[MotoreTest.PresaDelQuartierGeneraleTest test_01_5_18_3_il_quartier_generale_cade_dopo_le_giornate_della_regola_per_le_due_parti]' passed (0.008 seconds).
+Test Case '-[MotoreTest.PresaDelQuartierGeneraleTest test_01_5_18_3_la_ricognizione_e_le_non_armate_non_occupano]' passed (0.008 seconds).
+Test Case '-[MotoreTest.PresaDelQuartierGeneraleTest test_01_5_18_3_le_giornate_sono_quelle_che_la_campagna_dichiara]' passed (0.008 seconds).
+Test Case '-[MotoreTest.PresaDelQuartierGeneraleTest test_01_5_6_3_1_le_giornate_verso_una_meta_seguono_la_via_piu_breve]' passed (0.008 seconds).
+Test Case '-[MotoreTest.PresaDelQuartierGeneraleTest test_05_12_5_il_vantaggio_della_caduta_simultanea_e_disattivabile]' passed (0.024 seconds).
+Test Case '-[MotoreTest.PresaDelQuartierGeneraleTest test_incarico_32_senza_la_regola_la_condotta_non_cambia]' passed (0.008 seconds).
+Test Case '-[MotoreTest.PresaDelQuartierGeneraleTest test_incarico_32_senza_la_regola_nulla_cambia]' passed (0.008 seconds).
+	 Executed 28 tests, with 1 failure (0 unexpected) in 0.354 (0.355) seconds
+	 Executed 28 tests, with 1 failure (0 unexpected) in 0.354 (0.356) seconds
+
+== il richiamo non guarda il rifornimento
+   sorgente: Codice/Sources/Motore/PresaDelQuartierGenerale.swift
+   tolto:  for gruppo in miei where !gruppo.esenteDalTaglio && rifornimentoTagliato(di: gruppo, stato: stato) {
+   messo:  for gruppo in miei where !gruppo.esenteDalTaglio && rifornimentoTagliato(di: gruppo, stato: stato) && false {
+   prove:  swift test --filter PresaDelQuartierGeneraleTest|CompletamentoDellaCampagnaTest (uscita 1)
+Test Case '-[SessioneTest.CompletamentoDellaCampagnaTest test_01_5_18_2_il_richiamo_conclude_la_campagna_sta_nel_giornale_e_non_si_annulla]' passed (0.017 seconds).
+/Users/lucascabini/Developer/WarSense/Codice/Tests/SessioneTest/CompletamentoDellaCampagnaTest.swift:168: error: -[SessioneTest.CompletamentoDellaCampagnaTest test_01_5_18_2_il_richiamo_impedito_si_rifiuta_col_motivo_e_non_scrive_nulla] : failed - un gruppo ha il rifornimento tagliato
+/Users/lucascabini/Developer/WarSense/Codice/Tests/SessioneTest/CompletamentoDellaCampagnaTest.swift:173: error: -[SessioneTest.CompletamentoDellaCampagnaTest test_01_5_18_2_il_richiamo_impedito_si_rifiuta_col_motivo_e_non_scrive_nulla] : XCTAssertEqual failed: ("3") is not equal to ("2")
+/Users/lucascabini/Developer/WarSense/Codice/Tests/SessioneTest/CompletamentoDellaCampagnaTest.swift:175: error: -[SessioneTest.CompletamentoDellaCampagnaTest test_01_5_18_2_il_richiamo_impedito_si_rifiuta_col_motivo_e_non_scrive_nulla] : XCTAssertNil failed: "ConclusioneCampagna(modo: Motore.ConclusioneCampagna.Modo.richiamo, vincitore: Optional(Dati.Parte.avversario), giorno: 1)"
+Test Case '-[SessioneTest.CompletamentoDellaCampagnaTest test_01_5_18_2_il_richiamo_impedito_si_rifiuta_col_motivo_e_non_scrive_nulla]' failed (0.110 seconds).
+Test Case '-[SessioneTest.CompletamentoDellaCampagnaTest test_01_5_18_3_2_l_avversario_torna_a_riprendere_il_proprio_e_la_battaglia_decide]' passed (0.013 seconds).
+Test Case '-[SessioneTest.CompletamentoDellaCampagnaTest test_01_5_18_3_l_avversario_prende_il_quartier_generale_e_il_giocatore_sente_ogni_passo]' passed (0.016 seconds).
+Test Case '-[SessioneTest.CompletamentoDellaCampagnaTest test_05_6_5_il_passo_di_un_occupazione_non_si_annulla]' passed (0.010 seconds).
+/Users/lucascabini/Developer/WarSense/Codice/Tests/SessioneTest/CompletamentoDellaCampagnaTest.swift:187: error: -[SessioneTest.CompletamentoDellaCampagnaTest test_05_6_8_un_richiamo_impossibile_nel_giornale_lo_dichiara_corrotto] : XCTAssertThrowsError failed: did not throw an error
+Test Case '-[SessioneTest.CompletamentoDellaCampagnaTest test_05_6_8_un_richiamo_impossibile_nel_giornale_lo_dichiara_corrotto]' failed (0.010 seconds).
+	 Executed 6 tests, with 4 failures (0 unexpected) in 0.176 (0.177) seconds
+	 Executed 6 tests, with 4 failures (0 unexpected) in 0.176 (0.178) seconds
+Test Case '-[MotoreTest.PresaDelQuartierGeneraleTest test_00_15_le_occupazioni_stanno_nello_stato_e_nell_impronta]' passed (0.014 seconds).
+Test Case '-[MotoreTest.PresaDelQuartierGeneraleTest test_01_15_2_5_caduti_insieme_gli_ultimi_quartieri_generali_vince_il_giocatore]' passed (0.008 seconds).
+Test Case '-[MotoreTest.PresaDelQuartierGeneraleTest test_01_5_14_3_2_con_una_fortezza_vanno_presi_tutti_e_due_i_quartieri_generali]' passed (0.008 seconds).
+Test Case '-[MotoreTest.PresaDelQuartierGeneraleTest test_01_5_17_1_il_registro_annota_l_occupazione_subita]' passed (0.008 seconds).
+Test Case '-[MotoreTest.PresaDelQuartierGeneraleTest test_01_5_18_2_il_contatto_col_nemico_impedisce_il_richiamo_e_dice_quale_gruppo_e_dove]' passed (0.007 seconds).
+/Users/lucascabini/Developer/WarSense/Codice/Tests/MotoreTest/PresaDelQuartierGeneraleTest.swift:496: error: -[MotoreTest.PresaDelQuartierGeneraleTest test_01_5_18_2_il_rifornimento_tagliato_impedisce_il_richiamo_e_dice_quale_gruppo] : XCTAssertEqual failed: ("nil") is not equal to ("Optional(Motore.ImpedimentoDelRichiamo.rifornimentoTagliato(gruppo: "lupo", casella: Motore.Cella(riga: 2, colonna: 2)))")
+Test Case '-[MotoreTest.PresaDelQuartierGeneraleTest test_01_5_18_2_il_rifornimento_tagliato_impedisce_il_richiamo_e_dice_quale_gruppo]' failed (0.110 seconds).
+Test Case '-[MotoreTest.PresaDelQuartierGeneraleTest test_01_5_18_2_l_esercito_si_richiama_quando_nessun_gruppo_e_tagliato_ne_a_contatto]' passed (0.007 seconds).
+Test Case '-[MotoreTest.PresaDelQuartierGeneraleTest test_01_5_18_3_2_chi_sta_per_uscire_occupa_ancora_finche_non_e_uscito]' passed (0.007 seconds).
+Test Case '-[MotoreTest.PresaDelQuartierGeneraleTest test_01_5_18_3_2_il_difensore_battuto_che_non_puo_ripiegare_non_ferma_il_conteggio]' passed (0.008 seconds).
+Test Case '-[MotoreTest.PresaDelQuartierGeneraleTest test_01_5_18_3_2_il_difensore_che_torna_e_vince_azzera_e_se_perde_il_conteggio_riprende]' passed (0.007 seconds).
+Test Case '-[MotoreTest.PresaDelQuartierGeneraleTest test_01_5_18_3_2_lasciata_la_casella_il_conteggio_si_azzera_e_ricomincia_da_capo]' passed (0.008 seconds).
+Test Case '-[MotoreTest.PresaDelQuartierGeneraleTest test_01_5_18_3_2_riunito_altrove_l_occupante_lascia_il_quartier_generale]' passed (0.008 seconds).
+Test Case '-[MotoreTest.PresaDelQuartierGeneraleTest test_01_5_18_3_2_vinta_la_battaglia_contro_il_difensore_comincia_l_occupazione]' passed (0.007 seconds).
+Test Case '-[MotoreTest.PresaDelQuartierGeneraleTest test_01_5_18_3_3_chi_possiede_il_quartier_generale_sa_sempre_che_e_occupato]' passed (0.008 seconds).
+Test Case '-[MotoreTest.PresaDelQuartierGeneraleTest test_01_5_18_3_4_l_esito_della_presa_e_del_richiamo_arriva_al_regno]' passed (0.008 seconds).
+Test Case '-[MotoreTest.PresaDelQuartierGeneraleTest test_01_5_18_3_4_la_caduta_dell_ultimo_quartier_generale_chiude_anche_le_battaglie_in_sospeso]' passed (0.007 seconds).
+Test Case '-[MotoreTest.PresaDelQuartierGeneraleTest test_01_5_18_3_4_la_presa_che_si_compie_nell_ultima_giornata_vince_sull_inverno]' passed (0.008 seconds).
+Test Case '-[MotoreTest.PresaDelQuartierGeneraleTest test_01_5_18_3_5_a_un_passo_l_avversario_entra_nel_quartier_generale]' passed (0.008 seconds).
+Test Case '-[MotoreTest.PresaDelQuartierGeneraleTest test_01_5_18_3_5_l_avversario_che_occupa_il_quartier_generale_lo_tiene]' passed (0.007 seconds).
+Test Case '-[MotoreTest.PresaDelQuartierGeneraleTest test_01_5_18_3_5_l_avversario_torna_a_riprendere_il_proprio_quartier_generale]' passed (0.008 seconds).
+Test Case '-[MotoreTest.PresaDelQuartierGeneraleTest test_01_5_18_3_5_l_avversario_valuta_la_corsa]' passed (0.007 seconds).
+Test Case '-[MotoreTest.PresaDelQuartierGeneraleTest test_01_5_18_3_il_quartier_generale_cade_dopo_le_giornate_della_regola_per_le_due_parti]' passed (0.008 seconds).
+Test Case '-[MotoreTest.PresaDelQuartierGeneraleTest test_01_5_18_3_la_ricognizione_e_le_non_armate_non_occupano]' passed (0.008 seconds).
+Test Case '-[MotoreTest.PresaDelQuartierGeneraleTest test_01_5_18_3_le_giornate_sono_quelle_che_la_campagna_dichiara]' passed (0.007 seconds).
+Test Case '-[MotoreTest.PresaDelQuartierGeneraleTest test_01_5_6_3_1_le_giornate_verso_una_meta_seguono_la_via_piu_breve]' passed (0.007 seconds).
+Test Case '-[MotoreTest.PresaDelQuartierGeneraleTest test_05_12_5_il_vantaggio_della_caduta_simultanea_e_disattivabile]' passed (0.026 seconds).
+Test Case '-[MotoreTest.PresaDelQuartierGeneraleTest test_incarico_32_senza_la_regola_la_condotta_non_cambia]' passed (0.008 seconds).
+Test Case '-[MotoreTest.PresaDelQuartierGeneraleTest test_incarico_32_senza_la_regola_nulla_cambia]' passed (0.008 seconds).
+	 Executed 28 tests, with 1 failure (0 unexpected) in 0.339 (0.341) seconds
+
+== il richiamo non guarda le battaglie in sospeso
+   sorgente: Codice/Sources/Motore/PresaDelQuartierGenerale.swift
+   tolto:  if let battaglia = stato.battaglieInSospeso.first { return .battagliaInSospeso(casella: battaglia.casella) }
+   messo:  _ = stato.battaglieInSospeso.first
+   prove:  swift test --filter PresaDelQuartierGeneraleTest|CompletamentoDellaCampagnaTest (uscita 1)
+Test Case '-[SessioneTest.CompletamentoDellaCampagnaTest test_01_5_18_2_il_richiamo_conclude_la_campagna_sta_nel_giornale_e_non_si_annulla]' passed (0.017 seconds).
+Test Case '-[SessioneTest.CompletamentoDellaCampagnaTest test_01_5_18_2_il_richiamo_impedito_si_rifiuta_col_motivo_e_non_scrive_nulla]' passed (0.009 seconds).
+Test Case '-[SessioneTest.CompletamentoDellaCampagnaTest test_01_5_18_3_2_l_avversario_torna_a_riprendere_il_proprio_e_la_battaglia_decide]' passed (0.013 seconds).
+Test Case '-[SessioneTest.CompletamentoDellaCampagnaTest test_01_5_18_3_l_avversario_prende_il_quartier_generale_e_il_giocatore_sente_ogni_passo]' passed (0.015 seconds).
+Test Case '-[SessioneTest.CompletamentoDellaCampagnaTest test_05_6_5_il_passo_di_un_occupazione_non_si_annulla]' passed (0.010 seconds).
+Test Case '-[SessioneTest.CompletamentoDellaCampagnaTest test_05_6_8_un_richiamo_impossibile_nel_giornale_lo_dichiara_corrotto]' passed (0.009 seconds).
+	 Executed 6 tests, with 0 failures (0 unexpected) in 0.073 (0.073) seconds
+	 Executed 6 tests, with 0 failures (0 unexpected) in 0.073 (0.074) seconds
+Test Case '-[MotoreTest.PresaDelQuartierGeneraleTest test_00_15_le_occupazioni_stanno_nello_stato_e_nell_impronta]' passed (0.014 seconds).
+Test Case '-[MotoreTest.PresaDelQuartierGeneraleTest test_01_15_2_5_caduti_insieme_gli_ultimi_quartieri_generali_vince_il_giocatore]' passed (0.008 seconds).
+Test Case '-[MotoreTest.PresaDelQuartierGeneraleTest test_01_5_14_3_2_con_una_fortezza_vanno_presi_tutti_e_due_i_quartieri_generali]' passed (0.008 seconds).
+Test Case '-[MotoreTest.PresaDelQuartierGeneraleTest test_01_5_17_1_il_registro_annota_l_occupazione_subita]' passed (0.007 seconds).
+/Users/lucascabini/Developer/WarSense/Codice/Tests/MotoreTest/PresaDelQuartierGeneraleTest.swift:518: error: -[MotoreTest.PresaDelQuartierGeneraleTest test_01_5_18_2_il_contatto_col_nemico_impedisce_il_richiamo_e_dice_quale_gruppo_e_dove] : XCTAssertEqual failed: ("Optional(Motore.ImpedimentoDelRichiamo.rifornimentoTagliato(gruppo: "corvo", casella: Motore.Cella(riga: 1, colonna: 2)))") is not equal to ("Optional(Motore.ImpedimentoDelRichiamo.battagliaInSospeso(casella: Motore.Cella(riga: 1, colonna: 2)))")
+Test Case '-[MotoreTest.PresaDelQuartierGeneraleTest test_01_5_18_2_il_contatto_col_nemico_impedisce_il_richiamo_e_dice_quale_gruppo_e_dove]' failed (0.102 seconds).
+Test Case '-[MotoreTest.PresaDelQuartierGeneraleTest test_01_5_18_2_il_rifornimento_tagliato_impedisce_il_richiamo_e_dice_quale_gruppo]' passed (0.008 seconds).
+Test Case '-[MotoreTest.PresaDelQuartierGeneraleTest test_01_5_18_2_l_esercito_si_richiama_quando_nessun_gruppo_e_tagliato_ne_a_contatto]' passed (0.008 seconds).
+Test Case '-[MotoreTest.PresaDelQuartierGeneraleTest test_01_5_18_3_2_chi_sta_per_uscire_occupa_ancora_finche_non_e_uscito]' passed (0.007 seconds).
+Test Case '-[MotoreTest.PresaDelQuartierGeneraleTest test_01_5_18_3_2_il_difensore_battuto_che_non_puo_ripiegare_non_ferma_il_conteggio]' passed (0.009 seconds).
+Test Case '-[MotoreTest.PresaDelQuartierGeneraleTest test_01_5_18_3_2_il_difensore_che_torna_e_vince_azzera_e_se_perde_il_conteggio_riprende]' passed (0.009 seconds).
+Test Case '-[MotoreTest.PresaDelQuartierGeneraleTest test_01_5_18_3_2_lasciata_la_casella_il_conteggio_si_azzera_e_ricomincia_da_capo]' passed (0.008 seconds).
+Test Case '-[MotoreTest.PresaDelQuartierGeneraleTest test_01_5_18_3_2_riunito_altrove_l_occupante_lascia_il_quartier_generale]' passed (0.009 seconds).
+Test Case '-[MotoreTest.PresaDelQuartierGeneraleTest test_01_5_18_3_2_vinta_la_battaglia_contro_il_difensore_comincia_l_occupazione]' passed (0.009 seconds).
+Test Case '-[MotoreTest.PresaDelQuartierGeneraleTest test_01_5_18_3_3_chi_possiede_il_quartier_generale_sa_sempre_che_e_occupato]' passed (0.008 seconds).
+Test Case '-[MotoreTest.PresaDelQuartierGeneraleTest test_01_5_18_3_4_l_esito_della_presa_e_del_richiamo_arriva_al_regno]' passed (0.010 seconds).
+Test Case '-[MotoreTest.PresaDelQuartierGeneraleTest test_01_5_18_3_4_la_caduta_dell_ultimo_quartier_generale_chiude_anche_le_battaglie_in_sospeso]' passed (0.009 seconds).
+Test Case '-[MotoreTest.PresaDelQuartierGeneraleTest test_01_5_18_3_4_la_presa_che_si_compie_nell_ultima_giornata_vince_sull_inverno]' passed (0.008 seconds).
+Test Case '-[MotoreTest.PresaDelQuartierGeneraleTest test_01_5_18_3_5_a_un_passo_l_avversario_entra_nel_quartier_generale]' passed (0.008 seconds).
+Test Case '-[MotoreTest.PresaDelQuartierGeneraleTest test_01_5_18_3_5_l_avversario_che_occupa_il_quartier_generale_lo_tiene]' passed (0.008 seconds).
+Test Case '-[MotoreTest.PresaDelQuartierGeneraleTest test_01_5_18_3_5_l_avversario_torna_a_riprendere_il_proprio_quartier_generale]' passed (0.008 seconds).
+Test Case '-[MotoreTest.PresaDelQuartierGeneraleTest test_01_5_18_3_5_l_avversario_valuta_la_corsa]' passed (0.008 seconds).
+Test Case '-[MotoreTest.PresaDelQuartierGeneraleTest test_01_5_18_3_il_quartier_generale_cade_dopo_le_giornate_della_regola_per_le_due_parti]' passed (0.007 seconds).
+Test Case '-[MotoreTest.PresaDelQuartierGeneraleTest test_01_5_18_3_la_ricognizione_e_le_non_armate_non_occupano]' passed (0.008 seconds).
+Test Case '-[MotoreTest.PresaDelQuartierGeneraleTest test_01_5_18_3_le_giornate_sono_quelle_che_la_campagna_dichiara]' passed (0.009 seconds).
+Test Case '-[MotoreTest.PresaDelQuartierGeneraleTest test_01_5_6_3_1_le_giornate_verso_una_meta_seguono_la_via_piu_breve]' passed (0.007 seconds).
+Test Case '-[MotoreTest.PresaDelQuartierGeneraleTest test_05_12_5_il_vantaggio_della_caduta_simultanea_e_disattivabile]' passed (0.022 seconds).
+Test Case '-[MotoreTest.PresaDelQuartierGeneraleTest test_incarico_32_senza_la_regola_la_condotta_non_cambia]' passed (0.008 seconds).
+Test Case '-[MotoreTest.PresaDelQuartierGeneraleTest test_incarico_32_senza_la_regola_nulla_cambia]' passed (0.008 seconds).
+	 Executed 28 tests, with 1 failure (0 unexpected) in 0.340 (0.341) seconds
+	 Executed 28 tests, with 1 failure (0 unexpected) in 0.340 (0.342) seconds
+
+== il richiamo da' la campagna al giocatore
+   sorgente: Codice/Sources/Motore/PresaDelQuartierGenerale.swift
+   tolto:  return [Self.concludi(&stato, modo: .richiamo, vincitore: .avversario, giorno: stato.giorno)]
+   messo:  return [Self.concludi(&stato, modo: .richiamo, vincitore: .giocatore, giorno: stato.giorno)]
+   prove:  swift test --filter PresaDelQuartierGeneraleTest|CompletamentoDellaCampagnaTest (uscita 1)
+/Users/lucascabini/Developer/WarSense/Codice/Tests/SessioneTest/CompletamentoDellaCampagnaTest.swift:143: error: -[SessioneTest.CompletamentoDellaCampagnaTest test_01_5_18_2_il_richiamo_conclude_la_campagna_sta_nel_giornale_e_non_si_annulla] : XCTAssertEqual failed: ("[Motore.EventoCampagna.campagnaConclusa(modo: Motore.ConclusioneCampagna.Modo.richiamo, vincitore: Optional(Dati.Parte.giocatore))]") is not equal to ("[Motore.EventoCampagna.campagnaConclusa(modo: Motore.ConclusioneCampagna.Modo.richiamo, vincitore: Optional(Dati.Parte.avversario))]")
+/Users/lucascabini/Developer/WarSense/Codice/Tests/SessioneTest/CompletamentoDellaCampagnaTest.swift:145: error: -[SessioneTest.CompletamentoDellaCampagnaTest test_01_5_18_2_il_richiamo_conclude_la_campagna_sta_nel_giornale_e_non_si_annulla] : XCTAssertEqual failed: ("Optional(Motore.ConclusioneCampagna(modo: Motore.ConclusioneCampagna.Modo.richiamo, vincitore: Optional(Dati.Parte.giocatore), giorno: 2))") is not equal to ("Optional(Motore.ConclusioneCampagna(modo: Motore.ConclusioneCampagna.Modo.richiamo, vincitore: Optional(Dati.Parte.avversario), giorno: 2))")
+Test Case '-[SessioneTest.CompletamentoDellaCampagnaTest test_01_5_18_2_il_richiamo_conclude_la_campagna_sta_nel_giornale_e_non_si_annulla]' failed (0.105 seconds).
+Test Case '-[SessioneTest.CompletamentoDellaCampagnaTest test_01_5_18_2_il_richiamo_impedito_si_rifiuta_col_motivo_e_non_scrive_nulla]' passed (0.009 seconds).
+Test Case '-[SessioneTest.CompletamentoDellaCampagnaTest test_01_5_18_3_2_l_avversario_torna_a_riprendere_il_proprio_e_la_battaglia_decide]' passed (0.013 seconds).
+Test Case '-[SessioneTest.CompletamentoDellaCampagnaTest test_01_5_18_3_l_avversario_prende_il_quartier_generale_e_il_giocatore_sente_ogni_passo]' passed (0.014 seconds).
+Test Case '-[SessioneTest.CompletamentoDellaCampagnaTest test_05_6_5_il_passo_di_un_occupazione_non_si_annulla]' passed (0.009 seconds).
+Test Case '-[SessioneTest.CompletamentoDellaCampagnaTest test_05_6_8_un_richiamo_impossibile_nel_giornale_lo_dichiara_corrotto]' passed (0.009 seconds).
+	 Executed 6 tests, with 2 failures (0 unexpected) in 0.158 (0.159) seconds
+Test Case '-[MotoreTest.PresaDelQuartierGeneraleTest test_00_15_le_occupazioni_stanno_nello_stato_e_nell_impronta]' passed (0.013 seconds).
+Test Case '-[MotoreTest.PresaDelQuartierGeneraleTest test_01_15_2_5_caduti_insieme_gli_ultimi_quartieri_generali_vince_il_giocatore]' passed (0.008 seconds).
+Test Case '-[MotoreTest.PresaDelQuartierGeneraleTest test_01_5_14_3_2_con_una_fortezza_vanno_presi_tutti_e_due_i_quartieri_generali]' passed (0.008 seconds).
+Test Case '-[MotoreTest.PresaDelQuartierGeneraleTest test_01_5_17_1_il_registro_annota_l_occupazione_subita]' passed (0.007 seconds).
+Test Case '-[MotoreTest.PresaDelQuartierGeneraleTest test_01_5_18_2_il_contatto_col_nemico_impedisce_il_richiamo_e_dice_quale_gruppo_e_dove]' passed (0.008 seconds).
+Test Case '-[MotoreTest.PresaDelQuartierGeneraleTest test_01_5_18_2_il_rifornimento_tagliato_impedisce_il_richiamo_e_dice_quale_gruppo]' passed (0.007 seconds).
+/Users/lucascabini/Developer/WarSense/Codice/Tests/MotoreTest/PresaDelQuartierGeneraleTest.swift:485: error: -[MotoreTest.PresaDelQuartierGeneraleTest test_01_5_18_2_l_esercito_si_richiama_quando_nessun_gruppo_e_tagliato_ne_a_contatto] : XCTAssertEqual failed: ("[Motore.EventoCampagna.campagnaConclusa(modo: Motore.ConclusioneCampagna.Modo.richiamo, vincitore: Optional(Dati.Parte.giocatore))]") is not equal to ("[Motore.EventoCampagna.campagnaConclusa(modo: Motore.ConclusioneCampagna.Modo.richiamo, vincitore: Optional(Dati.Parte.avversario))]")
+/Users/lucascabini/Developer/WarSense/Codice/Tests/MotoreTest/PresaDelQuartierGeneraleTest.swift:486: error: -[MotoreTest.PresaDelQuartierGeneraleTest test_01_5_18_2_l_esercito_si_richiama_quando_nessun_gruppo_e_tagliato_ne_a_contatto] : XCTAssertEqual failed: ("Optional(Motore.ConclusioneCampagna(modo: Motore.ConclusioneCampagna.Modo.richiamo, vincitore: Optional(Dati.Parte.giocatore), giorno: 1))") is not equal to ("Optional(Motore.ConclusioneCampagna(modo: Motore.ConclusioneCampagna.Modo.richiamo, vincitore: Optional(Dati.Parte.avversario), giorno: 1))")
+Test Case '-[MotoreTest.PresaDelQuartierGeneraleTest test_01_5_18_2_l_esercito_si_richiama_quando_nessun_gruppo_e_tagliato_ne_a_contatto]' failed (0.098 seconds).
+Test Case '-[MotoreTest.PresaDelQuartierGeneraleTest test_01_5_18_3_2_chi_sta_per_uscire_occupa_ancora_finche_non_e_uscito]' passed (0.008 seconds).
+Test Case '-[MotoreTest.PresaDelQuartierGeneraleTest test_01_5_18_3_2_il_difensore_battuto_che_non_puo_ripiegare_non_ferma_il_conteggio]' passed (0.008 seconds).
+Test Case '-[MotoreTest.PresaDelQuartierGeneraleTest test_01_5_18_3_2_il_difensore_che_torna_e_vince_azzera_e_se_perde_il_conteggio_riprende]' passed (0.008 seconds).
+Test Case '-[MotoreTest.PresaDelQuartierGeneraleTest test_01_5_18_3_2_lasciata_la_casella_il_conteggio_si_azzera_e_ricomincia_da_capo]' passed (0.008 seconds).
+Test Case '-[MotoreTest.PresaDelQuartierGeneraleTest test_01_5_18_3_2_riunito_altrove_l_occupante_lascia_il_quartier_generale]' passed (0.008 seconds).
+Test Case '-[MotoreTest.PresaDelQuartierGeneraleTest test_01_5_18_3_2_vinta_la_battaglia_contro_il_difensore_comincia_l_occupazione]' passed (0.008 seconds).
+Test Case '-[MotoreTest.PresaDelQuartierGeneraleTest test_01_5_18_3_3_chi_possiede_il_quartier_generale_sa_sempre_che_e_occupato]' passed (0.007 seconds).
+/Users/lucascabini/Developer/WarSense/Codice/Tests/MotoreTest/PresaDelQuartierGeneraleTest.swift:404: error: -[MotoreTest.PresaDelQuartierGeneraleTest test_01_5_18_3_4_l_esito_della_presa_e_del_richiamo_arriva_al_regno] : XCTAssertEqual failed: ("[Motore.EventoCampagna.campagnaConclusa(modo: Motore.ConclusioneCampagna.Modo.richiamo, vincitore: Optional(Dati.Parte.giocatore))]") is not equal to ("[Motore.EventoCampagna.campagnaConclusa(modo: Motore.ConclusioneCampagna.Modo.richiamo, vincitore: Optional(Dati.Parte.avversario))]")
+/Users/lucascabini/Developer/WarSense/Codice/Tests/MotoreTest/PresaDelQuartierGeneraleTest.swift:406: error: -[MotoreTest.PresaDelQuartierGeneraleTest test_01_5_18_3_4_l_esito_della_presa_e_del_richiamo_arriva_al_regno] : XCTAssertFalse failed
+/Users/lucascabini/Developer/WarSense/Codice/Tests/MotoreTest/PresaDelQuartierGeneraleTest.swift:411: error: -[MotoreTest.PresaDelQuartierGeneraleTest test_01_5_18_3_4_l_esito_della_presa_e_del_richiamo_arriva_al_regno] : XCTAssertTrue failed
+Test Case '-[MotoreTest.PresaDelQuartierGeneraleTest test_01_5_18_3_4_l_esito_della_presa_e_del_richiamo_arriva_al_regno]' failed (0.009 seconds).
+Test Case '-[MotoreTest.PresaDelQuartierGeneraleTest test_01_5_18_3_4_la_caduta_dell_ultimo_quartier_generale_chiude_anche_le_battaglie_in_sospeso]' passed (0.008 seconds).
+Test Case '-[MotoreTest.PresaDelQuartierGeneraleTest test_01_5_18_3_4_la_presa_che_si_compie_nell_ultima_giornata_vince_sull_inverno]' passed (0.008 seconds).
+Test Case '-[MotoreTest.PresaDelQuartierGeneraleTest test_01_5_18_3_5_a_un_passo_l_avversario_entra_nel_quartier_generale]' passed (0.007 seconds).
+Test Case '-[MotoreTest.PresaDelQuartierGeneraleTest test_01_5_18_3_5_l_avversario_che_occupa_il_quartier_generale_lo_tiene]' passed (0.008 seconds).
+Test Case '-[MotoreTest.PresaDelQuartierGeneraleTest test_01_5_18_3_5_l_avversario_torna_a_riprendere_il_proprio_quartier_generale]' passed (0.008 seconds).
+Test Case '-[MotoreTest.PresaDelQuartierGeneraleTest test_01_5_18_3_5_l_avversario_valuta_la_corsa]' passed (0.007 seconds).
+Test Case '-[MotoreTest.PresaDelQuartierGeneraleTest test_01_5_18_3_il_quartier_generale_cade_dopo_le_giornate_della_regola_per_le_due_parti]' passed (0.008 seconds).
+Test Case '-[MotoreTest.PresaDelQuartierGeneraleTest test_01_5_18_3_la_ricognizione_e_le_non_armate_non_occupano]' passed (0.008 seconds).
+Test Case '-[MotoreTest.PresaDelQuartierGeneraleTest test_01_5_18_3_le_giornate_sono_quelle_che_la_campagna_dichiara]' passed (0.007 seconds).
+Test Case '-[MotoreTest.PresaDelQuartierGeneraleTest test_01_5_6_3_1_le_giornate_verso_una_meta_seguono_la_via_piu_breve]' passed (0.008 seconds).
+Test Case '-[MotoreTest.PresaDelQuartierGeneraleTest test_05_12_5_il_vantaggio_della_caduta_simultanea_e_disattivabile]' passed (0.025 seconds).
+Test Case '-[MotoreTest.PresaDelQuartierGeneraleTest test_incarico_32_senza_la_regola_la_condotta_non_cambia]' passed (0.008 seconds).
+Test Case '-[MotoreTest.PresaDelQuartierGeneraleTest test_incarico_32_senza_la_regola_nulla_cambia]' passed (0.008 seconds).
+	 Executed 28 tests, with 5 failures (0 unexpected) in 0.328 (0.330) seconds
+
+== la condotta dell'avversario non conosce la presa
+   sorgente: Codice/Sources/Motore/CondottaAvversaria.swift
+   tolto:  if let presa = vista.presa, let comando = comandoPerLaPresa(gruppo, vista: vista, presa: presa) {
+   messo:  if false, let presa = vista.presa, let comando = comandoPerLaPresa(gruppo, vista: vista, presa: presa) {
+   prove:  swift test --filter PresaDelQuartierGeneraleTest (uscita 1)
+Test Case '-[MotoreTest.PresaDelQuartierGeneraleTest test_00_15_le_occupazioni_stanno_nello_stato_e_nell_impronta]' passed (0.014 seconds).
+Test Case '-[MotoreTest.PresaDelQuartierGeneraleTest test_01_15_2_5_caduti_insieme_gli_ultimi_quartieri_generali_vince_il_giocatore]' passed (0.008 seconds).
+Test Case '-[MotoreTest.PresaDelQuartierGeneraleTest test_01_5_14_3_2_con_una_fortezza_vanno_presi_tutti_e_due_i_quartieri_generali]' passed (0.008 seconds).
+Test Case '-[MotoreTest.PresaDelQuartierGeneraleTest test_01_5_17_1_il_registro_annota_l_occupazione_subita]' passed (0.007 seconds).
+Test Case '-[MotoreTest.PresaDelQuartierGeneraleTest test_01_5_18_2_il_contatto_col_nemico_impedisce_il_richiamo_e_dice_quale_gruppo_e_dove]' passed (0.008 seconds).
+Test Case '-[MotoreTest.PresaDelQuartierGeneraleTest test_01_5_18_2_il_rifornimento_tagliato_impedisce_il_richiamo_e_dice_quale_gruppo]' passed (0.008 seconds).
+Test Case '-[MotoreTest.PresaDelQuartierGeneraleTest test_01_5_18_2_l_esercito_si_richiama_quando_nessun_gruppo_e_tagliato_ne_a_contatto]' passed (0.007 seconds).
+Test Case '-[MotoreTest.PresaDelQuartierGeneraleTest test_01_5_18_3_2_chi_sta_per_uscire_occupa_ancora_finche_non_e_uscito]' passed (0.008 seconds).
+Test Case '-[MotoreTest.PresaDelQuartierGeneraleTest test_01_5_18_3_2_il_difensore_battuto_che_non_puo_ripiegare_non_ferma_il_conteggio]' passed (0.008 seconds).
+Test Case '-[MotoreTest.PresaDelQuartierGeneraleTest test_01_5_18_3_2_il_difensore_che_torna_e_vince_azzera_e_se_perde_il_conteggio_riprende]' passed (0.008 seconds).
+Test Case '-[MotoreTest.PresaDelQuartierGeneraleTest test_01_5_18_3_2_lasciata_la_casella_il_conteggio_si_azzera_e_ricomincia_da_capo]' passed (0.008 seconds).
+Test Case '-[MotoreTest.PresaDelQuartierGeneraleTest test_01_5_18_3_2_riunito_altrove_l_occupante_lascia_il_quartier_generale]' passed (0.008 seconds).
+Test Case '-[MotoreTest.PresaDelQuartierGeneraleTest test_01_5_18_3_2_vinta_la_battaglia_contro_il_difensore_comincia_l_occupazione]' passed (0.008 seconds).
+Test Case '-[MotoreTest.PresaDelQuartierGeneraleTest test_01_5_18_3_3_chi_possiede_il_quartier_generale_sa_sempre_che_e_occupato]' passed (0.008 seconds).
+Test Case '-[MotoreTest.PresaDelQuartierGeneraleTest test_01_5_18_3_4_l_esito_della_presa_e_del_richiamo_arriva_al_regno]' passed (0.008 seconds).
+Test Case '-[MotoreTest.PresaDelQuartierGeneraleTest test_01_5_18_3_4_la_caduta_dell_ultimo_quartier_generale_chiude_anche_le_battaglie_in_sospeso]' passed (0.008 seconds).
+Test Case '-[MotoreTest.PresaDelQuartierGeneraleTest test_01_5_18_3_4_la_presa_che_si_compie_nell_ultima_giornata_vince_sull_inverno]' passed (0.008 seconds).
+Test Case '-[MotoreTest.PresaDelQuartierGeneraleTest test_01_5_18_3_5_a_un_passo_l_avversario_entra_nel_quartier_generale]' passed (0.008 seconds).
+Test Case '-[MotoreTest.PresaDelQuartierGeneraleTest test_01_5_18_3_5_l_avversario_che_occupa_il_quartier_generale_lo_tiene]' passed (0.008 seconds).
+/Users/lucascabini/Developer/WarSense/Codice/Tests/MotoreTest/PresaDelQuartierGeneraleTest.swift:573: error: -[MotoreTest.PresaDelQuartierGeneraleTest test_01_5_18_3_5_l_avversario_torna_a_riprendere_il_proprio_quartier_generale] : XCTAssertEqual failed: ("[]") is not equal to ("[Motore.Cella(riga: 1, colonna: 2)]") - entra nella casella a scacciare l'occupante
+Test Case '-[MotoreTest.PresaDelQuartierGeneraleTest test_01_5_18_3_5_l_avversario_torna_a_riprendere_il_proprio_quartier_generale]' failed (0.108 seconds).
+/Users/lucascabini/Developer/WarSense/Codice/Tests/MotoreTest/PresaDelQuartierGeneraleTest.swift:586: error: -[MotoreTest.PresaDelQuartierGeneraleTest test_01_5_18_3_5_l_avversario_valuta_la_corsa] : XCTAssertEqual failed: ("marcia(gruppo: gruppo-2, a: Motore.Cella(riga: 3, colonna: 2), giorni: 1)") is not equal to ("presidio(gruppo: gruppo-2)") - vince la corsa, e resta
+/Users/lucascabini/Developer/WarSense/Codice/Tests/MotoreTest/PresaDelQuartierGeneraleTest.swift:588: error: -[MotoreTest.PresaDelQuartierGeneraleTest test_01_5_18_3_5_l_avversario_valuta_la_corsa] : XCTAssertEqual failed: ("marcia(gruppo: gruppo-2, a: Motore.Cella(riga: 3, colonna: 2), giorni: 1)") is not equal to ("presidio(gruppo: gruppo-2)") - non arriverebbe in tempo, e resta
+Test Case '-[MotoreTest.PresaDelQuartierGeneraleTest test_01_5_18_3_5_l_avversario_valuta_la_corsa]' failed (0.009 seconds).
+Test Case '-[MotoreTest.PresaDelQuartierGeneraleTest test_01_5_18_3_il_quartier_generale_cade_dopo_le_giornate_della_regola_per_le_due_parti]' passed (0.008 seconds).
+Test Case '-[MotoreTest.PresaDelQuartierGeneraleTest test_01_5_18_3_la_ricognizione_e_le_non_armate_non_occupano]' passed (0.008 seconds).
+Test Case '-[MotoreTest.PresaDelQuartierGeneraleTest test_01_5_18_3_le_giornate_sono_quelle_che_la_campagna_dichiara]' passed (0.008 seconds).
+Test Case '-[MotoreTest.PresaDelQuartierGeneraleTest test_01_5_6_3_1_le_giornate_verso_una_meta_seguono_la_via_piu_breve]' passed (0.007 seconds).
+Test Case '-[MotoreTest.PresaDelQuartierGeneraleTest test_05_12_5_il_vantaggio_della_caduta_simultanea_e_disattivabile]' passed (0.022 seconds).
+/Users/lucascabini/Developer/WarSense/Codice/Tests/MotoreTest/PresaDelQuartierGeneraleTest.swift:608: error: -[MotoreTest.PresaDelQuartierGeneraleTest test_incarico_32_senza_la_regola_la_condotta_non_cambia] : failed - imboscata(gruppo: gruppo-3)
+Test Case '-[MotoreTest.PresaDelQuartierGeneraleTest test_incarico_32_senza_la_regola_la_condotta_non_cambia]' failed (0.008 seconds).
+Test Case '-[MotoreTest.PresaDelQuartierGeneraleTest test_incarico_32_senza_la_regola_nulla_cambia]' passed (0.008 seconds).
+	 Executed 28 tests, with 4 failures (0 unexpected) in 0.340 (0.342) seconds
+
+== perdere la battaglia non azzera (dopo la prova aggiunta per la mutazione sopravvissuta)
+   sorgente: Codice/Sources/Motore/PresaDelQuartierGenerale.swift
+   tolto:  if inCorso { eventi.append(interrompiLOccupazione(di: esito.casella, da: occupante, in: &stato)) }
+   messo:  _ = inCorso
+   prove:  swift test --filter PresaDelQuartierGeneraleTest (uscita 1)
+Test Case '-[MotoreTest.PresaDelQuartierGeneraleTest test_00_15_le_occupazioni_stanno_nello_stato_e_nell_impronta]' passed (0.014 seconds).
+Test Case '-[MotoreTest.PresaDelQuartierGeneraleTest test_01_15_2_5_caduti_insieme_gli_ultimi_quartieri_generali_vince_il_giocatore]' passed (0.011 seconds).
+Test Case '-[MotoreTest.PresaDelQuartierGeneraleTest test_01_5_14_3_2_con_una_fortezza_vanno_presi_tutti_e_due_i_quartieri_generali]' passed (0.009 seconds).
+Test Case '-[MotoreTest.PresaDelQuartierGeneraleTest test_01_5_17_1_il_registro_annota_l_occupazione_subita]' passed (0.009 seconds).
+Test Case '-[MotoreTest.PresaDelQuartierGeneraleTest test_01_5_18_2_il_contatto_col_nemico_impedisce_il_richiamo_e_dice_quale_gruppo_e_dove]' passed (0.008 seconds).
+Test Case '-[MotoreTest.PresaDelQuartierGeneraleTest test_01_5_18_2_il_rifornimento_tagliato_impedisce_il_richiamo_e_dice_quale_gruppo]' passed (0.007 seconds).
+Test Case '-[MotoreTest.PresaDelQuartierGeneraleTest test_01_5_18_2_l_esercito_si_richiama_quando_nessun_gruppo_e_tagliato_ne_a_contatto]' passed (0.008 seconds).
+Test Case '-[MotoreTest.PresaDelQuartierGeneraleTest test_01_5_18_3_2_chi_sta_per_uscire_occupa_ancora_finche_non_e_uscito]' passed (0.007 seconds).
+Test Case '-[MotoreTest.PresaDelQuartierGeneraleTest test_01_5_18_3_2_il_difensore_battuto_che_non_puo_ripiegare_non_ferma_il_conteggio]' passed (0.008 seconds).
+Test Case '-[MotoreTest.PresaDelQuartierGeneraleTest test_01_5_18_3_2_il_difensore_che_torna_e_vince_azzera_e_se_perde_il_conteggio_riprende]' passed (0.008 seconds).
+/Users/lucascabini/Developer/WarSense/Codice/Tests/MotoreTest/PresaDelQuartierGeneraleTest.swift:284: error: -[MotoreTest.PresaDelQuartierGeneraleTest test_01_5_18_3_2_l_occupante_battuto_che_non_puo_ripiegare_perde_comunque_il_conteggio] : XCTAssertEqual failed: ("nil") is not equal to ("Optional(Motore.EventoCampagna.occupazioneInterrotta(casella: Motore.Cella(riga: 4, colonna: 2), occupante: Dati.Parte.avversario))")
+/Users/lucascabini/Developer/WarSense/Codice/Tests/MotoreTest/PresaDelQuartierGeneraleTest.swift:285: error: -[MotoreTest.PresaDelQuartierGeneraleTest test_01_5_18_3_2_l_occupante_battuto_che_non_puo_ripiegare_perde_comunque_il_conteggio] : XCTAssertNil failed: "OccupazioneDelQuartierGenerale(casella: Motore.Cella(riga: 4, colonna: 2), occupante: Dati.Parte.avversario, giornate: 0)"
+/Users/lucascabini/Developer/WarSense/Codice/Tests/MotoreTest/PresaDelQuartierGeneraleTest.swift:286: error: -[MotoreTest.PresaDelQuartierGeneraleTest test_01_5_18_3_2_l_occupante_battuto_che_non_puo_ripiegare_perde_comunque_il_conteggio] : XCTAssertTrue failed
+/Users/lucascabini/Developer/WarSense/Codice/Tests/MotoreTest/PresaDelQuartierGeneraleTest.swift:287: error: -[MotoreTest.PresaDelQuartierGeneraleTest test_01_5_18_3_2_l_occupante_battuto_che_non_puo_ripiegare_perde_comunque_il_conteggio] : XCTAssertEqual failed: ("[Motore.EventoCampagna.occupazioneProsegue(casella: Motore.Cella(riga: 4, colonna: 2), occupante: Dati.Parte.avversario, mancano: 2), Motore.EventoCampagna.occupazioneProsegue(casella: Motore.Cella(riga: 4, colonna: 2), occupante: Dati.Parte.avversario, mancano: 1), Motore.EventoCampagna.campagnaConclusa(modo: Motore.ConclusioneCampagna.Modo.presa, vincitore: Optional(Dati.Parte.avversario))]") is not equal to ("[]") - battuto, non occupa finché il difensore vi sta
+/Users/lucascabini/Developer/WarSense/Codice/Tests/MotoreTest/PresaDelQuartierGeneraleTest.swift:288: error: -[MotoreTest.PresaDelQuartierGeneraleTest test_01_5_18_3_2_l_occupante_battuto_che_non_puo_ripiegare_perde_comunque_il_conteggio] : XCTAssertNil failed: "ConclusioneCampagna(modo: Motore.ConclusioneCampagna.Modo.presa, vincitore: Optional(Dati.Parte.avversario), giorno: 5)"
+Test Case '-[MotoreTest.PresaDelQuartierGeneraleTest test_01_5_18_3_2_l_occupante_battuto_che_non_puo_ripiegare_perde_comunque_il_conteggio]' failed (0.108 seconds).
+Test Case '-[MotoreTest.PresaDelQuartierGeneraleTest test_01_5_18_3_2_lasciata_la_casella_il_conteggio_si_azzera_e_ricomincia_da_capo]' passed (0.008 seconds).
+Test Case '-[MotoreTest.PresaDelQuartierGeneraleTest test_01_5_18_3_2_riunito_altrove_l_occupante_lascia_il_quartier_generale]' passed (0.008 seconds).
+Test Case '-[MotoreTest.PresaDelQuartierGeneraleTest test_01_5_18_3_2_vinta_la_battaglia_contro_il_difensore_comincia_l_occupazione]' passed (0.007 seconds).
+Test Case '-[MotoreTest.PresaDelQuartierGeneraleTest test_01_5_18_3_3_chi_possiede_il_quartier_generale_sa_sempre_che_e_occupato]' passed (0.008 seconds).
+Test Case '-[MotoreTest.PresaDelQuartierGeneraleTest test_01_5_18_3_4_l_esito_della_presa_e_del_richiamo_arriva_al_regno]' passed (0.008 seconds).
+Test Case '-[MotoreTest.PresaDelQuartierGeneraleTest test_01_5_18_3_4_la_caduta_dell_ultimo_quartier_generale_chiude_anche_le_battaglie_in_sospeso]' passed (0.008 seconds).
+Test Case '-[MotoreTest.PresaDelQuartierGeneraleTest test_01_5_18_3_4_la_presa_che_si_compie_nell_ultima_giornata_vince_sull_inverno]' passed (0.007 seconds).
+Test Case '-[MotoreTest.PresaDelQuartierGeneraleTest test_01_5_18_3_5_a_un_passo_l_avversario_entra_nel_quartier_generale]' passed (0.008 seconds).
+Test Case '-[MotoreTest.PresaDelQuartierGeneraleTest test_01_5_18_3_5_l_avversario_che_occupa_il_quartier_generale_lo_tiene]' passed (0.008 seconds).
+Test Case '-[MotoreTest.PresaDelQuartierGeneraleTest test_01_5_18_3_5_l_avversario_torna_a_riprendere_il_proprio_quartier_generale]' passed (0.008 seconds).
+Test Case '-[MotoreTest.PresaDelQuartierGeneraleTest test_01_5_18_3_5_l_avversario_valuta_la_corsa]' passed (0.008 seconds).
+Test Case '-[MotoreTest.PresaDelQuartierGeneraleTest test_01_5_18_3_il_quartier_generale_cade_dopo_le_giornate_della_regola_per_le_due_parti]' passed (0.007 seconds).
+Test Case '-[MotoreTest.PresaDelQuartierGeneraleTest test_01_5_18_3_la_ricognizione_e_le_non_armate_non_occupano]' passed (0.008 seconds).
+Test Case '-[MotoreTest.PresaDelQuartierGeneraleTest test_01_5_18_3_le_giornate_sono_quelle_che_la_campagna_dichiara]' passed (0.007 seconds).
+Test Case '-[MotoreTest.PresaDelQuartierGeneraleTest test_01_5_6_3_1_le_giornate_verso_una_meta_seguono_la_via_piu_breve]' passed (0.007 seconds).
+Test Case '-[MotoreTest.PresaDelQuartierGeneraleTest test_05_12_5_il_vantaggio_della_caduta_simultanea_e_disattivabile]' passed (0.023 seconds).
+Test Case '-[MotoreTest.PresaDelQuartierGeneraleTest test_incarico_32_senza_la_regola_la_condotta_non_cambia]' passed (0.008 seconds).
+Test Case '-[MotoreTest.PresaDelQuartierGeneraleTest test_incarico_32_senza_la_regola_nulla_cambia]' passed (0.008 seconds).
+	 Executed 29 tests, with 5 failures (0 unexpected) in 0.350 (0.351) seconds
+	 Executed 29 tests, with 5 failures (0 unexpected) in 0.350 (0.352) seconds
+
