@@ -307,7 +307,7 @@ public struct ValoriRicognizione: Codable, Hashable, Sendable {
     }
 }
 
-/// I valori della PRESA DEL QUARTIER GENERALE (01 §5.18.3, 03 §4.8.4; incarico 32): quante giornate di
+/// I valori della PRESA DEL QUARTIER GENERALE (01 §5.18.3, 03 §4.12.1; incarico 32): quante giornate di
 /// fila un gruppo armato deve tenere un quartier generale dell'altra parte, senza esserne scacciato,
 /// perché sia preso. PROVVISORIO, nei dati e mai nel codice (00 §13.1). Vale quello del momento in cui la
 /// campagna nasce: lo scenario lo porta con sé, e una campagna in corso non lo vede cambiare.

@@ -8,7 +8,7 @@ import Contenuti
 @testable import WarSense
 
 /// La presa del quartier generale e il richiamo dell'esercito attraverso l'interfaccia (01 §5.18.2, §5.18.3;
-/// 02 §6.5.5, §8.2.2; incarico 32): ciò che la mappa dice a ogni passo, dove lo dice, il comando di richiamo
+/// 02 §6.5.5, §6.5.6; incarico 32): ciò che la mappa dice a ogni passo, dove lo dice, il comando di richiamo
 /// con il suo perché, e la patria che ne dichiara l'esito.
 @MainActor
 final class CompletamentoDellaCampagnaTest: XCTestCase {

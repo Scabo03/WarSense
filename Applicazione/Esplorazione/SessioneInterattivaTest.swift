@@ -454,6 +454,9 @@ final class SessioneInterattivaTest: XCTestCase {
                 e.doubleTap()
                 esito["doppio_tocco_s"] = (Date().timeIntervalSince(primaDelDoppioTocco) * 100).rounded() / 100
             case "multi_tocco":
+                // Un elemento senza coordinate calcolabili — accade di rado, appena tornati da un'altra
+                // schermata — farebbe cadere il pilota (incarico 32): si dichiara, e chi guida sceglie altro.
+                guard e.isHittable else { esito["errore"] = "elemento non toccabile"; break }
                 e.tap(withNumberOfTaps: c["tocchi"] as? Int ?? 2, numberOfTouches: c["dita"] as? Int ?? 2)
             case "rotazione":
                 e.rotate(CGFloat(c["angolo"] as? Double ?? 1.0), withVelocity: CGFloat(c["velocita"] as? Double ?? 2.0))

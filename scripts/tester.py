@@ -131,6 +131,18 @@ def etichette():
     return [re.sub(r" \[.*$", "", r) for r in albero()]
 
 
+def tocco_a_due_dita(bersaglio, **altro):
+    """Il doppio tocco a due dita su un pulsante. Appena tornati da un'altra schermata l'elemento può non avere ancora
+    coordinate calcolabili: il pilota lo dichiara, si attende e si riprova una volta."""
+    c = dict({"azione": "multi_tocco", "tocchi": 2, "dita": 2, "etichetta": bersaglio, "tipo": "pulsante"}, **altro)
+    e = cmd(c)
+    if e.get("errore"):
+        diario("osservazione_tester", testo="tocco a due dita non eseguito, si riprova", errore=e.get("errore"))
+        time.sleep(3)
+        e = cmd(c)
+    return e
+
+
 def tocco_magico():
     # Il gesto su un elemento concreto: sull'iPad l'applicazione e la sua finestra non hanno coordinate
     # calcolabili per un tocco a più dita, e per VoiceOver il tocco magico vale ovunque.
@@ -143,8 +155,7 @@ def tocco_magico():
         # Senza un pulsante visibile il tocco a due dita fa cadere il pilota (coordinate non calcolabili).
         diario("osservazione_tester", testo="tocco magico non eseguito: nessun bersaglio visibile")
         return ""
-    c = {"etichetta": bersaglio, "tipo": "pulsante"}
-    e = cmd(dict({"azione": "multi_tocco", "tocchi": 2, "dita": 2, "ascolto": 3.0}, **c))
+    e = tocco_a_due_dita(bersaglio, ascolto=3.0)
     s = sentito(e)
     diario("tocco_magico", sentito=s)
     return s
@@ -799,8 +810,9 @@ def marcia_verso(da, meta, evita):
         m = re.search(r"raggiungibile in (\d+) giorn", e)
         if m and (c == meta or ("formazione avversaria" not in e and c not in evita)):
             mete.append((abs(c[0] - meta[0]) * 2 + abs(c[1] - meta[1]), int(m.group(1)), c))
-    if not mete or min(mete)[2] == da:
-        attiva(contiene=f"riga {da[0]}, casella {da[1]},")  # nessuna meta: si toglie la designazione
+    if not mete or min(mete)[0] >= abs(da[0] - meta[0]) * 2 + abs(da[1] - meta[1]):
+        # Nessuna meta, o nessuna che avvicini: si toglie la designazione.
+        attiva(contiene=f"riga {da[0]}, casella {da[1]},")
         return None
     _, giorni, c = min(mete)
     e = attiva_e_ascolta(contiene=f"riga {c[0]}, casella {c[1]},", ascolto=4)
@@ -865,8 +877,7 @@ def presa_del_quartier_generale():
         if "ccup" in s or "Tieni il quartier generale" in s or "cade" in s or "caduto" in s:
             diario("presa", numero=g, sentito=s, casella=caselle().get(suo))
             if not conclusa():
-                tocco = cmd({"azione": "multi_tocco", "tocchi": 2, "dita": 2, "etichetta": "Registro della campagna",
-                             "tipo": "pulsante", "ascolto": 18, "quiete": 4, "intere": "ogni"})
+                tocco = tocco_a_due_dita("Registro della campagna", ascolto=18, quiete=4, intere="ogni")
                 diario("tocco_magico", sentito=sentito_intero(tocco))
         if not conclusa() and ("attaglia" in s or "mboscata" in s):
             if combatti_se_serve(caselle()):
@@ -875,7 +886,8 @@ def presa_del_quartier_generale():
         diario("osservazione_tester", testo="il quartier generale non è stato preso nelle giornate giocate", battaglie=battaglie)
         return
     pronunce = dichiarazione_e_ritorno("presa")
-    preso = any("quartier generale avversario" in p and "caduto" in p for p in pronunce)
+    # Il servizio VoiceOver delle prove può troncare la frase a 64 caratteri: basta il suo inizio.
+    preso = any(p.startswith("Vittoria: il quartier generale avversario") for p in pronunce)
     diario("esito", quartier_generale_preso=preso, battaglie=battaglie)
     print("QUARTIER GENERALE PRESO" if preso else "campagna conclusa, ma non per la presa", flush=True)
 
@@ -906,12 +918,14 @@ def richiamo_dell_esercito():
         if any("battaglia in sospeso" in e for e in mappa.values()) and combatti_se_serve(mappa):
             continue
         armate = proprie_armate(mappa)
-        nemico = [c for c, e in mappa.items() if "formazione avversaria" in e]
-        if nemico and not impedito:
-            # La formazione più piccola va a contatto, per mettersi in un punto da cui il richiamo non si può dare.
-            piccola = min((x for x in armate if ", in attesa" in x[1]), key=lambda x: atomi_in(x[1]), default=None)
-            if piccola:
-                marcia_verso(piccola[0], nemico[0], evita=set())
+        # Verso il nemico che si vede o, finché non se ne vede, verso il suo quartier generale.
+        nemico = [c for c, e in mappa.items() if "formazione avversaria" in e] or [c for c, e in mappa.items() if QG_AVVERSARIO in e]
+        in_marcia = any("in marcia" in e for _, e in armate)
+        if nemico and not impedito and not in_marcia:
+            # Un gruppo armato va a contatto, dal più piccolo che può muoversi: il richiamo da lì non si può dare.
+            for c, e in sorted((x for x in armate if ", in attesa" in x[1]), key=lambda x: atomi_in(x[1])):
+                if marcia_verso(c, nemico[0], evita=set()):
+                    break
         if conclusa():
             continue
         s = chiudi_la_giornata(g, True)

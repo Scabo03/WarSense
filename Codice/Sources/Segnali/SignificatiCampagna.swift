@@ -237,7 +237,7 @@ public struct TraduttoreEventiCampagna: Sendable {
             // di portarvi il fuoco dal registro.
             return testi.frase("campagna.arrivo_dalla_patria", soggetto: soggetto(chiave),
                                verbosita: verbosita, casella.riga, casella.colonna)
-        // L'occupazione di un quartier generale (02 §8.2.2; incarico 32): una frase intera per ciascuna
+        // L'occupazione di un quartier generale (02 §6.5.6; incarico 32): una frase intera per ciascuna
         // delle due parti, chi occupa e chi è occupato, con le giornate che mancano.
         case .quartierGeneraleOccupato(let casella, let occupante, let mancano):
             return testi.frase(occupante == parte ? "campagna.qg_avversario_occupato" : "campagna.qg_proprio_occupato",

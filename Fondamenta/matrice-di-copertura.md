@@ -2,7 +2,7 @@
 
 Documento di lavoro della fase di architettura — versione 1.0
 
-Avvertenza del 2026-11-20 (incarico 27). La matrice si riferisce a versioni superate dei documenti (01 3.2, 02 2.1, 03 2.0) e non registra le decisioni del titolare del 18–20 novembre 2026: le due modalità di battaglia, lo scambio dei termini campagna e fronte, il caso confinato allo scontro a campioni, lo stato di conoscenza «osservato». Le righe che vi dipendono (01 §5.6.9–5.6.10, 5.7.1, 5.9.2, 5.9.3, 5.9.1.7, 12.1–12.5; 02 §4.2, 4.4, 6.5–6.7, 7.3, 7.4; 03 §4.6, 4.8.1, 4.8.4, 4.9.2, 4.11.1, 9.4) vanno lette con i documenti consolidati correnti; il suo aggiornamento appartiene al riallineamento dei consolidati. Il 2026-11-21 (incarico 28) il titolare ha riportato al caso meteo e guasti delle macchine, come eccezione dichiarata accanto allo scontro a campioni (01 3.9 §12.1, §12.2; RDA-152): per quella parte valgono il documento 01 nella versione 3.9, 02 2.7, 03 2.6 e 05 1.5. Non registra nemmeno i punti nuovi dell'incarico 29 (2026-11-21): 02 §3.3 riscritto, §4.6, §6.5.2.1, §9.2.2, §10.4; 01 §12.2.1; 05 §8.7, §10.3 lettera f, §10.14; documento della modalità a campioni 11.10. Il 2026-11-23 (incarico 31) sono state invece AGGIUNTE, nelle tabelle dei documenti 01 e 03, le righe dei punti nuovi nati dalle decisioni del titolare di quel giorno sul regno (01 3.11: §4.14.1.1, §4.14.1.2, §5.5.1.6, §5.5.1.6.1, §5.6.5.2, §5.9.5, §5.18–5.18.2, §16.8; 03 2.8: §4.3.3, §4.4.6, §4.11.2, §6.3.1; RDA-173): ciascuna porta la versione in cui il punto è nato. Nello stesso incarico la seconda tappa del regno è stata costruita nelle sue prime tre parti, e il documento 05 l'ha recepita nella versione 1.8: quelle righe rinviano ora al 05 versione 1.8 e alle voci del registro che registrano la costruzione (RDA-175–RDA-182), e sono state aggiunte le righe dei punti nuovi che la tappa ha portato nei documenti 02 (versione 2.10: §4.4.1.5, §6.5.4.5, §6.6.3, §8.7.3.1, §8.7.4, §8.7.5) e 03 (versione 2.8: §4.4.3.1, §4.4.3.2, §4.4.4.1, §4.4.4.2, §9.2.1.3).
+Avvertenza del 2026-11-20 (incarico 27). La matrice si riferisce a versioni superate dei documenti (01 3.2, 02 2.1, 03 2.0) e non registra le decisioni del titolare del 18–20 novembre 2026: le due modalità di battaglia, lo scambio dei termini campagna e fronte, il caso confinato allo scontro a campioni, lo stato di conoscenza «osservato». Le righe che vi dipendono (01 §5.6.9–5.6.10, 5.7.1, 5.9.2, 5.9.3, 5.9.1.7, 12.1–12.5; 02 §4.2, 4.4, 6.5–6.7, 7.3, 7.4; 03 §4.6, 4.8.1, 4.8.4, 4.9.2, 4.11.1, 9.4) vanno lette con i documenti consolidati correnti; il suo aggiornamento appartiene al riallineamento dei consolidati. Il 2026-11-21 (incarico 28) il titolare ha riportato al caso meteo e guasti delle macchine, come eccezione dichiarata accanto allo scontro a campioni (01 3.9 §12.1, §12.2; RDA-152): per quella parte valgono il documento 01 nella versione 3.9, 02 2.7, 03 2.6 e 05 1.5. Non registra nemmeno i punti nuovi dell'incarico 29 (2026-11-21): 02 §3.3 riscritto, §4.6, §6.5.2.1, §9.2.2, §10.4; 01 §12.2.1; 05 §8.7, §10.3 lettera f, §10.14; documento della modalità a campioni 11.10. Il 2026-11-23 (incarico 31) sono state invece AGGIUNTE, nelle tabelle dei documenti 01 e 03, le righe dei punti nuovi nati dalle decisioni del titolare di quel giorno sul regno (01 3.11: §4.14.1.1, §4.14.1.2, §5.5.1.6, §5.5.1.6.1, §5.6.5.2, §5.9.5, §5.18–5.18.2, §16.8; 03 2.8: §4.3.3, §4.4.6, §4.11.2, §6.3.1; RDA-173): ciascuna porta la versione in cui il punto è nato. Nello stesso incarico la seconda tappa del regno è stata costruita nelle sue prime tre parti, e il documento 05 l'ha recepita nella versione 1.8: quelle righe rinviano ora al 05 versione 1.8 e alle voci del registro che registrano la costruzione (RDA-175–RDA-182), e sono state aggiunte le righe dei punti nuovi che la tappa ha portato nei documenti 02 (versione 2.10: §4.4.1.5, §6.5.4.5, §6.6.3, §8.7.3.1, §8.7.4, §8.7.5) e 03 (versione 2.8: §4.4.3.1, §4.4.3.2, §4.4.4.1, §4.4.4.2, §9.2.1.3). Il 2026-11-24 (incarico 32) sono state aggiunte o aggiornate le righe dei punti 01 3.12 (§5.2.1.1, §5.18–§5.18.3.5, §10.4.2, §10.7.1), 02 2.11 (§5.5.1, §5.7, §6.5.1.4, §6.5.4.6, §6.5.4.7, §6.5.5, §6.5.6) e 03 2.9 (§4.12.1, §4.12.2, §9.2.1.4, §10.10); il documento 05 è alla versione 1.9 (RDA-183–RDA-191).
 
 ## 0. Che cosa contiene e come si usa
 
@@ -184,6 +184,7 @@ La matrice si legge per documento; l'ordine delle righe segue la numerazione dei
 | 01 §5.1.3 | Al più una strettoia, annunciata, costo fisso | A §7.6, A §7.8 (validazione) |
 | 01 §5.2 | Tre categorie di formazioni sulla mappa | A §2.6.2 (categoria del gruppo) |
 | 01 §5.2.1 | Quartier generale perno della campagna | A §7.6 (posizioni dei quartier generali), A §2.6 |
+| 01 §5.2.1.1 | Dove entra chi viene dalla patria: la libera più vicina, a parità la più lontana dal nemico (versione 3.12) | A §2.6 (arrivi in attesa), A §2.6.3; 02 §6.5.4.7; RDA-186 |
 | 01 §5.2.2 | Rifornimento per catene proprie; tratto patria-QG automatico | A §2.6.2 (condizione di rifornimento derivata) |
 | 01 §5.2.2.1 | La linea è condizione dello spazio, non convogli | A §2.6.2 (derivata, mai memorizzata) |
 | 01 §5.2.2.2 | Regola del taglio: sei caselle retrostanti | A §2.6.2, A §14.2 (casi di bordo) |
@@ -301,9 +302,17 @@ La matrice si legge per documento; l'ordine delle righe segue la numerazione dei
 | 01 §5.16.2 | Gruppo con scatto residuo: annuncio motivato | A §10.6, A §10.7 |
 | 01 §5.17 | Registro cronologico per campagna e per patria | A §2.6 (registri), A §10.13 |
 | 01 §5.17.1 | Nel registro solo i fatti non decisi dal giocatore | A §3.7 (annotazione dei soli fatti non decisi) |
-| 01 §5.18 | Vie di conclusione della campagna raccolte: quartier generale, resa, annientamento, inverno (versione 3.11) | A §2.11, A §2.11.1, A §9.3 (dichiarazione di conclusione); RDA-164 |
+| 01 §5.18 | Vie di conclusione della campagna raccolte: quartier generale, resa, annientamento, inverno (versione 3.11; costruite tutte dalla 3.12) | A §2.6.3, A §2.11, A §2.11.1, A §3.6, A §9.3 (dichiarazione di conclusione); RDA-164, RDA-184, RDA-185 |
 | 01 §5.18.1 | La campagna interrotta dall'inverno si chiude senza vincitore e senza conseguenze territoriali (versione 3.11) | A §2.11.1; RDA-164, RDA-173 |
-| 01 §5.18.2 | Resa della campagna: richiamo ammesso senza rifornimento tagliato né contatto; campagna perduta, superstiti tutti in patria (versione 3.11) | A §2.11.1 (non costruita); RDA-173 |
+| 01 §5.18.2 | Resa della campagna: richiamo ammesso senza rifornimento tagliato né contatto; campagna perduta, superstiti tutti in patria (versione 3.11; costruita nella 3.12) | A §2.11.1, A §3.6 (riga del giornale, conferma, nessun annullamento); RDA-173, RDA-185 |
+| 01 §5.18.2.1 | Contatto: stessa casella di un gruppo avversario, o battaglia in sospeso (versione 3.12) | A §3.2 (motivo di non ammissibilità); RDA-185 |
+| 01 §5.18.2.2 | Il richiamo riguarda la campagna intera, chiede conferma, dichiara perché non si può (versione 3.12) | A §3.6, A §9.4; 02 §6.5.5; RDA-185 |
+| 01 §5.18.3 | Presa del quartier generale: gruppo armato, giornate di fila, identica per le due parti (versione 3.12) | A §2.6.3, A §7.1 (`presa-campagna.json`), A §12.8 (invarianti); 03 §4.12.1; RDA-184 |
+| 01 §5.18.3.1 | Il conteggio alla chiusura, la contesa che non conta e non azzera (versione 3.12) | A §2.6.3, A §3.7; RDA-184 |
+| 01 §5.18.3.2 | L'azzeramento (versione 3.12) | A §2.6.3, A §3.7; RDA-184 |
+| 01 §5.18.3.3 | Il difensore lo sa sempre (versione 3.12) | A §2.6.1; 02 §6.5.6; RDA-184 |
+| 01 §5.18.3.4 | La caduta: fortezza, premio, inverno, caduta simultanea (versione 3.12) | A §2.6.3, A §2.11.1, A §12.5 (vantaggio nascosto); RDA-184 |
+| 01 §5.18.3.5 | L'avversario usa la regola e se ne difende con ciò che sa (versione 3.12) | A §5 (condotta); 03 §4.12.2; RDA-184 |
 | 01 §6.1 | La compresenza non obbliga a combattere | A §3.3 (imposizione come comando esplicito) |
 | 01 §6.1.1 | Basta la volontà di uno per imporre lo scontro | A §3.3 (imposizione, accettazione) |
 | 01 §6.1.2 | Rifiutare richiede vedere arrivare; chi è lento accetta | Nessuna provvidenza architetturale necessaria — conseguenza voluta delle regole esistenti |
@@ -401,9 +410,11 @@ La matrice si legge per documento; l'ordine delle righe segue la numerazione dei
 | 01 §10.3 | Prosegue fino alla riga di soglia | A §2.7 (riga di soglia) |
 | 01 §10.4 | Volume per ritirare gli arretrati e sbarrare | A §3.4 (ritira unità), A §7.4 |
 | 01 §10.4.1 | I reparti a contatto non si ritirano | A §3.2 (motivo di non ammissibilità) |
+| 01 §10.4.2 | Il ritiro non costa più di un turno; gli evacuati tornano con gli uomini che avevano (versione 3.12) | A §2.7 (sciami evacuati), A §6.8; RDA-188 |
 | 01 §10.5 | Riga interamente occupata = barriera per costruzione | Nessuna provvidenza architetturale necessaria — proprietà geometrica della griglia esagonale |
 | 01 §10.6 | Evacuati ricompaiono in casella arretrata | A §3.6 (collocamento delle forze superstiti) |
 | 01 §10.7 | Ritirata avversaria limitata: vantaggio nascosto | A §5.5 (vantaggi-nascosti.json) |
+| 01 §10.7.1 | L'avversario che si ritira torna alla propria riga, e da uno stallo è lui a uscire (versione 3.12) | A §5 (tattico), A §12.9; RDA-189 |
 | 01 §10.8 | Ogni ritirata avversaria è annunciata | A §3.7 (eventi), A §10.7 |
 | 01 §10.9 | Margine di convenienza della resa: misurare con simulazioni | A §12.4 (metrica 03 §6.2) |
 | 01 §10.10 | Soglia minima di turni: taratura critica | A §12.4 (metrica 03 §6.1) |
@@ -513,7 +524,9 @@ La matrice si legge per documento; l'ordine delle righe segue la numerazione dei
 | 02 §5.3 | Esaurimento del deck: deselezione annunciata, fuoco fermo | A §10.3 |
 | 02 §5.4 | Rinforzi annunciati con suono dedicato, senza spostare fuoco | A §10.3, A §3.7 |
 | 02 §5.5 | Ogni cambiamento rilevante annunciato senza rubare fuoco | A §10.3, A §10.7 |
+| 02 §5.5.1 | L'annuncio che accompagna uno spostamento del fuoco si dice per intero (versione 2.11) | A §10.3 lettera g, A §11.6, A §14.5 (cancello di `ConfiniTest`); RDA-183 |
 | 02 §5.6 | La battaglia si apre solo per scelta del giocatore | A §3.6, A §3.3 |
+| 02 §5.7 | Ogni schermata che si apre prende il fuoco in testa, anche da un pannello (versione 2.11) | A §10.3 lettere f e h, A §14.4; RDA-183 |
 | 02 §6.1 | Stato di una riga verificato scorrendone le celle | A §10.2 |
 | 02 §6.2 | Riga piena come barriera, coincidenza da preservare | Nessuna provvidenza architetturale necessaria — motivazione geometrica fondata sulle regole di gioco |
 | 02 §6.3 | Cambio di riga segnalato con impulso tattile e sonoro | A §11.2, A §11.3 |
@@ -532,6 +545,11 @@ La matrice si legge per documento; l'ordine delle righe segue la numerazione dei
 | 02 §6.6 | Registro: voci accessibili singole, dal più recente | A §10.13, A §3.7 |
 | 02 §6.6.1 | Registro come recupero testuale degli annunci persi | A §11.5 |
 | 02 §6.6.2 | Nel registro solo i fatti non decisi dal giocatore | A §3.7 |
+| 02 §6.5.1.4 | Le occupazioni in coda all'informazione di stato (versione 2.11) | A §10.7, A §3.7; RDA-184 |
+| 02 §6.5.4.6 | La scelta del fronte non si apre se nessuno può aprirsi (versione 2.11) | A §3.2; RDA-186 |
+| 02 §6.5.4.7 | A campagna aperta la riga dice dov'è la formazione (versione 2.11) | A §2.12.1, A §10.7; RDA-186 |
+| 02 §6.5.5 | Il comando di richiamo dichiara perché non si può (versione 2.11) | A §3.2, A §9.4; RDA-185 |
+| 02 §6.5.6 | Gli annunci della presa, per chi occupa e per chi è occupato (versione 2.11) | A §10.7, A §11.6; RDA-184 |
 | 02 §6.6.3 | Arrivo dalla patria annunciato senza rubare il fuoco e annotato nel registro della campagna col luogo; fatti delle forze nel registro della patria (versione 2.10) | A §2.6 (arrivi in attesa), A §2.12.1 (registro della patria), A §3.7, A §10.13; RDA-177, RDA-178, RDA-180 |
 | 02 §6.5.2 | Stato dichiara stagione e sospensione invernale | A §10.9, A §2.3 |
 | 02 §6.5.3 | Gruppo in imboscata annuncia il proprio stato | A §8.4, A §2.6.2 |
@@ -653,6 +671,8 @@ La matrice si legge per documento; l'ordine delle righe segue la numerazione dei
 | 03 §4.10.1 | Soglia in turni della sortita e termini imminenza | A §7.5, A §4.4 |
 | 03 §4.11.1 | Probabilità meteo per stagione ed effetti sulla marcia | A §7.5 (meteo.json), A §4.2 |
 | 03 §4.11.2 | Giornate per stagione operativa fissate a trenta (versione 2.8) | 03 §9.4 (regno.json), A §2.12, A §7.5 |
+| 03 §4.12.1 | Giornate di occupazione che fanno cadere un quartier generale: tre, provvisorio (versione 2.9) | 03 §9.4 (presa-campagna.json), A §2.6.3; RDA-184 |
+| 03 §4.12.2 | Peso della presa nella condotta dell'avversario (versione 2.9) | 03 §9.4 (condotta-campagna.json), A §5; RDA-184 |
 | 03 §5.1 | Penalità di avanzamento per archetipo con formula unica | A §7.5 (archetipi.json), A §7.4 |
 | 03 §5.2 | Capacità di volume per turno, primo turno maggiorato | A §7.5 (formato-battaglia.json) |
 | 03 §5.3 | Costo aggiuntivo dello spostamento di due celle | A §7.5, A §3.4 |
@@ -684,6 +704,8 @@ La matrice si legge per documento; l'ordine delle righe segue la numerazione dei
 | 03 §9.1 | Collocazione dei file: fabbrica, Documenti, ripiego dichiarato | A §7.1 |
 | 03 §9.2 | Manifest dei valori con versione e compatibilità | A §7.2, A §6.6 |
 | 03 §9.2.1.3 | La regola delle versioni applicata alla seconda tappa: valori 0.15.0, 0.14.0 compatibile, giornale del regno a schema 2 (versione 2.8) | A §6.6, A §7.2; RDA-181 |
+| 03 §9.2.1.4 | La regola delle versioni applicata al completamento della campagna: valori 0.16.0, 0.15.0 compatibile, schemi fermi (versione 2.9) | A §6.6, A §7.2; RDA-190 |
+| 03 §10.10 | Le misure della campagna: frequenza, banco del regno, duelli, tattico pari (versione 2.9) | A §12.8, A §12.9; RDA-189, RDA-191 |
 | 03 §9.3 | Forma delle voci: base, coefficiente, intervallo con variazione | A §7.3, A §7.4 |
 | 03 §9.4 | Elenco dei file dei valori e corrispondenze | A §7.5, A §7.6 |
 | 03 §9.5 | Testi: pacchetti per lingua, vocabolario chiuso, manifest | A §8.1, A §8.2, A §8.3, A §8.4, A §8.6 |

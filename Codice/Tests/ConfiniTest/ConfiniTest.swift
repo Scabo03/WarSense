@@ -171,7 +171,7 @@ final class ConfiniTest: XCTestCase {
     /// a cui segue uno spostamento del fuoco — chiesto, o portato da un pannello che si chiude o da una
     /// schermata che compare — dev'essere preceduto dalla sua dichiarazione. L'annuncio di un rifiuto,
     /// che precede un'uscita dalla funzione, non accompagna nulla.
-    func test_02_8_l_annuncio_che_accompagna_uno_spostamento_segue_la_richiesta_del_fuoco() throws {
+    func test_02_5_5_1_l_annuncio_che_accompagna_uno_spostamento_segue_la_richiesta_del_fuoco() throws {
         let funzione = try NSRegularExpression(pattern: "^    (?:@objc |private |public |fileprivate |override |static |@discardableResult )*(?:func |init\\()")
         let annuncio = try NSRegularExpression(pattern: "segnali\\.annuncia\\(|\\bannuncia\\(|\\bsegnala\\(")
         let dichiarazione = try NSRegularExpression(pattern: "Fuoco\\.(?:sposta|staPerSpostarsi)\\(")

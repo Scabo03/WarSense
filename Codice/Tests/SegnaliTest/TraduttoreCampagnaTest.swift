@@ -49,7 +49,7 @@ final class TraduttoreCampagnaTest: XCTestCase {
         }
     }
 
-    /// La presa del quartier generale (02 §8.2.2; incarico 32): ciascun passo, detto a chi occupa e a chi è
+    /// La presa del quartier generale (02 §6.5.6; incarico 32): ciascun passo, detto a chi occupa e a chi è
     /// occupato, per esteso e nel livello sintetico, col numero delle giornate accordato.
     func test_02_8_2_2_l_occupazione_di_un_quartier_generale_si_annuncia_alle_due_parti() throws {
         let casella = Cella(riga: 4, colonna: 2)
