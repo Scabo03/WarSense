@@ -40,6 +40,8 @@ final class SchermataBattaglia: UIViewController {
     private var fuocoDiAperturaDato = false
     /// Il resoconto si presenta una volta sola (incarico 32): fra la fine e la sua comparsa passa un istante.
     private var resocontoMostrato = false
+    /// La battaglia si è conclusa in questa schermata: il fuoco appartiene al resoconto.
+    private var conclusioneRicevuta = false
 
     init(partita: PartitaCorrente) {
         self.partita = partita
@@ -240,6 +242,7 @@ final class SchermataBattaglia: UIViewController {
     /// mostrava il solo titolo e il congedo (osservazione 2 dell'esplorazione dell'incarico 27).
     private func ricevi(_ eventi: [EventoBattaglia]) {
         let conclusa = eventi.contains { if case .battagliaConclusa = $0 { return true } else { return false } }
+        if conclusa { conclusioneRicevuta = true }
         Task {
             await ricaricaStato()
             if conclusa { await mostraResoconto() }
@@ -407,14 +410,24 @@ final class SchermataBattaglia: UIViewController {
     /// L'avviso di sistema si congeda DA SOLO al tocco di una voce: congedare qui
     /// senza pannello presentato congederebbe la schermata dello scontro stessa.
     /// Ciò che il pannello fa dire si annuncia DOPO aver chiesto il fuoco, che l'annuncio accompagna
-    /// (incarico 32, RDA-183).
+    /// (incarico 32, RDA-183). Un COMANDO invece si esegue prima di chiederlo: se conclude la battaglia il
+    /// fuoco va al resoconto, e una richiesta verso la cella, già in viaggio, lo porterebbe su una sua voce
+    /// qualunque. Che il fuoco si sposterà lo si dichiara prima del comando, sicché i suoi annunci lo
+    /// accompagnano a priorità alta.
     private func chiudiPannello(cella: Cella, poi azione: (() async -> Void)?,
                                 annunciando testo: TestoLocalizzato? = nil) {
         let ripristina: () -> Void = { [weak self] in
             guard let self else { return }
-            Fuoco.sposta(a: self.elementi[cella], perche: .richiesto)
-            if let testo { self.partita.ambiente.segnali.annuncia(testo) }
-            if let azione { Task { await azione() } }
+            guard let azione else {
+                Fuoco.sposta(a: self.elementi[cella], perche: .richiesto)
+                if let testo { self.partita.ambiente.segnali.annuncia(testo) }
+                return
+            }
+            Fuoco.staPerSpostarsi()
+            Task {
+                await azione()
+                if !self.conclusioneRicevuta { Fuoco.sposta(a: self.elementi[cella], perche: .richiesto) }
+            }
         }
         if let pannello = presentedViewController as? UIAlertController,
            !pannello.isBeingDismissed {
@@ -608,8 +621,8 @@ final class SchermataBattaglia: UIViewController {
     // MARK: - Resoconto
 
     /// Il resoconto si presenta un istante dopo la fine (incarico 32): quando a concludere lo scontro è un
-    /// comando dato da un pannello, VoiceOver sta ancora riportando il fuoco sulla cella d'origine, e lo
-    /// avrebbe portato lì — o su una voce qualunque del resoconto — invece che sul titolo.
+    /// comando dato da un pannello, il sistema sta ancora congedando il pannello, e avrebbe portato il fuoco
+    /// altrove che sul titolo.
     private func mostraResoconto() async {
         guard let costruttore, !resocontoMostrato else { return }
         resocontoMostrato = true

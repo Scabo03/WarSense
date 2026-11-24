@@ -30,3 +30,13 @@ Test Case '-[WarSenseTest.PassaggioBattagliaInterfacciaTest test_02_2_9_dal_pann
 Test Case '-[WarSenseTest.PassaggioBattagliaInterfacciaTest test_02_2_9_dal_pannello_alla_battaglia_e_al_resoconto_il_fuoco_va_in_testa_alla_schermata_nuova]' failed (1.491 seconds).
 ** TEST FAILED **
 
+== dal pannello il fuoco si chiede verso la cella prima del comando (build 32 e prima stesura)
+   sorgente: Applicazione/Sorgenti/SchermataBattaglia.swift
+   tolto:  if !self.conclusioneRicevuta { Fuoco.sposta(a: self.elementi[cella], perche: .richiesto) }
+   messo:  Fuoco.sposta(a: self.elementi[cella], perche: .richiesto)
+   prove ospitate: PannelloAzioniTest/test_02_5_7_l_evacuazione_che_conclude_la_battaglia_porta_il_fuoco_al_resoconto (uscita 65)
+/Users/lucascabini/Developer/WarSense/Applicazione/ProveOspitate/PannelloAzioniTest.swift:125: error: -[WarSenseTest.PannelloAzioniTest test_02_5_7_l_evacuazione_che_conclude_la_battaglia_porta_il_fuoco_al_resoconto] : XCTAssertEqual failed: ("[WarSense.Fuoco.Movimento.richiesto]") is not equal to ("[WarSense.Fuoco.Movimento.schermataAperta]") - nessuno spostamento verso la cella
+/Users/lucascabini/Developer/WarSense/Applicazione/ProveOspitate/PannelloAzioniTest.swift:126: error: -[WarSenseTest.PannelloAzioniTest test_02_5_7_l_evacuazione_che_conclude_la_battaglia_porta_il_fuoco_al_resoconto] : XCTAssertEqual failed: ("nil") is not equal to ("Optional("Resoconto della battaglia")")
+Test Case '-[WarSenseTest.PannelloAzioniTest test_02_5_7_l_evacuazione_che_conclude_la_battaglia_porta_il_fuoco_al_resoconto]' failed (1.197 seconds).
+** TEST FAILED **
+

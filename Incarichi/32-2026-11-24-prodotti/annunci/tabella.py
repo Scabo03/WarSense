@@ -60,6 +60,14 @@ def intero(a):
     return a["detto"] >= (0.75 * serve if serve else 0.6 * a["caratteri"] / 17.5)
 
 
+# Superato dal GIOCO e non da VoiceOver: la conferma della chiusura che conclude la campagna, che l'annuncio della
+# conclusione supera per scelta (A §11.6, RDA-172): il successivo è pubblicato mentre il primo comincia.
+def superato_dal_gioco(d, k):
+    a = d["annunci"]
+    return (not intero(a[k]) and k + 1 < len(a) and a[k]["testo"].startswith("Giornata chiusa")
+            and "conclusa" in a[k + 1]["testo"] and a[k + 1]["pubblicato_a"] - a[k]["pubblicato_a"] <= 0.1)
+
+
 # chiave: (blocco, passo, posizione dell'annuncio nel passo)
 tavola = collections.OrderedDict()
 for d in righe:
@@ -76,7 +84,9 @@ colonne = [("iphone", "prima"), ("iphone", "dopo"), ("ipad", "prima"), ("ipad", 
 def cella(elenco):
     if not elenco:
         return "—"
-    a, _ = elenco[-1]
+    a, d = elenco[-1]
+    if superato_dal_gioco(d, d["annunci"].index(a)):
+        return "superato dal gioco"
     if a["modo"] == "nessuna voce" or a["detto"] is None:
         return "nessuna voce" if a["modo"] == "nessuna voce" else "in corso"
     ritardo = a["voce_comincia_dopo"]
@@ -98,7 +108,21 @@ with open(sys.argv[1], "w", encoding="utf-8") as f:
     for titolo, vuole in (("Con spostamento: interi su detti", True), ("Senza spostamento: interi su detti", False)):
         celle = []
         for c in colonne:
-            tutti = [e[-1][0] for k, v in tavola.items() if v["sposta"] == vuole for cc, e in v["celle"].items() if cc == c]
+            tutti = [e[-1][0] for k, v in tavola.items() if v["sposta"] == vuole for cc, e in v["celle"].items()
+                     if cc == c and not superato_dal_gioco(e[-1][1], e[-1][1]["annunci"].index(e[-1][0]))]
             celle.append("%d su %d" % (sum(1 for a in tutti if intero(a)), len(tutti)))
         f.write("| %s | %s |\n" % (titolo, " | ".join(celle)))
+    # Dove arriva il fuoco, nei passi che lo spostano: l'ultimo elemento che lo riceve.
+    f.write("\n## Dove arriva il fuoco\n\nL'ultimo elemento che riceve il fuoco in ciascun passo che lo sposta o cambia schermata.\n\n"
+            "| Quando | iPhone prima | iPhone dopo | iPad prima | iPad dopo |\n|---|---|---|---|---|\n")
+    arrivi = collections.OrderedDict()
+    for percorso in sys.argv[2:]:
+        with open(percorso, encoding="utf-8") as h:
+            for r in h:
+                d = json.loads(r)
+                if d.get("sposta") and "fuochi" in d:
+                    chiave = (d["blocco"], d["passo"])
+                    arrivi.setdefault(chiave, {})[(d["apparecchio"], d["versione"])] = (d["fuochi"] or [[0, "—"]])[-1][1][:48]
+    for (blocco, passo), celle in arrivi.items():
+        f.write("| %s · %s | %s |\n" % (blocco, passo, " | ".join(celle.get(c, "—").replace("|", "/") for c in colonne)))
 print(open(sys.argv[1], encoding="utf-8").read())

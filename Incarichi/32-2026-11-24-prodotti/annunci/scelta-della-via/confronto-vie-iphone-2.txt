@@ -1,0 +1,216 @@
+=================== via S3
+### K1 attendi l'inverno
+   VOCE   0.85  durata 3.23 s  intera
+   VOCE   4.10  durata 14.18 s  intera
+   voce   0.00  Attendi l'inverno Pulsante
+   voce   1.02  Comincia l'inverno dell'anno 1. Entrate: monete di bronzo 200, u
+   app  34760.36 FUOCO su «Attendi l'inverno» (da «nulla»)
+   app  34766.44 ANNUNCIO «Comincia l'inverno dell'anno 1. Entrate: monete » (175)
+   app  34766.45 FUOCO CHIESTO a «Anno 1, inverno, schermata 1 di 4»
+   app  34766.54 TRATTENUTO «Comincia l'inverno dell'anno 1»
+   app  34767.25 FUOCO su «Anno 1, inverno, schermata 1 di 4» (da «nulla»)
+   app  34767.40 PUBBLICA bassa «Comincia l'inverno dell'anno 1. Entrate: monete » (175)
+   app  34784.72 CONCLUSO riuscito=true «Comincia l'inverno dell'anno 1. Entrate: monete »
+### K8 leva, senza spostamento
+   VOCE   5.32  in corso  in corso
+   voce   0.00  Leva di fanteria leggera ordinata: pronta in primavera.
+   app  34789.36 FUOCO su «Leva di fanteria leggera. Costa: monete di bronz» (da «nulla»)
+   app  34795.43 ANNUNCIO «Leva di fanteria leggera ordinata: pronta in pri» (55)
+   app  34795.54 PUBBLICA bassa «Leva di fanteria leggera ordinata: pronta in pri» (55)
+   app  34804.27 CONCLUSO riuscito=true «Leva di fanteria leggera ordinata: pronta in pri»
+### K3 scelta, conferma
+   VOCE   0.84  durata 7.99 s  intera
+   VOCE   8.82  durata 5.52 s  intera
+   voce   0.00  Lupo: 8 atomi di fanteria pesante. Costa: monete di bronzo 100 s
+   voce   1.02  Addestramento mirato ordinato per 8 atomi di fanteria pesante di
+   app  34805.29 FUOCO su «Addestramento mirato. Si sceglie il reparto. Acc» (da «nulla»)
+   app  34811.36 FUOCO CHIESTO a «nulla»
+   app  34812.16 FUOCO su «Addestramento mirato.» (da «nulla»)
+   app  34815.98 FUOCO su «Lupo: 8 atomi di fanteria pesante. Costa: monete» (da «nulla»)
+   app  34822.05 FUOCO CHIESTO a «Addestramento mirato. Si sceglie il reparto. Acc»
+   app  34822.05 ANNUNCIO «Addestramento mirato ordinato per 8 atomi di fan» (91)
+   app  34822.16 TRATTENUTO «Addestramento mirato ordinato »
+   app  34822.84 FUOCO su «Addestramento mirato. Si sceglie il reparto. Acc» (da «nulla»)
+   app  34822.99 PUBBLICA bassa «Addestramento mirato ordinato per 8 atomi di fan» (91)
+   app  34836.36 CONCLUSO riuscito=true «Addestramento mirato ordinato per 8 atomi di fan»
+### K4 scelta impedita, rifiuto
+   VOCE   0.73  durata 7.99 s  intera
+   VOCE   8.71  durata 3.05 s  intera
+   voce   0.00  Falco: 24 atomi di fanteria pesante. Non si può ordinare: mancan
+   voce   1.02  Non si può ordinare: mancano monete di bronzo.
+   app  34846.77 FUOCO CHIESTO a «nulla»
+   app  34847.56 FUOCO su «Addestramento mirato.» (da «nulla»)
+   app  34851.39 FUOCO su «Falco: 24 atomi di fanteria pesante. Non si può » (da «nulla»)
+   app  34857.46 FUOCO CHIESTO a «Addestramento mirato. Si sceglie il reparto. Acc»
+   app  34857.46 ANNUNCIO «Non si può ordinare: mancano monete di bronzo.» (46)
+   app  34857.57 TRATTENUTO «Non si può ordinare: mancano m»
+   app  34858.25 FUOCO su «Addestramento mirato. Si sceglie il reparto. Acc» (da «nulla»)
+   app  34858.41 PUBBLICA bassa «Non si può ordinare: mancano monete di bronzo.» (46)
+   app  34869.29 CONCLUSO riuscito=true «Non si può ordinare: mancano monete di bronzo.»
+=================== via S4
+### K1 attendi l'inverno
+   VOCE   0.85  durata 0.15 s  troncata
+   VOCE   1.00  durata 14.17 s  intera
+   voce   0.00  Attendi l'inverno Pulsante
+   voce   1.03  Comincia l'inverno dell'anno 1. Entrate: monete di bronzo 200, u
+   app  34893.22 FUOCO su «Attendi l'inverno» (da «nulla»)
+   app  34899.30 ANNUNCIO «Comincia l'inverno dell'anno 1. Entrate: monete » (175)
+   app  34899.30 FUOCO CHIESTO a «Anno 1, inverno, schermata 1 di 4»
+   app  34899.40 TRATTENUTO «Comincia l'inverno dell'anno 1»
+   app  34900.10 FUOCO su «Anno 1, inverno, schermata 1 di 4» (da «nulla»)
+   app  34900.26 PUBBLICA default «Comincia l'inverno dell'anno 1. Entrate: monete » (175)
+   app  34914.44 CONCLUSO riuscito=true «Comincia l'inverno dell'anno 1. Entrate: monete »
+### K8 leva, senza spostamento
+   VOCE   0.03  durata 3.42 s  intera
+   voce   0.00  Leva di fanteria leggera. Costa: monete di bronzo 30 su 193, uom
+   voce   0.26  Leva di fanteria leggera ordinata: pronta in primavera.
+   app  34922.12 FUOCO su «Leva di fanteria leggera. Costa: monete di bronz» (da «nulla»)
+   app  34928.16 ANNUNCIO «Leva di fanteria leggera ordinata: pronta in pri» (55)
+   app  34928.27 PUBBLICA default «Leva di fanteria leggera ordinata: pronta in pri» (55)
+   app  34931.69 CONCLUSO riuscito=true «Leva di fanteria leggera ordinata: pronta in pri»
+### K3 scelta, conferma
+   VOCE   0.81  durata 0.15 s  troncata
+   VOCE   0.95  durata 5.52 s  intera
+   voce   0.00  Lupo: 8 atomi di fanteria pesante. Costa: monete di bronzo 100 s
+   voce   1.03  Addestramento mirato ordinato per 8 atomi di fanteria pesante di
+   app  34938.00 FUOCO su «Addestramento mirato. Si sceglie il reparto. Acc» (da «nulla»)
+   app  34944.08 FUOCO CHIESTO a «nulla»
+   app  34944.89 FUOCO su «Addestramento mirato.» (da «nulla»)
+   app  34948.69 FUOCO su «Lupo: 8 atomi di fanteria pesante. Costa: monete» (da «nulla»)
+   app  34954.77 FUOCO CHIESTO a «Addestramento mirato. Si sceglie il reparto. Acc»
+   app  34954.77 ANNUNCIO «Addestramento mirato ordinato per 8 atomi di fan» (91)
+   app  34954.88 TRATTENUTO «Addestramento mirato ordinato »
+   app  34955.56 FUOCO su «Addestramento mirato. Si sceglie il reparto. Acc» (da «nulla»)
+   app  34955.71 PUBBLICA default «Addestramento mirato ordinato per 8 atomi di fan» (91)
+   app  34961.23 CONCLUSO riuscito=true «Addestramento mirato ordinato per 8 atomi di fan»
+### K4 scelta impedita, rifiuto
+   VOCE   0.69  durata 0.15 s  troncata
+   VOCE   0.84  durata 3.05 s  intera
+   voce   0.00  Falco: 24 atomi di fanteria pesante. Non si può ordinare: mancan
+   voce   0.77  Addestramento mirato. Si sceglie il reparto. Accresce la capacit
+   voce   1.03  Non si può ordinare: mancano monete di bronzo.
+   app  34979.42 FUOCO CHIESTO a «nulla»
+   app  34980.21 FUOCO su «Addestramento mirato.» (da «nulla»)
+   app  34984.02 FUOCO su «Falco: 24 atomi di fanteria pesante. Non si può » (da «nulla»)
+   app  34990.10 FUOCO CHIESTO a «Addestramento mirato. Si sceglie il reparto. Acc»
+   app  34990.10 ANNUNCIO «Non si può ordinare: mancano monete di bronzo.» (46)
+   app  34990.20 TRATTENUTO «Non si può ordinare: mancano m»
+   app  34990.89 FUOCO su «Addestramento mirato. Si sceglie il reparto. Acc» (da «nulla»)
+   app  34991.05 PUBBLICA default «Non si può ordinare: mancano monete di bronzo.» (46)
+   app  34994.10 CONCLUSO riuscito=true «Non si può ordinare: mancano monete di bronzo.»
+=================== via S7
+### K1 attendi l'inverno
+   VOCE  -0.00  durata 0.00 s  troncata
+   VOCE   0.79  durata 3.24 s  intera
+   voce   0.00  Attendi l'inverno Pulsante
+   voce   0.26  Comincia l'inverno dell'anno 1. Entrate: monete di bronzo 200, u
+   voce   1.05  Anno 1, inverno, schermata 1 di 4
+   app  35025.15 FUOCO su «Attendi l'inverno» (da «nulla»)
+   app  35031.25 ANNUNCIO «Comincia l'inverno dell'anno 1. Entrate: monete » (175)
+   app  35031.25 PUBBLICA coda «Comincia l'inverno dell'anno 1. Entrate: monete » (175)
+   app  35031.25 FUOCO CHIESTO a «Anno 1, inverno, schermata 1 di 4»
+   app  35031.28 CONCLUSO riuscito=true «Comincia l'inverno dell'anno 1. Entrate: monete »
+   app  35032.05 FUOCO su «Anno 1, inverno, schermata 1 di 4» (da «nulla»)
+### K8 leva, senza spostamento
+   VOCE   5.34  durata 0.02 s  troncata
+   VOCE   5.36  durata 3.38 s  intera
+   voce   0.00  Leva di fanteria leggera. Costa: monete di bronzo 30 su 193, uom
+   voce   0.26  Leva di fanteria leggera ordinata: pronta in primavera.
+   app  35053.89 FUOCO su «Leva di fanteria leggera. Costa: monete di bronz» (da «nulla»)
+   app  35059.98 ANNUNCIO «Leva di fanteria leggera ordinata: pronta in pri» (55)
+   app  35059.98 PUBBLICA coda «Leva di fanteria leggera ordinata: pronta in pri» (55)
+   app  35068.79 CONCLUSO riuscito=true «Leva di fanteria leggera ordinata: pronta in pri»
+### K3 scelta, conferma
+   VOCE  -0.03  durata 0.75 s  troncata
+   VOCE   0.71  durata 7.99 s  intera
+   voce   0.00  Lupo: 8 atomi di fanteria pesante. Costa: monete di bronzo 100 s
+   voce   0.26  Addestramento mirato ordinato per 8 atomi di fanteria pesante di
+   voce   0.78  Addestramento mirato. Si sceglie il reparto. Accresce la capacit
+   app  35071.26 FUOCO su «Addestramento mirato. Si sceglie il reparto. Acc» (da «nulla»)
+   app  35077.32 FUOCO CHIESTO a «nulla»
+   app  35078.12 FUOCO su «Addestramento mirato.» (da «nulla»)
+   app  35081.96 FUOCO su «Lupo: 8 atomi di fanteria pesante. Costa: monete» (da «nulla»)
+   app  35088.03 FUOCO CHIESTO a «Addestramento mirato. Si sceglie il reparto. Acc»
+   app  35088.04 ANNUNCIO «Addestramento mirato ordinato per 8 atomi di fan» (91)
+   app  35088.04 PUBBLICA coda «Addestramento mirato ordinato per 8 atomi di fan» (91)
+   app  35088.80 FUOCO su «Addestramento mirato. Si sceglie il reparto. Acc» (da «nulla»)
+   app  35088.80 CONCLUSO riuscito=false «Addestramento mirato ordinato per 8 atomi di fan»
+### K4 scelta impedita, rifiuto
+   VOCE   0.04  durata 0.77 s  troncata
+   VOCE   0.82  durata 8.01 s  intera
+   voce   0.00  Falco: 24 atomi di fanteria pesante. Non si può ordinare: mancan
+   voce   0.26  Non si può ordinare: mancano monete di bronzo.
+   voce   0.78  Addestramento mirato. Si sceglie il reparto. Accresce la capacit
+   app  35112.94 FUOCO CHIESTO a «nulla»
+   app  35113.74 FUOCO su «Addestramento mirato.» (da «nulla»)
+   app  35117.61 FUOCO su «Falco: 24 atomi di fanteria pesante. Non si può » (da «nulla»)
+   app  35123.70 FUOCO CHIESTO a «Addestramento mirato. Si sceglie il reparto. Acc»
+   app  35123.71 ANNUNCIO «Non si può ordinare: mancano monete di bronzo.» (46)
+   app  35123.71 PUBBLICA coda «Non si può ordinare: mancano monete di bronzo.» (46)
+   app  35124.50 FUOCO su «Addestramento mirato. Si sceglie il reparto. Acc» (da «nulla»)
+   app  35124.51 CONCLUSO riuscito=false «Non si può ordinare: mancano monete di bronzo.»
+=================== via S8
+### K1 attendi l'inverno
+   VOCE   0.91  durata 1.90 s  intera
+   voce   0.00  Attendi l'inverno Pulsante
+   voce   1.04  Patria Intestazione
+   app  35159.17 FUOCO su «Attendi l'inverno» (da «nulla»)
+   app  35165.24 ANNUNCIO «Comincia l'inverno dell'anno 1. Entrate: monete » (175)
+   app  35165.25 FUOCO CHIESTO a «Anno 1, inverno, schermata 1 di 4»
+   app  35165.35 S8 cambio di schermata col testo (176)
+   app  35166.15 FUOCO su «Patria» (da «nulla»)
+### K8 leva, senza spostamento
+   voce   0.00  Leva di fanteria leggera. Costa: monete di bronzo 30 su 193, uom
+   app  35188.00 FUOCO su «Leva di fanteria leggera. Costa: monete di bronz» (da «nulla»)
+### K3 scelta, conferma
+   VOCE   0.85  durata 7.99 s  intera
+   voce   0.00  Lupo: 8 atomi di fanteria pesante. Costa: monete di bronzo 100 s
+   voce   1.05  Addestramento mirato. Si sceglie il reparto. Accresce la capacit
+   app  35203.81 FUOCO su «Addestramento mirato. Si sceglie il reparto. Acc» (da «nulla»)
+   app  35209.89 FUOCO CHIESTO a «nulla»
+   app  35210.78 FUOCO su «Addestramento mirato.» (da «nulla»)
+   app  35214.55 FUOCO su «Lupo: 8 atomi di fanteria pesante. Costa: monete» (da «nulla»)
+   app  35220.64 FUOCO CHIESTO a «Addestramento mirato. Si sceglie il reparto. Acc»
+   app  35221.51 FUOCO su «Addestramento mirato. Si sceglie il reparto. Acc» (da «nulla»)
+### K4 scelta impedita, rifiuto
+   VOCE   0.83  durata 7.98 s  intera
+   voce   0.00  Falco: 24 atomi di fanteria pesante. Non si può ordinare: mancan
+   voce   1.05  Addestramento mirato. Si sceglie il reparto. Accresce la capacit
+   app  35245.13 FUOCO CHIESTO a «nulla»
+   app  35246.00 FUOCO su «Addestramento mirato.» (da «nulla»)
+   app  35249.78 FUOCO su «Falco: 24 atomi di fanteria pesante. Non si può » (da «nulla»)
+   app  35255.86 FUOCO CHIESTO a «Addestramento mirato. Si sceglie il reparto. Acc»
+   app  35256.73 FUOCO su «Addestramento mirato. Si sceglie il reparto. Acc» (da «nulla»)
+=================== via S9
+### K1 attendi l'inverno
+   VOCE   0.89  durata 17.40 s  intera
+   voce   0.00  Attendi l'inverno Pulsante
+   voce   1.04  Comincia l'inverno dell'anno 1. Entrate: monete di bronzo 200, u
+   app  35291.12 FUOCO su «Attendi l'inverno» (da «nulla»)
+   app  35297.20 ANNUNCIO «Comincia l'inverno dell'anno 1. Entrate: monete » (175)
+   app  35297.21 FUOCO CHIESTO a «Anno 1, inverno, schermata 1 di 4»
+   app  35297.31 S9 l'elemento porta il testo (209)
+   app  35298.11 FUOCO su «Comincia l'inverno dell'anno 1. Entrate: monete » (da «nulla»)
+### K8 leva, senza spostamento
+   voce   0.00  Leva di fanteria leggera. Costa: monete di bronzo 30 su 193, uom
+   app  35320.00 FUOCO su «Leva di fanteria leggera. Costa: monete di bronz» (da «nulla»)
+### K3 scelta, conferma
+   VOCE   0.72  durata 7.99 s  intera
+   voce   0.00  Lupo: 8 atomi di fanteria pesante. Costa: monete di bronzo 100 s
+   voce   0.77  Addestramento mirato. Si sceglie il reparto. Accresce la capacit
+   app  35336.02 FUOCO su «Addestramento mirato. Si sceglie il reparto. Acc» (da «nulla»)
+   app  35342.11 FUOCO CHIESTO a «nulla»
+   app  35343.00 FUOCO su «Addestramento mirato.» (da «nulla»)
+   app  35346.75 FUOCO su «Lupo: 8 atomi di fanteria pesante. Costa: monete» (da «nulla»)
+   app  35352.84 FUOCO CHIESTO a «Addestramento mirato. Si sceglie il reparto. Acc»
+   app  35353.72 FUOCO su «Addestramento mirato. Si sceglie il reparto. Acc» (da «nulla»)
+### K4 scelta impedita, rifiuto
+   VOCE   0.88  durata 7.98 s  intera
+   voce   0.00  Falco: 24 atomi di fanteria pesante. Non si può ordinare: mancan
+   voce   1.03  Addestramento mirato. Si sceglie il reparto. Accresce la capacit
+   app  35377.61 FUOCO CHIESTO a «nulla»
+   app  35378.48 FUOCO su «Addestramento mirato.» (da «nulla»)
+   app  35382.26 FUOCO su «Falco: 24 atomi di fanteria pesante. Non si può » (da «nulla»)
+   app  35388.36 FUOCO CHIESTO a «Addestramento mirato. Si sceglie il reparto. Acc»
+   app  35389.23 FUOCO su «Addestramento mirato. Si sceglie il reparto. Acc» (da «nulla»)
+FINITO

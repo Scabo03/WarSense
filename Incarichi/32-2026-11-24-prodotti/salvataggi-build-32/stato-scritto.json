@@ -1,0 +1,72 @@
+{
+ "regno": [
+  "riga 1, casella 1, inesplorato",
+  "riga 1, casella 2, formazione avversaria, quartier generale avversario, strada battuta",
+  "riga 1, casella 3, inesplorato",
+  "riga 1, casella 4, inesplorato, bosco",
+  "riga 2, casella 1, acqua",
+  "riga 2, casella 2, acqua, strada battuta",
+  "riga 2, casella 3, acqua",
+  "riga 2, casella 4, acqua",
+  "riga 3, casella 1, bosco",
+  "riga 3, casella 2, tuo Cervo, formazione non armata, in attesa, composta da 4 atomi di fanteria leggera, strada battuta",
+  "riga 3, casella 3, libera",
+  "riga 3, casella 4, bosco",
+  "riga 4, casella 1, tuo Orso, formazione di ricognizione, in attesa, composta da 3 atomi di fanteria leggera",
+  "riga 4, casella 2, tuo Corvo, in attesa, composta da 6 atomi di fanteria leggera, tuo quartier generale, strada battuta",
+  "riga 4, casella 3, tuo Lupo, in attesa, composta da 18 atomi di fanteria leggera, 8 atomi di fanteria pesante",
+  "riga 4, casella 4, tuo Falco, in attesa, composta da 24 atomi di fanteria pesante, 12 atomi di cavalleria manovrata"
+ ],
+ "patria": [
+  "Corvo, gruppo armato: 6 atomi di fanteria leggera. Parte per il fronte",
+  "Lupo, gruppo armato: 18 atomi di fanteria leggera, 8 atomi di fanteria pesante. Parte per il fronte",
+  "Falco, gruppo armato: 24 atomi di fanteria pesante, 12 atomi di cavalleria manovrata. Parte per il fronte",
+  "Orso, formazione di ricognizione: 3 atomi di fanteria leggera. Parte per il fronte",
+  "Cervo, formazione non armata: 4 atomi di fanteria leggera. Parte per il fronte"
+ ],
+ "campagna": [
+  "riga 1, casella 1, inesplorato",
+  "riga 1, casella 2, inesplorato, quartier generale avversario, strada battuta",
+  "riga 1, casella 3, inesplorato",
+  "riga 1, casella 4, inesplorato, bosco",
+  "riga 2, casella 1, acqua",
+  "riga 2, casella 2, acqua, strada battuta",
+  "riga 2, casella 3, acqua",
+  "riga 2, casella 4, acqua",
+  "riga 3, casella 1, bosco",
+  "riga 3, casella 2, strada battuta",
+  "riga 3, casella 3, libera",
+  "riga 3, casella 4, bosco",
+  "riga 4, casella 1, tuo Orso, formazione non armata, in attesa, composta da 4 atomi di fanteria leggera",
+  "riga 4, casella 2, tuo Corvo, in attesa, composta da 6 atomi di fanteria leggera, tuo quartier generale, strada battuta",
+  "riga 4, casella 3, tuo Lupo, in attesa, composta da 18 atomi di fanteria leggera, 8 atomi di fanteria pesante",
+  "riga 4, casella 4, tuo Falco, formazione di ricognizione, in attesa, composta da 3 atomi di fanteria leggera"
+ ],
+ "scontro": [
+  "riga 1, cella 3, fanteria pesante E avversaria, occupata",
+  "riga 1, cella 4, fanteria leggera C avversaria, occupata",
+  "riga 1, cella 5, fanteria leggera A avversaria, occupata",
+  "riga 1, cella 6, fanteria leggera B avversaria, occupata",
+  "riga 1, cella 7, fanteria pesante D avversaria, occupata",
+  "riga 1, cella 8, tiratori F avversari, occupata",
+  "riga 10, cella 4, tua fanteria leggera A, occupata"
+ ],
+ "giornali": {
+  "Documents/Partite/campagna-di-prova/giornale.jsonl": {
+   "righe": 13,
+   "valori": "0.15.0"
+  },
+  "Documents/Partite/regno/campagna/giornale.jsonl": {
+   "righe": 21,
+   "valori": "0.15.0"
+  },
+  "Documents/Partite/regno/giornale.jsonl": {
+   "righe": 2,
+   "valori": "0.15.0"
+  },
+  "Documents/Partite/scontro-di-prova/giornale.jsonl": {
+   "righe": 18,
+   "valori": "0.15.0"
+  }
+ }
+}

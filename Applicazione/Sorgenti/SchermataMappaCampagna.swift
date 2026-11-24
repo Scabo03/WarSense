@@ -541,14 +541,23 @@ final class SchermataMappaCampagna: UIViewController {
     /// sistema si congeda DA SOLO al tocco di una voce: si congeda qui soltanto un
     /// pannello ancora presentato (precisazione P5).
     /// Ciò che il pannello fa dire si annuncia DOPO aver chiesto il fuoco, che l'annuncio accompagna
-    /// (incarico 32, RDA-183).
+    /// (incarico 32, RDA-183). Un COMANDO invece si esegue prima di chiederlo, come nella battaglia: se
+    /// conclude la campagna il fuoco va alla dichiarazione di conclusione. Che il fuoco si sposterà lo si
+    /// dichiara prima del comando, sicché i suoi annunci lo accompagnano a priorità alta.
     private func chiudiPannello(casella: Cella, poi azione: (() async -> Void)?,
                                 annunciando testo: TestoLocalizzato? = nil) {
         let ripristina: () -> Void = { [weak self] in
             guard let self else { return }
-            Fuoco.sposta(a: self.elementi[casella], perche: .richiesto)
-            if let testo { self.partita.ambiente.segnali.annuncia(testo) }
-            if let azione { Task { await azione() } }
+            guard let azione else {
+                Fuoco.sposta(a: self.elementi[casella], perche: .richiesto)
+                if let testo { self.partita.ambiente.segnali.annuncia(testo) }
+                return
+            }
+            Fuoco.staPerSpostarsi()
+            Task {
+                await azione()
+                if self.statoCorrente?.conclusione == nil { Fuoco.sposta(a: self.elementi[casella], perche: .richiesto) }
+            }
         }
         if let pannello = presentedViewController as? UIAlertController, !pannello.isBeingDismissed {
             pannello.dismiss(animated: false, completion: ripristina)

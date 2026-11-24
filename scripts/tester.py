@@ -917,6 +917,17 @@ def richiamo_dell_esercito():
         mappa = caselle()
         if any("battaglia in sospeso" in e for e in mappa.values()) and combatti_se_serve(mappa):
             continue
+        tagliato = re.search(r"rifornimento tagliato in riga (\d+), casella (\d+)", comando or "")
+        if tagliato:
+            # Chi è tagliato torna verso il proprio quartier generale; se deve rifornirsi, fa la sosta e poi torna.
+            da = (int(tagliato.group(1)), int(tagliato.group(2)))
+            casa = next((c for c, e in mappa.items() if "tuo quartier generale" in e), da)
+            if ", in attesa" in mappa.get(da, "") and not marcia_verso(da, casa, evita=set()):
+                attiva(contiene=f"riga {da[0]}, casella {da[1]},")
+                voce = next((v for v in (PANNELLO["sosta"], PANNELLO["chiudi"]) if v in etichette()), None)
+                if voce:
+                    e = attiva_e_ascolta(etichetta=voce, tipo="pulsante", ascolto=4)
+                    diario("sosta", casella=da, sentito=sentito_intero(e))
         armate = proprie_armate(mappa)
         # Verso il nemico che si vede o, finché non se ne vede, verso il suo quartier generale.
         nemico = [c for c, e in mappa.items() if "formazione avversaria" in e] or [c for c, e in mappa.items() if QG_AVVERSARIO in e]

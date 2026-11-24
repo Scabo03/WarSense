@@ -93,6 +93,39 @@ final class PannelloAzioniTest: XCTestCase {
         XCTAssertTrue(mosso, "il movimento designato è eseguito (02 §9.2.1)")
     }
 
+    /// Il comando del pannello che CONCLUDE la battaglia — qui l'evacuazione dell'ultima unità — non riporta il
+    /// fuoco sulla cella, che sta per sparire: va al titolo del resoconto, e in nessun altro posto (02 §5.7;
+    /// incarico 32). Un comando che non la conclude riporta il fuoco sulla cella, come sempre.
+    func test_02_5_7_l_evacuazione_che_conclude_la_battaglia_porta_il_fuoco_al_resoconto() async throws {
+        let ambiente = try Ambiente()
+        let (schermata, partita, cella) = try await schermataConTruppaPronta(ambiente)
+        var giri = 0
+        while giri < 12, !(await partita.anteprima(.dichiaraResa)).eValido {
+            _ = try await partita.esegui(.fineTurno)
+            giri += 1
+        }
+        _ = try await partita.esegui(.dichiaraResa)
+        try await Task.sleep(nanoseconds: 300_000_000)
+        XCTAssertTrue(schermata.attiva(cella))
+        try await attendi("apertura del pannello") { schermata.presentedViewController is UIAlertController }
+        let voce = try XCTUnwrap(schermata.vociPannelloPerProva.first { $0.titolo.hasPrefix("Evacua questa unità") },
+                                 "il pannello offre l'evacuazione: \(schermata.vociPannelloPerProva.map(\.titolo))")
+        schermata.presentedViewController?.dismiss(animated: false)
+        try await attendi("congedo automatico dell'avviso") { schermata.presentedViewController == nil }
+        Fuoco.azzeraRegistro()
+        voce.esegui()
+        var visti: [Fuoco.Movimento] = []
+        let limite = Date().addingTimeInterval(4)
+        while Date() < limite {
+            for movimento in Fuoco.registro where !visti.contains(movimento) { visti.append(movimento) }
+            if schermata.presentedViewController is SchermataResoconto, !Fuoco.registro.isEmpty { break }
+            await Task.yield()
+        }
+        XCTAssertTrue(schermata.presentedViewController is SchermataResoconto, "l'ultima unità è fuori: la battaglia è conclusa")
+        XCTAssertEqual(visti, [.schermataAperta], "nessuno spostamento verso la cella")
+        XCTAssertEqual((Fuoco.ultimoBersaglio as? UILabel)?.text, ambiente.testi.frase("resoconto.titolo").testo)
+    }
+
     func test_02_9_5_lo_spostamento_non_si_offre_senza_alcuna_destinazione() async throws {
         let ambiente = try Ambiente()
         let partita = try await PartitaCorrente(nuova: ambiente)
