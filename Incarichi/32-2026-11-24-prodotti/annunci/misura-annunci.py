@@ -209,6 +209,16 @@ def avvia(argomenti=None):
     registro()
 
 
+def valori_di_fabbrica():
+    """I valori della copia in Documenti tornano quelli di fabbrica: tolto il manifest, l'app li ricopia all'avvio
+    (00 §15.4). Serve a un blocco che segue uno che li ha messi a punto."""
+    global _cont
+    cmd({"azione": "termina", "ascolto": 0.3})
+    _cont = contenitore()
+    if _cont:
+        (_cont / "Documents" / "Valori" / "manifest.json").unlink(missing_ok=True)
+
+
 def caselle_proprie():
     """Le caselle coi propri gruppi: nome -> prefisso dell'etichetta («riga 4, casella 3»)."""
     fuori = {}
@@ -221,6 +231,7 @@ def caselle_proprie():
 
 # ------------------------------------------------------------------------------------------ i blocchi
 def blocco_regno():
+    valori_di_fabbrica()
     avvia()
     cmd(puls("Nuovo regno", 4))
     misura("resta in patria (riga attivata)", [att(6, prefisso="Corvo,", tipo="pulsante")], False)
@@ -241,6 +252,7 @@ def blocco_regno():
 def blocco_mappa():
     """Sulla campagna aperta dal regno nel blocco precedente, oppure su una nuova."""
     if "Torna in patria" not in albero():
+        valori_di_fabbrica()
         avvia()
         cmd(puls("Nuovo regno", 4))
         cmd(puls("Apri la campagna", 3))
@@ -249,7 +261,7 @@ def blocco_mappa():
     misura("entra nel fronte", [att(24, prefisso="Entra nel fronte", tipo="pulsante")], True)
     c = caselle_proprie()
     misura("marcia: destinazione da scegliere", [att(3, prefisso=c.get("Lupo", "riga 4, casella 3")), puls("Marcia: scegli la casella sulla mappa", 20)], True)
-    libera = next((n for n in albero() if "disponibile" in n and "giorn" in n), None)
+    libera = next((n for n in albero() if "raggiungibile in" in n), None)
     if libera:
         misura("marcia ordinata sulla casella", [att(9, prefisso=re.match(r"^riga \d+, casella \d+", libera).group(0))], False)
     c = caselle_proprie()
@@ -274,9 +286,10 @@ def blocco_mappa():
 
 
 def blocco_scontro():
+    valori_di_fabbrica()
     avvia()
     misura("apertura dello scontro", [puls("Nuovo scontro di prova", 22)], True)
-    misura("elemento del deck selezionato", [att(3, prefisso="fanteria leggera", tipo="pulsante")], False)
+    misura("elemento del deck selezionato", [att(3, prefisso="fanteria leggera")], False)
     misura("piazzamento confermato", [att(8, prefisso="riga 10, cella 4")], False)
     misura("turno chiuso, il turno dell'avversario", [puls("Fine del turno", 40)], False)
     misura("movimento: destinazione da scegliere", [att(3, prefisso="riga 10, cella 4"), puls("Scegli la destinazione sulla griglia", 14)], True)
@@ -328,25 +341,27 @@ def blocco_battaglia():
     """Una battaglia nata dalla campagna: il nemico accanto, un solo gruppo armato per parte."""
     def vicino(d):
         s = d["campagna_piccola"]
-        s["gruppi_giocatore"] = [{"riga": 3, "colonna": 2, "composizione": [{"archetipo": "fanteria_leggera", "atomi": 6}]},
+        # Il nemico sta sul proprio quartier generale, minacciato da vicino: la sua condotta lo tiene lì.
+        s["gruppi_giocatore"] = [{"riga": 2, "colonna": 2, "composizione": [{"archetipo": "fanteria_leggera", "atomi": 6}]},
                                  {"riga": 4, "colonna": 4, "composizione": [{"archetipo": "fanteria_leggera", "atomi": 3}], "categoria": "ricognizione", "competenza": 5}]
-        s["gruppi_avversario"] = [{"riga": 2, "colonna": 2, "composizione": [{"archetipo": "fanteria_leggera", "atomi": 3}]}]
+        s["gruppi_avversario"] = [{"riga": 1, "colonna": 2, "composizione": [{"archetipo": "fanteria_leggera", "atomi": 3}]}]
+    valori_di_fabbrica()
     avvia()
     prepara_i_documenti(scenari=vicino)
     avvia()
     cmd(puls("Nuova campagna, mappa piccola", 14))
-    cmd(att(3, prefisso="riga 3, casella 2"))
+    cmd(att(3, prefisso="riga 2, casella 2"))
     cmd(puls("Marcia: scegli la casella sulla mappa", 4))
-    misura("marcia verso il nemico ordinata", [att(9, prefisso="riga 2, casella 2")], False)
+    misura("marcia verso il nemico ordinata", [att(9, prefisso="riga 1, casella 2")], False)
     for k in range(6):
         r = misura("giornata chiusa, la battaglia che nasce" if k == 0 else f"giornata chiusa ({k + 1})", [puls("Chiudi la giornata", 22)], False)
         if any("Battaglia in sospeso" in a["testo"] for a in r["annunci"]):
             break
     c = caselle_proprie()
-    dove = next((p for n, p in c.items() if n != "Orso" and etichetta_con(p)), "riga 2, casella 2")
+    dove = next((p for n, p in c.items() if n != "Orso" and etichetta_con(p)), "riga 1, casella 2")
     cmd(att(3, prefisso=dove))
     misura("la battaglia aperta dalla casella", [puls("Apri la battaglia", 26)], True)
-    cmd(att(3, prefisso="fanteria leggera", tipo="pulsante"))
+    cmd(att(3, prefisso="fanteria leggera"))
     cmd(att(5, prefisso="riga 10, cella 5"))
     for _ in range(14):
         nomi = albero()
@@ -375,6 +390,7 @@ def blocco_battaglia():
 
 def blocco_conclusione():
     """La campagna del regno che si conclude con l'inverno: un anno di tre giornate."""
+    valori_di_fabbrica()
     avvia()
     prepara_i_documenti(regno=lambda d: d.update(giornate_per_stagione=1))
     avvia()

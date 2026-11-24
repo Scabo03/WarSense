@@ -224,7 +224,13 @@ final class PassaggioBattagliaInterfacciaTest: XCTestCase {
             if let r = battleScreen.presentedViewController as? SchermataResoconto { resoconto = r; break }
             try await Task.sleep(nanoseconds: 20_000_000)
         }
-        try XCTUnwrap(resoconto, "il resoconto di fine battaglia è stato presentato").chiudiTuttoPerProva()
+        let resocontoMostrato = try XCTUnwrap(resoconto, "il resoconto di fine battaglia è stato presentato")
+        // Il congedo dice dove porta: sulla mappa (incarico 32).
+        resocontoMostrato.loadViewIfNeeded()
+        let letto = LettoreAccessibilita.ordineDiLettura(radice: resocontoMostrato.view as Any)
+            .map { LettoreAccessibilita.etichetta(di: $0) }
+        XCTAssertEqual(letto.last, "Torna sulla mappa", "\(letto)")
+        resocontoMostrato.chiudiTuttoPerProva()
 
         // Attende che la mappa torni in primo piano e che l'esito sia piegato (la catena alTermine).
         // Se il gruppo del giocatore è stato sconfitto e ha più caselle dove ripiegare, la mappa

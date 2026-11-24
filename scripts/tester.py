@@ -241,7 +241,10 @@ def battaglia():
         diario("turno", numero=turno, stato=tocco_magico())
     resoconto = cmd({"azione": "giro", "ascolto": 0.5, "con_schermata": True, "nome": f"{FORMATO}-resoconto-{int(time.time())}"})
     diario("resoconto", pronunce=resoconto.get("pronunce"))
-    attiva(etichetta="Torna all'inizio", tipo="pulsante", ascolto=3)
+    # Il congedo dice dove porta: «Torna sulla mappa» dalla build 33, «Torna all'inizio» prima (incarico 32).
+    congedo = next((n for n in ("Torna sulla mappa", "Torna all'inizio") if n in etichette()), "Torna sulla mappa")
+    diario("congedo", voce=congedo)
+    attiva(etichetta=congedo, tipo="pulsante", ascolto=3)
     # Il ripiegamento, se lo sconfitto ha più caselle: la prima voce del pannello.
     voci = etichette()
     if "Campagna conclusa" in voci:

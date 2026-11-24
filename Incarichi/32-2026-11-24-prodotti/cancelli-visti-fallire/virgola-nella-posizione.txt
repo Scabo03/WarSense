@@ -1,0 +1,4 @@
+	 Executed 0 tests, with 0 failures (0 unexpected) in 0.000 (0.000) seconds
+	 Executed 0 tests, with 0 failures (0 unexpected) in 0.000 (0.001) seconds
+	 Executed 1 test, with 1 failure (0 unexpected) in 0.061 (0.061) seconds
+Codice/Tests/DatiTest/PosizioneNelleFrasiTest.swift:19: error: -[DatiTest.PosizioneNelleFrasiTest test_02_3_3_la_riga_e_la_cella_sono_separate_dalla_virgola] : XCTAssertNil failed: "<NSSimpleRegularExpressionCheckingResult: 0x7923080880>{61, 13}{<NSRegularExpr

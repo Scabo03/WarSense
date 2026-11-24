@@ -14,6 +14,9 @@ final class PartitaCorrente {
     let motore: MotoreBattaglia
     private let sessione: SessioneBattaglia
     private let tattico: TatticoBattaglia
+    /// La chiave del congedo del resoconto: dice dove porta (incarico 32) — all'inizio per lo scontro di
+    /// prova, sulla mappa per la battaglia nata da una campagna.
+    let chiaveCongedo: String
     /// Chi ascolta gli eventi dell'interfaccia (la schermata di battaglia).
     var consegnaEventi: (([EventoBattaglia]) -> Void)?
 
@@ -41,6 +44,7 @@ final class PartitaCorrente {
     /// Crea uno scontro nuovo, sostituendo l'eventuale slot precedente.
     init(nuova ambiente: Ambiente) async throws {
         self.ambiente = ambiente
+        self.chiaveCongedo = "resoconto.torna"
         self.motore = MotoreBattaglia(valori: ambiente.valori)
         try? FileManager.default.removeItem(at: Self.cartellaScontroDiProva)
         let scenario = try Self.scenarioDiProva()
@@ -56,6 +60,7 @@ final class PartitaCorrente {
     /// Riprende lo scontro salvato dal giornale (00 §3.5, 05 §6.3).
     init(riprendi ambiente: Ambiente) async throws {
         self.ambiente = ambiente
+        self.chiaveCongedo = "resoconto.torna"
         self.motore = MotoreBattaglia(valori: ambiente.valori)
         self.sessione = try await SessioneBattaglia(riprendi: Self.cartellaScontroDiProva,
                                                     valori: ambiente.valori)
@@ -71,6 +76,7 @@ final class PartitaCorrente {
     init(daCampagna ambiente: Ambiente, scenario: ScenarioBattaglia,
          cartella: URL, identificatore: String) async throws {
         self.ambiente = ambiente
+        self.chiaveCongedo = "resoconto.torna_sulla_mappa"
         self.motore = MotoreBattaglia(valori: ambiente.valori)
         let giornale = cartella.appendingPathComponent("giornale.jsonl")
         if FileManager.default.fileExists(atPath: giornale.path) {

@@ -607,7 +607,8 @@ final class SchermataBattaglia: UIViewController {
 
     private func mostraResoconto() async {
         guard let costruttore else { return }
-        let schermata = SchermataResoconto(voci: costruttore.vociResoconto(), testi: testi)
+        let schermata = SchermataResoconto(voci: costruttore.vociResoconto(), testi: testi,
+                                           chiaveCongedo: partita.chiaveCongedo)
         schermata.alTermine = { [weak self] in self?.alTermine?() }
         schermata.modalPresentationStyle = .fullScreen
         present(schermata, animated: false)
