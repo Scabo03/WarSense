@@ -1,6 +1,6 @@
 # La misura della frequenza delle battaglie, ripetuta (incarico 31)
 
-> Corsa sul codice del commit `c3b5e2a` del ramo `incarico-31` (albero dei sorgenti pulito). Una prima corsa a tappa non ancora chiusa aveva dato gli stessi dati grezzi: quella conservata qui è la ripetizione sul codice committato (9 s, `date +%s`).
+> Corsa sul codice del commit `b0a15f2` del ramo `incarico-31` (albero dei sorgenti pulito; 7 s, `date +%s`). È la terza: la prima a tappa non ancora chiusa, la seconda sul commit `c3b5e2a`, questa dopo la regola dei nomi dell'avversario (RDA-175). Tutte e tre hanno dato gli stessi dati grezzi, identici byte per byte a quelli dell'incarico 29.
 
 L'incarico chiede di ripeterla se la tappa tocca il Motore della campagna. La seconda tappa del regno lo tocca in tre punti (RDA-175, RDA-177): i nomi dei gruppi, che uno scenario può ora dichiarare e che una campagna può riservare, con la ricerca del primo nome libero per chi nasce sul fronte; gli arrivi dalla patria, consegnati all'apertura di ogni giornata; il reparto, che può portare un miglioramento e un anno di leva, con i superstiti di una battaglia raggruppati anche per quei due tratti. Tutti e tre sono attivi soltanto dove lo scenario li dichiara, cioè nella campagna dell'anno di un regno.
 

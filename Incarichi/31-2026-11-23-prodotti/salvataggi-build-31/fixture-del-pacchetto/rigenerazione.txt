@@ -1,0 +1,40 @@
+LE FIXTURE DEL PACCHETTO «SALVATI CON LA BUILD 31» — DA DOVE VENGONO, E LA RIGENERAZIONE INDIPENDENTE
+
+Che cosa sono. `Codice/Tests/SessioneTest/SalvataggioCampagnaBuild31/` e
+`Codice/Tests/SessioneTest/SalvataggioBattagliaBuild31/` (giornale e impronta ciascuna) sono un giornale di
+campagna e uno di battaglia scritti DAL CODICE DELLA BUILD 31 (commit 41cccff, valori 0.14.0), non da quello
+di oggi. Le legge `SalvataggiBattagliaECampagnaBuild31Test`, che li riapre col codice di oggi e pretende lo
+stato e l'impronta di allora.
+
+Chi le ha scritte. Il sotto-agente delle prove del pacchetto, esportando `git archive 41cccff Codice` in una
+cartella ignorata (`Codice/.build/riferimento-build-31`) ed eseguendovi il generatore qui accanto
+(`GeneraSalvataggiBuild31Test.swift.txt`: ha l'estensione .txt perché non appartiene al pacchetto di oggi).
+
+La rigenerazione indipendente, fatta dalla sessione principale il 24 novembre. Comandi, dalla radice del repo:
+
+  V=Codice/.build/riferimento-build-31-verifica
+  rm -rf "$V" && mkdir -p "$V" && git archive 41cccff Codice | tar -x -C "$V"
+  cp <il generatore> "$V/Codice/Tests/SessioneTest/GeneraSalvataggiBuild31Test.swift"
+  diff -rq Codice/.build/riferimento-build-31/Codice/Sources "$V/Codice/Sources"     # nessuna differenza
+  (cd "$V/Codice" && USCITA_SALVATAGGI="$PWD/../uscita" swift test -j 5 --filter GeneraSalvataggiBuild31Test)
+  cmp "$V/uscita/<cartella>/<file>" "Codice/Tests/SessioneTest/<cartella>/<file>"   # per i quattro file
+
+Uscita (le righe stampate dal generatore e i confronti; durata 30 s, `date +%s`):
+
+  Executed 1 test, with 0 failures (0 unexpected) in 0.045 (0.046) seconds
+  Executed 1 test, with 0 failures (0 unexpected) in 0.045 (0.047) seconds
+GENERA SalvataggioBattagliaBuild31 impronta=be2be81149d90e39b8c581bf955ce83a21668452cb6d8e6b8d20368aa33b6a57
+GENERA SalvataggioCampagnaBuild31 impronta=28466d0cc79fd2ba78b39a247640a6321d85b2225bea28d802ee30b20964d598
+GENERA versione_valori=0.14.0
+GENERA-STATO campagna_grande impronta=81bbeb0e77b6528d649a1524b396b2267aa6f3f7f63d0fa1208dbd6f06ae73fb nomi=corvo,lupo,falco,orso,cervo,lince,aquila,volpe,ariete,bisonte indice=10
+GENERA-STATO campagna_media impronta=1bce375c0670eafae12cc8ae0e7ab981d25a336160afac5684c64f6267ef4376 nomi=corvo,lupo,falco,orso,cervo,lince,aquila,volpe indice=8
+GENERA-STATO campagna_piccola impronta=83f87315dc37f21cbcc339e2a88ffbd625bde1553dd70967697fb9d09166ecb3 nomi=corvo,lupo,falco,orso,cervo,lince,aquila indice=7
+IDENTICO SalvataggioBattagliaBuild31/giornale.jsonl
+IDENTICO SalvataggioBattagliaBuild31/impronta.txt
+IDENTICO SalvataggioCampagnaBuild31/giornale.jsonl
+IDENTICO SalvataggioCampagnaBuild31/impronta.txt
+la copia dell'agente e la mia esportazione di 41cccff hanno gli stessi sorgenti
+
+Che cosa ne segue. I quattro file committati sono byte per byte quelli che il codice di 41cccff produce. Le
+tre impronte «GENERA-STATO» sono quelle che `ArriviDallaPatriaTest.swift` (righe 278–280) porta scritte per
+esteso e confronta con lo stato iniziale delle tre campagne di prova costruito dal codice di oggi.

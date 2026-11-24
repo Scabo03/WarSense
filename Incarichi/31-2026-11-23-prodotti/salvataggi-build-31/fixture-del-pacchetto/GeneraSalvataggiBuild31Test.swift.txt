@@ -1,0 +1,89 @@
+import XCTest
+import Sessione
+import Motore
+import Dati
+import Contenuti
+
+/// GENERATORE TEMPORANEO, eseguito soltanto nella copia di lavoro del commit della build 31: gioca i
+/// due copioni col codice di allora e ne scrive giornale e impronta nella cartella indicata.
+final class GeneraSalvataggiBuild31Test: XCTestCase {
+
+    // MARK: - I due copioni
+
+    /// Il copione di CAMPAGNA: la campagna di prova piccola, senza nomi dichiarati. Il primo giorno
+    /// Lupo stacca il proprio secondo reparto, che riceve il prossimo nome della lista, e la
+    /// formazione di ricognizione esplora; il secondo giorno Corvo marcia lungo la strada; poi tre
+    /// giornate chiuse col tasto. A ogni chiusura l'avversario svolge il proprio turno. La campagna
+    /// resta in corso al quinto giorno. Usa soltanto ciò che esisteva già nella build 31.
+    static func giocaCopioneDiCampagna(in cartella: URL, valori: ValoriDiGioco,
+                                       valoriCampagna: ValoriCampagna) async throws -> SessioneCampagna {
+        let dati = try Data(contentsOf: Contenuti.valoriDiFabbrica.appendingPathComponent("scenari-campagna.json"))
+        let scenario = try XCTUnwrap(
+            try JSONDecoder().decode([String: ScenarioCampagna].self, from: dati)["campagna_piccola"])
+        let sessione = try SessioneCampagna(nuova: scenario, valori: valori, valoriCampagna: valoriCampagna,
+                                            versioneTesti: "0.1.1", cartella: cartella, seme: 31,
+                                            identificatore: "campagna-build-31")
+        func ordina(_ comando: ComandoCampagna, riga: UInt = #line) async throws {
+            let esito = try await sessione.esegui(comando, parte: .giocatore).esito
+            XCTAssertTrue(esito.eValido, "il copione contiene un ordine respinto: \(comando), "
+                          + "motivo \(String(describing: esito.motivo))", line: riga)
+        }
+        func gruppo(_ nome: String) async throws -> IdGruppo {
+            let stato = await sessione.stato
+            return try XCTUnwrap(stato.gruppiOrdinati.first { $0.nome == nome }, "manca il gruppo \(nome)").id
+        }
+        // Il primo giorno.
+        try await ordina(.divisione(gruppo: try await gruppo("lupo"), repartiStaccati: [1],
+                                    a: Cella(riga: 3, colonna: 3)))
+        try await ordina(.esplorazione(gruppo: try await gruppo("falco")))
+        try await sessione.chiudiGiornata()
+        // Il secondo giorno.
+        try await ordina(.marcia(gruppo: try await gruppo("corvo"), a: Cella(riga: 3, colonna: 2), giorni: 1))
+        try await sessione.chiudiGiornata()
+        // Il terzo e il quarto.
+        try await sessione.chiudiGiornata()
+        try await sessione.chiudiGiornata()
+        return sessione
+    }
+
+    /// Il copione di BATTAGLIA: quello dell'oro con le riserve nel mazzo, che si chiude per resa
+    /// (`RiproduzioneOroRiserveTest.giocaCopione`), giocato dall'avversario col tattico.
+    static func giocaCopioneDiBattaglia(in cartella: URL, valori: ValoriDiGioco) async throws -> SessioneBattaglia {
+        try await RiproduzioneOroRiserveTest.giocaCopione(in: cartella, valori: valori)
+    }
+
+
+    func test_genera() async throws {
+        let uscita = URL(fileURLWithPath: try XCTUnwrap(ProcessInfo.processInfo.environment["USCITA_SALVATAGGI"]))
+        let valori = try CaricatoreValori.carica(da: Contenuti.valoriDiFabbrica)
+        let valoriCampagna = try CaricatoreCampagna.carica(da: Contenuti.valoriDiFabbrica)
+        print("GENERA versione_valori=\(valori.versioneEffettiva)")
+        func scrivi(_ cartella: URL, _ impronta: String, in nome: String) throws {
+            let destinazione = uscita.appendingPathComponent(nome)
+            try? FileManager.default.removeItem(at: destinazione)
+            try FileManager.default.createDirectory(at: destinazione, withIntermediateDirectories: true)
+            try FileManager.default.copyItem(at: cartella.appendingPathComponent("giornale.jsonl"),
+                                             to: destinazione.appendingPathComponent("giornale.jsonl"))
+            try (impronta + "\n").write(to: destinazione.appendingPathComponent("impronta.txt"),
+                                        atomically: true, encoding: .utf8)
+            print("GENERA \(nome) impronta=\(impronta)")
+        }
+        let slotCampagna = FileManager.default.temporaryDirectory.appendingPathComponent("genera-campagna-\(UUID().uuidString)")
+        let campagna = try await Self.giocaCopioneDiCampagna(in: slotCampagna, valori: valori, valoriCampagna: valoriCampagna)
+        try scrivi(slotCampagna, await campagna.impronta(), in: "SalvataggioCampagnaBuild31")
+        let slotBattaglia = FileManager.default.temporaryDirectory.appendingPathComponent("genera-battaglia-\(UUID().uuidString)")
+        let battaglia = try await Self.giocaCopioneDiBattaglia(in: slotBattaglia, valori: valori)
+        try scrivi(slotBattaglia, await battaglia.impronta(), in: "SalvataggioBattagliaBuild31")
+
+        // Le impronte di riferimento degli stati iniziali delle tre campagne di prova, e dopo una divisione.
+        let dati = try Data(contentsOf: Contenuti.valoriDiFabbrica.appendingPathComponent("scenari-campagna.json"))
+        let scenari = try JSONDecoder().decode([String: ScenarioCampagna].self, from: dati)
+        let motore = MotoreCampagna(valori: valori, valoriCampagna: valoriCampagna)
+        for nome in scenari.keys.sorted() {
+            let stato = try FabbricaCampagna.crea(scenario: scenari[nome]!, valori: valoriCampagna,
+                                                  archetipiNoti: Set(valori.archetipi.keys))
+            print("GENERA-STATO \(nome) impronta=\(stato.impronta()) nomi=\(stato.gruppiOrdinati.map(\.nome).joined(separator: ",")) indice=\(stato.prossimoIndiceNome)")
+            _ = motore
+        }
+    }
+}
