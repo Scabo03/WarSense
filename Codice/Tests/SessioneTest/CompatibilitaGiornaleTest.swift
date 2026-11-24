@@ -58,9 +58,10 @@ final class CompatibilitaGiornaleTest: XCTestCase {
     }
 
     /// Specchio di `ComandoRegno` (incarico 30): il giornale del regno è anch'esso formato di
-    /// salvataggio, e i suoi comandi hanno la stessa catena.
+    /// salvataggio, e i suoi comandi hanno la stessa catena. Dalla seconda tappa (incarico 31) il
+    /// comando che ordina porta un bersaglio facoltativo, ed esiste la scelta di chi parte.
     enum SpecieDiComandoRegno: String, CaseIterable {
-        case apriCampagna, attendiInverno, ordina, prosegui
+        case apriCampagna, attendiInverno, ordina, destina, prosegui
     }
 
     /// Specchio di `ComandoBattaglia`.
@@ -123,6 +124,7 @@ final class CompatibilitaGiornaleTest: XCTestCase {
         case .apriCampagna: return .apriCampagna
         case .attendiInverno: return .attendiInverno
         case .ordina: return .ordina
+        case .destina: return .destina
         case .prosegui: return .prosegui
         }
     }
@@ -131,7 +133,8 @@ final class CompatibilitaGiornaleTest: XCTestCase {
         switch specie {
         case .apriCampagna: return .apriCampagna(fronte: "guado")
         case .attendiInverno: return .attendiInverno
-        case .ordina: return .ordina(voce: "leva_fanteria_leggera")
+        case .ordina: return .ordina(voce: "leva_fanteria_leggera", bersaglio: nil)
+        case .destina: return .destina(unita: "lupo", alFronte: false)
         case .prosegui: return .prosegui
         }
     }
@@ -226,16 +229,28 @@ final class CompatibilitaGiornaleTest: XCTestCase {
                                    gruppiGiocatore: [.init(riga: 4, colonna: 2,
                                        composizione: [.init(archetipo: "fanteria_leggera", atomi: 6)])]))
 
-    static let forzeDiProva = ForzeDelRegno.sciami([
-        FormazioneDelRegno(categoria: .armato,
-                           composizione: [Reparto(archetipo: "fanteria_leggera", atomi: 6)]),
-        FormazioneDelRegno(categoria: .ricognizione(competenza: 5),
-                           composizione: [Reparto(archetipo: "fanteria_leggera", atomi: 3)]),
-    ])
+    /// Le forze del regno nella forma della seconda tappa (incarico 31), con ciò che la codifica
+    /// deve saper portare: il nome di ogni formazione; una formazione al fronte, una tenuta in
+    /// patria, una di reclute ancora in arrivo; un reparto ordinario, uno col miglioramento, uno con
+    /// l'anno di leva; la posizione nella lista dei nomi.
+    static let forzeDiProva = ForzeDelRegno.sciami(formazioni: [
+        FormazioneDelRegno(nome: "corvo", categoria: .armato,
+                           composizione: [Reparto(archetipo: "fanteria_leggera", atomi: 6),
+                                          Reparto(archetipo: "fanteria_pesante", atomi: 8,
+                                                  miglioramento: "addestramento_mirato")]),
+        FormazioneDelRegno(nome: "lupo", categoria: .ricognizione(competenza: 5),
+                           composizione: [Reparto(archetipo: "fanteria_leggera", atomi: 3)], inPatria: true),
+        FormazioneDelRegno(nome: "falco", categoria: .armato,
+                           composizione: [Reparto(archetipo: "cavalleria_manovrata", atomi: 6, leva: 1)],
+                           arrivo: .estate),
+    ], prossimoNome: 3)
 
     static let esitoCampagnaDiProva = EsitoCampagna(
         fronte: "guado", anno: 1, modo: .annientamento, vincitore: .giocatore, giornate: 12,
         battaglieVinte: 1, battagliePerse: 0, superstiti: forzeDiProva)
+
+    /// Il prelievo del mantenimento com'è nello stato: il solo denaro.
+    static let mantenimentoDiProva = Riserve(["denaro": 5])
 
     static let fondazioneRegnoDiProva = FondazioneRegno(
         versioneSchema: FondazioneRegno.schemaCorrente, versioneValori: "0.0.0",
@@ -246,16 +261,25 @@ final class CompatibilitaGiornaleTest: XCTestCase {
             riserve: Riserve(["denaro": 20, "uomini": 2, "metalli": 3, "materiale": 3, "animali": 1]),
             entrataDellAnno: Riserve(["denaro": 200, "uomini": 24, "metalli": 30, "materiale": 30, "animali": 12]),
             forze: forzeDiProva, campagna: .conclusa(esitoCampagnaDiProva),
+            // I tre ganci d'effetto, e il lavoro col bersaglio accanto a quello senza.
             lavori: [LavoroOrdinato(voce: "leva_fanteria_leggera",
                                     costo: Riserve(["denaro": 30, "uomini": 6, "metalli": 3]),
                                     stazione: 1,
                                     effetto: .reclutaReparto(archetipo: "fanteria_leggera", atomi: 6),
-                                    pronto: .primavera)],
-            registro: [VoceRegistroPatria(numero: 0, anno: 1, stagione: .estate,
-                                          fatto: .campagnaConclusa(fronte: "guado", modo: .annientamento,
-                                                                   vincitore: .giocatore)),
-                       VoceRegistroPatria(numero: 1, anno: 1, stagione: .inverno, fatto: .invernoCominciato)],
-            prossimoNumeroVoce: 2))
+                                    pronto: .primavera),
+                     LavoroOrdinato(voce: "addestramento_mirato", costo: Riserve(["denaro": 24]), stazione: 2,
+                                    effetto: .miglioraReparto(miglioramento: "addestramento_mirato"),
+                                    pronto: .primavera, bersaglio: BersaglioMilitare(unita: "corvo", elemento: 0)),
+                     LavoroOrdinato(voce: "mantenimento_addestramento", costo: Riserve(["denaro": 8]), stazione: 2,
+                                    effetto: .mantieniMiglioramento(miglioramento: "addestramento_mirato"),
+                                    pronto: .primavera, bersaglio: BersaglioMilitare(unita: "corvo", elemento: 1))],
+            // Un esemplare per ciascun fatto della patria: il campione ne fissa la codifica, e la
+            // prova pretende che nessun caso di `FattoDiPatria` ne resti fuori.
+            registro: FattoDiPatria.casiDiRiferimento.enumerated().map { indice, fatto in
+                VoceRegistroPatria(numero: indice, anno: 1, stagione: .inverno, fatto: fatto)
+            },
+            prossimoNumeroVoce: FattoDiPatria.casiDiRiferimento.count,
+            mantenimento: mantenimentoDiProva, sciolti: [Esemplari.sciolto]))
 
     // MARK: - La prova
 
@@ -270,6 +294,12 @@ final class CompatibilitaGiornaleTest: XCTestCase {
         var casiComandoCampagna = Set<String>()
         var casiComandoRegno = Set<String>()
         var casiVoce = Set<String>()
+        // Incarico 31: del comando che ordina servono i due modi — con e senza bersaglio —, della
+        // scelta di chi parte i due versi, e dell'atto di fondazione del regno lo schema corrente.
+        var ordiniSenzaBersaglio = 0, ordiniConBersaglio = 0
+        var destinazioni = Set<Bool>()
+        var fondazioniDelRegno: [FondazioneRegno] = []
+        var esitiNelRegno: [EsitoCampagna] = []
         for riga in righe {
             let dati = Data(riga.utf8)
             let voce: RigaGiornale
@@ -290,7 +320,15 @@ final class CompatibilitaGiornaleTest: XCTestCase {
             }
             if case .comandoRegno(let comando) = voce.voce {
                 casiComandoRegno.insert(specie(di: comando).rawValue)
+                switch comando {
+                case .ordina(_, let bersaglio):
+                    if bersaglio == nil { ordiniSenzaBersaglio += 1 } else { ordiniConBersaglio += 1 }
+                case .destina(_, let alFronte): destinazioni.insert(alFronte)
+                case .apriCampagna, .attendiInverno, .prosegui: break
+                }
             }
+            if case .fondazioneRegno(let fondazione) = voce.voce { fondazioniDelRegno.append(fondazione) }
+            if case .campagnaConclusaNelRegno(let esito) = voce.voce { esitiNelRegno.append(esito) }
             casiVoce.formUnion(try chiaviDiPrimoLivelloDellaVoce(dati))
         }
 
@@ -305,6 +343,40 @@ final class CompatibilitaGiornaleTest: XCTestCase {
                        "casi di comando di campagna senza campione committato")
         XCTAssertEqual(casiComandoRegno, Set(SpecieDiComandoRegno.allCases.map(\.rawValue)),
                        "casi di comando del regno senza campione committato")
+
+        // I campioni dei casi nuovi dell'incarico 31.
+        XCTAssertGreaterThanOrEqual(ordiniSenzaBersaglio, 1, "manca il campione dell'ordine senza bersaglio (la leva)")
+        XCTAssertGreaterThanOrEqual(ordiniConBersaglio, 1,
+                                    "manca il campione dell'ordine CON bersaglio (addestramento, mantenimento)")
+        XCTAssertEqual(destinazioni, [true, false], "mancano i campioni della scelta di chi parte, nei due versi")
+        // L'ordine senza bersaglio si scrive come nella prima tappa: il campo nullo si omette, e il
+        // campione scritto con lo schema 1 è rimasto identico al byte.
+        XCTAssertTrue(testo.contains(#"{"comandoRegno":{"comando":{"ordina":{"voce":"leva_fanteria_leggera"}}}}"#),
+                      "l'ordine senza bersaglio non ha più la forma della prima tappa")
+
+        // L'atto di fondazione e l'esito del regno sono nello schema corrente, e sono proprio gli
+        // esemplari di qui: chi cambia la forma delle forze o dello stato trova il campione vecchio.
+        XCTAssertEqual(fondazioniDelRegno.map(\.versioneSchema), [FondazioneRegno.schemaCorrente])
+        XCTAssertEqual(fondazioniDelRegno.first?.statoIniziale, Self.fondazioneRegnoDiProva.statoIniziale,
+                       "il campione della fondazione del regno non è l'esemplare di questa prova: va rigenerato")
+        XCTAssertEqual(esitiNelRegno, [Self.esitoCampagnaDiProva],
+                       "il campione dell'esito della campagna nel regno non è l'esemplare di questa prova")
+        // E l'esemplare porta ogni caso dei fatti della patria e ogni gancio d'effetto.
+        let fattiNelCampione = Set(try (fondazioniDelRegno.first?.statoIniziale.registro ?? []).map {
+            try chiaveDelCaso($0.fatto)
+        })
+        XCTAssertEqual(fattiNelCampione, Set(try FattoDiPatria.casiDiRiferimento.map { try chiaveDelCaso($0) }),
+                       "un fatto della patria è privo di campione")
+        XCTAssertEqual(fattiNelCampione.count, 8, "gli otto fatti della patria della seconda tappa")
+        XCTAssertEqual(Set((fondazioniDelRegno.first?.statoIniziale.lavori ?? []).map(\.effetto.gancio)),
+                       ["recluta_reparto", "migliora_reparto", "mantieni_miglioramento"],
+                       "un gancio d'effetto è privo di campione")
+    }
+
+    /// La chiave con cui il codificatore sintetizzato scrive il caso di un enumerativo: il suo nome.
+    private func chiaveDelCaso<T: Encodable>(_ valore: T) throws -> String {
+        let oggetto = try JSONSerialization.jsonObject(with: try JSONEncoder().encode(valore))
+        return try XCTUnwrap((oggetto as? [String: Any])?.keys.first, "il valore non si codifica come un caso")
     }
 
     /// Lo specchio deve rispecchiare: `specie(di: esemplare(di: s))` è `s` per

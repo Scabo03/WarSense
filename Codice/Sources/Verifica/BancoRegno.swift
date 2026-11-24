@@ -197,10 +197,19 @@ public struct SondaInvariantiRegno: Sendable {
             if dopo.anno != prima.anno { v.append(.annoFuoriPasso) }
             if prima.momento.eInverno || dopo.momento.stazione != 1 { v.append(.stazioneFuoriPasso) }
             if prima.campagna.fronteAperto != nil || dopo.campagna != prima.campagna { v.append(.campagnaFuoriPasso) }
+            // Il bilancio dell'inizio dell'inverno, risorsa per risorsa. Per ciò che il mantenimento
+            // non tocca — tutto fuorché il denaro (01 §4.14.1.1) — il saldo è quello di prima più
+            // l'entrata, e un prelievo dichiarato su una di quelle risorse è già una violazione. Per
+            // il denaro il saldo è quello di prima più l'entrata meno il prelievo dichiarato.
             for risorsa in Risorsa.allCases {
-                let atteso = prima.riserve[risorsa] + entrata[risorsa] - dopo.mantenimento[risorsa]
-                if dopo.riserve[risorsa] != atteso || (risorsa != .denaro && dopo.mantenimento[risorsa] != 0) {
+                if risorsa == .denaro {
+                    if dopo.riserve[risorsa] != prima.riserve[risorsa] + entrata[risorsa] - dopo.mantenimento[risorsa] {
+                        v.append(.mantenimentoNonConservato(risorsa))
+                    }
+                } else if dopo.mantenimento[risorsa] != 0 {
                     v.append(.mantenimentoNonConservato(risorsa))
+                } else if dopo.riserve[risorsa] != prima.riserve[risorsa] + entrata[risorsa] {
+                    v.append(.entrataNonConservata(risorsa))
                 }
             }
             if dopo.mantenimento[.denaro] != Self.quota(dopo.forze, mantenimento) { v.append(.mantenimentoErrato) }

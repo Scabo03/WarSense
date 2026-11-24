@@ -265,13 +265,18 @@ public struct TraduttoreEventiRegno: Sendable {
     /// quando sarà pronta. Il costo dipende dal reparto e lo dichiara ciascuna scelta.
     public func etichetta(dellaVoceConBersaglio voce: VoceDelRegno, bersagli: Int, pronta: Stagione,
                           verbosita: Verbosita) -> String {
+        // Le due frasi che hanno la voce per soggetto si compongono per prime, ciascuna con la
+        // propria chiave scritta per esteso: il cancello dell'accordo di genere legge le chiamate
+        // con un'espressione regolare, e una frase senza soggetto seguita da una con soggetto,
+        // senza una virgola in mezzo, gli parrebbe una chiave non letterale.
         let soggetto = self.voce(voce.identificatore)
-        var parti = [testi.frase("regno.voce_nome", soggetto: soggetto).testo]
-        parti.append(testi.frase(bersagli == 0 ? "regno.voce_senza_bersagli" : "regno.voce_con_bersaglio").testo)
-        if verbosita != .sintetico {
-            parti.append(testi.frase("regno.voce_effetto", soggetto: soggetto, effetto(voce.effetto),
-                                     testi.termine(pronta.chiaveTesto).testo).testo)
-        }
+        let nome = testi.frase("regno.voce_nome", soggetto: soggetto).testo
+        let cheCosaDa = testi.frase("regno.voce_effetto", soggetto: soggetto, effetto(voce.effetto),
+                                    testi.termine(pronta.chiaveTesto).testo).testo
+        let scelta = bersagli == 0 ? testi.frase("regno.voce_senza_bersagli").testo
+                                   : testi.frase("regno.voce_con_bersaglio").testo
+        var parti = [nome, scelta]
+        if verbosita != .sintetico { parti.append(cheCosaDa) }
         return parti.joined(separator: separatoreDiFrasi)
     }
 
@@ -373,8 +378,11 @@ public struct TraduttoreEventiRegno: Sendable {
             for elemento in perduti { testo += testi.frase("regno.frase_in_fila", miglioramentoPerduto(elemento)).testo }
             return TestoLocalizzato(testo: testo, lingua: testi.lingua)
         case .unitaDestinata(let unita, let alFronte):
-            return testi.frase(alFronte ? "regno.unita_al_fronte" : "regno.unita_in_patria",
-                               soggetto: testi.soggetto(.gruppo, unita))
+            // Due chiamate con la chiave scritta per esteso, non una con la chiave scelta: il
+            // cancello dell'accordo di genere vuole leggere quale frase riceve il soggetto.
+            let nome = testi.soggetto(.gruppo, unita)
+            return alFronte ? testi.frase("regno.unita_al_fronte", soggetto: nome)
+                            : testi.frase("regno.unita_in_patria", soggetto: nome)
         }
     }
 

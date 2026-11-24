@@ -243,23 +243,38 @@ final class CampagnaDelRegnoTest: XCTestCase {
     }
 
     private func forzeDiFabbrica() throws -> ForzeDelRegno {
-        let regno = try CaricatoreRegno.carica(da: Contenuti.valoriDiFabbrica, archetipiNoti: Set(valori.archetipi.keys))
-        return try ForzeDelRegno.iniziali(regno.forzeIniziali)
+        let regno = try CaricatoreRegno.carica(da: Contenuti.valoriDiFabbrica, archetipiNoti: Set(valori.archetipi.keys),
+                                               miglioramentiNoti: Set(valori.miglioramenti.keys))
+        return try ForzeDelRegno.iniziali(regno.forzeIniziali, nomi: regno.nomiDelleUnita)
     }
 
     func test_sul_fronte_dell_istmo_il_primo_anno_e_lo_scenario_di_oggi_col_calendario() throws {
         let base = try scenarioDiFabbrica("campagna_media")
         let scenario = try PonteRegnoCampagna.scenario(delFronte: base, forze: try forzeDiFabbrica(),
                                                        calendario: dueGiornate, valori: valoriCampagna)
-        XCTAssertEqual(scenario.gruppiGiocatore, base.gruppiGiocatore,
+        // Le forze iniziali del regno sono quelle dello scenario medio, nelle stesse caselle; dall'incarico
+        // 31 ciascun gruppo porta in più il NOME della propria formazione, che è l'unica differenza.
+        let nomi = ["corvo", "lupo", "falco", "orso", "cervo"]
+        XCTAssertEqual(base.gruppiGiocatore.count, nomi.count)
+        let attesi = zip(base.gruppiGiocatore, nomi).map { gruppo, nome in
+            ScenarioCampagna.GruppoIniziale(riga: gruppo.riga, colonna: gruppo.colonna, composizione: gruppo.composizione,
+                                            categoria: gruppo.categoria, competenza: gruppo.competenza,
+                                            carico: gruppo.carico, sogliaProtezione: gruppo.sogliaProtezione,
+                                            nome: nome)
+        }
+        XCTAssertEqual(scenario.gruppiGiocatore, attesi,
                        "le forze iniziali del regno sono quelle dello scenario medio, nelle stesse caselle")
         XCTAssertEqual(scenario.gruppiAvversario, base.gruppiAvversario)
+        XCTAssertTrue(scenario.nomiRiservati.isEmpty, "nessuna formazione resta in patria")
+        XCTAssertTrue(scenario.arrivi.isEmpty, "il primo anno non ci sono reclute")
         XCTAssertEqual(scenario.mappa, base.mappa)
         XCTAssertEqual(scenario.calendario, dueGiornate)
         // E lo stato nasce senza che la fabbrica rifiuti nulla.
         let stato = try FabbricaCampagna.crea(scenario: scenario, valori: valoriCampagna,
                                               archetipiNoti: Set(valori.archetipi.keys))
         XCTAssertEqual(stato.calendario, dueGiornate)
+        XCTAssertEqual(stato.gruppiOrdinati.filter { $0.parte == .giocatore }.map(\.nome), nomi,
+                       "sul fronte i gruppi portano il nome della formazione")
     }
 
     func test_le_formazioni_in_piu_occupano_le_caselle_libere_piu_vicine_al_quartier_generale() throws {
@@ -286,25 +301,51 @@ final class CampagnaDelRegnoTest: XCTestCase {
     }
 
     func test_le_formazioni_oltre_il_tetto_confluiscono_nell_armata_che_le_precede() throws {
+        // Dall'incarico 31 ogni formazione porta un nome della lista chiusa, sicché il regno non ne
+        // può avere più dei nomi: le trenta formazioni anonime della prima tappa non esistono più.
+        // Qui sono quante la lista ne ammette — ventiquattro —, più delle caselle del guado e più
+        // dei nomi che restano una volta dati i suoi all'avversario.
+        let nomi = valoriCampagna.nomiGruppi
+        XCTAssertEqual(nomi.count, 24)
+        let troppe = ForzeDelRegno.sciami(formazioni: nomi.map {
+            FormazioneDelRegno(nome: $0, categoria: .armato, composizione: [Reparto(archetipo: "fanteria_leggera", atomi: 2)])
+        }, prossimoNome: 0)
+        func atomi(_ scenario: ScenarioCampagna) -> Int {
+            scenario.gruppiGiocatore.reduce(0) { $0 + $1.composizione.reduce(0) { $0 + $1.atomi } }
+        }
+
+        // Sul guado il tetto è delle caselle: sedici.
         let base = try scenarioDiFabbrica("campagna_piccola")
-        // Trenta formazioni armate: più dei nomi disponibili e più delle caselle del guado.
-        let troppe = ForzeDelRegno.sciami((0..<30).map { _ in
-            FormazioneDelRegno(categoria: .armato, composizione: [Reparto(archetipo: "fanteria_leggera", atomi: 2)])
-        })
         let scenario = try PonteRegnoCampagna.scenario(delFronte: base, forze: troppe,
                                                        calendario: dueGiornate, valori: valoriCampagna)
         let tetto = min(valoriCampagna.nomiGruppi.count - base.gruppiAvversario.count, 16)
         XCTAssertEqual(scenario.gruppiGiocatore.count, tetto)
-        XCTAssertEqual(scenario.gruppiGiocatore.reduce(0) { $0 + $1.composizione.reduce(0) { $0 + $1.atomi } }, 60,
-                       "nessuna forza resta in patria")
+        XCTAssertEqual(atomi(scenario), 48, "nessuna forza resta in patria")
+        XCTAssertEqual(scenario.gruppiGiocatore.map(\.nome), Array(nomi.prefix(tetto)),
+                       "restano le prime, col loro nome: le armate in eccesso confluiscono in quella che le precede")
+        XCTAssertEqual(scenario.gruppiGiocatore.last?.composizione.count, nomi.count - tetto + 1,
+                       "l'ultima armata rimasta porta i reparti di tutte quelle confluite")
         XCTAssertNoThrow(try FabbricaCampagna.crea(scenario: scenario, valori: valoriCampagna,
+                                                   archetipiNoti: Set(valori.archetipi.keys)))
+
+        // Sulla pianura lunga le caselle bastano, e il tetto è dei nomi: quelli della lista meno
+        // quelli che servono all'avversario.
+        let grande = try scenarioDiFabbrica("campagna_grande")
+        let scenarioGrande = try PonteRegnoCampagna.scenario(delFronte: grande, forze: troppe,
+                                                             calendario: dueGiornate, valori: valoriCampagna)
+        XCTAssertEqual(scenarioGrande.gruppiGiocatore.count, nomi.count - grande.gruppiAvversario.count)
+        XCTAssertEqual(atomi(scenarioGrande), 48, "nessuna forza resta in patria")
+        XCTAssertEqual(Set(scenarioGrande.gruppiGiocatore.map(\.casella)).count, scenarioGrande.gruppiGiocatore.count,
+                       "nessuna casella due volte")
+        XCTAssertNoThrow(try FabbricaCampagna.crea(scenario: scenarioGrande, valori: valoriCampagna,
                                                    archetipiNoti: Set(valori.archetipi.keys)))
     }
 
     func test_il_ponte_rifiuta_cio_che_non_puo_diventare_una_campagna() throws {
         let base = try scenarioDiFabbrica("campagna_piccola")
-        let soloEsploratori = ForzeDelRegno.sciami([FormazioneDelRegno(
-            categoria: .ricognizione(competenza: 5), composizione: [Reparto(archetipo: "fanteria_leggera", atomi: 3)])])
+        let soloEsploratori = ForzeDelRegno.sciami(formazioni: [FormazioneDelRegno(
+            nome: "corvo", categoria: .ricognizione(competenza: 5),
+            composizione: [Reparto(archetipo: "fanteria_leggera", atomi: 3)])], prossimoNome: 1)
         XCTAssertThrowsError(try PonteRegnoCampagna.scenario(delFronte: base, forze: soloEsploratori,
                                                              calendario: dueGiornate, valori: valoriCampagna)) {
             XCTAssertEqual($0 as? PonteRegnoCampagna.Errore, .nessunaFormazioneArmata)
@@ -328,11 +369,15 @@ final class CampagnaDelRegnoTest: XCTestCase {
         XCTAssertEqual(esito.giornate, 1)
         XCTAssertEqual(esito.battaglieVinte, 1)
         XCTAssertEqual(esito.battagliePerse, 0)
-        XCTAssertEqual(esito.superstiti, .sciami([
-            FormazioneDelRegno(categoria: .armato, composizione: [Reparto(archetipo: "fanteria_leggera", atomi: 4)]),
-            FormazioneDelRegno(categoria: .ricognizione(competenza: 5),
+        // Rientrano i gruppi com'erano alla conclusione, e dall'incarico 31 col NOME che portavano
+        // sul fronte: qui i primi due della lista, che la fabbrica ha dato ai gruppi di una campagna
+        // senza nomi dichiarati.
+        XCTAssertEqual(esito.superstiti, .sciami(formazioni: [
+            FormazioneDelRegno(nome: "corvo", categoria: .armato,
+                               composizione: [Reparto(archetipo: "fanteria_leggera", atomi: 4)]),
+            FormazioneDelRegno(nome: "lupo", categoria: .ricognizione(competenza: 5),
                                composizione: [Reparto(archetipo: "fanteria_leggera", atomi: 3)]),
-        ]), "rientrano i gruppi com'erano alla conclusione: i caduti no")
+        ], prossimoNome: 0), "rientrano i gruppi com'erano alla conclusione: i caduti no")
         XCTAssertNil(PonteRegnoCampagna.esito(da: try crea(calendario: nil), fronte: "pianura_lunga"))
     }
 }
