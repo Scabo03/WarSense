@@ -4,7 +4,13 @@
 
 ## In testa
 
-⟦IN-TESTA⟧
+- **La build 32 è uscita.** `VALID` su App Store Connect, treno 1.1.0, nel gruppo interno «WarLab», con la nota per i tester allegata e uguale al file; il registro `build-caricate.md` concorda. Il suo codice è quello del commit `b0a15f2`.
+- **Le decisioni del titolare del 23 novembre** sono scritte nei documenti (tabella più sotto), e la proposta delle classi è rivista: `Proposte/classi-dei-campioni.md`.
+- **Della seconda tappa sono costruite e verificate le prime tre parti**: i nomi conservati e la scelta di chi parte; il mantenimento; le durate, le linguette, l'addestramento mirato e gli arrivi a campagna aperta. **La quarta, assetti e riordino, non è costruita**: la capacità non è bastata (tre interruzioni per il limite d'uso).
+- **Versioni**: valori 0.15.0 con la 0.14.0 fra le compatibili; giornale del regno a schema 2, sicché i regni salvati con la build 31 non si riaprono, e il gioco e le note lo dichiarano; campagna 9 e battaglia 2 fermi.
+- **Quattro reperti della verifica con VoiceOver, dichiarati e non corretti** (S29q). Il più serio: gli annunci che accompagnano un cambio di schermata sono superati dalla lettura dell'elemento dopo circa un secondo e mezzo. Per l'inverno e la primavera era così già nella build 31, e la misura lo mostra.
+- **Un errore mio, da dire qui**: ho cambiato il Motore perché i nomi dell'avversario non passassero alle reclute dell'anno dopo, e per questo ho rifatto collaudo e misure, senza controllare prima che l'interfaccia quei nomi non li pronuncia mai. La modifica è rimasta, verificata e innocua, ma al giocatore non serviva (punto 13 dell'esecuzione).
+- Rami: `principale` spinto, col commit finale che contiene questo file; `incarico-31` fuso e cancellato, in locale e sul remoto.
 
 ## Lo stato di partenza, verificato
 
@@ -14,7 +20,7 @@ Una cosa dello stato di partenza che l'incarico non diceva: la corsa di integraz
 
 ## Le versioni della macchina
 
-macOS 27.0.1 (26A434), Xcode 27.2 (27B52), Swift 6.4.2, xcodegen 2.45.4, Python 3.9.6; Apple M5 Pro, 15 processori (`sysctl`). Simulatori iOS 27.0 (24A434), tutti di WarSense: «WarSense iPhone Air» C86CB490… per il collaudo e le sessioni; «· 2» 76DF33B6… e «WarSense iPad Pro 13 · 2» 8D3583DB… per i percorsi con VoiceOver; «· 3» E2C6F42C… e «iPad · 3» 75A249BF… per il tester; il quarto iPhone, 87AB2F55…, per il confronto con la build 31; il quinto, 4CD3DC60…, per la prova dei salvataggi. All'avvio della sessione nessun simulatore era acceso, di nessun progetto (`xcrun simctl list devices`: tutti `Shutdown`). Non ho spento, azzerato né creato nulla che non fosse di WarSense; Device Hub non è stato aperto. ⟦SIMULATORI-FINE⟧
+macOS 27.0.1 (26A434), Xcode 27.2 (27B52), Swift 6.4.2, xcodegen 2.45.4, Python 3.9.6; Apple M5 Pro, 15 processori (`sysctl`). Simulatori iOS 27.0 (24A434), tutti di WarSense: «WarSense iPhone Air» C86CB490… per il collaudo e le sessioni; «· 2» 76DF33B6… e «WarSense iPad Pro 13 · 2» 8D3583DB… per i percorsi con VoiceOver; «· 3» E2C6F42C… e «iPad · 3» 75A249BF… per il tester; il quarto iPhone, 87AB2F55…, per il confronto con la build 31; il quinto, 4CD3DC60…, per la prova dei salvataggi. All'avvio della sessione nessun simulatore era acceso, di nessun progetto (`xcrun simctl list devices`: tutti `Shutdown`). Non ho spento, azzerato né creato nulla che non fosse di WarSense; Device Hub non è stato aperto. Alla fine VoiceOver è spento su tutti quelli usati (`scripts/controlla-voiceover-spento.sh`, che `corri.sh` esegue a ogni chiusura) e sulla macchina non è acceso alcun simulatore (`xcrun simctl list devices | grep -ci booted`: 0), com'era all'inizio.
 
 ## Le decisioni del titolare del 23 novembre: dove sono scritte, e se sono costruite
 
@@ -54,7 +60,7 @@ Costruite la prima, la seconda e la terza parte. La quarta, gli assetti e il rio
 - *I mutanti dei sorgenti* (`P/cancelli-visti-fallire/mutanti-dei-sorgenti.py` e `.txt`): ventuno mutanti, una riga dei sorgenti cambiata alla volta in una copia del pacchetto esportata da `b0a15f2`, e a ogni mutante le 157 prove del regno e della seconda tappa. Ventuno uccisi su ventuno, nessun sopravvissuto; senza mutanti le 157 passano; 343 s. Coprono la quota e il suo minimo, l'ordine dello scioglimento, il prelievo, la stagione in cui un lavoro è pronto, i nomi, la scelta di chi parte, gli arrivi (giorno, casella, restituzione), il miglioramento in battaglia e in patria, il costo, una frase del traduttore. Non coprono le prove ospitate né quelle d'interfaccia (`P/cancelli-visti-fallire/README.md`).
 - *Ospitate* (`Applicazione/ProveOspitate/`): `SecondaTappaDelRegnoTest`, cinque prove, una per ciascuna cosa nuova, che leggono la schermata nell'ordine in cui la percorre la voce, premono i comandi e ascoltano il punto dei segnali — chi parte e i nomi conservati per due anni; il mantenimento e lo scioglimento dell'ultimo reclutato, coi valori cambiati per la via dei Documenti; l'addestramento ordinato dalla scelta, la scelta impedita, il mantenimento e la perdita; la leva ordinata alla quarta schermata che arriva al quartier generale con l'estate; il reparto migliorato dichiarato sulla mappa e sulla tessera del deck di una battaglia vera, combattuta fino alla fine (l'esecutore stampa «REPARTO-MIGLIORATO-31 giorno=10 tessere=["fanteria pesante | 24 atomi, volume 336, 1 esemplare", "cavalleria manovrata | 12 atomi, volume 360, 1 esemplare, addestramento mirato"]»). `PatriaTest`, otto prove: le sette dell'incarico 30 con i testi e i numeri nuovi, più il regno della build 31 che l'avvio dichiara non apribile. `AnnoDelRegnoTest`: l'anno intero coi valori veri («ANNO-DEL-REGNO-30 fronte=guado conclusione=annientamento vincitore=giocatore giornate=17 battaglie=2 vinte=1 perse=1 formazioni_partite=5 rientrate=4 leve=6 formazioni_anno_2=6», stampata alla prima esecuzione; la prova è poi passata nei collaudi completi, ma la riga non l'ho riletta dopo `b0a15f2`). `TestoDinamicoTest`: la patria d'inverno con un addestramento in corso e la schermata di scelta alla dimensione massima.
 - *Interfaccia, col tocco vero* (`FumoRegnoTest`): in verticale la scelta di chi parte col dito, il mantenimento dichiarato, le tre linguette, l'addestramento ordinato dalla scelta; in orizzontale a testo massimo l'inverno percorso fino all'ultimo comando e l'ultima scelta dell'elenco dei reparti raggiunta e ordinata.
-- *Il collaudo completo* (`scripts/collaudo-completo.sh`; `P/collaudo/`): su `b0a15f2` tutto verde in 429 s, 143 prove fra ospitate e d'interfaccia, 143 passate (riepilogo dell'esecutore); ⟦COLLAUDO-CARICAMENTO⟧ La corsa separata delle sessioni complete (`scripts/esegui-sessioni-complete.sh`) su `b0a15f2`: esito «successo», 144 campagne per l'interfaccia e la suite senza interfaccia con le 32 battaglie al Motore, 543 s. Le stesse due corse erano verdi anche su `88d4874` (464 s e 571 s).
+- *Il collaudo completo* (`scripts/collaudo-completo.sh`; `P/collaudo/`): su `b0a15f2` tutto verde in 429 s, 143 prove fra ospitate e d'interfaccia, 143 passate (riepilogo dell'esecutore); ripetuto dentro il caricamento, su `7033195` che ha gli stessi sorgenti, di nuovo 143 su 143. La corsa separata delle sessioni complete (`scripts/esegui-sessioni-complete.sh`) su `b0a15f2`: esito «successo», 144 campagne per l'interfaccia e la suite senza interfaccia con le 32 battaglie al Motore, 543 s. Le stesse due corse erano verdi anche su `88d4874` (464 s e 571 s).
 - *Il pilota e il tester con VoiceOver, iPhone e iPad* (`P/verifica-con-voiceover/`, col suo README). Quattro corse definitive sull'app compilata da `dd7b8ef`, cioè dal codice di `b0a15f2` col solo pilota in più. *I percorsi a controlli*, nove blocchi, sul secondo iPhone e sul secondo iPad: 94 controlli passati su 106 e 90 su 105. Passano per intero, sui due apparecchi, la partenza (i nomi, la destinazione di ogni riga col suo suggerimento, chi resta e chi riparte col fuoco fermo: 16 su 16) e la mappa coi soli partiti (10 su 10); dell'inverno 30 su 34 (l'annuncio col mantenimento, la riga dopo le riserve con 193 monete, le tre intestazioni raggiunte dal rotore, le stagioni schermata per schermata, la scelta del reparto coi sette costi e le due scelte impedite); dell'estate 8 su 9 (la leva della quarta schermata pronta in estate, l'arrivo annunciato e registrato); delle reclute 8 su 9; del mantenimento dell'addestramento 11 su 13. Cadono: undici controlli per apparecchio sugli annunci superati dallo spostamento del fuoco, che è il primo reperto; uno per apparecchio sulla riga in patria di una formazione già arrivata, che è il quarto; e, sul solo iPad, tre letture di una schermata intera in orizzontale e a testo massimo in cui una o due posizioni portano la pronuncia «Tastiera visibile» al posto dell'etichetta — un artefatto del comando di copia che il pilota dà a VoiceOver, non dell'app: le altre posizioni coincidono, e le stesse letture passano sull'iPhone. *Il tester a orecchio*, due anni interi sul terzo iPhone (guado) e sul terzo iPad (istmo): 479 righe di diario ciascuno, nessun errore; tiene in patria Cervo, ascolta il mantenimento, le intestazioni e la scelta impedita, ordina un addestramento e una leva alla quarta schermata, il secondo anno ritrova ogni nome sulla sua formazione, sente «Lince è arrivata dalla patria in riga 3, casella 2» alla prima giornata dell'estate, e d'inverno paga il mantenimento dell'addestramento; in due anni non incontra una battaglia. Sei schermate in `P/verifica-con-voiceover/schermate/`.
 - *Il banco del regno e la misura della frequenza*: più sotto.
 - *I salvataggi della build 31*: più sotto, alle versioni.
@@ -80,9 +86,10 @@ In ordine di tempo, compreso ciò che è stato risolto.
 14. **Quattro reperti della verifica con VoiceOver, dichiarati e non corretti** (S29q; `P/verifica-con-voiceover/README.md`, «Difetti e osservazioni riferiti»). (a) Gli annunci che accompagnano uno spostamento del fuoco — l'inizio dell'inverno, la primavera, la conferma e il rifiuto dopo la scelta di un reparto — sono superati dalla lettura dell'elemento dopo al più un secondo e mezzo (1,30–1,48 s nelle misure pulite delle corse definitive), quando a dirli ne servono fino a dieci: misurato dal pilota sulla pronuncia corrente di VoiceOver, non udito, perché il simulatore non dà audio. Per l'inverno e la primavera non nasce in questa tappa: la stessa misura sull'app della build 31 dà 1,58 s e 1,42 s. (b) Sul guado, a quartier generale occupato, la formazione delle reclute entra in riga 2, casella 2, a una casella dal quartier generale avversario: lo spareggio fra caselle alla stessa distanza è l'ordine di lettura. (c) Senza un gruppo armato che parta, il rifiuto di aprire la campagna arriva soltanto dopo la scelta del fronte. (d) A campagna aperta la riga in patria di una formazione già arrivata dice ancora «Raggiunge il quartier generale in estate, a campagna aperta». I primi tre li ha riferiti il sotto-agente dalle corse di messa a punto; il quarto è un suo controllo, che ho letto fallito nelle corse definitive.
 15. **La nota per i tester rifiutata per lunghezza.** Aggiunti i limiti noti nuovi, `controlla-note.py` ha rifiutato `note-di-rilascio.txt`: «RIFIUTATO: note-di-rilascio.txt ha 4027 caratteri e il limite di App Store Connect è 4000»; accorciata.
 16. **Terza interruzione per il limite d'uso**, dalle 03:01 alle 07:21 del 24 novembre. All'avviso ho fermato il sotto-agente della verifica con VoiceOver, che aveva le quattro corse definitive in corso da nove minuti, e ho lasciato sul ramo un resoconto provvisorio (`40aa3c7`). Alla riapertura i dati parziali di quelle corse sono stati messi da parte (`P/verifica-con-voiceover/messa-a-punto/…-interrotta-dal-limite-d-uso/`) e le quattro corse le ho rilanciate io, col comando che il sotto-agente aveva lasciato (`corri.sh`), sull'app compilata da `b0a15f2`. Il README di quella cartella è suo fino alla sezione dei reperti; la sezione «Le corse definitive», in fondo, l'ho scritta io dai file delle corse.
-⟦ESECUZIONE-SEGUITO⟧
+17. **Le quattro corse definitive con VoiceOver**, dalle 07:22 alle 08:11 del 24 novembre: finite tutte, con gli esiti detti sopra. Poi sei schermate, col pilota.
+18. **La fusione e il caricamento.** `principale` portato a `7033195` in avanzamento rapido e spinto; `scripts/carica-testflight.sh` dalle 08:18:09 alle 08:28:19, uscita 0. Nel registro del caricamento xcodebuild stampa quattro volte «error: the following command failed with exit code 0 but produced no further output», mentre compila le prove e l'archivio: i passi che seguono si compiono, e non ne ho cercato l'origine. Lo strumento di caricamento di Apple stampa una riga «ERROR: … Failed to create URL for 'CDUploaderStateInfoResumeFilePath'» subito prima di «UPLOAD SUCCEEDED with no errors».
 
-Intermittenze osservate in locale: ⟦INTERMITTENZE⟧
+Intermittenze osservate in locale: nessuna nelle prove: tre collaudi completi (su `88d4874`, su `b0a15f2`, dentro il caricamento) e due corse delle sessioni, tutti verdi alla prima esecuzione. Una nel pilota: sull'iPad, in tre letture di una schermata intera, una o due posizioni portano la pronuncia «Tastiera visibile» al posto dell'etichetta dell'elemento, e le posizioni cambiano da una lettura all'altra.
 
 ## Il banco del regno e la misura della frequenza ripetuta
 
@@ -107,7 +114,19 @@ Osservato e non indagato, perché è della conclusione della campagna e l'incari
 
 ## App Store Connect
 
-⟦ASC⟧
+Verifica per API alle 08:29 del 24 novembre, un minuto dopo la fine del caricamento (`P/build-32/asc-build-32.md`, con lo script e l'uscita intera accanto; le credenziali caricate nell'ambiente da `~/Developer/private_keys/scabo_deploy.env`, mai stampate né copiate).
+
+| build | stato | caricata | scaduta | treno |
+|---|---|---|---|---|
+| 32 | VALID | 2026-11-23T23:27:15-08:00 | False | 1.1.0 |
+| 31 | VALID | 2026-11-22T14:35:32-08:00 | False | 1.1.0 |
+| 30 | VALID | 2026-11-21T12:42:06-08:00 | False | 1.1.0 |
+
+Build 32: `internalBuildState` `IN_BETA_TESTING`, `externalBuildState` `READY_FOR_BETA_SUBMISSION`, `autoNotifyEnabled` vero. La nota per i tester in italiano è allegata, 3993 caratteri, uguale a `note-di-rilascio.txt`. Il gruppo «WarLab» è interno e ha accesso a tutte le build. `scripts/controlla-build.py`: «registro e App Store Connect concordano: 32 build, la più alta è la 32»; la riga del registro l'ha scritta lo script (`| 32 | 2026-11-24 07:27:15 | 1.1.0 | 7033195 |`). Il numero di build l'ha ricavato lo script. La build è archiviata da `7033195`, che ha gli stessi sorgenti del pacchetto e dell'applicazione di `b0a15f2` (`git diff --stat`: vuoto).
+
+Firma manuale, come sempre (`CODE_SIGN_STYLE: Manual`; lo script non contiene `-allowProvisioningUpdates`). Nessun certificato e nessun profilo creato, revocato o modificato. La versione di marketing non è stata toccata.
+
+Non verificato: l'installazione della build da TestFlight su un apparecchio.
 
 ## Le versioni: la valutazione
 
@@ -153,7 +172,9 @@ Osservato e non indagato, perché è della conclusione della campagna e l'incari
 - `40aa3c7` — il resoconto provvisorio della terza interruzione (sostituito da questo); `Incarichi/README.md`; `P/cancelli-visti-fallire/` (mutanti dei sorgenti, i due cancelli).
 - `dd7b8ef` — `Applicazione/Esplorazione/SessioneInterattivaTest.swift`, `scripts/interattivo.py`, `scripts/tester.py` (il pilota e il tester estesi: strumenti di prova, non entrano nell'app); `P/verifica-con-voiceover/`.
 - `2f78b06` — `registro-scostamenti.md` (S29q), `Fondamenta/registro-decisioni-architetturali.md` (RDA-175 corretta), `P/cancelli-visti-fallire/README.md`, `P/collaudo/`.
-⟦COMMIT-SEGUITO⟧
+- `ffab61f` — questo resoconto, in una stesura con gli esiti ancora da inserire.
+- `7033195` — `P/verifica-con-voiceover/` (le corse definitive, le schermate, il README completato), `registro-scostamenti.md` (S29q coi numeri definitivi e la quarta osservazione), `note-di-rilascio.txt`, `nota-per-il-titolare-il-regno-seconda-tappa.md`. **È il commit da cui la build è stata archiviata.**
+- i due commit finali — `build-caricate.md` (la riga della build 32, scritta dallo script), `P/build-32/`, `P/README.md`, questo resoconto; poi l'esito dell'integrazione continua in questo resoconto.
 
 ## Ciò che ho fatto senza che fosse chiesto
 
@@ -202,7 +223,7 @@ Dove non è detto altro lo strumento è `date +%s` attorno al comando.
 | App e pilota della build 31 dal suo commit, e del codice sotto prova da una copia pulita (`prepara.sh`) | 15 s e 15 s |
 | **Collaudo.** `swift test` sul commit di partenza; dopo l'adeguamento delle prove, prima e seconda esecuzione; dopo la regola dei nomi, prima e seconda | 56 s; 63 s (2 fallite) e 66 s (verde); 65 s (7 fallite, da adeguare) e 67 s (verde) |
 | Tutte le prove ospitate e d'interfaccia, fuori dal collaudo completo | 341 s |
-| Collaudo completo: su `88d4874`; su `b0a15f2`; dentro il caricamento | 464 s; 429 s; ⟦TEMPI-COLLAUDO⟧ |
+| Collaudo completo: su `88d4874`; su `b0a15f2`; dentro il caricamento | 464 s; 429 s; non misurato a parte: sta dentro i 610 s del caricamento |
 | Sessioni complete: su `88d4874`; su `b0a15f2` | 571 s; 543 s |
 | Mutanti dei sorgenti: prima corsa, venti; corsa definitiva, ventuno | 349 s; 343 s |
 | Rigenerazione delle fixture della build 31 da un'esportazione di `41cccff` | 30 s |
@@ -210,8 +231,8 @@ Dove non è detto altro lo strumento è `date +%s` attorno al comando.
 | **Simulatore, con VoiceOver.** La prova dei salvataggi della build 31: prima corsa, e corsa definitiva (stampati dal guidatore) | 188 s e 112 s; 171 s e 120 s |
 | Percorsi a controlli, nove blocchi: iPhone 2 e iPad 2; tester a due anni: iPhone 3 e iPad 3 (stampati da `corri.sh`); le sei schermate | 2058 s e 2066 s; 2859 s e 2849 s; circa 3 minuti, non misurati |
 | **Misure.** Frequenza delle battaglie, 1200 partite, tre volte; banco del regno, 1829 anni, due volte sul codice committato | 9 s, 9 s, 7 s; 4 s, 3 s |
-| **Caricamento.** `scripts/carica-testflight.sh` | ⟦TEMPI-CARICAMENTO⟧ |
-| **Esplorazione e scrittura.** Lettura dei documenti, costruzione, registri, resoconto | non misurati. Dai commit: primo alle 20:28 del 23 novembre; interruzioni dalle 21:20 circa alle 21:26, dalle 21:54 alle 02:21 e dalle 03:01 alle 07:21; ⟦ULTIMO-COMMIT⟧ |
+| **Caricamento.** `scripts/carica-testflight.sh` | 610 s in tutto: i cancelli, il collaudo completo, l'archivio, l'esportazione, il caricamento (2 171 432 byte in 3,8 s, dal registro dello strumento di Apple), l'attesa dell'elaborazione, la nota e la riga del registro |
+| **Esplorazione e scrittura.** Lettura dei documenti, costruzione, registri, resoconto | non misurati. Dai commit: primo alle 20:28 del 23 novembre; interruzioni dalle 21:20 circa alle 21:26, dalle 21:54 alle 02:21 e dalle 03:01 alle 07:21; il commit della build alle 08:17 del 24, i commit finali fra le 08:30 e le 09:00 |
 
 ## Integrazione continua
 

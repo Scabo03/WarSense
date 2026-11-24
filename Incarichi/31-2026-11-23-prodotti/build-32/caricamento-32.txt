@@ -1,0 +1,53 @@
+IL CARICAMENTO DELLA BUILD 32 — scripts/carica-testflight.sh da principale a 7033195 (24 novembre 2026, dalle 08:18:09 alle 08:28:19: uscita 0, 610 s, date +%s attorno al comando)
+
+Registro filtrato (le righe dei passi, dei cancelli, dell'esecutore delle prove e del caricamento):
+
+== Controllo preventivo: il ramo principale è spinto sul remoto ==
+  principale locale e origin/principale coincidono: si procede
+== Controllo preventivo: la versione non torna mai indietro ==
+versione da caricare: 1.1.0; più alta già presente: 1.1.0 — si procede
+== Numero di build: massimo su tutto l'account più uno ==
+== Controllo preventivo: i documenti consegnati ==
+  lunghezza: note-di-rilascio.txt, 3994 caratteri su 4000
+  freschezza: documento 7033195, codice b0a15f2
+  vocabolario: 69 nomi citati, tutti esposti dal codice
+  misure: nessuna dichiarata
+  cifre: nessun numero non dichiarato nel corpo
+  prove a mano: nessuna prova chiesta al titolare
+  freschezza: documento 7033195, codice b0a15f2
+== Controllo preventivo: registro delle build e App Store Connect ==
+registro e App Store Connect concordano: 31 build, la più alta è la 31
+== Controllo preventivo: freschezza della corsa separata delle sessioni complete ==
+== Collaudo COMPLETO prima del caricamento (pacchetto, ospitate, interfaccia) ==
+== 0/3 Cancello dei simboli d'archetipo (biiezione archetipi <-> simboli, RDA-97) ==
+== 0b/3 Cancello delle impronte dei Contenuti (RDA-105) ==
+== 0c/3 Cancello: VoiceOver spento sul simulatore delle prove d'interfaccia (incarico 30) ==
+== 1/3 Collaudo del pacchetto (Motore, Dati, Sessione, Segnali, Verifica, Confini) ==
+== 2/3 Generazione del progetto applicativo dalla sua sorgente di verità ==
+== 3/3 Prove ospitate e d'interfaccia sul simulatore ==
+error: the following command failed with exit code 0 but produced no further output
+error: the following command failed with exit code 0 but produced no further output
+error: the following command failed with exit code 0 but produced no further output
+== Conteggio delle prove ospitate e d'interfaccia, dall'esecutore ==
+  esecutore (xcresulttool summary): 143 prove eseguite fra ospitate e interfaccia — 143 passate, 0 fallite, 0 saltate; esito Passed
+== Collaudo completo: tutto verde ==
+== Generazione del progetto e archivio ==
+error: the following command failed with exit code 0 but produced no further output
+== Esportazione firmata ==
+== Caricamento su TestFlight ==
+2026-11-24 08:26:43.390 ERROR: [ContentDelivery.Uploader.76A8C652C0] Failed to create URL for 'CDUploaderStateInfoResumeFilePath'. The file doesn’t exist. (4) The file doesn’t exist.
+UPLOAD SUCCEEDED with no errors
+Delivery UUID: 295b10e9-8925-482b-8ac0-0d9637a82668
+Transferred 2171432 bytes in 3.758 seconds (577.88KB/s, 4.623Mbps)
+No errors uploading archive at 'Applicazione/build/esportazione/WarSense.ipa'.
+== Nota di rilascio (attende l'elaborazione della build) ==
+nota allegata alla build 32
+== Registrazione della build nel registro ==
+build 32 registrata in build-caricate.md
+== Fatto: build 32 caricata ==
+
+Nota sulle righe «error: the following command failed with exit code 0 but produced no further output»: le stampa xcodebuild
+durante la compilazione delle prove e dell'archivio; il comando che nominano esce con zero, i passi che seguono si compiono
+(143 prove passate, archivio ed esportazione riusciti). Non ne ho cercato l'origine.
+Nota sulla riga «ERROR: [ContentDelivery.Uploader…] Failed to create URL for 'CDUploaderStateInfoResumeFilePath'»: la stampa lo
+strumento di caricamento di Apple subito prima di «UPLOAD SUCCEEDED with no errors»; non è un errore del caricamento.

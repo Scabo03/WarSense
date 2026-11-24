@@ -1,0 +1,9 @@
+| build | stato | caricata | scaduta | treno |
+|---|---|---|---|---|
+| 32 | VALID | 2026-11-23T23:27:15-08:00 | False | 1.1.0 |
+| 31 | VALID | 2026-11-22T14:35:32-08:00 | False | 1.1.0 |
+| 30 | VALID | 2026-11-21T12:42:06-08:00 | False | 1.1.0 |
+
+Build 32, dettaglio beta: internalBuildState IN_BETA_TESTING, externalBuildState READY_FOR_BETA_SUBMISSION, autoNotifyEnabled True.
+Nota per i tester (it): 3993 caratteri; uguale a note-di-rilascio.txt: True
+Gruppo «WarLab»: interno True, hasAccessToAllBuilds True
