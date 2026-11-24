@@ -220,6 +220,13 @@ final class MappaCampagnaAccessibileTest: XCTestCase {
                                    "il pannello offre «\(voce)»")
         if let pannello = schermata.presentedViewController as? UIAlertController {
             pannello.dismiss(animated: false)
+            // Il congedo non è immediato: lo si attende, perché il controllo in fondo guardi un pannello
+            // NUOVO e non questo. Senza attesa falliva, anche sulla build 32, quattro volte su duecento
+            // (incarico 32).
+            for _ in 0..<100 where schermata.presentedViewController != nil {
+                try await Task.sleep(nanoseconds: 20_000_000)
+            }
+            XCTAssertNil(schermata.presentedViewController, "il pannello della casella si è chiuso")
         }
         ambiente.segnali.azzeraAnnunciPronunciati()
         marcia.esegui()

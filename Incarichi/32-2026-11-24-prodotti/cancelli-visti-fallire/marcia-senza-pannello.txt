@@ -1,0 +1,9 @@
+== attivare la destinazione apre un pannello di conferma
+   sorgente: Applicazione/Sorgenti/SchermataMappaCampagna.swift
+   tolto:  if let comando = costruttore?.vista.comandoDiMarcia(per: id, a: casella) { Task { await eseguiComando(comando) } }
+   messo:  if let comando = costruttore?.vista.comandoDiMarcia(per: id, a: casella) { present(UIAlertController(title: testi.frase("avvio.titolo").testo, message: nil, preferredStyle: .alert), animated: false) Task { await eseguiComando(comando) } }
+   prove ospitate: MappaCampagnaAccessibileTest/test_02_9_2_1_l_attivazione_della_destinazione_ordina_la_marcia_senza_pannello (uscita 65)
+Applicazione/ProveOspitate/MappaCampagnaAccessibileTest.swift:252: error: -[WarSenseTest.MappaCampagnaAccessibileTest test_02_9_2_1_l_attivazione_della_destinazione_ordina_la_marcia_senza_pannello] : XCTAssertNil failed: "<UIAlertController: 0x108258000>" - l'ordine di marcia non apre alcun pannello di conferma
+Test Case '-[WarSenseTest.MappaCampagnaAccessibileTest test_02_9_2_1_l_attivazione_della_destinazione_ordina_la_marcia_senza_pannello]' failed (0.631 seconds).
+** TEST FAILED **
+

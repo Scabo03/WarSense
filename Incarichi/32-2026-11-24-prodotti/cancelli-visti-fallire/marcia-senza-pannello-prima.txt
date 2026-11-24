@@ -1,0 +1,7 @@
+La prova `MappaCampagnaAccessibileTest.test_02_9_2_1_l_attivazione_della_destinazione_ordina_la_marcia_senza_pannello`, ripetuta con xcodebuild -test-iterations sul simulatore iPhone Air del collaudo (il congedo del pannello che la prova stessa chiude non era atteso):
+
+  codice della build 32 (06dee59), prova com'era      200 ripetizioni: 196 passate, 4 fallite
+  codice dell'incarico (4af4dca), prova com'era       200 ripetizioni: 195 passate, 5 fallite
+  codice dell'incarico, prova che attende il congedo  300 ripetizioni: 300 passate, 0 fallite
+
+Il primo fallimento si è visto nel collaudo che scripts/carica-testflight.sh rifà prima di archiviare: il caricamento si è fermato da sé.
