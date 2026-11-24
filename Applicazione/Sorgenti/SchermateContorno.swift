@@ -252,6 +252,8 @@ final class SchermataResoconto: UIViewController {
     /// stessa forma — voci in ordine fisso, una frase ciascuna — e torna in patria.
     private let chiaveTitolo: String
     private let chiaveCongedo: String
+    private let titolo = UILabel()
+    private var fuocoDiAperturaDato = false
     var alTermine: (() -> Void)?
 
     init(voci: [String], testi: Testi, chiaveTitolo: String = "resoconto.titolo",
@@ -272,7 +274,6 @@ final class SchermataResoconto: UIViewController {
         colonna.spacing = 12
         // Sette voci a testo massimo non entrano nello schermo: la colonna scorre.
         ColonnaScorrevole.monta(colonna, in: view, centrata: true)
-        let titolo = UILabel()
         titolo.text = testi.frase(chiaveTitolo).testo
         titolo.font = .preferredFont(forTextStyle: .title1)
         titolo.adjustsFontForContentSizeCategory = true
@@ -291,6 +292,16 @@ final class SchermataResoconto: UIViewController {
         chiudi.accessibilityIdentifier = chiaveCongedo
         chiudi.addTarget(self, action: #selector(chiudiTutto), for: .touchUpInside)
         colonna.addArrangedSubview(chiudi)
+    }
+
+    /// Il fuoco d'apertura sul titolo, alla comparsa e una volta sola (02 §2.9; incarico 32): fino alla
+    /// build 32 lo chiedeva chi presentava la schermata, senza un elemento, e quando la battaglia si
+    /// concludeva dal pannello di un reparto il fuoco finiva su una voce qualunque, o restava sulla griglia.
+    override func viewDidAppear(_ animated: Bool) {
+        super.viewDidAppear(animated)
+        guard !fuocoDiAperturaDato else { return }
+        fuocoDiAperturaDato = true
+        Fuoco.sposta(a: titolo, perche: .schermataAperta)
     }
 
     @objc private func chiudiTutto() {

@@ -412,6 +412,10 @@ final class PatriaTest: XCTestCase {
         // Lo slot della campagna ha esaurito il suo compito: l'esito vive nel giornale del regno.
         XCTAssertFalse(FileManager.default.fileExists(atPath: PartitaRegno.cartellaCampagna.path))
 
+        // La dichiarazione prende il fuoco sul proprio titolo, alla comparsa (02 §2.9; incarico 32).
+        try await attendi("il fuoco va sul titolo della dichiarazione") {
+            Fuoco.registro.last == .schermataAperta && (Fuoco.ultimoBersaglio as? UILabel)?.text == "Campagna conclusa"
+        }
         Fuoco.azzeraRegistro()
         dichiarazione.chiudiTuttoPerProva()
         try await attendi("si torna in patria") { schermata.presentedViewController == nil }

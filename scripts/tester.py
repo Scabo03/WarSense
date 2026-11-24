@@ -28,6 +28,16 @@ anno; nella seconda campagna ascolta, alla chiusura che apre l'estate, l'arrivo 
 nel secondo inverno paga il mantenimento dell'addestramento; nella terza primavera rilegge le forze.
   python3 scripts/tester.py <cartella> <formato> <giornate> regno due-anni [tieni=Cervo] [solo=Corvo]
       [tieni2=…] [solo2=Falco] ["addestra=Falco: 12"] [contatto] …
+Con «presa» (incarico 32) il tester gioca UNA CAMPAGNA DEL REGNO per prendere il quartier generale avversario (01
+§5.18.3): manda avanti i gruppi armati più forti («colonne=1» quanti), che entrano nella casella del quartier generale,
+combatte le battaglie che nascono, tiene la casella e ascolta le giornate che mancano finché la campagna si conclude; poi
+legge la dichiarazione di conclusione e torna in patria.
+  python3 scripts/tester.py <cartella> <formato> <giornate massime> regno presa [colonne=1] [resa]
+Con «richiamo» (incarico 32) gioca una campagna del regno fino a un contatto col nemico, ascolta il comando di richiamo che
+dichiara perché non si può dare (01 §5.18.2, 02 §6.5.5), si ritira dalla battaglia, e appena si può richiama l'esercito:
+prima rinuncia, poi conferma; legge la dichiarazione di conclusione e torna in patria.
+  python3 scripts/tester.py <cartella> <formato> <giornate massime> regno richiamo resa
+
 «tieni=» le formazioni da tenere in patria il primo anno (separate da virgola); «solo=» la sola che parte;
 «tieni2=» e «solo2=» lo stesso per il secondo anno; «addestra=» l'inizio della scelta del reparto da
 addestrare (altrimenti la più costosa che lascia di che pagare la leva della quarta schermata).
@@ -717,9 +727,227 @@ def due_anni_del_regno():
            esito="ogni nome è rimasto alla sua formazione" if not scorsi else "NOMI SCORSI")
 
 
+# ---------------------------------------------------------------- la presa e il richiamo (incarico 32)
+
+QG_AVVERSARIO = "quartier generale avversario"
+RICHIAMA = "Richiama l'esercito in patria"
+
+
+def caselle():
+    """Le caselle della mappa come si leggono: (riga, casella) -> il resto dell'etichetta."""
+    out = {}
+    for n in etichette():
+        m = re.match(r"^riga (\d+), casella (\d+), (.*)$", n)
+        if m:
+            out.setdefault((int(m.group(1)), int(m.group(2))), m.group(3))
+    return out
+
+
+def atomi_in(etichetta):
+    return sum(int(x) for x in re.findall(r"(\d+) atomi di", etichetta))
+
+
+def proprie_armate(mappa):
+    """I gruppi armati propri: casella -> etichetta, dal più forte."""
+    mie = {c: e for c, e in mappa.items() if PROPRIO.match(e) and "ricognizione" not in e and "non armata" not in e}
+    return sorted(mie.items(), key=lambda x: -atomi_in(x[1]))
+
+
+def apri_la_campagna_del_regno():
+    e = attiva_e_ascolta(etichetta="Nuovo regno", tipo="pulsante", ascolto=5)
+    diario("patria", anno=1, fuoco=e.get("dopo"), forze=[f["riga"] for f in forze_in_patria()])
+    attiva_e_ascolta(etichetta="Apri la campagna", tipo="pulsante", ascolto=3)
+    e = attiva_e_ascolta(prefisso=FRONTE[FORMATO], tipo="pulsante", ascolto=20)
+    diario("campagna_aperta", fronte=FRONTE[FORMATO], sentito=sentito_intero(e), pronunce=e.get("ascoltate"),
+           formazioni_sulla_mappa=formazioni_sulla_mappa())
+    return "Chiudi la giornata" in etichette()
+
+
+def conclusa():
+    return "Campagna conclusa" in etichette()
+
+
+def combatti_se_serve(mappa):
+    """La battaglia in sospeso, se c'è, aperta dal pannello del gruppo che vi è coinvolto e combattuta. Vero se si è
+    combattuto. La campagna è bloccata: il pannello di ogni altro gruppo dice dove (02 §6.5)."""
+    for c, e in proprie_armate(mappa) + [(c, e) for c, e in mappa.items() if PROPRIO.match(e) and not armato(e)]:
+        attiva(contiene=f"riga {c[0]}, casella {c[1]},")
+        voci = etichette()
+        if PANNELLO["apri"] in voci:
+            e = attiva_e_ascolta(etichetta=PANNELLO["apri"], tipo="pulsante", ascolto=6)
+            diario("battaglia_aperta_dal_pannello", casella=c, sentito=sentito_intero(e), fuoco=e.get("dopo"))
+            battaglia()
+            return True
+        if PANNELLO["chiudi"] in voci:
+            attiva(etichetta=PANNELLO["chiudi"], tipo="pulsante")
+        else:
+            break
+    return False
+
+
+def marcia_verso(da, meta, evita):
+    """La marcia di un gruppo verso una casella: fra quelle raggiungibili la più vicina alla meta, poi la meno
+    lontana in giornate; mai in una casella con una formazione avversaria che non sia la meta."""
+    attiva(contiene=f"riga {da[0]}, casella {da[1]},")
+    if PANNELLO["marcia"] not in etichette():
+        if PANNELLO["chiudi"] in etichette():
+            attiva(etichetta=PANNELLO["chiudi"], tipo="pulsante")
+        return None
+    attiva(etichetta=PANNELLO["marcia"], tipo="pulsante", ascolto=3)
+    mete = []
+    for c, e in caselle().items():
+        m = re.search(r"raggiungibile in (\d+) giorn", e)
+        if m and (c == meta or ("formazione avversaria" not in e and c not in evita)):
+            mete.append((abs(c[0] - meta[0]) * 2 + abs(c[1] - meta[1]), int(m.group(1)), c))
+    if not mete or min(mete)[2] == da:
+        attiva(contiene=f"riga {da[0]}, casella {da[1]},")  # nessuna meta: si toglie la designazione
+        return None
+    _, giorni, c = min(mete)
+    e = attiva_e_ascolta(contiene=f"riga {c[0]}, casella {c[1]},", ascolto=4)
+    diario("marcia", da=da, verso=c, giorni=giorni, sentito=sentito_intero(e))
+    return c
+
+
+def chiudi_la_giornata(numero, ascolta_tutto):
+    """Chiude la giornata col comando e ascolta: tutto, finché la voce tace, quando c'è da sentire qualcosa."""
+    c = {"azione": "attiva", "etichetta": "Chiudi la giornata", "tipo": "pulsante", "ascolto": 4}
+    if ascolta_tutto:
+        c.update(ascolto=45, quiete=6, intere="ogni")
+    e = cmd(c)
+    s = sentito_intero(e)
+    diario("giornata_chiusa", numero=numero, sentito=s, pronunce=e.get("ascoltate"), errore=e.get("errore"))
+    return s
+
+
+def dichiarazione_e_ritorno(nome):
+    """La dichiarazione di conclusione letta per intero, e il ritorno in patria."""
+    cmd({"azione": "schermata", "nome": f"{FORMATO}-{nome}-conclusione", "ascolto": 0.3})
+    pronunce = letta_per_intero()
+    diario("dichiarazione_di_conclusione", pronunce=pronunce)
+    e = attiva_e_ascolta(etichetta="Torna in patria", tipo="pulsante", ascolto=6)
+    nomi = etichette()
+    diario("ritorno_in_patria", fuoco=e.get("dopo"), sentito=sentito_intero(e),
+           campagna=[n for n in nomi if n.startswith("Campagna sul")], forze=[f["riga"] for f in forze_in_patria()])
+    cmd({"azione": "schermata", "nome": f"{FORMATO}-{nome}-patria", "ascolto": 0.3})
+    return pronunce
+
+
+def presa_del_quartier_generale():
+    if not apri_la_campagna_del_regno():
+        diario("osservazione_tester", testo="la campagna non si è aperta")
+        return
+    colonne = int(PARAMETRI.get("colonne", "1"))
+    battaglie = 0
+    for g in range(1, GIORNATE + 1):
+        if conclusa():
+            break
+        mappa = caselle()
+        suo = next((c for c, e in mappa.items() if QG_AVVERSARIO in e), None)
+        armate = proprie_armate(mappa)
+        diario("giornata", numero=g, armate=[(c, e) for c, e in armate], quartier_generale_avversario=suo,
+               sua_etichetta=mappa.get(suo))
+        # Con una battaglia in sospeso ogni altro comando è bloccato: la si combatte per prima.
+        if any("battaglia in sospeso" in e for e in mappa.values()) and combatti_se_serve(mappa):
+            battaglie += 1
+            continue
+        for c, e in armate[:colonne]:
+            if c == suo or ", in attesa" not in e or suo is None:
+                continue  # chi è sul quartier generale lo tiene: la chiusura lo lascia fermo
+            marcia_verso(c, suo, evita=set())
+            if conclusa():
+                break
+        if conclusa():
+            break
+        mappa = caselle()
+        interessa = any("occupato" in e for e in mappa.values()) or any(
+            abs(c[0] - suo[0]) <= 1 and abs(c[1] - suo[1]) <= 1 for c, _ in proprie_armate(mappa)) if suo else False
+        s = chiudi_la_giornata(g, interessa)
+        if "ccup" in s or "Tieni il quartier generale" in s or "cade" in s or "caduto" in s:
+            diario("presa", numero=g, sentito=s, casella=caselle().get(suo))
+            if not conclusa():
+                tocco = cmd({"azione": "multi_tocco", "tocchi": 2, "dita": 2, "etichetta": "Registro della campagna",
+                             "tipo": "pulsante", "ascolto": 18, "quiete": 4, "intere": "ogni"})
+                diario("tocco_magico", sentito=sentito_intero(tocco))
+        if not conclusa() and ("attaglia" in s or "mboscata" in s):
+            if combatti_se_serve(caselle()):
+                battaglie += 1
+    if not conclusa():
+        diario("osservazione_tester", testo="il quartier generale non è stato preso nelle giornate giocate", battaglie=battaglie)
+        return
+    pronunce = dichiarazione_e_ritorno("presa")
+    preso = any("quartier generale avversario" in p and "caduto" in p for p in pronunce)
+    diario("esito", quartier_generale_preso=preso, battaglie=battaglie)
+    print("QUARTIER GENERALE PRESO" if preso else "campagna conclusa, ma non per la presa", flush=True)
+
+
+def comando_di_richiamo():
+    return next((n for n in etichette() if n.startswith(RICHIAMA)), None)
+
+
+def richiamo_dell_esercito():
+    if not apri_la_campagna_del_regno():
+        diario("osservazione_tester", testo="la campagna non si è aperta")
+        return
+    impedito = None
+    for g in range(1, GIORNATE + 1):
+        if conclusa():
+            diario("osservazione_tester", testo="la campagna si è conclusa prima del richiamo")
+            return
+        comando = comando_di_richiamo()
+        diario("comando_di_richiamo", numero=g, etichetta=comando)
+        if comando and "adesso non si può" in comando:
+            # Attivato, dichiara il perché e non apre nulla.
+            e = attiva_e_ascolta(prefisso=RICHIAMA, tipo="pulsante", ascolto=9)
+            diario("richiamo_impedito", etichetta=comando, sentito=sentito_intero(e), pannello="Conferma il richiamo" in etichette())
+            impedito = comando
+        elif impedito:
+            break
+        mappa = caselle()
+        if any("battaglia in sospeso" in e for e in mappa.values()) and combatti_se_serve(mappa):
+            continue
+        armate = proprie_armate(mappa)
+        nemico = [c for c, e in mappa.items() if "formazione avversaria" in e]
+        if nemico and not impedito:
+            # La formazione più piccola va a contatto, per mettersi in un punto da cui il richiamo non si può dare.
+            piccola = min((x for x in armate if ", in attesa" in x[1]), key=lambda x: atomi_in(x[1]), default=None)
+            if piccola:
+                marcia_verso(piccola[0], nemico[0], evita=set())
+        if conclusa():
+            continue
+        s = chiudi_la_giornata(g, True)
+        if "attaglia" in s or "mboscata" in s:
+            diario("battaglia_nata", numero=g, sentito=s)
+    comando = comando_di_richiamo()
+    diario("comando_di_richiamo", etichetta=comando, impedito_prima=impedito)
+    if not comando or "adesso non si può" in comando:
+        diario("osservazione_tester", testo="il richiamo non è mai stato possibile", etichetta=comando)
+        return
+    # Prima si rinuncia, e la campagna continua.
+    e = attiva_e_ascolta(etichetta=RICHIAMA, tipo="pulsante", ascolto=10)
+    diario("pannello_del_richiamo", sentito=sentito_intero(e), pronunce=e.get("ascoltate"), voci=[n for n in etichette()][:8])
+    e = attiva_e_ascolta(etichetta="Rinuncia", tipo="pulsante", ascolto=4)
+    diario("richiamo_rinunciato", sentito=sentito_intero(e), fuoco=e.get("dopo"), conclusa=conclusa())
+    attiva_e_ascolta(etichetta=RICHIAMA, tipo="pulsante", ascolto=4)
+    e = cmd({"azione": "attiva", "etichetta": "Conferma il richiamo", "tipo": "pulsante", "ascolto": 20, "quiete": 5, "intere": "ogni"})
+    diario("richiamo_confermato", sentito=sentito_intero(e), pronunce=e.get("ascoltate"), istanti=e.get("ascoltate_t"))
+    if not conclusa():
+        diario("osservazione_tester", testo="dopo la conferma la campagna non è conclusa")
+        return
+    pronunce = dichiarazione_e_ritorno("richiamo")
+    richiamato = any("richiamato l'esercito" in p for p in pronunce)
+    diario("esito", esercito_richiamato=richiamato, impedito_prima=impedito)
+    print("ESERCITO RICHIAMATO" if richiamato else "campagna conclusa, ma non per il richiamo", flush=True)
+
+
 def main():
     if len(sys.argv) > 4 and sys.argv[4] == "regno":
-        if "due-anni" in OPZIONI:
+        if "presa" in OPZIONI:
+            presa_del_quartier_generale()
+            diario("fine", stato="presa")
+        elif "richiamo" in OPZIONI:
+            richiamo_dell_esercito()
+            diario("fine", stato="richiamo")
+        elif "due-anni" in OPZIONI:
             due_anni_del_regno()
             diario("fine", stato="due anni del regno")
         else:

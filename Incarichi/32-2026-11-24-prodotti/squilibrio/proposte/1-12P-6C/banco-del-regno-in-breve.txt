@@ -1,0 +1,10 @@
+condotta|fronte|anni|battaglie|vinte|perse|campagne_vinte|campagne_perse|inverno|ferme|violazioni|vinte_senza_perdite|perse_senza_perdite
+competente|guado|333|614|105|509|111|94|128|0|0|0|2
+competente|istmo|334|172|32|140|20|10|304|0|0|0|2
+competente|pianura_lunga|333|243|5|238|4|29|300|0|0|0|0
+prudente|guado|333|1196|266|930|266|0|67|0|0|0|0
+prudente|istmo|334|1470|67|1403|133|0|201|0|0|0|801
+prudente|pianura_lunga|333|265|66|199|66|0|267|0|0|0|0
+mirata|guado|333|1488|230|1258|232|0|101|0|0|0|150
+mirata|istmo|334|965|266|699|303|0|31|0|0|0|41
+mirata|pianura_lunga|333|1650|258|1392|263|0|70|0|0|0|184

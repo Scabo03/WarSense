@@ -11,7 +11,8 @@ conclusione. Tre fonti, abbinate per istante:
   - le pronunce lette dal pilota (`ascoltate`), come le misure dell'incarico 31.
 
 Uso: misura-annunci.py <cartella del pilota> <udid> <apparecchio> <prima|dopo> <uscita.jsonl> [blocchi…]
-Blocchi: regno, mappa, scontro, battaglia, conclusione.
+Blocchi: regno, mappa, scontro, battaglia, conclusione; e, per ciò che prima non esisteva o che si misura soltanto
+dopo: presa, subita, azzeramento, richiamo, gesto, velocita.
 Una riga JSON per passo: `passo`, `sposta` (vero se il passo sposta il fuoco o cambia schermata), `annunci`.
 """
 import importlib.util
@@ -426,7 +427,137 @@ def blocco_conclusione():
             break
 
 
-BLOCCHI_NOTI = dict(regno=blocco_regno, mappa=blocco_mappa, scontro=blocco_scontro, battaglia=blocco_battaglia, conclusione=blocco_conclusione)
+def sul_guado(giocatore, avversario):
+    """Le formazioni del regno e il gruppo armato avversario dove li vuole il blocco, sulla mappa del guado, coi valori
+    messi a punto nei Documenti (00 §15.4); poi un regno nuovo, e la sua campagna."""
+    def piazza(d):
+        s = d["campagna_piccola"]
+        s["gruppi_giocatore"] = [{"riga": r, "colonna": c, "composizione": [{"archetipo": "fanteria_leggera", "atomi": 6}]} for r, c in giocatore]
+        s["gruppi_avversario"] = [{"riga": r, "colonna": c, "composizione": [{"archetipo": "fanteria_leggera", "atomi": 6}]} for r, c in avversario]
+    valori_di_fabbrica()
+    avvia()
+    prepara_i_documenti(scenari=piazza)
+    avvia()
+    cmd(puls("Nuovo regno", 4))
+    cmd(puls("Apri la campagna", 3))
+    cmd(puls("fronte del guado, mappa 4 per 4", 20))
+
+
+def chiudi_fino_alla_conclusione(massimo=5):
+    for k in range(massimo):
+        r = misura(f"giornata chiusa ({k + 1})", [puls("Chiudi la giornata", 30)], False)
+        if any(a["testo"].startswith("Campagna conclusa") for a in r["annunci"]) or "Campagna conclusa" in albero():
+            return
+
+
+def blocco_presa():
+    """Il giocatore occupa il quartier generale avversario e lo tiene fino alla caduta."""
+    sul_guado([(1, 2), (4, 1), (3, 1), (2, 1), (1, 1)], [(4, 4)])
+    chiudi_fino_alla_conclusione()
+    misura("ritorno in patria dopo la presa", [puls("Torna in patria", 14)], True)
+
+
+def blocco_subita():
+    """L'avversario occupa il quartier generale del giocatore, che è lontano, fino alla caduta."""
+    sul_guado([(1, 4), (2, 4), (1, 3), (2, 3), (1, 1)], [(4, 2)])
+    chiudi_fino_alla_conclusione()
+    misura("ritorno in patria dopo la caduta", [puls("Torna in patria", 14)], True)
+
+
+def blocco_azzeramento():
+    """Il giocatore occupa il quartier generale avversario e poi lo lascia: il conteggio si azzera."""
+    sul_guado([(1, 2), (4, 1), (3, 1), (2, 1), (1, 1)], [(4, 4)])
+    misura("giornata chiusa, l'occupazione comincia", [puls("Chiudi la giornata", 26)], False)
+    misura("tocco magico con un'occupazione in corso", [{"azione": "multi_tocco", "tocchi": 2, "dita": 2, "etichetta": "Registro della campagna", "tipo": "pulsante", "ascolto": 18}], False)
+    cmd(att(3, prefisso="riga 1, casella 2"))
+    cmd(puls("Marcia: scegli la casella sulla mappa", 4))
+    libera = next((n for n in albero() if n.startswith("riga 1, casella 3") and "raggiungibile in" in n), None) or \
+        next((n for n in albero() if "raggiungibile in" in n), None)
+    misura("marcia che lascia il quartier generale", [att(9, prefisso=re.match(r"^riga \d+, casella \d+", libera).group(0))], False)
+    for k in range(3):
+        r = misura(f"giornata chiusa dopo aver lasciato ({k + 1})", [puls("Chiudi la giornata", 26)], False)
+        if any("il conteggio si azzera" in a["testo"] for a in r["annunci"]):
+            break
+
+
+def blocco_richiamo():
+    """Il richiamo impedito, col suo perché, e il richiamo compiuto."""
+    sul_guado([(2, 2), (4, 4), (4, 1), (3, 4), (1, 4)], [(3, 2)])
+    misura("richiamo impedito", [att(10, prefisso="Richiama l'esercito in patria")], False)
+    sul_guado([(4, 2), (4, 3), (4, 4), (4, 1), (3, 1)], [(1, 2)])
+    misura("richiamo compiuto", [att(4, prefisso="Richiama l'esercito in patria"), puls("Conferma il richiamo", 20)], True)
+    misura("ritorno in patria dopo il richiamo", [puls("Torna in patria", 14)], True)
+
+
+def blocco_gesto():
+    """Un annuncio ad alta priorità cede al gesto di chi gioca: l'annuncio dell'inverno, quattordici secondi, e dopo tre
+    uno scorrimento verso destra. Il tratto di voce deve finire al gesto, e la voce passare all'elemento."""
+    valori_di_fabbrica()
+    avvia()
+    cmd(puls("Nuovo regno", 4))
+    quiete()
+    registro()
+    prima = time.time()
+    cmd(puls("Attendi l'inverno", 3))
+    gesto = time.time()
+    e = cmd({"azione": "scorri", "verso": "destra", "ascolto": 8})
+    time.sleep(1.6)
+    righe = registro()
+    tr = voce.tratti(UDID, prima - 1, time.time())
+    riga = {"apparecchio": APPARECCHIO, "versione": VERSIONE, "blocco": BLOCCO, "passo": "scorrimento a metà dell'annuncio dell'inverno",
+            "sposta": True, "annunci": [], "gesto_a": round(gesto - prima, 2), "pronunce": e.get("ascoltate"),
+            "registro": [[round(t - prima, 2), r[:90]] for t, r in righe],
+            "tratti": [[round(x["inizio"] - prima, 2), round(x["fine"] - x["inizio"], 2) if x["fine"] else None, x["modo"]] for x in tr if x["inizio"] >= prima - 0.2],
+            "errore": e.get("errore"), "ora": time.strftime("%H:%M:%S")}
+    with USCITA.open("a", encoding="utf-8") as f:
+        f.write(json.dumps(riga, ensure_ascii=False) + "\n")
+    print("gesto", json.dumps({k: riga[k] for k in ("gesto_a", "tratti", "pronunce")}, ensure_ascii=False), flush=True)
+
+
+ROTORE = ["control", "option", "command"]
+
+
+def velocita_della_voce(obiettivo):
+    """Porta la velocità della voce al valore indicato, dal rotore. Restituisce quella raggiunta."""
+    detto = ""
+    for _ in range(20):
+        detto = cmd({"azione": "tasto", "tasto": "destra", "modificatori": ROTORE, "ascolto": 0.6}).get("dopo", "")
+        if "elocità" in detto:
+            break
+    m = re.search(r"(\d+)%", detto)
+    ora = int(m.group(1)) if m else 50
+    for _ in range(40):
+        if ora == obiettivo:
+            break
+        m = re.search(r"(\d+)%", cmd({"azione": "tasto", "tasto": "su" if ora < obiettivo else "giu", "modificatori": ROTORE, "ascolto": 0.4}).get("dopo", ""))
+        if m:
+            ora = int(m.group(1))
+    return ora
+
+
+def blocco_velocita():
+    """Gli stessi annunci del regno con la voce al novanta per cento, e poi la voce com'era."""
+    valori_di_fabbrica()
+    avvia()
+    raggiunta = velocita_della_voce(90)
+    print("velocità della voce:", raggiunta, flush=True)
+    try:
+        cmd(puls("Nuovo regno", 4))
+        misura(f"comincia l'inverno, voce al {raggiunta} per cento", [puls("Attendi l'inverno", 14)], True)
+        misura(f"addestramento ordinato, voce al {raggiunta} per cento", [att(4, prefisso="Addestramento mirato.", tipo="pulsante"),
+                                                                         att(12, prefisso="Lupo: 8 atomi", tipo="pulsante")], True)
+        misura(f"leva ordinata, voce al {raggiunta} per cento", [att(6, prefisso="Leva di fanteria leggera", tipo="pulsante")], False)
+        avvia()
+        cmd(puls("Nuovo regno", 4))
+        misura(f"apertura della campagna, voce al {raggiunta} per cento", [puls("Apri la campagna", 3), puls("fronte del guado, mappa 4 per 4", 20)], True)
+        misura(f"giornata chiusa, voce al {raggiunta} per cento", [puls("Chiudi la giornata", 14)], False)
+    finally:
+        avvia()
+        print("velocità della voce, com'era:", velocita_della_voce(50), flush=True)
+
+
+BLOCCHI_NOTI = dict(presa=blocco_presa, subita=blocco_subita, azzeramento=blocco_azzeramento, richiamo=blocco_richiamo,
+                    gesto=blocco_gesto, velocita=blocco_velocita, regno=blocco_regno, mappa=blocco_mappa, scontro=blocco_scontro, battaglia=blocco_battaglia, conclusione=blocco_conclusione)
 USCITA.parent.mkdir(parents=True, exist_ok=True)
 for b in BLOCCHI:
     BLOCCO = b

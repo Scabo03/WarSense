@@ -354,6 +354,9 @@ public struct BancoRegno: Sendable {
         public let battaglie: Int
         public let vinte: Int
         public let perse: Int
+        /// Le battaglie vinte e perse senza che nessuna delle due parti perdesse un atomo (incarico 32).
+        public let vinteSenzaPerdite: Int
+        public let perseSenzaPerdite: Int
         public let atomiPartiti: Int
         public let atomiRientrati: Int
         public let formazioniPartite: Int
@@ -384,6 +387,8 @@ public struct BancoRegno: Sendable {
         public var diagnosi: DiagnosiBattaglia?
         enum CodingKeys: String, CodingKey {
             case seme, condotta, anno, fronte, conclusione, vincitore, giornate, battaglie, vinte, perse, diagnosi
+            case vinteSenzaPerdite = "vinte_senza_perdite"
+            case perseSenzaPerdite = "perse_senza_perdite"
             case atomiPartiti = "atomi_partiti"
             case atomiRientrati = "atomi_rientrati"
             case formazioniPartite = "formazioni_partite"
@@ -471,6 +476,7 @@ public struct BancoRegno: Sendable {
             var esitoCampagna: EsitoCampagna?
             var conclusione = "nessuna"
             var battaglie = 0, vinte = 0, perse = 0, giornate = 0
+            var vinteSenzaPerdite = 0, perseSenzaPerdite = 0
             var respinte = 0, primaRespinta: String?
             if motoreRegno.valida(.apriCampagna(fronte: fronte.identificatore), stato: stato).eValido {
                 guard let base = scenari[fronte.scenario] else { throw Errore.fronteSenzaScenario(fronte.scenario) }
@@ -487,6 +493,7 @@ public struct BancoRegno: Sendable {
                     seme: seme &+ UInt64(stato.anno) &* 1_000_003, limiteGiornate: giornateOperative + 1)
                 violazioni.formUnion(partita.violazioni)
                 battaglie = partita.battaglie; vinte = partita.vinte; perse = partita.perse
+                vinteSenzaPerdite = partita.vinteSenzaPerdite; perseSenzaPerdite = partita.perseSenzaPerdite
                 giornate = partita.giornate
                 respinte = partita.proposteAvversarieRespinte ?? 0
                 primaRespinta = partita.primaPropostaRespinta
@@ -496,7 +503,8 @@ public struct BancoRegno: Sendable {
                     giocati.append(Anno(
                         seme: seme, condotta: condotta, anno: stato.anno, fronte: fronte.identificatore,
                         conclusione: "ferma", vincitore: nil, giornate: giornate, battaglie: battaglie,
-                        vinte: vinte, perse: perse, atomiPartiti: atomiPartiti, atomiRientrati: 0,
+                        vinte: vinte, perse: perse, vinteSenzaPerdite: vinteSenzaPerdite,
+                        perseSenzaPerdite: perseSenzaPerdite, atomiPartiti: atomiPartiti, atomiRientrati: 0,
                         formazioniPartite: formazioniPartite, formazioniRientrate: 0, entrata: [:],
                         leveOrdinate: 0, atomiReclutati: 0, mantenimento: 0, repartiSciolti: 0,
                         miglioramentiOrdinati: 0, mantenimentiOrdinati: 0, formazioniDiReclute: 0,
@@ -582,7 +590,8 @@ public struct BancoRegno: Sendable {
             giocati.append(Anno(
                 seme: seme, condotta: condotta, anno: stato.anno - 1, fronte: fronte.identificatore,
                 conclusione: conclusione, vincitore: esitoCampagna?.vincitore?.rawValue, giornate: giornate,
-                battaglie: battaglie, vinte: vinte, perse: perse, atomiPartiti: atomiPartiti,
+                battaglie: battaglie, vinte: vinte, perse: perse, vinteSenzaPerdite: vinteSenzaPerdite,
+                perseSenzaPerdite: perseSenzaPerdite, atomiPartiti: atomiPartiti,
                 atomiRientrati: atomiRientrati, formazioniPartite: formazioniPartite,
                 formazioniRientrate: formazioniRientrate, entrata: mappa(entrata), leveOrdinate: leve,
                 atomiReclutati: atomiReclutati, mantenimento: mantenimento, repartiSciolti: repartiSciolti,

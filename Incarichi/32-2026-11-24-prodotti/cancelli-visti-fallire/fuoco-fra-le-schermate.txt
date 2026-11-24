@@ -1,0 +1,32 @@
+== il resoconto non prende il fuoco alla comparsa
+   sorgente: Applicazione/Sorgenti/SchermateContorno.swift
+   tolto:  fuocoDiAperturaDato = true Fuoco.sposta(a: titolo, perche: .schermataAperta) } @objc private func chiudiTutto() {
+   messo:  fuocoDiAperturaDato = true } @objc private func chiudiTutto() {
+   prove ospitate: PassaggioBattagliaInterfacciaTest/test_02_2_9_dal_pannello_alla_battaglia_e_al_resoconto_il_fuoco_va_in_testa_alla_schermata_nuova,PatriaTest/test_la_campagna_che_l_inverno_conclude_torna_con_la_dichiarazione_e_il_bilancio_ne_nasce (uscita 65)
+/Users/lucascabini/Developer/WarSense/Applicazione/ProveOspitate/PassaggioBattagliaInterfacciaTest.swift:404: error: -[WarSenseTest.PassaggioBattagliaInterfacciaTest test_02_2_9_dal_pannello_alla_battaglia_e_al_resoconto_il_fuoco_va_in_testa_alla_schermata_nuova] : XCTAssertEqual failed: ("[]") is not equal to ("[WarSense.Fuoco.Movimento.schermataAperta]")
+/Users/lucascabini/Developer/WarSense/Applicazione/ProveOspitate/PassaggioBattagliaInterfacciaTest.swift:406: error: -[WarSenseTest.PassaggioBattagliaInterfacciaTest test_02_2_9_dal_pannello_alla_battaglia_e_al_resoconto_il_fuoco_va_in_testa_alla_schermata_nuova] : XCTAssertEqual failed: ("Optional("Riserve da schierare")") is not equal to ("Optional("Resoconto della battaglia")")
+/Users/lucascabini/Developer/WarSense/Applicazione/ProveOspitate/PassaggioBattagliaInterfacciaTest.swift:409: error: -[WarSenseTest.PassaggioBattagliaInterfacciaTest test_02_2_9_dal_pannello_alla_battaglia_e_al_resoconto_il_fuoco_va_in_testa_alla_schermata_nuova] : XCTAssertEqual failed: ("[]") is not equal to ("[WarSense.Fuoco.Movimento.schermataAperta]") - il fuoco d'apertura si porta una volta sola
+Test Case '-[WarSenseTest.PassaggioBattagliaInterfacciaTest test_02_2_9_dal_pannello_alla_battaglia_e_al_resoconto_il_fuoco_va_in_testa_alla_schermata_nuova]' failed (3.897 seconds).
+/Users/lucascabini/Developer/WarSense/Applicazione/ProveOspitate/PatriaTest.swift:416: error: -[WarSenseTest.PatriaTest test_la_campagna_che_l_inverno_conclude_torna_con_la_dichiarazione_e_il_bilancio_ne_nasce] : XCTAssertTrue failed - attesa scaduta: il fuoco va sul titolo della dichiarazione
+Test Case '-[WarSenseTest.PatriaTest test_la_campagna_che_l_inverno_conclude_torna_con_la_dichiarazione_e_il_bilancio_ne_nasce]' failed (9.429 seconds).
+** TEST FAILED **
+
+== la divisione non prende il fuoco alla comparsa
+   sorgente: Applicazione/Sorgenti/SchermataDivisione.swift
+   tolto:  fuocoDiAperturaDato = true Fuoco.sposta(a: titolo, perche: .schermataAperta)
+   messo:  fuocoDiAperturaDato = true
+   prove ospitate: PassaggioBattagliaInterfacciaTest/test_02_2_9_dal_pannello_alla_divisione_il_fuoco_va_sul_titolo (uscita 65)
+/Users/lucascabini/Developer/WarSense/Applicazione/ProveOspitate/PassaggioBattagliaInterfacciaTest.swift:426: error: -[WarSenseTest.PassaggioBattagliaInterfacciaTest test_02_2_9_dal_pannello_alla_divisione_il_fuoco_va_sul_titolo] : XCTAssertEqual failed: ("[]") is not equal to ("[WarSense.Fuoco.Movimento.schermataAperta]")
+/Users/lucascabini/Developer/WarSense/Applicazione/ProveOspitate/PassaggioBattagliaInterfacciaTest.swift:427: error: -[WarSenseTest.PassaggioBattagliaInterfacciaTest test_02_2_9_dal_pannello_alla_divisione_il_fuoco_va_sul_titolo] : XCTAssertEqual failed: ("nil") is not equal to ("Optional(true)")
+Test Case '-[WarSenseTest.PassaggioBattagliaInterfacciaTest test_02_2_9_dal_pannello_alla_divisione_il_fuoco_va_sul_titolo]' failed (2.916 seconds).
+** TEST FAILED **
+
+== dal pannello alla battaglia il fuoco torna prima alla casella (build 32)
+   sorgente: Applicazione/Sorgenti/SchermataMappaCampagna.swift
+   tolto:  self?.lasciaIlPannello { await self?.apriLaBattaglia(battaglia) }
+   messo:  self?.chiudiPannello(casella: gruppo.posizione) { await self?.apriLaBattaglia(battaglia) }
+   prove ospitate: PassaggioBattagliaInterfacciaTest/test_02_2_9_dal_pannello_alla_battaglia_e_al_resoconto_il_fuoco_va_in_testa_alla_schermata_nuova (uscita 65)
+/Users/lucascabini/Developer/WarSense/Applicazione/ProveOspitate/PassaggioBattagliaInterfacciaTest.swift:396: error: -[WarSenseTest.PassaggioBattagliaInterfacciaTest test_02_2_9_dal_pannello_alla_battaglia_e_al_resoconto_il_fuoco_va_in_testa_alla_schermata_nuova] : XCTAssertEqual failed: ("[WarSense.Fuoco.Movimento.richiesto, WarSense.Fuoco.Movimento.schermataAperta]") is not equal to ("[WarSense.Fuoco.Movimento.schermataAperta]") - nessuno spostamento verso la casella da cui si è partiti
+Test Case '-[WarSenseTest.PassaggioBattagliaInterfacciaTest test_02_2_9_dal_pannello_alla_battaglia_e_al_resoconto_il_fuoco_va_in_testa_alla_schermata_nuova]' failed (1.491 seconds).
+** TEST FAILED **
+

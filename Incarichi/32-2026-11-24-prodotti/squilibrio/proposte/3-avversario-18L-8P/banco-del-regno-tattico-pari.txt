@@ -1,0 +1,15 @@
+regno.versione_valori=0.16.0+f4019c4f
+regno.partite_per_condotta=200,anni_per_partita=5,giornate_operative=90,anni_giocati=3000,anni_previsti=3000,errori=0
+condotta|fronte|anni|vinte|perse|interrotte_dall_inverno|ferme|battaglie_ogni_10_giornate|giornate_mediana|battaglie_per_anno_x100|atomi_partiti_mediana|atomi_rientrati_mediana|atomi_reclutati_mediana|mantenimento_mediana|anni_con_reparti_sciolti|miglioramenti_ordinati|mantenimenti_ordinati|anni_con_arrivi_a_campagna_aperta|anni_con_formazioni_in_patria|anni_con_violazioni|anni_con_proposte_avversarie_respinte
+competente|guado|333|128|74|131|0|0.308|38|155|93|71|26|25|0|132|63|260|18|0|0
+competente|istmo|334|24|14|296|0|0.051|90|44|83|79,5|20|28|0|26|121|262|0|0|0
+competente|pianura_lunga|333|9|28|296|0|0.052|90|45|84|83|20|29|0|20|91|246|1|0|0
+competente|tutti|1000|161|116|723|0|0.109|90|81|84,5|81|20|28|0|178|275|768|19|0|0
+prudente|guado|333|200|0|133|0|0.451|39|219|92|57|26|20|0|133|66|266|66|0|0
+prudente|istmo|334|133|0|201|0|0.293|90|180|83|65|26|22|0|133|0|267|0|0|0
+prudente|pianura_lunga|333|66|0|267|0|0.102|90|79|82|59|20|20|0|66|66|267|66|0|0
+prudente|tutti|1000|399|0|601|0|0.255|90|159|83|59|26|20|0|332|132|800|132|0|0
+mirata|guado|333|262|4|67|0|0.690|22|240|70|39|32|14|0|233|252|266|66|0|0
+mirata|istmo|334|332|0|2|0|0.707|31|256|65|37|34|12|0|293|187|267|0|0|0
+mirata|pianura_lunga|333|267|0|66|0|0.492|42|230|67|41|34|14|0|229|299|267|66|0|0
+mirata|tutti|1000|861|4|135|0|0.617|29|242|68|39|34|13|0|755|738|800|132|0|0

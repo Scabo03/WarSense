@@ -31,6 +31,8 @@ final class SchermataDivisione: UIViewController {
     /// dichiarata (00 §14.4).
     var annuncia: ((TestoLocalizzato) -> Void)?
 
+    private var titolo: UIView?
+    private var fuocoDiAperturaDato = false
     private var staccati: Set<Int> = []
     private var pulsantiReparto: [(indice: Int, pulsante: UIButton)] = []
 
@@ -69,9 +71,11 @@ final class SchermataDivisione: UIViewController {
             colonna.widthAnchor.constraint(equalTo: view.widthAnchor, constant: -48),
         ])
 
-        colonna.addArrangedSubview(intestazione(
+        let titolo = intestazione(
             testi.frase("divisione.titolo", soggetto: testi.soggetto(.gruppo, gruppo.nome)).testo,
-            .title1, .header))
+            .title1, .header)
+        self.titolo = titolo
+        colonna.addArrangedSubview(titolo)
         colonna.addArrangedSubview(intestazione(
             testi.frase("divisione.scegli_reparti").testo, .headline, .header))
 
@@ -100,6 +104,14 @@ final class SchermataDivisione: UIViewController {
         let annulla = pulsanteRiga(testi.frase("divisione.annulla").testo)
         annulla.addAction(UIAction { [weak self] _ in self?.esci() }, for: .touchUpInside)
         colonna.addArrangedSubview(annulla)
+    }
+
+    /// Il fuoco d'apertura sul titolo, alla comparsa e una volta sola (02 §2.9; incarico 32).
+    override func viewDidAppear(_ animated: Bool) {
+        super.viewDidAppear(animated)
+        guard !fuocoDiAperturaDato else { return }
+        fuocoDiAperturaDato = true
+        Fuoco.sposta(a: titolo, perche: .schermataAperta)
     }
 
     // MARK: - Azioni

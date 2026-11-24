@@ -38,6 +38,8 @@ final class SchermataBattaglia: UIViewController {
     /// Vero dopo che il fuoco d'apertura è stato portato sull'intestazione del deck: si porta una volta
     /// sola, alla prima comparsa (incarico 29).
     private var fuocoDiAperturaDato = false
+    /// Il resoconto si presenta una volta sola (incarico 32): fra la fine e la sua comparsa passa un istante.
+    private var resocontoMostrato = false
 
     init(partita: PartitaCorrente) {
         self.partita = partita
@@ -605,14 +607,19 @@ final class SchermataBattaglia: UIViewController {
 
     // MARK: - Resoconto
 
+    /// Il resoconto si presenta un istante dopo la fine (incarico 32): quando a concludere lo scontro è un
+    /// comando dato da un pannello, VoiceOver sta ancora riportando il fuoco sulla cella d'origine, e lo
+    /// avrebbe portato lì — o su una voce qualunque del resoconto — invece che sul titolo.
     private func mostraResoconto() async {
-        guard let costruttore else { return }
+        guard let costruttore, !resocontoMostrato else { return }
+        resocontoMostrato = true
+        Fuoco.staPerSpostarsi()
+        try? await Task.sleep(nanoseconds: UInt64(Fuoco.attesaDelSistema * 1_000_000_000))
         let schermata = SchermataResoconto(voci: costruttore.vociResoconto(), testi: testi,
                                            chiaveCongedo: partita.chiaveCongedo)
         schermata.alTermine = { [weak self] in self?.alTermine?() }
         schermata.modalPresentationStyle = .fullScreen
         present(schermata, animated: false)
-        Fuoco.sposta(a: nil, perche: .schermataAperta)
     }
 
     // Attrezzi per le prove ospitate (05 §14.4).

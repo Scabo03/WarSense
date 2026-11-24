@@ -62,6 +62,10 @@ public struct MisuraFrequenzaBattaglie: Sendable {
         public let primaBattaglia: Int?
         public let vinte: Int
         public let perse: Int
+        /// Quante delle battaglie vinte e delle perse si sono concluse senza che NESSUNA delle due parti
+        /// perdesse un atomo (incarico 32): battaglie che nessuno ha combattuto.
+        public let vinteSenzaPerdite: Int
+        public let perseSenzaPerdite: Int
         public let daImboscata: Int
         public let fine: Fine
         public let armatiGiocatore: Int
@@ -91,6 +95,8 @@ public struct MisuraFrequenzaBattaglie: Sendable {
             case formato, condotta, seme, giornate, battaglie, vinte, perse, fine, diagnosi
             case giornateDelleBattaglie = "giornate_delle_battaglie"
             case primaBattaglia = "prima_battaglia"
+            case vinteSenzaPerdite = "vinte_senza_perdite"
+            case perseSenzaPerdite = "perse_senza_perdite"
             case daImboscata = "da_imboscata"
             case armatiGiocatore = "armati_giocatore"
             case armatiAvversario = "armati_avversario"
@@ -161,7 +167,8 @@ public struct MisuraFrequenzaBattaglie: Sendable {
         let sfasamento = condotta == .competente ? Int(seme % 420) : 0
         var giornoUltimaRiunione = Int.min
         var giornateBattaglie: [Int] = []
-        var vinte = 0, perse = 0, daImboscata = 0
+        var vinte = 0, perse = 0, vinteSenzaPerdite = 0, perseSenzaPerdite = 0, daImboscata = 0
+        func atomi(_ reparti: [Reparto]) -> Int { reparti.reduce(0) { $0 + $1.atomi } }
         let giornoIniziale = stato.giorno
         var passi = 0
         var giornoDelControllo = stato.giorno, passiNelGiorno = 0
@@ -202,11 +209,15 @@ public struct MisuraFrequenzaBattaglie: Sendable {
                     let imboscata = battaglia.daImboscata
                     return "battaglia_non_conclusa:\(trovata.inUnaRiga):giorno=\(battaglia.giorno):casella=\(battaglia.casella.riga),\(battaglia.casella.colonna):imboscata=\(imboscata)"
                 }
+                let senzaPerdite = atomi(stato.gruppi[esito.gruppoGiocatore]?.composizione ?? []) == atomi(esito.composizioneGiocatore)
+                    && atomi(stato.gruppi[esito.gruppoAvversario]?.composizione ?? []) == atomi(esito.composizioneAvversario)
                 _ = motore.applicaEsitoInCampagna(esito, in: &stato)
                 sorveglia()
                 giornateBattaglie.append(battaglia.giorno)
                 if battaglia.daImboscata { daImboscata += 1 }
                 if esito.sconfitto == .giocatore { perse += 1 } else { vinte += 1 }
+                if senzaPerdite, esito.sconfitto == .giocatore { perseSenzaPerdite += 1 }
+                if senzaPerdite, esito.sconfitto == .avversario { vinteSenzaPerdite += 1 }
             }
             return nil
         }
@@ -301,7 +312,8 @@ public struct MisuraFrequenzaBattaglie: Sendable {
                        giornate: stato.giorno - giornoIniziale, battaglie: giornateBattaglie.count,
                        giornateDelleBattaglie: giornateBattaglie.map { $0 - giornoIniziale + 1 },
                        primaBattaglia: giornateBattaglie.first.map { $0 - giornoIniziale + 1 },
-                       vinte: vinte, perse: perse, daImboscata: daImboscata, fine: fine,
+                       vinte: vinte, perse: perse, vinteSenzaPerdite: vinteSenzaPerdite,
+                       perseSenzaPerdite: perseSenzaPerdite, daImboscata: daImboscata, fine: fine,
                        armatiGiocatore: armati(.giocatore, stato), armatiAvversario: armati(.avversario, stato),
                        motivoFerma: motivoFerma, violazioni: violazioni.sorted(),
                        giornoPrimaViolazione: giornoPrimaViolazione,

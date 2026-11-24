@@ -1,0 +1,21 @@
+--- Codice/Sources/Motore/MotoreBattaglia.swift	2026-11-24 18:38:37
++++ (copia di laboratorio)	2026-11-24 18:56:15
+@@ -292,6 +292,7 @@
+             }
+             c = max(valori.minimi.costoPiazzamentoMinimo,
+                     modificatore(.coefficienteCostoMovimento, stato).applicato(a: c))
++            if percorso.count == 1 { c = min(c, formato(stato).budgetVolumeBase) } // LABORATORIO: il tetto
+             guard c <= bilancio.disponibile else { return .nonValido(.volumeInsufficiente) }
+             return .valido(CostiDichiarati(volume: c, residuoDopo: bilancio.disponibile - c))
+ 
+@@ -774,8 +775,8 @@
+             while avanzamento < ultimo {
+                 let riga = parte == .giocatore ? stato.griglia.righe - (avanzamento + 1) : 1 + (avanzamento + 1)
+                 let grezzo = costo(archetipo: id, atomi: atomi, cella: Cella(riga: riga, colonna: 1), parte: parte, stato: stato)
+-                let c = max(valori.minimi.costoPiazzamentoMinimo,
+-                            modificatore(.coefficienteCostoMovimento, stato).applicato(a: grezzo))
++                let c = min(formato(stato).budgetVolumeBase, max(valori.minimi.costoPiazzamentoMinimo,
++                            modificatore(.coefficienteCostoMovimento, stato).applicato(a: grezzo)))
+                 guard c <= regime else { break }
+                 avanzamento += 1
+             }

@@ -369,6 +369,67 @@ final class PassaggioBattagliaInterfacciaTest: XCTestCase {
         return stato
     }
 
+    // MARK: - Il fuoco fra una schermata e l'altra (incarico 32)
+
+    /// Dal pannello della casella alla battaglia, e dalla fine della battaglia al resoconto, il fuoco va in
+    /// testa alla schermata che si apre e in nessun altro posto: non sulla casella che sta per sparire, non
+    /// su una cella della griglia, non su una voce qualunque del resoconto (02 §2.9).
+    func test_02_2_9_dal_pannello_alla_battaglia_e_al_resoconto_il_fuoco_va_in_testa_alla_schermata_nuova() async throws {
+        let (schermata, ambiente) = try await mappaAperta(taglia: .piccola)
+        let battaglia = try await portaAContatto(schermata)
+        XCTAssertTrue(schermata.attiva(battaglia.casella))
+        try await Task.sleep(nanoseconds: 150_000_000)
+        let voce = try XCTUnwrap(schermata.vociPannelloPerProva.first { $0.titolo == ambiente.testi.frase("pannello.apri_battaglia").testo })
+        Fuoco.azzeraRegistro()
+        voce.esegui()
+        var visti: [Fuoco.Movimento] = []
+        var scontro: SchermataBattaglia?
+        // Si guarda a ogni passo del filo principale, e non a intervalli: l'apertura della battaglia azzera il
+        // registro del fuoco, e uno spostamento verso la casella vi resterebbe un istante soltanto.
+        let limite = Date().addingTimeInterval(4)
+        while Date() < limite {
+            for movimento in Fuoco.registro where !visti.contains(movimento) { visti.append(movimento) }
+            if let b = schermata.presentedViewController as? SchermataBattaglia, Fuoco.registro.contains(.schermataAperta) { scontro = b; break }
+            await Task.yield()
+        }
+        let aperta = try XCTUnwrap(scontro, "la battaglia si apre dal pannello")
+        XCTAssertEqual(visti, [.schermataAperta], "nessuno spostamento verso la casella da cui si è partiti")
+        XCTAssertEqual((Fuoco.ultimoBersaglio as? UILabel)?.text, ambiente.testi.frase("deck.intestazione").testo)
+
+        // La fine della battaglia: il resoconto prende il fuoco sul proprio titolo, alla comparsa e una volta.
+        for _ in 0..<200 where aperta.elementiPerProva.isEmpty { try await Task.sleep(nanoseconds: 20_000_000) }
+        _ = try await combattiAConclusione(aperta.partitaPerProva, ambiente: ambiente)
+        Fuoco.azzeraRegistro()
+        for _ in 0..<400 where !(aperta.presentedViewController is SchermataResoconto) || Fuoco.registro.isEmpty {
+            try await Task.sleep(nanoseconds: 5_000_000)
+        }
+        let resoconto = try XCTUnwrap(aperta.presentedViewController as? SchermataResoconto)
+        XCTAssertEqual(Fuoco.registro, [.schermataAperta])
+        let bersaglio = Fuoco.ultimoBersaglio as? UILabel
+        XCTAssertEqual(bersaglio?.text, ambiente.testi.frase("resoconto.titolo").testo)
+        XCTAssertEqual(bersaglio?.accessibilityTraits.contains(.header), true)
+        resoconto.viewDidAppear(false)
+        XCTAssertEqual(Fuoco.registro, [.schermataAperta], "il fuoco d'apertura si porta una volta sola")
+    }
+
+    /// Dal pannello alla divisione, allo stesso modo.
+    func test_02_2_9_dal_pannello_alla_divisione_il_fuoco_va_sul_titolo() async throws {
+        let (schermata, ambiente) = try await mappaAperta(taglia: .piccola)
+        let stato = try XCTUnwrap(schermata.statoPerProva)
+        let gruppo = try XCTUnwrap(stato.gruppi(di: .giocatore).first { $0.composizione.count > 1 })
+        XCTAssertTrue(schermata.attiva(gruppo.posizione))
+        try await Task.sleep(nanoseconds: 150_000_000)
+        let voce = try XCTUnwrap(schermata.vociPannelloPerProva.first { $0.titolo == ambiente.testi.frase("pannello.dividi").testo })
+        Fuoco.azzeraRegistro()
+        voce.esegui()
+        for _ in 0..<400 where !(schermata.presentedViewController is SchermataDivisione) || Fuoco.registro.isEmpty {
+            try await Task.sleep(nanoseconds: 5_000_000)
+        }
+        XCTAssertTrue(schermata.presentedViewController is SchermataDivisione)
+        XCTAssertEqual(Fuoco.registro, [.schermataAperta])
+        XCTAssertEqual((Fuoco.ultimoBersaglio as? UILabel)?.text?.hasPrefix("Dividi "), true)
+    }
+
     // MARK: - Il tasto di chiusura della giornata e la diagnostica (incarico 26)
 
     /// Il titolare preme «Chiudi la giornata» con gruppi ancora in attesa: la giornata si chiude

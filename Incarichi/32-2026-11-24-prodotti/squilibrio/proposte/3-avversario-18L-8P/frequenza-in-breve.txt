@@ -1,0 +1,10 @@
+condotta|formato|partite|battaglie|vinte|perse|ferme|violazioni|vinte_senza_perdite|perse_senza_perdite
+competente|campagna_piccola|200|847|123|724|0|0|0|197
+prudente|campagna_piccola|200|400|0|400|0|0|0|0
+mirata|campagna_piccola|200|31218|100|31118|0|0|0|30518
+competente|campagna_media|200|213|39|174|0|0|0|1
+prudente|campagna_media|200|400|0|400|0|0|0|0
+mirata|campagna_media|200|1557|136|1421|0|0|0|977
+competente|campagna_grande|200|176|21|155|0|0|0|4
+prudente|campagna_grande|200|0|0|0|0|0|0|0
+mirata|campagna_grande|200|2021|158|1863|0|0|0|1067

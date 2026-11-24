@@ -1,0 +1,12 @@
+frequenza.versione_valori=0.16.0+d01dcb35
+frequenza.partite_per_cella=200,giornate_massime=730,partite_giocate=1800,partite_previste=1800
+formato|condotta|partite|battaglie_ogni_10_giornate|battaglie_per_partita|prima_battaglia_mediana|partite_senza_battaglie|giornate_mediana|giornate_min|giornate_max|fine_avversario_senza_armati|fine_giocatore_senza_armati|fine_limite|ferma|giornate_mediane_fino_alla_fine_naturale|partite_con_violazioni
+campagna_grande|competente|200|0.01|0.65|46|113|730|30|730|33|0|167|0|42|0
+campagna_grande|mirata|200|0.08|3.13|15|0|81|16|730|102|0|98|0|28|0
+campagna_grande|prudente|200|0.00|0.00|-|200|730|730|730|0|0|200|0|-|0
+campagna_media|competente|200|0.07|4.62|68|105|730|48|732|20|0|180|0|113|0
+campagna_media|mirata|200|0.05|2.60|17|0|730|25|730|59|0|141|0|57|0
+campagna_media|prudente|200|0.01|1.00|11|0|730|730|730|0|0|200|0|-|0
+campagna_piccola|competente|200|0.10|4.24|18|12|730|14|733|97|1|102|0|80|0
+campagna_piccola|mirata|200|4.16|156.09|10|0|730|17|730|100|0|100|0|20|0
+campagna_piccola|prudente|200|0.03|2.00|4|0|730|730|730|0|0|200|0|-|0

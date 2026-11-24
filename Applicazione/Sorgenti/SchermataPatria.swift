@@ -592,7 +592,6 @@ final class SchermataPatria: UIViewController {
         schermata.modalPresentationStyle = .fullScreen
         schermata.alTermine = { [weak self] in self?.portaIlFuocoInTesta() }
         present(schermata, animated: false)
-        Fuoco.sposta(a: nil, perche: .schermataAperta)
     }
 
     // MARK: - Registro, uscita, gesti (02 §6.6, §6.7)

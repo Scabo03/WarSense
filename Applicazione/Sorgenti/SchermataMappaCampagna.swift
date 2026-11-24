@@ -351,9 +351,7 @@ final class SchermataMappaCampagna: UIViewController {
         if let battaglia = statoCorrente?.battagliaInSospeso(su: gruppo.posizione) {
             voci.append(VocePannello(titolo: testi.frase("pannello.apri_battaglia").testo,
                                      stile: .default) { [weak self] in
-                self?.chiudiPannello(casella: gruppo.posizione) {
-                    await self?.apriLaBattaglia(battaglia)
-                }
+                self?.lasciaIlPannello { await self?.apriLaBattaglia(battaglia) }
             })
         }
 
@@ -401,13 +399,7 @@ final class SchermataMappaCampagna: UIViewController {
         if costruttore.vista.puoDividere(per: gruppo.id) {
             voci.append(VocePannello(titolo: testi.frase("pannello.dividi").testo,
                                      stile: .default) { [weak self] in
-                guard let self else { return }
-                if let attuale = self.presentedViewController as? UIAlertController,
-                   !attuale.isBeingDismissed {
-                    attuale.dismiss(animated: false) { self.apriSchermataDivisione(per: gruppo) }
-                } else {
-                    self.apriSchermataDivisione(per: gruppo)
-                }
+                self?.lasciaIlPannello { self?.apriSchermataDivisione(per: gruppo) }
             })
         }
         // La riunione (non è un'azione, 01 §5.6.0.3): una voce per ciascun gruppo
@@ -565,6 +557,26 @@ final class SchermataMappaCampagna: UIViewController {
         }
     }
 
+    /// Dal pannello a UN'ALTRA SCHERMATA (incarico 32). Il fuoco non torna alla casella, che sta per
+    /// sparire: VoiceOver applica lo spostamento quando la schermata nuova è già comparsa, e fino alla build
+    /// 32 lo portava su un suo elemento a caso — all'apertura di una battaglia su «riga 1, cella 2». Si
+    /// attende che il sistema abbia finito di congedare il pannello, e la schermata nuova prende il fuoco
+    /// alla propria comparsa.
+    private func lasciaIlPannello(aprendo apri: @escaping () async -> Void) {
+        Fuoco.staPerSpostarsi()
+        let prosegui: () -> Void = {
+            Task {
+                try? await Task.sleep(nanoseconds: UInt64(Fuoco.attesaDelSistema * 1_000_000_000))
+                await apri()
+            }
+        }
+        if let pannello = presentedViewController as? UIAlertController, !pannello.isBeingDismissed {
+            pannello.dismiss(animated: false, completion: prosegui)
+        } else {
+            prosegui()
+        }
+    }
+
     // MARK: - Passaggio alla battaglia e ritorno (01 §6, §15, incarico 24)
 
     /// Apre la battaglia in sospeso e PRESENTA la schermata di battaglia (01 §6.2): il passaggio
@@ -583,6 +595,8 @@ final class SchermataMappaCampagna: UIViewController {
             present(schermata, animated: false)
             Fuoco.azzeraRegistro()
         } catch {
+            // Si resta sulla mappa: il fuoco torna sulla casella da cui si era partiti, e l'annuncio segue.
+            Fuoco.sposta(a: elementi[battaglia.casella], perche: .richiesto)
             partita.ambiente.segnali.annuncia(TestoLocalizzato(
                 testo: testi.frase("campagna.battaglia_non_apribile").testo, lingua: testi.lingua),
                 interrompente: true)

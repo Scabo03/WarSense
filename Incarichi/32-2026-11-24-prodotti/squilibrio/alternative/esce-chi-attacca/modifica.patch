@@ -1,0 +1,7 @@
+--- Codice/Sources/Motore/TatticoBattaglia.swift
++++ (copia di laboratorio)
+     private func convieneUscireDalloStallo(stato: StatoBattaglia) -> Bool {
+-        parte == .avversario && stato.resaDichiarataDa == nil
++        parte != stato.primoOccupante && stato.resaDichiarataDa == nil
+             && (motore.nonPossonoPiuIncontrarsi(stato) || motore.nessunoPuoAvvicinarsi(stato))
+     }
