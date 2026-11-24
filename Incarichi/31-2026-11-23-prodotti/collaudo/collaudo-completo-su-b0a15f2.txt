@@ -1,0 +1,18 @@
+IL COLLAUDO COMPLETO SUL COMMIT b0a15f2 — scripts/collaudo-completo.sh (24 novembre, 429 s, uscita 0)
+
+== 0/3 Cancello dei simboli d'archetipo (biiezione archetipi <-> simboli, RDA-97) ==
+== 0b/3 Cancello delle impronte dei Contenuti (RDA-105) ==
+== 0c/3 Cancello: VoiceOver spento sul simulatore delle prove d'interfaccia (incarico 30) ==
+  VoiceOver spento sul simulatore C86CB490-B9AE-48E8-BC1B-FDD2C52274B4
+== 1/3 Collaudo del pacchetto (Motore, Dati, Sessione, Segnali, Verifica, Confini) ==
+Test Case '-[DatiTest.CaricamentoTest test_05_7_2_testi_di_fabbrica_coincidono_con_le_impronte]' started.
+Test Case '-[DatiTest.CaricamentoTest test_05_7_2_testi_di_fabbrica_coincidono_con_le_impronte]' passed (0.020 seconds).
+== 2/3 Generazione del progetto applicativo dalla sua sorgente di verità ==
+== 3/3 Prove ospitate e d'interfaccia sul simulatore ==
+== Conteggio delle prove ospitate e d'interfaccia, dall'esecutore ==
+  esecutore (xcresulttool summary): 143 prove eseguite fra ospitate e interfaccia — 143 passate, 0 fallite, 0 saltate; esito Passed
+== Collaudo completo: tutto verde ==
+
+Sul commit 88d4874 (che differisce da b0a15f2 per la sola regola dei nomi dell'avversario): uscita 0 in 464 s,
+== Conteggio delle prove ospitate e d'interfaccia, dall'esecutore ==
+  esecutore (xcresulttool summary): 143 prove eseguite fra ospitate e interfaccia — 143 passate, 0 fallite, 0 saltate; esito Passed

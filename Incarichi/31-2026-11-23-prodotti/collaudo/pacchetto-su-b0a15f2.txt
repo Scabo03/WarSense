@@ -1,0 +1,46 @@
+IL PACCHETTO SUL COMMIT b0a15f2 — cd Codice && swift test -j 6 (24 novembre, 67 s, uscita 0)
+casi passati: 534   falliti: 0   saltati: 2
+
+I casi saltati:
+Test Case '-[SessioneTest.RigenerazioneOroTest test_rigenerazione_esplicita_dei_copioni_d_oro]' skipped (0.000 seconds).
+Test Case '-[SessioneTest.RigenerazioneOroTest test_rigenerazione_esplicita_dell_oro_del_regno]' skipped (0.000 seconds).
+
+Le righe che le prove stampano (sonda, banco, accordo di genere, nomi, salvataggi):
+ACCORDO-DI-GENERE chiamate-con-soggetto=73
+ACCORDO-DI-GENERE frasi=74 forme=360
+BANCO-REGNO anni=18 conclusi=18 fermi=0 con_leve=18 con_violazioni=0
+BANCO-REGNO-31 anni=59 conclusi=58 fermi=1 con_violazioni=0 con_formazioni_in_patria=4 con_reclute=58 con_arrivi_a_campagna_aperta=45 miglioramenti=8 mantenimenti=9 con_reparti_sciolti=0
+BANCO-REGNO-POVERO anni=31 con_reparti_sciolti=7 reparti_sciolti=14 mantenimento=[13, 13, 13, 13, 27, 22, 14, 14, 27, 20, 0, 14, 16, 16, 16, 27, 26, 16, 14, 27, 21, 19, 19, 27, 19, 19, 19, 27, 26, 16, 14] con_violazioni=0
+FREQUENZA-FEDELTA confronti=3 su 4
+FREQUENZA-FEDELTA guado_contro_avversario: corsa del banco chiusa al giorno 10, non confrontata
+MIGLIORAMENTO-DANNO coefficiente=1200 senza=243 con=291 confronti=120
+MIGLIORAMENTO-SUPERSTITI passi=38 giro=7 esito=Optional(Motore.EsitoBattaglia(sconfitto: Dati.Parte.avversario, modo: Motore.EsitoBattaglia.Modo.annientamento, turni: 7)) superstiti=["fanteria_leggera:6:-:2", "fanteria_leggera:6:addestramento_mirato:2", "fanteria_pesante:7:addestramento_mirato:-"]
+MIGLIORAMENTO-TIRO distanza=5 ordinario=60 addestrato=72
+NOMI-DELLE-PARTI-31 fronte=guado nemici_anno_1=["muflone", "ermellino", "sciacallo"] nemici_anno_2=["muflone", "ermellino", "sciacallo"] regno_anno_2=["corvo", "lupo", "falco", "orso", "cervo", "lince", "aquila"]
+NOMI-DELLE-PARTI-31 fronte=istmo nemici_anno_1=["muflone", "ermellino", "sciacallo"] nemici_anno_2=["muflone", "ermellino", "sciacallo"] regno_anno_2=["corvo", "lupo", "falco", "orso", "cervo", "lince", "aquila"]
+NOMI-DELLE-PARTI-31 fronte=pianura_lunga nemici_anno_1=["muflone", "ermellino", "sciacallo"] nemici_anno_2=["muflone", "ermellino", "sciacallo"] regno_anno_2=["corvo", "lupo", "falco", "orso", "cervo", "lince", "aquila"]
+REGNO-COSTO addestramento_mirato denaro=12
+REGNO-COSTO leva_cavalleria_manovrata denaro=72 uomini=6 metalli=6 animali=6
+REGNO-COSTO leva_fanteria_leggera denaro=30 uomini=6 metalli=3
+REGNO-COSTO leva_fanteria_pesante denaro=64 uomini=8 metalli=16
+REGNO-COSTO mantenimento_addestramento denaro=1
+REGNO-ENTRATA denaro=200 uomini=24 metalli=30 materiale=30 animali=12
+REGNO-SESSIONE righe_giornale=11 anno=2 formazioni=3
+REGNO-SESSIONE-31 righe_giornale=21 anno=3 formazioni=6 registro=12
+REGNO-VALORI giornate_per_stagione=30 voci=5 fronti=3 formazioni_iniziali=5
+SONDA-REGNO invarianti=13 mutanti_riferiti=13
+SONDA-REGNO-31 invarianti=10 mutanti_riferiti=10
+
+I totali per fascio di prove:
+Test Suite 'VerificaTest.xctest' passed at 2026-11-24 02:47:58.923.
+	 Executed 89 tests, with 0 failures (0 unexpected) in 57.470 (57.475) seconds
+Test Suite 'SessioneTest.xctest' passed at 2026-11-24 02:47:59.719.
+	 Executed 65 tests, with 2 tests skipped and 0 failures (0 unexpected) in 0.654 (0.658) seconds
+Test Suite 'SegnaliTest.xctest' passed at 2026-11-24 02:48:01.222.
+	 Executed 61 tests, with 0 failures (0 unexpected) in 1.428 (1.432) seconds
+Test Suite 'MotoreTest.xctest' passed at 2026-11-24 02:48:03.109.
+	 Executed 258 tests, with 0 failures (0 unexpected) in 1.730 (1.740) seconds
+Test Suite 'DatiTest.xctest' passed at 2026-11-24 02:48:03.908.
+	 Executed 58 tests, with 0 failures (0 unexpected) in 0.728 (0.732) seconds
+Test Suite 'ConfiniTest.xctest' passed at 2026-11-24 02:48:04.098.
+	 Executed 5 tests, with 0 failures (0 unexpected) in 0.123 (0.124) seconds

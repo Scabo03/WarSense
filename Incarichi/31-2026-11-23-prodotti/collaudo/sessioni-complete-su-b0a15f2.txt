@@ -1,0 +1,26 @@
+LA CORSA SEPARATA DELLE SESSIONI COMPLETE SUL COMMIT b0a15f2 — scripts/esegui-sessioni-complete.sh (24 novembre, 543 s, uscita 0)
+
+	 Executed 15 tests, with 0 failures (0 unexpected) in 9.063 (9.065) seconds
+	 Executed 0 tests, with 0 failures (0 unexpected) in 0.000 (0.000) seconds
+	 Executed 0 tests, with 0 failures (0 unexpected) in 0.000 (0.001) seconds
+	 Executed 0 tests, with 0 failures (0 unexpected) in 0.000 (0.000) seconds
+	 Executed 0 tests, with 0 failures (0 unexpected) in 0.000 (0.001) seconds
+	 Executed 0 tests, with 0 failures (0 unexpected) in 0.000 (0.000) seconds
+	 Executed 0 tests, with 0 failures (0 unexpected) in 0.000 (0.001) seconds
+	 Executed 0 tests, with 0 failures (0 unexpected) in 0.000 (0.000) seconds
+	 Executed 0 tests, with 0 failures (0 unexpected) in 0.000 (0.001) seconds
+	 Executed 0 tests, with 0 failures (0 unexpected) in 0.000 (0.000) seconds
+	 Executed 0 tests, with 0 failures (0 unexpected) in 0.000 (0.001) seconds
+  headless (campagna + 32 battaglia): VERDE
+  esito scritto in esiti-sessioni-complete/esito.json: successo
+== Corsa separata: SUCCESSO ==
+
+esiti-sessioni-complete/esito.json (il file è ignorato da git: copia):
+{
+ "data": "2026-11-24T01:56:26Z",
+ "commit": "b0a15f2c5e845ca9f89efb3fdc75f16c285ef9a8",
+ "esito": "successo",
+ "dettaglio": "144 campagna per interfaccia + headless completo con 32 battaglia al Motore (S11)"
+}
+
+Sul commit 88d4874: uscita 0 in 571 s, esito «successo».

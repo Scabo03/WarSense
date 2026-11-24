@@ -25,3 +25,8 @@ Tests/MotoreTest/ArriviDallaPatriaTest.swift:248: error: -[MotoreTest.ArriviDall
 Tests/MotoreTest/ArriviDallaPatriaTest.swift:249: error: -[MotoreTest.ArriviDallaPatriaTest test_incarico_31_A_l_avversario_porta_gli_stessi_nomi_ogni_anno_e_le_reclute_non_li_ereditano] : XCTAssertEqual failed: ("Optional("martora")") is not equal to ("Optional("volpe")") - guado
 Tests/MotoreTest/ArriviDallaPatriaTest.swift:249: error: -[MotoreTest.ArriviDallaPatriaTest test_incarico_31_A_l_avversario_porta_gli_stessi_nomi_ogni_anno_e_le_reclute_non_li_ereditano] : XCTAssertEqual failed: ("Optional("martora")") is not equal to ("Optional("volpe")") - istmo
 Tests/MotoreTest/ArriviDallaPatriaTest.swift:249: error: -[MotoreTest.ArriviDallaPatriaTest test_incarico_31_A_l_avversario_porta_gli_stessi_nomi_ogni_anno_e_le_reclute_non_li_ereditano] : XCTAssertEqual failed: ("Optional("martora")") is not equal to ("Optional("volpe")") - pianura_lunga
+
+NOTA AGGIUNTA DOPO (24 novembre). Ciò che questa riproduzione mostra è vero dello STATO della campagna, non di
+ciò che il giocatore sente: l'interfaccia non pronuncia mai il nome di un gruppo avversario (una casella osservata
+dice «formazione avversaria», avvistamenti e battaglie dicono il luogo). La regola nuova resta, ma non corregge
+un difetto udibile: vedi RDA-175, «I nomi dell'avversario».
