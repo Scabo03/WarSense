@@ -46,16 +46,20 @@ def abbina(d):
 
 for d in righe:
     abbina(d)
+    for a in d["annunci"]:
+        a["veloce"] = d["blocco"] == "velocita"
 durata_intera = collections.defaultdict(float)
 for d in righe:
     for a in d["annunci"]:
-        if a["modo"] == "intera" and a["detto"] and a["concluso_riuscito"] == "true" and a["detto"] >= 0.6 * a["caratteri"] / 17.5 and a["detto"] <= 2.2 * a["caratteri"] / 17.5 + 1:
+        if a["modo"] == "intera" and not a["veloce"] and a["detto"] and a["concluso_riuscito"] == "true" and a["detto"] >= 0.6 * a["caratteri"] / 17.5 and a["detto"] <= 2.2 * a["caratteri"] / 17.5 + 1:
             durata_intera[a["testo"]] = max(durata_intera[a["testo"]], a["detto"])
 
 
 def intero(a):
     if a["modo"] != "intera" or a["detto"] is None:
         return False
+    if a.get("veloce"):  # voce al novanta per cento: le durate non si confrontano con quelle a cinquanta; vale che il
+        return a["concluso_riuscito"] == "true"  # tratto finisca da sé e il sistema notifichi la conclusione riuscita
     serve = durata_intera.get(a["testo"])
     return a["detto"] >= (0.75 * serve if serve else 0.6 * a["caratteri"] / 17.5)
 

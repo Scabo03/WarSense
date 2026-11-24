@@ -283,6 +283,19 @@ def richiamo():
     controlla("la patria lo dice", any(n == "Campagna sul fronte del guado perduta: esercito richiamato in patria" for n in albero()), nomi=albero()[:12])
 
 
+def posto(etichetta):
+    m = re.match(r"^riga (\d+), cella (\d+)", etichetta)
+    return (int(m.group(1)), int(m.group(2))) if m else None
+
+
+def vicino_al_nemico(mio):
+    """Vero se un reparto avversario è a due celle o meno: si aspetta che venga a contatto, e al turno dopo il pannello
+    offre l'ingaggio. Avanzando ancora, ingaggerebbe lui."""
+    io = posto(mio)
+    nemici = [posto(n) for n in albero() if re.match(r"^riga \d+, cella \d+, .*avversari[ao]", n)]
+    return any(abs(n[0] - io[0]) + max(0, abs(n[1] - io[1]) - abs(n[0] - io[0]) // 2) <= 2 for n in nemici if n)
+
+
 def battaglia():
     """Una battaglia della campagna: il fuoco in testa all'apertura, la virgola nelle azioni d'ingaggio, il congedo che dice
     dove porta, il ritorno sulla mappa."""
@@ -331,7 +344,7 @@ def battaglia():
             if trovate:
                 e = puls(trovate[0], 8)
                 frasi += sentito(e)
-            elif "Scegli la destinazione sulla griglia" in voci:
+            elif "Scegli la destinazione sulla griglia" in voci and not vicino_al_nemico(mio):
                 puls("Scegli la destinazione sulla griglia", 3)
                 mete = [n for n in albero() if re.search(r", libera, costa \d+, restano \d+$", n)]
                 if mete:

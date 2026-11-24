@@ -179,6 +179,29 @@ def cella_dei_conti(c):
 
 righe = []
 for cartella in cartelle:
+    r_ = [cartella.name]
+    for formato in FORMATI:
+        c, d = (next(x for x in conti(cartella / f"frequenza-in-breve{s}.txt") if x["condotta"] == "competente" and x["formato"] == formato)
+                for s in ("", "-tattico-pari"))
+        def combattute(x):
+            v, p, vs, ps = (int(x[k]) for k in ("vinte", "perse", "vinte_senza_perdite", "perse_senza_perdite"))
+            return percento(v - vs, v + p - vs - ps)
+        senza_perdite = int(c["vinte_senza_perdite"]) + int(c["perse_senza_perdite"])
+        r_.append(f"{combattute(c)} [{combattute(d)}]" + (f"; {senza_perdite} senza perdite" if senza_perdite else ""))
+    for fronte in FRONTI:
+        x = next(y for y in conti(cartella / "banco-del-regno-in-breve.txt") if y["condotta"] == "mirata" and y["fronte"] == fronte)
+        r_.append(percento(int(x["campagne_vinte"]), int(x["anni"])))
+    r_.append(sum(int(y["ferme"]) for s in ("", "-tattico-pari") for y in conti(cartella / f"frequenza-in-breve{s}.txt")
+                  + conti(cartella / f"banco-del-regno-in-breve{s}.txt")))
+    righe.append(r_)
+testo.append("In breve. Le prime tre colonne: battaglie COMBATTUTE vinte dalla condotta competente nelle campagne di prova, fra "
+             "parentesi quadre col tattico che non si arrende, e quante battaglie si sono concluse senza che nessuno perdesse "
+             "un uomo. Le altre tre: campagne del regno vinte dalla condotta mirata. L'ultima: battaglie che non si concludono.\n\n")
+testo.append(tabella(("variante", "piccola", "media", "grande", "guado", "istmo", "pianura lunga", "ferme"), righe))
+testo.append("\n")
+
+righe = []
+for cartella in cartelle:
     for condotta in ("competente", "mirata"):
         r_ = [cartella.name, condotta]
         for formato in FORMATI:

@@ -122,6 +122,21 @@ Un gruppo contro l'altro, coi due tattici del banco, le due parti e i due ordini
 Nessun file del gioco cambia. Le composizioni: `squilibrio/proposte.py` misura copie dei valori; la variante 0 è il gioco com'è. Le due alternative di regola (`squilibrio/alternative/`): il codice dell'incarico con la modifica del file `modifica.patch` accanto ai numeri. In ogni cella le battaglie vinte dal giocatore e, dopo il punto e virgola, le sole combattute; fra parentesi quadre lo stesso col tattico del giocatore che non si arrende a metà delle perdite.
 
 
+In breve. Le prime tre colonne: battaglie COMBATTUTE vinte dalla condotta competente nelle campagne di prova, fra parentesi quadre col tattico che non si arrende, e quante battaglie si sono concluse senza che nessuno perdesse un uomo. Le altre tre: campagne del regno vinte dalla condotta mirata. L'ultima: battaglie che non si concludono.
+
+
+| variante | piccola | media | grande | guado | istmo | pianura lunga | ferme |
+|---|---|---|---|---|---|---|---|
+| 0-com-e-oggi | 18,9% [36,2%]; 197 senza perdite | 39,3% [56,0%]; 2524 senza perdite | 27,0% [41,5%] | 85,9% | 82,6% | 82,3% | 0 |
+| 1-12P-6C | 18,9% [36,2%]; 197 senza perdite | 23,4% [50,3%]; 8 senza perdite | 12,2% [30,1%]; 4 senza perdite | 69,7% | 90,7% | 79,0% | 0 |
+| 2-16P-8C | 18,9% [36,2%]; 197 senza perdite | 32,2% [51,5%]; 718 senza perdite | 25,4% [57,3%] | 84,1% | 73,1% | 91,3% | 0 |
+| 3-avversario-18L-8P | 18,9% [36,2%]; 197 senza perdite | 18,4% [32,3%]; 1 senza perdite | 12,2% [30,1%]; 4 senza perdite | 65,2% | 71,0% | 84,7% | 0 |
+| 4-12P-12P-6C-6C | 18,9% [36,2%]; 197 senza perdite | 7,2% [22,9%]; 327 senza perdite | 8,7% [22,9%]; 5 senza perdite | 83,2% | 66,8% | 83,8% | 0 |
+| esce-chi-attacca | 18,9% [36,2%]; 197 senza perdite | 39,3% [56,0%]; 2524 senza perdite | 27,0% [41,5%] | 83,2% | 4,5% | 78,1% | 0 |
+| tetto-al-passo | 18,9% [36,2%]; 197 senza perdite | 23,2% [47,7%]; 3 senza perdite | 26,3% [39,8%] | 84,7% | 48,5% | 82,0% | 0 |
+
+
+
 Campagne di prova, 200 partite per cella:
 
 
