@@ -1,0 +1,22 @@
+Confronto della misura della frequenza delle battaglie ripetuta nell'incarico 31 con quella dell'incarico 29.
+
+Comando della corsa (dalla sessione): cd Codice && .build/release/StrumentoVerifica --frequenza-battaglie 200 --giornate-massime 730 --uscita ../Incarichi/31-2026-11-23-prodotti/frequenza-battaglie
+
+$ shasum -a 256 Incarichi/29-2026-11-21-prodotti/frequenza-battaglie/base/frequenza-battaglie.jsonl Incarichi/31-2026-11-23-prodotti/frequenza-battaglie/frequenza-battaglie.jsonl
+d2e2002b608282802aec36269b40aa4f0c08df5bfb03bb99173da79ae5fca567  Incarichi/29-2026-11-21-prodotti/frequenza-battaglie/base/frequenza-battaglie.jsonl
+d2e2002b608282802aec36269b40aa4f0c08df5bfb03bb99173da79ae5fca567  Incarichi/31-2026-11-23-prodotti/frequenza-battaglie/frequenza-battaglie.jsonl
+
+$ cmp Incarichi/29-2026-11-21-prodotti/frequenza-battaglie/base/frequenza-battaglie.jsonl Incarichi/31-2026-11-23-prodotti/frequenza-battaglie/frequenza-battaglie.jsonl; echo uscita=$?
+uscita=0
+
+$ wc -l Incarichi/29-2026-11-21-prodotti/frequenza-battaglie/base/frequenza-battaglie.jsonl Incarichi/31-2026-11-23-prodotti/frequenza-battaglie/frequenza-battaglie.jsonl
+    1200 Incarichi/29-2026-11-21-prodotti/frequenza-battaglie/base/frequenza-battaglie.jsonl
+    1200 Incarichi/31-2026-11-23-prodotti/frequenza-battaglie/frequenza-battaglie.jsonl
+    2400 total
+
+$ diff Incarichi/29-2026-11-21-prodotti/frequenza-battaglie/base/frequenza-battaglie.txt Incarichi/31-2026-11-23-prodotti/frequenza-battaglie/frequenza-battaglie.txt; echo uscita=$?
+1c1
+< frequenza.versione_valori=0.14.0
+---
+> frequenza.versione_valori=0.15.0
+uscita=1
