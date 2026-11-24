@@ -128,6 +128,53 @@ final class CodaAnnunciTest: XCTestCase {
         XCTAssertFalse(finestra.eAperta(a: 19.9), "un istante di prima della richiesta non vi cade")
     }
 
+    // MARK: - La conferma del fuoco (incarico 32, RDA-192)
+
+    /// VoiceOver ha portato il fuoco su un altro elemento della schermata: la richiesta si rinnova, una volta
+    /// sola, e poi chi si muove è chi gioca.
+    func test_02_5_7_la_richiesta_perduta_si_rinnova_una_volta_sola() {
+        var conferma = ConfermaDelFuoco()
+        XCTAssertFalse(conferma.raggiunto(bersaglio: false, a: 5), "nessuna richiesta: non c'è nulla da rinnovare")
+        conferma.chiesto(a: 10)
+        XCTAssertTrue(conferma.raggiunto(bersaglio: false, a: 10.8))
+        XCTAssertFalse(conferma.raggiunto(bersaglio: false, a: 11.6), "rinnovata una volta, non due")
+        conferma.chiesto(a: 20)
+        XCTAssertTrue(conferma.raggiunto(bersaglio: false, a: 20.8), "una richiesta nuova ricomincia")
+    }
+
+    /// Arrivato il fuoco dove il gioco l'ha chiesto, uno scorrimento di chi gioca non si contrasta.
+    func test_02_5_7_arrivato_il_fuoco_chi_si_muove_e_chi_gioca() {
+        var conferma = ConfermaDelFuoco()
+        conferma.chiesto(a: 10)
+        XCTAssertFalse(conferma.raggiunto(bersaglio: true, a: 10.8))
+        XCTAssertFalse(conferma.raggiunto(bersaglio: false, a: 11), "lo scorrimento all'elemento dopo")
+    }
+
+    /// Finché la richiesta è in viaggio, ciò che riceve il fuoco non la conferma e non la smentisce: il sistema
+    /// può passare dall'elemento chiesto e poi applicarla su un altro, o passare da un altro e applicarla bene.
+    func test_02_5_7_finche_la_richiesta_e_in_viaggio_il_fuoco_non_conta() {
+        var conferma = ConfermaDelFuoco()
+        conferma.chiesto(a: 10)
+        XCTAssertFalse(conferma.raggiunto(bersaglio: true, a: 10.07), "il sistema passa dall'elemento chiesto")
+        XCTAssertTrue(conferma.raggiunto(bersaglio: false, a: 10.8), "e la applica su un altro: si rinnova")
+        conferma.chiesto(a: 20)
+        XCTAssertFalse(conferma.raggiunto(bersaglio: false, a: 20.03), "il sistema passa da un altro elemento")
+        XCTAssertFalse(conferma.raggiunto(bersaglio: true, a: 20.9), "e la applica dove il gioco l'ha chiesta")
+        XCTAssertFalse(conferma.raggiunto(bersaglio: false, a: 21.2), "poi chi si muove è chi gioca")
+        conferma.chiesto(a: 30)
+        XCTAssertTrue(conferma.raggiunto(bersaglio: false, a: 30 + ConfermaDelFuoco.viaggio))
+    }
+
+    /// Passato il tempo in cui la richiesta può ancora arrivare, il fuoco è di chi gioca.
+    func test_02_5_7_passato_il_tempo_la_richiesta_non_si_rinnova() {
+        var conferma = ConfermaDelFuoco()
+        conferma.chiesto(a: 10)
+        XCTAssertTrue(conferma.raggiunto(bersaglio: false, a: 10 + FinestraDelFuoco.durata))
+        conferma.chiesto(a: 20)
+        XCTAssertFalse(conferma.raggiunto(bersaglio: false, a: 20.01 + FinestraDelFuoco.durata))
+        XCTAssertFalse(conferma.raggiunto(bersaglio: false, a: 20.02 + FinestraDelFuoco.durata))
+    }
+
     /// Gli eventi a cui segue un'altra schermata, e nessun altro.
     func test_gli_eventi_che_cambiano_schermata() {
         XCTAssertTrue(TraduttoreEventiCampagna.cambiaSchermata(.campagnaConclusa(modo: .inverno, vincitore: nil)))

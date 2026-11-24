@@ -12,11 +12,13 @@ conclusione. Tre fonti, abbinate per istante:
 
 Uso: misura-annunci.py <cartella del pilota> <udid> <apparecchio> <prima|dopo> <uscita.jsonl> [blocchi…]
 Blocchi: regno, mappa, scontro, battaglia, conclusione; e, per ciò che prima non esisteva o che si misura soltanto
-dopo: presa, subita, azzeramento, richiamo, gesto, velocita.
+dopo: presa, subita, azzeramento, richiamo, gesto, velocita. «fuoco» ripete il richiamo e il ritorno in patria
+(`FUOCO_VOLTE` volte, dodici se non si dice) e conta dove arriva il fuoco.
 Una riga JSON per passo: `passo`, `sposta` (vero se il passo sposta il fuoco o cambia schermata), `annunci`.
 """
 import importlib.util
 import json
+import os
 import pathlib
 import re
 import subprocess
@@ -171,8 +173,11 @@ def misura(passo, comandi, sposta, nota=None):
     fine = time.time()
     time.sleep(1.2)  # il registro di sistema arriva con un istante di ritardo
     righe = registro()
-    pubblicati, conclusi, fuochi = [], [], []
+    pubblicati, conclusi, fuochi, chiesti = [], [], [], []
     for t, r in righe:
+        if r.startswith("FUOCO CHIESTO"):
+            chiesti.append([round(t - prima, 2), r[len("FUOCO CHIESTO"):].strip()])
+            continue
         m = re.match(r"^PUBBLICA (\S+) \((\d+)\) «(.*)»$", r, re.S)
         if m:
             pubblicati.append((t, m.group(3), m.group(1)))
@@ -202,7 +207,7 @@ def misura(passo, comandi, sposta, nota=None):
             "concluso_dopo": round(concluso[0] - t, 2) if concluso else None,
             "concluso_riuscito": concluso[2] if concluso else None})
     riga = {"apparecchio": APPARECCHIO, "versione": VERSIONE, "blocco": BLOCCO, "passo": passo, "sposta": sposta,
-            "annunci": annunci, "fuochi": fuochi, "pronunce": e.get("ascoltate"), "istanti": e.get("ascoltate_t"),
+            "annunci": annunci, "fuochi": fuochi, "chiesti": chiesti, "pronunce": e.get("ascoltate"), "istanti": e.get("ascoltate_t"),
             "tratti": [[round(x["inizio"] - prima, 2), round(x["fine"] - x["inizio"], 2) if x["fine"] else None, x["modo"]] for x in tr if x["inizio"] >= prima - 0.2],
             "errore": e.get("errore"), "nota": nota, "ora": time.strftime("%H:%M:%S")}
     with USCITA.open("a", encoding="utf-8") as f:
@@ -489,6 +494,23 @@ def blocco_richiamo():
     misura("ritorno in patria dopo il richiamo", [puls("Torna in patria", 14)], True)
 
 
+def blocco_fuoco():
+    """Il fuoco fra la campagna richiamata, la dichiarazione di conclusione e la patria, ripetuto: quante volte arriva
+    dove il gioco lo chiede. Non misura annunci: serve a contare ciò che accade una volta ogni tante."""
+    quante = int(os.environ.get("FUOCO_VOLTE", "12"))
+    sul_guado([(4, 2), (4, 3), (4, 4), (4, 1), (3, 1)], [(1, 2)])
+    for k in range(quante):
+        if k and os.environ.get("FUOCO_LENTO"):  # ogni volta da capo, coi tempi d'ascolto interi
+            sul_guado([(4, 2), (4, 3), (4, 4), (4, 1), (3, 1)], [(1, 2)])
+        elif k:  # i documenti sono già a posto: basta un regno nuovo
+            avvia()
+            cmd(puls("Nuovo regno", 3))
+            cmd(puls("Apri la campagna", 2))
+            cmd(puls("fronte del guado, mappa 4 per 4", 5))
+        misura(f"richiamo compiuto ({k + 1})", [att(4, prefisso="Richiama l'esercito in patria"), puls("Conferma il richiamo", 11)], True)
+        misura(f"ritorno in patria ({k + 1})", [puls("Torna in patria", 6)], True)
+
+
 def blocco_gesto():
     """Un annuncio ad alta priorità cede al gesto di chi gioca: l'annuncio dell'inverno, quattordici secondi, e dopo tre
     uno scorrimento verso destra. Il tratto di voce deve finire al gesto, e la voce passare all'elemento."""
@@ -556,7 +578,7 @@ def blocco_velocita():
         print("velocità della voce, com'era:", velocita_della_voce(50), flush=True)
 
 
-BLOCCHI_NOTI = dict(presa=blocco_presa, subita=blocco_subita, azzeramento=blocco_azzeramento, richiamo=blocco_richiamo,
+BLOCCHI_NOTI = dict(fuoco=blocco_fuoco, presa=blocco_presa, subita=blocco_subita, azzeramento=blocco_azzeramento, richiamo=blocco_richiamo,
                     gesto=blocco_gesto, velocita=blocco_velocita, regno=blocco_regno, mappa=blocco_mappa, scontro=blocco_scontro, battaglia=blocco_battaglia, conclusione=blocco_conclusione)
 USCITA.parent.mkdir(parents=True, exist_ok=True)
 for b in BLOCCHI:

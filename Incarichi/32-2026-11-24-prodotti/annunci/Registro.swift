@@ -16,6 +16,12 @@ import UIKit
         guard let o = o as? NSObject else { return "nulla" }
         return String((o.accessibilityLabel ?? (o as? UILabel)?.text ?? (o as? UIButton)?.currentTitle ?? String(describing: type(of: o))).prefix(60))
     }
+    /// Il fuoco che il gioco chiede: a quale elemento, se sta in una finestra e dove, al momento della richiesta.
+    public static func fuocoChiesto(_ o: Any?) {
+        let vista = o as? UIView
+        let riquadro = (o as? NSObject)?.accessibilityFrame ?? .zero
+        scrivi("FUOCO CHIESTO «\(nome(o))» finestra=\(vista.map { $0.window != nil } ?? false) y=\(Int(riquadro.minY))-\(Int(riquadro.maxY))")
+    }
     private static var installato = false
     static func installa() {
         guard !installato else { return }

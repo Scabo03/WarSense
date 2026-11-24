@@ -15,7 +15,7 @@ t=t.replace("        self.testi = testi\n        self.definizioni = definizioni"
 open(p,"w",encoding="utf-8").write(t)
 p=a+"/Applicazione/Sorgenti/Servizi.swift"
 t=open(p,encoding="utf-8").read()
-t=t.replace("        UIAccessibility.post(notification: .screenChanged, argument: elemento)","        Lab.scrivi(\"FUOCO CHIESTO\")\n        UIAccessibility.post(notification: .screenChanged, argument: elemento)")
+t=t.replace("        UIAccessibility.post(notification: .screenChanged, argument: elemento)","        Lab.fuocoChiesto(elemento)\n        UIAccessibility.post(notification: .screenChanged, argument: elemento)")
 open(p,"w",encoding="utf-8").write(t)
 PY
 grep -c "Lab\." "$A/Codice/Sources/Segnali/PuntoSegnali.swift"

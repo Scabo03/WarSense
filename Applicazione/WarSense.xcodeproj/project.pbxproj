@@ -10,6 +10,7 @@
 		09CFF70CB8EC19E916A3C7BA /* ToccoDirettoTest.swift in Sources */ = {isa = PBXBuildFile; fileRef = 10A40D60A1907135F70F1FB4 /* ToccoDirettoTest.swift */; };
 		116EEE5C15D49181561AFDB5 /* DesignazioneBersaglioTest.swift in Sources */ = {isa = PBXBuildFile; fileRef = 589A5B5EA3AF0D6D1EFB3900 /* DesignazioneBersaglioTest.swift */; };
 		14B5803E132A5513A223659C /* EsploratoriAvversarioTest.swift in Sources */ = {isa = PBXBuildFile; fileRef = 70C73D2597EF834F084727EB /* EsploratoriAvversarioTest.swift */; };
+		15840F900172E4A327AE5DF6 /* ConfermaDelFuocoTest.swift in Sources */ = {isa = PBXBuildFile; fileRef = CC6FD446F6485A49F9E76689 /* ConfermaDelFuocoTest.swift */; };
 		190E7D5DC3B892BF2DFD277B /* SchermateContorno.swift in Sources */ = {isa = PBXBuildFile; fileRef = 44914552A51BDF0197E99DAF /* SchermateContorno.swift */; };
 		1996CB0694B301073B89C9E5 /* AnnoDelRegnoTest.swift in Sources */ = {isa = PBXBuildFile; fileRef = F9064DDE9EA140B49E4AF2BA /* AnnoDelRegnoTest.swift */; };
 		257142A45053AF1D37BEE4F9 /* FumoRegnoTest.swift in Sources */ = {isa = PBXBuildFile; fileRef = 3AAD9620D5F35C500D1ABA6E /* FumoRegnoTest.swift */; };
@@ -147,6 +148,7 @@
 		C217410DA2BE88F4B1000D93 /* PorzioneVisibileTest.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = PorzioneVisibileTest.swift; sourceTree = "<group>"; };
 		C50CAE1A5AEB350F4FEDAB36 /* CostruttoreAnnunciCampagna.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = CostruttoreAnnunciCampagna.swift; sourceTree = "<group>"; };
 		CA35E60BF76CBA9D9456CC57 /* EsplorazioneInterfacciaTest.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = EsplorazioneInterfacciaTest.swift; sourceTree = "<group>"; };
+		CC6FD446F6485A49F9E76689 /* ConfermaDelFuocoTest.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ConfermaDelFuocoTest.swift; sourceTree = "<group>"; };
 		D02CD1A940C35DBC8B46486B /* FumoMappaCampagnaTest.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = FumoMappaCampagnaTest.swift; sourceTree = "<group>"; };
 		D05C93D40ACCC919E14E0F90 /* PartitaCampagna.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = PartitaCampagna.swift; sourceTree = "<group>"; };
 		D09017EA703DD5FF54F15458 /* CostruttoreAnnunci.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = CostruttoreAnnunci.swift; sourceTree = "<group>"; };
@@ -268,6 +270,7 @@
 				88D7A0731824F60DFDBEED2D /* AnnuncioDiCasellaTest.swift */,
 				2F77F23D7958A0EE7DC80E0A /* CatenaInterfacciaMotoreTest.swift */,
 				B3B245B33BC398E8A80B4F93 /* CompletamentoDellaCampagnaTest.swift */,
+				CC6FD446F6485A49F9E76689 /* ConfermaDelFuocoTest.swift */,
 				589A5B5EA3AF0D6D1EFB3900 /* DesignazioneBersaglioTest.swift */,
 				52406D8EA4A880585D67DA47 /* EsploratoriAvversarioInterfacciaTest.swift */,
 				3EF9E5EB5AC6650CDB0D1660 /* GestiUnLivelloSottoTest.swift */,
@@ -461,6 +464,7 @@
 				C00890F2F953EE7041175812 /* AnnuncioDiCasellaTest.swift in Sources */,
 				321465D14C83340BB6030A0F /* CatenaInterfacciaMotoreTest.swift in Sources */,
 				854BF091AF561745DBC8F1A3 /* CompletamentoDellaCampagnaTest.swift in Sources */,
+				15840F900172E4A327AE5DF6 /* ConfermaDelFuocoTest.swift in Sources */,
 				116EEE5C15D49181561AFDB5 /* DesignazioneBersaglioTest.swift in Sources */,
 				AAAF5011876C2223ECD3B289 /* EsploratoriAvversarioInterfacciaTest.swift in Sources */,
 				363082D02975925B7A44772B /* GestiUnLivelloSottoTest.swift in Sources */,

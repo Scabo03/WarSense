@@ -1,0 +1,78 @@
+Collaudo completo (scripts/collaudo-completo.sh) sul commit 10dd1f5 (codice dell'applicazione e del pacchetto: e19b47b).
+Inizio 2026-11-24 21:57:13, durata 413 s (orologio). Strumenti: swift test (pacchetto) e xcodebuild test con xcresulttool (ospitate e d'interfaccia).
+
+Pacchetto: 607 passate, 0 fallite, 3 saltate.
+Saltate (si eseguono soltanto su richiesta): SessioneTest.GeneraFixtureBuild32Test test_genera_le_fixture_della_build_32; SessioneTest.RigenerazioneOroTest test_rigenerazione_esplicita_dei_copioni_d_oro; SessioneTest.RigenerazioneOroTest test_rigenerazione_esplicita_dell_oro_del_regno
+
+  VerificaTest BancoRegnoTest                                   10 passed
+  VerificaTest ChiusuraGiornataTest                             6 passed
+  VerificaTest ConclusioneBattagliaTest                         1 passed
+  VerificaTest FumoDelleSimulazioniTest                         11 passed
+  VerificaTest InvariantiCampagnaTest                           36 passed
+  VerificaTest MisuraFrequenzaBattaglieTest                     3 passed
+  VerificaTest MisuraMischiaTest                                8 passed
+  VerificaTest SessioniCompleteTest                             15 passed
+  SessioneTest AnnullamentoGiornataTest                         11 passed
+  SessioneTest AvversarioCampagnaTest                           3 passed
+  SessioneTest CompatibilitaGiornaleTest                        2 passed
+  SessioneTest CompletamentoDellaCampagnaTest                   6 passed
+  SessioneTest GeneraFixtureBuild32Test                         1 skipped
+  SessioneTest RigenerazioneOroTest                             2 skipped
+  SessioneTest RiproduzioneOroRiserveTest                       1 passed
+  SessioneTest RiproduzioneOroTest                              1 passed
+  SessioneTest SalvataggiBattagliaECampagnaBuild31Test          6 passed
+  SessioneTest SalvataggiBuild32Test                            8 passed
+  SessioneTest SalvataggioBuildDistribuitaTest                  3 passed
+  SessioneTest SalvataggioRegnoBuild31Test                      2 passed
+  SessioneTest SbloccoTurnoAvversarioTest                       3 passed
+  SessioneTest SessioneBattagliaTest                            8 passed
+  SessioneTest SessioneCampagnaTest                             10 passed
+  SessioneTest SessioneRegnoSecondaTappaTest                    4 passed
+  SessioneTest SessioneRegnoTest                                9 passed
+  SegnaliTest  CodaAnnunciTest                                  9 passed
+  SegnaliTest  DecisoreCanaliTest                               3 passed
+  SegnaliTest  TraduttoreCampagnaTest                           16 passed
+  SegnaliTest  TraduttoreEventiTest                             8 passed
+  SegnaliTest  TraduttoreRegnoSecondaTappaTest                  20 passed
+  SegnaliTest  TraduttoreRegnoTest                              11 passed
+  MotoreTest   AccertamentoScontriTest                          12 passed
+  MotoreTest   AccertamentoSecondaProvaTest                     5 passed
+  MotoreTest   ArriviDallaPatriaTest                            22 passed
+  MotoreTest   BudgetDelPrimoTurnoTest                          2 passed
+  MotoreTest   CampagnaDelRegnoTest                             17 passed
+  MotoreTest   CasiAngoloMischiaTest                            3 passed
+  MotoreTest   CondottaAvversariaTest                           5 passed
+  MotoreTest   ConoscenzaTest                                   4 passed
+  MotoreTest   CostoDellaMarciaTest                             13 passed
+  MotoreTest   DisingaggioElitarioTest                          5 passed
+  MotoreTest   DivisioneRiunioneTest                            7 passed
+  MotoreTest   LimiteBersagliTest                               11 passed
+  MotoreTest   MarciaLungaTest                                  10 passed
+  MotoreTest   MiglioramentoInBattagliaTest                     10 passed
+  MotoreTest   ModificatoriDiScontroTest                        14 passed
+  MotoreTest   PresaDelQuartierGeneraleTest                     29 passed
+  MotoreTest   RegnoSecondaTappaTest                            26 passed
+  MotoreTest   RegnoTest                                        11 passed
+  MotoreTest   RegoleBattagliaTest                              28 passed
+  MotoreTest   RegoleCampagnaTest                               30 passed
+  MotoreTest   RicognizioneImboscateTest                        14 passed
+  MotoreTest   RifornimentoTest                                 14 passed
+  MotoreTest   RipiegamentoTest                                 2 passed
+  MotoreTest   StalloDellaBattagliaTest                         6 passed
+  MotoreTest   TatticoPiazzamentoTest                           4 passed
+  MotoreTest   UnitaEvacuateTest                                2 passed
+  DatiTest     AccordoAlNumeroTest                              2 passed
+  DatiTest     AccordoDiGenereTest                              4 passed
+  DatiTest     CaricamentoCampagnaTest                          13 passed
+  DatiTest     CaricamentoRegnoTest                             21 passed
+  DatiTest     CaricamentoTest                                  12 passed
+  DatiTest     CatenaTestiEsterniTest                           4 passed
+  DatiTest     PosizioneNelleFrasiTest                          1 passed
+  DatiTest     VocabolarioOsservatoTest                         3 passed
+  ConfiniTest  ConfiniTest                                      7 passed
+
+Simboli d'archetipo: biiezione verificata su 9 archetipi (cavalleria_manovrata, cavalleria_ricognizione, fanteria_leggera, fanteria_pesante, guardia_elite, macchina_assedio, macchina_tiro, piattaforma_trainata, tiratori)
+  esecutore (xcresulttool summary): 153 prove eseguite fra ospitate e interfaccia — 153 passate, 0 fallite, 0 saltate; esito Passed
+    per bersaglio: WarSenseTest = 136
+    per bersaglio: WarSenseUITest = 17
+== Collaudo completo: tutto verde ==

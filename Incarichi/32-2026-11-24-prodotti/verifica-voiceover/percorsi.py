@@ -7,9 +7,11 @@ le formazioni in un punto preciso mettono a punto gli scenari nella cartella Doc
 dall'iPad (00 §15.4): nessun canale esiste per il solo collaudo.
 
 Uso: percorsi.py <cartella del pilota> <udid> <iphone|ipad> <uscita.jsonl> [percorsi…]
-Percorsi: reclute rifiuto presa subita richiamo battaglia.
+Percorsi: reclute rifiuto presa subita richiamo battaglia. Con `PERCORSI_SCHERMATE=<cartella>` nell'ambiente scatta una
+schermata a ogni controllo.
 """
 import json
+import os
 import pathlib
 import re
 import subprocess
@@ -20,6 +22,7 @@ CARTELLA, UDID, APPARECCHIO = pathlib.Path(sys.argv[1]), sys.argv[2], sys.argv[3
 USCITA = pathlib.Path(sys.argv[4])
 APP = "com.scabo.warsense"
 TUTTI = ["reclute", "rifiuto", "presa", "subita", "richiamo", "battaglia"]
+SCHERMATE = os.environ.get("PERCORSI_SCHERMATE")
 PERCORSO = ""
 conto = {"si": 0, "no": 0}
 _letti, _esiti, _prossimo = 0, {}, None
@@ -71,6 +74,10 @@ def scrivi(tipo, **dati):
 
 def controlla(che_cosa, esito, **dati):
     conto["si" if esito else "no"] += 1
+    if SCHERMATE:  # una schermata a ogni controllo, numerata: se ne consegna una selezione
+        dati["schermata"] = "%s-%s-%02d.png" % (APPARECCHIO, PERCORSO, sum(conto.values()))
+        subprocess.run(["xcrun", "simctl", "io", UDID, "screenshot", str(pathlib.Path(SCHERMATE) / dati["schermata"])],
+                       capture_output=True, timeout=60)
     scrivi("controllo", che_cosa=che_cosa, esito=bool(esito), **dati)
     print(("  si  " if esito else "  NO  ") + che_cosa + ("" if esito else "   " + json.dumps(dati, ensure_ascii=False)[:400]), flush=True)
 

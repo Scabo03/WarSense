@@ -96,3 +96,31 @@ struct FinestraDelFuoco {
         return istante >= chiestoA && istante - chiestoA <= Self.durata
     }
 }
+
+/// LA CONFERMA DEL FUOCO (incarico 32, RDA-192). Alla comparsa e al congedo di una schermata VoiceOver
+/// applica la richiesta del gioco 0,77–0,80 secondi dopo, ma non sempre sull'elemento chiesto: a volte su
+/// un altro della stessa schermata, che sceglie da sé. Misurato sui simulatori dell'iPhone, al ritorno in
+/// patria dopo una campagna: sette volte su sedici; sull'iPad mai. Perché lo faccia non si è accertato.
+///
+/// Perciò la richiesta si conferma: se l'elemento della schermata che riceve il fuoco quando VoiceOver la
+/// applica non è quello chiesto, la si rinnova, una volta sola. Chi riceve il fuoco prima non conta, perché
+/// la richiesta è ancora in viaggio; dopo, chi si muove è chi gioca, e il gioco non gli riporta il fuoco
+/// (00 §11.1).
+public struct ConfermaDelFuoco {
+    /// L'istante della richiesta che nessun elemento della schermata ha ancora confermato o smentito.
+    private var chiestoA: TimeInterval?
+    /// Quanto resta in viaggio, al meno: meno di quanto VoiceOver impiega ad applicarla. Tempo d'interfaccia
+    /// e non di gioco (05 §0.4).
+    static let viaggio: TimeInterval = 0.5
+
+    public init() {}
+
+    public mutating func chiesto(a istante: TimeInterval) { chiestoA = istante }
+
+    /// Un elemento della schermata ha ricevuto il fuoco. Vero se la richiesta va rinnovata.
+    public mutating func raggiunto(bersaglio: Bool, a istante: TimeInterval) -> Bool {
+        guard let inizio = chiestoA, istante - inizio >= Self.viaggio else { return false }
+        chiestoA = nil
+        return !bersaglio && istante - inizio <= FinestraDelFuoco.durata
+    }
+}

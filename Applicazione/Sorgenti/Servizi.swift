@@ -145,11 +145,65 @@ enum Fuoco {
     private(set) static weak var ultimoBersaglio: AnyObject?
 
     static func sposta(a elemento: Any?, perche movimento: Movimento) {
+        pubblica(elemento, perche: movimento)
+        // Alla comparsa e al congedo di una schermata la richiesta si conferma (RDA-192): il sistema ne
+        // manda una sua, e VoiceOver applica l'ultima. Su richiesta del giocatore no: lì non c'è gara.
+        guard movimento != .richiesto, let bersaglio = elemento as AnyObject? else {
+            bersaglioAtteso = nil
+            return
+        }
+        ascoltaIlFuoco()
+        bersaglioAtteso = bersaglio
+        conferma.chiesto(a: ProcessInfo.processInfo.systemUptime)
+    }
+
+    private static func pubblica(_ elemento: Any?, perche movimento: Movimento) {
         registro.append(movimento)
         ultimoBersaglio = elemento as AnyObject?
         // Gli annunci che seguono accompagnano questo spostamento (RDA-183).
         PuntoSegnali.ilFuocoSiSposta()
         UIAccessibility.post(notification: .screenChanged, argument: elemento)
+    }
+
+    // MARK: - La conferma (RDA-192)
+
+    private static var conferma = ConfermaDelFuoco()
+    private static weak var bersaglioAtteso: AnyObject?
+    private static var osservatore: NSObjectProtocol?
+
+    private static func ascoltaIlFuoco() {
+        guard osservatore == nil else { return }
+        osservatore = NotificationCenter.default.addObserver(
+            forName: UIAccessibility.elementFocusedNotification, object: nil, queue: .main
+        ) { notifica in
+            // L'elemento che riceve il fuoco e chi gliel'ha portato viaggiano nella notifica.
+            nonisolated(unsafe) let elemento = notifica.userInfo?[UIAccessibility.focusedElementUserInfoKey] as AnyObject?
+            let daVoiceOver = notifica.userInfo?[UIAccessibility.assistiveTechnologyUserInfoKey] as? String
+                == UIAccessibility.AssistiveTechnologyIdentifier.notificationVoiceOver.rawValue
+            MainActor.assumeIsolated { if let elemento, daVoiceOver { ricevuto(elemento) } }
+        }
+    }
+
+    /// Un elemento ha ricevuto il fuoco di VoiceOver. Conta soltanto se sta nella schermata di quello
+    /// chiesto: mentre un pannello o una schermata si congedano il fuoco passa, ed è ancora altrove, su
+    /// quella che si lascia.
+    private static func ricevuto(_ elemento: AnyObject) {
+        guard let atteso = bersaglioAtteso, let schermata = controllore(di: atteso),
+              controllore(di: elemento) === schermata else { return }
+        let istante = ProcessInfo.processInfo.systemUptime
+        guard conferma.raggiunto(bersaglio: elemento === atteso, a: istante) else { return }
+        pubblica(atteso, perche: registro.last ?? .schermataAperta)
+    }
+
+    /// La schermata a cui un elemento accessibile appartiene: il controllore in fondo alla sua catena dei
+    /// risponditori. Vale anche per la casella di una mappa, che una vista propria non ce l'ha.
+    private static func controllore(di elemento: AnyObject) -> UIViewController? {
+        var via = elemento as? UIResponder
+        while let passo = via {
+            if let schermata = passo as? UIViewController { return schermata }
+            via = passo.next
+        }
+        return nil
     }
 
     /// Quanto attendere, chiusa una schermata o un pannello di sistema, prima di chiedere il fuoco o di

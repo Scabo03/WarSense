@@ -50,3 +50,165 @@ Test Case '-[WarSenseTest.PannelloAzioniTest test_02_5_7_l_evacuazione_che_concl
 Test Case '-[WarSenseTest.OsservazioniTesterTest test_02_5_5_1_la_battaglia_si_annuncia_alla_comparsa_anche_se_il_caricamento_finisce_prima]' failed (0.414 seconds).
 ** TEST FAILED **
 
+== la conferma: conta anche chi riceve il fuoco mentre la richiesta e' in viaggio
+   sorgente: Codice/Sources/Segnali/CodaAnnunci.swift
+   tolto:  guard let inizio = chiestoA, istante - inizio >= Self.viaggio else { return false }
+   messo:  guard let inizio = chiestoA else { return false }
+   prove:  swift test --filter CodaAnnunciTest/test_02_5_7 (uscita 1)
+Test Case '-[SegnaliTest.CodaAnnunciTest test_02_5_7_arrivato_il_fuoco_chi_si_muove_e_chi_gioca]' passed (0.004 seconds).
+Codice/Tests/SegnaliTest/CodaAnnunciTest.swift:159: error: -[SegnaliTest.CodaAnnunciTest test_02_5_7_finche_la_richiesta_e_in_viaggio_il_fuoco_non_conta] : XCTAssertTrue failed - e la applica su un altro: si rinnova
+Codice/Tests/SegnaliTest/CodaAnnunciTest.swift:161: error: -[SegnaliTest.CodaAnnunciTest test_02_5_7_finche_la_richiesta_e_in_viaggio_il_fuoco_non_conta] : XCTAssertFalse failed - il sistema passa da un altro elemento
+Test Case '-[SegnaliTest.CodaAnnunciTest test_02_5_7_finche_la_richiesta_e_in_viaggio_il_fuoco_non_conta]' failed (1.396 seconds).
+Test Case '-[SegnaliTest.CodaAnnunciTest test_02_5_7_la_richiesta_perduta_si_rinnova_una_volta_sola]' passed (0.001 seconds).
+Test Case '-[SegnaliTest.CodaAnnunciTest test_02_5_7_passato_il_tempo_la_richiesta_non_si_rinnova]' passed (0.000 seconds).
+	 Executed 4 tests, with 2 failures (0 unexpected) in 1.401 (1.402) seconds
+	 Executed 4 tests, with 2 failures (0 unexpected) in 1.401 (1.403) seconds
+	 Executed 4 tests, with 2 failures (0 unexpected) in 1.401 (1.407) seconds
+
+== la conferma: si rinnova anche dopo che il tempo e' passato
+   sorgente: Codice/Sources/Segnali/CodaAnnunci.swift
+   tolto:  return !bersaglio && istante - inizio <= FinestraDelFuoco.durata
+   messo:  return !bersaglio && istante >= inizio
+   prove:  swift test --filter CodaAnnunciTest/test_02_5_7 (uscita 1)
+Test Case '-[SegnaliTest.CodaAnnunciTest test_02_5_7_arrivato_il_fuoco_chi_si_muove_e_chi_gioca]' passed (0.001 seconds).
+Test Case '-[SegnaliTest.CodaAnnunciTest test_02_5_7_finche_la_richiesta_e_in_viaggio_il_fuoco_non_conta]' passed (0.000 seconds).
+Test Case '-[SegnaliTest.CodaAnnunciTest test_02_5_7_la_richiesta_perduta_si_rinnova_una_volta_sola]' passed (0.000 seconds).
+Codice/Tests/SegnaliTest/CodaAnnunciTest.swift:174: error: -[SegnaliTest.CodaAnnunciTest test_02_5_7_passato_il_tempo_la_richiesta_non_si_rinnova] : XCTAssertFalse failed
+Test Case '-[SegnaliTest.CodaAnnunciTest test_02_5_7_passato_il_tempo_la_richiesta_non_si_rinnova]' failed (0.255 seconds).
+	 Executed 4 tests, with 1 failure (0 unexpected) in 0.256 (0.256) seconds
+	 Executed 4 tests, with 1 failure (0 unexpected) in 0.256 (0.258) seconds
+
+== la conferma: la richiesta resta in attesa dopo il primo elemento
+   sorgente: Codice/Sources/Segnali/CodaAnnunci.swift
+   tolto:  chiestoA = nil return !bersaglio
+   messo:  return !bersaglio
+   prove:  swift test --filter CodaAnnunciTest/test_02_5_7 (uscita 1)
+Codice/Tests/SegnaliTest/CodaAnnunciTest.swift:150: error: -[SegnaliTest.CodaAnnunciTest test_02_5_7_arrivato_il_fuoco_chi_si_muove_e_chi_gioca] : XCTAssertFalse failed - lo scorrimento all'elemento dopo
+Test Case '-[SegnaliTest.CodaAnnunciTest test_02_5_7_arrivato_il_fuoco_chi_si_muove_e_chi_gioca]' failed (0.123 seconds).
+Codice/Tests/SegnaliTest/CodaAnnunciTest.swift:163: error: -[SegnaliTest.CodaAnnunciTest test_02_5_7_finche_la_richiesta_e_in_viaggio_il_fuoco_non_conta] : XCTAssertFalse failed - poi chi si muove è chi gioca
+Test Case '-[SegnaliTest.CodaAnnunciTest test_02_5_7_finche_la_richiesta_e_in_viaggio_il_fuoco_non_conta]' failed (0.000 seconds).
+Codice/Tests/SegnaliTest/CodaAnnunciTest.swift:140: error: -[SegnaliTest.CodaAnnunciTest test_02_5_7_la_richiesta_perduta_si_rinnova_una_volta_sola] : XCTAssertFalse failed - rinnovata una volta, non due
+Test Case '-[SegnaliTest.CodaAnnunciTest test_02_5_7_la_richiesta_perduta_si_rinnova_una_volta_sola]' failed (0.000 seconds).
+Test Case '-[SegnaliTest.CodaAnnunciTest test_02_5_7_passato_il_tempo_la_richiesta_non_si_rinnova]' passed (0.000 seconds).
+	 Executed 4 tests, with 3 failures (0 unexpected) in 0.124 (0.124) seconds
+	 Executed 4 tests, with 3 failures (0 unexpected) in 0.124 (0.125) seconds
+
+== la conferma: la richiesta perduta non si rinnova
+   sorgente: Codice/Sources/Segnali/CodaAnnunci.swift
+   tolto:  return !bersaglio && istante - inizio <= FinestraDelFuoco.durata
+   messo:  return false && istante - inizio <= FinestraDelFuoco.durata
+   prove:  swift test --filter CodaAnnunciTest/test_02_5_7 (uscita 1)
+Test Case '-[SegnaliTest.CodaAnnunciTest test_02_5_7_arrivato_il_fuoco_chi_si_muove_e_chi_gioca]' passed (0.000 seconds).
+Codice/Tests/SegnaliTest/CodaAnnunciTest.swift:159: error: -[SegnaliTest.CodaAnnunciTest test_02_5_7_finche_la_richiesta_e_in_viaggio_il_fuoco_non_conta] : XCTAssertTrue failed - e la applica su un altro: si rinnova
+Codice/Tests/SegnaliTest/CodaAnnunciTest.swift:165: error: -[SegnaliTest.CodaAnnunciTest test_02_5_7_finche_la_richiesta_e_in_viaggio_il_fuoco_non_conta] : XCTAssertTrue failed
+Test Case '-[SegnaliTest.CodaAnnunciTest test_02_5_7_finche_la_richiesta_e_in_viaggio_il_fuoco_non_conta]' failed (0.089 seconds).
+Codice/Tests/SegnaliTest/CodaAnnunciTest.swift:139: error: -[SegnaliTest.CodaAnnunciTest test_02_5_7_la_richiesta_perduta_si_rinnova_una_volta_sola] : XCTAssertTrue failed
+Codice/Tests/SegnaliTest/CodaAnnunciTest.swift:142: error: -[SegnaliTest.CodaAnnunciTest test_02_5_7_la_richiesta_perduta_si_rinnova_una_volta_sola] : XCTAssertTrue failed - una richiesta nuova ricomincia
+Test Case '-[SegnaliTest.CodaAnnunciTest test_02_5_7_la_richiesta_perduta_si_rinnova_una_volta_sola]' failed (0.000 seconds).
+Codice/Tests/SegnaliTest/CodaAnnunciTest.swift:172: error: -[SegnaliTest.CodaAnnunciTest test_02_5_7_passato_il_tempo_la_richiesta_non_si_rinnova] : XCTAssertTrue failed
+Test Case '-[SegnaliTest.CodaAnnunciTest test_02_5_7_passato_il_tempo_la_richiesta_non_si_rinnova]' failed (0.000 seconds).
+	 Executed 4 tests, with 5 failures (0 unexpected) in 0.091 (0.091) seconds
+	 Executed 4 tests, with 5 failures (0 unexpected) in 0.091 (0.092) seconds
+
+== la conferma: si rinnova anche arrivata dove il gioco l'ha chiesta
+   sorgente: Codice/Sources/Segnali/CodaAnnunci.swift
+   tolto:  return !bersaglio && istante - inizio <= FinestraDelFuoco.durata
+   messo:  return istante - inizio <= FinestraDelFuoco.durata
+   prove:  swift test --filter CodaAnnunciTest/test_02_5_7 (uscita 1)
+Codice/Tests/SegnaliTest/CodaAnnunciTest.swift:149: error: -[SegnaliTest.CodaAnnunciTest test_02_5_7_arrivato_il_fuoco_chi_si_muove_e_chi_gioca] : XCTAssertFalse failed
+Test Case '-[SegnaliTest.CodaAnnunciTest test_02_5_7_arrivato_il_fuoco_chi_si_muove_e_chi_gioca]' failed (0.128 seconds).
+Codice/Tests/SegnaliTest/CodaAnnunciTest.swift:162: error: -[SegnaliTest.CodaAnnunciTest test_02_5_7_finche_la_richiesta_e_in_viaggio_il_fuoco_non_conta] : XCTAssertFalse failed - e la applica dove il gioco l'ha chiesta
+Test Case '-[SegnaliTest.CodaAnnunciTest test_02_5_7_finche_la_richiesta_e_in_viaggio_il_fuoco_non_conta]' failed (0.000 seconds).
+Test Case '-[SegnaliTest.CodaAnnunciTest test_02_5_7_la_richiesta_perduta_si_rinnova_una_volta_sola]' passed (0.000 seconds).
+Test Case '-[SegnaliTest.CodaAnnunciTest test_02_5_7_passato_il_tempo_la_richiesta_non_si_rinnova]' passed (0.001 seconds).
+	 Executed 4 tests, with 2 failures (0 unexpected) in 0.129 (0.130) seconds
+	 Executed 4 tests, with 2 failures (0 unexpected) in 0.129 (0.131) seconds
+
+== la conferma: la richiesta perduta non si rinnova (ospitate)
+   sorgente: Codice/Sources/Segnali/CodaAnnunci.swift
+   tolto:  return !bersaglio && istante - inizio <= FinestraDelFuoco.durata
+   messo:  return false && istante - inizio <= FinestraDelFuoco.durata
+   prove ospitate: ConfermaDelFuocoTest (uscita 65)
+Applicazione/ProveOspitate/ConfermaDelFuocoTest.swift:138: error: -[WarSenseTest.ConfermaDelFuocoTest test_02_5_7_anche_la_casella_di_una_mappa_sta_in_una_schermata] : XCTAssertEqual failed: ("1") is not equal to ("2")
+Test Case '-[WarSenseTest.ConfermaDelFuocoTest test_02_5_7_anche_la_casella_di_una_mappa_sta_in_una_schermata]' failed (1.060 seconds).
+Test Case '-[WarSenseTest.ConfermaDelFuocoTest test_02_5_7_arrivato_il_fuoco_sul_titolo_uno_scorrimento_non_si_contrasta]' passed (0.787 seconds).
+Applicazione/ProveOspitate/ConfermaDelFuocoTest.swift:79: error: -[WarSenseTest.ConfermaDelFuocoTest test_02_5_7_il_fuoco_andato_su_una_voce_si_chiede_di_nuovo_sul_titolo_una_volta_sola] : XCTAssertEqual failed: ("[WarSense.Fuoco.Movimento.schermataAperta]") is not equal to ("[WarSense.Fuoco.Movimento.schermataAperta, WarSense.Fuoco.Movimento.schermataAperta]") - la richiesta perduta si rinnova
+Applicazione/ProveOspitate/ConfermaDelFuocoTest.swift:83: error: -[WarSenseTest.ConfermaDelFuocoTest test_02_5_7_il_fuoco_andato_su_una_voce_si_chiede_di_nuovo_sul_titolo_una_volta_sola] : XCTAssertEqual failed: ("1") is not equal to ("2") - una volta sola: adesso chi si muove è chi gioca (00 §11.1)
+Test Case '-[WarSenseTest.ConfermaDelFuocoTest test_02_5_7_il_fuoco_andato_su_una_voce_si_chiede_di_nuovo_sul_titolo_una_volta_sola]' failed (0.798 seconds).
+Applicazione/ProveOspitate/ConfermaDelFuocoTest.swift:106: error: -[WarSenseTest.ConfermaDelFuocoTest test_02_5_7_il_fuoco_che_passa_da_un_altra_schermata_non_conta] : XCTAssertEqual failed: ("1") is not equal to ("2") - e quello che arriva sulla schermata giusta conta ancora
+Test Case '-[WarSenseTest.ConfermaDelFuocoTest test_02_5_7_il_fuoco_che_passa_da_un_altra_schermata_non_conta]' failed (0.792 seconds).
+Test Case '-[WarSenseTest.ConfermaDelFuocoTest test_02_5_7_il_fuoco_di_un_altra_tecnologia_non_conta]' passed (0.771 seconds).
+Test Case '-[WarSenseTest.ConfermaDelFuocoTest test_02_5_7_uno_spostamento_chiesto_dal_giocatore_non_si_conferma]' passed (1.491 seconds).
+** TEST FAILED **
+
+== la conferma: la richiesta resta in attesa dopo il primo elemento (ospitate)
+   sorgente: Codice/Sources/Segnali/CodaAnnunci.swift
+   tolto:  chiestoA = nil return !bersaglio
+   messo:  return !bersaglio
+   prove ospitate: ConfermaDelFuocoTest (uscita 65)
+Test Case '-[WarSenseTest.ConfermaDelFuocoTest test_02_5_7_anche_la_casella_di_una_mappa_sta_in_una_schermata]' passed (0.819 seconds).
+Applicazione/ProveOspitate/ConfermaDelFuocoTest.swift:92: error: -[WarSenseTest.ConfermaDelFuocoTest test_02_5_7_arrivato_il_fuoco_sul_titolo_uno_scorrimento_non_si_contrasta] : XCTAssertEqual failed: ("[WarSense.Fuoco.Movimento.schermataAperta, WarSense.Fuoco.Movimento.schermataAperta, WarSense.Fuoco.Movimento.schermataAperta]") is not equal to ("[WarSense.Fuoco.Movimento.schermataAperta]")
+Test Case '-[WarSenseTest.ConfermaDelFuocoTest test_02_5_7_arrivato_il_fuoco_sul_titolo_uno_scorrimento_non_si_contrasta]' failed (0.819 seconds).
+Applicazione/ProveOspitate/ConfermaDelFuocoTest.swift:83: error: -[WarSenseTest.ConfermaDelFuocoTest test_02_5_7_il_fuoco_andato_su_una_voce_si_chiede_di_nuovo_sul_titolo_una_volta_sola] : XCTAssertEqual failed: ("4") is not equal to ("2") - una volta sola: adesso chi si muove è chi gioca (00 §11.1)
+Test Case '-[WarSenseTest.ConfermaDelFuocoTest test_02_5_7_il_fuoco_andato_su_una_voce_si_chiede_di_nuovo_sul_titolo_una_volta_sola]' failed (0.781 seconds).
+Test Case '-[WarSenseTest.ConfermaDelFuocoTest test_02_5_7_il_fuoco_che_passa_da_un_altra_schermata_non_conta]' passed (0.797 seconds).
+Test Case '-[WarSenseTest.ConfermaDelFuocoTest test_02_5_7_il_fuoco_di_un_altra_tecnologia_non_conta]' passed (0.769 seconds).
+Test Case '-[WarSenseTest.ConfermaDelFuocoTest test_02_5_7_uno_spostamento_chiesto_dal_giocatore_non_si_conferma]' passed (1.514 seconds).
+** TEST FAILED **
+
+== la conferma: conta anche il fuoco che passa da un'altra schermata (ospitate)
+   sorgente: Applicazione/Sorgenti/Servizi.swift
+   tolto:  guard let atteso = bersaglioAtteso, let schermata = controllore(di: atteso), controllore(di: elemento) === schermata else { return }
+   messo:  guard let atteso = bersaglioAtteso else { return }
+   prove ospitate: ConfermaDelFuocoTest (uscita 65)
+Test Case '-[WarSenseTest.ConfermaDelFuocoTest test_02_5_7_anche_la_casella_di_una_mappa_sta_in_una_schermata]' passed (0.822 seconds).
+Test Case '-[WarSenseTest.ConfermaDelFuocoTest test_02_5_7_arrivato_il_fuoco_sul_titolo_uno_scorrimento_non_si_contrasta]' passed (0.786 seconds).
+Test Case '-[WarSenseTest.ConfermaDelFuocoTest test_02_5_7_il_fuoco_andato_su_una_voce_si_chiede_di_nuovo_sul_titolo_una_volta_sola]' passed (0.785 seconds).
+Applicazione/ProveOspitate/ConfermaDelFuocoTest.swift:104: error: -[WarSenseTest.ConfermaDelFuocoTest test_02_5_7_il_fuoco_che_passa_da_un_altra_schermata_non_conta] : XCTAssertEqual failed: ("[WarSense.Fuoco.Movimento.schermataAperta, WarSense.Fuoco.Movimento.schermataAperta]") is not equal to ("[WarSense.Fuoco.Movimento.schermataAperta]")
+Test Case '-[WarSenseTest.ConfermaDelFuocoTest test_02_5_7_il_fuoco_che_passa_da_un_altra_schermata_non_conta]' failed (0.819 seconds).
+Test Case '-[WarSenseTest.ConfermaDelFuocoTest test_02_5_7_il_fuoco_di_un_altra_tecnologia_non_conta]' passed (0.778 seconds).
+Test Case '-[WarSenseTest.ConfermaDelFuocoTest test_02_5_7_uno_spostamento_chiesto_dal_giocatore_non_si_conferma]' passed (1.509 seconds).
+** TEST FAILED **
+
+== la conferma: conta anche il fuoco di un'altra tecnologia (ospitate)
+   sorgente: Applicazione/Sorgenti/Servizi.swift
+   tolto:  MainActor.assumeIsolated { if let elemento, daVoiceOver { ricevuto(elemento) } }
+   messo:  MainActor.assumeIsolated { if let elemento { _ = daVoiceOver; ricevuto(elemento) } }
+   prove ospitate: ConfermaDelFuocoTest (uscita 65)
+Test Case '-[WarSenseTest.ConfermaDelFuocoTest test_02_5_7_anche_la_casella_di_una_mappa_sta_in_una_schermata]' passed (0.809 seconds).
+Test Case '-[WarSenseTest.ConfermaDelFuocoTest test_02_5_7_arrivato_il_fuoco_sul_titolo_uno_scorrimento_non_si_contrasta]' passed (0.782 seconds).
+Test Case '-[WarSenseTest.ConfermaDelFuocoTest test_02_5_7_il_fuoco_andato_su_una_voce_si_chiede_di_nuovo_sul_titolo_una_volta_sola]' passed (0.794 seconds).
+Test Case '-[WarSenseTest.ConfermaDelFuocoTest test_02_5_7_il_fuoco_che_passa_da_un_altra_schermata_non_conta]' passed (0.793 seconds).
+Applicazione/ProveOspitate/ConfermaDelFuocoTest.swift:113: error: -[WarSenseTest.ConfermaDelFuocoTest test_02_5_7_il_fuoco_di_un_altra_tecnologia_non_conta] : XCTAssertEqual failed: ("[WarSense.Fuoco.Movimento.schermataAperta, WarSense.Fuoco.Movimento.schermataAperta]") is not equal to ("[WarSense.Fuoco.Movimento.schermataAperta]")
+Test Case '-[WarSenseTest.ConfermaDelFuocoTest test_02_5_7_il_fuoco_di_un_altra_tecnologia_non_conta]' failed (0.800 seconds).
+Test Case '-[WarSenseTest.ConfermaDelFuocoTest test_02_5_7_uno_spostamento_chiesto_dal_giocatore_non_si_conferma]' passed (1.484 seconds).
+** TEST FAILED **
+
+== la conferma: vale anche per uno spostamento chiesto dal giocatore (ospitate)
+   sorgente: Applicazione/Sorgenti/Servizi.swift
+   tolto:  guard movimento != .richiesto, let bersaglio = elemento as AnyObject? else {
+   messo:  guard let bersaglio = elemento as AnyObject? else {
+   prove ospitate: ConfermaDelFuocoTest (uscita 65)
+Test Case '-[WarSenseTest.ConfermaDelFuocoTest test_02_5_7_anche_la_casella_di_una_mappa_sta_in_una_schermata]' passed (0.808 seconds).
+Test Case '-[WarSenseTest.ConfermaDelFuocoTest test_02_5_7_arrivato_il_fuoco_sul_titolo_uno_scorrimento_non_si_contrasta]' passed (0.790 seconds).
+Test Case '-[WarSenseTest.ConfermaDelFuocoTest test_02_5_7_il_fuoco_andato_su_una_voce_si_chiede_di_nuovo_sul_titolo_una_volta_sola]' passed (0.779 seconds).
+Test Case '-[WarSenseTest.ConfermaDelFuocoTest test_02_5_7_il_fuoco_che_passa_da_un_altra_schermata_non_conta]' passed (0.782 seconds).
+Test Case '-[WarSenseTest.ConfermaDelFuocoTest test_02_5_7_il_fuoco_di_un_altra_tecnologia_non_conta]' passed (0.770 seconds).
+Applicazione/ProveOspitate/ConfermaDelFuocoTest.swift:123: error: -[WarSenseTest.ConfermaDelFuocoTest test_02_5_7_uno_spostamento_chiesto_dal_giocatore_non_si_conferma] : XCTAssertEqual failed: ("[WarSense.Fuoco.Movimento.schermataAperta, WarSense.Fuoco.Movimento.richiesto, WarSense.Fuoco.Movimento.richiesto]") is not equal to ("[WarSense.Fuoco.Movimento.schermataAperta, WarSense.Fuoco.Movimento.richiesto]")
+Test Case '-[WarSenseTest.ConfermaDelFuocoTest test_02_5_7_uno_spostamento_chiesto_dal_giocatore_non_si_conferma]' failed (1.512 seconds).
+** TEST FAILED **
+
+== la conferma: si riconoscono soltanto le viste, e non la casella di una mappa (ospitate)
+   sorgente: Applicazione/Sorgenti/Servizi.swift
+   tolto:  var via = elemento as? UIResponder
+   messo:  var via: UIResponder? = elemento as? UIView
+   prove ospitate: ConfermaDelFuocoTest (uscita 65)
+Applicazione/ProveOspitate/ConfermaDelFuocoTest.swift:138: error: -[WarSenseTest.ConfermaDelFuocoTest test_02_5_7_anche_la_casella_di_una_mappa_sta_in_una_schermata] : XCTAssertEqual failed: ("1") is not equal to ("2")
+Test Case '-[WarSenseTest.ConfermaDelFuocoTest test_02_5_7_anche_la_casella_di_una_mappa_sta_in_una_schermata]' failed (0.834 seconds).
+Test Case '-[WarSenseTest.ConfermaDelFuocoTest test_02_5_7_arrivato_il_fuoco_sul_titolo_uno_scorrimento_non_si_contrasta]' passed (0.784 seconds).
+Test Case '-[WarSenseTest.ConfermaDelFuocoTest test_02_5_7_il_fuoco_andato_su_una_voce_si_chiede_di_nuovo_sul_titolo_una_volta_sola]' passed (0.794 seconds).
+Test Case '-[WarSenseTest.ConfermaDelFuocoTest test_02_5_7_il_fuoco_che_passa_da_un_altra_schermata_non_conta]' passed (0.801 seconds).
+Test Case '-[WarSenseTest.ConfermaDelFuocoTest test_02_5_7_il_fuoco_di_un_altra_tecnologia_non_conta]' passed (0.768 seconds).
+Test Case '-[WarSenseTest.ConfermaDelFuocoTest test_02_5_7_uno_spostamento_chiesto_dal_giocatore_non_si_conferma]' passed (1.492 seconds).
+** TEST FAILED **
+
