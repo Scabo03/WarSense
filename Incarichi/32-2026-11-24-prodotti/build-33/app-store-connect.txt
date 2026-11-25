@@ -1,0 +1,7 @@
+App Store Connect, per API, build 33 (25 novembre 2026, 00:56, sola lettura).
+
+build: 33, stato VALID, scaduta False, caricata 2026-11-24T15:51:37-08:00, treno 1.1.0 (il più alto sull'account)
+nota allegata (it): 3218 caratteri, uguale a note-di-rilascio.txt
+gruppi: WarLab (interno True, accesso a tutte le build True)
+stato per i tester interni: IN_BETA_TESTING; esterni: READY_FOR_BETA_SUBMISSION; avviso automatico: True
+scripts/controlla-build.py: registro e App Store Connect concordano: 33 build, la più alta è la 33

@@ -45,6 +45,12 @@ final class ConfermaDelFuocoTest: XCTestCase {
     }
 
     /// La notifica con cui il sistema dice che una tecnologia assistiva ha messo a fuoco un elemento.
+    /// Il fuoco si chiede di nuovo, adesso: il tempo della richiesta comincia qui e non quando la schermata è
+    /// comparsa, che su una macchina lenta può essere molto prima.
+    private func richiede(_ elemento: AnyObject) {
+        Fuoco.azzeraRegistro()
+        Fuoco.sposta(a: elemento, perche: .schermataAperta)
+    }
     private func attendiIlViaggio() async throws { try await Task.sleep(nanoseconds: 700_000_000) }
 
     private func metteAFuoco(_ elemento: AnyObject,
@@ -71,6 +77,7 @@ final class ConfermaDelFuocoTest: XCTestCase {
 
     func test_02_5_7_il_fuoco_andato_su_una_voce_si_chiede_di_nuovo_sul_titolo_una_volta_sola() async throws {
         let (titolo, voci) = try await dichiarazione()
+        richiede(titolo)
         metteAFuoco(titolo)
         metteAFuoco(voci[0])
         XCTAssertEqual(Fuoco.registro, [.schermataAperta], "la richiesta è ancora in viaggio")
@@ -85,6 +92,7 @@ final class ConfermaDelFuocoTest: XCTestCase {
 
     func test_02_5_7_arrivato_il_fuoco_sul_titolo_uno_scorrimento_non_si_contrasta() async throws {
         let (titolo, voci) = try await dichiarazione()
+        richiede(titolo)
         try await attendiIlViaggio()
         metteAFuoco(titolo)
         metteAFuoco(voci[0])
@@ -93,12 +101,13 @@ final class ConfermaDelFuocoTest: XCTestCase {
     }
 
     func test_02_5_7_il_fuoco_che_passa_da_un_altra_schermata_non_conta() async throws {
-        let (_, voci) = try await dichiarazione()
+        let (titolo, voci) = try await dichiarazione()
         // Mentre un pannello si congeda il fuoco passa per la schermata che si lascia.
         let altra = UIViewController()
         let comando = UIButton(type: .system)
         altra.view.addSubview(comando)
         monta(altra)
+        richiede(titolo)
         try await attendiIlViaggio()
         metteAFuoco(comando)
         XCTAssertEqual(Fuoco.registro, [.schermataAperta])
@@ -107,7 +116,8 @@ final class ConfermaDelFuocoTest: XCTestCase {
     }
 
     func test_02_5_7_il_fuoco_di_un_altra_tecnologia_non_conta() async throws {
-        let (_, voci) = try await dichiarazione()
+        let (titolo, voci) = try await dichiarazione()
+        richiede(titolo)
         try await attendiIlViaggio()
         metteAFuoco(voci[0], .notificationSwitchControl)
         XCTAssertEqual(Fuoco.registro, [.schermataAperta])
@@ -115,6 +125,7 @@ final class ConfermaDelFuocoTest: XCTestCase {
 
     func test_02_5_7_uno_spostamento_chiesto_dal_giocatore_non_si_conferma() async throws {
         let (titolo, voci) = try await dichiarazione()
+        richiede(titolo)
         try await attendiIlViaggio()
         metteAFuoco(titolo)
         Fuoco.sposta(a: voci[1], perche: .richiesto)
@@ -132,6 +143,7 @@ final class ConfermaDelFuocoTest: XCTestCase {
         let chiesto = try XCTUnwrap(Fuoco.ultimoBersaglio)
         let altra = try XCTUnwrap(mappa.elementiPerProva.values.first { $0 !== chiesto })
         XCTAssertTrue(mappa.elementiPerProva.values.contains { $0 === chiesto }, "il fuoco si chiede su una casella")
+        richiede(chiesto)
         let prima = Fuoco.registro.count
         try await attendiIlViaggio()
         metteAFuoco(altra)

@@ -1,0 +1,65 @@
+Registro condensato di scripts/carica-testflight.sh (le righe che contano; le intere sono 2.000, quasi tutte di xcodebuild).
+
+PRIMO TENTATIVO, 00:15:10-00:22:08: fermato dal collaudo, una prova (MappaCampagnaAccessibileTest.test_02_9_2_1_…).
+
+== Controllo preventivo: il ramo principale è spinto sul remoto ==
+  principale locale e origin/principale coincidono: si procede
+== Controllo preventivo: la versione non torna mai indietro ==
+versione da caricare: 1.1.0; più alta già presente: 1.1.0 — si procede
+== Numero di build: massimo su tutto l'account più uno ==
+massimo: 32 -> nuovo: 33
+== Controllo preventivo: i documenti consegnati ==
+i documenti consegnati reggono a tutti i controlli: si procede
+== Controllo preventivo: registro delle build e App Store Connect ==
+== Controllo preventivo: freschezza della corsa separata delle sessioni complete ==
+corsa separata delle sessioni complete: esito «successo», girata su bb1a69b, codice a c5bcb09 (data 2026-11-24T22:58:58Z)
+== Collaudo COMPLETO prima del caricamento (pacchetto, ospitate, interfaccia) ==
+== 0/3 Cancello dei simboli d'archetipo (biiezione archetipi <-> simboli, RDA-97) ==
+== 0b/3 Cancello delle impronte dei Contenuti (RDA-105) ==
+== 0c/3 Cancello: VoiceOver spento sul simulatore delle prove d'interfaccia (incarico 30) ==
+== 1/3 Collaudo del pacchetto (Motore, Dati, Sessione, Segnali, Verifica, Confini) ==
+== 2/3 Generazione del progetto applicativo dalla sua sorgente di verità ==
+== 3/3 Prove ospitate e d'interfaccia sul simulatore ==
+Failing tests:
+	MappaCampagnaAccessibileTest.test_02_9_2_1_l_attivazione_della_destinazione_ordina_la_marcia_senza_pannello()
+** TEST FAILED **
+
+
+SECONDO TENTATIVO, 00:42:26-00:55: caricata.
+
+== Controllo preventivo: il ramo principale è spinto sul remoto ==
+  principale locale e origin/principale coincidono: si procede
+== Controllo preventivo: la versione non torna mai indietro ==
+versione da caricare: 1.1.0; più alta già presente: 1.1.0 — si procede
+== Numero di build: massimo su tutto l'account più uno ==
+massimo: 32 -> nuovo: 33
+== Controllo preventivo: i documenti consegnati ==
+i documenti consegnati reggono a tutti i controlli: si procede
+== Controllo preventivo: registro delle build e App Store Connect ==
+== Controllo preventivo: freschezza della corsa separata delle sessioni complete ==
+corsa separata delle sessioni complete: esito «successo», girata su bb1a69b, codice a c5bcb09 (data 2026-11-24T22:58:58Z)
+== Collaudo COMPLETO prima del caricamento (pacchetto, ospitate, interfaccia) ==
+== 0/3 Cancello dei simboli d'archetipo (biiezione archetipi <-> simboli, RDA-97) ==
+== 0b/3 Cancello delle impronte dei Contenuti (RDA-105) ==
+== 0c/3 Cancello: VoiceOver spento sul simulatore delle prove d'interfaccia (incarico 30) ==
+== 1/3 Collaudo del pacchetto (Motore, Dati, Sessione, Segnali, Verifica, Confini) ==
+== 2/3 Generazione del progetto applicativo dalla sua sorgente di verità ==
+== 3/3 Prove ospitate e d'interfaccia sul simulatore ==
+== Conteggio delle prove ospitate e d'interfaccia, dall'esecutore ==
+  esecutore (xcresulttool summary): 159 prove eseguite fra ospitate e interfaccia — 159 passate, 0 fallite, 0 saltate; esito Passed
+    per bersaglio: WarSenseTest = 142
+    per bersaglio: WarSenseUITest = 17
+== Collaudo completo: tutto verde ==
+== Generazione del progetto e archivio ==
+== Esportazione firmata ==
+== Caricamento su TestFlight ==
+==========================================
+UPLOAD SUCCEEDED with no errors
+Delivery UUID: aaec4afc-d4ff-4877-8d45-1dfa2b5ffd8f
+Transferred 2323315 bytes in 4.088 seconds (568.33KB/s, 4.547Mbps)
+==========================================
+== Nota di rilascio (attende l'elaborazione della build) ==
+nota allegata alla build 33
+== Registrazione della build nel registro ==
+build 33 registrata in build-caricate.md
+== Fatto: build 33 caricata ==
