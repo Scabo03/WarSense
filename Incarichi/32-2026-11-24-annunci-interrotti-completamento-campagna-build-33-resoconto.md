@@ -507,17 +507,17 @@ Tempi d'orologio, da `time`, dai registri e dai diari (gli strumenti sono nei pu
 | simulatore: tester della presa; del richiamo | 13 min 25 s; 6 min 30 s |
 | caricamento (secondo tentativo, dallo script) | 13 min, di cui 4 s di trasferimento e 4 min di elaborazione |
 | esplorazione (documenti, resoconti, copia di laboratorio, riproduzioni) | non misurata a parte: dal primo commit, 15:32, al primo commit di codice, 16:39 |
-| sessione intera | dalle 15:31 del 24 novembre all'1:20 circa del 25 |
+| sessione intera | dalle 15:31 del 24 novembre alle 2 circa del 25 |
 
 ## Integrazione continua
 
-`collaudo.yml`, a ogni invio sul ramo `principale`, immagine `xcode-27`. Letto dall'API pubblica di GitHub (`/repos/…/actions/runs`).
+`collaudo.yml`, a ogni invio sul ramo `principale`, immagine `xcode-27`. Letto dall'API pubblica di GitHub (`/repos/…/actions/runs`), che senza credenziali concede sessanta richieste l'ora: le ho esaurite una volta.
 
 | commit | esito | durata |
 |---|---|---|
 | `06dee59` (incarico 31, partenza) | verde | — |
 | `4af4dca` (fusione di questo incarico) | **rosso**, uscita 65 nel passo del collaudo | 35 min |
 | `d2cc8a8` (il commit da cui è uscita la build) | verde | 36 min |
-| il commit di questa stesura (prodotti, prove insensibili a una macchina lenta) | in corso alla sua spinta | — |
+| `31b1ebf` (prodotti del caricamento, prove insensibili a una macchina lenta, resoconto; il commit che segue aggiunge soltanto questa riga) | verde | 30 min |
 
 La prova fallita su `4af4dca` non la so: i registri chiedono credenziali (l'API risponde 403, `gh` non è installato) e non ne ho cercate altrove. L'ipotesi è la stessa prova intermittente che ha fermato il caricamento locale — `MappaCampagnaAccessibileTest.test_02_9_2_1_…`, 5 fallimenti su 200 sulla mia macchina, e più probabile su una più lenta — corretta in `d2cc8a8`; resta un'ipotesi.
